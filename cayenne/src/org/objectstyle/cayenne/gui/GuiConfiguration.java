@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.gui;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.gui;
 
 import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.conf.*;
@@ -76,7 +76,7 @@ public class GuiConfiguration extends DefaultConfiguration {
     private File projFile;
     private static GuiConfiguration guiConfig;
 
-	private GuiConfiguration(){}
+	private GuiConfiguration() {}
 
 
     public static void initSharedConfig(File proj_file) throws Exception {

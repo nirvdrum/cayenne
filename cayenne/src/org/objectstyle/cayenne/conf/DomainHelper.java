@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conf;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,7 +53,7 @@ package org.objectstyle.cayenne.conf;
  * <http://objectstyle.org/>.
  *
  */
-
+package org.objectstyle.cayenne.conf;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -64,17 +63,13 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
-import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
-
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.util.AbstractHandler;
 import org.objectstyle.util.Util;
-
+import org.xml.sax.*;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Assists Configuration object in loading DataDomain configuration files.
@@ -91,501 +86,601 @@ import org.objectstyle.util.Util;
  * @author Andrei Adamchik 
  */
 public class DomainHelper {
-    static Logger logObj = Logger.getLogger(DomainHelper.class.getName());
+	static Logger logObj = Logger.getLogger(DomainHelper.class.getName());
 
-    private Level logLevel = Level.FINER;
-    private Configuration config;
-    private MapLoaderImpl loader;
-    private XMLReader parser;
-    private Locator locator;
-    private ArrayList domains;
-    private HashMap failedMaps;
-    private HashMap failedAdapters;
-    private HashMap failedDataSources;
-    private ArrayList failedMapRefs;
+	private Level logLevel = Level.FINER;
+	private Configuration config;
+	private MapLoaderImpl loader;
+	private XMLReader parser;
+	private Locator locator;
+	private ArrayList domains;
+	private HashMap failedMaps;
+	private HashMap failedAdapters;
+	private HashMap failedDataSources;
+	private ArrayList failedMapRefs;
 
+	/** If set, <code>factory</code> will override
+	  * factory settings in domain configuration file. */
+	private DataSourceFactory factory;
 
-    /** If set, <code>factory</code> will override
-      * factory settings in domain configuration file. */
-    private DataSourceFactory factory;
-
-
-    /** Creates new DomainHelper. */
-    public DomainHelper(Configuration config) throws java.lang.Exception {
-        this(config, Level.FINER);
-    }
-
-    /** Creates new DomainHelper that uses specified level of verbosity. */
-    public DomainHelper(Configuration config, Level logLevel) throws java.lang.Exception {
-        this.logLevel = logLevel;
-        this.config = config;
-        parser = Util.createXmlReader();
-        loader = new MapLoaderImpl();
-    }
-
-
-    /** Returns domains loaded during the last call to "loadDomains". */
-    public List getDomains() {
-        return domains;
-    }
-
-    /** Returns a list of map reference names that failed to load
-      * during node processing. */
-    public List getFailedMapRefs() {
-        return failedMapRefs;
-    }
-
-    /** Returns a map of locations for names of the data maps that
-      * failed to load during the last call to "loadDomains". */
-    public Map getFailedMaps() {
-        return failedMaps;
-    }
-
-
-    /** Returns a map of DataSource locations for node names that
-      * failed to load during the last call to "loadDomains". */
-    public Map getFailedDataSources() {
-        return failedDataSources;
-    }
-
-    /** Returns a map of adapter classes for node names that
-      * failed to load during the last call to "loadDomains". */
-    public Map getFailedAdapters() {
-        return failedAdapters;
-    }
-
-
-    /** Reads domain configuration from the InputStream, returns an array
-      * of initialized DataDomains. An attempt will be made to resolve and
-      * load all referenced resources (data maps, data sources). 
-      * <p><code>factory</code> parameter will override any factory settings
-      * for the node datasources in domain configuration. This API is intended for
-      * tools working with Cayenne, so that they can load objects from
-      * deployment configuration files but use their own database connections. 
-      * </p>
-      * 
-      * <p> 
-      * If referenced resource is nonexistent or inaccessible, it will be 
-      * inserted in one of the failed lists, available for analysis by the caller.
-      * </p>
-      * <p>
-      * XML errors are fatal, and are being rethrown. 
-      * </p>
-      *
-      * @param in InputStream to read configuration data. Must be not null.
-      * @param factory DataSourceFactory that overrides factories specified in configuration data.
-      * Could be null.
-      * @return true if no failures happened during domain loading,
-      * false - if at least one non-fatal failure ocurred.
-      */
-    public boolean loadDomains(InputStream in, DataSourceFactory factory) throws java.lang.Exception {
-        this.factory = factory;
-
-        logObj.log(logLevel, "start configuration loading.");
-        if(factory != null)
-            logObj.log(logLevel,
-                       "factory "
-                       + factory.getClass().getName()
-                       + " will override any configured DataSourceFactory.");
-
-
-        domains = new ArrayList();
-        failedMaps = new HashMap();
-        failedDataSources = new HashMap();
-        failedAdapters = new HashMap();
-        failedMapRefs = new ArrayList();
-
-        DefaultHandler handler = new RootHandler();
-        parser.setContentHandler(handler);
-        parser.setErrorHandler(handler);
-        parser.parse(new InputSource(in));
-
-        // return true if no failures
-        return !hasFailures();
-    }
-
-    /** Returns true if any of the "failed.." collections
-      * is non-empty. */
-    private boolean hasFailures() {
-        return
-            (failedMaps != null && failedMaps.size() > 0) ||
-            (failedDataSources != null && failedDataSources.size() > 0) ||
-            (failedAdapters != null && failedAdapters.size() > 0) ||
-            (failedMapRefs != null && failedMapRefs.size() > 0);
-    }
-
-    /** Reads domain configuration from the InputStream, returns an array
-      * of initialized DataDomains. An attempt will be made to resolve and
-      * load all referenced resources (data maps, data sources). 
-      * 
-      * <p> 
-      * If referenced resource is nonexistent or inaccessible, it will be 
-      * inserted in one of the failed lists, available for analysis by the caller.
-      * </p>
-      * <p>
-      * XML errors are fatal, and are being rethrown. 
-      * </p>
-      * @return true if no failures happened during domain loading,
-      * false - if at least one non-fatal failure ocurred.
-      */
-    public boolean loadDomains(InputStream in) throws java.lang.Exception {
-        return loadDomains(in, null);
-    }
-
-
-    /** Saves domains into the specified file.
-      * Assumes that the maps have already been saved.*/
-    public static void storeDomains(PrintWriter pw, DataDomain[] domains) {
-        pw.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-        pw.println("<domains>");
-        for (int i = 0; i < domains.length; i++) {
-            storeDomains(pw, domains[i]);
-        }
-        pw.println("</domains>");
-    }
-
-
-    private static void storeDomains(PrintWriter pw, DataDomain domain) {
-        DataNode[] nodes = domain.getDataNodes();
-        List maps = domain.getMapList();
-        pw.println("<domain name=\"" + domain.getName().trim() + "\">");
-        Iterator iter = maps.iterator();
-        while(iter.hasNext()) {
-            StringBuffer buf = new StringBuffer();
-            DataMap map = (DataMap)iter.next();
-            buf.append("\t <map name=\"").append(map.getName().trim());
-            buf.append("\"  location=\"").append(map.getLocation().trim());
-            buf.append("\"/> ");
-            pw.println(buf.toString());
-        }
-
-        for (int i = 0; i < nodes.length; i++) {
-            pw.println("\t<node name=\"" + nodes[i].getName().trim() + "\"" );
-            String datasource = nodes[i].getDataSourceLocation();
-            if (null != datasource) 
-            	datasource = datasource.trim();
-            else 
-            	datasource = "";
-            pw.println("\t\t datasource=\""+ datasource + "\"");
-            if (nodes[i].getAdapter() != null)
-            	pw.println("\t\t adapter=\""+ nodes[i].getAdapter().getClass().getName() + "\"");
-            else 
-            	pw.println("\t\t adapter=\"\"");
-            String factory = nodes[i].getDataSourceFactory();
-            if (null != factory)
-            	factory = factory.trim();
-            else factory = "";
-            pw.println("\t\t factory=\""+ factory + "\">");
-            DataMap[] map_arr = nodes[i].getDataMaps();
-            for (int j = 0; map_arr != null && j < map_arr.length; j++) {
-                pw.println("\t\t\t<map-ref name=\"" + map_arr[j].getName().trim() + "\"/>");
-            }
-            pw.println("\t </node>");
-        }
-        pw.println("</domain>");
-    }
-
-	/** Stores DataSolurceInfo to the specified output writer. */
-	public static void storeDataNode(PrintWriter pw, DataSourceInfo info) {
-		StringBuffer buf = new StringBuffer();
-		buf.append("<driver class=\"" + info.getJdbcDriver() + "\">");
-		buf.append("\n\t<url value=\"" + info.getDataSourceUrl() + "\"/>");
-		buf.append("\n\t<connectionPool min=\"" + info.getMinConnections() 
-					+ "\" max=\""+ info.getMaxConnections() + "\" />");
-		if (info.getUserName() != null && info.getPassword() != null)
-		{
-			buf.append("\n\t<login userName=\"" + info.getUserName() 
-					+ "\" password=\"" + info.getPassword() + "\" />");
-		}
-		buf.append("\n</driver>");
-		pw.println(buf.toString());
+	/** Creates new DomainHelper. */
+	public DomainHelper(Configuration config) throws java.lang.Exception {
+		this(config, Level.FINER);
 	}
 
-    // SAX handlers start below
+	/** Creates new DomainHelper that uses specified level of verbosity. */
+	public DomainHelper(Configuration config, Level logLevel)
+		throws java.lang.Exception {
+		this.logLevel = logLevel;
+		this.config = config;
+		parser = Util.createXmlReader();
+		loader = new MapLoaderImpl();
+	}
 
-    /**
-     * Handler for the root element. Its only child must be the "domains" element.
-     */
-    private class RootHandler extends DefaultHandler {
-        /**
-          * Sets the locator in the project helper for future reference.
-          * 
-          * @param locator The locator used by the parser.
-          *                Will not be <code>null</code>.
-          */
-        public void setDocumentLocator(Locator locator) {
-            DomainHelper.this.locator = locator;
-        }
+	/** Returns domains loaded during the last call to "loadDomains". */
+	public List getDomains() {
+		return domains;
+	}
 
-        /**
-         * Handles the start of a datadomains element. A domains handler is created
-         * and initialised with the element name and attributes.
-         * 
-         * @exception SAXException if the tag given is not 
-         *                              <code>"domains"</code>
-         */
-        public void startElement(String namespaceURI, String localName, String qName, Attributes atts)
-        throws SAXException {
-            if (localName.equals("domains")) {
-                new DomainsHandler(parser, this);
-            } else {
-                logObj.log(logLevel, "<domains> should be the root element. <"
-                           + localName
-                           + "> is unexpected.");
-                throw new SAXParseException("Config file is not of expected XML type", locator);
-            }
-        }
-    }
+	/** Returns a list of map reference names that failed to load
+	  * during node processing. */
+	public List getFailedMapRefs() {
+		return failedMapRefs;
+	}
 
+	/** Returns a map of locations for names of the data maps that
+	  * failed to load during the last call to "loadDomains". */
+	public Map getFailedMaps() {
+		return failedMaps;
+	}
 
-    /**
-    * Handler for the top level "project" element.
-    */
-    private class DomainsHandler extends AbstractHandler {
+	/** Returns a map of DataSource locations for node names that
+	  * failed to load during the last call to "loadDomains". */
+	public Map getFailedDataSources() {
+		return failedDataSources;
+	}
 
-        /**
-         * Constructor which just delegates to the superconstructor.
-         * 
-         * @param parentHandler The handler which should be restored to the 
-         *                      parser at the end of the element. 
-         *                      Must not be <code>null</code>.
-         */
-        public DomainsHandler(XMLReader parser, ContentHandler parentHandler) {
-            super(parser, parentHandler);
-        }
+	/** Returns a map of adapter classes for node names that
+	  * failed to load during the last call to "loadDomains". */
+	public Map getFailedAdapters() {
+		return failedAdapters;
+	}
 
+	/** Reads domain configuration from the InputStream, returns an array
+	  * of initialized DataDomains. An attempt will be made to resolve and
+	  * load all referenced resources (data maps, data sources). 
+	  * <p><code>factory</code> parameter will override any factory settings
+	  * for the node datasources in domain configuration. This API is intended for
+	  * tools working with Cayenne, so that they can load objects from
+	  * deployment configuration files but use their own database connections. 
+	  * </p>
+	  * 
+	  * <p> 
+	  * If referenced resource is nonexistent or inaccessible, it will be 
+	  * inserted in one of the failed lists, available for analysis by the caller.
+	  * </p>
+	  * <p>
+	  * XML errors are fatal, and are being rethrown. 
+	  * </p>
+	  *
+	  * @param in InputStream to read configuration data. Must be not null.
+	  * @param factory DataSourceFactory that overrides factories specified in configuration data.
+	  * Could be null.
+	  * @return true if no failures happened during domain loading,
+	  * false - if at least one non-fatal failure ocurred.
+	  */
+	public boolean loadDomains(InputStream in, DataSourceFactory factory)
+		throws java.lang.Exception {
+		this.factory = factory;
 
-        /**
-         * Handles the start of a top-level element within the project. An
-         * appropriate handler is created and initialised with the details
-         * of the element.
-         */
-        public void startElement(String namespaceURI, String localName, String qName, Attributes atts)
-        throws SAXException {
-            if (localName.equals("domain")) {
-                new DomainHandler(getParser(), this).init(localName, atts);
-            } else {
-                logObj.log(logLevel, "<domain> should be the only child of <domains>. <"
-                           + localName
-                           + "> is unexpected.");
-                throw new SAXParseException("Unexpected element \"" + localName + "\"", locator);
-            }
-        }
-    }
+		logObj.log(logLevel, "start configuration loading.");
+		if (factory != null)
+			logObj.log(
+				logLevel,
+				"factory "
+					+ factory.getClass().getName()
+					+ " will override any configured DataSourceFactory.");
 
+		domains = new ArrayList();
+		failedMaps = new HashMap();
+		failedDataSources = new HashMap();
+		failedAdapters = new HashMap();
+		failedMapRefs = new ArrayList();
 
-    /**
-      * Handler for the "domain" element.
-      */
-    private class DomainHandler extends AbstractHandler {
-        private DataDomain domain;
+		DefaultHandler handler = new RootHandler();
+		parser.setContentHandler(handler);
+		parser.setErrorHandler(handler);
+		parser.parse(new InputSource(in));
 
-        public DomainHandler(XMLReader parser, ContentHandler parentHandler) {
-            super(parser, parentHandler);
-        }
+		// return true if no failures
+		return !hasFailures();
+	}
 
-        public void init(String name, Attributes attrs) throws SAXException {
-            String domainName = attrs.getValue("", "name");
-            if (domainName == null) {
-                logObj.log(logLevel, "error: unnamed <domain>.");
-                throw new SAXParseException("Domain 'name' attribute must be not null.", locator);
-            }
+	/** Returns true if any of the "failed.." collections
+	  * is non-empty. */
+	private boolean hasFailures() {
+		return (failedMaps != null && failedMaps.size() > 0)
+			|| (failedDataSources != null && failedDataSources.size() > 0)
+			|| (failedAdapters != null && failedAdapters.size() > 0)
+			|| (failedMapRefs != null && failedMapRefs.size() > 0);
+	}
 
-            logObj.log(logLevel, "loaded domain: " + domainName);
-            domain = new DataDomain(domainName);
-            domains.add(domain);
-        }
+	/** Reads domain configuration from the InputStream, returns an array
+	  * of initialized DataDomains. An attempt will be made to resolve and
+	  * load all referenced resources (data maps, data sources). 
+	  * 
+	  * <p> 
+	  * If referenced resource is nonexistent or inaccessible, it will be 
+	  * inserted in one of the failed lists, available for analysis by the caller.
+	  * </p>
+	  * <p>
+	  * XML errors are fatal, and are being rethrown. 
+	  * </p>
+	  * @return true if no failures happened during domain loading,
+	  * false - if at least one non-fatal failure ocurred.
+	  */
+	public boolean loadDomains(InputStream in) throws java.lang.Exception {
+		return loadDomains(in, null);
+	}
 
-        public void startElement(String namespaceURI, String localName, String qName, Attributes atts)
-        throws SAXException {
-            if (localName.equals("map")) {
-                new MapHandler(getParser(), this).init(localName, atts, domain);
-            } else if (localName.equals("node")) {
-                new NodeHandler(getParser(), this).init(localName, atts, domain);
-            } else {
-                logObj.log(logLevel, "<node> or <map> should be the children of <domain>. <"
-                           + localName
-                           + "> is unexpected.");
-                throw new SAXParseException("Unexpected element \"" + localName + "\"", locator);
-            }
-        }
-    }
+	/** Saves domains into the specified file.
+	  * Assumes that the maps have already been saved.*/
+	public static void storeDomains(PrintWriter pw, DataDomain[] domains) {
+		pw.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+		pw.println("<domains>");
+		for (int i = 0; i < domains.length; i++) {
+			storeDomains(pw, domains[i]);
+		}
+		pw.println("</domains>");
+	}
 
-    private class MapHandler extends AbstractHandler {
-        public MapHandler(XMLReader parser, ContentHandler parentHandler) {
-            super(parser, parentHandler);
-        }
+	private static void storeDomains(PrintWriter pw, DataDomain domain) {
+		DataNode[] nodes = domain.getDataNodes();
+		List maps = domain.getMapList();
+		pw.println("<domain name=\"" + domain.getName().trim() + "\">");
+		Iterator iter = maps.iterator();
+		while (iter.hasNext()) {
+			StringBuffer buf = new StringBuffer();
+			DataMap map = (DataMap) iter.next();
+			buf.append("\t <map name=\"").append(map.getName().trim());
+			buf.append("\"  location=\"").append(map.getLocation().trim());
+			buf.append("\"/> ");
+			pw.println(buf.toString());
+		}
 
-        public void init(String name, Attributes attrs, DataDomain domain) throws SAXException {
-            String mapName = attrs.getValue("", "name");
-            if (mapName == null) {
-                logObj.log(logLevel, "error: <map> without 'name'.");
-                throw new SAXParseException("<map> 'name' attribute must be present.", locator);
-            }
+		for (int i = 0; i < nodes.length; i++) {
+			pw.println("\t<node name=\"" + nodes[i].getName().trim() + "\"");
+			String datasource = nodes[i].getDataSourceLocation();
+			if (null != datasource)
+				datasource = datasource.trim();
+			else
+				datasource = "";
+			pw.println("\t\t datasource=\"" + datasource + "\"");
+			if (nodes[i].getAdapter() != null)
+				pw.println(
+					"\t\t adapter=\""
+						+ nodes[i].getAdapter().getClass().getName()
+						+ "\"");
+			else
+				pw.println("\t\t adapter=\"\"");
+			String factory = nodes[i].getDataSourceFactory();
+			if (null != factory)
+				factory = factory.trim();
+			else
+				factory = "";
+			pw.println("\t\t factory=\"" + factory + "\">");
+			DataMap[] map_arr = nodes[i].getDataMaps();
+			for (int j = 0; map_arr != null && j < map_arr.length; j++) {
+				pw.println(
+					"\t\t\t<map-ref name=\""
+						+ map_arr[j].getName().trim()
+						+ "\"/>");
+			}
+			pw.println("\t </node>");
+		}
+		pw.println("</domain>");
+	}
 
-            String location = attrs.getValue("", "location");
-            if (location == null) {
-                logObj.log(logLevel, "error: <map> without 'location'.");
-                throw new SAXParseException("<map> 'location' attribute must be present.", locator);
-            }
+	/** 
+	 * Stores DataSolurceInfo to the specified PrintWriter. 
+	 * <code>info</code> object may contain full or partial information.
+	 */
+	public static void storeDataNode(PrintWriter out, DataSourceInfo info) {
+		out.print("<driver");
+		if (info.getJdbcDriver() != null) {
+			out.print(" class=\"" + info.getJdbcDriver() + "\"");
+		}
+		out.println(">");
 
-            logObj.log(logLevel, "loading <map name='" + mapName + "' location='" + location + "'>.");
+		if (info.getDataSourceUrl() != null) {
+			out.println("\t<url value=\"" + info.getDataSourceUrl() + "\"/>");
+		}
 
-            InputStream mapIn = config.getMapConfig(location);
-            if (mapIn == null) {
-                logObj.log(logLevel, "warning: map location not found.");
-                failedMaps.put(mapName, location);
-                return ;
-            }
+		out.println(
+			"\t<connectionPool min=\""
+				+ info.getMinConnections()
+				+ "\" max=\""
+				+ info.getMaxConnections()
+				+ "\" />");
 
-            DataMap map = null;
-            try {
-                map = loader.loadDataMap(new InputSource(mapIn));
-            } catch (DataMapException dmex) {
-                logObj.log(logLevel, "warning: map loading failed.", dmex);
-                failedMaps.put(mapName, location);
-                return;
-            }
+		if (info.getUserName() != null || info.getPassword() != null) {
+			out.print("\t<login");
+			if (info.getUserName() != null) {
+				out.print(" userName=\"" + info.getUserName() + "\"");
+			}
+			if (info.getPassword() != null) {
+				out.print(" password=\"" + info.getPassword() + "\"");
+			}
+			out.println("/>");
+		}
 
-            logObj.log(logLevel, "loaded <map name='" + mapName + "' location='" + location + "'>.");
-            map.setName(mapName);
-            map.setLocation(location);
-            domain.addMap(map);
-        }
-    }
+		out.println("</driver>");
+	}
 
-    /** Handles processing of "node" element. */
-    private class NodeHandler extends AbstractHandler {
-        protected DataNode node;
-        protected DataDomain domain;
+	// SAX handlers start below
 
-        /**
-         * Constructor which just delegates to the superconstructor.
-         * 
-         * @param parentHandler The handler which should be restored to the 
-         *                      parser at the end of the element. 
-         *                      Must not be <code>null</code>.
-         */
-        public NodeHandler(XMLReader parser, ContentHandler parentHandler) {
-            super(parser, parentHandler);
-        }
+	/**
+	 * Handler for the root element. Its only child must be the "domains" element.
+	 */
+	private class RootHandler extends DefaultHandler {
+		/**
+		  * Sets the locator in the project helper for future reference.
+		  * 
+		  * @param locator The locator used by the parser.
+		  *                Will not be <code>null</code>.
+		  */
+		public void setDocumentLocator(Locator locator) {
+			DomainHelper.this.locator = locator;
+		}
 
+		/**
+		 * Handles the start of a datadomains element. A domains handler is created
+		 * and initialised with the element name and attributes.
+		 * 
+		 * @exception SAXException if the tag given is not 
+		 *                              <code>"domains"</code>
+		 */
+		public void startElement(
+			String namespaceURI,
+			String localName,
+			String qName,
+			Attributes atts)
+			throws SAXException {
+			if (localName.equals("domains")) {
+				new DomainsHandler(parser, this);
+			} else {
+				logObj.log(
+					logLevel,
+					"<domains> should be the root element. <"
+						+ localName
+						+ "> is unexpected.");
+				throw new SAXParseException(
+					"Config file is not of expected XML type",
+					locator);
+			}
+		}
+	}
 
-        public void init(String name, Attributes attrs, DataDomain domain) throws SAXException {
-            this.domain = domain;
+	/**
+	* Handler for the top level "project" element.
+	*/
+	private class DomainsHandler extends AbstractHandler {
 
-            String nodeName = attrs.getValue("", "name");
-            if (nodeName == null) {
-                logObj.log(logLevel, "error: <node> without 'name'.");
-                throw new SAXParseException("'<node name=' attribute must be present.", locator);
-            }
+		/**
+		 * Constructor which just delegates to the superconstructor.
+		 * 
+		 * @param parentHandler The handler which should be restored to the 
+		 *                      parser at the end of the element. 
+		 *                      Must not be <code>null</code>.
+		 */
+		public DomainsHandler(XMLReader parser, ContentHandler parentHandler) {
+			super(parser, parentHandler);
+		}
 
-            String dataSrcLocation = attrs.getValue("", "datasource");
-            if (dataSrcLocation == null) {
-                logObj.log(logLevel, "error: <map> without 'datasource'.");
-                throw new SAXParseException("'<node datasource=' attribute must be present.", locator);
-            }
+		/**
+		 * Handles the start of a top-level element within the project. An
+		 * appropriate handler is created and initialised with the details
+		 * of the element.
+		 */
+		public void startElement(
+			String namespaceURI,
+			String localName,
+			String qName,
+			Attributes atts)
+			throws SAXException {
+			if (localName.equals("domain")) {
+				new DomainHandler(getParser(), this).init(localName, atts);
+			} else {
+				logObj.log(
+					logLevel,
+					"<domain> should be the only child of <domains>. <"
+						+ localName
+						+ "> is unexpected.");
+				throw new SAXParseException(
+					"Unexpected element \"" + localName + "\"",
+					locator);
+			}
+		}
+	}
 
-            String factoryName = attrs.getValue("", "factory");
-            if (factoryName == null) {
-                logObj.log(logLevel, "error: <map> without 'factory'.");
-                throw new SAXParseException("'<node factory=' attribute must be present.", locator);
-            }
+	/**
+	  * Handler for the "domain" element.
+	  */
+	private class DomainHandler extends AbstractHandler {
+		private DataDomain domain;
 
-            logObj.log(logLevel, "loading <node name='" + nodeName
-                       + "' datasource='" + dataSrcLocation
-                       + "' factory='" + factoryName + "'>.");
+		public DomainHandler(XMLReader parser, ContentHandler parentHandler) {
+			super(parser, parentHandler);
+		}
 
-            // unlike other parameters, adapter class is optional
-            // default is used when none is specified.
-            String adapterClass = attrs.getValue("", "adapter");
-            if (adapterClass == null)
-                adapterClass = "org.objectstyle.cayenne.dba.JdbcAdapter";
+		public void init(String name, Attributes attrs) throws SAXException {
+			String domainName = attrs.getValue("", "name");
+			if (domainName == null) {
+				logObj.log(logLevel, "error: unnamed <domain>.");
+				throw new SAXParseException(
+					"Domain 'name' attribute must be not null.",
+					locator);
+			}
 
-            logObj.log(logLevel, "node DbAdapter: " + adapterClass);
+			logObj.log(logLevel, "loaded domain: " + domainName);
+			domain = new DataDomain(domainName);
+			domains.add(domain);
+		}
 
-            this.node = new DataNode(nodeName);
-            node.setDataSourceFactory(factoryName);
-            node.setDataSourceLocation(dataSrcLocation);
+		public void startElement(
+			String namespaceURI,
+			String localName,
+			String qName,
+			Attributes atts)
+			throws SAXException {
+			if (localName.equals("map")) {
+				new MapHandler(getParser(), this).init(localName, atts, domain);
+			} else if (localName.equals("node")) {
+				new NodeHandler(getParser(), this).init(
+					localName,
+					atts,
+					domain);
+			} else {
+				logObj.log(
+					logLevel,
+					"<node> or <map> should be the children of <domain>. <"
+						+ localName
+						+ "> is unexpected.");
+				throw new SAXParseException(
+					"Unexpected element \"" + localName + "\"",
+					locator);
+			}
+		}
+	}
 
+	private class MapHandler extends AbstractHandler {
+		public MapHandler(XMLReader parser, ContentHandler parentHandler) {
+			super(parser, parentHandler);
+		}
 
-            // load DataSource
-            try {
-                // use DomainHelper factory if it exists, if not - use factory specified
-                // in configuration data
-                DataSourceFactory localFactory = (factory != null)
-                                                 ? factory
-                                                 : (DataSourceFactory)Class.forName(factoryName).newInstance();
+		public void init(String name, Attributes attrs, DataDomain domain)
+			throws SAXException {
+			String mapName = attrs.getValue("", "name");
+			if (mapName == null) {
+				logObj.log(logLevel, "error: <map> without 'name'.");
+				throw new SAXParseException(
+					"<map> 'name' attribute must be present.",
+					locator);
+			}
 
-                DataSource ds = localFactory.getDataSource(dataSrcLocation, logLevel);
-                if(ds != null) {
-                    logObj.log(logLevel, "loaded datasource.");
-                    node.setDataSource(ds);
-                } else {
-                    logObj.log(logLevel, "warning: null datasource.");
-                    failedDataSources.put(nodeName, dataSrcLocation);
-                }
-            } catch (Exception ex) {
-                logObj.log(logLevel, "error: DataSource load failed", ex);
-                failedDataSources.put(nodeName, dataSrcLocation);
-            }
+			String location = attrs.getValue("", "location");
+			if (location == null) {
+				logObj.log(logLevel, "error: <map> without 'location'.");
+				throw new SAXParseException(
+					"<map> 'location' attribute must be present.",
+					locator);
+			}
 
-            // load DbAdapter
-            try {
-                node.setAdapter((DbAdapter)Class.forName(adapterClass).newInstance());
-            } catch (Exception ex) {
-                logObj.log(logLevel, "instantiating adapter failed.", ex);
-                failedAdapters.put(nodeName, adapterClass);
-            }
-        }
+			logObj.log(
+				logLevel,
+				"loading <map name='"
+					+ mapName
+					+ "' location='"
+					+ location
+					+ "'>.");
 
-        public void startElement(String namespaceURI, String localName, String qName, Attributes attrs)
-        throws SAXException {
-            if (localName.equals("map-ref")) {
-                new MapRefHandler(getParser(), this).init(localName, attrs, domain, node);
-            } else {
-                logObj.log(logLevel, "<domap-ref> should be the only node child. <"
-                           + localName
-                           + "> is unexpected.");
-                throw new SAXParseException("Unexpected element \"" + localName + "\"", locator);
-            }
-        }
+			InputStream mapIn = config.getMapConfig(location);
+			if (mapIn == null) {
+				logObj.log(logLevel, "warning: map location not found.");
+				failedMaps.put(mapName, location);
+				return;
+			}
 
-        protected void finished() {
-            // it is important to add node to domain after all node maps
-            // are initialized..
-            domain.addNode(node);
-        }
-    }
+			DataMap map = null;
+			try {
+				map = loader.loadDataMap(new InputSource(mapIn));
+			} catch (DataMapException dmex) {
+				logObj.log(logLevel, "warning: map loading failed.", dmex);
+				failedMaps.put(mapName, location);
+				return;
+			}
 
+			logObj.log(
+				logLevel,
+				"loaded <map name='"
+					+ mapName
+					+ "' location='"
+					+ location
+					+ "'>.");
+			map.setName(mapName);
+			map.setLocation(location);
+			domain.addMap(map);
+		}
+	}
 
-    private class MapRefHandler extends AbstractHandler {
-        /**
-         * Constructor which just delegates to the superconstructor.
-         * 
-         * @param parentHandler The handler which should be restored to the 
-         *                      parser at the end of the element. 
-         *                      Must not be <code>null</code>.
-         */
-        public MapRefHandler(XMLReader parser, ContentHandler parentHandler) {
-            super(parser, parentHandler);
-        }
+	/** Handles processing of "node" element. */
+	private class NodeHandler extends AbstractHandler {
+		protected DataNode node;
+		protected DataDomain domain;
 
-        public void init(String name, Attributes attrs, DataDomain domain, DataNode node) throws SAXException {
-            String mapName = attrs.getValue("", "name");
-            if (mapName == null) {
-                logObj.log(logLevel, "<map-ref> has no 'name'.");
-                throw new SAXParseException("'<map-ref name=' attribute must be present.", locator);
-            }
+		/**
+		 * Constructor which just delegates to the superconstructor.
+		 * 
+		 * @param parentHandler The handler which should be restored to the 
+		 *                      parser at the end of the element. 
+		 *                      Must not be <code>null</code>.
+		 */
+		public NodeHandler(XMLReader parser, ContentHandler parentHandler) {
+			super(parser, parentHandler);
+		}
 
-            DataMap map = domain.getMap(mapName);
-            if (map == null) {
-                logObj.log(logLevel, "warning: unknown map-ref: " + mapName + ".");
-                failedMapRefs.add(mapName);
-            } else {
-                logObj.log(logLevel, "loaded map-ref: " + mapName + ".");
-                node.addDataMap(map);
-            }
-        }
-    }
+		public void init(String name, Attributes attrs, DataDomain domain)
+			throws SAXException {
+			this.domain = domain;
+
+			String nodeName = attrs.getValue("", "name");
+			if (nodeName == null) {
+				logObj.log(logLevel, "error: <node> without 'name'.");
+				throw new SAXParseException(
+					"'<node name=' attribute must be present.",
+					locator);
+			}
+
+			String dataSrcLocation = attrs.getValue("", "datasource");
+			if (dataSrcLocation == null) {
+				logObj.log(logLevel, "error: <map> without 'datasource'.");
+				throw new SAXParseException(
+					"'<node datasource=' attribute must be present.",
+					locator);
+			}
+
+			String factoryName = attrs.getValue("", "factory");
+			if (factoryName == null) {
+				logObj.log(logLevel, "error: <map> without 'factory'.");
+				throw new SAXParseException(
+					"'<node factory=' attribute must be present.",
+					locator);
+			}
+
+			logObj.log(
+				logLevel,
+				"loading <node name='"
+					+ nodeName
+					+ "' datasource='"
+					+ dataSrcLocation
+					+ "' factory='"
+					+ factoryName
+					+ "'>.");
+
+			// unlike other parameters, adapter class is optional
+			// default is used when none is specified.
+			String adapterClass = attrs.getValue("", "adapter");
+			if (adapterClass == null)
+				adapterClass = "org.objectstyle.cayenne.dba.JdbcAdapter";
+
+			logObj.log(logLevel, "node DbAdapter: " + adapterClass);
+
+			this.node = new DataNode(nodeName);
+			node.setDataSourceFactory(factoryName);
+			node.setDataSourceLocation(dataSrcLocation);
+
+			// load DataSource
+			try {
+				// use DomainHelper factory if it exists, if not - use factory specified
+				// in configuration data
+				DataSourceFactory localFactory =
+					(factory != null)
+						? factory
+						: (DataSourceFactory) Class
+							.forName(factoryName)
+							.newInstance();
+
+				DataSource ds =
+					localFactory.getDataSource(dataSrcLocation, logLevel);
+				if (ds != null) {
+					logObj.log(logLevel, "loaded datasource.");
+					node.setDataSource(ds);
+				} else {
+					logObj.log(logLevel, "warning: null datasource.");
+					failedDataSources.put(nodeName, dataSrcLocation);
+				}
+			} catch (Exception ex) {
+				logObj.log(logLevel, "error: DataSource load failed", ex);
+				failedDataSources.put(nodeName, dataSrcLocation);
+			}
+
+			// load DbAdapter
+			try {
+				node.setAdapter(
+					(DbAdapter) Class.forName(adapterClass).newInstance());
+			} catch (Exception ex) {
+				logObj.log(logLevel, "instantiating adapter failed.", ex);
+				failedAdapters.put(nodeName, adapterClass);
+			}
+		}
+
+		public void startElement(
+			String namespaceURI,
+			String localName,
+			String qName,
+			Attributes attrs)
+			throws SAXException {
+			if (localName.equals("map-ref")) {
+				new MapRefHandler(getParser(), this).init(
+					localName,
+					attrs,
+					domain,
+					node);
+			} else {
+				logObj.log(
+					logLevel,
+					"<domap-ref> should be the only node child. <"
+						+ localName
+						+ "> is unexpected.");
+				throw new SAXParseException(
+					"Unexpected element \"" + localName + "\"",
+					locator);
+			}
+		}
+
+		protected void finished() {
+			// it is important to add node to domain after all node maps
+			// are initialized..
+			domain.addNode(node);
+		}
+	}
+
+	private class MapRefHandler extends AbstractHandler {
+		/**
+		 * Constructor which just delegates to the superconstructor.
+		 * 
+		 * @param parentHandler The handler which should be restored to the 
+		 *                      parser at the end of the element. 
+		 *                      Must not be <code>null</code>.
+		 */
+		public MapRefHandler(XMLReader parser, ContentHandler parentHandler) {
+			super(parser, parentHandler);
+		}
+
+		public void init(
+			String name,
+			Attributes attrs,
+			DataDomain domain,
+			DataNode node)
+			throws SAXException {
+			String mapName = attrs.getValue("", "name");
+			if (mapName == null) {
+				logObj.log(logLevel, "<map-ref> has no 'name'.");
+				throw new SAXParseException(
+					"'<map-ref name=' attribute must be present.",
+					locator);
+			}
+
+			DataMap map = domain.getMap(mapName);
+			if (map == null) {
+				logObj.log(
+					logLevel,
+					"warning: unknown map-ref: " + mapName + ".");
+				failedMapRefs.add(mapName);
+			} else {
+				logObj.log(logLevel, "loaded map-ref: " + mapName + ".");
+				node.addDataMap(map);
+			}
+		}
+	}
 }

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,15 +53,12 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.map;
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import java.io.*;
-import org.objectstyle.util.*;
-import org.objectstyle.*;
-import java.sql.*;
-import org.xml.sax.*;
+import junit.framework.TestCase;
+
+import org.objectstyle.TestConstants;
+import org.xml.sax.InputSource;
 
 
 public class MapLoaderLoadTst extends TestCase {

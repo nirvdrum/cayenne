@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conf;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.conf;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.conf;
 
 import java.io.InputStream;
 import java.util.logging.Level;
@@ -194,11 +194,6 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 
         public void init(String name, Attributes attrs) throws SAXException {
             String className = attrs.getValue("", "class");
-            if (className == null) {
-                logObj.log(logLevel, "error: <driver> has no 'class'.");
-                throw new SAXException("Driver 'class' attribute must be present.");
-            }
-
             logObj.log(logLevel, "loading driver " + className);
             driverInfo = new DataSourceInfo();
             driverInfo.setJdbcDriver(className);

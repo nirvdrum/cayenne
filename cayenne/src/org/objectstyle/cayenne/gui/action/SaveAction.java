@@ -161,23 +161,16 @@ public class SaveAction extends CayenneAction {
             String proj_dir_str = mediator.getConfig().getProjDir();
 			file = new File(proj_dir_str + File.separator + node.getDataSourceLocation());
 			if (!file.exists()) {
-				System.out.println("Editor::saveDataNode(), "
-									+"calling save as for node name "
-									+ node.getName());
 				saveNodeAs(node);
 				return;
 			}
 			FileWriter fw = new FileWriter(file);
 			PrintWriter pw = new PrintWriter(fw);
 			GuiDataSource src = (GuiDataSource)node.getDataSource();
-			System.out.println("Editor::saveDataNode(), node name "
-								+ node.getName());
 			DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
 			pw.close();
 			fw.close();
 		} catch (Exception e) {
-            System.out.println("SaveDataNode(), Error saving DataNode "
-            				+ node.getName()  +": " + e.getMessage());
             e.printStackTrace();
 		}
 	}

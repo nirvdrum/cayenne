@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conf;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,26 +53,104 @@ package org.objectstyle.cayenne.conf;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.conf;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import junit.framework.TestCase;
-import java.util.*;
-import java.io.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.access.DataDomain;
 
+import org.objectstyle.cayenne.access.DataSourceInfo;
 
+/**
+ * Test cases for DomainHelper class.
+ * 
+ * @author Andrei Adamchik
+ */
 public class DomainHelperTst extends TestCase {
-    protected DomainHelper helper;
 
-    public DomainHelperTst(String name) {
-        super(name);
-    }
+	public DomainHelperTst(String name) {
+		super(name);
+	}
 
-    public void setUp() throws java.lang.Exception {
-        helper = new DomainHelper(new EmptyConfiguration());
-    }
+	public void testLoadDomains() throws Exception {
+		DomainHelper helper = new DomainHelper(new EmptyConfiguration());
+		new DomainHelperSimpleSuite().test(helper);
+	}
 
-    public void testLoadDomains1() throws java.lang.Exception {
-        new DomainHelperSimpleSuite().test(helper);
-    }
+	public void testStoreFullDataNode() throws Exception {
+		DataSourceInfo info = new DataSourceInfo();
+		info.setDataSourceUrl("s1");
+		info.setJdbcDriver("s2");
+		info.setPassword("s3");
+		info.setUserName("s4");
+		
+		info.setMaxConnections(35);
+		info.setMinConnections(22);
+		assertSaved(info);
+	}
+	
+	public void testStoreDataNodeNoUserName() throws Exception {
+		DataSourceInfo info = new DataSourceInfo();
+		info.setDataSourceUrl("s1");
+		info.setJdbcDriver("s2");
+		info.setPassword("s3");
+		
+		info.setMaxConnections(35);
+		info.setMinConnections(22);
+		assertSaved(info);
+	}
+	
+	public void testStoreDataNodeNoPassword() throws Exception {
+		DataSourceInfo info = new DataSourceInfo();
+		info.setDataSourceUrl("s1");
+		info.setJdbcDriver("s2");
+		info.setUserName("s4");
+		
+		info.setMaxConnections(35);
+		info.setMinConnections(22);
+		assertSaved(info);
+	}
+
+
+	protected void assertSaved(DataSourceInfo info) throws Exception {
+		StringWriter str = new StringWriter();
+		PrintWriter out = new PrintWriter(str);
+
+		DomainHelper.storeDataNode(out, info);
+
+		out.close();
+		str.close();
+
+		StringBuffer buf = str.getBuffer();
+
+		// perform assertions
+		if (info.getDataSourceUrl() != null) {
+			assertTrue(
+				"URL not saved: " + info.getDataSourceUrl(),
+				buf.indexOf("<url value=\"" + info.getDataSourceUrl() + "\"/>")
+					>= 0);
+		}
+		
+		if (info.getJdbcDriver() != null) {
+			assertTrue(
+				"Driver not saved: " + info.getJdbcDriver(),
+				buf.indexOf("<driver class=\"" + info.getJdbcDriver() + "\">")
+					>= 0);
+		}
+		
+		if (info.getUserName() != null) {
+			assertTrue(
+				"User name not saved: " + info.getUserName(),
+				buf.indexOf("userName=\"" + info.getUserName() + "\"")
+					>= 0);
+		}
+		
+		if (info.getPassword() != null) {
+			assertTrue(
+				"Password not saved: " + info.getPassword(),
+				buf.indexOf("password=\"" + info.getPassword() + "\"")
+					>= 0);
+		}
+	}
 }

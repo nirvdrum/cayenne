@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conf;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,11 +53,12 @@ package org.objectstyle.cayenne.conf;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.conf;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 import junit.framework.Assert;
-import java.util.*;
-import java.io.*;
-import org.objectstyle.cayenne.access.DataDomain;
 
 
 /** Test setup for a certain setup of domain configuration. */

@@ -68,6 +68,7 @@ import javax.swing.*;
 
 import org.objectstyle.cayenne.ConfigException;
 import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.gui.action.*;
 import org.objectstyle.cayenne.gui.datamap.GenerateClassDialog;
 import org.objectstyle.cayenne.gui.event.*;
@@ -479,10 +480,14 @@ public class Editor
 			} else if (src == aboutMenu) {
 				AboutDialog win = new AboutDialog(this);
 			} else if (lastOpenProjMenus.contains(src)) {
+				// uncomment this line to provide debugging 
+				// information during driver loading
+				// Configuration.setLogLevel(Level.SEVERE);
+				
 				openProject(((JMenuItem) src).getText());
 			}
-		} catch (Throwable th) {
-            GUIErrorHandler.guiException(th);
+		} catch (Exception ex) {
+            GUIErrorHandler.guiException(ex);
 		}
 	}
 

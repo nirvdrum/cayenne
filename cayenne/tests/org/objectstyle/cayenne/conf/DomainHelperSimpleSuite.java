@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conf;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.conf;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.conf;
 
 import java.util.*;
 import java.io.*;

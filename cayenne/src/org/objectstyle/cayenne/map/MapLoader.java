@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,24 +52,29 @@ package org.objectstyle.cayenne.map;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.map;
 
 import java.io.PrintWriter;
 
-public interface MapLoader
-{
+public interface MapLoader {
 	/** Loads the data map from the input source*/
-	public DataMap loadDataMap(org.xml.sax.InputSource src) throws DataMapException;
+	public DataMap loadDataMap(org.xml.sax.InputSource src)
+		throws DataMapException;
 
 	/** Loads the array of data maps per array of input sources. */
-	public DataMap[] loadDataMaps(org.xml.sax.InputSource[] src)  throws DataMapException;
-    
-    /** Loads the array of data maps per array of map file URI's. 
-    * This is a convenience method that would resolve string URI's 
-    * to InputSources and then call <code>loadDataMap</code> for each one of them. */
+	public DataMap[] loadDataMaps(org.xml.sax.InputSource[] src)
+		throws DataMapException;
+
+	/** 
+	 * Loads the array of data maps per array of map file URI's. 
+	 * This is a convenience method that would resolve string 
+	 * URI's to InputSources and then call 
+	 * <code>loadDataMap</code> for each one of them. 
+	 */
 	public DataMap[] loadDataMaps(String[] src) throws DataMapException;
 
 	/** Creates XML file from DataMap.*/
-	public void storeDataMap(PrintWriter out, DataMap map) throws DataMapException;
-
+	public void storeDataMap(PrintWriter out, DataMap map)
+		throws DataMapException;
 }
