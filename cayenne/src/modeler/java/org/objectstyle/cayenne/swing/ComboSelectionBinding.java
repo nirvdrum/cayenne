@@ -76,14 +76,17 @@ public class ComboSelectionBinding extends BindingBase {
     protected Color defaultBGColor;
     protected Color errorColor;
     protected String defaultToolTip;
+    protected String noSelectionValue;
 
     /**
      * Binds to update model for a combo box selection events. For editable combo boxes
      * model is updated whenever a new value is entered.
      */
-    public ComboSelectionBinding(JComboBox comboBox, String expression) {
+    public ComboSelectionBinding(JComboBox comboBox, String expression,
+            String noSelectionValue) {
         super(expression);
         this.comboBox = comboBox;
+        this.noSelectionValue = noSelectionValue;
 
         comboBox.addActionListener(new ActionListener() {
 
@@ -120,6 +123,9 @@ public class ComboSelectionBinding extends BindingBase {
             if (value != null) {
                 this.comboBox.setSelectedItem(value.toString());
             }
+            else if (noSelectionValue != null) {
+                this.comboBox.setSelectedItem(noSelectionValue);
+            }
             else {
                 this.comboBox.setSelectedIndex(-1);
             }
@@ -131,7 +137,11 @@ public class ComboSelectionBinding extends BindingBase {
 
     protected void updateModel() {
         try {
-            setValue(comboBox.getSelectedItem());
+            Object value = comboBox.getSelectedItem();
+            if (noSelectionValue != null && noSelectionValue.equals(value)) {
+                value = null;
+            }
+            setValue(value);
             clear();
         }
         catch (ValidationException vex) {

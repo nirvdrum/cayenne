@@ -59,6 +59,7 @@ import java.awt.Component;
 
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.swing.BindingBuilder;
+import org.objectstyle.cayenne.swing.BindingDelegate;
 import org.objectstyle.cayenne.swing.ObjectBinding;
 
 /**
@@ -68,8 +69,9 @@ public class JNDIDataSourceEditor extends DataSourceEditor {
 
     protected JNDIDataSourceView view;
 
-    public JNDIDataSourceEditor(ProjectController parent) {
-        super(parent);
+    public JNDIDataSourceEditor(ProjectController parent,
+            BindingDelegate nodeChangeProcessor) {
+        super(parent, nodeChangeProcessor);
     }
 
     public Component getView() {
@@ -78,7 +80,7 @@ public class JNDIDataSourceEditor extends DataSourceEditor {
 
     protected void prepareBindings(BindingBuilder builder) {
         this.view = new JNDIDataSourceView();
-        
+
         fieldAdapters = new ObjectBinding[1];
         fieldAdapters[0] = builder.bindToTextField(
                 view.getJndiPath(),

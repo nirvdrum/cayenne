@@ -57,8 +57,12 @@ package org.objectstyle.cayenne.modeler.editor.datanode;
 
 import java.awt.Component;
 
+import org.objectstyle.cayenne.modeler.CayenneModelerController;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
+import org.objectstyle.cayenne.project.ProjectDataSource;
 import org.objectstyle.cayenne.swing.BindingBuilder;
+import org.objectstyle.cayenne.swing.BindingDelegate;
 import org.objectstyle.cayenne.swing.ObjectBinding;
 
 /**
@@ -68,9 +72,9 @@ public class JDBCDataSourceEditor extends DataSourceEditor {
 
     protected JDBCDataSourceView view;
 
-    public JDBCDataSourceEditor(ProjectController parent) {
-        super(parent);
-
+    public JDBCDataSourceEditor(ProjectController parent,
+            BindingDelegate nodeChangeProcessor) {
+        super(parent, nodeChangeProcessor);
     }
 
     public Component getView() {
@@ -100,5 +104,43 @@ public class JDBCDataSourceEditor extends DataSourceEditor {
                 view.getMinConnections(),
                 "node.dataSource.dataSourceInfo.minConnections");
 
+        // one way binding
+        builder.bindToAction(view.getSyncWithLocal(), "syncDataSourceAction()");
+
+    }
+
+    public void syncDataSourceAction() {
+        CayenneModelerController mainController = getApplication().getFrameController();
+
+        if (getNode() == null || getNode().getDataSource() == null) {
+            return;
+        }
+
+        ProjectDataSource projectDS = (ProjectDataSource) getNode().getDataSource();
+
+        ProjectController parent = (ProjectController) getParent();
+        String key = parent.getDataNodePreferences().getLocalDataSource();
+        if (key == null) {
+            mainController.updateStatus("No Local DataSource selected for node...");
+            return;
+        }
+
+        DBConnectionInfo dataSource = (DBConnectionInfo) parent
+                .getApplicationPreferenceDomain()
+                .getPreferenceDetail(key, DBConnectionInfo.class, false);
+
+        if (dataSource != null) {
+            if (dataSource.updateSettings(projectDS.getDataSourceInfo())) {
+                refreshView();
+                super.nodeChangeProcessor.modelUpdated(null, null, null);
+                mainController.updateStatus(null);
+            }
+            else {
+                mainController.updateStatus("DataNode is up to date...");
+            }
+        }
+        else {
+            mainController.updateStatus("Invalid Local DataSource selected for node...");
+        }
     }
 }

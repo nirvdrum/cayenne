@@ -53,75 +53,37 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.swing;
+package org.objectstyle.cayenne.modeler.editor.datanode;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import java.awt.Component;
+
+import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.swing.BindingBuilder;
+import org.objectstyle.cayenne.swing.BindingDelegate;
+import org.objectstyle.cayenne.swing.ObjectBinding;
 
 /**
  * @author Andrei Adamchik
  */
-public class BindingFactory {
+public class CustomDataSourceEditor extends DataSourceEditor {
 
-    protected boolean usingNullForEmptyStrings;
-    protected boolean checkingForValueChange;
+    protected CustomDataSourceView view;
 
-    public BindingFactory() {
-        // init defaults...
-        usingNullForEmptyStrings = true;
-        checkingForValueChange = true;
+    public CustomDataSourceEditor(ProjectController controller,
+            BindingDelegate nodeChangeProcessor) {
+        super(controller, nodeChangeProcessor);
     }
 
-    public ObjectBinding bindToButton(JButton button, String action) {
-        ActionBinding binding = new ActionBinding(button, action);
-        prepareBinding(binding);
-        return binding;
+    protected void prepareBindings(BindingBuilder builder) {
+        this.view = new CustomDataSourceView();
+
+        fieldAdapters = new ObjectBinding[1];
+        fieldAdapters[0] = builder.bindToTextField(
+                view.getLocationHint(),
+                "node.dataSourceLocation");
     }
 
-    public ObjectBinding bindToComboSelection(
-            JComboBox component,
-            String property,
-            String noSelectionValue) {
-        ComboSelectionBinding binding = new ComboSelectionBinding(
-                component,
-                property,
-                noSelectionValue);
-        prepareBinding(binding);
-        return binding;
-    }
-
-    public ObjectBinding bindToTextArea(JTextArea component, String property) {
-        TextBinding binding = new TextBinding(component, property);
-        prepareBinding(binding);
-        return binding;
-    }
-
-    public ObjectBinding bindToTextField(JTextField component, String property) {
-        TextBinding binding = new TextBinding(component, property);
-        prepareBinding(binding);
-        return binding;
-    }
-
-    protected void prepareBinding(BindingBase binding) {
-        binding.setUsingNullForEmptyStrings(isUsingNullForEmptyStrings());
-        binding.setCheckingForValueChange(isCheckingForValueChange());
-    }
-
-    public boolean isCheckingForValueChange() {
-        return checkingForValueChange;
-    }
-
-    public void setCheckingForValueChange(boolean callingSetForEqual) {
-        this.checkingForValueChange = callingSetForEqual;
-    }
-
-    public boolean isUsingNullForEmptyStrings() {
-        return usingNullForEmptyStrings;
-    }
-
-    public void setUsingNullForEmptyStrings(boolean usingNullForEmptyStrings) {
-        this.usingNullForEmptyStrings = usingNullForEmptyStrings;
+    public Component getView() {
+        return view;
     }
 }

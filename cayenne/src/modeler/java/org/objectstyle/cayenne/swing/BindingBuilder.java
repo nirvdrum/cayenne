@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.swing;
 
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -70,6 +71,11 @@ public class BindingBuilder {
 
     public BindingBuilder(BindingFactory factory) {
         this.factory = factory;
+    }
+    
+    public BindingBuilder(BindingFactory factory, Object context) {
+        this.factory = factory;
+        this.context = context;
     }
 
     public BindingDelegate getDelegate() {
@@ -88,8 +94,24 @@ public class BindingBuilder {
         this.context = context;
     }
 
+    public ObjectBinding bindToAction(JButton button, String action) {
+        ObjectBinding binding = factory.bindToButton(button, action);
+        return initBinding(binding);
+    }
+
     public ObjectBinding bindToComboSelection(JComboBox component, String property) {
-        ObjectBinding binding = factory.bindToComboSelection(component, property);
+        ObjectBinding binding = factory.bindToComboSelection(component, property, null);
+        return initBinding(binding);
+    }
+
+    public ObjectBinding bindToComboSelection(
+            JComboBox component,
+            String property,
+            String noSelectionValue) {
+        ObjectBinding binding = factory.bindToComboSelection(
+                component,
+                property,
+                noSelectionValue);
         return initBinding(binding);
     }
 
@@ -108,5 +130,4 @@ public class BindingBuilder {
         binding.setContext(context);
         return binding;
     }
-
 }

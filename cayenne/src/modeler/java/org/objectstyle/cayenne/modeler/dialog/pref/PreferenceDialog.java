@@ -79,8 +79,12 @@ import org.objectstyle.cayenne.pref.PreferenceException;
  */
 public class PreferenceDialog extends CayenneController {
 
+    public static final String GENERAL_KEY = "General";
+    public static final String DATA_SOURCES_KEY = "Local DataSources";
+    public static final String CLASS_PATH_KEY = "ClassPath";
+
     private static final String[] preferenceMenus = new String[] {
-            "General", "Local DataSources", "ClassPath"
+            GENERAL_KEY, DATA_SOURCES_KEY, CLASS_PATH_KEY
     };
 
     protected PreferenceDialogView view;
@@ -91,6 +95,9 @@ public class PreferenceDialog extends CayenneController {
         super(parent);
         this.view = new PreferenceDialogView();
         this.detailControllers = new HashMap();
+
+        // editor must be configured before startup for "showDetailViewAction()" to work
+        this.editor = new CayenneModelerPreferenceEditor(application);
 
         initBindings();
     }
@@ -141,13 +148,13 @@ public class PreferenceDialog extends CayenneController {
         if (!detailControllers.containsKey(name)) {
             CayenneController c;
 
-            if ("General".equals(name)) {
+            if (GENERAL_KEY.equals(name)) {
                 c = new GeneralPreferences(this);
             }
-            else if ("Local DataSources".equals(name)) {
+            else if (DATA_SOURCES_KEY.equals(name)) {
                 c = new DataSourcePreferences(this);
             }
-            else if ("ClassPath".equals(name)) {
+            else if (CLASS_PATH_KEY.equals(name)) {
                 c = new ClasspathPreferences(this);
             }
             else {
@@ -165,7 +172,6 @@ public class PreferenceDialog extends CayenneController {
     }
 
     public void startupAction() {
-        this.editor = new CayenneModelerPreferenceEditor(application);
 
         // bind own view preferences
         Domain prefDomain = application.getPreferenceDomain().getSubdomain(

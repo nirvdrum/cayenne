@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.modeler.editor.datanode;
 
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.swing.BindingBuilder;
@@ -71,9 +70,12 @@ public abstract class DataSourceEditor extends CayenneController {
 
     protected ObjectBinding[] fieldAdapters;
     protected DataNode node;
+    protected BindingDelegate nodeChangeProcessor;
 
-    public DataSourceEditor(ProjectController controller) {
+    public DataSourceEditor(ProjectController controller,
+            BindingDelegate nodeChangeProcessor) {
         super(controller);
+        this.nodeChangeProcessor = nodeChangeProcessor;
         initBindings();
     }
 
@@ -92,26 +94,17 @@ public abstract class DataSourceEditor extends CayenneController {
     }
 
     protected void initBindings() {
-        // note that it is up to
-
-        // setup delegate to fire update event...
-        BindingDelegate delegate = new BindingDelegate() {
-
-            public void modelUpdated(
-                    ObjectBinding binding,
-                    Object oldValue,
-                    Object newValue) {
-                DataNodeEvent e = new DataNodeEvent(DataSourceEditor.this, node);
-                ((ProjectController) getParent()).fireDataNodeEvent(e);
-            }
-        };
-
         BindingBuilder builder = new BindingBuilder(getApplication().getBindingFactory());
-        builder.setDelegate(delegate);
+        builder.setDelegate(nodeChangeProcessor);
         builder.setContext(this);
         prepareBindings(builder);
     }
 
     protected abstract void prepareBindings(BindingBuilder builder);
 
+    protected void refreshView() {
+        for (int i = 0; i < fieldAdapters.length; i++) {
+            fieldAdapters[i].updateView();
+        }
+    }
 }

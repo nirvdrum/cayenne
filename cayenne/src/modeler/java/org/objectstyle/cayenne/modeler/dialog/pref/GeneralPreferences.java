@@ -57,15 +57,13 @@ package org.objectstyle.cayenne.modeler.dialog.pref;
 
 import java.awt.Component;
 
-import javax.swing.InputVerifier;
-import javax.swing.JComponent;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-
 import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.pref.CayennePreferenceEditor;
 import org.objectstyle.cayenne.pref.CayennePreferenceService;
 import org.objectstyle.cayenne.pref.PreferenceEditor;
+import org.objectstyle.cayenne.swing.BindingBuilder;
+import org.objectstyle.cayenne.swing.ObjectBinding;
+import org.objectstyle.cayenne.validation.ValidationException;
 
 /**
  * @author Andrei Adamchik
@@ -74,6 +72,7 @@ public class GeneralPreferences extends CayenneController {
 
     protected GeneralPreferencesView view;
     protected CayennePreferenceEditor editor;
+    protected ObjectBinding saveIntervalBinding;
 
     public GeneralPreferences(PreferenceDialog parentController) {
         super(parentController);
@@ -83,8 +82,9 @@ public class GeneralPreferences extends CayenneController {
         if (editor instanceof CayennePreferenceEditor) {
             this.editor = (CayennePreferenceEditor) editor;
             this.view.setEnabled(true);
-            this.view.getSaveInterval().setText(this.editor.getSaveInterval() + "");
             initBindings();
+            
+            saveIntervalBinding.updateView();
         }
         else {
             this.view.setEnabled(false);
@@ -96,42 +96,27 @@ public class GeneralPreferences extends CayenneController {
     }
 
     protected void initBindings() {
-        final JTextField textField = view.getSaveInterval();
-        textField.setInputVerifier(new InputVerifier() {
+        BindingBuilder builder = new BindingBuilder(
+                getApplication().getBindingFactory(),
+                this);
 
-            public boolean verify(JComponent component) {
-                String text = textField.getText();
-                boolean resetText = false;
-                if (text.length() == 0) {
-                    resetText = true;
-                }
-                else {
-                    try {
-                        int interval = Integer.parseInt(text);
-                        if (interval < CayennePreferenceService.MIN_SAVE_INTERVAL) {
-                            interval = CayennePreferenceService.MIN_SAVE_INTERVAL;
-                            textField.setText("" + interval);
-                        }
+        this.saveIntervalBinding = builder.bindToTextField(
+                view.getSaveInterval(),
+                "timeInterval");
+    }
 
-                        editor.setSaveInterval(interval);
-                    }
-                    catch (NumberFormatException ex) {
-                        resetText = true;
-                    }
-                }
+    public double getTimeInterval() {
+        return this.editor.getSaveInterval() / 1000.0;
+    }
 
-                if (resetText) {
-                    Runnable setText = new Runnable() {
+    public void setTimeInterval(double d) {
+        int ms = (int) (d * 1000.0);
+        if (ms < CayennePreferenceService.MIN_SAVE_INTERVAL) {
+            throw new ValidationException(
+                    "Time interval is too small, minimum allowed is "
+                            + (CayennePreferenceService.MIN_SAVE_INTERVAL / 1000.0));
+        }
 
-                        public void run() {
-                            textField.setText("" + editor.getSaveInterval());
-                        }
-                    };
-                    SwingUtilities.invokeLater(setText);
-                }
-
-                return true;
-            }
-        });
+        this.editor.setSaveInterval(ms);
     }
 }

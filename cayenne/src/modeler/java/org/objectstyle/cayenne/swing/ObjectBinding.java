@@ -68,8 +68,6 @@ public interface ObjectBinding {
 
     public void setContext(Object object);
 
-    public String getPropertyExpression();
-
     public void updateView();
 
     public BindingDelegate getDelegate();

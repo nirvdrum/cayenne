@@ -192,6 +192,14 @@ public class CayenneModelerController extends CayenneController {
 
         projectController.setProject(project);
 
+        frame.setView(new EditorView(projectController));
+        frame.getContentPane().add(frame.getView(), BorderLayout.CENTER);
+        frame.validate();
+
+        projectController.projectOpened();
+        actionController.projectOpened();
+
+        // do status update AFTER the project is actually opened...
         if (project.isLocationUndefined()) {
             updateStatus("New project created...");
             frame.setTitle(ModelerConstants.TITLE + "- [New]");
@@ -202,13 +210,6 @@ public class CayenneModelerController extends CayenneController {
                     + " - "
                     + project.getMainFile().getAbsolutePath());
         }
-
-        frame.setView(new EditorView(projectController));
-        frame.getContentPane().add(frame.getView(), BorderLayout.CENTER);
-        frame.validate();
-
-        projectController.projectOpened();
-        actionController.projectOpened();
 
         // --- check for load errors
         if (project.getLoadStatus().hasFailures()) {
@@ -222,7 +223,7 @@ public class CayenneModelerController extends CayenneController {
                     project.getLoadStatus()));
         }
     }
-    
+
     /** Adds path to the list of last opened projects in preferences. */
     public void addToLastProjListAction(String path) {
         ModelerPreferences pref = ModelerPreferences.getPreferences();
@@ -255,7 +256,7 @@ public class CayenneModelerController extends CayenneController {
     /**
      * Performs status bar update with a message. Message will dissappear in 6 seconds.
      */
-    protected void updateStatus(String message) {
+    public void updateStatus(String message) {
         frame.getStatus().setText(message);
 
         // start message cleanup thread that would remove the message after X seconds

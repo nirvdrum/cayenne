@@ -75,15 +75,13 @@ public class GeneralPreferencesView extends JPanel {
     public GeneralPreferencesView() {
         this.saveInterval = new JTextField();
 
-        FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, fill:max(50dlu;pref):grow",
-                "");
+        FormLayout layout = new FormLayout("pref, 3dlu, fill:50dlu", "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
         builder.appendSeparator("General Preferences");
         saveIntervalLabel = builder.append(
-                "Preferences Save Interval (ms.):",
+                "Preferences Save Interval (sec.):",
                 saveInterval);
 
         this.setLayout(new BorderLayout());

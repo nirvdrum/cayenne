@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.modeler.editor.datanode;
 import java.awt.Component;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -73,8 +74,10 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.dialog.pref.PreferenceDialog;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
+import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
@@ -89,6 +92,8 @@ import org.objectstyle.cayenne.validation.ValidationException;
  */
 public class DataNodeEditor extends CayenneController {
 
+    protected static final String NO_LOCAL_DATA_SOURCE = "Select DataSource for Local Work...";
+
     final static String[] standardDataSourceFactories = new String[] {
             DriverDataSourceFactory.class.getName(),
             JNDIDataSourceFactory.class.getName()
@@ -98,12 +103,34 @@ public class DataNodeEditor extends CayenneController {
     protected DataNode node;
     protected Map datasourceEditors;
     protected ObjectBinding[] bindings;
+    protected Map localDataSources;
+    protected BindingDelegate nodeChangeProcessor;
+    protected DataSourceEditor defaultSubeditor;
 
     public DataNodeEditor(ProjectController parent) {
         super(parent);
 
         this.datasourceEditors = new HashMap();
         this.view = new DataNodeView();
+        this.localDataSources = new HashMap();
+
+        this.nodeChangeProcessor = new BindingDelegate() {
+
+            public void modelUpdated(
+                    ObjectBinding binding,
+                    Object oldValue,
+                    Object newValue) {
+
+                DataNodeEvent e = new DataNodeEvent(DataNodeEditor.this, node);
+                if (binding != null && binding.getComponent() == view.getDataNodeName()) {
+                    e.setOldName(oldValue != null ? oldValue.toString() : null);
+                }
+
+                ((ProjectController) getParent()).fireDataNodeEvent(e);
+            }
+        };
+
+        this.defaultSubeditor = new CustomDataSourceEditor(parent, nodeChangeProcessor);
 
         initController();
     }
@@ -217,6 +244,10 @@ public class DataNodeEditor extends CayenneController {
     // ======== other stuff
 
     protected void initController() {
+        view.getDataSourceDetail().add(defaultSubeditor.getView(), "default");
+
+        view.getAdapters().setEditable(true);
+        view.getFactories().setEditable(true);
 
         // init combo box choices
         view.getAdapters().setModel(
@@ -242,31 +273,55 @@ public class DataNodeEditor extends CayenneController {
             }
         });
 
-        // create a delegate to fire events on field updates...
-        BindingDelegate delegate = new BindingDelegate() {
-
-            public void modelUpdated(
-                    ObjectBinding binding,
-                    Object oldValue,
-                    Object newValue) {
-
-                DataNodeEvent e = new DataNodeEvent(DataNodeEditor.this, node);
-                if ("nodeName".equals(binding.getPropertyExpression())) {
-                    e.setOldName(oldValue != null ? oldValue.toString() : null);
-                }
-
-                ((ProjectController) getParent()).fireDataNodeEvent(e);
-            }
-        };
-
         BindingBuilder builder = new BindingBuilder(getApplication().getBindingFactory());
-        builder.setDelegate(delegate);
+
         builder.setContext(this);
 
-        bindings = new ObjectBinding[3];
-        bindings[0] = builder.bindToTextField(view.getDataNodeName(), "nodeName");
-        bindings[1] = builder.bindToComboSelection(view.getFactories(), "factoryName");
-        bindings[2] = builder.bindToComboSelection(view.getAdapters(), "adapterName");
+        bindings = new ObjectBinding[4];
+        bindings[0] = builder.bindToComboSelection(
+                view.getLocalDataSources(),
+                "parent.dataNodePreferences.localDataSource",
+                NO_LOCAL_DATA_SOURCE);
+
+        // use delegate for the rest of them
+        builder.setDelegate(nodeChangeProcessor);
+        bindings[1] = builder.bindToTextField(view.getDataNodeName(), "nodeName");
+        bindings[2] = builder.bindToComboSelection(view.getFactories(), "factoryName");
+        bindings[3] = builder.bindToComboSelection(view.getAdapters(), "adapterName");
+
+        // one way bindings
+        builder.bindToAction(
+                view.getConfigLocalDataSources(),
+                "showDataSourceConfigAction()");
+    }
+
+    public void showDataSourceConfigAction() {
+        PreferenceDialog prefs = new PreferenceDialog(this);
+        prefs.showDetailViewAction(PreferenceDialog.DATA_SOURCES_KEY);
+        prefs.startupAction();
+
+        refreshLocalDataSources();
+    }
+
+    protected void refreshLocalDataSources() {
+        localDataSources.clear();
+
+        Collection sources = getApplication().getPreferenceDomain().getPreferenceDetails(
+                DBConnectionInfo.class);
+
+        int len = sources.size();
+        Object[] keys = new Object[len + 1];
+
+        // a slight chance that a real datasource is called NO_LOCAL_DATA_SOURCE...
+        keys[0] = NO_LOCAL_DATA_SOURCE;
+        Iterator it = sources.iterator();
+        for (int i = 1; i <= len; i++) {
+            DBConnectionInfo info = (DBConnectionInfo) it.next();
+            keys[i] = info.getKey();
+            localDataSources.put(keys[i], info);
+        }
+
+        view.getLocalDataSources().setModel(new DefaultComboBoxModel(keys));
     }
 
     /**
@@ -279,6 +334,8 @@ public class DataNodeEditor extends CayenneController {
             getView().setVisible(false);
             return;
         }
+
+        refreshLocalDataSources();
 
         getView().setVisible(true);
         for (int i = 0; i < bindings.length; i++) {
@@ -298,13 +355,18 @@ public class DataNodeEditor extends CayenneController {
         if (c == null) {
 
             if (DriverDataSourceFactory.class.getName().equals(factoryName)) {
-                c = new JDBCDataSourceEditor((ProjectController) getParent());
+                c = new JDBCDataSourceEditor(
+                        (ProjectController) getParent(),
+                        nodeChangeProcessor);
             }
             else if (JNDIDataSourceFactory.class.getName().equals(factoryName)) {
-                c = new JNDIDataSourceEditor((ProjectController) getParent());
+                c = new JNDIDataSourceEditor(
+                        (ProjectController) getParent(),
+                        nodeChangeProcessor);
             }
             else {
                 // special case - no detail view, just show it and bail..
+                defaultSubeditor.setNode(getNode());
                 view.getDataSourceDetailLayout().show(
                         view.getDataSourceDetail(),
                         "default");

@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.modeler.editor.datanode;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Component;
 
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -76,37 +76,38 @@ public class DataNodeView extends JPanel {
     protected JPanel dataSourceDetail;
     protected CardLayout dataSourceDetailLayout;
     protected JComboBox adapters;
-
-    protected Component defaultDatasourceView;
+    protected JComboBox localDataSources;
+    protected JButton configLocalDataSources;
 
     public DataNodeView() {
 
         // create widgets
         this.dataNodeName = new JTextField();
-
         this.factories = new JComboBox();
-        this.factories.setEditable(true);
-
         this.adapters = new JComboBox();
-        this.adapters.setEditable(true);
+        this.localDataSources = new JComboBox();
 
         this.dataSourceDetailLayout = new CardLayout();
         this.dataSourceDetail = new JPanel(dataSourceDetailLayout);
 
-        this.defaultDatasourceView = new JPanel();
-        dataSourceDetail.add(defaultDatasourceView, "default");
+        this.configLocalDataSources = new JButton("...");
+        this.configLocalDataSources.setToolTipText("configure local DataSource");
 
         // assemble
 
         DefaultFormBuilder topPanelBuilder = new DefaultFormBuilder(new FormLayout(
-                "right:80dlu, 3dlu, fill:200dlu",
+                "right:80dlu, 3dlu, fill:177dlu, 3dlu, fill:20dlu",
                 ""));
         topPanelBuilder.setDefaultDialogBorder();
 
         topPanelBuilder.appendSeparator("DataNode Configuration");
-        topPanelBuilder.append("DataNode Name:", dataNodeName);
-        topPanelBuilder.append("DB Adapter:", adapters);
-        topPanelBuilder.append("DataSource Factory:", factories);
+        topPanelBuilder.append("DataNode Name:", dataNodeName, 3);
+        topPanelBuilder.append("DB Adapter:", adapters, 3);
+        topPanelBuilder.append(
+                "Local DataSource (opt.):",
+                localDataSources,
+                configLocalDataSources);
+        topPanelBuilder.append("DataSource Factory:", factories, 3);
 
         setLayout(new BorderLayout());
         add(topPanelBuilder.getPanel(), BorderLayout.NORTH);
@@ -125,15 +126,19 @@ public class DataNodeView extends JPanel {
         return dataSourceDetail;
     }
 
+    public JComboBox getLocalDataSources() {
+        return localDataSources;
+    }
+
     public CardLayout getDataSourceDetailLayout() {
         return dataSourceDetailLayout;
     }
 
-    public Component getDefaultDatasourceView() {
-        return defaultDatasourceView;
-    }
-
     public JComboBox getFactories() {
         return factories;
+    }
+
+    public JButton getConfigLocalDataSources() {
+        return configLocalDataSources;
     }
 }
