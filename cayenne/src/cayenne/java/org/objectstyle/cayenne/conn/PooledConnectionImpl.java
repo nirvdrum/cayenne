@@ -59,14 +59,20 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
+import javax.sql.PooledConnection;
+
 import org.apache.log4j.Logger;
 
-import javax.sql.*;
-
 /**
- *  Cayenne implementation of the pooling wrapper for the database connection
- *  as per J2EE spec. Most of the modern JDBC drivers should have its
- *  own implementation that should be used instead of this class...
+ * PooledConnectionImpl is an implementation of a pooling wrapper 
+ * for the database connection as per JDBC3 spec. Most of the modern 
+ * JDBC drivers should have its own implementation that may be 
+ * used instead of this class.
+ * 
+ * @author Andrei Adamchik
  */
 public class PooledConnectionImpl implements PooledConnection {
     static Logger logObj = Logger.getLogger(PooledConnectionImpl.class.getName());

@@ -57,17 +57,22 @@ package org.objectstyle.cayenne.conn;
 
 import java.io.PrintWriter;
 import java.sql.SQLException;
+
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
+import javax.sql.PooledConnection;
+
 import org.apache.log4j.Logger;
 
-import javax.sql.*;
-
 /**
- *   <p>This class allows to generate pooled connections.</p>
+ * <p>PoolDataSource allows to generate pooled connections.</p>
  *
- *   <p>It is implemented as a wrapper around a non-pooled data source object. Delegates all method
- *   calls except for "getPooledConnection" to the underlying datasource...
- *   </p>
- *
+ * <p>It is implemented as a wrapper around a non-pooled data source object. 
+ * Delegates all method calls except for "getPooledConnection" to the underlying 
+ * datasource.
+ * </p>
+ * 
+ * @author Andrei Adamchik
  */
 public class PoolDataSource implements ConnectionPoolDataSource {
 	static Logger logObj = Logger.getLogger(PoolDataSource.class.getName());

@@ -55,20 +55,25 @@ package org.objectstyle.cayenne.conn;
  *
  */
 
-import java.sql.*;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Savepoint;
+import java.sql.Statement;
 import java.util.Map;
 
 /**
- * <p>Cayenne specific java.sql.Connection implementation that allowes to pool
- * JDBC connections when a driver used does not support pooled connections.
+ * <p>ConnectionWrapper is a <code>java.sql.Connection</code> implementation that 
+ * allows to pool JDBC connections when a driver used does not support pooled connections.
  * This implementation will wrap existing connection object obtained elsewhere,
  * delegating all the calls to it, except for "close" method that is
  * implemented to return connection to the pool and "isClosed" method that
  * returns true if connection was returned to the pool or closed by the pool.</p>
- *
- * <p>Because of the overhead involved when calling connection methods, this class
- * should only be used when a corresponding driver does not support connection
- * pooling at all.</p>
+ * 
+ * @author Andrei Adamchik
  */
 public class ConnectionWrapper implements Connection {
     private Connection connectionObj;

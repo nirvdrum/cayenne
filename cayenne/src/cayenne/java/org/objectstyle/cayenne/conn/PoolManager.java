@@ -61,15 +61,18 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.ListIterator;
+
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
+import javax.sql.PooledConnection;
+
 import org.apache.log4j.Logger;
 
-import javax.sql.*;
-
 /**
- * PoolManager is a DataSource impementation that hides connection pooling logic
- * from the users, acting as a normal DataSource. Application servers may provide 
- * their own DataSources that handle pooling. In such cases Cayenne should 
- * use app server specific implementation instead of PoolManager.
+ * PoolManager is a pooling DataSource impementation. 
+ * It wraps a non-pooling datasource.
  *
  * <p>TODO: create a low priority thread that will do pool maintenance.</p>
  *

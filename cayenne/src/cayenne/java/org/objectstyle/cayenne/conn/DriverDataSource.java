@@ -56,15 +56,17 @@ package org.objectstyle.cayenne.conn;
  */
 
 import java.io.PrintWriter;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
 /**
- * Class that wrapps "old-style" JDBC access via Drivers
- * to "new-style" access via DataSource. Also provides things like
- * connection pooling, etc...
- *
+ * DriverDataSource is a simple DataSource implementation
+ * on top of a JDBC driver. 
+ * 
+ * @author Andrei Adamchik
  */
 public class DriverDataSource implements DataSource {
     private int loginTimeout;
