@@ -356,6 +356,10 @@ public class DataRowStore implements Serializable {
      * and then resends the event to local listeners.
      */
     public void processRemoteEvent(SnapshotEvent event) {
+        if(event.getPostedBy() == this || event.getSource() != remoteNotificationsHandler) {
+            return;
+        }
+        
         if (logObj.isDebugEnabled()) {
             logObj.debug("remote event: " + event);
         }
@@ -477,6 +481,7 @@ public class DataRowStore implements Serializable {
                 }
 
                 DataRow newSnapshot = oldSnapshot.applyDiff((DataRow) entry.getValue());
+                logObj.info("APPLIED DIFF: " + entry.getValue() + "; NEW: " + newSnapshot);
                 snapshots.put(key, newSnapshot);
             }
         }

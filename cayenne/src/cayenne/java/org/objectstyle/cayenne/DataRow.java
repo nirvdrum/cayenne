@@ -111,7 +111,7 @@ public class DataRow extends HashMap {
     public void setReplacesVersion(long replacesVersion) {
         this.replacesVersion = replacesVersion;
     }
-    
+
     /**
      * Builds a new DataRow, merging changes from <code>diff</code>
      * parameter with data contained in this DataRow.
@@ -120,20 +120,16 @@ public class DataRow extends HashMap {
      */
     public DataRow applyDiff(DataRow diff) {
         DataRow merged = new DataRow(this);
-        
+
         Iterator it = diff.entrySet().iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
-            Object key = entry.getKey();
-            
-            if(!merged.containsKey(key)) {
-                merged.put(key, entry.getValue());
-            }
+            merged.put(entry.getKey(), entry.getValue());
         }
-        
+
         return merged;
     }
-    
+
     /**
       * Creates a DataRow that contains only the keys that have values that differ
       * between this object and <code>row</code> parameter. Diff values are taken from the
@@ -143,29 +139,29 @@ public class DataRow extends HashMap {
       * 
       * @since 1.1
       */
-     public DataRow createDiff(DataRow row) {
+    public DataRow createDiff(DataRow row) {
 
-         // build a diff...
-         DataRow diff = null;
+        // build a diff...
+        DataRow diff = null;
 
-         Iterator entries = entrySet().iterator();
-         while (entries.hasNext()) {
-             Map.Entry entry = (Map.Entry)entries.next();
-             
-             Object key = entry.getKey();
-             Object currentValue = entry.getValue();
-             Object rowValue = row.get(key);
-             
-             if (!Util.nullSafeEquals(currentValue, rowValue)) {
-                 if (diff == null) {
-                     diff = new DataRow(this.size());
-                 }
-                 diff.put(key, rowValue);
-             }
-         }
+        Iterator entries = entrySet().iterator();
+        while (entries.hasNext()) {
+            Map.Entry entry = (Map.Entry) entries.next();
 
-         return diff;
-     }
+            Object key = entry.getKey();
+            Object currentValue = entry.getValue();
+            Object rowValue = row.get(key);
+
+            if (!Util.nullSafeEquals(currentValue, rowValue)) {
+                if (diff == null) {
+                    diff = new DataRow(this.size());
+                }
+                diff.put(key, rowValue);
+            }
+        }
+
+        return diff;
+    }
 
     /**
       * Creates an ObjectId from the values in the snapshot.
@@ -173,10 +169,10 @@ public class DataRow extends HashMap {
       * CayenneRuntimeException is thrown.
       */
     public ObjectId createObjectId(ObjEntity entity) {
-    	return createObjectId(entity.getJavaClass(), entity.getDbEntity());
+        return createObjectId(entity.getJavaClass(), entity.getDbEntity());
     }
-    
-	public ObjectId createObjectId(Class objectClass, DbEntity entity) {
+
+    public ObjectId createObjectId(Class objectClass, DbEntity entity) {
 
         // ... handle special case - PK.size == 1
         //     use some not-so-significant optimizations...
@@ -218,7 +214,7 @@ public class DataRow extends HashMap {
         if (relationship.isToMany()) {
             throw new CayenneRuntimeException("Only 'to one' can have a target ObjectId.");
         }
-        
+
         Map target = relationship.targetPkSnapshotWithSrcSnapshot(this);
         return (target != null) ? new ObjectId(targetClass, target) : null;
     }
