@@ -56,9 +56,14 @@
 
 package org.objectstyle.cayenne.access.trans;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
@@ -67,10 +72,12 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
 /**
  * A translator for UpdateBatchQueries that produces parameterized SQL.
  *  
- * @author Andriy Shapochka, Andrei Adamchik
+ * @author Andriy Shapochka, Andrei Adamchik, Mike Kienenberger
  */
 
 public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
+    private static Logger logObj = Logger.getLogger(UpdateBatchQueryBuilder.class);
+
     public UpdateBatchQueryBuilder(DbAdapter adapter) {
         super(adapter);
     }
@@ -94,15 +101,118 @@ public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
         }
 
         query.append(" WHERE ");
+        int parameterIndex = len;
         Iterator i = idDbAttributes.iterator();
         while (i.hasNext()) {
             DbAttribute attribute = (DbAttribute) i.next();
             appendDbAttribute(query, attribute);
-            query.append(" = ?");
+            if (updateBatch.isUsingOptimisticLocking()) {
+                Object value = batch.getObject(parameterIndex++);
+                if (null == value)
+                    query.append(" IS NULL");
+                else
+                    query.append(" = ?");
+            }
+            else
+                query.append(" = ?");
             if (i.hasNext()) {
                 query.append(" AND ");
             }
         }
         return query.toString();
     }
+
+    /**
+     * Binds BatchQuery parameters to the PreparedStatement. 
+     */
+    public void bindParameters(
+        PreparedStatement statement,
+        BatchQuery query,
+        List dbAttributes)
+        throws SQLException, Exception {
+
+        UpdateBatchQuery updateBatch = (UpdateBatchQuery) query;
+        List idDbAttributes = updateBatch.getIdDbAttributes();
+        List updatedDbAttributes = updateBatch.getUpdatedDbAttributes();
+
+        int len = updatedDbAttributes.size();
+        int parameterIndex = 0;
+        for (int i = 0; i < len; i++) {
+            Object value = query.getObject(i);
+
+            DbAttribute attribute = (DbAttribute) updatedDbAttributes.get(i);
+            adapter.bindParameter(
+                statement,
+                value,
+                parameterIndex + 1,
+                attribute.getType(),
+                attribute.getPrecision());
+
+            logQueryParameterInDetail(
+                Level.DEBUG,
+                "binding set",
+                parameterIndex + 1,
+                attribute.getType(),
+                attribute.getName(),
+                value);
+
+            ++parameterIndex;
+        }
+
+        for (int i = 0; i < idDbAttributes.size(); i++) {
+            Object value = query.getObject(len + i);
+            if (null == value)
+                continue;
+
+            DbAttribute attribute = (DbAttribute) idDbAttributes.get(i);
+            adapter.bindParameter(
+                statement,
+                value,
+                parameterIndex + 1,
+                attribute.getType(),
+                attribute.getPrecision());
+
+            logQueryParameterInDetail(
+                Level.DEBUG,
+                "binding id/lock",
+                parameterIndex + 1,
+                attribute.getType(),
+                attribute.getName(),
+                value);
+
+            ++parameterIndex;
+        }
+    }
+
+    // utility method to log batch bindings
+    static void logQueryParameterInDetail(
+        Level logLevel,
+        String label,
+        int parameterIndex,
+        int attributeSqlType,
+        String attributeName,
+        Object value) {
+
+        if (logObj.isEnabledFor(logLevel)) {
+            StringBuffer buf = new StringBuffer("[");
+            buf.append(label).append(": ");
+
+            buf.append("parameter=");
+            buf.append(parameterIndex);
+
+            buf.append(", type=");
+            buf.append(attributeSqlType);
+
+            buf.append(", name=");
+            buf.append(attributeName);
+
+            buf.append(", value=");
+            QueryLogger.sqlLiteralForObject(buf, value);
+
+            buf.append(']');
+
+            logObj.log(logLevel, buf.toString());
+        }
+    }
+
 }

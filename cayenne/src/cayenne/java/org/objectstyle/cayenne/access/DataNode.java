@@ -91,6 +91,7 @@ import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.UpdateBatchQuery;
 
 /**
  * Describes a single physical data source. This can be a database server, LDAP server, etc.
@@ -224,7 +225,7 @@ public class DataNode implements QueryEngine {
             ? this
             : null;
     }
-    
+
     /**
      * Returns a DataNode that should hanlde queries for all
      * DataMap components.
@@ -236,7 +237,7 @@ public class DataNode implements QueryEngine {
             ? this
             : null;
     }
-    
+
     /** 
      * Wraps queries in an internal transaction, and executes them via connection obtained from 
      * internal DataSource.
@@ -245,7 +246,6 @@ public class DataNode implements QueryEngine {
         Transaction transaction = Transaction.internalTransaction(null);
         transaction.performQueries(this, queries, observer);
     }
-    
 
     /** 
      * Calls "performQueries()" wrapping a query argument into a list.
@@ -274,7 +274,6 @@ public class DataNode implements QueryEngine {
             return;
         }
         QueryLogger.logQueryStart(logLevel, listSize);
-
 
         // since 1.1 Transaction object is required
         if (transaction == null) {
@@ -454,11 +453,17 @@ public class DataNode implements QueryEngine {
         }
 
         // run batch
-        if (adapter.supportsBatchUpdates()) {
-            runBatchUpdateAsBatch(con, query, queryBuilder, delegate);
+
+        // optimistic locking is not supported in batches due to JDBC driver limitations
+        boolean useOptimisticLock =
+            (query instanceof UpdateBatchQuery)
+                && ((UpdateBatchQuery) query).isUsingOptimisticLocking();
+
+        if (useOptimisticLock || !adapter.supportsBatchUpdates()) {
+            runBatchUpdateAsIndividualQueries(con, query, queryBuilder, delegate);
         }
         else {
-            runBatchUpdateAsIndividualQueries(con, query, queryBuilder, delegate);
+            runBatchUpdateAsBatch(con, query, queryBuilder, delegate);
         }
     }
 
@@ -528,6 +533,9 @@ public class DataNode implements QueryEngine {
 
         Level logLevel = query.getLoggingLevel();
         boolean isLoggable = QueryLogger.isLoggable(logLevel);
+        boolean useOptimisticLock =
+            (query instanceof UpdateBatchQuery)
+                && ((UpdateBatchQuery) query).isUsingOptimisticLocking();
 
         String queryStr = queryBuilder.createSqlString(query);
 
@@ -551,6 +559,24 @@ public class DataNode implements QueryEngine {
                 queryBuilder.bindParameters(statement, query, dbAttributes);
 
                 int updated = statement.executeUpdate();
+
+                if (useOptimisticLock && updated != 1) {
+                    List parameters = query.getValuesForUpdateParameters();
+                    StringBuffer buf = new StringBuffer("[");
+                    QueryLogger.sqlLiteralForObject(buf, parameters.get(0));
+                    for (int i = 1; i < parameters.size(); i++) {
+                        buf.append(", ");
+                        QueryLogger.sqlLiteralForObject(buf, parameters.get(i));
+                    }
+                    buf.append(']');
+
+                    throw new CayenneException(
+                        "Optimistic lock failure on sql '"
+                            + queryStr
+                            + "' for query bindings="
+                            + buf.toString());
+                }
+
                 delegate.nextCount(query, updated);
 
                 if (isLoggable) {

@@ -85,12 +85,16 @@ import org.objectstyle.cayenne.util.XMLEncoder;
  * @author Andrei Adamchik
  */
 public class ObjEntity extends Entity {
+    final public static int LOCK_TYPE_NONE = 0;
+    final public static int LOCK_TYPE_OPTIMISTIC = 1;
+
     protected String superClassName;
     protected String className;
     protected DbEntity dbEntity;
     protected String superEntityName;
     protected Expression qualifier;
     protected boolean readOnly;
+    protected int lockType = LOCK_TYPE_NONE;
 
     public ObjEntity() {
         super();
@@ -171,6 +175,24 @@ public class ObjEntity extends Entity {
                     + e.getMessage(),
                 e);
         }
+    }
+
+    /**
+     * Returns the type of lock used by this ObjEntity.
+     * 
+     * @since 1.1
+     */
+    public int getLockType() {
+        return lockType;
+    }
+
+    /**
+     * Sets the type of lock used by this ObjEntity.
+     * 
+     * @since 1.1
+     */
+    public void setLockType(int i) {
+        lockType = i;
     }
 
     /**

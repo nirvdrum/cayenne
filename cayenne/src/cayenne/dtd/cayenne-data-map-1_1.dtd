@@ -66,6 +66,7 @@ hierarchy.
 	superEntityName CDATA #IMPLIED
 	superClassName CDATA #IMPLIED
 	readOnly (true | false) "false"
+	lock-type (optimistic | none) "none"
 >
 
 <!ELEMENT obj-attribute EMPTY>
@@ -73,6 +74,7 @@ hierarchy.
 	name CDATA #REQUIRED
 	db-attribute-path CDATA #REQUIRED
 	type CDATA #REQUIRED
+	lock (true | false) "false"
 >
 
 <!ELEMENT obj-relationship (db-relationship-ref*)>
@@ -81,6 +83,7 @@ hierarchy.
 	source CDATA #REQUIRED
 	target CDATA #REQUIRED
 	toMany (true | false) "false"
+	lock (true | false) "false"
 >
 
 <!ELEMENT db-relationship-ref EMPTY>

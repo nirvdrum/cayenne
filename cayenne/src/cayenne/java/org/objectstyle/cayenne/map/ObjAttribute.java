@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.util.XMLEncoder;
  */
 public class ObjAttribute extends Attribute {
     protected String type;
+    protected boolean usedForLocking;
     private String dbAttributePath;
 
     public ObjAttribute() {
@@ -123,6 +124,24 @@ public class ObjAttribute extends Attribute {
      */
     public void setType(String type) {
         this.type = type;
+    }
+
+    /** 
+     * Returns whether this attribute should be used for locking.
+     * 
+     * @since 1.1
+     */
+    public boolean isUsedForLocking() {
+        return usedForLocking;
+    }
+
+    /** 
+     * Sets whether this attribute should be used for locking.
+     * 
+     * @since 1.1
+     */
+    public void setUsedForLocking(boolean usedForLocking) {
+        this.usedForLocking = usedForLocking;
     }
 
     /**

@@ -71,6 +71,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.ObjectStore.FlattenedRelationshipInfo;
@@ -79,6 +80,8 @@ import org.objectstyle.cayenne.access.util.ContextCommitObserver;
 import org.objectstyle.cayenne.access.util.DataNodeCommitHelper;
 import org.objectstyle.cayenne.access.util.DependencySorter;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -168,15 +171,16 @@ class ContextCommit {
                         insObjects,
                         updObjects,
                         delObjects);
-                
+
                 if (context.isTransactionEventsEnabled()) {
                     observer.registerForDataContextEvents();
                 }
 
                 try {
                     context.fireWillCommit();
-                    
-                    Transaction transaction = context.getParentDataDomain().createTransaction();
+
+                    Transaction transaction =
+                        context.getParentDataDomain().createTransaction();
                     transaction.begin();
 
                     try {
@@ -188,7 +192,10 @@ class ContextCommit {
 
                             if (queries.size() > 0) {
                                 // note: observer throws on error
-                                nodeHelper.getNode().performQueries(queries, observer, transaction);
+                                nodeHelper.getNode().performQueries(
+                                    queries,
+                                    observer,
+                                    transaction);
                             }
                         }
 
@@ -205,7 +212,9 @@ class ContextCommit {
                         }
 
                         context.fireTransactionRolledback();
-                        throw new CayenneException("Transaction was rolledback.", Util.unwindException(th));
+                        throw new CayenneException(
+                            "Transaction was rolledback.",
+                            Util.unwindException(th));
                     }
 
                     context.getObjectStore().objectsCommitted();
@@ -340,7 +349,7 @@ class ContextCommit {
 
                     // check if object was modified from underneath and consult the delegate
                     // if this is the case...
-                   // checkConcurrentModifications(o);
+                    // checkConcurrentModifications(o);
 
                     Map id = o.getObjectId().getIdSnapshot();
                     if (id != null && !id.isEmpty()) {
@@ -355,6 +364,88 @@ class ContextCommit {
             }
             commitHelper.getQueries().add(batch);
         }
+    }
+
+    private List createOptimisticLockingIdSnapshotKeys(ObjEntity objEntity) {
+        List newLockingAttributeList = new ArrayList();
+
+        Iterator dbAttributeIterator = objEntity.getDbEntity().getAttributes().iterator();
+        while (dbAttributeIterator.hasNext()) {
+            DbAttribute dbAttr = (DbAttribute) dbAttributeIterator.next();
+
+            // always lock on primary key(s)
+            if (dbAttr.isPrimaryKey()) {
+                newLockingAttributeList.add(dbAttr);
+                continue;
+            }
+
+            ObjAttribute objAttr = objEntity.getAttributeForDbAttribute(dbAttr);
+
+            if (objAttr == null)
+                continue;
+
+            // Per-objAtttribute optimistic locking conditional
+            if (!objAttr.isUsedForLocking())
+                continue;
+
+            newLockingAttributeList.add(dbAttr);
+        }
+
+        Iterator dbRelationshipIterator =
+            objEntity.getDbEntity().getRelationships().iterator();
+        while (dbRelationshipIterator.hasNext()) {
+            DbRelationship dbRel = (DbRelationship) dbRelationshipIterator.next();
+
+            ObjRelationship objRel = objEntity.getRelationshipForDbRelationship(dbRel);
+
+            if (objRel == null)
+                continue;
+
+            // Per-objAtttribute optimistic locking conditional
+            if (!objRel.isUsedForLocking())
+                continue;
+
+            Iterator joinsIterator = dbRel.getJoins().iterator();
+            while (joinsIterator.hasNext()) {
+                DbAttributePair dbAttrPair = (DbAttributePair) joinsIterator.next();
+                DbAttribute dbAttr = dbAttrPair.getSource();
+                newLockingAttributeList.add(dbAttr);
+            }
+        }
+
+        return newLockingAttributeList;
+    }
+
+    private Map createOptimisticLockingIdSnapshot(
+        ObjEntity objEntity,
+        DataObject dataObject,
+        List dbAttrList,
+        Map srcIdSnapshotMap)
+        throws CayenneException {
+            
+        // Unclear to me if srcIdSnapshotMap is necessary as a starting point, but it seems safest to leave it
+        Map newLockingAttributeMap = new HashMap(srcIdSnapshotMap);
+
+        // Use this to insure we're not fetching it from the db.
+        DataRow commitedSnapshot =
+            dataObject.getDataContext().getObjectStore().getRetainedSnapshot(
+                dataObject.getObjectId());
+
+        if (null == commitedSnapshot) {
+            throw new CayenneException(
+                "getRetainedSnapshot() is null for " + dataObject.getObjectId());
+        }
+
+        Iterator dbAttributeIterator = dbAttrList.iterator();
+        while (dbAttributeIterator.hasNext()) {
+            DbAttribute dbAttr = (DbAttribute) dbAttributeIterator.next();
+
+            newLockingAttributeMap.put(
+                dbAttr.getName(),
+                commitedSnapshot.get(dbAttr.getName()));
+        }
+
+        return newLockingAttributeMap;
     }
 
     private void prepareUpdateQueries(DataNodeCommitHelper commitHelper)
@@ -375,6 +466,14 @@ class ContextCommit {
             for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {
                 ObjEntity entity = (ObjEntity) j.next();
 
+                // Per-objEntity optimistic locking conditional
+                boolean shouldUseOptimisticLocking =
+                    (ObjEntity.LOCK_TYPE_OPTIMISTIC == entity.getLockType());
+                List lockingIdSnapshotKeys = null;
+                if (shouldUseOptimisticLocking) {
+                    lockingIdSnapshotKeys = createOptimisticLockingIdSnapshotKeys(entity);
+                }
+
                 boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
 
                 DbRelationship masterDependentDbRel =
@@ -391,7 +490,7 @@ class ContextCommit {
 
                     // check if object was modified from underneath and consult the delegate
                     // if this is the case...
-                   // checkConcurrentModifications(o);
+                    // checkConcurrentModifications(o);
 
                     Map snapshot =
                         BatchQueryUtils.buildSnapshotForUpdate(
@@ -432,7 +531,22 @@ class ContextCommit {
                         idSnapshot =
                             masterDependentDbRel.targetPkSnapshotWithSrcSnapshot(
                                 idSnapshot);
-                    batch.add(idSnapshot, snapshot);
+
+                    if (shouldUseOptimisticLocking) {
+                        Map lockingIdSnapshot =
+                            createOptimisticLockingIdSnapshot(
+                                entity,
+                                o,
+                                lockingIdSnapshotKeys,
+                                idSnapshot);
+                        batch.setIdDbAttributes(lockingIdSnapshotKeys);
+                        batch.setUsingOptimisticLocking(true);
+                        batch.add(lockingIdSnapshot, snapshot);
+                    }
+                    else {
+                        batch.add(idSnapshot, snapshot);
+                    }
+
                     if (isMasterDbEntity) {
                         ObjectId updId =
                             updatedId(
@@ -620,8 +734,7 @@ class ContextCommit {
         Iterator i = context.getObjectStore().getFlattenedDeletes().iterator();
 
         while (i.hasNext()) {
-            FlattenedRelationshipInfo info =
-                (FlattenedRelationshipInfo) i.next();
+            FlattenedRelationshipInfo info = (FlattenedRelationshipInfo) i.next();
             DataObject source = info.getSource();
             Map sourceId = source.getObjectId().getIdSnapshot();
             if (sourceId == null)

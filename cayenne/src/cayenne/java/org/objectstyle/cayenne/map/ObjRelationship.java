@@ -83,12 +83,15 @@ public class ObjRelationship extends Relationship implements EventListener {
 
     // Not flattened initially;
     // will be set when dbRels are added that make it flattened
-    private boolean isFlattened = false;
+    private boolean flattened;
 
     // Initially all relationships are read/write;
     // a flattened relationship may be readonly (in certain circumstances),
     // will be set in that case
-    private boolean isReadOnly = false;
+    private boolean readOnly;
+
+    //  Whether optimstic locking should consider this relationship
+    protected boolean usedForLocking;
 
     private List dbRelationships = new ArrayList();
     private List dbRelationshipsRef = Collections.unmodifiableList(dbRelationships);
@@ -268,7 +271,8 @@ public class ObjRelationship extends Relationship implements EventListener {
                         + "is not the target of the previous relationship "
                         + "in the chain");
             }
-            isFlattened = true;
+
+            flattened = true;
             //Now there will be more than one dbRel - this is a flattened
             // relationship
         }
@@ -300,7 +304,7 @@ public class ObjRelationship extends Relationship implements EventListener {
             dbRel);
         //If we removed all but one dbRel, then it's no longer flattened
         if (dbRelationships.size() <= 1) {
-            isFlattened = false;
+            flattened = false;
         }
         this.calculateReadOnlyValue();
         this.calculateToManyValue();
@@ -308,7 +312,7 @@ public class ObjRelationship extends Relationship implements EventListener {
 
     public void clearDbRelationships() {
         dbRelationships.clear();
-        this.isReadOnly = false;
+        this.readOnly = false;
         this.toMany = false;
     }
 
@@ -335,13 +339,13 @@ public class ObjRelationship extends Relationship implements EventListener {
     private void calculateReadOnlyValue() {
         //Quickly filter the single dbrel case
         if (dbRelationships.size() < 2) {
-            this.isReadOnly = false;
+            this.readOnly = false;
             return;
         }
 
         //Also quickly filter any really complex db rel cases
         if (dbRelationships.size() > 2) {
-            this.isReadOnly = true;
+            this.readOnly = true;
             return;
         }
 
@@ -351,7 +355,7 @@ public class ObjRelationship extends Relationship implements EventListener {
 
         //First toOne or second toMany means read only
         if (!firstRel.isToMany() || secondRel.isToMany()) {
-            this.isReadOnly = true;
+            this.readOnly = true;
             return;
         }
 
@@ -372,13 +376,13 @@ public class ObjRelationship extends Relationship implements EventListener {
         Iterator allAttribs = intermediateEntity.getAttributes().iterator();
         while (allAttribs.hasNext()) {
             if (!pkAttribs.contains(allAttribs.next())) {
-                this.isReadOnly = true;
+                this.readOnly = true;
                 return;
                 //one of the attributes of intermediate entity is not in the
                 // pk. Must be readonly
             }
         }
-        this.isReadOnly = false;
+        this.readOnly = false;
     }
 
     /**
@@ -422,7 +426,7 @@ public class ObjRelationship extends Relationship implements EventListener {
      * @return flag indicating if the relationship is flattened or not
      */
     public boolean isFlattened() {
-        return isFlattened;
+        return flattened;
     }
 
     /**
@@ -432,7 +436,7 @@ public class ObjRelationship extends Relationship implements EventListener {
      * @return flag indicating if the relationship is read only or not
      */
     public boolean isReadOnly() {
-        return isReadOnly;
+        return readOnly;
     }
 
     /**
@@ -472,5 +476,23 @@ public class ObjRelationship extends Relationship implements EventListener {
 
     public void dbRelationshipDidChange(RelationshipEvent event) {
         this.calculateToManyValue();
+    }
+
+    /** 
+     * Returns whether this attribute should be used for locking.
+     * 
+     * @since 1.1
+     */
+    public boolean isUsedForLocking() {
+        return usedForLocking;
+    }
+
+    /** 
+     * Sets whether this attribute should be used for locking.
+     * 
+     * @since 1.1
+     */
+    public void setUsedForLocking(boolean usedForLocking) {
+        this.usedForLocking = usedForLocking;
     }
 }

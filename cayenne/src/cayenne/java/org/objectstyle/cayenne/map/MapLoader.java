@@ -168,7 +168,6 @@ public class MapLoader extends DefaultHandler {
     public synchronized DataMap loadDataMap(InputSource src) throws DataMapException {
         return loadDataMap(src, Collections.EMPTY_LIST);
     }
-    
 
     /** 
      * Prints DataMap encoded as XML to a provided PrintWriter.
@@ -567,6 +566,11 @@ public class MapLoader extends DefaultHandler {
         String readOnly = atts.getValue("", "readOnly");
         objEntity.setReadOnly(TRUE.equalsIgnoreCase(readOnly));
 
+        String lockType = atts.getValue("", "lock-type");
+        if ("optimistic".equals(lockType)) {
+            objEntity.setLockType(ObjEntity.LOCK_TYPE_OPTIMISTIC);
+        }
+
         String temp = atts.getValue("", "dbEntityName");
         if (null != temp) {
             DbEntity db_temp = dataMap.getDbEntity(temp);
@@ -584,8 +588,11 @@ public class MapLoader extends DefaultHandler {
         String name = atts.getValue("", "name");
         String type = atts.getValue("", "type");
 
+        String lock = atts.getValue("", "lock");
+
         ObjAttribute oa = new ObjAttribute(name);
         oa.setType(type);
+        oa.setUsedForLocking(TRUE.equalsIgnoreCase(lock));
         objEntity.addAttribute(oa);
         String dbPath = atts.getValue("", "db-attribute-path");
         if (dbPath == null) {
@@ -753,9 +760,12 @@ public class MapLoader extends DefaultHandler {
             deleteRule = DeleteRule.deleteRuleForName(deleteRuleName);
         }
 
+        String lock = atts.getValue("", "lock");
+
         objRelationship = new ObjRelationship(source, target, to_many);
         objRelationship.setName(name);
         objRelationship.setDeleteRule(deleteRule);
+        objRelationship.setUsedForLocking(TRUE.equalsIgnoreCase(lock));
         source.addRelationship(objRelationship);
     }
 

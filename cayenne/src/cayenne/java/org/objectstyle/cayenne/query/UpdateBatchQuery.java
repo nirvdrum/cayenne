@@ -70,7 +70,6 @@ import org.objectstyle.cayenne.map.DbEntity;
  * 
  * @author Andriy Shapochka
  */
-
 public class UpdateBatchQuery extends BatchQuery {
     private List dataObjectIds;
     private List updates;
@@ -81,14 +80,14 @@ public class UpdateBatchQuery extends BatchQuery {
     private Map currentId = Collections.EMPTY_MAP;
     private Iterator updateIterator = IteratorUtils.EMPTY_ITERATOR;
     private Map currentUpdate = Collections.EMPTY_MAP;
+    private boolean usingOptimisticLocking;
 
     public UpdateBatchQuery(
         DbEntity objectEntity,
         List updatedDbAttributeNames,
         int batchCapacity) {
         super(objectEntity);
-        this.updatedDbAttributes =
-            new ArrayList(updatedDbAttributeNames.size());
+        this.updatedDbAttributes = new ArrayList(updatedDbAttributeNames.size());
         Map attrMap = getDbEntity().getAttributeMap();
         for (Iterator i = updatedDbAttributeNames.iterator(); i.hasNext();) {
             Object name = i.next();
@@ -97,6 +96,14 @@ public class UpdateBatchQuery extends BatchQuery {
         dataObjectIds = new ArrayList(batchCapacity);
         updates = new ArrayList(batchCapacity);
         prepareMetadata();
+    }
+
+    public boolean isUsingOptimisticLocking() {
+        return usingOptimisticLocking;
+    }
+
+    public void setUsingOptimisticLocking(boolean usingOptimisticLocking) {
+        this.usingOptimisticLocking = usingOptimisticLocking;
     }
 
     public void reset() {
@@ -112,14 +119,12 @@ public class UpdateBatchQuery extends BatchQuery {
         currentId = (Map) idIterator.next();
         currentId = (currentId != null ? currentId : Collections.EMPTY_MAP);
         currentUpdate = (Map) updateIterator.next();
-        currentUpdate =
-            (currentUpdate != null ? currentUpdate : Collections.EMPTY_MAP);
+        currentUpdate = (currentUpdate != null ? currentUpdate : Collections.EMPTY_MAP);
         return true;
     }
 
     public Object getObject(int dbAttributeIndex) {
-        DbAttribute attribute =
-            (DbAttribute) dbAttributes.get(dbAttributeIndex);
+        DbAttribute attribute = (DbAttribute) dbAttributes.get(dbAttributeIndex);
         String name = attribute.getName();
 
         // take value either from updated values or id's,
@@ -152,8 +157,14 @@ public class UpdateBatchQuery extends BatchQuery {
 
     private void prepareMetadata() {
         idDbAttributes = getDbEntity().getPrimaryKey();
-        dbAttributes =
-            new ArrayList(updatedDbAttributes.size() + idDbAttributes.size());
+        dbAttributes = new ArrayList(updatedDbAttributes.size() + idDbAttributes.size());
+        dbAttributes.addAll(updatedDbAttributes);
+        dbAttributes.addAll(idDbAttributes);
+    }
+
+    public void setIdDbAttributes(List idSnapshotKeys) {
+        idDbAttributes = idSnapshotKeys;
+        dbAttributes = new ArrayList(updatedDbAttributes.size() + idDbAttributes.size());
         dbAttributes.addAll(updatedDbAttributes);
         dbAttributes.addAll(idDbAttributes);
     }
@@ -161,4 +172,25 @@ public class UpdateBatchQuery extends BatchQuery {
     public int getQueryType() {
         return Query.UPDATE_QUERY;
     }
+
+    public List getValuesForUpdateParameters() {
+
+        int updLen = updatedDbAttributes.size();
+        int idLen = idDbAttributes.size();
+
+        List values = new ArrayList(updLen + idLen);
+
+        for (int i = 0; i < updLen; i++) {
+            values.add(getObject(i));
+        }
+
+        for (int i = updLen; i < (updLen + idLen); i++) {
+            Object anObject = getObject(i);
+            if (null != anObject)
+                values.add(anObject);
+        }
+
+        return values;
+    }
+
 }
