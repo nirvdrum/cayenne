@@ -79,7 +79,6 @@ public class DefaultConfiguration extends Configuration {
 
 	protected ResourceLocator locator;
 	protected File projectFile;
-	protected boolean shouldInitialize = false;
 
 	/**
 	 * Default constructor. Simply calls Configuration().
