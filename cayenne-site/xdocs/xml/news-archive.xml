@@ -4,6 +4,50 @@
 
     <body>        
         <section name="Cayenne News Archive">
+ <p><u><i>[October 24, 2004]</i></u> <strong>Cayenne 1.1 RC2</strong></p>
+		<p>1.1 Release Candidate 2 is available for download. It fixes all remaining bugs scheduled 
+		for 1.1 and is likely the last candidate release before 1.1 final. Modeler documentation
+		is updated with the latest 1.1 features (though the documentation update is still work in progress). 
+		For details see <a href="release-notes/RELEASE-NOTES-1.1RC2.txt">release
+		notes</a> and <a href="upgrade/UPGRADE-1.1RC2.txt">upgrade instructions</a>.
+		</p>
+
+<p><u><i>[October 3, 2004]</i></u> <strong>Cayenne 1.1 Release Candidate</strong></p>
+		<p>1.1 Release Candidate is available for download. This release features major 
+		improvements to CayenneModeler - new preferences subsystem, local DataSources, 
+		better database reverse and forward engineering support. Also it fixes a number of bugs.
+		For details see <a href="release-notes/RELEASE-NOTES-1.1RC1.txt">release
+		notes</a> and <a href="upgrade/UPGRADE-1.1RC1.txt">upgrade instructions</a>.
+		</p>
+
+<p><u><i>[September 21, 2004]</i></u> <strong>Cayenne-Examples B3 Release</strong></p>
+		<p>A new download of Cayenne Examples is available <a href="http://prdownloads.sourceforge.net/cayenne/cayenne-examples-1.1B3.tar.gz">here</a>. In addition to updated existing examples, new release includes 
+		Cayenne/Tapestry blog application, DataViews Swing example 
+		and a ServletFilter example. <a href="examples/index.html">This page provides more 
+		information about examples</a>.
+		</p>
+        <p><u><i>[September 19, 2004]</i></u> <strong>Cayenne 1.1 Beta 3</strong></p>
+		<p>Download Cayenne Beta 3 from <a href="http://prdownloads.sourceforge.net/cayenne/cayenne-1.1B3.tar.gz">here</a>.
+		This is a major bugfix release. For details see <a href="release-notes/RELEASE-NOTES-1.1B3.txt">release
+		notes</a> and <a href="upgrade/UPGRADE-1.1B3.txt">upgrade instructions</a>.
+		</p>
+<p><u><i>[July 25, 2004]</i></u> <strong>Cayenne 1.1 Beta 2</strong></p>
+		<p>Download Cayenne Beta 2 from <a href="http://prdownloads.sourceforge.net/cayenne/cayenne-1.1B2.tar.gz">here</a>.</p>
+		<p>This Beta release introduces thread-bound DataContext, improves connection pool reconnect feature,
+		allows wider range of mutable flattened relationships, adds full support for externally developed custom DbAdapters 
+		in the Modeler and fixes a number of Modeler bugs. For details see <a href="release-notes/RELEASE-NOTES-1.1B2.txt">release
+		notes</a> and <a href="upgrade/UPGRADE-1.1B2.txt">upgrade instructions</a>.
+		</p>
+
+<p><u><i>[July 23, 2004]</i></u> <strong>Cayenne @IT</strong></p>
+		
+		<p><img align="left" hspace="3" src="images/other/cayenne_atmarkit.gif"/> @IT Japanese technology site published a 
+		very thorough Cayenne 
+		<a href="http://www.atmarkit.co.jp/fjava/products/cayenne/cayenne_1.html" target="_blank">introductory 
+		article</a> (in Japanese).  A badly mangled babelfish English translation is available via <a target="_blank" href=
+		"http://world.altavista.com/babelfish/trurl_pagecontent?url=http%3A%2F%2Fwww.atmarkit.co.jp%2Ffjava%2Fproducts%2Fcayenne%2Fcayenne_1.html&amp;lp=ja_en">this
+		link</a>. The article explains main Cayenne concepts and then shows how to create a Cayenne application step by step.
+		<br/><br/><br/><br/></p>
         <p><u><i>[July 12, 2004]</i></u> <strong>Cayenne 1.1 Goes Beta!</strong></p>
 		<p>Download Cayenne Beta from <a href="http://prdownloads.sourceforge.net/cayenne/cayenne-1.1B1.tar.gz">here</a>.</p>
 		<p>1.1 now enters official feature freeze (excluding the Modeler). 
@@ -13,6 +57,8 @@
 		For details see <a href="release-notes/RELEASE-NOTES-1.1B1.txt">release
 		notes</a> and <a href="upgrade/UPGRADE-1.1B1.txt">upgrade instructions</a>.
 		</p>
+
+
 		
         <p><u><i>[June 14, 2004]</i></u> <strong>M7 - Cayenne 1.1 Milestone  Release</strong></p>
 		<p>This release includes support for shared and local caching of query results, a complete
