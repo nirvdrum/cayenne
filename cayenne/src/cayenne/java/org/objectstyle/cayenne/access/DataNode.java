@@ -83,7 +83,6 @@ import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
@@ -465,32 +464,15 @@ public class DataNode implements QueryEngine {
 					"Unsupported batch type: " + query.getQueryType());
 		}
 
-		// translate the query
-		String queryStr = queryBuilder.query(query);
-
-		// log batch SQL execution
-		QueryLogger.logQuery(
-			query.getLoggingLevel(),
-			queryStr,
-			Collections.EMPTY_LIST);
-
-		PreparedStatement statement = con.prepareStatement(queryStr);
-		try {
-			// run batch
-			if (adapter.supportsBatchUpdates()) {
-				runBatchUpdateAsBatch(con, query, delegate, statement);
-			} else {
-				runBatchUpdateAsIndividualQueries(
-					con,
-					query,
-					delegate,
-					statement);
-			}
-		} finally {
-			try {
-				statement.close();
-			} catch (Exception e) {
-			}
+		// run batch
+		if (adapter.supportsBatchUpdates()) {
+			runBatchUpdateAsBatch(con, query, queryBuilder, delegate);
+		} else {
+			runBatchUpdateAsIndividualQueries(
+				con,
+				query,
+				queryBuilder,
+				delegate);
 		}
 	}
 
@@ -500,47 +482,39 @@ public class DataNode implements QueryEngine {
 	protected void runBatchUpdateAsBatch(
 		Connection con,
 		BatchQuery query,
-		OperationObserver delegate,
-		PreparedStatement statement)
+		BatchQueryBuilder queryBuilder,
+		OperationObserver delegate)
 		throws SQLException, Exception {
 
-		// prepare batch information
+		String queryStr = queryBuilder.query(query);
+
+		// log batch SQL execution
+		QueryLogger.logQuery(
+			query.getLoggingLevel(),
+			queryStr,
+			Collections.EMPTY_LIST);
 		List dbAttributes = query.getDbAttributes();
-		int attributeCount = dbAttributes.size();
-		int[] attributeTypes = new int[attributeCount];
-		int[] attributeScales = new int[attributeCount];
 
-		for (int i = 0; i < attributeCount; i++) {
-			DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
-			attributeTypes[i] = attribute.getType();
-			attributeScales[i] = attribute.getPrecision();
-		}
-
-		// run batch
-		query.reset();
-		while (query.next()) {
-			// log next batch parameters
-			QueryLogger.logBatchQueryParameters(query.getLoggingLevel(), query);
-
-			for (int i = 0; i < attributeCount; i++) {
-				Object value = query.getObject(i);
-				int type = attributeTypes[i];
-				adapter.bindParameter(
-					statement,
-					value,
-					i + 1,
-					type,
-					attributeScales[i]);
+		PreparedStatement statement = con.prepareStatement(queryStr);
+		try {
+			// run batch
+			query.reset();
+			while (query.next()) {
+				queryBuilder.bindParameters(statement, query, dbAttributes);
+				statement.addBatch();
 			}
 
-			// this line differs from super
-			statement.addBatch();
+			int[] results = statement.executeBatch();
+			delegate.nextBatchCount(query, results);
+
+			// TODO: Create QueryLogger method to log batch counts
+
+		} finally {
+			try {
+				statement.close();
+			} catch (Exception e) {
+			}
 		}
-
-		int[] results = statement.executeBatch();
-		delegate.nextBatchCount(query, results);
-
-		// TODO: Create QueryLogger method to log batch counts
 	}
 
 	/**
@@ -550,41 +524,38 @@ public class DataNode implements QueryEngine {
 	protected void runBatchUpdateAsIndividualQueries(
 		Connection con,
 		BatchQuery query,
-		OperationObserver delegate,
-		PreparedStatement statement)
+		BatchQueryBuilder queryBuilder,
+		OperationObserver delegate)
 		throws SQLException, Exception {
 
-		// translate batch
+		String queryStr = queryBuilder.query(query);
+
+		// log batch SQL execution
+		QueryLogger.logQuery(
+			query.getLoggingLevel(),
+			queryStr,
+			Collections.EMPTY_LIST);
 		List dbAttributes = query.getDbAttributes();
-		int attributeCount = dbAttributes.size();
-		int[] attributeTypes = new int[attributeCount];
-		int[] attributeScales = new int[attributeCount];
-		for (int i = 0; i < attributeCount; i++) {
-			DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
-			attributeTypes[i] = attribute.getType();
-			attributeScales[i] = attribute.getPrecision();
-		}
 
-		query.reset();
-		while (query.next()) {
-			// log next batch parameters
-			QueryLogger.logBatchQueryParameters(query.getLoggingLevel(), query);
+		PreparedStatement statement = con.prepareStatement(queryStr);
+		try {
+			// run batch
+			query.reset();
+			while (query.next()) {
+				queryBuilder.bindParameters(statement, query, dbAttributes);
 
-			for (int i = 0; i < attributeCount; i++) {
-				Object value = query.getObject(i);
-				int type = attributeTypes[i];
-				adapter.bindParameter(
-					statement,
-					value,
-					i + 1,
-					type,
-					attributeScales[i]);
+				int updated = statement.executeUpdate();
+				delegate.nextCount(query, updated);
+				QueryLogger.logUpdateCount(query.getLoggingLevel(), updated);
 			}
-			int updated = statement.executeUpdate();
-			delegate.nextCount(query, updated);
-			QueryLogger.logUpdateCount(query.getLoggingLevel(), updated);
+		} finally {
+			try {
+				statement.close();
+			} catch (Exception e) {
+			}
 		}
 	}
+	
 
 	protected void runStoredProcedure(
 		Connection con,
