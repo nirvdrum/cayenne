@@ -99,6 +99,8 @@ public class DefaultResultIterator implements ResultIterator {
     protected ExtendedType[] converters;
     protected int[] idIndex;
     protected int resultWidth;
+    protected int mapCapacity;
+    protected int idMapCapacity;
 
     protected boolean closingConnection;
     protected boolean isClosed;
@@ -106,6 +108,7 @@ public class DefaultResultIterator implements ResultIterator {
     protected boolean nextRow;
     protected int fetchedSoFar;
     protected int fetchLimit;
+    
 
     protected DefaultResultIterator(
         Connection connection,
@@ -117,8 +120,8 @@ public class DefaultResultIterator implements ResultIterator {
     }
 
     /** 
-     * Creates new DefaultResultIterator. Initializes it with ResultSet and
-     * query metadata.
+     * Creates new DefaultResultIterator. Executes the query, setting internal
+     * ResultSet.
      */
     public DefaultResultIterator(
         PreparedStatement statement,
@@ -146,7 +149,7 @@ public class DefaultResultIterator implements ResultIterator {
         ExtendedTypeMap typeMap,
         int fetchLimit) {
 
-        this.resultWidth = rowDescriptor.length;
+        this.resultWidth = rowDescriptor.length;        
         this.converters = new ExtendedType[resultWidth];
         this.rowDescriptor = rowDescriptor;
         this.fetchLimit = fetchLimit;
@@ -169,6 +172,9 @@ public class DefaultResultIterator implements ResultIterator {
         for (int i = 0; i < indexSize; i++) {
             this.idIndex[i] = ((Integer) idIndexList.get(i)).intValue();
         }
+        
+        this.mapCapacity = (int)Math.ceil(((double)resultWidth) / 0.75);
+        this.idMapCapacity = (int)Math.ceil(((double)indexSize) / 0.75);
     }
 
     /**
@@ -242,7 +248,7 @@ public class DefaultResultIterator implements ResultIterator {
      */
     protected Map readDataRow() throws SQLException, CayenneException {
         try {
-            Map dataRow = new HashMap();
+            Map dataRow = new HashMap(mapCapacity, 0.75f);
 
             // process result row columns,
             for (int i = 0; i < resultWidth; i++) {
@@ -273,7 +279,7 @@ public class DefaultResultIterator implements ResultIterator {
      */
     protected Map readIdRow() throws SQLException, CayenneException {
         try {
-            Map idRow = new HashMap();
+            Map idRow = new HashMap(idMapCapacity, 0.75f);
 
             int len = idIndex.length;
 
