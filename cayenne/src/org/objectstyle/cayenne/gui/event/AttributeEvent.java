@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,64 +52,103 @@ package org.objectstyle.cayenne.gui.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.gui.event;
 
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
+import java.util.EventObject;
+
+import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.map.Entity;
 
 /** Events pertaining to change in Attribute (Object or Database) properties. */
-public class AttributeEvent extends EventObject
-{
+public class AttributeEvent extends EventObject {
 	/** Attribute changed. Display or re-display it.*/
-	public static final int CHANGE 	= 1;
+	public static final int CHANGE = 1;
 	/** New attribute created. Display it or add to the list, if applicable.*/
-	public static final int ADD		= 2;
+	public static final int ADD = 2;
 	/** Attribute removed. Display another one and/or remove this one from lists.*/
-	public static final int REMOVE	= 3;
-	
-	private int	id = CHANGE;
+	public static final int REMOVE = 3;
+
+	private int id = CHANGE;
 	private Entity entity;
 	private Attribute attribute;
 	private String oldName;
 	private String newName;
-	
-	/** Attribute property(-ies) changed. */
-	public AttributeEvent(Object src, Attribute temp_attribute
-	, Entity temp_entity)
-	{
+
+	/**  Constructor used if an attribute properties has changed. */
+	public AttributeEvent(
+		Object src,
+		Attribute attribute,
+		Entity entity) {
+			
 		super(src);
-		attribute = temp_attribute;
-		entity = temp_entity;
-		oldName = newName = temp_attribute.getName();
+		this.attribute = attribute;
+		this.entity = entity;
+		oldName = newName = attribute.getName();
 	}
 
-	/** Attribute added or removed. */
-	public AttributeEvent(Object src, Attribute temp_attribute
-	, Entity temp_entity, int temp_id)
-	{
+	/** Constructor used if an attribute is added or removed. */
+	public AttributeEvent(
+		Object src,
+		Attribute temp_attribute,
+		Entity temp_entity,
+		int temp_id) {
 		this(src, temp_attribute, temp_entity);
 		id = temp_id;
 	}
 
-	/** Attribute name changed.*/
-	public AttributeEvent(Object src, Attribute temp_attribute
-	, Entity temp_entity, String old_name)
-	{
+	/** Constructor used if an attribute name has changed.*/
+	public AttributeEvent(
+		Object src,
+		Attribute temp_attribute,
+		Entity temp_entity,
+		String old_name) {
 		this(src, temp_attribute, temp_entity, CHANGE);
 		oldName = old_name;
 	}
-	
+
 	/** Get attribute (obj or db). */
-	public Attribute getAttribute() {return attribute;}
+	public Attribute getAttribute() {
+		return attribute;
+	}
+	
 	/** Get entity (obj or db) to which this attribute belongs. */
-	public Entity getEntity() {return entity;}
+	public Entity getEntity() {
+		return entity;
+	}
+	
 	/** Get the type of the event.
 	 *  @return CHANGE, ADD or REMOVE.*/
-	public int getId() {return id;}
-	
+	public int getId() {
+		return id;
+	}
+
 	/** Returns the old attribute name. Used only in CHANGE event. */
-	public String getOldName() {return oldName;}
-	
+	public String getOldName() {
+		return oldName;
+	}
+
 	/** Returns the new attribute name. Used only in CHANGE event.*/
-	public String getNewName() {return newName;}
+	public String getNewName() {
+		return newName;
+	}
+	
+	/**
+	 * Sets the newName.
+	 * @param newName The newName to set
+	 */
+	public void setNewName(String newName) {
+		this.newName = newName;
+	}
+
+
+	/**
+	 * Sets the oldName.
+	 * @param oldName The oldName to set
+	 */
+	public void setOldName(String oldName) {
+		this.oldName = oldName;
+	}
+
+
 }

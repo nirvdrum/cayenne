@@ -144,19 +144,25 @@ class DbAttributeTableModel extends CayenneTableModel {
 	public Object getValueAt(int row, int column) {
 		DbAttribute attr = getAttribute(row);
 
-       
 		if (attr == null) {
 			return "";
-		} 
-		
-		switch(column) {
-			case DB_ATTRIBUTE_NAME: return getAttributeName(attr);
-			case DB_ATTRIBUTE_TYPE: return getAttributeType(attr);
-			case DB_ATTRIBUTE_PRIMARY_KEY: return isPrimaryKey(attr);
-			case DB_ATTRIBUTE_PRECISION: return getPrecision(attr);
-			case DB_ATTRIBUTE_MANDATORY: return isMandatory(attr);
-			case DB_ATTRIBUTE_MAX: return getMaxLength(attr);
-			default: return "";
+		}
+
+		switch (column) {
+			case DB_ATTRIBUTE_NAME :
+				return getAttributeName(attr);
+			case DB_ATTRIBUTE_TYPE :
+				return getAttributeType(attr);
+			case DB_ATTRIBUTE_PRIMARY_KEY :
+				return isPrimaryKey(attr);
+			case DB_ATTRIBUTE_PRECISION :
+				return getPrecision(attr);
+			case DB_ATTRIBUTE_MANDATORY :
+				return isMandatory(attr);
+			case DB_ATTRIBUTE_MAX :
+				return getMaxLength(attr);
+			default :
+				return "";
 		}
 	}
 
@@ -165,7 +171,7 @@ class DbAttributeTableModel extends CayenneTableModel {
 			? String.valueOf(attr.getMaxLength())
 			: "";
 	}
-	
+
 	public String getAttributeName(DbAttribute attr) {
 		return attr.getName();
 	}
@@ -188,80 +194,97 @@ class DbAttributeTableModel extends CayenneTableModel {
 		return (attr.isMandatory()) ? Boolean.TRUE : Boolean.FALSE;
 	}
 
-	public void setValueAt(Object aValue, int row, int column) {
-		DbAttribute attrib = getAttribute(row);
-		AttributeEvent e = null;
-		if (null == attrib) {
-			JOptionPane.showMessageDialog(
-				Editor.getFrame(),
-				"The last edited value is not saved",
-				"Value not saved",
-				JOptionPane.WARNING_MESSAGE);
+	public void setValueAt(Object newVal, int row, int col) {
+		DbAttribute attr = getAttribute(row);
+		if (null == attr) {
 			return;
-		} else if (column == DB_ATTRIBUTE_NAME) {
-			String new_name = ((String) aValue).trim();
-			String old_name = attrib.getName();
-			MapUtil.setAttributeName(attrib, new_name);
-			e = new AttributeEvent(eventSource, attrib, entity, old_name);
-			mediator.fireDbAttributeEvent(e);
-			fireTableCellUpdated(row, column);
-		} else if (column == DB_ATTRIBUTE_TYPE) {
-			String type_str = (String) aValue;
-			int type = TypesMapping.getSqlTypeByName(type_str);
-			attrib.setType(type);
-		} else if (column == DB_ATTRIBUTE_PRIMARY_KEY) {
-			Boolean primary = (Boolean) aValue;
-			attrib.setPrimaryKey(primary.booleanValue());
-			if (primary.booleanValue())
-				attrib.setMandatory(true);
-			fireTableCellUpdated(row, DB_ATTRIBUTE_MANDATORY);
-		} else if (column == DB_ATTRIBUTE_PRECISION) {
-			String str = (String) aValue;
-			if (null == str || str.trim().length() <= 0) {
-				// FIXME!! Change to static variable NOT_DEFINED
-				attrib.setPrecision(-1);
-			} else {
-				try {
-					int precision = Integer.parseInt(str);
-					attrib.setPrecision(precision);
-				} catch (NumberFormatException ex) {
-					JOptionPane.showMessageDialog(
-						null,
-						"Invalid precision value - "
-							+ aValue
-							+ ", only numbers are allowed",
-						"Invalid Precision value",
-						JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-			}
-		} else if (column == DB_ATTRIBUTE_MANDATORY) {
-			Boolean mandatory = (Boolean) aValue;
-			attrib.setMandatory(mandatory.booleanValue());
-		} else if (column == DB_ATTRIBUTE_MAX) {
-			String str = (String) aValue;
-			if (null == str || str.trim().length() <= 0) {
-				// FIXME!! Change to static variable NOT_DEFINED
-				attrib.setMaxLength(-1);
-			} else {
-				try {
-					int max_len = Integer.parseInt((String) aValue);
-					attrib.setMaxLength(max_len);
-				} catch (NumberFormatException ex) {
-					JOptionPane.showMessageDialog(
-						null,
-						"Invalid Max Length value - "
-							+ aValue
-							+ ", only numbers are allowed",
-						"Invalid Maximum Length",
-						JOptionPane.ERROR_MESSAGE);
-					return;
-				}
+		}
+
+		AttributeEvent e = new AttributeEvent(eventSource, attr, entity);
+
+		switch (col) {
+			case DB_ATTRIBUTE_NAME :
+				e.setOldName(attr.getName());
+				setAttributeName((String) newVal, attr);
+				fireTableCellUpdated(row, col);
+				break;
+			case DB_ATTRIBUTE_TYPE :
+				setAttributeType((String) newVal, attr);
+				break;
+			case DB_ATTRIBUTE_PRIMARY_KEY :
+				setPrimaryKey((Boolean) newVal, attr);
+				fireTableCellUpdated(row, DB_ATTRIBUTE_MANDATORY);
+				break;
+			case DB_ATTRIBUTE_PRECISION :
+				setPrecision((String) newVal, attr);
+				break;
+			case DB_ATTRIBUTE_MANDATORY :
+				setMandatory((Boolean) newVal, attr);
+				break;
+			case DB_ATTRIBUTE_MAX :
+				setMaxLength((String) newVal, attr);
+				break;
+		}
+
+		mediator.fireDbAttributeEvent(e);
+	}
+
+	public void setMaxLength(String newVal, DbAttribute attr) {
+		if (newVal == null || newVal.trim().length() <= 0) {
+			attr.setMaxLength(-1);
+		} else {
+			try {
+				attr.setMaxLength(Integer.parseInt(newVal));
+			} catch (NumberFormatException ex) {
+				JOptionPane.showMessageDialog(
+					null,
+					"Invalid Max Length value - "
+						+ newVal
+						+ ", only numbers are allowed",
+					"Invalid Maximum Length",
+					JOptionPane.ERROR_MESSAGE);
+				return;
 			}
 		}
-		if (null == e)
-			e = new AttributeEvent(eventSource, attrib, entity);
-		mediator.fireDbAttributeEvent(e);
+	}
+
+	public void setAttributeName(String newVal, DbAttribute attr) {
+		String newName = newVal.trim();
+		String oldName = attr.getName();
+		MapUtil.setAttributeName(attr, newName);
+	}
+
+	public void setAttributeType(String newVal, DbAttribute attr) {
+		attr.setType(TypesMapping.getSqlTypeByName(newVal));
+	}
+
+	public void setPrecision(String newVal, DbAttribute attr) {
+		if (newVal == null || newVal.trim().length() <= 0) {
+			attr.setPrecision(-1);
+		} else {
+			try {
+				attr.setPrecision(Integer.parseInt(newVal));
+			} catch (NumberFormatException ex) {
+				JOptionPane.showMessageDialog(
+					null,
+					"Invalid precision value - "
+						+ newVal
+						+ ", only numbers are allowed",
+					"Invalid Precision Value",
+					JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+	public void setPrimaryKey(Boolean newVal, DbAttribute attr) {
+		attr.setPrimaryKey(newVal.booleanValue());
+		if (newVal.booleanValue()) {
+			attr.setMandatory(true);
+		}
+	}
+
+	public void setMandatory(Boolean newVal, DbAttribute attr) {
+		attr.setMandatory(newVal.booleanValue());
 	}
 
 	/** Attribute just needs to be removed from the model. 
