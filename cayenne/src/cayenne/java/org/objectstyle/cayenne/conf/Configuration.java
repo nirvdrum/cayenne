@@ -322,11 +322,8 @@ public abstract class Configuration {
 
 	/**
 	 * Returns the resource locator used for finding and loading resources.
-	 * @deprecated since 1.0 Beta-3; this method will become "protected".
-	 * Please use appropriate Configuration subclass methods for customization
-	 * of resource lookup strategies.
 	 */
-	public abstract ResourceLocator getResourceLocator();
+	protected abstract ResourceLocator getResourceLocator();
 
 	/**
 	 * Returns a DataDomain as a stream or <code>null</code>

@@ -60,6 +60,7 @@ import java.io.File;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.conf.FileConfiguration;
+import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
  * Subclass of FileConfiguration used in the project model.
@@ -80,10 +81,11 @@ public class ProjectConfiguration extends FileConfiguration {
         this.setIgnoringLoadFailures(true);
 
         // configure deterministic file opening rules
-        this.locator.setSkipAbsolutePath(false);
-        this.locator.setSkipClasspath(true);
-        this.locator.setSkipCurrentDirectory(true);
-        this.locator.setSkipHomeDirectory(true);
+		ResourceLocator locator = this.getResourceLocator();
+        locator.setSkipAbsolutePath(false);
+        locator.setSkipClasspath(true);
+        locator.setSkipCurrentDirectory(true);
+        locator.setSkipHomeDirectory(true);
     }
 
     /**

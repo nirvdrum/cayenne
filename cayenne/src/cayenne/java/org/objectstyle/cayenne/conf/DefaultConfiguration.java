@@ -76,7 +76,7 @@ public class DefaultConfiguration extends Configuration {
 	/**
 	 * the default ResourceLocator used for CLASSPATH loading
 	 */
-	protected ResourceLocator locator;
+	private ResourceLocator locator;
 
 	/**
 	 * Default constructor.
@@ -203,9 +203,8 @@ public class DefaultConfiguration extends Configuration {
 
 	/**
 	 * Returns the default ResourceLocator configured for CLASSPATH lookups.
-	 * @deprecated since 1.0 Beta-3; this method will become "protected".
 	 */
-	public ResourceLocator getResourceLocator() {
+	protected ResourceLocator getResourceLocator() {
 		return this.locator;
 	}
 

@@ -123,7 +123,7 @@ public class ApplicationProject extends Project {
     * Returns Cayenne configuration object associated with this project. 
     */
     public Configuration getConfiguration() {
-        return (Configuration) configuration;
+        return configuration;
     }
 
     /**
