@@ -4,7 +4,16 @@
 
     <body>        
         <section name="Cayenne News Archive">
-        
+        <p><u><i>[July 12, 2004]</i></u> <strong>Cayenne 1.1 Goes Beta!</strong></p>
+		<p>Download Cayenne Beta from <a href="http://prdownloads.sourceforge.net/cayenne/cayenne-1.1B1.tar.gz">here</a>.</p>
+		<p>1.1 now enters official feature freeze (excluding the Modeler). 
+		In addition to the functionality available via the earlier milestone releases, Beta introduces
+		DataMap defaults, simplified API for executing mapped queries in DataContext, a number of
+		bug fixes and much more.
+		For details see <a href="release-notes/RELEASE-NOTES-1.1B1.txt">release
+		notes</a> and <a href="upgrade/UPGRADE-1.1B1.txt">upgrade instructions</a>.
+		</p>
+		
         <p><u><i>[June 14, 2004]</i></u> <strong>M7 - Cayenne 1.1 Milestone  Release</strong></p>
 		<p>This release includes support for shared and local caching of query results, a complete
 		GUI support for all types of queries, and also lots of bug fixes.. For details see 
