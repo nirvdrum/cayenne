@@ -56,6 +56,10 @@
 package org.objectstyle.cayenne.access.trans;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.art.Gallery;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.exp.TstBinaryExpSuite;
 import org.objectstyle.cayenne.exp.TstExpressionCase;
 import org.objectstyle.cayenne.exp.TstExpressionSuite;
@@ -108,6 +112,32 @@ public class QualifierTranslatorTst extends CayenneTestCase {
 
     public void testTernary() throws Exception {
         doExpressionTest(new TstTernaryExpSuite());
+    }
+
+    public void testExtras() throws Exception {
+        ObjectId oid1 = new ObjectId(Gallery.class, "GALLERY_ID", 1);
+        ObjectId oid2 = new ObjectId(Gallery.class, "GALLERY_ID", 2);
+        Gallery g1 = new Gallery();
+        Gallery g2 = new Gallery();
+        g1.setObjectId(oid1);
+        g2.setObjectId(oid2);
+        
+
+        Expression e1 = ExpressionFactory.matchExp("toGallery", g1);
+        Expression e2 = e1.orExp(ExpressionFactory.matchExp("toGallery", g2));
+
+        TstExpressionCase extraCase =
+            new TstExpressionCase(
+                "Exhibit",
+                e2,
+                "(ta.GALLERY_ID = ?) OR (ta.GALLERY_ID = ?)",
+                4,
+                4);
+
+        TstExpressionSuite suite = new TstExpressionSuite() {
+        };
+        suite.addCase(extraCase);
+        doExpressionTest(suite);
     }
 
     private void doExpressionTest(TstExpressionSuite suite) throws Exception {
