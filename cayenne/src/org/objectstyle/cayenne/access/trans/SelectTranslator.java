@@ -365,6 +365,12 @@ public class SelectTranslator extends SelectQueryAssembler {
 		Entity ent = attr.getEntity();
 		int aliasIndex = tableList.indexOf(ent);
 
+		if (aliasIndex < 0) {
+			String name = (ent != null) ? ent.getName() : "<null entity>";
+			throw new CayenneRuntimeException(
+				"Alias not found for table: " + name);
+		}
+
 		queryBuf.append(
 			attr.getAliasedName((String) aliasList.get(aliasIndex)));
 	}
