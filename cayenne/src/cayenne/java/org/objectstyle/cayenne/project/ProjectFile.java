@@ -56,8 +56,9 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
 import org.objectstyle.cayenne.util.Util;
@@ -175,7 +176,10 @@ public abstract class ProjectFile {
 
         // ...but save to temp file first
         tempFile = tempFileForFile(finalFile);
-        FileWriter fw = new FileWriter(tempFile);
+        
+        // must encode as UTF-8 - a default used by all Cayenne XML files
+        FileOutputStream fout = new FileOutputStream(tempFile);
+        OutputStreamWriter fw = new OutputStreamWriter(fout, "UTF-8");
 
         try {
             PrintWriter pw = new PrintWriter(fw);
