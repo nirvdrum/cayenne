@@ -61,3 +61,8 @@ diagnosing e.g. Configuration loading problems.
 16. Modeler's logfile path can be customized or disabled by editing
 $HOME/.cayenne/modeler.preferences.
 
+17. Initial stored procedure support.
+
+18. In-memory BLOB/CLOB support.
+
+
