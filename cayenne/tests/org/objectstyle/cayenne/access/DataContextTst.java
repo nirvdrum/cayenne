@@ -56,16 +56,17 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import junit.framework.TestCase;
 
 import org.objectstyle.TestMain;
-import org.objectstyle.art.Artist;
-import org.objectstyle.art.Painting;
+import org.objectstyle.art.*;
 import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.exp.Expression;
@@ -262,6 +263,20 @@ public class DataContextTst extends TestCase {
         assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
 	}
 
+	/** 
+	 * Test that a to-many relationship is initialized.
+	 */
+	public void testDerivedEntityFetch() throws Exception {
+		populatePaintings();
+		
+		SelectQuery q = new SelectQuery("ArtistAssets");
+		q.setQualifier(ExpressionFactory.matchExp("estimatedPrice", new Integer(1000)));
+		q.setLogLevel(Level.SEVERE);
+
+		ArtistAssets a1 = (ArtistAssets)ctxt.performQuery(q).get(0);
+        assertEquals(1, a1.getPaintingsCount().intValue());
+	}
+	
 	public void testPerformQueries() throws Exception {
 		SelectQuery q1 = new SelectQuery();
 		q1.setObjEntityName("Artist");
@@ -371,7 +386,7 @@ public class DataContextTst extends TestCase {
 	/** Give each artist a single painting. */
 	public void populatePaintings() throws Exception {
 		String insertPaint =
-			"INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID) VALUES (?,?,?)";
+			"INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) VALUES (?,?,?, ?)";
 
 		Connection conn = TestMain.getSharedConnection();
 
@@ -384,6 +399,7 @@ public class DataContextTst extends TestCase {
 				stmt.setInt(1, i);
 				stmt.setString(2, "P_" + artistName(i));
 				stmt.setInt(3, i);
+				stmt.setBigDecimal(4, new BigDecimal(i * 1000));
 				stmt.executeUpdate();
 			}
 

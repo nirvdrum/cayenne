@@ -80,6 +80,7 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 	private static final String DB_ENTITY_TAG = "db-entity";
 	private static final String OBJ_ENTITY_TAG = "obj-entity";
 	private static final String DB_ATTRIBUTE_TAG = "db-attribute";
+	private static final String DB_ATTRIBUTE_REF_TAG = "db-attribute-ref";
 	private static final String OBJ_ATTRIBUTE_TAG = "obj-attribute";
 	private static final String OBJ_RELATIONSHIP_TAG = "obj-relationship";
 	private static final String DB_RELATIONSHIP_TAG = "db-relationship";
@@ -94,6 +95,7 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 	private ObjEntity objEntity;
 	private DbRelationship dbRelationship;
 	private ObjRelationship objRelationship;
+	private DbAttribute attrib;
 	private HashMap dbRelationshipMap;
 
 	/* Saving to XML */
@@ -213,6 +215,8 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 			processStartDbEntity(atts);
 		} else if (local_name.equals(DB_ATTRIBUTE_TAG)) {
 			processStartDbAttribute(atts);
+		} else if (local_name.equals(DB_ATTRIBUTE_REF_TAG)) {
+			processStartDbAttributeRef(atts);
 		} else if (local_name.equals(OBJ_ENTITY_TAG)) {
 			processStartObjEntity(atts);
 		} else if (local_name.equals(OBJ_ATTRIBUTE_TAG)) {
@@ -238,6 +242,8 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 			processEndDbEntity();
 		} else if (local_name.equals(OBJ_ENTITY_TAG)) {
 			processEndObjEntity();
+		} else if (local_name.equals(DB_ATTRIBUTE_TAG)) {
+			processEndDbAttribute();
 		} else if (local_name.equals(DB_RELATIONSHIP_TAG)) {
 			processEndDbRelationship();
 		} else if (local_name.equals(OBJ_RELATIONSHIP_TAG)) {
@@ -521,15 +527,38 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 		dbEntity.setCatalog(atts.getValue("", "catalog"));
 	}
 
+	private void processStartDbAttributeRef(Attributes atts)
+		throws SAXException {
+		String name = atts.getValue("", "name");
+		if ((attrib instanceof DerivedDbAttribute) && (dbEntity instanceof DerivedDbEntity)) {
+            DbEntity parent = ((DerivedDbEntity)dbEntity).getParentEntity();
+            DbAttribute ref = (DbAttribute)parent.getAttribute(name);
+            ((DerivedDbAttribute)attrib).addParam(ref);
+		} else {
+			throw new SAXException(
+				"Referenced attributes are not supported by regular DbAttributes. Offending attribute name '"
+					+ attrib.getName()
+					+ "'.");
+		}
+	}
+
 	private void processStartDbAttribute(Attributes atts) throws SAXException {
 		String name = atts.getValue("", "name");
 		String type = atts.getValue("", "type");
+		String spec = atts.getValue("", "spec");
 
-		DbAttribute attrib =
-			new DbAttribute(
-				name,
-				TypesMapping.getSqlTypeByName(type),
-				dbEntity);
+		attrib =
+			(dbEntity instanceof DerivedDbEntity)
+				? new DerivedDbAttribute(
+					name,
+					TypesMapping.getSqlTypeByName(type),
+					dbEntity,
+					spec)
+				: new DbAttribute(
+					name,
+					TypesMapping.getSqlTypeByName(type),
+					dbEntity);
+
 		dbEntity.addAttribute(attrib);
 
 		String temp = atts.getValue("", "length");
@@ -755,6 +784,10 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 		objRelationship = new ObjRelationship(source, target, to_many);
 		objRelationship.setName(name);
 		source.addRelationship(objRelationship);
+	}
+
+	private void processEndDbAttribute() throws SAXException {
+		attrib = null;
 	}
 
 	private void processEndDbEntity() {

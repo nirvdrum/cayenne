@@ -52,8 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-
+ */
 
 package org.objectstyle.cayenne.map;
 
@@ -66,112 +65,110 @@ import org.objectstyle.cayenne.dba.TypesMapping;
  * @author Andrei Adamchik
  */
 public class DbAttribute extends Attribute {
-    /** 
-     * The type of the column. 
-     */
-    private int type = TypesMapping.NOT_DEFINED;
+	/** 
+	 * The type of the column. 
+	 */
+	private int type = TypesMapping.NOT_DEFINED;
 
-    // Does this attribute allow null
-    private boolean mandatory;
+	// Does this attribute allow null
+	private boolean mandatory;
 
-    // Is this attribute a part of primary key
-    private boolean primaryKey;
+	// Is this attribute a part of primary key
+	private boolean primaryKey;
 
-    // The length of CHAR or VARCHAr or max num of digits for DECIMAL.
-    private int maxLength = -1;
+	// The length of CHAR or VARCHAr or max num of digits for DECIMAL.
+	private int maxLength = -1;
 
-    // The number of digits after period for DECIMAL.
-    private int precision = -1;
+	// The number of digits after period for DECIMAL.
+	private int precision = -1;
 
-    public DbAttribute() {}
+	public DbAttribute() {
+	}
 
-    public DbAttribute(String name, int type, DbEntity entity) {
-        setName(name);
-        setType(type);
-        setEntity(entity);
-    }
-    
-    /**
-     * Creates new DbAttribute using another attribute as a prototype.
-     */
-    public DbAttribute(DbAttribute proto) {
-    	this.name = proto.name;
-    	this.type = proto.type;
-    	this.mandatory = proto.mandatory;
-    	this.maxLength = proto.maxLength;
-    	this.precision = proto.precision;
-    	this.primaryKey = proto.primaryKey;
-    }
+	public DbAttribute(String name, int type, DbEntity entity) {
+		setName(name);
+		setType(type);
+		setEntity(entity);
+	}
 
+	/**
+	 * Creates new DbAttribute using another attribute as a prototype.
+	 */
+	public DbAttribute(DbAttribute proto) {
+		this.name = proto.name;
+		this.type = proto.type;
+		this.mandatory = proto.mandatory;
+		this.maxLength = proto.maxLength;
+		this.precision = proto.precision;
+		this.primaryKey = proto.primaryKey;
+	}
 
+	public String getAliasedName(String alias) {
+		return (alias != null) ? alias + '.' + name : name;
+	}
 
-    /** 
-     * Returns the SQL type of the column.
-    *  @see java.sql.Types*/
-    public int getType() {
-        return type;
-    }
+	/** 
+	 * Returns the SQL type of the column.
+	*  @see java.sql.Types*/
+	public int getType() {
+		return type;
+	}
 
+	/** Set the SQL type for the column.
+	*  @see java.sql.Types*/
+	public void setType(int type) {
+		this.type = type;
+	}
 
-    /** Set the SQL type for the column.
-    *  @see java.sql.Types*/
-    public void setType(int type) {
-        this.type = type;
-    }
+	public boolean isPrimaryKey() {
+		return primaryKey;
+	}
 
-    public boolean isPrimaryKey() {
-        return primaryKey;
-    }
+	public void setPrimaryKey(boolean primaryKey) {
+		this.primaryKey = primaryKey;
+	}
 
+	public boolean isMandatory() {
+		return mandatory;
+	}
 
-    public void setPrimaryKey(boolean primaryKey) {
-        this.primaryKey = primaryKey;
-    }
+	public void setMandatory(boolean mandatory) {
+		this.mandatory = mandatory;
+	}
 
-    public boolean isMandatory() {
-        return mandatory;
-    }
+	/** Returns the length of database column described by this attribute. */
+	public int getMaxLength() {
+		return maxLength;
+	}
 
+	/** Sets the length of character or binary type or max num of digits for DECIMAL.*/
+	public void setMaxLength(int maxLength) {
+		this.maxLength = maxLength;
+	}
 
-    public void setMandatory(boolean mandatory) {
-        this.mandatory = mandatory;
-    }
+	/** Returns the number of digits after period for DECIMAL.*/
+	public int getPrecision() {
+		return precision;
+	}
 
-    /** Returns the length of database column described by this attribute. */
-    public int getMaxLength() {
-        return maxLength;
-    }
+	/** Sets the number of digits after period for DECIMAL.*/
+	public void setPrecision(int precision) {
+		this.precision = precision;
+	}
 
-    /** Sets the length of character or binary type or max num of digits for DECIMAL.*/
-    public void setMaxLength(int maxLength) {
-        this.maxLength = maxLength;
-    }
+	/** Appends string representation of attribute to a provided buffer.
+	 *  This is a variation of "toString" method. It may be more
+	 *  efficient in some cases. For example, when printing all
+	 *  attributes of a single entity together. */
+	public StringBuffer toStringBuffer(StringBuffer buf) {
+		buf.append("   Column name: " + name + "\n");
+		buf.append("   Column type: " + type + "\n");
+		return buf;
+	}
 
-    /** Returns the number of digits after period for DECIMAL.*/
-    public int getPrecision() {
-        return precision;
-    }
-
-    /** Sets the number of digits after period for DECIMAL.*/
-    public void setPrecision(int precision) {
-        this.precision = precision;
-    }
-
-
-
-    /** Appends string representation of attribute to a provided buffer.
-     *  This is a variation of "toString" method. It may be more
-     *  efficient in some cases. For example, when printing all
-     *  attributes of a single entity together. */
-    public StringBuffer toStringBuffer(StringBuffer buf) {
-        buf.append("   Column name: " + name + "\n");
-        buf.append("   Column type: " + type + "\n");
-        return buf;
-    }
-
-    public String toString() {
-        StringBuffer buf = new StringBuffer("DbAttribute\n");
-        return this.toStringBuffer(buf).toString();
-    }
+	public String toString() {
+		StringBuffer buf = new StringBuffer("DbAttribute\n");
+		return this.toStringBuffer(buf).toString();
+	}
 
 }

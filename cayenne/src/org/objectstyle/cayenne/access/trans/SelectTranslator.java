@@ -77,6 +77,7 @@ public class SelectTranslator extends SelectQueryAssembler {
 	private final ArrayList tableList = new ArrayList();
 	private final ArrayList aliasList = new ArrayList();
 	private final ArrayList dbRelList = new ArrayList();
+	private List groupByList;
 	private int aliasCounter;
 
 	/** 
@@ -96,9 +97,9 @@ public class SelectTranslator extends SelectQueryAssembler {
 	}
 
 	public int getFetchLimit() {
-        return getSelectQuery().getFetchLimit();
+		return getSelectQuery().getFetchLimit();
 	}
-	
+
 	/** 
 	 * Returns an ordered list of DbAttributes that describe the
 	 * result columns in the in the ResultSet. ResultSet column names are ignored, 
@@ -156,6 +157,9 @@ public class SelectTranslator extends SelectQueryAssembler {
 				.createTranslator(this)
 				.doTranslation();
 
+		// build GROUP BY
+		buildGroupByList();
+
 		// build ORDER BY,
 		String orderByStr = new OrderingTranslator(this).doTranslation();
 
@@ -207,9 +211,23 @@ public class SelectTranslator extends SelectQueryAssembler {
 			queryBuf.append(qualifierStr);
 		}
 
+		// append group by
+		if (groupByList != null) {
+			int groupByCount = groupByList.size();
+			if (groupByCount > 0) {
+				queryBuf.append(" GROUP BY ");
+				appendGroupBy(queryBuf, 0);
+				for (int i = 1; i < groupByCount; i++) {
+					queryBuf.append(", ");
+					appendGroupBy(queryBuf, i);
+				}
+			}
+		}
+
 		// append prebuilt ordering
-		if (orderByStr != null)
+		if (orderByStr != null) {
 			queryBuf.append(" ORDER BY ").append(orderByStr);
+		}
 
 		return queryBuf.toString();
 	}
@@ -229,33 +247,53 @@ public class SelectTranslator extends SelectQueryAssembler {
 		columnList.addAll(extractQueryAttributes());
 	}
 
+	/**
+	 * Creates a list of columns used in the query's GROUP BY clause.
+	 */
+	private void buildGroupByList() {
+		DbEntity dbEntity = getRootEntity().getDbEntity();
+		if (dbEntity instanceof DerivedDbEntity) {
+			groupByList = ((DerivedDbEntity) dbEntity).getGroupByAttributes();
+		}
+	}
+
 	/** 
 	 * Returns a list of DbAttributes used in query.
 	 */
 	private List extractQueryAttributes() {
 		DbEntity dbe = getRootEntity().getDbEntity();
 		SelectQuery q = getSelectQuery();
-	
-		if(!q.isFetchingCustAttributes()) {
+
+		if (!q.isFetchingCustAttributes()) {
 			return dbe.getAttributeList();
 		}
-		
+
 		List custAttrNames = q.getCustDbAttributes();
 		int len = custAttrNames.size();
 		ArrayList attrs = new ArrayList(len);
-		for(int i = 0; i < len; i++) {
-			attrs.add(dbe.getAttribute((String)custAttrNames.get(i)));
+		for (int i = 0; i < len; i++) {
+			attrs.add(dbe.getAttribute((String) custAttrNames.get(i)));
 		}
-		
-		return attrs;		
+
+		return attrs;
 	}
 
 	private void appendColumn(StringBuffer queryBuf, int index) {
 		DbAttribute attr = (DbAttribute) columnList.get(index);
 		Entity ent = attr.getEntity();
 		int aliasIndex = tableList.indexOf(ent);
-		queryBuf.append(aliasList.get(aliasIndex)).append('.');
-		queryBuf.append(attr.getName());
+
+		queryBuf.append(
+			attr.getAliasedName((String) aliasList.get(aliasIndex)));
+	}
+
+	private void appendGroupBy(StringBuffer queryBuf, int index) {
+		DbAttribute attr = (DbAttribute) groupByList.get(index);
+		Entity ent = attr.getEntity();
+		int aliasIndex = tableList.indexOf(ent);
+
+		queryBuf.append(
+			attr.getAliasedName((String) aliasList.get(aliasIndex)));
 	}
 
 	private void appendTable(StringBuffer queryBuf, int index) {

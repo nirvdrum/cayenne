@@ -53,52 +53,29 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.art;
 
-import junit.framework.TestCase;
+import java.math.BigDecimal;
 
-import org.objectstyle.TestConstants;
-import org.xml.sax.InputSource;
+import org.objectstyle.cayenne.CayenneDataObject;
 
-
-public class MapLoaderLoadTst extends TestCase {
-    protected MapLoader mapLoader;
-    private String testDataMap;
-
-
-    public MapLoaderLoadTst(String name) {
-        super(name);
-    }
-
-
-    public void setUp() throws Exception {
-        mapLoader = new MapLoaderImpl();
-        testDataMap = ClassLoader.getSystemResource(TestConstants.TEST_MAP_PATH).toExternalForm();
-    }
-
-
-    public void testLoadDataMap() throws Exception {
-        InputSource in = new InputSource(testDataMap);
-        DataMap map = mapLoader.loadDataMap(in);
-        assertNotNull(map);
-        
-        // test derived entities
-        DerivedDbEntity d1 = (DerivedDbEntity)map.getDbEntity("ARTIST_ASSETS");
-        assertNotNull(d1);
-        assertNotNull(d1.getParentEntity());
-        assertEquals(1, d1.getGroupByAttributes().size());
-        
-        DerivedDbAttribute a1 = (DerivedDbAttribute)d1.getAttribute("ESTIMATED_PRICE");
-        assertNotNull(a1);
-        assertNotNull(a1.getExpressionSpec());
-        assertNotNull(a1.getParams());
-        assertEquals(1, a1.getParams().size());        
-    }
-
-    public void testLoadDataMaps1() throws Exception {
-        InputSource in = new InputSource(testDataMap);
-        DataMap[] maps = mapLoader.loadDataMaps(new InputSource[] {in});
-        assertNotNull(maps);
-        assertEquals(1, maps.length);
-    }
+/**
+ * @author Andrei Adamchik
+ */
+public class ArtistAssets extends CayenneDataObject {
+	public void setEstimatedPrice(BigDecimal estimatedPrice) {
+		writeProperty("estimatedPrice", estimatedPrice);
+	}
+	
+	public BigDecimal getEstimatedPrice() {
+		return (BigDecimal) readProperty("estimatedPrice");
+	}
+	
+	public void setPaintingsCount(Integer paintingsCount) {
+		writeProperty("paintingsCount", paintingsCount);
+	}
+	
+	public Integer getPaintingsCount() {
+		return (Integer) readProperty("paintingsCount");
+	}
 }

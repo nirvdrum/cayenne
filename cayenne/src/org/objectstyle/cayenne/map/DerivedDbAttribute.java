@@ -55,50 +55,104 @@
  */
 package org.objectstyle.cayenne.map;
 
-import junit.framework.TestCase;
+import java.util.*;
 
-import org.objectstyle.TestConstants;
-import org.xml.sax.InputSource;
+/**
+ * DbAttribute that contains an expression based ona set of 
+ * other attributes.
+ * 
+ * @author Andrei Adamchik
+ */
+public class DerivedDbAttribute extends DbAttribute {
+	private static final String ATTRIBUTE_TOKEN = "%@";
+	
+	protected String expressionSpec;
+	protected ArrayList params = new ArrayList();
+
+	/**
+	 * Constructor for DerivedDbAttribute.
+	 */
+	public DerivedDbAttribute() {
+		super();
+	}
+
+	/**
+	 * Constructor for DerivedDbAttribute.
+	 * 
+	 */
+	public DerivedDbAttribute(String name, int type, DbEntity entity, String spec) {
+		super(name, type, entity);
+		setExpressionSpec(spec);
+	}
+
+	/**
+	 * Constructor for DerivedDbAttribute.
+	 * @param proto
+	 */
+	public DerivedDbAttribute(DbAttribute proto) {
+		super(proto);
+	}
+
+	public String getAliasedName(String alias) {
+		if(expressionSpec == null) {
+			return super.getAliasedName(alias);
+		}
+		
+		int len = params.size();
+		StringBuffer buf = new StringBuffer();
+		int ind = 0;
+		for(int i = 0; i < len; i++) {
+			// no bound checking
+			// expression is assumed to be valid
+			int match = expressionSpec.indexOf(ATTRIBUTE_TOKEN, ind);
+			DbAttribute at = (DbAttribute)params.get(i);
+			if(match > i) {
+				buf.append(expressionSpec.substring(ind, match));
+			}
+			buf.append(at.getAliasedName(alias));
+			ind = match + 2;
+		}
+		
+		if(ind < expressionSpec.length()) {
+			buf.append(expressionSpec.substring(ind));
+		}
+		
+		return buf.toString();
+	}
+
+	/**
+	 * Returns the params.
+	 * @return List
+	 */
+	public List getParams() {
+		return Collections.unmodifiableList(params);
+	}
 
 
-public class MapLoaderLoadTst extends TestCase {
-    protected MapLoader mapLoader;
-    private String testDataMap;
+	/**
+	 * Returns the expressionSpec.
+	 * @return String
+	 */
+	public String getExpressionSpec() {
+		return expressionSpec;
+	}
 
 
-    public MapLoaderLoadTst(String name) {
-        super(name);
-    }
+	/**
+	 * Sets the params.
+	 * @param params The expParams to set
+	 */
+	public void addParam(DbAttribute param) {
+		params.add(param);
+	}
 
 
-    public void setUp() throws Exception {
-        mapLoader = new MapLoaderImpl();
-        testDataMap = ClassLoader.getSystemResource(TestConstants.TEST_MAP_PATH).toExternalForm();
-    }
-
-
-    public void testLoadDataMap() throws Exception {
-        InputSource in = new InputSource(testDataMap);
-        DataMap map = mapLoader.loadDataMap(in);
-        assertNotNull(map);
-        
-        // test derived entities
-        DerivedDbEntity d1 = (DerivedDbEntity)map.getDbEntity("ARTIST_ASSETS");
-        assertNotNull(d1);
-        assertNotNull(d1.getParentEntity());
-        assertEquals(1, d1.getGroupByAttributes().size());
-        
-        DerivedDbAttribute a1 = (DerivedDbAttribute)d1.getAttribute("ESTIMATED_PRICE");
-        assertNotNull(a1);
-        assertNotNull(a1.getExpressionSpec());
-        assertNotNull(a1.getParams());
-        assertEquals(1, a1.getParams().size());        
-    }
-
-    public void testLoadDataMaps1() throws Exception {
-        InputSource in = new InputSource(testDataMap);
-        DataMap[] maps = mapLoader.loadDataMaps(new InputSource[] {in});
-        assertNotNull(maps);
-        assertEquals(1, maps.length);
-    }
+	/**
+	 * Sets the expressionSpec.
+	 * @param expressionSpec The expressionSpec to set
+	 */
+	public void setExpressionSpec(String expressionSpec) {
+		this.expressionSpec = expressionSpec;
+	}
 }
+
