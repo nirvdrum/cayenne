@@ -74,9 +74,9 @@ import javax.swing.JTextArea;
 
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.PanelFactory;
-import org.objectstyle.cayenne.modeler.util.*;
-import org.objectstyle.cayenne.modeler.util.ModelerStrings;
+import org.objectstyle.cayenne.modeler.util.CayenneDialog;
 import org.objectstyle.cayenne.util.Util;
+import org.scopemvc.util.UIStrings;
 
 /**
  * Displays CayenneModeler exceptions and warning messages.
@@ -185,7 +185,7 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
     }
 
     protected String infoHTML() {
-        String bugreportURL = ModelerStrings.getString("cayenne.bugreport.url");
+        String bugreportURL = UIStrings.get("cayenne.bugreport.url");
         return "<b><font face='Arial,Helvetica' size='+1' color='red'>"
             + getTitle()
             + "</font></b><br>"
@@ -207,10 +207,10 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
             PrintWriter out = new PrintWriter(str);
 
             // first add extra diagnostics
-            String version = ModelerStrings.getString("cayenne.version");
+            String version = UIStrings.get("cayenne.version");
             version = (version != null) ? version : "(unknown)";
 
-            String buildDate = ModelerStrings.getString("cayenne.build.date");
+            String buildDate = UIStrings.get("cayenne.build.date");
             buildDate = (buildDate != null) ? buildDate : "(unknown)";
 
             out.println("CayenneModeler Info");

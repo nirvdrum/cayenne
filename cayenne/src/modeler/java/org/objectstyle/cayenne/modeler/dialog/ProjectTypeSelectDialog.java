@@ -65,9 +65,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.Border;
 
-import org.objectstyle.cayenne.modeler.util.ModelerStrings;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.scopemvc.core.Control;
+import org.scopemvc.util.UIStrings;
 import org.scopemvc.view.swing.SAction;
 import org.scopemvc.view.swing.SButton;
 import org.scopemvc.view.swing.SPanel;
@@ -115,8 +115,8 @@ public class ProjectTypeSelectDialog extends SPanel {
      * could not be created.
      */
     protected JPanel buildProjectPanel(String propsPrefix, boolean disabled) {
-        String name = ModelerStrings.getString(propsPrefix + ".name");
-        String desc = ModelerStrings.getString(propsPrefix + ".desc");
+        String name = UIStrings.get(propsPrefix + ".name");
+        String desc = UIStrings.get(propsPrefix + ".desc");
 
         JPanel panel = new JPanel(new BorderLayout());
         Border border = BorderFactory.createEmptyBorder(5, 3, 3, 3);

@@ -68,8 +68,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 import org.objectstyle.cayenne.modeler.PanelFactory;
-import org.objectstyle.cayenne.modeler.dialog.classgen.ClassGeneratorController;
-import org.objectstyle.cayenne.modeler.util.ScopeWidgetFactory;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.scopemvc.core.PropertyManager;
 import org.scopemvc.core.Selector;
@@ -99,16 +97,16 @@ public class ClassGeneratorDialog extends SPanel {
 
     private void init() {
         // **** build widgets
-        final STextField superClassPackage = ScopeWidgetFactory.createTextField(30);
+        final STextField superClassPackage = new STextField(30);
         superClassPackage.setSelector("superClassPackage");
 
-        final STextField superClassTemplate = ScopeWidgetFactory.createTextField(30);
+        final STextField superClassTemplate = new STextField(30);
         superClassTemplate.setSelector("customSuperclassTemplate");
 
-        STextField classTemplate = ScopeWidgetFactory.createTextField(30);
+        STextField classTemplate = new STextField(30);
         classTemplate.setSelector("customClassTemplate");
 
-        STextField folder = ScopeWidgetFactory.createTextField(30);
+        STextField folder = new STextField(30);
         folder.setSelector("outputDir");
 
         SButton chooseButton =

@@ -154,7 +154,6 @@ public class SelectQueryOrderingPanel extends SPanel {
 
         browser.addTreeSelectionListener(new TreeSelectionListener() {
             public void valueChanged(TreeSelectionEvent e) {
-                logObj.warn("setting path: " + e.getPath());
                 Object[] path = e.getPath() != null ? e.getPath().getPath() : null;
                 ((SelectQueryModel) getShownModel()).setNavigationPath(path);
             }

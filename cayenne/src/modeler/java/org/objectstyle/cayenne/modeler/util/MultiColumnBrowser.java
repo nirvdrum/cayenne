@@ -111,7 +111,7 @@ public class MultiColumnBrowser extends JPanel {
     private static Logger logObj = Logger.getLogger(MultiColumnBrowser.class);
 
     private static final ImageIcon rightArrow =
-        CellRenderers.buildIcon("scroll_right.gif");
+        ModelerUtil.buildIcon("scroll_right.gif");
 
     public static final int DEFAULT_MIN_COLUMNS_COUNT = 3;
 
@@ -158,6 +158,9 @@ public class MultiColumnBrowser extends JPanel {
         }
     }
 
+    /**
+     * Notifies listeners of a tree selection change.
+     */
     protected void fireTreeSelectionEvent(Object[] selectionPath) {
         TreeSelectionEvent e =
             new TreeSelectionEvent(this, new TreePath(selectionPath), false, null, null);
@@ -429,14 +432,9 @@ public class MultiColumnBrowser extends JPanel {
      * it cleans columns that are not common with the new path.
      */
     private Object[] rebuildPath(Object[] path, Object node, int panelIndex) {
-
-        if (panelIndex == 0) {
-            return new Object[] { getModel().getRoot()};
-        }
-
-        Object[] newPath = new Object[panelIndex + 1];
-        System.arraycopy(path, 0, newPath, 0, panelIndex);
-        newPath[panelIndex] = node;
+        Object[] newPath = new Object[panelIndex + 2];
+        System.arraycopy(path, 0, newPath, 0, panelIndex + 1);
+        newPath[panelIndex + 1] = node;
         return newPath;
     }
 

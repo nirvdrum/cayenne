@@ -88,6 +88,7 @@ import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.UIUtil;
 
 /** 
  * Displays DbRelationships for the current DbEntity. 
@@ -181,7 +182,7 @@ public class DbRelationshipPane
                 resolve.setEnabled(false);
 
             // scroll table
-            table.scroll(table.getSelectedRow(), 0);
+            UIUtil.scrollToSelectedRow(table);
         }
         else
             resolve.setEnabled(false);

@@ -85,6 +85,7 @@ import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.UIUtil;
 
 /**
  * @author Andrei Adamchik
@@ -138,8 +139,6 @@ public class ProcedureParameterPane
 
     public void processExistingSelection() {
 
-        logObj.warn("SELECTED: " + table.getSelectedRow());
-
         ProcedureParameter parameter = null;
         boolean enableButtons = false;
 
@@ -149,7 +148,7 @@ public class ProcedureParameterPane
             parameter = model.getParameter(table.getSelectedRow());
 
             // scroll table
-            table.scroll(table.getSelectedRow(), 0);
+            UIUtil.scrollToSelectedRow(table);
 
             if (table.getRowCount() > 1) {
                 enableButtons = true;

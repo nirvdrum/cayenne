@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.Component;
-import java.awt.Rectangle;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.EventObject;
@@ -64,7 +63,6 @@ import java.util.EventObject;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JViewport;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
@@ -198,45 +196,5 @@ public class CayenneTable extends JTable {
             }
         }
         return edit;
-    }
-
-    /**
-     * Scrolls view if it is located in a JViewport, so that the specified cell
-     * is displayed in the center.
-     */
-    public void scroll(int rowIndex, int vColIndex) {
-        if (!(getParent() instanceof JViewport)) {
-            return;
-        }
-
-        JViewport viewport = (JViewport) getParent();
-        Rectangle rect = getCellRect(rowIndex, vColIndex, true);
-        Rectangle viewRect = viewport.getViewRect();
-
-        if (viewRect.intersects(rect)) {
-            return;
-        }
-
-        // Translate the cell location so that it is relative
-        // to the view, assuming the northwest corner of the
-        // view is (0,0).
-        rect.setLocation(rect.x - viewRect.x, rect.y - viewRect.y);
-
-        // Calculate location of rect if it were at the center of view
-        int centerX = (viewRect.width - rect.width) / 2;
-        int centerY = (viewRect.height - rect.height) / 2;
-
-        // Fake the location of the cell so that scrollRectToVisible
-        // will move the cell to the center
-        if (rect.x < centerX) {
-            centerX = -centerX;
-        }
-        if (rect.y < centerY) {
-            centerY = -centerY;
-        }
-        rect.translate(centerX, centerY);
-
-        // Scroll the area into view.
-        viewport.scrollRectToVisible(rect);
     }
 }

@@ -69,7 +69,6 @@ import javax.swing.table.TableCellEditor;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.PanelFactory;
-import org.objectstyle.cayenne.modeler.util.ScopeWidgetFactory;
 import org.scopemvc.core.Selector;
 import org.scopemvc.view.swing.SAction;
 import org.scopemvc.view.swing.SButton;
@@ -119,7 +118,7 @@ public class ObjRelationshipInfoDialog extends SPanel {
             new SButton(new SAction(ObjRelationshipInfoController.NEW_TOMANY_CONTROL));
         newToManyButton.setEnabled(true);
 
-        STextField relationshipName = ScopeWidgetFactory.createTextField(25);
+        STextField relationshipName = new STextField(25);
         relationshipName.setSelector(ObjRelationshipInfoModel.RELATIONSHIP_NAME_SELECTOR);
 
         SLabel sourceEntityLabel = new SLabel();

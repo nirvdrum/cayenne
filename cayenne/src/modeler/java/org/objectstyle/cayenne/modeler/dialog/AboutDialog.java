@@ -66,7 +66,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -80,10 +79,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
-import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.CayenneDialog;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.util.ModelerStrings;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
+import org.scopemvc.util.UIStrings;
 
 /** 
  * Displays the Cayenne license and build information.
@@ -95,16 +94,14 @@ public class AboutDialog extends CayenneDialog {
 
     private static String licenseString;
     private static String infoString;
-    private static URL logoImageURL;
+    private static ImageIcon logoImage;
     private static final Dimension infoAreaSize = new Dimension(450, 350);
 
-    static synchronized URL getLogoImageURL() {
-        if (logoImageURL == null) {
-            ClassLoader classLoader = AboutDialog.class.getClassLoader();
-            logoImageURL =
-                classLoader.getResource(CayenneAction.RESOURCE_PATH + "logo.jpg");
+    static synchronized ImageIcon getLogoImage() {
+        if (logoImage == null) {
+            logoImage = ModelerUtil.buildIcon("logo.jpg");
         }
-        return logoImageURL;
+        return logoImage;
     }
 
     /**
@@ -115,16 +112,16 @@ public class AboutDialog extends CayenneDialog {
             StringBuffer buffer = new StringBuffer();
 
             buffer.append("<font size='-1' face='Arial,Helvetica'>");
-            buffer.append(ModelerStrings.getString("cayenne.modeler.about.info"));
+            buffer.append(UIStrings.get("cayenne.modeler.about.info"));
             buffer.append("</font>");
             buffer.append("<font size='-2' face='Arial,Helvetica'>");
 
-            String version = ModelerStrings.getString("cayenne.version");
+            String version = UIStrings.get("cayenne.version");
             if (version != null) {
                 buffer.append("<br>Version: ").append(version);
             }
 
-            String buildDate = ModelerStrings.getString("cayenne.build.date");
+            String buildDate = UIStrings.get("cayenne.build.date");
             if (buildDate != null) {
                 buffer.append(" (").append(buildDate).append(")");
             }
@@ -250,7 +247,7 @@ public class AboutDialog extends CayenneDialog {
 
     private JComponent initInfoPanel() {
 
-        JLabel image = new JLabel(new ImageIcon(getLogoImageURL()));
+        JLabel image = new JLabel(getLogoImage());
         image.setBounds(4, 4, 4, 4);
 
         JEditorPane infoPanel = new JEditorPane("text/html", getInfoString());

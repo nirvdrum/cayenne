@@ -55,12 +55,15 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import javax.swing.ImageIcon;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.access.DataDomain;
@@ -113,6 +116,18 @@ public final class ModelerUtil {
             ? ModelerConstants.TITLE + " - " + title
             : ModelerConstants.TITLE;
     }
+    
+
+    /**
+     * Returns an icon, building it from an image file located 
+     * at the shared resources folder for the modeler.
+     */
+    public static ImageIcon buildIcon(String path) {
+        ClassLoader cl = ModelerUtil.class.getClassLoader();
+        URL url = cl.getResource(ModelerConstants.RESOURCE_PATH + path);
+        return new ImageIcon(url);
+    }
+
 
     /** 
      * Returns array of db attribute names for DbEntity mapped to 

@@ -65,6 +65,7 @@ import org.scopemvc.util.convertor.StringConvertor;
 /**
  * A Scope convertor that allows to display expressions in text fields.
  * 
+ * @since 1.1
  * @author Andrei Adamchik
  */
 public class ExpressionConvertor implements StringConvertor {

@@ -82,21 +82,6 @@ import com.jgoodies.forms.layout.FormLayout;
 
 // TODO: get rid of PanelFactory in favor of JGoodies Forms
 public class PanelFactory {
-    
-    /**
-     * @deprecated since 1.1
-     */
-    public static JPanel createForm(
-        String title,
-        Component[] leftComponents,
-        Component[] rightComponents,
-        int initialX,
-        int initialY,
-        int xPad,
-        int yPad) {
-
-        return createForm(leftComponents, rightComponents);
-    }
 
     /** 
      * Creates and returns a panel with right-centered buttons.
@@ -111,10 +96,6 @@ public class PanelFactory {
         }
 
         return panel;
-    }
-
-    public static JPanel createForm(String[] labels, Component[] components) {
-        return createForm(null, labels, components);
     }
 
     public static JPanel createForm(

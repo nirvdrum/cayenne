@@ -82,6 +82,7 @@ import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.UIUtil;
 
 /** 
  * Detail view of the DbEntity attributes. 
@@ -120,8 +121,7 @@ public class DbAttributePane
         // Create table with two columns and no rows.
         table = new CayenneTable();
         editParams = new JButton("Edit Parameters");
-        JPanel panel =
-            PanelFactory.createTablePanel(table, new JButton[] { editParams });
+        JPanel panel = PanelFactory.createTablePanel(table, new JButton[] { editParams });
         add(panel, BorderLayout.CENTER);
     }
 
@@ -130,8 +130,7 @@ public class DbAttributePane
             int row = table.getSelectedRow();
             if (row >= 0) {
                 DbAttribute attr =
-                    ((DbAttributeTableModel) table.getModel()).getAttribute(
-                        row);
+                    ((DbAttributeTableModel) table.getModel()).getAttribute(row);
 
                 EditDerivedParamsDialog dialog =
                     new EditDerivedParamsDialog((DerivedDbAttribute) attr);
@@ -164,13 +163,12 @@ public class DbAttributePane
     public void processExistingSelection() {
         DbAttribute att = null;
         if (table.getSelectedRow() >= 0) {
-            DbAttributeTableModel model =
-                (DbAttributeTableModel) table.getModel();
+            DbAttributeTableModel model = (DbAttributeTableModel) table.getModel();
             att = model.getAttribute(table.getSelectedRow());
             editParams.setEnabled(att instanceof DerivedDbAttribute);
-            
+
             // scroll table
-            table.scroll(table.getSelectedRow(), 0);
+            UIUtil.scrollToSelectedRow(table);
         }
 
         mediator.fireDbAttributeDisplayEvent(
@@ -222,8 +220,7 @@ public class DbAttributePane
         table.setModel(model);
         table.setRowHeight(25);
         table.setRowMargin(3);
-        TableColumn col =
-            table.getColumnModel().getColumn(model.nameColumnInd());
+        TableColumn col = table.getColumnModel().getColumn(model.nameColumnInd());
         col.setMinWidth(150);
 
         col = table.getColumnModel().getColumn(model.typeColumnInd());

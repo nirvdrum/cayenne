@@ -61,7 +61,6 @@ import java.awt.BorderLayout;
 import javax.swing.Icon;
 
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
-import org.objectstyle.cayenne.modeler.util.ScopeWidgetFactory;
 import org.scopemvc.view.swing.SCheckBox;
 import org.scopemvc.view.swing.SLabel;
 import org.scopemvc.view.swing.SPanel;
@@ -86,10 +85,10 @@ public class SelectQueryMainPanel extends SPanel {
 
     protected void initView() {
         // create widgets
-        STextField name = ScopeWidgetFactory.createTextField(40);
+        STextField name = new STextField(40);
         name.setSelector(QueryModel.NAME_SELECTOR);
 
-        STextField qualifier = ScopeWidgetFactory.createTextField(40);
+        STextField qualifier = new STextField(40);
         qualifier.setSelector(SelectQueryModel.QUALIFIER_SELECTOR);
 
         SCheckBox distinct = new SCheckBox();
@@ -101,10 +100,10 @@ public class SelectQueryMainPanel extends SPanel {
         SCheckBox refreshesResults = new SCheckBox();
         refreshesResults.setSelector(SelectQueryModel.REFRESHING_OBJECTS_SELECTOR);
 
-        STextField fetchLimit = ScopeWidgetFactory.createTextField(7);
+        STextField fetchLimit = new STextField(7);
         fetchLimit.setSelector(SelectQueryModel.FETCH_LIMIT_SELECTOR);
 
-        STextField pageSize = ScopeWidgetFactory.createTextField(7);
+        STextField pageSize = new STextField(7);
         pageSize.setSelector(SelectQueryModel.PAGE_SIZE_SELECTOR);
 
         rootLabel = new SLabel();

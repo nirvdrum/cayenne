@@ -78,6 +78,7 @@ import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
+import org.objectstyle.cayenne.modeler.util.UIUtil;
 
 /** 
  * Detail view of the ObjEntity attributes.
@@ -138,7 +139,7 @@ public class ObjAttributePane
             rel = model.getAttribute(table.getSelectedRow());
 
             // scroll table
-            table.scroll(table.getSelectedRow(), 0);
+            UIUtil.scrollToSelectedRow(table);
         }
         AttributeDisplayEvent ev =
             new AttributeDisplayEvent(

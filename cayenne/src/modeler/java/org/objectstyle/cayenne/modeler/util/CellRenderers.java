@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.Component;
-import java.net.URL;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
@@ -78,7 +77,6 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.Relationship;
-import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -103,22 +101,16 @@ public final class CellRenderers {
     protected static ImageIcon queryIcon;
 
     static {
-        domainIcon = buildIcon("icon-dom.gif");
-        nodeIcon = buildIcon("icon-node.gif");
-        mapIcon = buildIcon("icon-datamap.gif");
-        dbEntityIcon = buildIcon("icon-dbentity.gif");
-        objEntityIcon = buildIcon("icon-objentity.gif");
-        derivedDbEntityIcon = buildIcon("icon-derived-dbentity.gif");
-        procedureIcon = buildIcon("icon-stored-procedure.gif");
-        queryIcon = buildIcon("icon-query.gif");
-        relationshipIcon = buildIcon("icon-relationship.gif");
-        attributeIcon = buildIcon("icon-attribute.gif");
-    }
-
-    public static ImageIcon buildIcon(String path) {
-        ClassLoader cl = CellRenderers.class.getClassLoader();
-        URL url = cl.getResource(CayenneAction.RESOURCE_PATH + path);
-        return new ImageIcon(url);
+        domainIcon = ModelerUtil.buildIcon("icon-dom.gif");
+        nodeIcon = ModelerUtil.buildIcon("icon-node.gif");
+        mapIcon = ModelerUtil.buildIcon("icon-datamap.gif");
+        dbEntityIcon = ModelerUtil.buildIcon("icon-dbentity.gif");
+        objEntityIcon = ModelerUtil.buildIcon("icon-objentity.gif");
+        derivedDbEntityIcon = ModelerUtil.buildIcon("icon-derived-dbentity.gif");
+        procedureIcon = ModelerUtil.buildIcon("icon-stored-procedure.gif");
+        queryIcon = ModelerUtil.buildIcon("icon-query.gif");
+        relationshipIcon = ModelerUtil.buildIcon("icon-relationship.gif");
+        attributeIcon = ModelerUtil.buildIcon("icon-attribute.gif");
     }
 
     public static ImageIcon iconForObject(Object object) {

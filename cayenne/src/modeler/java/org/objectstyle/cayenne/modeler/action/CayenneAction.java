@@ -61,7 +61,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
@@ -71,6 +70,7 @@ import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.TopModel;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.util.CayenneToolbarButton;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
@@ -80,8 +80,6 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public abstract class CayenneAction extends AbstractAction {
-    /** Defines path to the images. */
-    public static final String RESOURCE_PATH = "org/objectstyle/cayenne/modeler/images/";
 
     protected boolean alwaysOn;
 
@@ -139,9 +137,7 @@ public abstract class CayenneAction extends AbstractAction {
      */
     public Icon createIcon() {
         String name = getIconName();
-        return (name != null)
-            ? new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_PATH + name))
-            : null;
+        return (name != null) ? ModelerUtil.buildIcon(name) : null;
     }
 
     /**
@@ -157,7 +153,7 @@ public abstract class CayenneAction extends AbstractAction {
      * to allow for exception handling.
      */
     public abstract void performAction(ActionEvent e);
-    
+
     /**
      * Returns <code>true</code> if the action is enabled for the 
      * specified "project path" - a path on the project tree to a 
@@ -165,7 +161,7 @@ public abstract class CayenneAction extends AbstractAction {
      * returns <code>false</code>.
      */
     public boolean enableForPath(ProjectPath obj) {
-    	return false;
+        return false;
     }
 
     /** 
@@ -186,7 +182,8 @@ public abstract class CayenneAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
         try {
             performAction(e);
-        } catch (Throwable th) {
+        }
+        catch (Throwable th) {
             ErrorDebugDialog.guiException(th);
         }
     }
