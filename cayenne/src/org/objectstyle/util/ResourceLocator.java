@@ -146,6 +146,21 @@ public class ResourceLocator {
         return loader.getResource(name);
     }
 
+    /** 
+     * Returns a base URL as a String from which this class was loaded.
+     * This is normally a JAR or a file URL, but it is ClassLoader dependent.
+     */
+    public static String classBaseUrl(Class aClass) {
+        String pathToClass = aClass.getName().replace('.', '/') + ".class";
+        URL selfUrl = aClass.getClassLoader().getResource(pathToClass);
+        if (selfUrl == null) {
+            return null;
+        }
+
+        String urlString = selfUrl.toExternalForm();
+        return urlString.substring(0, urlString.length() - pathToClass.length());
+    }
+
     /** Creates new ResourceLocator with default lookup policy including
      *  user home directory, current directory and CLASSPATH. */
     public ResourceLocator() {
@@ -167,7 +182,6 @@ public class ResourceLocator {
             return null;
         }
     }
-
 
     /** Returns resource URL using lookup strategy configured for this object or
      *  null if no readable resource can be found for name. */

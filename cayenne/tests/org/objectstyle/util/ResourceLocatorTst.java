@@ -59,7 +59,6 @@ import junit.framework.*;
 import java.util.*;
 import java.io.*;
 
-
 public class ResourceLocatorTst extends TestCase {
     private File fTmpFileInCurrentDir;
     private String fTmpFileName;
@@ -78,13 +77,10 @@ public class ResourceLocatorTst extends TestCase {
         fout.close();
     }
 
-
     protected void tearDown() throws java.lang.Exception {
         if (!fTmpFileInCurrentDir.delete())
-            throw new Exception("Error deleting temporary file: "
-                                + fTmpFileInCurrentDir);
+            throw new Exception("Error deleting temporary file: " + fTmpFileInCurrentDir);
     }
-
 
     public void testFindResourceInCurDir() throws java.lang.Exception {
         InputStream in = ResourceLocator.findResourceInFileSystem(fTmpFileName);
@@ -96,9 +92,15 @@ public class ResourceLocatorTst extends TestCase {
         }
     }
 
+    public void testClassBaseUrl() throws java.lang.Exception {
+        String me = ResourceLocator.classBaseUrl(this.getClass());
+        assertNotNull(me);
+        assertTrue("Expected jar:.. URL, got " + me, me.startsWith("jar:"));
+    }
 
     public void testFindResourceWithJarUrl() throws java.lang.Exception {
-        InputStream in = ResourceLocator.findResourceInClasspath("test_resources/testfile1.txt");
+        InputStream in =
+            ResourceLocator.findResourceInClasspath("test_resources/testfile1.txt");
         try {
             assertNotNull(in);
         }

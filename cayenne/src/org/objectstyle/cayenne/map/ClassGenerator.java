@@ -56,7 +56,6 @@ package org.objectstyle.cayenne.map;
  */
 
 import java.io.Writer;
-import java.net.URL;
 import java.util.Properties;
 
 import org.apache.velocity.Template;
@@ -65,6 +64,7 @@ import org.apache.velocity.app.Velocity;
 import org.apache.velocity.context.Context;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.util.ResourceLocator;
 
 /** Generates Java class source code using VTL (Velocity template engine) based on
   * template and ObjEntity.
@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 public class ClassGenerator {
     static {
         try {
-            String classLoaderUrl = cayenneClassUrl();
+            String classLoaderUrl = ResourceLocator.classBaseUrl(ClassGenerator.class);
 
             // use ClasspathResourceLoader for velocity templates lookup
             // if Cayenne URL is not null, load resource from this URL
@@ -108,19 +108,6 @@ public class ClassGenerator {
         }
     }
 
-    /** Returns a URL String from which this class was loaded. */
-    private static String cayenneClassUrl() {
-        String pathToClass =
-            ClassGenerator.class.getName().replace('.', '/') + ".class";
-        URL selfUrl =
-            ClassGenerator.class.getClassLoader().getSystemResource(pathToClass);
-        if (selfUrl == null) {
-            return null;
-        }
-
-        String urlString = selfUrl.toExternalForm();
-        return urlString.substring(0, urlString.length() - pathToClass.length());
-    }
 
     protected Template classTemplate;
     protected Context velCtxt;
