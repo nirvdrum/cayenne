@@ -220,10 +220,24 @@ public abstract class Expression implements Serializable {
     }
 
     /**
+     * @deprecated Since 1.0 Beta 1, use 'expWithParameters'
+     */
+    public Expression expWithParams(Map parameters) {
+        return expWithParameters(parameters, true);
+    }
+
+    /**
      * A shortcut for <code>expWithParams(params, true)</code>.
      */
-    public Expression expWithParams(Map params) {
-        return expWithParams(params, true);
+    public Expression expWithParameters(Map parameters) {
+        return expWithParameters(parameters, true);
+    }
+
+    /**
+     * @deprecated Since 1.0 Beta 1, use 'expWithParameters'
+     */
+    public Expression expWithParams(Map parameters, boolean pruneMissing) {
+        return expWithParameters(parameters, pruneMissing);
     }
 
     /**
@@ -235,7 +249,7 @@ public abstract class Expression implements Serializable {
      * explicitly created in the map for the corresponding key.
      * </i></p>
      * 
-     * @param params a map of parameters, with each key being a string name of
+     * @param parameters a map of parameters, with each key being a string name of
      * an expression parameter, and value being the value that should be used in
      * the final expression.
      * @param pruneMissing If <code>true</code>, subexpressions that rely
@@ -246,9 +260,9 @@ public abstract class Expression implements Serializable {
      * real values, or null if the whole expression was pruned, due to the
      * missing parameters.
      */
-    public Expression expWithParams(Map params, boolean pruneMissing) {
+    public Expression expWithParameters(Map parameters, boolean pruneMissing) {
         ParametrizedExpressionBuilder builder =
-            new ParametrizedExpressionBuilder(this, params, pruneMissing);
+            new ParametrizedExpressionBuilder(this, parameters, pruneMissing);
         ExpressionTraversal traversal = new ExpressionTraversal();
         traversal.setHandler(builder);
         traversal.traverseExpression(this);
@@ -256,7 +270,7 @@ public abstract class Expression implements Serializable {
 
         if (logObj.isDebugEnabled()) {
             logObj.debug("Created expression: " + newExp);
-            logObj.debug("  Parameters: " + params);
+            logObj.debug("  Parameters: " + parameters);
         }
 
         return newExp;
@@ -338,7 +352,6 @@ public abstract class Expression implements Serializable {
         return filtered;
     }
 
-
     /**
      * Convenience method to log nested expressions. Used mainly for debugging.
      * Called from "toString".
@@ -350,15 +363,15 @@ public abstract class Expression implements Serializable {
             if (i > 0) {
                 buf.append(" ").append(expName()).append(" ");
             }
-            
+
             Object op = getOperand(i);
             if (op == null) {
                 buf.append("<null>");
             } else if (op instanceof String) {
                 buf.append("'").append(op).append("'");
             } else if (op instanceof Expression) {
-            	buf.append('(');
-            	((Expression)op).toStringBuffer(buf);
+                buf.append('(');
+                ((Expression) op).toStringBuffer(buf);
                 buf.append(')');
             } else {
                 buf.append(String.valueOf(op));

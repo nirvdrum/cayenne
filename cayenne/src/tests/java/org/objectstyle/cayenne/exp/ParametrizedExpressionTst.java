@@ -23,7 +23,7 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
         e1 = e1.orExp(ExpressionFactory.matchExp("k2", "v2"));
         e1 = e1.orExp(ExpressionFactory.matchExp("k3", "v3"));
 
-        Expression e2 = e1.expWithParams(new HashMap(), true);
+        Expression e2 = e1.expWithParameters(new HashMap(), true);
 
         TstTraversalHandler.compareExps(e1, e2);
     }
@@ -44,7 +44,7 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
         exprs.add(ExpressionFactory.matchExp("k1", "v1"));
 
         Expression e1 = ExpressionFactory.joinExp(Expression.OR, exprs);
-        Expression e2 = e1.expWithParams(new HashMap(), true);
+        Expression e2 = e1.expWithParameters(new HashMap(), true);
 
         TstTraversalHandler.compareExps(e1, e2);
     }
@@ -62,7 +62,7 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
         e1 = e1.orExp(ExpressionFactory.matchExp("k3", "v3"));
 
         try {
-            e1.expWithParams(new HashMap(), false);
+            e1.expWithParameters(new HashMap(), false);
             fail("Parameter was missing, but no exception was thrown.");
         } catch (ExpressionException ex) {
             // exception expected
@@ -75,7 +75,7 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
 
         Map map = new HashMap();
         map.put("test", "xyz");
-        Expression e2 = e1.expWithParams(map, false);
+        Expression e2 = e1.expWithParameters(map, false);
         assertNotNull(e2);
         assertEquals(2, e2.getOperandCount());
         assertEquals(Expression.EQUAL_TO, e2.getType());
@@ -86,7 +86,7 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
         Expression e1 =
             ExpressionFactory.matchExp("k1", new ExpressionParam("test"));
 
-        Expression e2 = e1.expWithParams(new HashMap(), true);
+        Expression e2 = e1.expWithParameters(new HashMap(), true);
 
         // all expression nodes must be pruned
         assertNull(e2);
@@ -107,7 +107,7 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
         Map params = new HashMap();
         params.put("test2", "abc");
         params.put("test3", "xyz");
-        Expression e2 = e1.expWithParams(params, true);
+        Expression e2 = e1.expWithParameters(params, true);
 
         // some expression nodes must be pruned
         assertNotNull(e2);
@@ -139,7 +139,7 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
 
         Map params = new HashMap();
         params.put("test4", "123");
-        Expression e2 = e1.expWithParams(params, true);
+        Expression e2 = e1.expWithParameters(params, true);
 
         // some expression nodes must be pruned
         assertNotNull(e2);

@@ -64,7 +64,6 @@ import org.objectstyle.cayenne.dba.TypesMapping;
  */
 public class ProcedureParameter extends MapObject {
     public static final int IN_OUT_PARAMETER = 3;
-
     public static final int IN_PARAMETER = 1;
     public static final int OUT_PARAMETER = 2;
 
@@ -72,6 +71,7 @@ public class ProcedureParameter extends MapObject {
      * Defines a stored procedure parameter with unknown direction.
      */
     public static final int VOID_PARAMETER = 4;
+
 
     protected int direction = VOID_PARAMETER;
 

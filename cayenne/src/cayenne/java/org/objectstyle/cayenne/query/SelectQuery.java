@@ -87,7 +87,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 
     /** Creates empty SelectQuery. */
     public SelectQuery() {
-    	super();
+        super();
     }
 
     private void init(Object root, Expression qualifier) {
@@ -109,7 +109,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
     * @param qualifier an Expression indicating which objects should be fetched
     */
     public SelectQuery(ObjEntity root, Expression qualifier) {
-    	this();
+        this();
         this.init(root, qualifier);
     }
 
@@ -141,10 +141,24 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
     }
 
     /**
+     * @deprecated Since 1.0 Beta 1, use 'queryWithParameters'
+     */
+    public SelectQuery queryWithParams(Map parameters) {
+        return queryWithParameters(parameters);
+    }
+
+    /**
      * A shortcut for <code>queryWithParams(params, true)</code>.
      */
-    public SelectQuery queryWithParams(Map params) {
-        return queryWithParams(params, true);
+    public SelectQuery queryWithParameters(Map parameters) {
+        return queryWithParameters(parameters, true);
+    }
+
+    /**
+     * @deprecated Since 1.0 Beta 1, use 'queryWithParameters'
+     */
+    public SelectQuery queryWithParams(Map parameters, boolean pruneMissing) {
+        return queryWithParameters(parameters, pruneMissing);
     }
 
     /**
@@ -154,7 +168,9 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
      * @see org.objectstyle.cayenne.exp.Expression#expWithParams(java.util.Map,
      * boolean) Explanation on parameter substitution.
      */
-    public SelectQuery queryWithParams(Map params, boolean pruneMissing) {
+    public SelectQuery queryWithParameters(
+        Map parameters,
+        boolean pruneMissing) {
         // create a query replica
         SelectQuery query = new SelectQuery();
         query.setDistinct(distinct);
@@ -172,7 +188,8 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 
         // substitute qualifier parameters
         if (qualifier != null) {
-            query.setQualifier(qualifier.expWithParams(params, pruneMissing));
+            query.setQualifier(
+                qualifier.expWithParameters(parameters, pruneMissing));
         }
 
         return query;
@@ -210,21 +227,21 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
         this.addOrdering(new Ordering(sortPathSpec, isAscending, ignoreCase));
     }
 
-	/**
-	 * Returns a list of orderings used by this query.
-	 * @deprecated Since 1.0 Beta1; use #getOrderings() instead.
-	 */
-	public List getOrderingList() {
-		return this.getOrderings();
-	}
-    
-	/**
-	 * Returns a list of orderings used by this query.
-	 */
-	public List getOrderings() {
-		return orderings;
-	}
-    
+    /**
+     * Returns a list of orderings used by this query.
+     * @deprecated Since 1.0 Beta1; use #getOrderings() instead.
+     */
+    public List getOrderingList() {
+        return this.getOrderings();
+    }
+
+    /**
+     * Returns a list of orderings used by this query.
+     */
+    public List getOrderings() {
+        return orderings;
+    }
+
     public void clearOrderings() {
         orderings.clear();
     }
@@ -239,97 +256,97 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
         this.distinct = distinct;
     }
 
-	/**
-	 * Returns a list of attributes that will be included
-	 * in the results of this query.
-	 * @deprecated Since 1.0 Beta1; use #getCustomAttributes() instead
-	 */
-	public List getCustDbAttributes() {
-		return customDbAttributes;
-	}
+    /**
+     * Returns a list of attributes that will be included
+     * in the results of this query.
+     * @deprecated Since 1.0 Beta1; use #getCustomAttributes() instead
+     */
+    public List getCustDbAttributes() {
+        return customDbAttributes;
+    }
 
-	/**
-	 * Returns a list of attributes that will be included
-	 * in the results of this query.
-	 */
-	public List getCustomDbAttributes() {
-		return customDbAttributes;
-	}
+    /**
+     * Returns a list of attributes that will be included
+     * in the results of this query.
+     */
+    public List getCustomDbAttributes() {
+        return customDbAttributes;
+    }
 
-	/**
-	 * Adds a path to the DbAttribute that should be included 
-	 * in the results of this query. Valid paths would look like
-	 * <code>ARTIST_NAME</code>, <code>PAINTING_ARRAY.PAINTING_ID</code>,
-	 * etc.
-	 * @deprecated Since 1.0 Beta1; use #addCustomAttribute() instead
-	 */
-	public void addCustDbAttribute(String attributePath) {
-		this.customDbAttributes.add(attributePath);
-	}
-    
-	public void addCustDbAttributes(List attrPaths) {
-		this.customDbAttributes.addAll(attrPaths);
-	}
+    /**
+     * Adds a path to the DbAttribute that should be included 
+     * in the results of this query. Valid paths would look like
+     * <code>ARTIST_NAME</code>, <code>PAINTING_ARRAY.PAINTING_ID</code>,
+     * etc.
+     * @deprecated Since 1.0 Beta1; use #addCustomAttribute() instead
+     */
+    public void addCustDbAttribute(String attributePath) {
+        this.customDbAttributes.add(attributePath);
+    }
 
-	/**
-	 * Adds a path to the DbAttribute that should be included 
-	 * in the results of this query. Valid paths would look like
-	 * <code>ARTIST_NAME</code>, <code>PAINTING_ARRAY.PAINTING_ID</code>,
-	 * etc.
-	 */
-	public void addCustomDbAttribute(String attributePath) {
-		customDbAttributes.add(attributePath);
-	}
-    
-	public void addCustomDbAttributes(List attrPaths) {
-		customDbAttributes.addAll(attrPaths);
-	}
+    public void addCustDbAttributes(List attrPaths) {
+        this.customDbAttributes.addAll(attrPaths);
+    }
 
-	/**
-	 * Returns <code>true</code> if there is at least one custom query 
-	 * attribute specified, otherwise returns <code>false</code>
-	 * for the case when the query results will contain only the 
-	 * root entity attributes.
-	 * 
-	 * <p>Note that queries that are fetching custom attributes
-	 * always return data rows instead of DataObjects.
-	 * </p>
-	 * @deprecated Since 1.0 Beta1; use #isFetchingCustomAttributes() instead
-	 */
-	public boolean _isFetchingCustAttributes() {
-		return customDbAttributes.size() > 0;
-	}
+    /**
+     * Adds a path to the DbAttribute that should be included 
+     * in the results of this query. Valid paths would look like
+     * <code>ARTIST_NAME</code>, <code>PAINTING_ARRAY.PAINTING_ID</code>,
+     * etc.
+     */
+    public void addCustomDbAttribute(String attributePath) {
+        customDbAttributes.add(attributePath);
+    }
 
-	/**
-	 * Returns <code>true</code> if there is at least one custom query 
-	 * attribute specified, otherwise returns <code>false</code>
-	 * for the case when the query results will contain only the 
-	 * root entity attributes.
-	 * 
-	 * <p>Note that queries that are fetching custom attributes
-	 * always return data rows instead of DataObjects.
-	 * </p>
-	 */
-	public boolean isFetchingCustomAttributes() {
-		return customDbAttributes.size() > 0;
-	}
+    public void addCustomDbAttributes(List attrPaths) {
+        customDbAttributes.addAll(attrPaths);
+    }
 
-	/**
-	 * Returns a list of relationships that must be prefetched 
-	 * as a part of this query.
-	 * @deprecated Since 1.0 Beta1; use #getPrefetches() instead
-	 */
-	public List getPrefetchList() {
-		return this.getPrefetches();
-	}
+    /**
+     * Returns <code>true</code> if there is at least one custom query 
+     * attribute specified, otherwise returns <code>false</code>
+     * for the case when the query results will contain only the 
+     * root entity attributes.
+     * 
+     * <p>Note that queries that are fetching custom attributes
+     * always return data rows instead of DataObjects.
+     * </p>
+     * @deprecated Since 1.0 Beta1; use #isFetchingCustomAttributes() instead
+     */
+    public boolean _isFetchingCustAttributes() {
+        return customDbAttributes.size() > 0;
+    }
 
-	/**
-	 * Returns a list of relationships that must be prefetched 
-	 * as a part of this query.
-	 */
-	public List getPrefetches() {
-		return prefetches;
-	}
+    /**
+     * Returns <code>true</code> if there is at least one custom query 
+     * attribute specified, otherwise returns <code>false</code>
+     * for the case when the query results will contain only the 
+     * root entity attributes.
+     * 
+     * <p>Note that queries that are fetching custom attributes
+     * always return data rows instead of DataObjects.
+     * </p>
+     */
+    public boolean isFetchingCustomAttributes() {
+        return customDbAttributes.size() > 0;
+    }
+
+    /**
+     * Returns a list of relationships that must be prefetched 
+     * as a part of this query.
+     * @deprecated Since 1.0 Beta1; use #getPrefetches() instead
+     */
+    public List getPrefetchList() {
+        return this.getPrefetches();
+    }
+
+    /**
+     * Returns a list of relationships that must be prefetched 
+     * as a part of this query.
+     */
+    public List getPrefetches() {
+        return prefetches;
+    }
 
     /** 
      * Adds a relationship path. ObjRelationship names are separated by ".".
@@ -343,7 +360,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
     public void addPrefetches(List relPaths) {
         prefetches.addAll(relPaths);
     }
-    
+
     public void clearPrefetches() {
         prefetches.clear();
     }

@@ -141,7 +141,6 @@ public class Procedure extends MapObject {
     /**
      * Returns a list of OUT and INOUT call parameters. If procedure has a
      * return value, it will also be included as a call parameter.
-     * @return
      */
     public List getCallOutParams() {
         List outParams = new ArrayList(callParameters.size());
