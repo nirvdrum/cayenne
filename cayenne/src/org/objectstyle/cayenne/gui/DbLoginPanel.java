@@ -60,11 +60,13 @@ import javax.swing.text.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Arrays;
 import java.util.logging.*;
 
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.util.Preferences;
 import org.objectstyle.cayenne.gui.util.PreferenceField;
+import org.objectstyle.cayenne.dba.DbAdapter;
 
 
 public class DbLoginPanel extends JDialog implements ActionListener {
@@ -164,7 +166,14 @@ public class DbLoginPanel extends JDialog implements ActionListener {
         disableVKEvents(urlInput);
         // Adapter class line
         JLabel adapterLabel = new JLabel("RDBMS Adapter:");
-        adapterInput = new PreferenceField(Preferences.RDBMS_ADAPTER);
+		String[] adapter_arr
+			= {DbAdapter.JDBC
+			  ,DbAdapter.SYBASE
+			  ,DbAdapter.MYSQL
+			  ,DbAdapter.ORACLE
+			  /* [DISABLE POSTGRES DATA] ,DbAdapter.POSTGRES */ };
+        adapterInput = new PreferenceField(Preferences.RDBMS_ADAPTER
+        								 , false, Arrays.asList(adapter_arr));
         disableVKEvents(adapterInput);
         
         Component[] left = new Component[5];
