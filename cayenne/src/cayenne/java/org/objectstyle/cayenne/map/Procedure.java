@@ -84,7 +84,7 @@ public class Procedure extends DbEntity {
      */
     public void addCallParam(ProcedureParam param) {
         if (param.getName() == null) {
-            throw new IllegalArgumentException("Attempt to add tunnamed parameter.");
+            throw new IllegalArgumentException("Attempt to add unnamed parameter.");
         }
 
         if (callParams.contains(param)) {
