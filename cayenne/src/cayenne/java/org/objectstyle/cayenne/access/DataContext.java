@@ -207,8 +207,7 @@ public class DataContext implements QueryEngine, Serializable {
     /**
      * Factory method that creates and returns a new instance of DataContext based on
      * default domain. If more than one domain exists in the current configuration,
-     * {@link #createDataContext(String)createDataContext(String domainName)}must be used
-     * instead.
+     * {@link DataContext#createDataContext(String)} must be used instead.
      */
     public static DataContext createDataContext() {
         return Configuration.getSharedConfiguration().getDomain().createDataContext();
