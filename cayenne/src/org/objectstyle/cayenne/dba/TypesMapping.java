@@ -61,10 +61,18 @@ import java.util.*;
 import java.util.logging.Logger;
 
 
+/** Handles mappings of JDBC data types to the database types 
+  * and Java types. This is mostly a utility class.
+  *
+  * <p><i>(Good candidate for refactoring.)</i></p>
+  *
+  * @author Michael Shengaout
+  * @author Andrei Adamchik
+  */
 public class TypesMapping {
     static Logger logObj = Logger.getLogger(TypesMapping.class.getName());
 
-    // Never us "-1" or any other normal integer, since there
+    // Never use "-1" or any other normal integer, since there
     // is a big chance it is being reserved in java.sql.Types
     public static final int NOT_DEFINED = Integer.MAX_VALUE;
 
@@ -213,8 +221,8 @@ public class TypesMapping {
         javaSqlEnum.put(JAVA_TIMESTAMP, new Integer(Types.TIMESTAMP));
     }
 
-    /** Returns an array of string values of the default JDBC data types.*/
-    public String[] getDatabaseTypes() {
+    /** Returns an array of string names of the default JDBC data types.*/
+    public static String[] getDatabaseTypes() {
         Set keys = sqlStringType.keySet();
         int len = keys.size();
         String[] types = new String[len];
