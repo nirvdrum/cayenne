@@ -44,6 +44,11 @@
             extensions directory ($JRE_HOME/lib/ext).
             </p>
             
+            <p><strong>- JDBC2.0 Optional Package (JDK1.3 only).</strong> If the system runs JDK1.3,
+            JDBC extensions package is required (javax.sql). It can be downloaded from Sun at
+            <a href="http://java.sun.com/products/jdbc/download.html#spec">http://java.sun.com/products/jdbc/download.html#spec</a>
+            and copied to the JRE extensions directory ($JRE_HOME/lib/ext).</p>
+            
             <p><strong>- (Optional) Ant 1.4.1 or newer.</strong> Ant can be downloaded from
             <a href="http://jakarta.apache.org/ant/index.html">http://jakarta.apache.org/ant/index.html</a>.
             Ant is needed for:
