@@ -86,6 +86,16 @@ public class ConfigurationTst extends CayenneTestCase {
         assertSame(factory, cfg.getDataSourceFactory());
 	}
 
+	public void testDefaultConfigurationConstructorWithNullName() {
+		try {
+			new DefaultConfiguration((String)null);
+			fail("expected ConfigurationException!");
+		}
+		catch (ConfigurationException ex) {
+			// OK
+		}
+	}
+
 	public void testFileConfigurationConstructorWithNullFile() {
 		try {
 			new FileConfiguration((File)null);
