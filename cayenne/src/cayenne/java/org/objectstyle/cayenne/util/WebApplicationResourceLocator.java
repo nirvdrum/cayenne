@@ -142,4 +142,22 @@ public class WebApplicationResourceLocator extends ResourceLocator {
         return super.findResource(location);
     }
 
+    /**
+     * Override ResourceLocator.addFilesystemPath(String) to intercept context 
+     * paths starting with "/WEB-INF/" to place in additionalContextPaths.
+     */
+    public void addFilesystemPath(String path) {
+        if (path != null) {
+            if (path.startsWith("/WEB-INF/")) {
+                this.additionalContextPaths.add(path);
+            }
+            else
+            {
+                super.addFilesystemPath(path);
+            }
+        } else {
+            throw new IllegalArgumentException("Path must not be null.");
+        }
+    }
+
 }
