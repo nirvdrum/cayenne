@@ -72,6 +72,11 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -98,8 +103,7 @@ public class Util {
         return stringFromFile(file, "");
     }
 
-    public static String stringFromFile(File file, String joinWith)
-        throws IOException {
+    public static String stringFromFile(File file, String joinWith) throws IOException {
         StringBuffer buf = new StringBuffer();
         BufferedReader in = new BufferedReader(new FileReader(file));
 
@@ -108,7 +112,8 @@ public class Util {
             while ((line = in.readLine()) != null) {
                 buf.append(line).append(joinWith);
             }
-        } finally {
+        }
+        finally {
             in.close();
         }
         return buf.toString();
@@ -125,21 +130,26 @@ public class Util {
             fin = new BufferedInputStream(new FileInputStream(from), bufSize);
             fout = new BufferedOutputStream(new FileOutputStream(to), bufSize);
             copyPipe(fin, fout, bufSize);
-        } catch (IOException ioex) {
+        }
+        catch (IOException ioex) {
             return false;
-        } catch (SecurityException sx) {
+        }
+        catch (SecurityException sx) {
             return false;
-        } finally {
+        }
+        finally {
             if (fin != null) {
                 try {
                     fin.close();
-                } catch (IOException cioex) {
+                }
+                catch (IOException cioex) {
                 }
             }
             if (fout != null) {
                 try {
                     fout.close();
-                } catch (IOException cioex) {
+                }
+                catch (IOException cioex) {
                 }
             }
         }
@@ -155,26 +165,29 @@ public class Util {
         try {
             int bufSize = 8 * 1024;
             urlin =
-                new BufferedInputStream(
-                    from.openConnection().getInputStream(),
-                    bufSize);
+                new BufferedInputStream(from.openConnection().getInputStream(), bufSize);
             fout = new BufferedOutputStream(new FileOutputStream(to), bufSize);
             copyPipe(urlin, fout, bufSize);
-        } catch (IOException ioex) {
+        }
+        catch (IOException ioex) {
             return false;
-        } catch (SecurityException sx) {
+        }
+        catch (SecurityException sx) {
             return false;
-        } finally {
+        }
+        finally {
             if (urlin != null) {
                 try {
                     urlin.close();
-                } catch (IOException cioex) {
+                }
+                catch (IOException cioex) {
                 }
             }
             if (fout != null) {
                 try {
                     fout.close();
-                } catch (IOException cioex) {
+                }
+                catch (IOException cioex) {
                 }
             }
         }
@@ -190,10 +203,7 @@ public class Util {
      * @param bufSizeHint
      * @throws IOException
      */
-    public static void copyPipe(
-        InputStream in,
-        OutputStream out,
-        int bufSizeHint)
+    public static void copyPipe(InputStream in, OutputStream out, int bufSizeHint)
         throws IOException {
         int read = -1;
         byte[] buf = new byte[bufSizeHint];
@@ -245,12 +255,14 @@ public class Util {
             if (e.getCause() != null) {
                 return unwindException(e.getCause());
             }
-        } else if (th instanceof CayenneRuntimeException) {
+        }
+        else if (th instanceof CayenneRuntimeException) {
             CayenneRuntimeException e = (CayenneRuntimeException) th;
             if (e.getCause() != null) {
                 return unwindException(e.getCause());
             }
-        } else if (th instanceof InvocationTargetException) {
+        }
+        else if (th instanceof InvocationTargetException) {
             InvocationTargetException e = (InvocationTargetException) th;
             if (e.getTargetException() != null) {
                 return unwindException(e.getTargetException());
@@ -283,16 +295,14 @@ public class Util {
     /**
      * Create object copy using serialization mechanism.
      */
-    public static Object cloneViaSerialization(Serializable obj)
-        throws Exception {
+    public static Object cloneViaSerialization(Serializable obj) throws Exception {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(bytes);
         out.writeObject(obj);
         out.close();
 
         ObjectInputStream in =
-            new ObjectInputStream(
-                new ByteArrayInputStream(bytes.toByteArray()));
+            new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()));
         Object objCopy = in.readObject();
         in.close();
         return objCopy;
@@ -329,7 +339,8 @@ public class Util {
         if (regexUtil.match("/\\./", className)) {
             String path = regexUtil.substitute("s/\\./\\//g", className);
             return path.substring(0, path.lastIndexOf("/"));
-        } else {
+        }
+        else {
             return "";
         }
     }
@@ -416,8 +427,22 @@ public class Util {
         int startLen = len / 2;
         int endLen = len - startLen;
 
-        return str.substring(0, startLen)
-            + "..."
-            + str.substring(str.length() - endLen);
+        return str.substring(0, startLen) + "..." + str.substring(str.length() - endLen);
+    }
+
+    /**
+      * Returns a sorted iterator from an unsorted one. 
+      * Use this method as a last resort, since it is 
+      * much less efficient then just sorting a collection 
+      * that backs the original iterator.
+      */
+    public static Iterator sortedIterator(Iterator it, Comparator comparator) {
+        List list = new ArrayList();
+        while (it.hasNext()) {
+            list.add(it.next());
+        }
+
+        Collections.sort(list, comparator);
+        return list.iterator();
     }
 }

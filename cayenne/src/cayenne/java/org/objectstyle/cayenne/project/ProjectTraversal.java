@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.project;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.access.DataDomain;
@@ -63,8 +64,10 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * ProjectTraversal allows to traverse Cayenne project tree in a
@@ -78,10 +81,26 @@ import org.objectstyle.cayenne.map.Relationship;
  */
 public class ProjectTraversal {
 
+    protected static final Comparator mapObjectComparator = new MapObjectComparator();
+    protected static final Comparator dataDomainComparator = new DataDomainComparator();
+    protected static final Comparator dataNodeComparator = new DataNodeComparator();
+
     protected ProjectTraversalHandler handler;
+    protected boolean sort;
 
     public ProjectTraversal(ProjectTraversalHandler handler) {
+        this(handler, false);
+    }
+
+    /**
+     * Creates ProjectTraversal instance with a given handler and 
+     * sort policy. If <code>sort</code> is true, children of each
+     * node will be sorted using a predefined Comparator for a given 
+     * type of child nodes.
+     */
+    public ProjectTraversal(ProjectTraversalHandler handler, boolean sort) {
         this.handler = handler;
+        this.sort = sort;
     }
 
     /**
@@ -142,6 +161,11 @@ public class ProjectTraversal {
       * Performs traversal starting from a list of domains.
       */
     public void traverseDomains(Iterator domains, ProjectPath path) {
+
+        if (sort) {
+            domains = Util.sortedIterator(domains, ProjectTraversal.dataDomainComparator);
+        }
+
         while (domains.hasNext()) {
             DataDomain domain = (DataDomain) domains.next();
             ProjectPath domainPath = path.appendToPath(domain);
@@ -155,6 +179,10 @@ public class ProjectTraversal {
     }
 
     public void traverseNodes(Iterator nodes, ProjectPath path) {
+        if (sort) {
+            nodes = Util.sortedIterator(nodes, ProjectTraversal.dataNodeComparator);
+        }
+
         while (nodes.hasNext()) {
             DataNode node = (DataNode) nodes.next();
             ProjectPath nodePath = path.appendToPath(node);
@@ -167,6 +195,10 @@ public class ProjectTraversal {
     }
 
     public void traverseMaps(Iterator maps, ProjectPath path) {
+        if (sort) {
+            maps = Util.sortedIterator(maps, ProjectTraversal.mapObjectComparator);
+        }
+
         while (maps.hasNext()) {
             DataMap map = (DataMap) maps.next();
             ProjectPath mapPath = path.appendToPath(map);
@@ -184,14 +216,24 @@ public class ProjectTraversal {
      * Performs recusrive traversal of an Iterator of Cayenne Procedure objects.
      */
     public void traverseProcedures(Iterator procedures, ProjectPath path) {
+        if (sort) {
+            procedures =
+                Util.sortedIterator(procedures, ProjectTraversal.mapObjectComparator);
+        }
+
         while (procedures.hasNext()) {
-			Procedure procedure = (Procedure) procedures.next();
+            Procedure procedure = (Procedure) procedures.next();
             ProjectPath procedurePath = path.appendToPath(procedure);
             handler.projectNode(procedurePath);
         }
     }
 
     public void traverseEntities(Iterator entities, ProjectPath path) {
+        if (sort) {
+            entities =
+                Util.sortedIterator(entities, ProjectTraversal.mapObjectComparator);
+        }
+
         while (entities.hasNext()) {
             Entity ent = (Entity) entities.next();
             ProjectPath entPath = path.appendToPath(ent);
@@ -205,14 +247,77 @@ public class ProjectTraversal {
     }
 
     public void traverseAttributes(Iterator attributes, ProjectPath path) {
+        if (sort) {
+            attributes =
+                Util.sortedIterator(attributes, ProjectTraversal.mapObjectComparator);
+        }
+
         while (attributes.hasNext()) {
             handler.projectNode(path.appendToPath(attributes.next()));
         }
     }
 
     public void traverseRelationships(Iterator relationships, ProjectPath path) {
+        if (sort) {
+            relationships =
+                Util.sortedIterator(relationships, ProjectTraversal.mapObjectComparator);
+        }
+
         while (relationships.hasNext()) {
             handler.projectNode(path.appendToPath(relationships.next()));
+        }
+    }
+
+    static class MapObjectComparator implements Comparator {
+        public int compare(Object o1, Object o2) {
+            String name1 = ((MapObject) o1).getName();
+            String name2 = ((MapObject) o2).getName();
+
+            if (name1 == null) {
+                return (name2 != null) ? -1 : 0;
+            }
+            else if (name2 == null) {
+                return 1;
+            }
+            else {
+                return name1.compareTo(name2);
+            }
+        }
+
+    }
+
+    static class DataDomainComparator implements Comparator {
+        public int compare(Object o1, Object o2) {
+            String name1 = ((DataDomain) o1).getName();
+            String name2 = ((DataDomain) o2).getName();
+
+            if (name1 == null) {
+                return (name2 != null) ? -1 : 0;
+            }
+            else if (name2 == null) {
+                return 1;
+            }
+            else {
+                return name1.compareTo(name2);
+            }
+        }
+
+    }
+
+    static class DataNodeComparator implements Comparator {
+        public int compare(Object o1, Object o2) {
+            String name1 = ((DataNode) o1).getName();
+            String name2 = ((DataNode) o2).getName();
+
+            if (name1 == null) {
+                return (name2 != null) ? -1 : 0;
+            }
+            else if (name2 == null) {
+                return 1;
+            }
+            else {
+                return name1.compareTo(name2);
+            }
         }
     }
 }

@@ -94,7 +94,9 @@ public class ProjectTreeModel extends DefaultTreeModel {
      */
     public static DefaultMutableTreeNode wrapProjectNode(Object node) {
         TraversalHelper helper = new TraversalHelper();
-        new ProjectTraversal(helper).traverse(node);
+        
+        // do sorted traversal
+        new ProjectTraversal(helper, true).traverse(node);
         return helper.getStartNode();
     }
 
@@ -127,9 +129,9 @@ public class ProjectTreeModel extends DefaultTreeModel {
     }
 
     /**
-     * Refreshes object subtree.
+     * Fixes ordering of nodes.
      */
-    public void refreshSubtree(Object[] path) {
+    public void refresh() {
 
     }
 
