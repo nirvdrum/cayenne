@@ -75,24 +75,37 @@ public abstract class CayenneAction extends AbstractAction {
 	/** Defines path to the images. */
 	public static final String RESOURCE_PATH = "org/objectstyle/cayenne/gui/";
 
-    public CayenneAction(String name) {
+	public CayenneAction(String name) {
 		super(name);
 		super.putValue(Action.DEFAULT, name);
-		
+
 		Icon icon = createIcon();
-		if(icon != null) {
+		if (icon != null) {
 			super.putValue(Action.SMALL_ICON, icon);
+		}
+
+		KeyStroke accelerator = getAcceleratorKey();
+		if (accelerator != null) {
+			super.putValue(Action.ACCELERATOR_KEY, accelerator);
 		}
 	}
 
-    /** 
-     * Changes the name of this action, propagating the change
-     * to all widgets using this action.
-     */
-    public void setName(String newName) {
-    	super.putValue(Action.NAME, newName);
-    }
-    
+	/** 
+	 * Changes the name of this action, propagating the change
+	 * to all widgets using this action.
+	 */
+	public void setName(String newName) {
+		super.putValue(Action.NAME, newName);
+	}
+
+	/**
+	 * Returns keyboard shortcut for this action. Default
+	 * implementation returns <code>null</code>.
+	 */
+	public KeyStroke getAcceleratorKey() {
+		return null;
+	}
+
 	/**
 	 * Returns the name of the icon that should be used
 	 * for buttons. Name will be reolved relative to
@@ -149,14 +162,14 @@ public abstract class CayenneAction extends AbstractAction {
 			GUIErrorHandler.guiException(th);
 		}
 	}
-	
+
 	/**
 	 * Factory method that creates a menu item hooked up
 	 * to this action.
 	 */
-	public JMenuItem buildMenu(KeyStroke stroke) {
+	public JMenuItem buildMenu() {
 		JMenuItem item = new JMenuItem(this);
-		item.setAccelerator(stroke);
+		item.setAccelerator((KeyStroke)getValue(Action.ACCELERATOR_KEY));
 		return item;
 	}
 

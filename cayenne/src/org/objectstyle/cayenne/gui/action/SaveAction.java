@@ -57,22 +57,24 @@
 package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
-import java.util.List;
+import java.awt.event.KeyEvent;
+import java.io.*;
 import java.util.Iterator;
 import java.util.logging.Logger;
-import java.io.*;
-import javax.swing.JFileChooser;
-import javax.swing.AbstractAction;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.util.Preferences;
-import org.objectstyle.cayenne.conf.*;
+import javax.swing.JFileChooser;
+import javax.swing.KeyStroke;
+
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.DataSourceFactory;
+import org.objectstyle.cayenne.conf.DomainHelper;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.GuiDataSource;
 import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
+import org.objectstyle.cayenne.gui.util.XmlFilter;
 import org.objectstyle.cayenne.gui.validator.*;
+import org.objectstyle.cayenne.map.*;
 
 
 /** 
@@ -87,6 +89,10 @@ public class SaveAction extends CayenneAction {
 		
 	public SaveAction() {
 		super(ACTION_NAME);
+	}
+	
+	public KeyStroke getAcceleratorKey() {
+		return KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK);
 	}
 	
 	public String getIconName() {

@@ -209,25 +209,23 @@ public class Editor
 		fileMenu.add(closeProjectMenu);
 		fileMenu.addSeparator();
 		fileMenu.add(
-			getAction(SaveAction.ACTION_NAME).buildMenu(
-				KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK)));
+			getAction(SaveAction.ACTION_NAME).buildMenu());
 		fileMenu.addSeparator();
 		fileMenu.addSeparator();
 		fileMenu.add(exitMenu);
 		reloadLastProjList();
 
 		projectMenu.add(createDomainMenu);
-		projectMenu.add(getAction(CreateDataMapAction.ACTION_NAME).buildMenu(null));
+		projectMenu.add(getAction(CreateDataMapAction.ACTION_NAME).buildMenu());
 		projectMenu.add(createDataSourceMenu);
 		projectMenu.add(createObjEntityMenu);
 		projectMenu.add(createDbEntityMenu);
 		projectMenu.addSeparator();
-		projectMenu.add(getAction(AddDataMapAction.ACTION_NAME).buildMenu(null));
+		projectMenu.add(getAction(AddDataMapAction.ACTION_NAME).buildMenu());
 		projectMenu.add(synchObjEntityMenu);
 		projectMenu.addSeparator();
 		projectMenu.add(
-			getAction(RemoveAction.ACTION_NAME).buildMenu(
-				KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK)));
+			getAction(RemoveAction.ACTION_NAME).buildMenu());
 
 		toolMenu.add(importDbMenu);
 		toolMenu.add(importEOMMenu);

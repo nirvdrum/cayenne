@@ -57,7 +57,10 @@
 package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.logging.Logger;
+
+import javax.swing.KeyStroke;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
@@ -85,6 +88,10 @@ public class RemoveAction extends CayenneAction {
 	
 	public void performAction(ActionEvent e) {
 		remove();
+	}
+	
+	public KeyStroke getAcceleratorKey() {
+		return KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK);
 	}
 
 	private void remove() {
