@@ -116,7 +116,7 @@ public class DataContext implements QueryEngine {
      * <p><i>
      * This implementation is rather naive and would scan all registered
      * objects. A better implementation based on catching context events
-     * is needed.</i></p>
+     * may be needed.</i></p>
      */
     public boolean hasChanges() {
         Iterator it = registeredObjects().iterator();
