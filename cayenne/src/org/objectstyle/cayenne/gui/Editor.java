@@ -392,10 +392,7 @@ public class Editor
 		mediator.addObjRelationshipDisplayListener(this);
 		mediator.addDbRelationshipDisplayListener(this);
 
-		getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
-		getAction(SaveAction.ACTION_NAME).setEnabled(false);
-		closeProjectMenu.setEnabled(false);
-
+        enableProjectMenu();
 		this.validate();
 	}
 
