@@ -118,6 +118,17 @@ import javax.naming.spi.ObjectFactory;
 &lt;/ResourceParams>
 </pre></code>
  *
+ * <p>After ContainerPoolFactory was configured to be used within the container 
+ * (see above for Tomcat example), you can reference your "jdbc/mydb" DataSource in
+ * web application deployment descriptor like that (per Servlet Specification): </p>
+ *<code><pre>
+&lt;resource-ref>
+    &lt;es-ref-name>jdbc/mydb&lt;/res-ref-name>
+    &lt;res-type>javax.sql.DataSource&lt;/res-type>
+    &lt;res-auth>Container&lt;/res-auth>
+&lt;/resource-ref>
+</pre></code> 
+ *
  * @author Craig R. McClanahan
  * @author Andrei Adamchik
  */
