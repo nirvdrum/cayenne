@@ -169,7 +169,7 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         // query from an alt DataContext must run from cache
         DataContext altContext = mockupDataContext();
         engine.reset();
-        List altResultRows = context.performQuery(select);
+        List altResultRows = altContext.performQuery(select);
         assertEquals(0, engine.getRunCount());
         assertEquals(rows, altResultRows);
     }
@@ -287,7 +287,7 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         // query from an alt DataContext must run from cache
         DataContext altContext = mockupDataContext();
         engine.reset();
-        List altResultRows = context.performQuery(select);
+        List altResultRows = altContext.performQuery(select);
         assertEquals(0, engine.getRunCount());
         assertEquals(2, altResultRows.size());
         assertTrue(altResultRows.get(0) instanceof DataObject);

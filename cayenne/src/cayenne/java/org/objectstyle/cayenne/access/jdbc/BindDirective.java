@@ -59,7 +59,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 
-import org.apache.log4j.Logger;
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
@@ -97,7 +96,6 @@ import org.objectstyle.cayenne.util.ConversionUtil;
  * @author Andrei Adamchik
  */
 public class BindDirective extends Directive {
-    private static Logger logObj = Logger.getLogger(BindDirective.class);
 
     public String getName() {
         return "bind";

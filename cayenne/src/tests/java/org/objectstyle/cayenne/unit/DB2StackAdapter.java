@@ -3,7 +3,6 @@ package org.objectstyle.cayenne.unit;
 import java.sql.Connection;
 import java.util.Collection;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 
@@ -11,7 +10,6 @@ import org.objectstyle.cayenne.map.DataMap;
  * @author Andrei Adamchik
  */
 public class DB2StackAdapter extends AccessStackAdapter {
-    private static Logger logObj = Logger.getLogger(DB2StackAdapter.class);
 
     public DB2StackAdapter(DbAdapter adapter) {
         super(adapter);

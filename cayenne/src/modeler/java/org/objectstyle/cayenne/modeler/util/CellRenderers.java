@@ -66,7 +66,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.Attribute;
@@ -88,7 +87,6 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public final class CellRenderers {
-    private static Logger logObj = Logger.getLogger(CellRenderers.class);
 
     // common icons
     protected static ImageIcon domainIcon;

@@ -183,7 +183,7 @@ public class PerformMain {
 
     public static void prepareDomain() {
         try {
-            DataSourceInfo dsi = new ConnectionSetup(true).buildConnectionInfo();
+            DataSourceInfo dsi = new ConnectionSetup().buildConnectionInfo();
 
             PoolDataSource poolDS =
                 new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());

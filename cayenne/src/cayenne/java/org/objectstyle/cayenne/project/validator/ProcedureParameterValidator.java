@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -67,7 +66,6 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class ProcedureParameterValidator extends TreeNodeValidator {
-    private static Logger logObj = Logger.getLogger(ProcedureParameterValidator.class);
 
     public void validateObject(ProjectPath treeNodePath, Validator validator) {
         ProcedureParameter parameter = (ProcedureParameter) treeNodePath.getObject();

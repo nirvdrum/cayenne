@@ -105,11 +105,23 @@ public class PackageUpdateController extends DefaultsPreferencesController {
             ObjEntity entity = (ObjEntity) it.next();
             if (doAll || Util.isEmptyString(entity.getClassName())) {
                 String oldName = entity.getClassName();
-                
-                
+                String className = extractClassName(Util.isEmptyString(oldName) ? entity
+                        .getName() : oldName);
+
             }
         }
 
         shutdown();
+    }
+
+    protected String extractClassName(String name) {
+        if (name == null) {
+            return "";
+        }
+
+        int dot = name.lastIndexOf('.');
+        return (dot < 0) ? name : (dot + 1 < name.length())
+                ? name.substring(dot + 1)
+                : "";
     }
 }

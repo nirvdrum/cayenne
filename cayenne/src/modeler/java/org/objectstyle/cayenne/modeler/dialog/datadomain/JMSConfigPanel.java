@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.modeler.dialog.datadomain;
 
 import java.awt.BorderLayout;
 
-import org.apache.log4j.Logger;
 import org.scopemvc.view.swing.SPanel;
 import org.scopemvc.view.swing.STextField;
 
@@ -68,7 +67,6 @@ import com.jgoodies.forms.layout.FormLayout;
  * @author Andrei Adamchik
  */
 public class JMSConfigPanel extends SPanel {
-    private static Logger logObj = Logger.getLogger(JMSConfigPanel.class);
 
     public JMSConfigPanel() {
         super();

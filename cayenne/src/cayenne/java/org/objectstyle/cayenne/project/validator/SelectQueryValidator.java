@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.project.validator;
 
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
@@ -77,8 +76,6 @@ import org.objectstyle.cayenne.util.Util;
  * @since 1.1
  */
 public class SelectQueryValidator extends TreeNodeValidator {
-
-    private static Logger logObj = Logger.getLogger(SelectQueryValidator.class);
 
     public void validateObject(ProjectPath treeNodePath, Validator validator) {
         SelectQuery query = (SelectQuery) treeNodePath.getObject();
@@ -170,7 +167,6 @@ public class SelectQueryValidator extends TreeNodeValidator {
         }
 
         // check for duplicate names in the parent context
-        Query sameNameQuery = map.getQuery(query.getName());
         
         Iterator it = map.getQueries().iterator();
         while (it.hasNext()) {

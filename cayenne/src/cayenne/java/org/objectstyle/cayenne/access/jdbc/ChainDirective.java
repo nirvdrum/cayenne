@@ -138,7 +138,7 @@ public class ChainDirective extends Directive {
         if (includedChunks > 0) {
             childWriter.flush();
             writer.write(prefix);
-            writer.write(((StringWriter) childWriter).toString());
+            writer.write(childWriter.toString());
         }
 
         return true;

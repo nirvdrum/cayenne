@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.modeler.util;
 
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.core.Selector;
 import org.scopemvc.model.basic.BasicModel;
@@ -69,7 +68,6 @@ import org.scopemvc.model.basic.BasicModel;
  * @author Andrei Adamchik
  */
 public abstract class MapModel extends BasicModel {
-    private static Logger logObj = Logger.getLogger(MapModel.class);
     
     protected Map map;
 

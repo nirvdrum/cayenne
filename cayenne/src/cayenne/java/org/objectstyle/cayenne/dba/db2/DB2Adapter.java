@@ -61,7 +61,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
@@ -92,7 +91,6 @@ test-db2.jdbc.driver = com.ibm.db2.jcc.DB2Driver
  * @author Holger Hoffstaette
  */
 public class DB2Adapter extends JdbcAdapter {
-    private static Logger logObj = Logger.getLogger(DB2Adapter.class);
     
     public DB2Adapter() {
     }

@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.modeler.dialog.validator;
 
 import javax.swing.JFrame;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Procedure;
@@ -72,7 +71,6 @@ import org.objectstyle.cayenne.project.validator.ValidationInfo;
  * @author Andrei Adamchik
  */
 public class ProcedureParameterErrorMsg extends ValidationDisplayHandler {
-    private static Logger logObj = Logger.getLogger(ProcedureParameterErrorMsg.class);
 
     public ProcedureParameterErrorMsg(ValidationInfo validationInfo) {
         super(validationInfo);

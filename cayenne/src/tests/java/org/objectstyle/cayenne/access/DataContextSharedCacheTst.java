@@ -61,7 +61,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.DataRow;
@@ -83,7 +82,6 @@ import org.objectstyle.cayenne.unit.util.ThreadedTestHelper;
  * @author Andrei Adamchik
  */
 public class DataContextSharedCacheTst extends MultiContextTestCase {
-    private static Logger logObj = Logger.getLogger(DataContextSharedCacheTst.class);
 
     protected Artist artist;
 

@@ -63,7 +63,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.collections.ComparatorUtils;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.util.ConversionUtil;
 import org.objectstyle.cayenne.util.XMLEncoder;
@@ -78,7 +77,6 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * @author Craig Miskell
  */
 public class Ordering implements Comparator, Serializable, XMLSerializable {
-    private static Logger logObj = Logger.getLogger(Ordering.class);
 
     /** 
      * Symbolic representation of ascending ordering criterion. 

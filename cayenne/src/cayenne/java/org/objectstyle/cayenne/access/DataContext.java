@@ -69,7 +69,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
@@ -132,7 +131,6 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class DataContext implements QueryEngine, Serializable {
-    private static Logger logObj = Logger.getLogger(DataContext.class);
 
     // noop delegate 
     private static final DataContextDelegate defaultDelegate =

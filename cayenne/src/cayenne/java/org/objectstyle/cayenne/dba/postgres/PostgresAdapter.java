@@ -59,7 +59,6 @@ import java.sql.PreparedStatement;
 import java.sql.Types;
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
@@ -91,8 +90,6 @@ test-postgresql.jdbc.driver = org.postgresql.Driver
  * @author Andrus Adamchik
  */
 public class PostgresAdapter extends JdbcAdapter {
-    private static Logger logObj = Logger.getLogger(PostgresAdapter.class);
-    
     
     /**
      * Installs appropriate ExtendedTypes as converters for passing values

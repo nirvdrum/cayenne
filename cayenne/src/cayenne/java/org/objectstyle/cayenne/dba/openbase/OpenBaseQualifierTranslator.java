@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.dba.openbase;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.exp.Expression;
@@ -70,7 +69,6 @@ import org.objectstyle.cayenne.map.DbAttribute;
  * @since 1.1
  */
 public class OpenBaseQualifierTranslator extends QualifierTranslator {
-    private static Logger logObj = Logger.getLogger(OpenBaseQualifierTranslator.class);
 
     public OpenBaseQualifierTranslator() {
         this(null);

@@ -233,7 +233,6 @@ public class SelectQueryMainTab extends JPanel {
     void setQueryQualifier(String string) {
         string = (string == null) ? "" : string.trim();
 
-        DataMap map = mediator.getCurrentDataMap();
         SelectQuery query = getQuery();
         Expression qualifier = null;
 

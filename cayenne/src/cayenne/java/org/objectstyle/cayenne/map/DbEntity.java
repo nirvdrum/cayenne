@@ -62,7 +62,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.collections.Transformer;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
@@ -81,7 +80,6 @@ import org.objectstyle.cayenne.util.XMLEncoder;
  * @author Andrei Adamchik
  */
 public class DbEntity extends Entity implements DbAttributeListener {
-    private static Logger logObj = Logger.getLogger(DbEntity.class);
 
     protected String catalog;
     protected String schema;

@@ -61,7 +61,6 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
@@ -74,7 +73,6 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
  */
 
 public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
-    private static Logger logObj = Logger.getLogger(UpdateBatchQueryBuilder.class);
 
     public UpdateBatchQueryBuilder(DbAdapter adapter) {
         super(adapter);

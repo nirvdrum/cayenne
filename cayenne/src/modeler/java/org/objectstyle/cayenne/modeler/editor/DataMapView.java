@@ -68,7 +68,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
@@ -97,8 +96,6 @@ import com.jgoodies.forms.layout.FormLayout;
  * Panel for editing a DataMap.
  */
 public class DataMapView extends JPanel {
-
-    private static final Logger logObj = Logger.getLogger(DataMapView.class);
 
     protected EventController eventController;
 

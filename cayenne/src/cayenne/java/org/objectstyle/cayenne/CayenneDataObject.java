@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -87,8 +86,7 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  * @author Andrei Adamchik
  */
 public class CayenneDataObject implements DataObject {
-    private static Logger logObj = Logger.getLogger(CayenneDataObject.class);
-
+    
     protected long snapshotVersion = DEFAULT_VERSION;
 
     protected ObjectId objectId;

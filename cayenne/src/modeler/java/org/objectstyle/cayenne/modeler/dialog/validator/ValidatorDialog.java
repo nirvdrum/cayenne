@@ -80,7 +80,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.PanelFactory;
@@ -97,8 +96,6 @@ import org.objectstyle.cayenne.project.validator.Validator;
  * @author Andrei Adamchik
  */
 public class ValidatorDialog extends CayenneDialog implements ActionListener {
-
-    private static Logger logObj = Logger.getLogger(ValidatorDialog.class);
 
     protected static ValidatorDialog instance;
 

@@ -640,11 +640,10 @@ public class DataNode implements QueryEngine {
         while (true) {
             if (hasResultSet) {
                 ResultSet rs = statement.getResultSet();
-                SelectQueryTranslator assembler = (SelectQueryTranslator) transl;
 
                 readResultSet(
                     rs,
-                    assembler.getResultDescriptor(rs),
+                    transl.getResultDescriptor(rs),
                     (GenericSelectQuery) query,
                     delegate);
             }

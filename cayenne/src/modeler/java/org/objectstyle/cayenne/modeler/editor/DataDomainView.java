@@ -65,7 +65,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataRowStore;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -89,8 +88,6 @@ import com.jgoodies.forms.layout.FormLayout;
  * Panel for editing DataDomain.
  */
 public class DataDomainView extends JPanel implements DomainDisplayListener {
-
-    private static Logger logObj = Logger.getLogger(DataDomainView.class);
 
     protected EventController eventController;
 

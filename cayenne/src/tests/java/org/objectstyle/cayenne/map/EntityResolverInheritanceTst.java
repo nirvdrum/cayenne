@@ -73,10 +73,6 @@ public class EntityResolverInheritanceTst extends PeopleTestCase {
         return getObjEntity("AbstractPerson");
     }
 
-    private ObjEntity getClientRep() {
-        return getObjEntity("ClientRepresentative");
-    }
-
     private ObjEntity getEmployee() {
         return getObjEntity("Employee");
     }

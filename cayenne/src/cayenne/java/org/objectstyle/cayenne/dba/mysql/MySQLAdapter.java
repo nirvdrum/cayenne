@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.dba.mysql;
 
 import java.sql.Types;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
@@ -76,13 +75,12 @@ test-mysql.cayenne.adapter = org.objectstyle.cayenne.dba.mysql.MySQLAdapter
 test-mysql.jdbc.username = test
 test-mysql.jdbc.password = secret
 test-mysql.jdbc.url = jdbc:mysql://serverhostname/cayenne
-test-mysql.jdbc.driver = org.gjt.mm.mysql.Driver
+test-mysql.jdbc.driver = com.mysql.jdbc.Driver
 </pre>
  * 
  * @author Andrei Adamchik
  */
 public class MySQLAdapter extends JdbcAdapter {
-    private static Logger logObj = Logger.getLogger(MySQLAdapter.class);
 
     public MySQLAdapter() {
         // init defaults

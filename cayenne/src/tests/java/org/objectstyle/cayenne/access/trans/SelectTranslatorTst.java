@@ -62,7 +62,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.ArtistExhibit;
@@ -78,7 +77,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class SelectTranslatorTst extends CayenneTestCase {
-    private static Logger logObj = Logger.getLogger(SelectTranslatorTst.class);
     protected SelectQuery q;
     protected DbEntity artistEnt;
 

@@ -72,7 +72,6 @@ import javax.swing.JTextField;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DataMap;
@@ -105,8 +104,6 @@ import com.jgoodies.forms.layout.FormLayout;
 public class ObjEntityTab
     extends JPanel
     implements ObjEntityDisplayListener, ExistingSelectionProcessor {
-
-    private static Logger logObj = Logger.getLogger(ObjEntityTab.class);
 
     private static final Object noInheritance =
         new MapObject("Direct Mapping to Table/View") {

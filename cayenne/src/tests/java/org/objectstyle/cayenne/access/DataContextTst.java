@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.Exhibit;
@@ -89,7 +88,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.util.MockupOperationObserver;
 
 public class DataContextTst extends DataContextTestBase {
-    private static Logger logObj = Logger.getLogger(DataContextTst.class);
 
     protected MockupOperationObserver opObserver;
 

@@ -63,7 +63,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.exp.Expression;
@@ -82,8 +81,6 @@ import org.objectstyle.cayenne.query.Query;
  * Class that converts EOModels to org.objectstyle.cayenne.map.DataMap objects.
  */
 public class EOModelProcessor {
-
-    private static Logger logObj = Logger.getLogger(EOModelProcessor.class);
 
     /**
      * Performs EOModel loading.

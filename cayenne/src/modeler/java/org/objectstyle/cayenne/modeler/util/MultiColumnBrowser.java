@@ -84,8 +84,6 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import org.apache.log4j.Logger;
-
 /**
  * A simple non-editable tree browser with multiple columns 
  * for display and navigation of a tree structure. This type of
@@ -108,7 +106,6 @@ import org.apache.log4j.Logger;
  * @author Andrei Adamchik
  */
 public class MultiColumnBrowser extends JPanel {
-    private static Logger logObj = Logger.getLogger(MultiColumnBrowser.class);
 
     private static final ImageIcon rightArrow =
         ModelerUtil.buildIcon("scroll_right.gif");

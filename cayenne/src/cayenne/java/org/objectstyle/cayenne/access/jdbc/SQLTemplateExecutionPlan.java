@@ -65,7 +65,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.collections.IteratorUtils;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
@@ -82,7 +81,6 @@ import org.objectstyle.cayenne.query.SQLTemplate;
 // soon, and all query types will be run by an execution plan instead of
 // a DataNode. Then ExecutionPlan will become a true Strategy pattern...
 public class SQLTemplateExecutionPlan {
-    private static Logger logObj = Logger.getLogger(SQLTemplateExecutionPlan.class);
 
     protected DbAdapter adapter;
 

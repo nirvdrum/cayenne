@@ -61,7 +61,6 @@ import java.util.Iterator;
 
 import javax.swing.JOptionPane;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -80,7 +79,6 @@ import org.objectstyle.cayenne.modeler.util.MapUtil;
  * @author Andrei Adamchik
  */
 public class DbAttributeTableModel extends CayenneTableModel {
-    private static Logger logObj = Logger.getLogger(DbAttributeTableModel.class);
 
     // Columns
     private static final int DB_ATTRIBUTE_NAME = 0;

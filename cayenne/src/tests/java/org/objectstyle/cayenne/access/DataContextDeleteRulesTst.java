@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.access;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
@@ -70,7 +69,6 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
 // and merge this test case with DeleteRulesTst that inherits 
 // from RelationshipTestCase.
 public class DataContextDeleteRulesTst extends CayenneTestCase {
-    private static Logger logObj = Logger.getLogger(DataContextDeleteRulesTst.class);
 
     private DataContext context;
 

@@ -60,14 +60,12 @@ import java.awt.Component;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 
 /**
  * @author Andrei Adamchik
  */
 public class UnsavedChangesDialog {
-	private static Logger logObj = Logger.getLogger(UnsavedChangesDialog.class);
 	
     private static final String SAVE_AND_CLOSE = "Save Changes";
     private static final String CLOSE_WITHOUT_SAVE = "Ignore Changes";

@@ -70,7 +70,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
@@ -97,9 +96,7 @@ public class ProcedureParameterTab
         ProcedureDisplayListener,
         ExistingSelectionProcessor,
         ActionListener {
-
-    private static Logger logObj = Logger.getLogger(ProcedureParameterTab.class);
-
+    
     protected EventController eventController;
 
     protected CayenneTable table;

@@ -78,10 +78,8 @@ import org.objectstyle.cayenne.util.ResourceLocator;
   * @author Andrei Adamchik
   */
 public class ConnectionSetup  {
-    private boolean interactive;
  
-    public ConnectionSetup(boolean interactive) {
-        this.interactive = interactive;
+    public ConnectionSetup() {
     }
 
     public DataSourceInfo buildConnectionInfo() throws Exception {

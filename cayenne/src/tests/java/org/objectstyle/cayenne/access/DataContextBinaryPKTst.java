@@ -1,6 +1,5 @@
 package org.objectstyle.cayenne.access;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.art.BinaryPKTest1;
 import org.objectstyle.art.BinaryPKTest2;
 import org.objectstyle.cayenne.PersistenceState;
@@ -11,8 +10,6 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DataContextBinaryPKTst extends CayenneTestCase {
-    private static Logger logObj = Logger.getLogger(DataContextBinaryPKTst.class);
-
     protected DataContext context;
 
     protected void setUp() throws Exception {

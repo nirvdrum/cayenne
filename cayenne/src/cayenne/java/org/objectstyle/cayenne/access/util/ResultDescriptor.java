@@ -63,7 +63,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.jdbc.ColumnDescriptor;
 import org.objectstyle.cayenne.access.types.ExtendedType;
@@ -84,7 +83,6 @@ import org.objectstyle.cayenne.map.ProcedureParameter;
  * @author Andrei Adamchik
  */
 public class ResultDescriptor {
-    private static Logger logObj = Logger.getLogger(ResultDescriptor.class);
 
     private static final int[] emptyInt = new int[0];
 
