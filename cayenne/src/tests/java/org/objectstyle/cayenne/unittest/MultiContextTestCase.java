@@ -66,24 +66,15 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public abstract class MultiContextTestCase extends CayenneTestCase {
-    protected DataContext context;
 
     protected void setUp() throws Exception {
         super.setUp();
 
         // cleanup database data
         getDatabaseSetup().cleanTableData();
-
-        // initialize main DataContext
-        context = createDataContext();
     }
 
-    /**
-     * Returns the main DataContext.
-     */
-    protected DataContext getContext() {
-        return context;
-    }
+
 
     /**
      * Helper method to create a new DataContext with the ObjectStore
@@ -91,6 +82,11 @@ public abstract class MultiContextTestCase extends CayenneTestCase {
      * serializing/deserializing the DataContext.
      */
     protected DataContext mirrorDataContext(DataContext context) throws Exception {
-        return (DataContext) Util.cloneViaSerialization(context);
+        DataContext mirror = (DataContext) Util.cloneViaSerialization(context);
+        
+        assertNotSame(context, mirror);
+        assertNotSame(context.getObjectStore(), mirror.getObjectStore());
+        
+        return mirror;
     }
 }

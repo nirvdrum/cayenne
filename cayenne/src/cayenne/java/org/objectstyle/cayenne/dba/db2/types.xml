@@ -12,7 +12,7 @@ IBM DB2 types mapping
        <db-type name="BIGINT"/>
    </jdbc-type>
    <jdbc-type name="BINARY">
-       <db-type name="BINARY"/>
+       <db-type name="BLOB"/>
    </jdbc-type>
    <jdbc-type name="BIT">
        <db-type name="BIT"/>
@@ -84,7 +84,7 @@ IBM DB2 types mapping
        <db-type name="TINYINT"/>
    </jdbc-type>
    <jdbc-type name="VARBINARY">
-       <db-type name="VARBINARY"/>
+       <db-type name="BLOB"/>
    </jdbc-type>
    <jdbc-type name="VARCHAR">
        <db-type name="VARCHAR"/>

@@ -392,7 +392,9 @@ public class DataDomain implements QueryEngine {
     }
 
     /** 
-     * Creates and returns a new DataContext. 
+     * Creates and returns a new DataContext. If this DataDomain is configured 
+     * to use shared cache, returned DataContext will use shared cache as well.
+     * Otherwise a new instance of DataRowStore will be used as its local cache.
      */
     public DataContext createDataContext() {
        return createDataContext(isSharedCacheEnabled());
@@ -400,6 +402,12 @@ public class DataDomain implements QueryEngine {
     
     
     /**
+     * Creates a new DataContext. 
+     * 
+     * @param useSharedCache determines whether resulting DataContext should use
+     * shared vs. local cache. This setting overrides default behavior configured
+     * for this DataDomain via {@link SHARED_CACHE_ENABLED_PROPERTY}. 
+     * 
      * @since 1.1
      */
     public DataContext createDataContext(boolean useSharedCache) {

@@ -185,7 +185,7 @@ public class DataDomainTst extends CayenneTestCase {
             domain.getSharedSnapshotCache());
     }
 
-    public void testCreateDataContextWithNoSharedCache() throws Exception {
+    public void testCreateDataContextWithLocalCache() throws Exception {
         Map properties = new HashMap();
         properties.put(DataDomain.SHARED_CACHE_ENABLED_PROPERTY, Boolean.toString(false));
 

@@ -87,20 +87,19 @@ public abstract class CayenneTestCase extends TestCase {
             new File(new File(new File("build"), "tests"), "deps"),
             "test-resources");
     }
-    
+
     /**
      * Utility method to strip the time part from the Date.
      */
-	public static Date stripTime(Date date) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-		cal.set(Calendar.HOUR_OF_DAY, 0);
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		cal.set(Calendar.MILLISECOND, 0);
-		return cal.getTime();
-	}
-
+    public static Date stripTime(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
+    }
 
     protected void setUp() throws Exception {
         // make sure that the right domain is setup as shared, as some tests
@@ -143,13 +142,40 @@ public abstract class CayenneTestCase extends TestCase {
     }
 
     public DataContext createDataContext() {
+        return createDataContextWithSharedCache();
+    }
+
+
+    /**
+     * Creates a DataContext that uses shared snapshot cache and is based on default test domain.
+     */
+    public DataContext createDataContextWithSharedCache() {
         // remove listeners for snapshot events
         EventManager.getDefaultManager().removeAllListeners(
             getDomain().getSharedSnapshotCache().getSnapshotEventSubject());
 
         // clear cache...
         getDomain().getSharedSnapshotCache().clear();
-        return getDomain().createDataContext();
+        DataContext context = getDomain().createDataContext(true);
+
+        assertSame(
+            getDomain().getSharedSnapshotCache(),
+            context.getObjectStore().getDataRowCache());
+
+        return context;
+    }
+
+    /**
+     * Creates a DataContext that uses local snapshot cache and is based on default test domain.
+     */
+    public DataContext createDataContextWithLocalCache() {
+        DataContext context = getDomain().createDataContext(false);
+
+        assertNotSame(
+            getDomain().getSharedSnapshotCache(),
+            context.getObjectStore().getDataRowCache());
+
+        return context;
     }
 
     public CayenneTestDatabaseSetup getDatabaseSetup() {

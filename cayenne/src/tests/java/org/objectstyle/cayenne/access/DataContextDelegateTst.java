@@ -67,6 +67,8 @@ public class DataContextDelegateTst extends MultiContextTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
+        DataContext context = createDataContextWithSharedCache();
+        
         // prepare a single gallery record
         gallery = (Gallery) context.createAndRegisterNewObject("Gallery");
         gallery.setGalleryName("version1");
@@ -87,7 +89,7 @@ public class DataContextDelegateTst extends MultiContextTestCase {
      * Test that "snapshotChangedInDataRow" method is called when expected.
      */
     public void testSnapshotChangedInDataRow1() throws Exception {
-        // prepare a second context
+        DataContext context = gallery.getDataContext();
         DataContext altContext = mirrorDataContext(context);
 
         // prepare delegates
@@ -120,6 +122,8 @@ public class DataContextDelegateTst extends MultiContextTestCase {
      * operations.
      */
     public void testSnapshotChangedInDataRow2() throws Exception {
+        DataContext context = gallery.getDataContext();
+        
         // prepare a second context
         DataContext altContext = mirrorDataContext(context);
         TestDelegate altDelegate = new TestDelegate();
@@ -147,6 +151,8 @@ public class DataContextDelegateTst extends MultiContextTestCase {
     }
 
     public void testWillPerformSelect1() throws Exception {
+        DataContext context = gallery.getDataContext();
+        
         TestDelegate delegate = new TestDelegate();
         context.setDelegate(delegate);
 
@@ -162,6 +168,8 @@ public class DataContextDelegateTst extends MultiContextTestCase {
     }
 
     public void testWillPerformSelect2() throws Exception {
+        DataContext context = gallery.getDataContext();
+        
         TestDelegate delegate = new TestDelegate();
         context.setDelegate(delegate);
 
