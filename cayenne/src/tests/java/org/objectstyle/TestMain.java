@@ -207,7 +207,7 @@ public class TestMain implements TestConstants {
 				new PoolManager(
 					poolDS,
 					1,
-					2,
+					1,
 					dsi.getUserName(),
 					dsi.getPassword());
 
