@@ -83,7 +83,7 @@ import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.gui.datamap.*;
 import org.objectstyle.cayenne.gui.validator.*;
-
+import org.objectstyle.cayenne.ConfigException;
 
 /** Window for the Cayenne Modeler.
   * Responsibilities include coordination of enabling/disabling of
@@ -730,45 +730,50 @@ implements ActionListener
        	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
         try {
             // Get the project file name (always cayenne.xml)
-            File file = null;
-            fileChooser.setFileFilter(new ProjFileFilter());
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            fileChooser.setDialogTitle("Choose new project directory");
-            if (null != init_dir) {
-            	File init_dir_file = new File(init_dir);
-            	if (init_dir_file.exists())
-            		fileChooser.setCurrentDirectory(init_dir_file);
-            }
-            int ret_code = fileChooser.showSaveDialog(this);
-            if ( ret_code != JFileChooser.APPROVE_OPTION)
-                return;
-            file = fileChooser.getSelectedFile();
-            if (!file.exists())
-            	file.createNewFile();
+            boolean finished = false;
+	        File file = null;
+	        File proj_file = null;
+            while (!finished) {
+		        fileChooser.setAcceptAllFileFilterUsed(false);
+		        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		        fileChooser.setDialogTitle("Choose project location");
+		        if (null != init_dir) {
+		        	File init_dir_file = new File(init_dir);
+		        	if (init_dir_file.exists())
+		        		fileChooser.setCurrentDirectory(init_dir_file);
+		        }
+		        int ret_code = fileChooser.showSaveDialog(this);
+		        if ( ret_code != JFileChooser.APPROVE_OPTION)
+		            return;
+		        file = fileChooser.getSelectedFile();
+		        if (!file.exists())
+		        	file.createNewFile();
+		        proj_file = new File(file, ProjFileFilter.PROJ_FILE_NAME);
+		        if (proj_file.exists()) {
+		        	int ret = JOptionPane.showConfirmDialog(this
+		        						, "There is already "
+		        						 +"project in this folder. Overwrite?");
+		        	if (ret == JOptionPane.YES_OPTION) {
+		        		finished = true;
+		        	} else if (ret == JOptionPane.CANCEL_OPTION) {
+		        		return;
+		        	}
+		        } else {
+		        	finished = true;	
+		        }
+			}// End while
 			// Save and close (if needed) currently open project.
     		if (mediator != null) {
     			if (false == closeProject())
     				return;
     		}
             // Save dir path to the preferences
-            pref.setProperty(Preferences.LAST_DIR, file.getParent());
-            // Create project file (cayenne.xml)
-            File proj_file = new File(file.getAbsolutePath()
-            							+ File.separator
-            							+ "cayenne.xml");
-            if (!proj_file.exists())
-            	proj_file.createNewFile();
-            addToLastProjList(proj_file.getAbsolutePath());
-
-			FileWriter fw = new FileWriter(proj_file);
-			PrintWriter pw = new PrintWriter(fw, true);
-			pw.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-			pw.println("<domains>");
-			pw.println("</domains>");
-			pw.flush();
-			pw.close();
-			fw.close();
-            GuiConfiguration.initSharedConfig(proj_file);
+            pref.setProperty(Preferences.LAST_DIR, file.getAbsolutePath());
+            try {
+            	GuiConfiguration.initSharedConfig(proj_file, false);
+        	} catch (ConfigException e) {
+        		logObj.warning(e.getMessage());
+        	}
             GuiConfiguration config = GuiConfiguration.getGuiConfig();
             Mediator mediator = Mediator.getMediator(config);
             project(mediator);
@@ -1063,6 +1068,7 @@ implements ActionListener
 			if (!file.exists()) {
 				file.createNewFile();
 			}
+            addToLastProjList(file.getAbsolutePath());
 			FileWriter fw = new FileWriter(file);
 			DomainHelper.storeDomains(new PrintWriter(fw), mediator.getDomains());
 			fw.flush();
