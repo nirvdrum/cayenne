@@ -62,6 +62,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -97,6 +98,16 @@ public class IncrementalFaultList implements List {
     protected SelectQuery internalQuery;
     protected int unfetchedObjects;
 
+    /** size fetches will be limited to in order to avoid where clause limitations */
+    protected int fetchSize = 10000;
+    // Don't confuse this with the JDBC ResultSet fetch size setting - this controls
+    // the where clause generation that is necessary to fetch specific records a page
+    // at a time.  Some JDBC Drivers/Databases may have limits on statement length
+    // or complexity of the where clause - e.g., PostgreSQL having a default limit of 10,000
+    // nested expressions.
+    //
+    // TODO: make configurable?
+    
     /**
      * Creates a new list copying settings from another list.
      * Elements WILL NOT be copied or fetched.
@@ -106,6 +117,7 @@ public class IncrementalFaultList implements List {
         this.internalQuery = list.internalQuery;
         this.dataContext = list.dataContext;
         this.rootEntity = list.rootEntity;
+        this.fetchSize = list.fetchSize;
         elements = Collections.synchronizedList(new ArrayList());
     }
 
@@ -240,12 +252,19 @@ public class IncrementalFaultList implements List {
                 return;
             }
 
+            // fetch the range of objects in fetchSize chunks
+            List objects = new ArrayList(1);
+            int fetchBegin = 0;
+            for (int fetchEnd = Math.min(quals.size(), fetchSize); fetchBegin < quals.size(); fetchEnd += Math.min(fetchSize, (quals.size()-fetchEnd)))
+            {
             SelectQuery query =
                 new SelectQuery(
                     rootEntity.getName(),
-                    ExpressionFactory.joinExp(Expression.OR, quals));
+                        ExpressionFactory.joinExp(Expression.OR, quals.subList(fetchBegin, fetchEnd)));
 
-            List objects = dataContext.performQuery(query);
+                objects.addAll(dataContext.performQuery(query));
+                fetchBegin = fetchEnd;                
+            }
 
             // sanity check - database data may have changed
             if (objects.size() < ids.size()) {
@@ -335,6 +354,18 @@ public class IncrementalFaultList implements List {
     }
 
     /**
+     * Get the upper bound on the number of records to resolve in one round
+     * trip to the database.  This setting governs the size/complexity of 
+     * the where clause generated to retrieve the next page of records.  
+     * If the fetch size is less than the page size, then multiple fetches 
+     * will be made to resolve a page.
+     * @return int
+     */
+    public int getFetchSize() {
+        return fetchSize;
+    }
+
+    /**
      * Returns the dataContext.
      * @return DataContext
      */
@@ -351,30 +382,157 @@ public class IncrementalFaultList implements List {
     }
 
     /**
-     * This method would resolve all unresolved objects and then return
-     * a list iterator over an internal list.
+     * Returns a list iterator for this list. DataObjects are resolved a page 
+     * (according to getPageSize()) at a time as necessary - when retrieved 
+     * with next() or previous().
      */
     public ListIterator listIterator() {
-        resolveAll();
-        return elements.listIterator();
+        // by virtue of get(index)'s implementation, resolution of ids into 
+        // objects will occur on pageSize boundaries as necessary.
+        return new ListIterator() {
+            int listIndex = 0;
+            
+            public void add(Object o) {
+                throw new UnsupportedOperationException(
+                            "add operation not supported");
+            }
+            
+            public boolean hasNext() {
+                return (listIndex < elements.size());
+            }
+            
+            public boolean hasPrevious() {
+                return (listIndex > 0);
+            }
+            
+            public Object next() {
+                if (listIndex >= elements.size()) 
+                    throw new NoSuchElementException(
+                                "at the end of the list");
+                    
+                return get(listIndex++);
+            }
+            
+            public int nextIndex() {
+                return listIndex;
+            }
+            
+            public Object previous() {
+                if (listIndex < 1)
+                    throw new NoSuchElementException(
+                                "at the beginning of the list");
+                
+                return get(--listIndex);
+            }
+            
+            public int previousIndex() {
+                return (listIndex - 1);
+            }
+            
+            public void remove() {
+                throw new UnsupportedOperationException(
+                            "remove operation not supported");             
+            }
+            
+            public void set(Object o) {
+                throw new UnsupportedOperationException(
+                            "set operation not supported");
+            }
+        };
     }
 
     /**
-     * This method would resolve all unresolved objects and then return
-     * a list iterator over an internal list.
+     * Returns a list iterator of the elements in this list (in proper 
+     * sequence), starting at the specified position in this list. The 
+     * specified index indicates the first element that would be returned 
+     * by an initial call to the next method. An initial call to the 
+     * previous method would return the element with the specified index 
+     * minus one. 
+     * 
+     * DataObjects are resolved a page (according to getPageSize()) at a 
+     * time as necessary - when retrieved with next() or previous().
      */
-    public ListIterator listIterator(int index) {
-        resolveAll();
-        return elements.listIterator(index);
+    public ListIterator listIterator(final int index) {
+        // by virtue of get(index)'s implementation, resolution of ids into 
+        // objects will occur on pageSize boundaries as necessary.
+        return new ListIterator() {
+            int listIndex = index;
+            
+            public void add(Object o) {
+                throw new UnsupportedOperationException(
+                            "add operation not supported");
+            }
+            
+            public boolean hasNext() {
+                return (listIndex < elements.size());
+            }
+            
+            public boolean hasPrevious() {
+                return (listIndex > 0);
+            }
+            
+            public Object next() {
+                if (listIndex >= elements.size()) 
+                    throw new NoSuchElementException(
+                                "at the end of the list");
+                    
+                return get(listIndex++);
+            }
+            
+            public int nextIndex() {
+                return listIndex;
+            }
+            
+            public Object previous() {
+                if (listIndex < 1)
+                    throw new NoSuchElementException(
+                                "at the beginning of the list");
+                
+                return get(--listIndex);
+            }
+            
+            public int previousIndex() {
+                return (listIndex - 1);
+            }
+            
+            public void remove() {
+                throw new UnsupportedOperationException(
+                            "remove operation not supported");             
+            }
+            
+            public void set(Object o) {
+                throw new UnsupportedOperationException(
+                            "set operation not supported");
+            }
+        };        
     }
 
     /**
-     * This method would resolve all unresolved objects and then return
-     * an iterator over an internal list.
+     * Return an iterator for this list. DataObjects are resolved a page 
+     * (according to getPageSize()) at a time as necessary - when retrieved 
+     * with next().
      */
     public Iterator iterator() {
-        resolveAll();
-        return elements.iterator();
+        // by virtue of get(index)'s implementation, resolution of ids into 
+        // objects will occur on pageSize boundaries as necessary.
+        return new Iterator() {
+            int listIndex = 0;
+
+            public boolean hasNext() {
+                return (listIndex < elements.size());                
+            }
+            
+            public Object next() {
+                if (listIndex >= elements.size())
+                    throw new NoSuchElementException("no more elements");
+                    
+                return get(listIndex++); 
+            }
+            
+            public void remove() { 
+                throw new UnsupportedOperationException("remove not supported.");
+            }
+        };
     }
 
     /**
