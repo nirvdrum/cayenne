@@ -59,7 +59,7 @@ package org.objectstyle.cayenne.conf;
 /**
  * @author Andrei Adamchik
  * 
- * @deprecated
+ * @deprecated Since 1.0Beta1. WebApplicationListener must be used.
  */
 public class ServletConfiguration extends WebApplicationListener {
 

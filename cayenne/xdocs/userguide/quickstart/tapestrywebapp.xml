@@ -18,6 +18,13 @@
    	    <panel name="Note:">
     		Full tutorial source code is included in Cayenne distribution in "src/tutorials" folder.
     	</panel>
+    	
+    	<panel name="Note:">
+    		Configuration given in this tutorial assumes Servlet 2.3 compatible
+    		container. For older containers, move cayenne files from WEB-INF to WEB-INF/classes
+    		(e.g. "mv cayenne.xml datanode.driver.xml datamap.map.xml classes/") and remove listener
+    		section from the web.xml.
+    	</panel>
 
    	<p>Tutorial steps:</p>
     	
@@ -63,7 +70,7 @@
     		from the Tapestry distribution (/lib/ext for ognl, /lib for tapestry-*.jar) 
     		to EITHER the <code>WEB-INF/lib</code> subdirectory of the tutorial project 
     		directory, or some other location that your web container will be able to 
-    		locate.  E.g. for Tomcat, $CATALINA_HOME/shared/lib is a good place. 
+    		locate.
     		</p>
     	</subsection>
     	
