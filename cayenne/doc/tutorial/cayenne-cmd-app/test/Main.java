@@ -62,8 +62,9 @@ public class Main {
                 likePattern);
 
         SelectQuery query = new SelectQuery("Gallery", qual);
-        // using log level of SEVERE to make sure that query execution is looged to STDOUT
-        query.setLogLevel(Level.SEVERE);
+        // using log level of ERROR to make sure that query 
+        // execution is logged to STDOUT
+        query.setLoggingLevel(Level.ERROR);
         
         List galleries = ctxt.performQuery(query);
         if (galleries.size() == 1) {
@@ -95,7 +96,7 @@ public class Main {
        dali.addToPaintingArray(paint);
        
        // commit to the database
-       // using log level of SEVERE to show the query execution
-       ctxt.commitChanges(Level.SEVERE); 
+       // using log level of ERROR to show the query execution
+       ctxt.commitChanges(Level.ERROR); 
     }
 }

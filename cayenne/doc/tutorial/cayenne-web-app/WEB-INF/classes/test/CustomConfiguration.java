@@ -9,7 +9,7 @@ import org.objectstyle.cayenne.conf.*;
  * custom tasks on servlet container startup.
  */
 public class CustomConfiguration extends ServletConfiguration {
-    static Logger logObj = Logger.getLogger(CustomConfiguration.class.getName());
+    static Logger logObj = Logger.getLogger(CustomConfiguration.class);
 
     public CustomConfiguration() {
         super();
@@ -19,6 +19,6 @@ public class CustomConfiguration extends ServletConfiguration {
 
     private void configureLogging() {
         // debug configuration
-        setLogLevel(Level.WARNING);
+        setLoggingLevel(Level.WARN);
     }
 }
