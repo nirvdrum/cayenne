@@ -59,6 +59,7 @@ import java.util.HashMap;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.*;
 
@@ -76,6 +77,7 @@ import org.objectstyle.cayenne.map.*;
  *    <li>DbAttribute</li>
  *    <li>DbRelationship</li>
  *    <li>DataNode</li>
+ *    <li>DataDomain</li>
  * </ul>
  * 
  * This is a helper class used mostly by GUI and database 
@@ -84,7 +86,6 @@ import org.objectstyle.cayenne.map.*;
  * @author Andrei Adamchik
  */
 public abstract class NamedObjectFactory {
-	private static int domainCounter = 1;
 	private static final HashMap factories = new HashMap();
 
 	static {
@@ -96,11 +97,9 @@ public abstract class NamedObjectFactory {
 		factories.put(DataNode.class, new DataNodeFactory());
 		factories.put(DbRelationship.class, new DbRelationshipFactory(null, false));
 		factories.put(ObjRelationship.class, new ObjRelationshipFactory(null, false));
+		factories.put(DataDomain.class, new DataDomainFactory());
 	}
 
-	public static String getDomainName() {
-		return "UntitledDomain" + domainCounter++;
-	}
 
 	/**
 	 * Creates an object using an appropriate factory class.
@@ -136,6 +135,10 @@ public abstract class NamedObjectFactory {
 		return (Relationship) factory.makeObject(srcEnt);
 	}
 
+    /**
+     * Creates a unique name for the new object and constructs
+     * this object.
+     */
 	protected Object makeObject(Object namingContext) {
 		int c = 1;
 		String name = null;
@@ -146,13 +149,36 @@ public abstract class NamedObjectFactory {
 		return create(name, namingContext);
 	}
 
+    /** Returns a base default name, like "UntitledEntity", etc. */
 	protected abstract String nameBase();
 
+    /** Internal factory method. Invoked after the name is figured out. */
 	protected abstract Object create(String name, Object namingContext);
 
+    /** 
+     * Checks if the name is already taken by another sibling
+     * in the same context.
+     */
 	protected abstract boolean isNameInUse(String name, Object namingContext);
 
+
 	// concrete factories
+	static class DataDomainFactory extends NamedObjectFactory {
+		protected String nameBase() {
+			return "UntitledDomain";
+		}
+
+		protected Object create(String name, Object namingContext) {
+			return new DataDomain(name);
+		}
+
+		protected boolean isNameInUse(String name, Object namingContext) {
+			Configuration config = (Configuration) namingContext;
+			return config.getDomain(name) != null;
+		}
+	}
+	
+	
 	static class DataMapFactory extends NamedObjectFactory {
 		protected String nameBase() {
 			return "UntitledMap";

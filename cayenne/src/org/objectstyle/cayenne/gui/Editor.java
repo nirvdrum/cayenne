@@ -742,19 +742,24 @@ public class Editor
 	}
 
 	private void createDomain() {
-		DataDomain domain = new DataDomain(NamedObjectFactory.getDomainName());
+		DataDomain domain = (DataDomain)NamedObjectFactory.createObject(DataDomain.class, mediator.getConfig());
 		mediator.getConfig().addDomain(domain);
 		mediator.fireDomainEvent(
 			new DomainEvent(this, domain, DomainEvent.ADD));
 		mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, domain));
 	}
 
-	/** Creates a new data node. Data node may consist of two pieces of information:
-	  * 1. Name/location
-	  * 2. Database url/uid/password (for direct connection to DB).
-	  * First piece of info is stored directly into the cayenne.xml.
-	  * Second piece of data should be stored in the separate file
-	  * if the factory requires it. */
+	/** 
+	 * Creates a new data node. Data node may consist of two pieces of information:
+	 * <ul>
+	 *   <li>Name/location</li>
+	 *   <li>Database url/uid/password (for direct connection to DB).</li>
+	 * </ul>
+	 * 
+	 * First piece of info is stored directly into the cayenne.xml.
+	 * Second piece of data should be stored in the separate file
+	 * if the factory requires it. 
+	 */
 	private void createDataNode() {
 		DataDomain domain = mediator.getCurrentDataDomain();
 		DataNode node = (DataNode)NamedObjectFactory.createObject(DataNode.class, domain);
