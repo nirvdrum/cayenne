@@ -57,11 +57,13 @@ package org.objectstyle.cayenne.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -91,6 +93,26 @@ public class Util {
 
     private static final Perl5Util regexUtil = new Perl5Util();
 
+    /**
+     * Reads file contents as String.
+     */
+    public static String stringFromFile(File file) throws IOException {
+    	StringBuffer buf = new StringBuffer();
+    	BufferedReader in = new BufferedReader(new FileReader(file));
+    	
+    	try {
+    		String line = null;
+    		while((line = in.readLine()) != null) {
+    			buf.append(line);
+    		}
+    	}
+    	finally {
+    		in.close();
+    	}
+    	return buf.toString();
+    }
+    
+    
     /** Makes up for the lack of file copying utilities in Java */
     public static boolean copy(File from, File to) {
         BufferedInputStream fin = null;

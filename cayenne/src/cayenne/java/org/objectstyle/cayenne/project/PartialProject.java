@@ -68,6 +68,8 @@ import org.objectstyle.cayenne.conf.ConfigLoader;
 import org.objectstyle.cayenne.conf.ConfigLoaderDelegate;
 import org.objectstyle.cayenne.conf.ConfigSaverDelegate;
 import org.objectstyle.cayenne.conf.ConfigStatus;
+import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
+import org.objectstyle.cayenne.conf.JNDIDataSourceFactory;
 
 /**
  * PartialProject is a "lightweight" project implementation. It can work with
@@ -94,7 +96,37 @@ public class PartialProject extends Project {
      * are assumed to be in place.
      */
     public void updateNodes(List list) throws ProjectException {
+        Iterator it = list.iterator();
+        while (it.hasNext()) {
+            DataNodeConfigInfo nodeConfig = (DataNodeConfigInfo) it.next();
+            String domainName = nodeConfig.getDomain();
+            if (domainName == null && domains.size() != 1) {
+                throw new IllegalArgumentException("Node must have domain set explicitly if there is no default domain.");
+            }
 
+            if (domainName == null) {
+                domainName =
+                    ((DomainMetaData) domains.values().toArray()[0]).name;
+            }
+
+            NodeMetaData node =
+                findNode(domainName, nodeConfig.getName(), false);
+            if (node == null) {
+                continue;
+            }
+
+            if (nodeConfig.getAdapter() != null) {
+                node.adapter = nodeConfig.getAdapter();
+            }
+
+            if (nodeConfig.getDataSource() != null) {
+                node.dataSource = nodeConfig.getDataSource();
+                node.factory = JNDIDataSourceFactory.class.getName();
+            } else if (nodeConfig.getDriverFile() != null) {
+                node.dataSource = node.name + DataNodeFile.LOCATION_SUFFIX;
+                node.factory = DriverDataSourceFactory.class.getName();
+            }
+        }
     }
 
     protected void prepareSave(List filesToSave, List wrappedObjects)
@@ -156,6 +188,30 @@ public class PartialProject extends Project {
         ApplicationProjectFile projectFile = new ApplicationProjectFile(this);
         projectFile.setSaveDelegate(new SaveDelegate());
         return projectFile;
+    }
+
+    private DomainMetaData findDomain(String domainName) {
+        DomainMetaData domain = (DomainMetaData) domains.get(domainName);
+        if (domain == null) {
+            throw new IllegalArgumentException(
+                "Can't find domain: " + domainName);
+        }
+
+        return domain;
+    }
+
+    private NodeMetaData findNode(
+        String domainName,
+        String nodeName,
+        boolean failIfNotFound) {
+        DomainMetaData domain = findDomain(domainName);
+        NodeMetaData node = (NodeMetaData) domain.nodes.get(nodeName);
+        if (node == null && failIfNotFound) {
+            throw new IllegalArgumentException(
+                "Can't find node: " + domainName + "." + nodeName);
+        }
+
+        return node;
     }
 
     protected class DomainMetaData {
@@ -278,16 +334,6 @@ public class PartialProject extends Project {
     }
 
     class SaveDelegate implements ConfigSaverDelegate {
-        protected DomainMetaData findDomain(String domainName) {
-            DomainMetaData domain = (DomainMetaData) domains.get(domainName);
-            if (domain == null) {
-                throw new IllegalArgumentException(
-                    "Can't find domain: " + domainName);
-            }
-
-            return domain;
-        }
-
         public Iterator dependentMapNames(String domainName, String mapName) {
             return ((MapMetaData) findDomain(domainName).maps.get(mapName))
                 .maps
@@ -315,15 +361,21 @@ public class PartialProject extends Project {
         }
 
         public String nodeAdapterName(String domainName, String nodeName) {
-            return ((NodeMetaData) findDomain(domainName).nodes.get(nodeName)).adapter;
+            return (
+                (NodeMetaData) findDomain(domainName).nodes.get(
+                    nodeName)).adapter;
         }
 
         public String nodeDataSourceName(String domainName, String nodeName) {
-            return ((NodeMetaData) findDomain(domainName).nodes.get(nodeName)).dataSource;
+            return (
+                (NodeMetaData) findDomain(domainName).nodes.get(
+                    nodeName)).dataSource;
         }
 
         public String nodeFactoryName(String domainName, String nodeName) {
-            return ((NodeMetaData) findDomain(domainName).nodes.get(nodeName)).factory;
+            return (
+                (NodeMetaData) findDomain(domainName).nodes.get(
+                    nodeName)).factory;
         }
 
         public Iterator nodeNames(String domainName) {

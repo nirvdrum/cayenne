@@ -85,6 +85,10 @@ public class DeploymentConfigurator extends Task {
         info = new ProjectConfigInfo();
     }
 
+    public ProjectConfigInfo getInfo() {
+        return info;
+    }
+
     /**
      * Executes the task. It will be called by ant framework.
      */
@@ -125,6 +129,15 @@ public class DeploymentConfigurator extends Task {
             DataNodeConfigInfo node = (DataNodeConfigInfo) nodes.next();
             if (node.getName() == null) {
                 throw new BuildException("'node.name' attribute is required.");
+            }
+
+            if (node.getDataSource() != null && node.getDriverFile() != null) {
+                throw new BuildException("'node.dataSource' and 'node.driverFile' are mutually exclusive.");
+            }
+
+            if (node.getDriverFile() != null
+                && !node.getDriverFile().isFile()) {
+                throw new BuildException("'node.driverFile' does not exist.");
             }
         }
     }

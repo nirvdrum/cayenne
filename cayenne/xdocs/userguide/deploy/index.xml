@@ -7,7 +7,7 @@
 <navigator>
 	<up>/userguide/index.html</up>
 	<prev>/userguide/perform/index.html</prev>
-	<next>/userguide/misc.html</next>
+	<next>/userguide/deploy/cdeploy.html</next>
 </navigator>    
 <body>
      <section name="10. Deployment">        

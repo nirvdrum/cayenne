@@ -39,4 +39,5 @@ deprecating the appropriate method.
 
 10. Initial implementation of an event-based notification mechanism
 
+11. Added cdeploy - Ant task for cayenne deployment configuration.
 

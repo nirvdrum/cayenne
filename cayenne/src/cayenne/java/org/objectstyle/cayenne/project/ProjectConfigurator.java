@@ -150,11 +150,16 @@ public class ProjectConfigurator {
         while (it.hasNext()) {
             DataNodeConfigInfo nodeInfo = (DataNodeConfigInfo) it.next();
             String name = nodeInfo.getName();
+
             File targetDriverFile =
                 new File(projectDir, name + DataNodeFile.LOCATION_SUFFIX);
-            // need to remove old file if exists
-            if (targetDriverFile.exists()) {
-                targetDriverFile.delete();
+
+            // these are the two cases when the driver file must be deleted
+            if (nodeInfo.getDataSource() != null
+                || nodeInfo.getDriverFile() != null) {
+                if (targetDriverFile.exists()) {
+                    targetDriverFile.delete();
+                }
             }
 
             if (nodeInfo.getDriverFile() != null
@@ -171,7 +176,9 @@ public class ProjectConfigurator {
         // load project
         if (needFix) {
             // read the project and fix data nodes
-            new PartialProject(projectFile).updateNodes(info.getNodes());
+            PartialProject project = new PartialProject(projectFile);
+            project.updateNodes(info.getNodes());
+            project.save();
         }
     }
 

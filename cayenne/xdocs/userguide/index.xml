@@ -82,6 +82,7 @@
                 <li><a href="deploy/index.html#web">10.3 Web Applications</a></li>
                 <li><a href="deploy/index.html#custom">10.4 Customizing Configuration</a></li>
                 <li><a href="deploy/index.html#jndi">10.5 Using JNDI</a></li>
+                <li><a href="deploy/cdeploy.html">10.6 Deployment Configuration With Ant</a></li>
             </ul><br/></li>
             
             <li><a href="misc.html">11. Miscellaneous Information</a>
