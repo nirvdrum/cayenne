@@ -19,9 +19,11 @@ public class $classGen.className extends $classGen.superClassName {
 ## Create attribute set/get methods
 #foreach( $attr in ${classGen.Entity.Attributes} )
 #set( $classGen.Prop = $attr.Name )## let controller know about current property
+#if ("true" != "${classGen.getEntity().isReadOnly()}")
     public void set${classGen.cappedProp}($classGen.formatJavaType(${attr.Type}) $classGen.formatVariableName(${attr.Name})) {
         writeProperty("${attr.Name}", $classGen.formatVariableName(${attr.Name}));
     }
+#end
     public $classGen.formatJavaType(${attr.Type}) get${classGen.cappedProp}() {
         return ($classGen.formatJavaType(${attr.Type}))readProperty("${attr.Name}");
     }
@@ -43,10 +45,11 @@ public class $classGen.className extends $classGen.superClassName {
         return (List)readProperty("${rel.name}");
     }
 #else
+#if ("true" != "${classGen.getEntity().isReadOnly()}")
     public void set${classGen.cappedProp}($classGen.formatJavaType(${rel.TargetEntity.ClassName}) $classGen.formatVariableName(${rel.name})) {
         setToOneTarget("${rel.name}", $classGen.formatVariableName(${rel.name}), true);
     }
-    
+#end
     public $classGen.formatJavaType(${rel.TargetEntity.ClassName}) get${classGen.cappedProp}() {
         return ($classGen.formatJavaType(${rel.TargetEntity.ClassName}))readProperty("${rel.name}");
     } 
