@@ -281,9 +281,10 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		node = getDataSourceNode(mediator.getCurrentDataDomain(), e.getDataNode());
 		if (null != node) {
 			model.nodeChanged(node);
-			// If assigned map to this node
 			DataMap[] maps = e.getDataNode().getDataMaps();
-			if (maps.length != node.getChildCount()) {
+			// If added map to this node
+			if (maps.length > node.getChildCount()) {
+				logObj.fine("About to add map to node");
 				// Find map not already under node and add it
 				for (int i = 0; i < maps.length; i++) {
 					boolean found = false;
@@ -300,10 +301,30 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 					if (false == found) {
 						DefaultMutableTreeNode map_ele = loadMap(maps[i]);
 						node.add(map_ele);
+						logObj.fine("Added map to node");
 						break;
 					}
 				}// End for(i)
-			}// End if number of maps changed
+			} else if (maps.length < node.getChildCount()){
+				for (int j = 0; j < node.getChildCount(); j++) {
+					boolean found = false;
+					DefaultMutableTreeNode child;
+					child = (DefaultMutableTreeNode)node.getChildAt(j);
+					DataMapWrapper wrap;
+					wrap = (DataMapWrapper)child.getUserObject();
+					for (int i = 0; i < maps.length; i++) {
+						if (maps[i] == wrap.getDataMap()) {
+							found = true;
+							break;
+						}
+					}
+					if (!found) {
+						model.removeNodeFromParent(child);
+						break;
+					}
+				}// End for(j)
+			}
+			
 		}// End if node found
 	}
 	public void dataNodeAdded(DataNodeEvent e) {

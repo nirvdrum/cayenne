@@ -56,7 +56,12 @@ package org.objectstyle.cayenne.gui;
  */
 
 
-import java.awt.*;
+//import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.*;
 import java.io.*;
 import java.net.URL;
@@ -415,7 +420,7 @@ implements ActionListener
 				+ ((DataMap)context).getName() + " data map?"
 				, "Cayenne", JOptionPane.YES_NO_OPTION);
 			if (ret == JOptionPane.YES_OPTION)
-				mediator.removeDataMap(this, (DataMap)context);
+				removeDataMap();
 		} else if (context instanceof DbEntity) {
 			ret = JOptionPane.showConfirmDialog(this,
 				"Are you sure you want to remove "
@@ -432,6 +437,35 @@ implements ActionListener
 				mediator.removeObjEntity(this, (ObjEntity)context);
 		}
 
+	}
+	
+	/** Removing data map either from node or from everywhere based on context.*/
+	private void removeDataMap() {
+		DataNode node = mediator.getCurrentDataNode();
+		DataMap map = mediator.getCurrentDataMap();
+		if (null == node)
+			mediator.removeDataMap(this, (DataMap)context);
+		else {
+			DataMap[] maps = node.getDataMaps();
+			boolean found = false;
+			for (int i = 0; i < maps.length; i++) {
+				if (map == maps[i]) {
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+				return;
+			DataMap[] new_maps = new DataMap[maps.length-1];
+			int new_map_idx = 0;
+			for (int i = 0; i < maps.length; i++) {
+				if (map == maps[i])
+					continue;
+				new_maps[new_map_idx] = maps[i];
+			}
+			node.setDataMaps(new_maps);
+			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
+		}
 	}
 
 	private void generateClasses() {
@@ -1012,7 +1046,21 @@ implements ActionListener
 	}
 
 
+	private void addDataMap() {
+		DataNode node = mediator.getCurrentDataNode();
+		List map_list = mediator.getCurrentDataDomain().getMapList();
+		AddDataMapDialog dialog = new AddDataMapDialog(node, map_list);
+		System.out.println("Node has " + node.getDataMaps().length + " maps");
+		mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
+	}
+
 	private void createDataMap() {
+		// If have current data node, don't create new data map, add to it 
+		// the existing one.
+		if (mediator.getCurrentDataNode() != null) {
+			addDataMap();
+			return;
+		}
     	Preferences pref = Preferences.getPreferences();
        	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
        	// Data map file
@@ -1062,6 +1110,8 @@ implements ActionListener
 
 	public void currentDomainChanged(DomainDisplayEvent e){
 		enableDomainMenu();
+		createDataMapMenu.setText("Create Data Map");
+		createDataMapBtn.setToolTipText("Create data map");
 		removeMenu.setText("Remove Domain");
 		removeBtn.setToolTipText("Remove current domain");
 		context = e.getDomain();
@@ -1069,6 +1119,8 @@ implements ActionListener
 
 	public void currentDataNodeChanged(DataNodeDisplayEvent e){
 		enableDomainMenu();
+		createDataMapMenu.setText("Add Data Map");
+		createDataMapBtn.setToolTipText("Add data map");
 		removeMenu.setText("Remove Data Node");
 		removeBtn.setToolTipText("Remove curent data node");
 		context = e.getDataNode();
@@ -1084,6 +1136,13 @@ implements ActionListener
    	public void currentObjEntityChanged(EntityDisplayEvent e)
    	{
 		enableDataMapMenu();
+		if (mediator.getCurrentDataNode() == null) {
+			createDataMapMenu.setText("Create Data Map");
+			createDataMapBtn.setToolTipText("Create data map");
+		} else {
+			createDataMapMenu.setText("Add Data Map");
+			createDataMapBtn.setToolTipText("Add data map");
+		}
 		removeMenu.setText("Remove Obj Entity");
 		removeBtn.setToolTipText("Remove current obj entity");
 		context = e.getEntity();
@@ -1093,6 +1152,13 @@ implements ActionListener
    	public void currentDbEntityChanged(EntityDisplayEvent e)
    	{
 		enableDataMapMenu();
+		if (mediator.getCurrentDataNode() == null) {
+			createDataMapMenu.setText("Create Data Map");
+			createDataMapBtn.setToolTipText("Create data map");
+		} else {
+			createDataMapMenu.setText("Add Data Map");
+			createDataMapBtn.setToolTipText("Add data map");
+		}
 		removeMenu.setText("Remove Db Entity");
 		removeBtn.setToolTipText("Remove current db entity");
 		context = e.getEntity();
@@ -1164,4 +1230,91 @@ implements ActionListener
     					 ,(screenSize.height - frameSize.height) / 2);
    		frame.setVisible(true);
    	}
+}
+
+class AddDataMapDialog extends JDialog implements ActionListener
+{
+	private static final int WIDTH  = 380;
+	private static final int HEIGHT = 150;
+
+	DataNode node;
+
+	private JList list;
+	private JButton add = new JButton("Add");
+	private JButton cancel = new JButton("Cancel");
+	
+	public AddDataMapDialog(DataNode temp_node, List map_list) {
+		super(Editor.getFrame(), "Add data maps to the data node", true);
+
+		DataMap[] maps = temp_node.getDataMaps();
+		if (map_list.size() == maps.length) {
+			dispose();
+			return;
+		}
+
+		node = temp_node;
+		
+		getContentPane().setLayout(new BorderLayout());
+		
+		list = new JList(populate(temp_node, map_list));
+		getContentPane().add(list, BorderLayout.CENTER);
+		
+		JPanel temp = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		temp.add(add);
+		temp.add(cancel);
+		add.addActionListener(this);
+		cancel.addActionListener(this);
+		getContentPane().add(temp, BorderLayout.SOUTH);
+
+		setSize(WIDTH, HEIGHT);
+		JFrame frame = Editor.getFrame();
+		Point point = frame.getLocationOnScreen();
+		int width = frame.getWidth();
+		int x = (width - WIDTH)/2;
+		int height = frame.getHeight();
+		int y = (height - HEIGHT)/2;
+		
+		point.setLocation(point.x + x, point.y + y);
+		this.setLocation(point);
+		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		this.setVisible(true);
+	}
+	
+	private Vector populate(DataNode temp_node, List map_list) {
+		DataMap[] maps = temp_node.getDataMaps();
+		Vector new_maps = new Vector();
+		Iterator iter = map_list.iterator();
+		while(iter.hasNext()) {
+			DataMap map = (DataMap)iter.next();
+			System.out.println("map " + map.getName());
+			boolean found = false;
+			for (int i = 0; maps != null && i < maps.length; i++) {
+				if (map == maps[i]) {
+					found = true;
+					break;
+				}
+			}// End for()
+			if (!found)
+				new_maps.add(new DataMapWrapper(map));
+		}// End while()
+		return new_maps;
+	}
+	
+	public void actionPerformed(ActionEvent e)
+	{
+		if (e.getSource() == add) {
+			Object[] sel = list.getSelectedValues();
+			DataMap [] old_maps = node.getDataMaps();
+			DataMap[] new_maps = new DataMap[old_maps.length + sel.length];
+			for (int i = 0; i < old_maps.length; i++) {
+				new_maps[i] = old_maps[i];
+			}
+			for (int i = 0; i < sel.length; i++) {
+				new_maps[i + old_maps.length] = ((DataMapWrapper)sel[i]).getDataMap();
+			}
+			node.setDataMaps(new_maps);
+		}// End add
+		setVisible(false);
+		dispose();
+	}
 }

@@ -55,10 +55,15 @@ package org.objectstyle.cayenne.gui.util;
  *
  */ 
 
+import java.awt.Component;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.*;
 import java.util.logging.Logger;
 
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.Document;
 
 import org.objectstyle.util.Preferences;
 
@@ -67,9 +72,18 @@ public class PreferenceField extends JComboBox
     static Logger logObj = Logger.getLogger(PreferenceField.class.getName());
 
 	private String key;
+	private boolean dirty = false;
 	
+	/** Sets preference only on explicit call to storePreferences().*/
 	public PreferenceField(String temp_key) {
-		super();
+		this(temp_key, false);
+	}
+
+	/** Allows storing preferences on focus lost.
+	  * @param temp_key Key under which preferences is retrieved or stored
+	  * @param set_on_focus If true, stores preferences each time focus is lost.
+	  */
+	public PreferenceField(String temp_key, boolean set_on_focus) {
 		key = temp_key;
 		setEditable(true);
 		setSelectedIndex(-1);
@@ -83,6 +97,21 @@ public class PreferenceField extends JComboBox
 			}
 		}
 		setSelectedItem(null);
+		if (set_on_focus) {
+			ComboBoxEditor editor = getEditor();
+			if (null != editor) {
+				editor.getEditorComponent().addFocusListener(new PreferenceFocus());
+				logObj.fine("Adding focus handler to fld " + key);
+			}
+		}
+	}
+	
+	public boolean isDirty() {
+		return dirty;
+	}
+	
+	public void setDirty(boolean temp) {
+		dirty = temp;
 	}
 	
 	/** Return the text of the selected item or "" if nothing is selected.*/
@@ -115,21 +144,44 @@ public class PreferenceField extends JComboBox
 	/** Saves the drop down items and newly added item to preferences.*/
 	public void storePreferences() {
 		Vector items = getItemsVector();
-		String item = (String)getSelectedItem();
+		String item = getText();
 		if (item != null) {
-			if (!items.contains(item))
+			item = item.trim();
+			if (item.length() > 0 && !items.contains(item))
 				items.add(item);
 		}
 		Collections.sort(items);
 		Preferences pref = Preferences.getPreferences();
 		pref.remove(key);
 		Iterator iter = items.iterator();
+		StringBuffer buf = new StringBuffer("PreferenceField::storePreferences(), "
+					+"key "+ key + ":\n");
 		while (iter.hasNext()) {
 			String str = (String)iter.next();
 			pref.addProperty(key, str);
+			buf.append(str + "\n");
 		}// End while
+		System.out.println(buf.toString());
 		DefaultComboBoxModel model = new DefaultComboBoxModel(items);
 		model.setSelectedItem(item);
 		setModel(model);
 	}
+	
+	public Document getDocument() {
+		Component comp = getEditor().getEditorComponent();
+		if (!(comp instanceof JTextComponent)) {
+			throw new ClassCastException();
+		}
+		JTextComponent text_comp = (JTextComponent)comp;
+		return text_comp.getDocument();
+	}
+	
+	private class PreferenceFocus extends FocusAdapter {
+		public void focusLost(FocusEvent e) {
+			logObj.fine("In focusLost()");
+			storePreferences();
+		}
+	}// End class PreferenceFocus
+
+
 }

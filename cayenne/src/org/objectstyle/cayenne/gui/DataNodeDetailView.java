@@ -57,7 +57,9 @@ package org.objectstyle.cayenne.gui;
 
 
 import java.awt.*;
+import java.awt.event.*;
 import java.util.*;
+import java.util.logging.Logger;
 import java.io.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -65,6 +67,7 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.border.TitledBorder;
 
+import org.objectstyle.util.Preferences;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.dba.DbAdapter;
@@ -80,6 +83,8 @@ import org.objectstyle.cayenne.gui.util.*;
 public class DataNodeDetailView extends JPanel 
 implements DocumentListener, ActionListener, DataNodeDisplayListener
 {
+    static Logger logObj = Logger.getLogger(DataNodeDetailView.class.getName());
+
 	Mediator mediator;
 	
 	JLabel		nameLabel;
@@ -97,13 +102,13 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 	JComboBox	adapter;
 	
 	JLabel			userNameLabel;
-	JTextField		userName;
+	PreferenceField	userName;
 	JLabel			passwordLabel;
 	JPasswordField	password;
 	JLabel			driverLabel;
-	JTextField		driver;
+	PreferenceField	driver;
 	JLabel			urlLabel;
-	JTextField		url;
+	PreferenceField	url;
 	JLabel			minConnectionsLabel;
 	// FIXME!!! Need to restrict only to numbers
 	JTextField		minConnections;
@@ -197,13 +202,13 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		fileBtn.setVisible(false);
 		
 		userNameLabel 	= new JLabel("User name: ");
-		userName		= new JTextField(20);
+		userName		= new PreferenceField(Preferences.USER_NAME, true);
 		passwordLabel	= new JLabel("Password: ");
 		password		= new JPasswordField(20);
 		driverLabel		= new JLabel("Driver class: ");
-		driver			= new JTextField(30);
+		driver			= new PreferenceField(Preferences.JDBC_DRIVER, true);
 		urlLabel		= new JLabel("Database URL: ");
-		url				= new JTextField(30);
+		url				= new PreferenceField(Preferences.DB_URL, true);
 		minConnectionsLabel = new JLabel("Min connections: ");
 		minConnections		= new JTextField(5);
 		maxConnectionsLabel	= new JLabel("Max connections: ");
@@ -255,6 +260,8 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		if (ignoreChange)
 			return;
 		DataNode node = mediator.getCurrentDataNode();
+		if (null == node)
+			return;
 		GuiDataSource src = (GuiDataSource)node.getDataSource();
 		DataSourceInfo info = src.getDataSourceInfo();
 		DataNodeEvent event;
@@ -269,10 +276,16 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 			oldName = new_name;
 		}// End changedName
 		else if (e.getDocument() == location.getDocument()) {
+			if (node.getDataSourceLocation().equals(location.getText()))
+				return;
 			node.setDataSourceLocation(location.getText());
 			event = new DataNodeEvent(this, node);
 			mediator.fireDataNodeEvent(event);
 		} else if (e.getDocument() == userName.getDocument()) {
+			logObj.fine("info.getUserName() is " + info.getUserName()
+					+ ", userName.getText() is " + userName.getText());
+			if (info.getUserName().equals(userName.getText()))
+				return;
 			info.setUserName(userName.getText());
 			event = new DataNodeEvent(this, node);
 			mediator.fireDataNodeEvent(event);
@@ -282,10 +295,14 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 			event = new DataNodeEvent(this, node);
 			mediator.fireDataNodeEvent(event);
 		} else if (e.getDocument() == driver.getDocument()) {
+			if (info.getJdbcDriver().equals(driver.getText()))
+				return;
 			info.setJdbcDriver(driver.getText());
 			event = new DataNodeEvent(this, node);
 			mediator.fireDataNodeEvent(event);
 		} else if (e.getDocument() == url.getDocument()) {
+			if (info.getDataSourceUrl().equals(url.getText()))
+				return;
 			info.setDataSourceUrl(url.getText());
 			event = new DataNodeEvent(this, node);
 			mediator.fireDataNodeEvent(event);
@@ -403,7 +420,6 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		oldName = node.getName();
 		ignoreChange = true;
 		name.setText(oldName);
-		location.setText(node.getDataSourceLocation());
 		populateFactory(node.getDataSourceFactory());
 		DbAdapter adapter = node.getAdapter();
 		if (null != adapter)
@@ -411,7 +427,9 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		else populateDbAdapter("");
 		DataSourceInfo info = src.getDataSourceInfo();
 		populateDataSourceInfo(info);
-		ignoreChange = false;;
+		// Must be last in order not to be reset when data src factory is set.
+		location.setText(node.getDataSourceLocation());
+		ignoreChange = false;
 	}
 	
 	private void populateDbAdapter(String selected_class){
