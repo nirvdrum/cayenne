@@ -56,10 +56,17 @@
 
 package org.objectstyle.cayenne.dba.db2;
 
+import java.util.Iterator;
+
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
 
 /**
  * DbAdapter implementation for the <a href="http://www.ibm.com/db2/"> DB2 RDBMS</a>.
@@ -74,7 +81,7 @@ test-db2.jdbc.url = jdbc:db2://servername:50000/databasename
 test-db2.jdbc.driver = com.ibm.db2.jcc.DB2Driver
 </pre>
  *
- * @author Holger Hoffstätte
+ * @author Holger Hoffstï¿½tte
  */
 public class DB2Adapter extends JdbcAdapter {
 
@@ -91,5 +98,108 @@ public class DB2Adapter extends JdbcAdapter {
 		// create specially configured CharType handler
 		map.registerType(new CharType(true, false));
 	}
+	
+	/**
+	  * Returns a SQL string that can be used to create database table
+	  * corresponding to <code>ent</code> parameter.
+	  */
+	 public String createTable(DbEntity ent) {
+		 // later we may support view creation
+		 // for derived DbEntities
+		 if (ent instanceof DerivedDbEntity) {
+			 throw new CayenneRuntimeException(
+				 "Can't create table for derived DbEntity '" + ent.getName() + "'.");
+		 }
+
+		 StringBuffer buf = new StringBuffer();
+		 buf.append("CREATE TABLE ").append(ent.getFullyQualifiedName()).append(" (");
+
+		 // columns
+		 Iterator it = ent.getAttributes().iterator();
+		 boolean first = true;
+		 while (it.hasNext()) {
+			 if (first) {
+				 first = false;
+			 }
+			 else {
+				 buf.append(", ");
+			 }
+
+			 DbAttribute at = (DbAttribute) it.next();
+
+			 // attribute may not be fully valid, do a simple check
+			 if (at.getType() == TypesMapping.NOT_DEFINED) {
+				 throw new CayenneRuntimeException(
+					 "Undefined type for attribute '"
+						 + ent.getFullyQualifiedName()
+						 + "."
+						 + at.getName()
+						 + "'.");
+			 }
+
+			 String[] types = externalTypesForJdbcType(at.getType());
+			 if (types == null || types.length == 0) {
+				 throw new CayenneRuntimeException(
+					 "Undefined type for attribute '"
+						 + ent.getFullyQualifiedName()
+						 + "."
+						 + at.getName()
+						 + "': "
+						 + at.getType());
+			 }
+
+			 String type = types[0];
+			 buf.append(at.getName()).append(' ').append(type);
+
+			 // append size and precision (if applicable)
+			 if (TypesMapping.supportsLength(at.getType())) {
+				 int len = at.getMaxLength();
+				 int prec = TypesMapping.isDecimal(at.getType()) ? at.getPrecision() : -1;
+
+				 // sanity check
+				 if (prec > len) {
+					 prec = -1;
+				 }
+
+				 if (len > 0) {
+					 buf.append('(').append(len);
+
+					 if (prec >= 0) {
+						 buf.append(", ").append(prec);
+					 }
+
+					 buf.append(')');
+				 }
+			 }
+
+			 if (at.isMandatory()) {
+				 buf.append(" NOT NULL");
+			 }
+		 }
+
+		 // primary key clause
+		 Iterator pkit = ent.getPrimaryKey().iterator();
+		 if (pkit.hasNext()) {
+			 if (first)
+				 first = false;
+			 else
+				 buf.append(", ");
+
+			 buf.append("PRIMARY KEY (");
+			 boolean firstPk = true;
+			 while (pkit.hasNext()) {
+				 if (firstPk)
+					 firstPk = false;
+				 else
+					 buf.append(", ");
+
+				 DbAttribute at = (DbAttribute) pkit.next();
+				 buf.append(at.getName());
+			 }
+			 buf.append(')');
+		 }
+		 buf.append(')');
+		 return buf.toString();
+	 }
 }
 

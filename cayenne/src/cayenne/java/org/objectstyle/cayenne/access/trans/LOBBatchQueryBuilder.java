@@ -197,13 +197,6 @@ public abstract class LOBBatchQueryBuilder extends BatchQueryBuilder {
             int type = attribute.getType();
 
             if (isUpdateableColumn(value, type)) {
-                logObj.warn(
-                    "Binding parameter for type: "
-                        + TypesMapping.getSqlNameByType(type)
-                        + ", i = "
-                        + i
-                        + "; j = "
-                        + j);
                 adapter.bindParameter(
                     statement,
                     value,

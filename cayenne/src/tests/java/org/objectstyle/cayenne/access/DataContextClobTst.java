@@ -66,100 +66,106 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class DataContextClobTst extends CayenneTestCase {
 
-	protected DataContext ctxt;
+    protected DataContext ctxt;
 
-	protected void setUp() throws Exception {
-		getDatabaseSetup().cleanTableData();
-		ctxt = getDomain().createDataContext();
-	}
+    protected void setUp() throws Exception {
+        getDatabaseSetup().cleanTableData();
+        ctxt = getDomain().createDataContext();
+    }
 
-	protected boolean skipTests() {
-		return !super.getDatabaseSetupDelegate().supportsLobs();
-	}
+    protected boolean skipTests() {
+        return !super.getDatabaseSetupDelegate().supportsLobs();
+    }
 
-	public void test5ByteClob() throws Exception {
-		if (skipTests()) {
-			return;
-		}
-		runWithClobSize(5);
-	}
+    public void testEmptyClob() throws Exception {
+        if (skipTests()) {
+            return;
+        }
+        runWithClobSize(0);
+    }
 
-public void test5KByteClob() throws Exception {
-		if (skipTests()) {
-			return;
-		}
-		runWithClobSize(5 * 1024);
-	}
-	
-	/*public void test1MBClob() throws Exception {
-		if (skipTests()) {
-			return;
-		}
-		runWithClobSize(1024 * 1024);
-	}
-	*/
-	public void testNullClob() throws Exception {
-		if (skipTests()) {
-			return;
-		}
+    public void test5ByteClob() throws Exception {
+        if (skipTests()) {
+            return;
+        }
+        runWithClobSize(5);
+    }
 
-		// insert new clob
-		ctxt.createAndRegisterNewObject("ClobTest");
-		ctxt.commitChanges();
+    public void test5KByteClob() throws Exception {
+        if (skipTests()) {
+            return;
+        }
+        runWithClobSize(5 * 1024);
+    }
 
-		// read the CLOB in the new context
-		DataContext ctxt2 = getDomain().createDataContext();
-		List objects2 = ctxt2.performQuery(new SelectQuery(ClobTest.class));
-		assertEquals(1, objects2.size());
+    public void test1MBClob() throws Exception {
+        if (skipTests()) {
+            return;
+        }
+        runWithClobSize(1024 * 1024);
+    }
 
-		ClobTest clobObj2 = (ClobTest) objects2.get(0);
-		assertNull(clobObj2.getClobCol());
+    public void testNullClob() throws Exception {
+        if (skipTests()) {
+            return;
+        }
 
-		// update and save Clob
-		clobObj2.setClobCol("updated rather small clob...");
-		ctxt2.commitChanges();
+        // insert new clob
+        ctxt.createAndRegisterNewObject("ClobTest");
+        ctxt.commitChanges();
 
-		// read into yet another context and check for changes 
-		DataContext ctxt3 = getDomain().createDataContext();
-		List objects3 = ctxt3.performQuery(new SelectQuery(ClobTest.class));
-		assertEquals(1, objects3.size());
+        // read the CLOB in the new context
+        DataContext ctxt2 = getDomain().createDataContext();
+        List objects2 = ctxt2.performQuery(new SelectQuery(ClobTest.class));
+        assertEquals(1, objects2.size());
 
-		ClobTest clobObj3 = (ClobTest) objects3.get(0);
-		assertEquals(clobObj2.getClobCol(), clobObj3.getClobCol());
-	}
+        ClobTest clobObj2 = (ClobTest) objects2.get(0);
+        assertNull(clobObj2.getClobCol());
 
-	protected void runWithClobSize(int sizeBytes) throws Exception {
-		// insert new clob
-		ClobTest clobObj1 =
-			(ClobTest) ctxt.createAndRegisterNewObject("ClobTest");
+        // update and save Clob
+        clobObj2.setClobCol("updated rather small clob...");
+        ctxt2.commitChanges();
 
-		// init CLOB of a specified size
-		byte[] bytes = new byte[sizeBytes];
-		for (int i = 0; i < sizeBytes; i++) {
-			bytes[i] = (byte) (65 + (50 + i) % 50);
-		}
+        // read into yet another context and check for changes 
+        DataContext ctxt3 = getDomain().createDataContext();
+        List objects3 = ctxt3.performQuery(new SelectQuery(ClobTest.class));
+        assertEquals(1, objects3.size());
 
-		clobObj1.setClobCol(new String(bytes));
-		ctxt.commitChanges();
+        ClobTest clobObj3 = (ClobTest) objects3.get(0);
+        assertEquals(clobObj2.getClobCol(), clobObj3.getClobCol());
+    }
 
-		// read the CLOB in the new context
-		DataContext ctxt2 = getDomain().createDataContext();
-		List objects2 = ctxt2.performQuery(new SelectQuery(ClobTest.class));
-		assertEquals(1, objects2.size());
+    protected void runWithClobSize(int sizeBytes) throws Exception {
+        // insert new clob
+        ClobTest clobObj1 = (ClobTest) ctxt.createAndRegisterNewObject("ClobTest");
 
-		ClobTest clobObj2 = (ClobTest) objects2.get(0);
-		assertEquals(clobObj1.getClobCol(), clobObj2.getClobCol());
+        // init CLOB of a specified size
+        byte[] bytes = new byte[sizeBytes];
+        for (int i = 0; i < sizeBytes; i++) {
+            bytes[i] = (byte) (65 + (50 + i) % 50);
+        }
 
-		// update and save Clob
-		clobObj2.setClobCol("updated rather small clob...");
-		ctxt2.commitChanges();
+        clobObj1.setClobCol(new String(bytes));
+        ctxt.commitChanges();
 
-		// read into yet another context and check for changes 
-		DataContext ctxt3 = getDomain().createDataContext();
-		List objects3 = ctxt3.performQuery(new SelectQuery(ClobTest.class));
-		assertEquals(1, objects3.size());
+        // read the CLOB in the new context
+        DataContext ctxt2 = getDomain().createDataContext();
+        List objects2 = ctxt2.performQuery(new SelectQuery(ClobTest.class));
+        assertEquals(1, objects2.size());
 
-		ClobTest clobObj3 = (ClobTest) objects3.get(0);
-		assertEquals(clobObj2.getClobCol(), clobObj3.getClobCol());
-	}
+        ClobTest clobObj2 = (ClobTest) objects2.get(0);
+        assertEquals(clobObj1.getClobCol(), clobObj2.getClobCol());
+
+        // update and save Clob
+        clobObj2.setClobCol("updated rather small clob...");
+        ctxt2.commitChanges();
+
+        // read into yet another context and check for changes 
+        DataContext ctxt3 = getDomain().createDataContext();
+        List objects3 = ctxt3.performQuery(new SelectQuery(ClobTest.class));
+        assertEquals(1, objects3.size());
+
+        ClobTest clobObj3 = (ClobTest) objects3.get(0);
+        assertEquals(clobObj2.getClobCol(), clobObj3.getClobCol());
+    }
 }

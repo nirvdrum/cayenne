@@ -113,9 +113,9 @@ public class JdbcAdapter implements DbAdapter {
 
     public JdbcAdapter() {
         // create Pk generator
-        pkGenerator = this.createPkGenerator();
-        typesHandler = TypesHandler.getHandler(this.getClass());
-        extendedTypes = new ExtendedTypeMap();
+        this.pkGenerator = this.createPkGenerator();
+        this.typesHandler = TypesHandler.getHandler(this.getClass());
+        this.extendedTypes = new ExtendedTypeMap();
         this.configureExtendedTypes(extendedTypes);
         this.setSupportsBatchUpdates(false);
     }
@@ -297,6 +297,9 @@ public class JdbcAdapter implements DbAdapter {
 
             if (at.isMandatory()) {
                 buf.append(" NOT NULL");
+            }
+            else {
+				buf.append(" NULL");
             }
         }
 
