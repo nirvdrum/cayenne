@@ -59,7 +59,9 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
+import java.util.Date;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.validation.ValidationResult;
@@ -73,7 +75,7 @@ import org.objectstyle.cayenne.validation.ValidationResult;
 public class UtilDateType extends AbstractType {
 
     public String getClassName() {
-        return java.util.Date.class.getName();
+        return Date.class.getName();
     }
 
     /**
@@ -93,41 +95,47 @@ public class UtilDateType extends AbstractType {
 
     protected Object convertToJdbcObject(Object val, int type) throws Exception {
         if (type == Types.DATE)
-            return new java.sql.Date(((java.util.Date) val).getTime());
+            return new java.sql.Date(((Date) val).getTime());
         else if (type == Types.TIME)
-            return new java.sql.Time(((java.util.Date) val).getTime());
+            return new java.sql.Time(((Date) val).getTime());
         else if (type == Types.TIMESTAMP)
-            return new java.sql.Timestamp(((java.util.Date) val).getTime());
+            return new java.sql.Timestamp(((Date) val).getTime());
         else
             throw new IllegalArgumentException(
                 "Only date/time types can be used for '" + getClassName() + "'.");
     }
 
     public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
-        Object val = null;
+        Date val = null;
 
         switch (type) {
-            case Types.TIMESTAMP :
+            case Types.TIMESTAMP:
                 val = rs.getTimestamp(index);
                 break;
-            case Types.DATE :
+            case Types.DATE:
                 val = rs.getDate(index);
                 break;
-            case Types.TIME :
+            case Types.TIME:
                 val = rs.getTime(index);
                 break;
-            default :
-                val = rs.getObject(index);
+            default:
+                // here the driver can "surpirse" us
+                // check the type of returned value...
+                Object object = rs.getObject(index);
+
+                if (object != null && !(object instanceof Date)) {
+                    throw new CayenneRuntimeException(
+                            "Expected an instance of java.util.Date, instead got "
+                                    + object.getClass().getName()
+                                    + ", column index: "
+                                    + index);
+                }
+
+                val = (Date) object;
                 break;
         }
 
-        // all sql time/date classes are subclasses of java.util.Date,
-        // so lets cast it to Date,
-        // if it is not date, ClassCastException will be thrown,
-        // which is what we want
-        return (rs.wasNull())
-            ? null
-            : new java.util.Date(((java.util.Date) val).getTime());
+        return (rs.wasNull()) ? null : new Date(val.getTime());
     }
 
     public Object materializeObject(CallableStatement cs, int index, int type)
