@@ -55,20 +55,28 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /** 
- * Defines a structure of a relational database table. 
+ * A DbEntity is a mapping descriptor that defines a structure of a database table. 
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
  */
 public class DbEntity extends Entity {
-	/** Catalog of the database table. */
 	protected String catalog;
-
-	/** Database table schema. */
 	protected String schema;
 
+   /**
+    * Creates an unnamed DbEntity. 
+    */
 	public DbEntity() {}
 
+    /**
+     * Creates a named DbEntity. 
+     */
 	public DbEntity(String name) {
 		setName(name);
 	}
@@ -89,23 +97,34 @@ public class DbEntity extends Entity {
 		return schema;
 	}
 
-	/** Set the schema of this table. */
+	/** 
+	 * Sets the database schema name of the table described
+	 * by this DbEntity. 
+	 */
 	public void setSchema(String schema) {
 		this.schema = schema;
 	}
 
-	/** Get the catalog of this table.
-	 *  @return catalog, or null if not set or applicable.*/
+	/** 
+	 * Returns the catalog name of the table described
+	 * by this DbEntity. 
+	 */
 	public String getCatalog() {
 		return catalog;
 	}
 
-	/** Set the catalog for this table.*/
+	/** 
+	 * Sets the catalog name of the table described
+	 * by this DbEntity. 
+	 */
 	public void setCatalog(String catalog) {
 		this.catalog = catalog;
 	}
 
-	/** Returns a list of DbAttributes representing the key of the given database table. */
+	/** 
+	 * Returns a list of DbAttributes representing the primary
+	 * key of the table described by this DbEntity. 
+	 */
 	public List getPrimaryKey() {
 		ArrayList list = new ArrayList();
 		Iterator it = this.getAttributeList().iterator();

@@ -58,8 +58,7 @@ package org.objectstyle.cayenne.map;
 
 
 /** 
- * Metadata for the data object property.
- * Also used to map properties to the database table columns. 
+ * An ObjAttribute is a mapping descriptor of a Java class property.
  * 
  * @author Misha Shengaout
  * @author Andrei Adamchik

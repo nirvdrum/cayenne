@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.project.ProjectTraversal;
 
 /**
  * Validator of a single node in a project object tree. 
- * Do not confuse with org.objectstyle.cayenne.access.DataNode.
+ * <i>Do not confuse with org.objectstyle.cayenne.access.DataNode.</i>
  * 
  * @author Andrei Adamchik
  */

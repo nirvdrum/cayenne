@@ -162,7 +162,9 @@ public class ContextCommitObserver extends DefaultOperationObserver {
             ex);
     }
 
-    /** Will do query sorting to try to satisfy DB ref. integrity rules */
+    /** 
+     * Performs query sorting to satisfy DB referential integrity rules.
+     */
     public List orderQueries(DataNode aNode, List queryList) {
         OperationSorter sorter = aNode.getAdapter().getOpSorter(aNode);
         return (sorter != null) ? sorter.sortedQueries(queryList) : queryList;

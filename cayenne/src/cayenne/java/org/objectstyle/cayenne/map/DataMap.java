@@ -66,9 +66,10 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.CayenneMap;
 
 /**
- * Provides the entry point into the relational and object meta information.
- * In many ways, particularly for the tools responsible for creation of the
- * DataMap, plays the role of the Facade design pattern.
+ * DataMap is a central class in Cayenne Object Relational mapping design.
+ * It contains a set of mapping descriptors, such as entities, attributes
+ * and relationships, providing O/R mapping of a set of database tables
+ * to a set of Java classes.
  *
  * @author Michael Shengaout
  * @author Andrei Adamchik  

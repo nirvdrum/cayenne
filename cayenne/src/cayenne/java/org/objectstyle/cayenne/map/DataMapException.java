@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.map;
 import org.objectstyle.cayenne.CayenneException;
 
 /**
- * A <strong>DataMapException</code> is thrown to indicate 
+ * A DataMapException is thrown to indicate 
  * problemes with DataMap loading.
  * 
  * @author Michael Misha Shengaout

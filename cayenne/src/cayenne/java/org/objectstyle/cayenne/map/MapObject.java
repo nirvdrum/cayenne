@@ -58,7 +58,8 @@ package org.objectstyle.cayenne.map;
 import org.objectstyle.cayenne.util.CayenneMapEntry;
 
 /**
- * Superclass of DataMap objects.
+ * Superclass of DataMap objects. Provides a default implementation
+ * of CayenneMapEntry needed to implement a doubly linked maps.
  * 
  * @author Andrei Adamchik
  */

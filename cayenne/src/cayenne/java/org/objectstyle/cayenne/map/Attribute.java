@@ -57,13 +57,16 @@
 package org.objectstyle.cayenne.map;
 
 /** 
- * Superclass of all attribute classes. 
+ * An Attribute defines an abstract descriptor of an entity attribute.
  * 
  * @author Andrei Adamchik
  */
 public abstract class Attribute extends MapObject {
 	public Attribute() {}
 	
+	/**
+	 * Creates a named attribute.
+	 */
 	public Attribute(String name) {
 		super(name);
 	}

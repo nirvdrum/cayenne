@@ -57,7 +57,7 @@
 package org.objectstyle.cayenne.map;
 
 /** 
- * A <strong>DbAttributePair</strong> represents a join
+ * A DbAttributePair represents a join
  * between two database tables. A set of DbAtributePair's
  * defines full semantics of a DbRelationship.
  * 

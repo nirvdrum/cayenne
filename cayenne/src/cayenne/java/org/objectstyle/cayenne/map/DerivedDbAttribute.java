@@ -55,10 +55,12 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * DbAttribute that resolves to a SQL expression based on 
+ * A DerivedDbAttribute is a DbAttribute that resolves to an SQL expression based on 
  * a set of other attributes. DerivedDbAttribute's allow to build
  * expressions like "<code>count(id)</code>", "<code>sum(price)</code>", etc.
  * 

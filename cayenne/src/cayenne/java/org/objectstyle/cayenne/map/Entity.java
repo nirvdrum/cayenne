@@ -55,14 +55,25 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.util.CayenneMap;
 
-/** Superclass of metadata classes. */
+/** 
+ * An Entity is an abstract descriptor for an entity mapping concept.
+ * Entity can represent either a descriptor of database table or
+ * a persistent object. 
+ * 
+ * @author Andrei Adamchik 
+ */
 public abstract class Entity extends MapObject {
 	static Logger logObj = Logger.getLogger(Entity.class);
 	

@@ -55,13 +55,20 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
- * A DbRelationship defines a database relationship between
- * two tables based on one or more primary key - foreign key pairs.
+ * A DbRelationship is a descriptor of a database inter-table relationship
+ * based on one or more primary key/foreign key pairs.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
  */
 public class DbRelationship extends Relationship {
 	// The columns through which the join is implemented.

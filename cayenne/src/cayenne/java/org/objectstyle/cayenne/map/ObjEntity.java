@@ -55,14 +55,22 @@ package org.objectstyle.cayenne.map;
  *
  */
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 
-/** Metadata for the data object class. Each data object class is tied
- *  to the relational table. The metadata for that relational table is
- *  in the corresponding "DbEntity". */
+/** 
+ * ObjEntity is a mapping descriptor for a DataObject Java class. 
+ * It contains the information about the Java class itself, as well
+ * as its mapping to the DbEntity layer.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
 public class ObjEntity extends Entity {
 	protected String className;
 	protected DbEntity dbEntity;
@@ -85,7 +93,7 @@ public class ObjEntity extends Entity {
 		this.className = className;
 	}
 
-	/** Returns the corresponding db entity. */
+	/** Returns a DbEntity that this ObjEntity is mapped to. */
 	public DbEntity getDbEntity() {
 		return dbEntity;
 	}
