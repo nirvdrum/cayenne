@@ -2,27 +2,27 @@
 <title>CayenneModeler Guide</title>
 <toc name="toc-modeler-guide" chapter="7. Configuring Deployment Settings"/>
 <body>
-        <section name="7.2 Configuring Caching Behavior">
+        <section name="7.3 Configuring Caching Behavior">
         	<p>Cayenne supports local and distributed caching of fetched data. The design
         	of the caching feature is discussed in the <a href="../../userguide/design/caching.html">User
         	Guide</a>. When a new DataDomain is created, it uses default caching settings - data is cached
         	within JVM, but no remote synchronization is performed. User can change these settings depending
         	on the target application deployment strategy.</p>
         	
-        	<subsection name="7.2.1 No Cache Sharing Configuration">
+        	<subsection name="7.3.1 No Cache Sharing Configuration">
         	<p>This type of configuration
         	may result in somewhat faster commit operations, but is likely to lead to stale data when multiple
         	users modify data in the same application. To disable any cache sharing uncheck "Use Shared Cache" 
         	checkbox. </p>
         	</subsection>
         	
-        	<subsection name="7.2.2 Local VM Cache Sharing Configuration">
+        	<subsection name="7.3.2 Local VM Cache Sharing Configuration">
         	<p>Default configuration for the new DataDomains. Ideal for applications that 
         	do not care about data being modified outside of the application. This configuration 
         	is acceptable for a lot of client-server and web applications.</p>
         	</subsection>
         	
-        	<subsection name="7.2.3 Cross-VM Cache Sharing Configuration">
+        	<subsection name="7.3.3 Cross-VM Cache Sharing Configuration">
         	<p>Configuration that allows to notify other applications about changes made by an application
         	and to listen for such changes made by others. This type of configuration incurrs the most overhead, because it will constantly
         	send and receive synchronization messages, but it is also the most powerful configuration. 
@@ -43,7 +43,7 @@
         	JavaGroups configuration, a combination of multicast address and port must be unique for each DataDomain name.</panel>
         	</subsection>
         	
-        	<subsection name="7.2.4 Choosing JavaGroups over JMS">
+        	<subsection name="7.3.4 Choosing JavaGroups over JMS">
         	<p>JavaGroups is the most portable and flexible mechanism. At the minimum, JMS setup requires a JMS server running, and 
         	subjects for each of the DataDomains to be configured. JavaGroups is peer-to-peer library that is embedded into  applications. 
         	Default configuration provided by CayenneModeler will work out of the box, provided that IP multicast is enabled on the network.

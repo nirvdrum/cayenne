@@ -140,7 +140,7 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
         builder.appendSeparator("DataDomain Configuration");
         builder.append("DataDomain Name:", name, 3);
         builder.append("Child DataContexts Validate Objects:", objectValidation, 3);
-        builder.append("Container Transactions Control:", externalTransactions, 3);
+        builder.append("Container-Managed Transactions:", externalTransactions, 3);
 
         builder.appendSeparator("Cache Configuration");
         builder.append("Max. Number of Objects:", cacheSize, 3);

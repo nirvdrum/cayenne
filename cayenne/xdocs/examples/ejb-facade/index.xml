@@ -11,6 +11,12 @@
 	This is a very simple example that demonstrates how to fetch and update data via EJB facade to
 	Cayenne. It omits a few things like bridging Cayenne DataObjects and Data Transfer Objects (DTO), etc.
 	</panel>
+	<p> </p>
+	<panel name="Modeling Note:">
+	 When opening cayenne.xml from this example in CayenneModeler, you will see that "Container-Managed
+	 Transactions" checkbox is checked for the "Auctions" DataDomain. This setting is important to
+	 prevent Cayenne from attempting explicit commit/rollback when container-managed transactions are in effect. 
+	</panel>
 	
 	<subsection name="1.1 Preparing the Environment">
 	<p>The example requires running JBoss server, version 3.0 or newer. Building the example
