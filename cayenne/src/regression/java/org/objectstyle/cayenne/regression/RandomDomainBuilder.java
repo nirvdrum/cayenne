@@ -397,13 +397,11 @@ public class RandomDomainBuilder {
             objForwardRel.setDeleteRule(DeleteRule.DENY);
         else
             objForwardRel.setDeleteRule(DeleteRule.NULLIFY);
-        objForwardRel.setToMany(forwardRelation.isToMany());
         objForwardRel.setSourceEntity(pkObjEntity);
         objForwardRel.setTargetEntity(fkObjEntity);
         pkObjEntity.addRelationship(objForwardRel);
         ObjRelationship objBackwardRel = new ObjRelationship(backwardRelation.getName());
         objBackwardRel.addDbRelationship(backwardRelation);
-        objBackwardRel.setToMany(backwardRelation.isToMany());
         objBackwardRel.setDeleteRule(DeleteRule.NULLIFY);
         objBackwardRel.setSourceEntity(fkObjEntity);
         objBackwardRel.setTargetEntity(pkObjEntity);
@@ -465,7 +463,6 @@ public class RandomDomainBuilder {
 
       //master1 <-> master2
       ObjRelationship objForwardRel = new ObjRelationship(firstRelation.getName() + '_' + secondBackwardRelation.getName());
-      objForwardRel.setToMany(true);
       objForwardRel.setDeleteRule(DeleteRule.NULLIFY);
       objForwardRel.addDbRelationship(firstRelation);
       objForwardRel.addDbRelationship(secondBackwardRelation);
@@ -474,7 +471,6 @@ public class RandomDomainBuilder {
       pk1ObjEntity.addRelationship(objForwardRel);
 
       ObjRelationship objBackwardRel = new ObjRelationship(secondRelation.getName() + '_' + firstBackwardRelation.getName());
-      objBackwardRel.setToMany(true);
       objBackwardRel.setDeleteRule(DeleteRule.NULLIFY);
       objBackwardRel.addDbRelationship(secondRelation);
       objBackwardRel.addDbRelationship(firstBackwardRelation);
