@@ -52,6 +52,7 @@ import javax.ejb.EJBException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.examples.ejbfacade.model.Auction;
@@ -133,7 +134,16 @@ public class AuctionSessionEJB implements SessionBean {
         // must commit Cayenne context explicitly
         // since Cayenne is running under container transaction control
         // this will store the data to DB, but will not commit the underlying connections
-        cayenneContext.commitChanges();
+        try {
+            cayenneContext.commitChanges();
+        }
+        catch (CayenneRuntimeException ex) {
+            // make sure we do not leave dirty context for the next invocation
+            // .. alternatively we can create a new one on each request
+            cayenneContext.rollbackChanges();
+            throw ex;
+        }
+
     }
 
     public void ejbActivate() throws EJBException, RemoteException {

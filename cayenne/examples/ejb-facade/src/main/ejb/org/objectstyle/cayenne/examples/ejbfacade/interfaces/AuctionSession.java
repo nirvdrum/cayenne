@@ -11,6 +11,7 @@ import javax.ejb.CreateException;
 import javax.ejb.EJBException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.examples.ejbfacade.model.Auction;
@@ -22,7 +23,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 /**
  * Remote interface for AuctionSession.
  * @author XDOCLET 1.1.2
- * @xdoclet-generated at Feb 5, 2004 6:32:42 PM
+ * @xdoclet-generated at Feb 5, 2004 6:40:31 PM
  */
 public interface AuctionSession
    extends javax.ejb.EJBObject
