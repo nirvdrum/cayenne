@@ -127,6 +127,7 @@ public class MapLoader extends DefaultHandler {
     private DbAttribute attrib;
     private Procedure procedure;
     private QueryBuilder queryBuilder;
+    private String sqlKey;
     private String descending;
     private String ignoreCase;
 
@@ -322,14 +323,15 @@ public class MapLoader extends DefaultHandler {
         else if (local_name.equals(QUERY_RESULT_COLUMN_TAG)) {
             processStartQueryResultColumn(atts);
         }
+        else if (local_name.equals(QUERY_SQL_TAG)) {
+            charactersBuffer = new StringBuffer();
+            processStartQuerySQL(atts);
+        }
         else if (local_name.equals(QUERY_ORDERING_TAG)) {
             charactersBuffer = new StringBuffer();
             processStartQueryOrdering(atts);
         }
         else if (local_name.equals(QUERY_PREFETCH_TAG)) {
-            charactersBuffer = new StringBuffer();
-        }
-        else if (local_name.equals(QUERY_SQL_TAG)) {
             charactersBuffer = new StringBuffer();
         }
         else if (local_name.equals(QUERY_QUALIFIER_TAG)) {
@@ -537,6 +539,10 @@ public class MapLoader extends DefaultHandler {
     private void processStartDbKeyGenerator(Attributes atts) throws SAXException {
         DbKeyGenerator pkGenerator = new DbKeyGenerator();
         dbEntity.setPrimaryKeyGenerator(pkGenerator);
+    }
+    
+    private void processStartQuerySQL(Attributes atts) throws SAXException {
+        this.sqlKey = atts.getValue("", "adapter-class");
     }
 
     private void processStartObjEntity(Attributes atts) {
@@ -771,9 +777,11 @@ public class MapLoader extends DefaultHandler {
 
         String rootType = attributes.getValue("", "root");
         String rootName = attributes.getValue("", "root-name");
+        String selecting = attributes.getValue("", "selecting");
 
         queryBuilder.setName(name);
         queryBuilder.setRoot(dataMap, rootType, rootName);
+        queryBuilder.setSelecting(selecting);
     }
 
     private void processStartQueryProperty(Attributes attributes) throws SAXException {
@@ -825,7 +833,8 @@ public class MapLoader extends DefaultHandler {
     }
 
     private void processEndQuerySQL() throws SAXException {
-        queryBuilder.addSql(charactersBuffer.toString(), null);
+        queryBuilder.addSql(charactersBuffer.toString(), sqlKey);
+        sqlKey = null;
     }
 
     private void processEndQualifier() throws SAXException {

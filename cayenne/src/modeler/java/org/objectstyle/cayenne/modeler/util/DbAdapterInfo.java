@@ -89,6 +89,9 @@ public final class DbAdapterInfo {
             OpenBaseAdapter.class.getName(), FirebirdAdapter.class.getName()
     };
 
+    private static final Map IMMUTABLE_LABELS = Collections
+            .unmodifiableMap(DEFAULT_ADAPTER_LABELS);
+
     static {
         DEFAULT_ADAPTER_LABELS.put(JdbcAdapter.class.getName(), "Generic JDBC Adapter");
         DEFAULT_ADAPTER_LABELS.put(OracleAdapter.class.getName(), "Oracle Adapter");
@@ -102,6 +105,10 @@ public final class DbAdapterInfo {
                 "MS SQLServer Adapter");
         DEFAULT_ADAPTER_LABELS.put(OpenBaseAdapter.class.getName(), "OpenBase Adapter");
         DEFAULT_ADAPTER_LABELS.put(FirebirdAdapter.class.getName(), "FireBird Adapter");
+    }
+
+    public static Map getStandardAdapterLabels() {
+        return IMMUTABLE_LABELS;
     }
 
     public static ListCellRenderer getListRenderer() {

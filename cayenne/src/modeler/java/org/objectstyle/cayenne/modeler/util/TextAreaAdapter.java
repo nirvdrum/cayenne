@@ -71,6 +71,8 @@ import org.objectstyle.cayenne.validation.ValidationException;
  */
 public abstract class TextAreaAdapter extends TextComponentAdapter {
 
+    protected boolean documentEventsDisabled;
+
     public TextAreaAdapter() {
         this(new JTextArea());
     }
@@ -105,6 +107,9 @@ public abstract class TextAreaAdapter extends TextComponentAdapter {
     protected abstract void initModel(DocumentEvent e) throws ValidationException;
 
     protected void verifyTextChange(DocumentEvent e) {
+        if (documentEventsDisabled) {
+            return;
+        }
 
         try {
             initModel(e);
@@ -117,4 +122,13 @@ public abstract class TextAreaAdapter extends TextComponentAdapter {
         }
     }
 
+    public void setText(String text) {
+        documentEventsDisabled = true;
+        try {
+            super.setText(text);
+        }
+        finally {
+            documentEventsDisabled = false;
+        }
+    }
 }

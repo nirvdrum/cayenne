@@ -57,15 +57,15 @@ package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Component;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -78,7 +78,6 @@ import javax.swing.text.Document;
 
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.EventController;
-import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
 import org.objectstyle.cayenne.modeler.util.TextAreaAdapter;
 import org.objectstyle.cayenne.query.Query;
@@ -100,13 +99,8 @@ public class SQLTemplateScriptsTab extends JPanel {
 
     protected EventController mediator;
 
-    protected JComboBox adapters;
-
     protected JList scripts;
     protected TextAreaAdapter script;
-
-    protected JButton addScript;
-    protected JButton removeScript;
 
     public SQLTemplateScriptsTab(EventController mediator) {
         this.mediator = mediator;
@@ -117,12 +111,17 @@ public class SQLTemplateScriptsTab extends JPanel {
 
     protected void initView() {
         // create widgets
-        addScript = new JButton("Add Adapter Template");
-        removeScript = new JButton("Remove Adapter Template");
 
         scripts = new JList();
         scripts.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        scripts.setCellRenderer(DbAdapterInfo.getListRenderer());
+        scripts.setCellRenderer(new DbAdapterListRenderer(DbAdapterInfo
+                .getStandardAdapterLabels()));
+
+        List keys = new ArrayList(DbAdapterInfo.getStandardAdapters().length + 1);
+        keys.addAll(Arrays.asList(DbAdapterInfo.getStandardAdapters()));
+        Collections.sort(keys);
+        keys.add(0, DEFAULT_LABEL);
+        scripts.setModel(new DefaultComboBoxModel(keys.toArray()));
 
         script = new TextAreaAdapter(15, 30) {
 
@@ -135,25 +134,18 @@ public class SQLTemplateScriptsTab extends JPanel {
             }
         };
 
-        adapters = CayenneWidgetFactory.createComboBox();
-        adapters.setModel(new DefaultComboBoxModel(DbAdapterInfo.getStandardAdapters()));
-        adapters.setRenderer(DbAdapterInfo.getListRenderer());
-
         // assemble
         CellConstraints cc = new CellConstraints();
         PanelBuilder builder = new PanelBuilder(new FormLayout(
-                "fill:100dlu, 3dlu, fill:pref:grow, 3dlu, fill:100dlu",
-                "3dlu, p, 3dlu, p, 10dlu, top:100dlu:grow"));
+                "fill:100dlu, 3dlu, fill:100dlu:grow",
+                "3dlu, fill:p:grow"));
 
         // orderings table must grow as the panel is resized
         builder.add(new JScrollPane(
                 scripts,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), cc.xywh(1, 2, 1, 5));
-        builder.add(new JScrollPane(script.getTextArea()), cc.xywh(3, 2, 1, 5));
-        builder.add(adapters, cc.xy(5, 2, "d, top"));
-        builder.add(addScript, cc.xy(5, 4, "d, top"));
-        builder.add(removeScript, cc.xy(5, 6, "d, top"));
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), cc.xy(1, 2));
+        builder.add(new JScrollPane(script.getTextArea()), cc.xy(3, 2));
 
         setLayout(new BorderLayout());
         add(builder.getPanel(), BorderLayout.CENTER);
@@ -170,20 +162,6 @@ public class SQLTemplateScriptsTab extends JPanel {
                 }
             }
         });
-
-        addScript.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                addAdapterScript();
-            }
-        });
-
-        removeScript.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                removeAdapterScript();
-            }
-        });
     }
 
     void initFromModel() {
@@ -194,8 +172,6 @@ public class SQLTemplateScriptsTab extends JPanel {
             return;
         }
 
-        initScriptsFromModel();
-
         // select default script
         scripts.setSelectedIndex(0);
         script.getTextArea().setEnabled(true);
@@ -203,57 +179,32 @@ public class SQLTemplateScriptsTab extends JPanel {
         setVisible(true);
     }
 
-    SQLTemplate getQuery() {
-        return (SQLTemplate) mediator.getCurrentQuery();
-    }
-
-    void initScriptsFromModel() {
-        SQLTemplate template = getQuery();
-
-        List keys = new ArrayList(template.getTemplateKeys());
-        Collections.sort(keys);
-        keys.add(0, DEFAULT_LABEL);
-
-        scripts.setModel(new DefaultComboBoxModel(keys.toArray()));
-    }
-
     /**
-     * Adds an empty SQL script for selected DbAdapter.
+     * Returns SQLTemplate text for current selection.
      */
-    void addAdapterScript() {
-        String key = (String) adapters.getSelectedItem();
+    String getSQLTemplate(String key) {
         if (key == null) {
-            return;
+            return null;
         }
 
         SQLTemplate query = getQuery();
-        if (!query.getTemplateKeys().contains(key)) {
-            query.setTemplate(key, "");
-            initScriptsFromModel();
-            mediator.fireQueryEvent(new QueryEvent(this, query));
+        if (query == null) {
+            return null;
         }
 
-        scripts.setSelectedValue(key, true);
+        return (key.equals(DEFAULT_LABEL)) ? query.getDefaultTemplate() : query
+                .getCustomTemplate(key);
     }
 
-    /**
-     * Removes existing SQL script for selected DbAdapter.
-     */
-    void removeAdapterScript() {
-        String key = (String) scripts.getSelectedValue();
-        if (key == null || key.equals(DEFAULT_LABEL)) {
-            return;
-        }
-
-        getQuery().removeTemplate(key);
-        initScriptsFromModel();
-        mediator.fireQueryEvent(new QueryEvent(this, getQuery()));
+    SQLTemplate getQuery() {
+        return (SQLTemplate) mediator.getCurrentQuery();
     }
 
     /**
      * Shows selected script in the editor.
      */
     void displayScript() {
+
         SQLTemplate query = getQuery();
         if (query == null) {
             disableEditor();
@@ -267,12 +218,11 @@ public class SQLTemplateScriptsTab extends JPanel {
         }
 
         enableEditor();
-        if (key.equals(DEFAULT_LABEL)) {
-            script.setText(query.getDefaultTemplate());
-        }
-        else {
-            script.setText(query.getCustomTemplate(key));
-        }
+
+        String text = (key.equals(DEFAULT_LABEL)) ? query.getDefaultTemplate() : query
+                .getCustomTemplate(key);
+
+        script.setText(text);
     }
 
     void disableEditor() {
@@ -335,6 +285,47 @@ public class SQLTemplateScriptsTab extends JPanel {
                 mediator.fireQueryEvent(new QueryEvent(this, query));
             }
         }
+    }
 
+    final class DbAdapterListRenderer extends DefaultListCellRenderer {
+
+        Map adapterLabels;
+
+        DbAdapterListRenderer(Map adapterLabels) {
+            this.adapterLabels = (adapterLabels != null)
+                    ? adapterLabels
+                    : Collections.EMPTY_MAP;
+        }
+
+        public Component getListCellRendererComponent(
+                JList list,
+                Object object,
+                int index,
+                boolean selected,
+                boolean hasFocus) {
+
+            if (object instanceof Class) {
+                object = ((Class) object).getName();
+            }
+
+            Object label = adapterLabels.get(object);
+            if (label == null) {
+                label = object;
+            }
+
+            Component c = super.getListCellRendererComponent(
+                    list,
+                    label,
+                    index,
+                    selected,
+                    hasFocus);
+
+            // grey out keys that have no SQL
+            setForeground(selected || getSQLTemplate(object.toString()) != null
+                    ? Color.BLACK
+                    : Color.LIGHT_GRAY);
+
+            return c;
+        }
     }
 }
