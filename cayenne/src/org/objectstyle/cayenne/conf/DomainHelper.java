@@ -229,21 +229,26 @@ public class DomainHelper {
 		pw.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
 		pw.println("<domains>");
 		for (int i = 0; i < domains.length; i++) {
-			storeDomains(pw, domains[i]);
+			storeDomain(pw, domains[i]);
 		}
 		pw.println("</domains>");
 	}
 
-	private static void storeDomains(PrintWriter pw, DataDomain domain) {
+	private static void storeDomain(PrintWriter pw, DataDomain domain) {
+		pw.println("<domain name=\"" + domain.getName().trim() + "\">");
+		
 		DataNode[] nodes = domain.getDataNodes();
 		List maps = domain.getMapList();
-		pw.println("<domain name=\"" + domain.getName().trim() + "\">");
+		
+		// sort to satisfy dependecies
+		OperationSorter.sortMaps(maps);
+		
 		Iterator iter = maps.iterator();
 		while (iter.hasNext()) {
 			StringBuffer buf = new StringBuffer();
 			DataMap map = (DataMap) iter.next();
-			buf.append("\t <map name=\"").append(map.getName().trim());
-			buf.append("\"  location=\"").append(map.getLocation().trim());
+			buf.append("\t<map name=\"").append(map.getName().trim());
+			buf.append("\" location=\"").append(map.getLocation().trim());
 			buf.append("\"/> ");
 			pw.println(buf.toString());
 		}

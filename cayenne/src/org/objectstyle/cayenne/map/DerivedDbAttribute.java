@@ -58,8 +58,18 @@ package org.objectstyle.cayenne.map;
 import java.util.*;
 
 /**
- * DbAttribute that contains an expression based ona set of 
- * other attributes.
+ * DbAttribute that resolves to a SQL expression based on 
+ * a set of other attributes. DerivedDbAttribute's allow to build
+ * expressions like "<code>count(id)</code>", "<code>sum(price)</code>", etc.
+ * 
+ * <p>
+ * Internally DerivedDbAttribute is defined as a specification string and a set of
+ * substitution DbAttribute parameters. Specification string is an SQL expression that contains
+ * placeholders (<code>%@</code>) for attribute parameters, for example:
+ * </p>
+ * 
+ * <p><code>sum(%@) + sum(%@)</code></p>
+ * 
  * 
  * @author Andrei Adamchik
  */

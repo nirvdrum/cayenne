@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.map;
 
 import java.util.*;
 
@@ -66,8 +66,14 @@ import java.util.*;
  * @author Andrei Adamchik  
  */
 public class DataMap {
-    private String name;
-    private String location;
+    protected String name;
+    protected String location;
+    
+    /** 
+     * Contains a list of DataMaps that are used by this map.
+     */
+    protected ArrayList dependencies = new ArrayList();
+    
 
     /** ObjEntities representing the data object classes.
       * The name of ObjEntity serves as a key. */
@@ -86,6 +92,29 @@ public class DataMap {
         this.name = name;
     }
 
+    /**
+     * Adds a data map that has entities used by this map.
+     */
+    public void addDependency(DataMap map) {
+    	dependencies.add(map);
+    }
+    
+    public void removeDependency(DataMap map) {
+    	dependencies.remove(map);
+    }
+    
+    public List getDependencies() {
+    	return Collections.unmodifiableList(dependencies);
+    }
+    
+    public boolean dependsOn(DataMap map) {
+    	return dependencies.contains(map);
+    }
+    
+    public void clearDependencies() {
+    	dependencies.clear();
+    }
+    
     /** Returns "name" property value. */
     public String getName() {
         return name;
@@ -201,9 +230,30 @@ public class DataMap {
         return new ArrayList(dbEntityMap.values());
     }
 
-    /** Get DbEntity by its name.*/
+    /** 
+     * Returnms DbEntity matching the <code>name</code> parameter.
+     * No dependencies will be searched.
+     */
     public DbEntity getDbEntity(String name) {
-        return (DbEntity) dbEntityMap.get(name);
+        return getDbEntity(name, false);
+    }
+    
+    public DbEntity getDbEntity(String name, boolean searchDependencies) {
+    	DbEntity ent = (DbEntity) dbEntityMap.get(name);
+    	if(ent != null || !searchDependencies) {
+    		return ent;
+    	}
+    	
+    	Iterator it = dependencies.iterator();
+    	while(it.hasNext()) {
+    		DataMap dep = (DataMap)it.next();
+    		// using "false" to avoid problems with circular dependencies
+    		DbEntity e = dep.getDbEntity(name, false);
+    		if(e != null) {
+    			return e;
+    		}
+    	}
+    	return null;
     }
 
     /** Get ObjEntity by its name. */

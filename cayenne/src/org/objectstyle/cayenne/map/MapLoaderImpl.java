@@ -141,16 +141,6 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 		return dataMap;
 	}
 
-	/** Load multiple DataMaps at once. */
-	public DataMap[] loadDataMaps(InputSource[] src) throws DataMapException {
-		int len = src.length;
-		DataMap[] maps = new DataMap[len];
-		for (int i = 0; i < src.length; i++) {
-			maps[i] = loadDataMap(src[i]);
-		}
-		return maps;
-	}
-
 	/** 
 	 * Creates, configures and returns ResourceLocator object used 
 	 * to lookup DataMap files.
@@ -171,37 +161,31 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 		return locator;
 	}
 
-	/** Loads the array of data maps per array of map file URI's.
-	 * This is a convenience method that would resolve string URI's
-	 * to InputSources and then call <code>loadDataMap</code> for each one of them.
+	/** 
+	 * Loads the array a DataMap for the map file URI.
+	 * This is a convenience method that would resolve string URI
+	 * to InputSource and then call <code>loadDataMap</code>.
 	 *
-	 * @throws DataMapException if source URI's do not resolve to valid map files
+	 * @throws DataMapException if source URI does not resolve to a valid map files
 	 * @throws NullPointerException if <code>src</code> parameter is null.
 	 */
-	public DataMap[] loadDataMaps(String[] src) throws DataMapException {
-		int len = src.length;
-		DataMap[] dataMaps = new DataMap[len];
-
+	public DataMap loadDataMap(String src) throws DataMapException {
 		// configure resource locator
 		ResourceLocator locator = configLocator();
+		InputStream in = locator.findResourceStream(src);
+		if (in == null) {
+			throw new DataMapException("Can't find data map " + src);
+		}
 
-		for (int i = 0; i < len; i++) {
-
-			InputStream in = locator.findResourceStream(src[i]);
-			if (in == null) {
-				throw new DataMapException("Can't find data map " + src[i]);
-			}
-
+		try {
+			return loadDataMap(new InputSource(in));
+		} finally {
 			try {
-				dataMaps[i] = loadDataMap(new InputSource(in));
-			} finally {
-				try {
-					in.close();
-				} catch (IOException ioex) {
-				}
+				in.close();
+			} catch (IOException ioex) {
 			}
 		}
-		return dataMaps;
+
 	}
 
 	public void startElement(
@@ -508,7 +492,8 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 		String parentName = atts.getValue("", "parentName");
 
 		if (parentName != null) {
-			DbEntity parent = dataMap.getDbEntity(parentName);
+			// search parent in this data map and all its dependencies
+			DbEntity parent = dataMap.getDbEntity(parentName, true);
 			if (parent == null) {
 				throw new SAXException(
 					"Can't find parent DbEntity '"
@@ -530,10 +515,11 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 	private void processStartDbAttributeRef(Attributes atts)
 		throws SAXException {
 		String name = atts.getValue("", "name");
-		if ((attrib instanceof DerivedDbAttribute) && (dbEntity instanceof DerivedDbEntity)) {
-            DbEntity parent = ((DerivedDbEntity)dbEntity).getParentEntity();
-            DbAttribute ref = (DbAttribute)parent.getAttribute(name);
-            ((DerivedDbAttribute)attrib).addParam(ref);
+		if ((attrib instanceof DerivedDbAttribute)
+			&& (dbEntity instanceof DerivedDbEntity)) {
+			DbEntity parent = ((DerivedDbEntity) dbEntity).getParentEntity();
+			DbAttribute ref = (DbAttribute) parent.getAttribute(name);
+			((DerivedDbAttribute) attrib).addParam(ref);
 		} else {
 			throw new SAXException(
 				"Referenced attributes are not supported by regular DbAttributes. Offending attribute name '"

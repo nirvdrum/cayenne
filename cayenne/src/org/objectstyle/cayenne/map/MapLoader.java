@@ -57,22 +57,29 @@ package org.objectstyle.cayenne.map;
 
 import java.io.PrintWriter;
 
+/** 
+ * Defines API of a generic DataMap loader.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
 public interface MapLoader {
-	/** Loads the data map from the input source*/
+	
+	/** 
+	 * Loads a DataMap from the XML input source.
+	 */
 	public DataMap loadDataMap(org.xml.sax.InputSource src)
 		throws DataMapException;
 
-	/** Loads the array of data maps per array of input sources. */
-	public DataMap[] loadDataMaps(org.xml.sax.InputSource[] src)
-		throws DataMapException;
-
 	/** 
-	 * Loads the array of data maps per array of map file URI's. 
-	 * This is a convenience method that would resolve string 
-	 * URI's to InputSources and then call 
-	 * <code>loadDataMap</code> for each one of them. 
+	 * Loads the array a DataMap for the map file URI.
+	 * This is a convenience method that would resolve string URI
+	 * to InputSource and then call <code>loadDataMap</code>.
+	 *
+	 * @throws DataMapException if source URI does not resolve to a 
+	 * valid map file.
 	 */
-	public DataMap[] loadDataMaps(String[] src) throws DataMapException;
+	public DataMap loadDataMap(String src) throws DataMapException;
 
 	/** Creates XML file from DataMap.*/
 	public void storeDataMap(PrintWriter out, DataMap map)

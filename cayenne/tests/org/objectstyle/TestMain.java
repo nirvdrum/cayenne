@@ -202,7 +202,7 @@ public class TestMain implements TestConstants {
 
 			// map
 			String[] maps = new String[] { TEST_MAP_PATH };
-			DataMap map = new MapLoaderImpl().loadDataMaps(maps)[0];
+			DataMap map = new MapLoaderImpl().loadDataMap(TEST_MAP_PATH);
 
 			// node
 			DataNode node = new DataNode("node");

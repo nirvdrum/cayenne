@@ -94,11 +94,4 @@ public class MapLoaderLoadTst extends TestCase {
         assertNotNull(a1.getParams());
         assertEquals(1, a1.getParams().size());        
     }
-
-    public void testLoadDataMaps1() throws Exception {
-        InputSource in = new InputSource(testDataMap);
-        DataMap[] maps = mapLoader.loadDataMaps(new InputSource[] {in});
-        assertNotNull(maps);
-        assertEquals(1, maps.length);
-    }
 }

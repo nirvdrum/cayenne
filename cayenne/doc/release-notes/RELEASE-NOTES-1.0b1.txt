@@ -20,3 +20,9 @@ to make API friendlier.
 and array filtering
 
 5. Added "fetch limit" to select queries.
+
+6. Added DerivedDbEntity with GROUP BY support
+
+7. Added DerivedDbAttribute with aggregate function support.
+
+8. Simplified MapLoader API
