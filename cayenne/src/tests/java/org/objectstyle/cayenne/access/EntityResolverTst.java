@@ -66,6 +66,10 @@ public class EntityResolverTst extends CayenneTestCase {
         assertIsArtistObjEntity(resolver.lookupObjEntity(Artist.class));
     }
 
+    public void testLookupObjEntityByInstance() throws Exception {
+        assertIsArtistObjEntity(resolver.lookupObjEntity(new Artist()));
+    }
+
     public void testGetDataMapList() throws Exception {
         DataMap m1 = new DataMap();
         DataMap m2 = new DataMap();

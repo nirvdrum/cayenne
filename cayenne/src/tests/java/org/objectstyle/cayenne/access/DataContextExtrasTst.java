@@ -187,7 +187,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
         for (int i = 0; i < cache + 2; i++) {
             Artist o1 = new Artist();
             o1.setArtistName("a" + i);
-            ctxt.registerNewObject(o1, "Artist");
+            ctxt.registerNewObject(o1);
         }
 
         // this should cause PK generation exception in commit later

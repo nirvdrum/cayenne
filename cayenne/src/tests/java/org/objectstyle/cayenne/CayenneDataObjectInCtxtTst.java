@@ -92,7 +92,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         CayenneDataObject o1 = new CayenneDataObject();
         assertNull(o1.getObjectId());
 
-        ctxt.registerNewObject(o1, "Artist");
+        ctxt.registerNewObject(o1);
         assertNotNull(o1.getObjectId());
     }
 
@@ -100,7 +100,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         Artist o1 = new Artist();
         assertEquals(PersistenceState.TRANSIENT, o1.getPersistenceState());
 
-        ctxt.registerNewObject(o1, "Artist");
+        ctxt.registerNewObject(o1);
         assertEquals(PersistenceState.NEW, o1.getPersistenceState());
     }
 
@@ -108,7 +108,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         Artist o1 = new Artist();
         o1.setArtistName("a");
 
-        ctxt.registerNewObject(o1, "Artist");
+        ctxt.registerNewObject(o1);
         assertEquals(PersistenceState.NEW, o1.getPersistenceState());
 
         ctxt.commitChanges();
@@ -118,7 +118,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
     public void testStateCommittedToModified() throws Exception {
         Artist o1 = new Artist();
         o1.setArtistName("a");
-        ctxt.registerNewObject(o1, "Artist");
+        ctxt.registerNewObject(o1);
         ctxt.commitChanges();
         assertEquals(PersistenceState.COMMITTED, o1.getPersistenceState());
 
@@ -138,7 +138,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
     public void testStateCommittedToDeleted() throws Exception {
         Artist o1 = new Artist();
         o1.setArtistName("a");
-        ctxt.registerNewObject(o1, "Artist");
+        ctxt.registerNewObject(o1);
         ctxt.commitChanges();
         assertEquals(PersistenceState.COMMITTED, o1.getPersistenceState());
 
@@ -161,7 +161,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         CayenneDataObject o1 = new CayenneDataObject();
         assertNull(o1.getDataContext());
 
-        ctxt.registerNewObject(o1, "Artist");
+        ctxt.registerNewObject(o1);
         assertSame(ctxt, o1.getDataContext());
     }
 
@@ -204,7 +204,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         Artist o1 = new Artist();
         o1.setArtistName("a");
         o1.setDateOfBirth(new java.util.Date());
-        ctxt.registerNewObject(o1, "Artist");
+        ctxt.registerNewObject(o1);
         ctxt.commitChanges();
         return o1;
     }

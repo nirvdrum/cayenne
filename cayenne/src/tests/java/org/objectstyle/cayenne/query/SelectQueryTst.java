@@ -105,7 +105,7 @@ public class SelectQueryTst extends SelectQueryBase {
     
     public void testSelectAllObjectsRootObjEntity() throws java.lang.Exception {
 		//Crude technique to obtain the Artist ObjEntity, but it works
-  		query.setRoot(this.getDomain().getEntityResolver().lookupObjEntity("Artist"));
+  		query.setRoot(this.getDomain().getEntityResolver().lookupObjEntity(Artist.class));
         performQuery();
 
         // check query results

@@ -73,12 +73,11 @@ public class QueryHelperTst extends CayenneTestCase {
             ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "abc"));
         SelectQuery reverseQ =
             QueryHelper.selectPrefetchPath(getDomain(), q, "paintingArray");
-		assertEquals("Painting", reverseQ.getObjEntityName());
 		Object queryRoot=reverseQ.getRoot();
 		if(queryRoot instanceof String) {
 			assertEquals("Painting", queryRoot);
 		} else if (queryRoot instanceof ObjEntity) {
-			assertEquals(getDomain().getEntityResolver().lookupObjEntity("Painting"), queryRoot);
+			assertEquals(getDomain().getEntityResolver().lookupObjEntity(Painting.class), queryRoot);
 		} else if (queryRoot instanceof Class) {
 			assertEquals(Painting.class ,queryRoot);
 		} else {

@@ -72,14 +72,6 @@ public class QueryTst extends CayenneTestCase {
     public void setUp() throws java.lang.Exception {
         query = new TstUnqualifiedQuery();
     }
-
-    
-    public void testObjEntityName() throws Exception {
-        assertNull(query.getObjEntityName());
-        
-        query.setObjEntityName("SomeEntity");
-        assertSame("SomeEntity", query.getObjEntityName());
-    }
     
     public void testSetRootEntityName() {
     	assertNull(query.getRoot());
@@ -89,7 +81,7 @@ public class QueryTst extends CayenneTestCase {
     
     public void testSetRootObjEntity() {
     	assertNull(query.getRoot());
-    	ObjEntity e= getDomain().getEntityResolver().lookupObjEntity("Artist");
+    	ObjEntity e= getDomain().getEntityResolver().lookupObjEntity(Artist.class);
     	query.setRoot(e);
     	assertSame(e, query.getRoot());
     }

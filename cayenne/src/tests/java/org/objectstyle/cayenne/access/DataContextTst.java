@@ -112,7 +112,7 @@ public class DataContextTst extends CayenneTestCase {
 
 	public void testCreatePermId1() throws Exception {
 		Artist artist = new Artist();
-		ctxt.registerNewObject(artist, "Artist");
+		ctxt.registerNewObject(artist);
 		ObjectId id = ctxt.createPermId(artist);
 		assertNotNull(id);
 	}
@@ -127,7 +127,7 @@ public class DataContextTst extends CayenneTestCase {
 		Map s2 = new HashMap();
 		s2.put("ARTIST_NAME", n2);
 		s2.put("DATE_OF_BIRTH", new java.util.Date());
-		ObjEntity e = ctxt.getEntityResolver().lookupObjEntity("Artist");
+		ObjEntity e = ctxt.getEntityResolver().lookupObjEntity(a1);
 		ctxt.getSnapshotManager().mergeObjectWithSnapshot(e, a1, s2);
 
 		// name was modified, so it should not change during merge
@@ -163,7 +163,7 @@ public class DataContextTst extends CayenneTestCase {
 		Artist a1 = fetchArtist("artist1");
 
 		Painting p1 = new Painting();
-		ctxt.registerNewObject(p1, "Painting");
+		ctxt.registerNewObject(p1);
 		p1.setToArtist(a1);
 
 		Map s1 = ctxt.takeObjectSnapshot(p1);
@@ -172,7 +172,7 @@ public class DataContextTst extends CayenneTestCase {
 	}
 
 	public void testLookupEntity() throws Exception {
-		assertNotNull(ctxt.getEntityResolver().lookupObjEntity("Artist"));
+		assertNotNull(ctxt.getEntityResolver().lookupObjEntity(Artist.class));
 		assertNull(ctxt.getEntityResolver().lookupObjEntity("NonExistent"));
 	}
 
