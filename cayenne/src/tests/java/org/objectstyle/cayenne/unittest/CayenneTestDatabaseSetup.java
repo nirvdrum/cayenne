@@ -80,22 +80,18 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
  * @author Andrei Adamchik
  */
 public class CayenneTestDatabaseSetup {
-    private static Logger logObj =
-        Logger.getLogger(CayenneTestDatabaseSetup.class);
+    private static Logger logObj = Logger.getLogger(CayenneTestDatabaseSetup.class);
 
     protected DataMap map;
     protected CayenneTestResources resources;
     protected DatabaseSetupDelegate delegate;
 
-    public CayenneTestDatabaseSetup(
-        CayenneTestResources resources,
-        DataMap map)
+    public CayenneTestDatabaseSetup(CayenneTestResources resources, DataMap map)
         throws Exception {
         this.map = map;
         this.resources = resources;
         this.delegate =
-            DatabaseSetupDelegate.createDelegate(
-                resources.getSharedNode().getAdapter());
+            DatabaseSetupDelegate.createDelegate(resources.getSharedNode().getAdapter());
     }
 
     /** Deletes all data from the database tables mentioned in the DataMap. */
@@ -117,12 +113,25 @@ public class CayenneTestDatabaseSetup {
                     continue;
                 }
 
+                // this may not work on tables with reflexive relationships
+                // at least on Firebird it doesn't... 
+                // for now implement a hardcoded hack assuming that 
+                // hierarchy of records is at most 2 levels deep;
+                // if nesting is deeper, some sort of hierarchical query is needed 
+                // (similar to CONNECT BY in Oracle)
+
+                if ("ARTGROUP".equalsIgnoreCase(ent.getName())) {
+                    String deleteSql = "DELETE FROM " + ent.getName() + " WHERE PARENT_GROUP_ID IS NOT NULL";
+                    stmt.executeUpdate(deleteSql);
+                }
+
                 String deleteSql = "DELETE FROM " + ent.getName();
                 stmt.executeUpdate(deleteSql);
             }
             conn.commit();
             stmt.close();
-        } finally {
+        }
+        finally {
             conn.close();
         }
     }
@@ -164,7 +173,8 @@ public class CayenneTestDatabaseSetup {
                     String dropSql = adapter.dropTable(ent);
                     logObj.info("Drop table: " + dropSql);
                     stmt.execute(dropSql);
-                } catch (SQLException sqe) {
+                }
+                catch (SQLException sqe) {
                     logObj.warn(
                         "Can't drop table " + ent.getName() + ", ignoring...",
                         sqe);
@@ -172,7 +182,8 @@ public class CayenneTestDatabaseSetup {
             }
 
             delegate.droppedTables(conn, map);
-        } finally {
+        }
+        finally {
             conn.close();
         }
 
@@ -194,14 +205,16 @@ public class CayenneTestDatabaseSetup {
                 stmt.execute(query);
             }
             delegate.createdTables(conn, map);
-        } finally {
+        }
+        finally {
             conn.close();
         }
 
         // create primary key support
         DataNode node = resources.getSharedNode();
         DbAdapter adapter = node.getAdapter();
-        Collection ents = ((DataMap)node.getDataMaps().iterator().next()).getDbEntities();
+        Collection ents =
+            ((DataMap) node.getDataMaps().iterator().next()).getDbEntities();
         adapter.getPkGenerator().createAutoPk(node, new ArrayList(ents));
     }
 
@@ -214,7 +227,7 @@ public class CayenneTestDatabaseSetup {
     public void createPkSupportForMapEntities(DataNode node) throws Exception {
         Iterator dataMaps = node.getDataMaps().iterator();
         while (dataMaps.hasNext()) {
-			Collection ents = ((DataMap)dataMaps.next()).getDbEntities();
+            Collection ents = ((DataMap) dataMaps.next()).getDbEntities();
             node.getAdapter().getPkGenerator().createAutoPk(node, new ArrayList(ents));
         }
     }
@@ -223,8 +236,8 @@ public class CayenneTestDatabaseSetup {
     public Iterator tableCreateQueries() throws Exception {
         DbAdapter adapter = resources.getSharedNode().getAdapter();
         DbGenerator gen = new DbGenerator(adapter, map);
-		List orderedEnts = this.dbEntitiesInInsertOrder();
-		List queries = new ArrayList();
+        List orderedEnts = this.dbEntitiesInInsertOrder();
+        List queries = new ArrayList();
 
         // table definitions
         Iterator it = orderedEnts.iterator();
@@ -266,20 +279,20 @@ public class CayenneTestDatabaseSetup {
             Iterator it = entities.iterator();
             List filtered = new ArrayList();
             while (it.hasNext()) {
-                DbEntity ent = (DbEntity)it.next();
-                
+                DbEntity ent = (DbEntity) it.next();
+
                 // check for LOB attributes
                 boolean hasLob = false;
                 Iterator attrs = ent.getAttributes().iterator();
-                while(attrs.hasNext()) {
-                	DbAttribute attr = (DbAttribute)attrs.next();
-                	if(attr.getType() == Types.BLOB || attr.getType() == Types.CLOB) {
-                	    hasLob = true;
-                	    break;
-                	}
+                while (attrs.hasNext()) {
+                    DbAttribute attr = (DbAttribute) attrs.next();
+                    if (attr.getType() == Types.BLOB || attr.getType() == Types.CLOB) {
+                        hasLob = true;
+                        break;
+                    }
                 }
-                
-                if(!hasLob) {
+
+                if (!hasLob) {
                     filtered.add(ent);
                 }
             }
