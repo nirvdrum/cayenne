@@ -124,5 +124,28 @@ public class GuiConfiguration extends DefaultConfiguration {
         }
         return null;
     }
+    
+    /** Initializes all Cayenne resources. Loads all configured domains and their
+      * data maps, initializes all domain Nodes and their DataSources using
+      * GuiDataSourceFactory. */
+    protected void init() throws java.lang.Exception {
+        InputStream in = getDomainConfig();
+        if (in == null)
+            throw new ConfigException("Domain configuration file \""
+                                      + DOMAIN_FILE
+                                      + "\" is not found.");
+
+        DomainHelper helper = new DomainHelper(this, getLogLevel());
+        if(!helper.loadDomains(in, new GuiDataSourceFactory())) {
+            throw new ConfigException("Failed to load domain and/or its maps/nodes.");
+        }
+
+        Iterator it = helper.getDomains().iterator();
+        while(it.hasNext()) {
+            addDomain((DataDomain)it.next());
+        }
+    }
+
+
 }
 
