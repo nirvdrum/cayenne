@@ -259,7 +259,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
         }
 
         if (factory == null) {
-            if (config.getOverrideFactory() != null) {
+            if (config.getDataSourceFactory() != null) {
                 logObj.log(
                     logLevel,
                     "Warning: <node> '" + nodeName + "' without 'factory'.");
@@ -292,7 +292,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
         try {
             // use DomainHelper factory if it exists, if not - use factory specified
             // in configuration data
-            DataSourceFactory confFactory = config.getOverrideFactory();
+            DataSourceFactory confFactory = config.getDataSourceFactory();
             DataSourceFactory localFactory =
                 (confFactory != null)
                     ? confFactory

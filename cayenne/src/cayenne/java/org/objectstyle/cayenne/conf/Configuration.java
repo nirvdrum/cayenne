@@ -75,15 +75,17 @@ import org.objectstyle.cayenne.util.ResourceLocator;
 /**
  * This class is an entry point to Cayenne. It loads all 
  * configuration files and instantiates main Cayenne objects. Used as a 
- * singleton via 'getSharedConfig' method.
+ * singleton via the 'getSharedConfiguration' method.
  *
- * <p>To force custom subclass of Configuration, Java application must
- * call "initSharedConfig" with the name of such subclass. This will initialize
- * Configuration singleton instance with new object of a specified class.
- * By default org.objectstyle.cayenne.conf.DefaultConfiguration is instantiated.
+ * <p>To use a custom subclass of Configuration, Java applications must
+ * call "initializeSharedConfiguration" with the subclass as argument.
+ * This will crate and initialize a Configuration singleton instance of the
+ * specified class. By default org.objectstyle.cayenne.conf.DefaultConfiguration
+ * is instantiated.
  * </p>
  *
  * @author Andrei Adamchik
+ * @author Holger Hoffstätte
  */
 public abstract class Configuration {
     private static Logger logObj = Logger.getLogger(Configuration.class);
@@ -96,7 +98,7 @@ public abstract class Configuration {
     private static boolean loggingConfigured;
 
     /** 
-     * Defines ClassLoader to use for resource lookup.
+     * Defines a ClassLoader to use for resource lookup.
      * Configuration objects that are using ClassLoaders
      * to locate reosurces may need to be bootstrapped
      * explicitly.
@@ -110,15 +112,22 @@ public abstract class Configuration {
     protected ConfigStatus loadStatus = new ConfigStatus();
 	protected boolean ignoringLoadFailures = false;
 
-    /** 
-     * Sets <code>cl</code> class's ClassLoader to serve
-     * as shared configuration resource ClassLoader.
-     * If shared Configuration object does not use ClassLoader,
-     * this method call will have no effect on how resources are loaded.
-     */
-    public static void bootstrapSharedConfig(Class cl) {
-        resourceLoader = cl.getClassLoader();
-    }
+	/** 
+	 * @deprecated Since 1.0 Beta1; use #bootstrapSharedConfiguration(Class) instead.
+	 */
+	public static void bootstrapSharedConfig(Class cl) {
+		Configuration.bootstrapSharedConfiguration(cl);
+	}
+
+	/** 
+	 * Sets <code>cl</code> class's ClassLoader to serve
+	 * as shared configuration resource ClassLoader.
+	 * If shared Configuration object does not use ClassLoader,
+	 * this method call will have no effect on how resources are loaded.
+	 */
+	public static void bootstrapSharedConfiguration(Class cl) {
+		resourceLoader = cl.getClassLoader();
+	}
 
     /** 
      * Configures Cayenne logging properties. 
@@ -136,14 +145,14 @@ public abstract class Configuration {
 
             // and load the default logging config file
             URL configURL = locator.findResource(DEFAULT_LOGGING_PROPS_FILE);
-			Configuration.configCommonLogging(configURL);
+			Configuration.configureCommonLogging(configURL);
         }
     }
 
     /** 
-     * Configures Cayenne logging properties using properties found at specified URL. 
+     * Configures Cayenne logging properties using properties found at the specified URL. 
      */
-    public synchronized static void configCommonLogging(URL propsFile) {
+    public synchronized static void configureCommonLogging(URL propsFile) {
         if (!Configuration.isLoggingConfigured()) {
             if (propsFile != null) {
                 PropertyConfigurator.configure(propsFile);
@@ -159,24 +168,21 @@ public abstract class Configuration {
     }
 
 	/**
-	 * @HH todo
+	 * Indicates whether log4j has been initialized.
 	 */
 	public static boolean isLoggingConfigured() {
 		return loggingConfigured;
 	}
 
 	/**
-	 * @HH todo
+	 * Indicate whether log4j has been initialized; can be used when
+	 * subclasses customize the initialization process.
 	 */
 	protected synchronized static void setLoggingConfigured(boolean state) {
 		loggingConfigured = state;
 	}
 
 	/**
-	 * Use this method as an entry point to all Cayenne access objects.
-	 * <p>Note that if you want to provide custom Configuration,
-	 * make sure you call one of <code>initSharedConfig</code> methods
-	 * before your application code has a chance to call this method.
 	 * @deprecated Since 1.0 Beta1; use #getSharedConfiguration() instead.
 	 */
 	public synchronized static Configuration getSharedConfig() {
@@ -198,7 +204,7 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * @HH todo
+	 * Returns the ClassLoader used to load resources.
 	 */
     public static ClassLoader getResourceLoader() {
         return resourceLoader;
@@ -222,19 +228,7 @@ public abstract class Configuration {
     }
 
 	/**
-	 * Creates and initializes shared Configuration object.
-	 * org.objectstyle.cayenne.conf.DefaultConfiguration will be 
-	 * instantiated and assigned to a singleton instance of
-	 * Configuration.
-	 */
-	public static void initializeSharedConfiguration() {
-		Configuration.initializeSharedConfiguration(DEFAULT_CONFIGURATION_CLASS);
-	}
-
-	/**
-	 * Creates and initializes shared Configuration object with
-	 * custom Configuration subclass.
-	 * @deprecated Since 1.0 Beta1; use #initSharedConfiguration(Class) instead.
+	 * @deprecated Since 1.0 Beta1; use #initializeSharedConfiguration(Class) instead.
 	 */
 	public static void initSharedConfig(String configClass) {
 		try {
@@ -243,6 +237,23 @@ public abstract class Configuration {
 			logObj.error("Error initializing shared Configuration", ex);
 			throw new ConfigurationException("Error initializing shared Configuration");
 		}
+	}
+
+	/**
+	 * @deprecated Since 1.0 Beta1; use #setSharedConfiguration(Configuration) instead.
+	 */
+	public static void initSharedConfig(Configuration conf) {
+		Configuration.setSharedConfiguration(conf);
+	}
+
+	/**
+	 * Creates and initializes shared Configuration object.
+	 * org.objectstyle.cayenne.conf.DefaultConfiguration will be 
+	 * instantiated and assigned to a singleton instance of
+	 * Configuration.
+	 */
+	public static void initializeSharedConfiguration() {
+		Configuration.initializeSharedConfiguration(DEFAULT_CONFIGURATION_CLASS);
 	}
 
 	/**
@@ -260,15 +271,6 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * Sets shared Configuration object to a new Configuration object.
-	 * calls <code>init</code> method of <code>conf</code> object.
-	 * @deprecated Since 1.0 Beta1; use #setSharedConfiguration(Configuration) instead.
-	 */
-	public static void initSharedConfig(Configuration conf) {
-		Configuration.setSharedConfiguration(conf);
-	}
-
-	/**
 	 * Sets the shared Configuration object to a new Configuration object.
 	 */
 	public static void setSharedConfiguration(Configuration conf) {
@@ -276,7 +278,9 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * @HH todo
+	 * Default constructor for new Configuration instances.
+	 * First calls #configureLogging, then #shouldInitialize
+	 * and - if permitted - #initialize follwed by #didInitialize.
 	 */
 	protected Configuration() {
 		super();
@@ -289,6 +293,7 @@ public abstract class Configuration {
 		if (this.shouldInitialize()) {
 			try {
 				this.initialize();
+				this.didInitialize();
 			} catch (Exception ex) {
 				throw new ConfigurationException(ex);
 			}
@@ -296,20 +301,20 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * @HH todo
-	 * @throws Exception
+	 * Indicate whether #initialize should be called.
+	 * Returning <code>false</code>> allows new instances to delay
+	 * the initialization process.
 	 */
 	protected abstract boolean shouldInitialize();
 
 	/**
-	 * @HH todo
+	 * Initializes the new instance.
 	 * @throws Exception
 	 */
 	protected abstract void initialize() throws Exception;
 
 	/**
-	 * @HH todo
-	 * @throws Exception
+	 * Called after #initialize from the default constructor.
 	 */
 	protected abstract void didInitialize();
 
@@ -331,7 +336,7 @@ public abstract class Configuration {
 	protected abstract InputStream getMapConfiguration(String location);
 
     /**
-     * Configures Log4J. This implementation calls
+     * Configures log4J. This implementation calls
      * <code>Configuration.configureCommonLogging</code>.
      */
     protected void configureLogging() {
@@ -343,13 +348,13 @@ public abstract class Configuration {
      * will override any settings configured in XML. 
      * Subclasses may override this method to provide a special factory for
      * DataSource creation that will take precedence over any factories
-     * configured in cayenne project. 
+     * configured in a cayenne project. 
      */
-    public DataSourceFactory getOverrideFactory() {
+    public DataSourceFactory getDataSourceFactory() {
         return overrideFactory;
     }
 
-    public void setOverrideFactory(DataSourceFactory overrideFactory) {
+    public void setDataSourceFactory(DataSourceFactory overrideFactory) {
         this.overrideFactory = overrideFactory;
     }
 
@@ -438,7 +443,8 @@ public abstract class Configuration {
     }
 
 	/**
-	 * @HH todo
+	 * Returns a delegate used for controlling the loading of
+	 * configuration elements.
 	 */
 	public ConfigLoaderDelegate getLoaderDelegate() {
 		return new RuntimeLoadDelegate(this, loadStatus, Configuration.getLoggingLevel());

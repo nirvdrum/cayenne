@@ -104,7 +104,7 @@ public class AntMain extends Main {
 
     protected DataDomain createDomain() throws Exception {
         ClassLoader loader = new DOStubClassLoader();
-        Configuration.bootstrapSharedConfig(loader.loadClass("Table"));
+        Configuration.bootstrapSharedConfiguration(loader.loadClass("Table"));
 
         DataSourceInfo info = ((TestPreferences) prefs).getConnectionInfo();
 

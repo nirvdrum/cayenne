@@ -43,7 +43,7 @@ public class Main {
 
     /** Creates and returns DataContext object. */
     private DataContext createContext() {
-        Configuration.bootstrapSharedConfig(this.getClass());
+        Configuration.bootstrapSharedConfiguration(this.getClass());
         return Configuration.getSharedConfiguration().getDomain().createDataContext();
     }
 

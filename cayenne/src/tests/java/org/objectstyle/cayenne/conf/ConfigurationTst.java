@@ -78,10 +78,10 @@ public class ConfigurationTst extends CayenneTestCase {
 	public void testOverrideFactory() throws java.lang.Exception {
 		Configuration cfg = new Config();
 
-        assertNull(cfg.getOverrideFactory());
+        assertNull(cfg.getDataSourceFactory());
 		ProjectDataSourceFactory factory = new ProjectDataSourceFactory(null);
-        cfg.setOverrideFactory(factory);
-        assertSame(factory, cfg.getOverrideFactory());
+        cfg.setDataSourceFactory(factory);
+        assertSame(factory, cfg.getDataSourceFactory());
 	}
 
 	public void testFileConfigurationConstructorWithNullFile() {

@@ -92,7 +92,7 @@ public class ConnectionSetup  {
     private DataSourceInfo getInfoFromFile() throws Exception {
 		DisconnectedFactory factory = new DisconnectedFactory();
         DefaultConfiguration conf = new DefaultConfiguration();
-		conf.setOverrideFactory(factory);
+		conf.setDataSourceFactory(factory);
         ConfigLoader loader = new ConfigLoader(conf.getLoaderDelegate());
         InputStream in = ResourceLocator.findResourceInFileSystem(Configuration.DEFAULT_DOMAIN_FILE);
         if(in == null) {
