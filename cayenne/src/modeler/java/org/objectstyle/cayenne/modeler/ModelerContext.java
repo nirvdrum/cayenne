@@ -89,7 +89,7 @@ public class ModelerContext extends SwingContext {
      * Overrides super implementation to allow using Scope
      * together with normal Swing code that CayenneModeler already has.
      */
-    protected JRootPane findRootPaneFor(View view) {
+    public JRootPane findRootPaneFor(View view) {
         JRootPane pane = super.findRootPaneFor(view);
 
         if (pane != null) {
