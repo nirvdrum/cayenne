@@ -69,6 +69,23 @@
                 
             <source># tar xzf [filename].tar.gz</source>
             
+            <p>To take advantage of the scripts located in <code>bin</code>
+            directory of Cayenne, the following environment variables need to be 
+            setup:
+            <ul>
+                <li><code>CAYENNE_HOME</code> - should point to
+                the directory created when your unpacked Cayenne distribution in the previous 
+                steps. (Directory named like <code>cayenne-[release-suffix]</code>). </li>
+                    
+                <li><code>JAVA_HOME</code> - should point to your JSDK 1.4 installation. 
+                It may already exist in the environment.</li>
+            </ul>
+            
+            <i>Note that these variables are only necessary to take advantage of the scripts
+            that run unit tests and start CayenneModeler. They are probably not needed on
+            a deployment machine.</i>
+            </p>
+            
             <p>Installation is complete.</p>
         </subsection>
         
@@ -100,19 +117,9 @@
         
         
         <subsection name="2.4 Unit Tests" anchor="tests">        
-            <p>[Optional] Run tests. To do that, you will need to set the following
-            environment variables:</p>
-            
-            <ul>
-                <li><code>CAYENNE_HOME</code> - should point to
-                the directory created when your unpacked Cayenne distribution in the previous 
-                steps. (Directory named like <code>cayenne-[release-suffix]</code>). </li>
-                    
-                <li><code>JAVA_HOME</code> - should point to your JSDK 1.4 installation. 
-                You may already have it set.</li>
-            </ul>
-            
-            <p>When	this is done, you can run test start script. On Windows, from the command line run:</p>
+            <p>[Optional] Run tests. To do that, you will need to set som
+            environment variables (<a href="inst">see above</a>). When this is 
+            done, you can run test start script. On Windows, from the command line run:</p>
             
             <source>%CAYENNE_HOME%\bin\runtests.bat</source>
                 
