@@ -55,8 +55,7 @@ package org.objectstyle.cayenne.tools;
  *
  */
 
-import java.io.File;
-import java.io.Writer;
+import java.io.*;
 
 import org.xml.sax.InputSource;
 
@@ -89,6 +88,7 @@ public class CayenneGenerator extends Task {
         validateAttributes();
 
         try {
+            mapTimestamp = map.lastModified();
             InputSource in = new InputSource(map.getCanonicalPath());
             DataMap dataMap = new MapLoaderImpl().loadDataMap(in);
 
@@ -119,7 +119,6 @@ public class CayenneGenerator extends Task {
             throw new BuildException("Error generating classes.", ex);
         }
     }
-    
 
     /** Validates atttribute combinatins. Throws BuildException if
      *  attributes are invalid. 
@@ -233,7 +232,46 @@ public class CayenneGenerator extends Task {
         }
 
         public Writer openWriter(ObjEntity entity, String className) throws Exception {
-            return null;
+            return (className.startsWith(SUPERCLASS_PREFIX))
+                ? writerForSuperclass(entity, className)
+                : writerForClass(entity, className);
+        }
+
+        private Writer writerForSuperclass(ObjEntity entity, String className)
+            throws Exception {
+            File destFile = (superDestDir != null) ? superDestDir : destDir;
+            File dest =
+                getProject().resolveFile(
+                    destFile.getPath() + File.separator + className + ".java");
+
+            // ignore newer files
+            if (dest.exists()
+                && dest.lastModified() > CayenneGenerator.this.mapTimestamp) {
+                return null;
+            }
+
+            return new FileWriter(dest);
+        }
+
+        private Writer writerForClass(ObjEntity entity, String className)
+            throws Exception {
+            File dest =
+                getProject().resolveFile(
+                    destDir.getPath() + File.separator + className + ".java");
+
+            if (dest.exists()) {
+                // skip if said so
+                if (!makepairs && !overwrite) {
+                    return null;
+                }
+                
+                // ignore newer files
+                if (dest.lastModified() > CayenneGenerator.this.mapTimestamp) {
+                    return null;
+                }
+            }
+
+            return new FileWriter(dest);
         }
     }
 }
