@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
 import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
 import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
+import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.GenerateDbAction;
 import org.objectstyle.cayenne.modeler.action.ImportDbAction;
 import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
@@ -112,11 +113,11 @@ public class TopModel {
         actionMap.put(closeProjectAction.getKey(), closeProjectAction);
 
         CayenneAction newProjectAction = new NewProjectAction();
-        newProjectAction.setEnabled(true);
+        newProjectAction.setAlwaysOn(true);
         actionMap.put(newProjectAction.getKey(), newProjectAction);
 
         CayenneAction openProjectAction = new OpenProjectAction();
-        openProjectAction.setEnabled(true);
+        openProjectAction.setAlwaysOn(true);
         actionMap.put(openProjectAction.getKey(), openProjectAction);
 
         CayenneAction saveAction = new SaveAction();
@@ -171,11 +172,15 @@ public class TopModel {
         actionMap.put(genDbAction.getKey(), genDbAction);
 
         CayenneAction aboutAction = new AboutAction();
-        aboutAction.setEnabled(true);
+        aboutAction.setAlwaysOn(true);
         actionMap.put(aboutAction.getKey(), aboutAction);
-        
+
         CayenneAction pkgAction = new PackageMenuAction();
         actionMap.put(pkgAction.getKey(), pkgAction);
+
+        CayenneAction exitAction = new ExitAction();
+        exitAction.setAlwaysOn(true);
+        actionMap.put(exitAction.getKey(), exitAction);
     }
 
     /**

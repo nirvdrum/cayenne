@@ -89,6 +89,7 @@ import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
 import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
 import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
+import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.GenerateDbAction;
 import org.objectstyle.cayenne.modeler.action.ImportDbAction;
 import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
@@ -160,8 +161,6 @@ public class Editor
     protected EditorView view;
     protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
 
-    // these all must be put in actions
-    protected JMenuItem exitMenu = new JMenuItem("Exit");
     protected JMenuItem generateMenu = new JMenuItem("Generate Classes");
 
     protected XmlFilter xmlFilter = new XmlFilter();
@@ -292,7 +291,7 @@ public class Editor
         fileMenu.add(recentFileMenu);
 
         fileMenu.addSeparator();
-        fileMenu.add(exitMenu);
+        fileMenu.add(getAction(ExitAction.ACTION_NAME).buildMenu());
 
         projectMenu.add(getAction(CreateDomainAction.ACTION_NAME).buildMenu());
         projectMenu.add(getAction(CreateNodeAction.ACTION_NAME).buildMenu());
@@ -323,8 +322,6 @@ public class Editor
         // "legacy" code - need to hook up all menus and toolbars with actions 
         disableMenu();
 
-        exitMenu.addActionListener(this);
-
         generateMenu.addActionListener(this);
 
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -332,7 +329,7 @@ public class Editor
 
         this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                exitEditor();
+                ((ExitAction)getAction(ExitAction.ACTION_NAME)).exit();
             }
         });
     }
@@ -447,26 +444,13 @@ public class Editor
         }
     }
 
-    protected void exitEditor() {
-        if (!((ProjectAction) getAction(NewProjectAction.ACTION_NAME))
-            .checkSaveOnClose()) {
-            return;
-        }
-
-        ModelerPreferences.getPreferences().storePreferences();
-        Editor.this.setVisible(false);
-        System.exit(0);
-    }
-
     public void actionPerformed(ActionEvent e) {
         try {
             Object src = e.getSource();
 
             if (src == generateMenu) {
                 generateClasses();
-            } else if (src == exitMenu) {
-                exitEditor();
-            }
+            } 
         } catch (Exception ex) {
             ErrorDebugDialog.guiException(ex);
         }
@@ -560,11 +544,6 @@ public class Editor
 
         // explicitly disable "legacy" menus
         generateMenu.setEnabled(false);
-
-        // these are always on
-        exitMenu.setEnabled(true);
-        getAction(NewProjectAction.ACTION_NAME).setEnabled(true);
-        getAction(OpenProjectAction.ACTION_NAME).setEnabled(true);
     }
 
     private void enableProjectMenu() {

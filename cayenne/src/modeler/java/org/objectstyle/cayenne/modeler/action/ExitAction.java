@@ -57,28 +57,33 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
-import org.objectstyle.cayenne.modeler.AboutDialog;
 import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.ModelerPreferences;
 
 /**
  * @author Andrei Adamchik
  */
-public class AboutAction extends CayenneAction {
-    public static final String ACTION_NAME = "About CayenneModeler";
+public class ExitAction extends ProjectAction {
+    public static final String ACTION_NAME = "Exit";
 
     /**
-     * Constructor for AboutMenuAction.
-     * @param name
+     * Constructor for ExitAction.
      */
-    public AboutAction() {
+    public ExitAction() {
         super(ACTION_NAME);
     }
 
-    /**
-     * Displays About dialog.
-     */
     public void performAction(ActionEvent e) {
-        new AboutDialog(Editor.getFrame());
+        exit();
     }
 
+    public void exit() {
+        if (!checkSaveOnClose()) {
+            return;
+        }
+
+        ModelerPreferences.getPreferences().storePreferences();
+        Editor.getFrame().setVisible(false);
+        System.exit(0);
+    }
 }
