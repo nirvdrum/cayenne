@@ -89,7 +89,7 @@ public class FlattenedRelationshipInsertQuery extends AbstractQuery {
 	
 	private ObjEntity getSourceObjEntity() {
 		DataObject sourceObject = this.getSource();
-		return sourceObject.getDataContext().getEntityResolver().lookupObjEntity(sourceObject.getClass());
+		return sourceObject.getDataContext().getEntityResolver().lookupObjEntity(sourceObject);
 	}
 	
 	private ObjRelationship getRelationship() {

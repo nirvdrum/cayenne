@@ -80,7 +80,7 @@ public class FlattenedRelationshipInsertTranslator extends InsertTranslator {
 
 	private ObjRelationship getRelationship() {
 		DataObject sourceObject =flattenedInsertQuery().getSource();
-		ObjEntity sourceEntity = engine.getEntityResolver().lookupObjEntity(sourceObject.getClass());
+		ObjEntity sourceEntity = engine.getEntityResolver().lookupObjEntity(sourceObject);
 		return
 			(ObjRelationship) sourceEntity.getRelationship(flattenedInsertQuery().getRelationshipName());
 	}

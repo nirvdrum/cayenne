@@ -319,7 +319,7 @@ public class CayenneDataObject implements DataObject {
     }
     
 	private ObjRelationship getRelationshipNamed(String relName) {
-		return (ObjRelationship) dataContext.getEntityResolver().lookupObjEntity(this.getClass()).getRelationship(relName);
+		return (ObjRelationship) dataContext.getEntityResolver().lookupObjEntity(this).getRelationship(relName);
 	}
 
     /** 

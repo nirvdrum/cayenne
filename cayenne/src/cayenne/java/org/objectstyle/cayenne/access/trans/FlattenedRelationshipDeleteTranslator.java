@@ -72,7 +72,7 @@ public class FlattenedRelationshipDeleteTranslator extends DeleteTranslator {
 
 	private ObjRelationship getRelationship() {
 		DataObject sourceObject =flattenedDeleteQuery().getSource();
-		ObjEntity sourceEntity = engine.getEntityResolver().lookupObjEntity(sourceObject.getClass());
+		ObjEntity sourceEntity = engine.getEntityResolver().lookupObjEntity(sourceObject);
 		return
 			(ObjRelationship) sourceEntity.getRelationship(flattenedDeleteQuery().getRelationshipName());
 	}

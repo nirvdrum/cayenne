@@ -255,7 +255,7 @@ public final class QueryHelper {
 
 	public static SelectQuery selectRelationshipObjects(QueryEngine e, DataObject source, String relName) {
 		SelectQuery sel = new SelectQuery();
-		ObjEntity ent = e.getEntityResolver().lookupObjEntity(source.getClass());
+		ObjEntity ent = e.getEntityResolver().lookupObjEntity(source);
 		ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
 		ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
 		sel.setRoot(destEnt);
