@@ -74,8 +74,8 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataRowStore;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.event.DomainEvent;
-import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.control.CacheSyncConfigController;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
@@ -84,7 +84,7 @@ import org.objectstyle.cayenne.modeler.validator.ValidatorDialog;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.util.Util;
 
-import com.jgoodies.forms.extras.DefaultFormBuilder;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
 /** 

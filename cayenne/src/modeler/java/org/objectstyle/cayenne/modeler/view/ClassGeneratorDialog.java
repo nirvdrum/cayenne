@@ -82,7 +82,7 @@ import org.scopemvc.view.swing.STableModel;
 import org.scopemvc.view.swing.STextField;
 import org.scopemvc.view.swing.SwingView;
 
-import com.jgoodies.forms.extras.DefaultFormBuilder;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
 /** 

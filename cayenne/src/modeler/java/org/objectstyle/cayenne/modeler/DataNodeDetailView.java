@@ -82,7 +82,7 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.PreferenceField;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 
-import com.jgoodies.forms.extras.DefaultFormBuilder;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
 /** 

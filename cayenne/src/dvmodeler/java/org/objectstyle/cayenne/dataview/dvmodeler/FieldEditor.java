@@ -56,14 +56,23 @@
 
 package org.objectstyle.cayenne.dataview.dvmodeler;
 
-import java.awt.*;
-import javax.swing.*;
-import com.jgoodies.forms.extras.DefaultFormBuilder;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.factories.*;
-import com.jgoodies.plaf.Options;
+import java.awt.BorderLayout;
 
-import java.util.*;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.factories.Borders;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.plaf.Options;
 
 /**
  *
@@ -212,8 +221,6 @@ public class FieldEditor extends JPanel {
     objEntityViewField = field;
     ObjEntityView objEntityView = field.getObjEntityView();
     viewNameField.setText(objEntityView.getName());
-
-    ObjEntity objEntity = field.getObjEntityView().getObjEntity();
 
     fieldNameField.setText(field.getName());
     dataTypeCombo.setSelectedItem(field.getDataType());

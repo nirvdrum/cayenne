@@ -90,7 +90,7 @@ import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 
-import com.jgoodies.forms.extras.DefaultFormBuilder;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
 /** 

@@ -70,7 +70,7 @@ import org.scopemvc.view.swing.SComboBox;
 import org.scopemvc.view.swing.SPanel;
 import org.scopemvc.view.swing.SwingView;
 
-import com.jgoodies.forms.extras.DefaultFormBuilder;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**

@@ -56,16 +56,23 @@
 
 package org.objectstyle.cayenne.dataview.dvmodeler;
 
-import java.util.*;
-import java.io.*;
+import java.awt.CardLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.Iterator;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 
-import com.jgoodies.forms.extras.DefaultFormBuilder;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.factories.*;
 
 /**
  * This class defines contents for part of DVModelerFrame frame.

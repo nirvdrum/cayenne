@@ -87,7 +87,7 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.DataNodeWrapper;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 
-import com.jgoodies.forms.extras.DefaultFormBuilder;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
 /** 

@@ -61,7 +61,7 @@ import org.objectstyle.cayenne.modeler.model.CacheSyncConfigModel;
 import org.scopemvc.view.swing.SPanel;
 import org.scopemvc.view.swing.STextField;
 
-import com.jgoodies.forms.extras.DefaultFormBuilder;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**
