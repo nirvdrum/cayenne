@@ -105,8 +105,7 @@ public class ClassGenerator {
 					"jar.resource.loader.class",
 					"org.apache.velocity.runtime.resource.loader.JarResourceLoader");
 				props.put("jar.resource.loader.path", classLoaderUrl);
-			} else if (
-				classLoaderUrl != null && classLoaderUrl.startsWith("file:")) {
+			} else if (classLoaderUrl != null && classLoaderUrl.startsWith("file:")) {
 
 				loaderProp = "file";
 				props.put("file.resource.loader.path", classLoaderUrl);
@@ -116,7 +115,7 @@ public class ClassGenerator {
 			if (loaderProp.indexOf("file") < 0) {
 				loaderProp += ",file";
 			}
-			
+
 			// use custome file loader
 			props.put(
 				"file.resource.loader.class",
@@ -203,6 +202,22 @@ public class ClassGenerator {
 		this.superPrefix = superPrefix;
 	}
 
+	public String formatJavaType(String type) {
+		if (type != null) {
+			if (type.startsWith("java.lang.") && type.indexOf(10, '.') < 0) {
+				return type.substring("java.lang.".length());
+			}
+
+			if (packageName != null
+				&& type.startsWith(packageName + '.')
+				&& type.indexOf(packageName.length() + 1, '.') < 0) {
+				return type.substring(packageName.length() + 1);
+			}
+		}
+
+		return type;
+	}
+
 	/** Returns prefix used to distinguish between superclass
 	  * and subclass when generating classes in pairs. */
 	public String getSuperPrefix() {
@@ -210,8 +225,9 @@ public class ClassGenerator {
 	}
 
 	/** Sets current class property name. This method
-	  * is calledduring template parsing for each of the 
-	  * class properties. */
+	  * is called during template parsing for each of the 
+	  * class properties. 
+	  */
 	public void setProp(String prop) {
 		this.prop = prop;
 	}
@@ -225,9 +241,7 @@ public class ClassGenerator {
 			return prop;
 
 		char c = Character.toUpperCase(prop.charAt(0));
-		return (prop.length() == 1)
-			? Character.toString(c)
-			: c + prop.substring(1);
+		return (prop.length() == 1) ? Character.toString(c) : c + prop.substring(1);
 	}
 
 	/** 

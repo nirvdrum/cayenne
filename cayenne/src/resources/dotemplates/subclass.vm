@@ -2,8 +2,6 @@
 package ${classGen.packageName};
 #end
 
-import org.objectstyle.cayenne.*;
-
 public class ${classGen.className} extends #if(${classGen.isUsingSuperPackage()})${classGen.superPackageName}.#end${classGen.superPrefix}${classGen.className} {
 
 }
