@@ -52,35 +52,107 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne;
 
-import junit.framework.TestSuite;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Properties;
+
+import org.apache.log4j.Logger;
+import org.objectstyle.TestMain;
 
 /**
- * Cayenne package tests.
+ * Tests issues not directly related to Cayenne.
  * 
  * @author Andrei Adamchik
  */
-public class AllTests {
-	
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Cayenne Framework Tests");
-		suite.addTestSuite(QueryHelperTst.class);
-		suite.addTestSuite(CayenneDataObjectTst.class);
-		suite.addTestSuite(CayenneDataObjectInCtxtTst.class);
-		suite.addTestSuite(CayenneDataObjectRelTst.class);
-		suite.addTestSuite(CDOMany2OneNoRevTst.class);
-		suite.addTestSuite(CDOOneDep2OneTst.class);
-		suite.addTestSuite(CDOMany2OneTst.class);
-		suite.addTestSuite(CDOOne2ManyTst.class);
-		suite.addTestSuite(CDOOne2OneDepTst.class);
-		suite.addTestSuite(ObjectIdTst.class);
-		suite.addTestSuite(DOPrefetchTst.class);
-		suite.addTestSuite(CayenneExceptionTst.class);
-		suite.addTestSuite(CayenneRuntimeExceptionTst.class);
-		suite.addTestSuite(ConfigExceptionTst.class);
-		suite.addTestSuite(MiscTst.class);
-		return suite;
-	}
+public class MiscTst extends CayenneTestCase {
+	static Logger logObj = Logger.getLogger(MiscTst.class);
+
+    /**
+     * Constructor for MiscTest.
+     * @param arg0
+     */
+    public MiscTst(String arg0) {
+        super(arg0);
+    }
+
+    public void setUp() throws java.lang.Exception {
+        TestMain.getSharedDatabaseSetup().cleanTableData();
+    }
+
+    public void testNothing() throws Exception {
+    	// noop to keep class from failing
+    }
+    
+   /* public void testUTFJDBC() throws Exception {        
+        Connection c = super.getSharedConnection();
+        try {
+            PreparedStatement st =
+                c.prepareStatement(
+                    "insert into ARTIST (ARTIST_ID, ARTIST_NAME) " + "values (1, ?)");
+
+            try {
+                st.setString(1, "\u0424");
+                st.execute();
+            } finally {
+                st.close();
+            }
+
+            Statement st1 = c.createStatement();
+
+            try {
+                ResultSet rs = st1.executeQuery("select ARTIST_NAME from ARTIST");
+                rs.next();
+                
+                
+                String inStr = rs.getString(1);
+                assertEquals("Not a unicode.", 1, inStr.length());
+                
+                char c1 = inStr.charAt(0);
+                assertTrue("Bad UNICODE char: " + charToHex(c1), c1 == '\u0424');
+            } finally {
+                st1.close();
+            }
+
+        } finally {
+            c.close();
+        }
+    }
+*/
+    static public String byteToHex(byte b) {
+        // Returns hex String representation of byte b
+
+        char hexDigit[] =
+            {
+                '0',
+                '1',
+                '2',
+                '3',
+                '4',
+                '5',
+                '6',
+                '7',
+                '8',
+                '9',
+                'a',
+                'b',
+                'c',
+                'd',
+                'e',
+                'f' };
+        char[] array = { hexDigit[(b >> 4) & 0x0f], hexDigit[b & 0x0f] };
+        return new String(array);
+    }
+
+    static public String charToHex(char c) {
+        // Returns hex String representation of char c
+        byte hi = (byte) (c >>> 8);
+        byte lo = (byte) (c & 0xff);
+        return byteToHex(hi) + byteToHex(lo);
+    }
 }
