@@ -9,8 +9,11 @@
     <section name="4. Design">
         <subsection name="4.2 Data Objects" anchor="do">
             <p>Cayenne's main function is to provide object-based access
-            to relational data sources. All objects that represent database data 
-            in Cayenne must implement <a href=
+            to relational data sources. Data objects in Cayenne are fully portable and contain
+            only data and business logic. It is a task of the framework to perform operations 
+            required to provide objects persistence.</p>
+            
+            <p>All objects that represent database data in Cayenne must implement <a href=
             "../../api/org/objectstyle/cayenne/DataObject.html">DataObject</a> interface.
             Default implementation of DataObject is <a href=
             "../../api/org/objectstyle/cayenne/CayenneDataObject.html">CayenneDataObject</a>.
@@ -28,7 +31,7 @@
             	relational databases. Its internal implementation in fact uses 
             	primary key values from the database. Cayenne takes care of creating 
             	and managing ObjectId's. Application developers normally do not 
-            	work with ObjectId directly.             		
+            	work with ObjectId directly.          		
             	</p>
             	
             	<panel name="Note:">
