@@ -375,6 +375,8 @@ public class EOModelProcessor {
             }
         }
     }
+    
+    
 
     /**
      * Create ObjRelationships of the specified entity, as well as DbRelationships of the
@@ -385,12 +387,18 @@ public class EOModelProcessor {
         List classProps = (List) entityPlistMap.get("classProperties");
         List rinfo = (List) entityPlistMap.get("relationships");
 
+        Collection attributes = (Collection) entityPlistMap.get("attributes");
+        
         if (rinfo == null) {
             return;
         }
 
         if (classProps == null) {
             classProps = Collections.EMPTY_LIST;
+        }
+        
+        if (attributes == null) {
+            attributes = Collections.EMPTY_LIST;
         }
 
         DbEntity dbSrc = objEntity.getDbEntity();
@@ -416,6 +424,8 @@ public class EOModelProcessor {
             }
 
             DbEntity dbTarget = target.getDbEntity();
+            Map targetPlistMap = helper.entityPListMap(targetName);
+            Collection targetAttributes = (Collection) targetPlistMap.get("attributes");
             DbRelationship dbRel = null;
 
             // process underlying DbRelationship
@@ -436,8 +446,14 @@ public class EOModelProcessor {
                     Map joinMap = (Map) jIt.next();
 
                     DbJoin join = new DbJoin(dbRel);
-                    join.setSourceName((String) joinMap.get("sourceAttribute"));
-                    join.setTargetName((String) joinMap.get("destinationAttribute"));
+                    
+                    // find source attribute dictionary and extract the column name
+                    String sourceAttributeName = (String) joinMap.get("sourceAttribute");
+                    join.setSourceName(columnName(attributes, sourceAttributeName));
+                    
+                    String targetAttributeName = (String) joinMap.get("destinationAttribute");
+                    
+                    join.setTargetName(columnName(targetAttributes, targetAttributeName));
                     dbRel.addJoin(join);
                 }
             }
@@ -547,6 +563,28 @@ public class EOModelProcessor {
             }
         }
 
+    }
+    
+    /**
+     * Locates an attribute map matching the name and returns column name for this
+     * attribute. 
+     * 
+     * @since 1.1
+     */
+    String columnName(Collection entityAttributes, String attributeName) {
+        if(attributeName == null) {
+            return null;
+        }
+        
+        Iterator it = entityAttributes.iterator();
+        while(it.hasNext()) {
+            Map map = (Map) it.next();
+            if(attributeName.equals(map.get("name"))) {
+                return (String) map.get("columnName");
+            }
+        }
+        
+        return null;
     }
 
     /**
