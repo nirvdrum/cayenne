@@ -101,7 +101,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     }
 
     /**
-     * @see DataSourceFactory#initWithParentConfiguration(Configuration)
+     * @see DataSourceFactory#initializeWithParentConfiguration(Configuration)
      */
     public void initializeWithParentConfiguration(Configuration conf) {
         this.parentConfiguration = conf;
