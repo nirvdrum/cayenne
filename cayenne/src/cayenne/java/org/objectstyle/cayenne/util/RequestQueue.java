@@ -65,11 +65,12 @@ import java.util.List;
  * in the queue until either of the following events happen:
  * 
  * <ul>
- *    <li>Thread is already #1 in the queue and an awaited event occurrs</li>
- * 	  <li>Thread timeout interval expired</li>
+ *    <li>Thread is already #1 in the queue and an awaited event occurrs.</li>
+ * 	  <li>Thread timeout interval expired.</li>
+ *    <li>Thread was interrupted (this is a quick way to remove thread from the queue).</li>
  * </ul>
  * 
- * In both cases thread will be removed from the queue. 
+ * If any of the conditions above ocurrs, thread will be removed from the queue. 
  * 
  * @author Andrei Adamchik
  */
