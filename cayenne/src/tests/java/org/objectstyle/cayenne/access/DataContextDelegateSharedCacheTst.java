@@ -61,6 +61,7 @@ import java.util.Date;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.unittest.MultiContextTestCase;
 
@@ -127,7 +128,7 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
      * 
      * @throws Exception
      */
-    public void testShouldProcessDelete() throws Exception {
+    public void testShouldProcessDeleteOnExternalChange() throws Exception {
         // two contexts being tested
         DataContext context = artist.getDataContext();
         DataContext altContext = mirrorDataContext(context);
@@ -157,5 +158,36 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         // assert that delegate was consulted when an object store
         // was refreshed
         assertTrue(methodInvoked[0]);
+    }
+    
+    /**
+     * Test case to prove that delegate method is invoked on an unsuccessful 
+     * fault resolution.
+     * 
+     * @throws Exception
+     */
+    public void testShouldProcessDeleteOnResolveFault() throws Exception {
+        // two contexts being tested
+        DataContext context = artist.getDataContext();
+ 
+        final boolean[] methodInvoked = new boolean[1];
+        DataContextDelegate delegate = new DefaultDataContextDelegate() {
+            public boolean shouldProcessDelete(DataObject object) {
+                methodInvoked[0] = true;
+                return true;
+            }
+        };
+        context.setDelegate(delegate);
+
+        // create a fault for artist with a non-existing id
+        ObjectId fakeID = new ObjectId(Artist.class, Artist.ARTIST_ID_PK_COLUMN, -10);
+        Artist noSuchArtist = (Artist)context.registeredObject(fakeID);
+        assertEquals(PersistenceState.HOLLOW, noSuchArtist.getPersistenceState());
+        
+        // attempt to resolve
+        noSuchArtist.resolveFault();
+
+        assertTrue(methodInvoked[0]);
+        assertEquals(PersistenceState.TRANSIENT, noSuchArtist.getPersistenceState());
     }
 }

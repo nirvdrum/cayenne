@@ -680,11 +680,17 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         synchronized (this) {
             DataRow snapshot = getSnapshot(object.getObjectId(), context);
 
-            ObjEntity entity = context.getEntityResolver().lookupObjEntity(object);
-            DataRowUtils.refreshObjectWithSnapshot(entity, object, snapshot, true);
+            // handle deleted object
+            if (snapshot == null) {
+                processDeletedIDs(Collections.singletonList(object.getObjectId()));
+            }
+            else {
+                ObjEntity entity = context.getEntityResolver().lookupObjEntity(object);
+                DataRowUtils.refreshObjectWithSnapshot(entity, object, snapshot, true);
 
-            if (object.getPersistenceState() == PersistenceState.HOLLOW) {
-                object.setPersistenceState(PersistenceState.COMMITTED);
+                if (object.getPersistenceState() == PersistenceState.HOLLOW) {
+                    object.setPersistenceState(PersistenceState.COMMITTED);
+                }
             }
         }
     }
