@@ -71,9 +71,10 @@ import org.objectstyle.cayenne.gui.util.CayenneTable;
 import org.objectstyle.cayenne.map.*;
 
 /** 
- * Displays DbRelationship-s for the current obj entity. 
+ * Displays DbRelationship's for the current DbEntity. 
  * 
  * @author Michael Misha Shengaout
+ * @author Andrei Adamchik
  */
 public class DbRelationshipPane extends CayenneActionPanel
 implements DbEntityDisplayListener

@@ -380,6 +380,10 @@ public class Mediator
 	public void fireDataNodeEvent(DataNodeEvent e) {
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.DataNodeListener");
+		
+		// FIXME: "dirty" flag and other procesisng is
+		// done in the loop. Loop should only care about 
+		// notifications...
 		for (int i = 0; i < list.length; i++) {
 			DataNodeListener temp = (DataNodeListener)list[i];
 			switch(e.getId()) {
@@ -395,6 +399,7 @@ public class Mediator
 				case DataNodeEvent.REMOVE:
 					temp.dataNodeRemoved(e);
 					dirtyNodes.remove(e.getDataNode());
+					setDirty(currentDomain);
 					break;
 				default:
 					throw new IllegalArgumentException(
@@ -756,14 +761,6 @@ public class Mediator
 			dirtyMaps.remove(iter.next());
 		fireDomainEvent(new DomainEvent(src, domain, DomainEvent.REMOVE));
 		fireDomainDisplayEvent(new DomainDisplayEvent(src, null));
-	}
-
-
-	public void removeDataNode(Object src, DataNode node) {
-		currentDomain.removeDataNode(node.getName());
-		fireDataNodeEvent(new DataNodeEvent(src, node, DataNodeEvent.REMOVE));
-		fireDataNodeDisplayEvent(new DataNodeDisplayEvent(src, currentDomain, null));
-		setDirty(true);
 	}
 	
 	public void addDomain(Object src, DataDomain domain) {

@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.gui.action;
 import java.awt.event.ActionEvent;
 import java.util.logging.Logger;
 
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.*;
@@ -108,10 +109,17 @@ public class RemoveAction extends CayenneAction {
 				mediator.removeDataMap(src, mediator.getCurrentDataMap());
 			}
 		} else if (mediator.getCurrentDataNode() != null) {
-			mediator.removeDataNode(src, mediator.getCurrentDataNode());
+			removeDataNode();
 		} else if (mediator.getCurrentDataDomain() != null) {
 			mediator.removeDomain(src, mediator.getCurrentDataDomain());
 		}
+	}
+
+	protected void removeDataNode() {
+		DataNode node = mediator.getCurrentDataNode();
+		DataDomain domain = mediator.getCurrentDataDomain();
+		domain.removeDataNode(node.getName());
+		mediator.fireDataNodeEvent(new DataNodeEvent(Editor.getFrame(), node, DataNodeEvent.REMOVE));
 	}
 
 	/** 

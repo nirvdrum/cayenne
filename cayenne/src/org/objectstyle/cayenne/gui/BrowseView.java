@@ -363,14 +363,17 @@ public class BrowseView
 		node = loadNode(e.getDataNode());
 		model.insertNodeInto(node, parent, parent.getChildCount());
 	}
+	
 	public void dataNodeRemoved(DataNodeEvent e) {
-		if (e.getSource() == this)
+		if (e.getSource() == this) {
 			return;
-		DefaultMutableTreeNode node;
-		node =
+		}
+		
+		DefaultMutableTreeNode treeNode =
 			getDataSourceNode(mediator.getCurrentDataDomain(), e.getDataNode());
-		if (null != node)
-			model.removeNodeFromParent(node);
+		if (treeNode != null) {
+            removeNode(treeNode);
+		}		
 	}
 
 	public void dataMapChanged(DataMapEvent e) {
@@ -526,10 +529,7 @@ public class BrowseView
 				e.getEntity());
 
 		if (treeNode != null) {
-			if (treeNode == currentNode) {
-				showClosestSibling();
-			}
-			model.removeNodeFromParent(treeNode);
+            removeNode(treeNode);
 		}
 
 		// remove from DataMap *reference* tree
@@ -541,35 +541,35 @@ public class BrowseView
 				e.getEntity());
 
 		if (treeNode != null) {
-			if (treeNode == currentNode) {
-				showClosestSibling();
-			}
-			model.removeNodeFromParent(treeNode);
+			removeNode(treeNode);
 		}
 	}
 
 	/** 
-	 * Selects a new node adjacent to the currently selected node.
-	 * This method may be called in cases like current node removal.
+	 * Removes current node from the tree. 
+	 * Selects a new node adjacent to the currently selected node instead.
 	 */
-	protected void showClosestSibling() {
-		if (currentNode != null) {
+	protected void removeNode(DefaultMutableTreeNode toBeRemoved) {
+		
+		// lookup for the new selected node
+		if (currentNode == toBeRemoved) {
+			
 			// first search siblings
-			DefaultMutableTreeNode newSelection = currentNode.getNextSibling();
+			DefaultMutableTreeNode newSelection = toBeRemoved.getNextSibling();
 			if (newSelection == null) {
-				newSelection = currentNode.getPreviousSibling();
+				newSelection = toBeRemoved.getPreviousSibling();
 
 				// try parent
 				if (newSelection == null) {
-					newSelection = (DefaultMutableTreeNode)currentNode.getParent();
+					newSelection = (DefaultMutableTreeNode)toBeRemoved.getParent();
 
 					// search the whole tree
 					if (newSelection == null) {
 
-						newSelection = currentNode.getNextNode();
+						newSelection = toBeRemoved.getNextNode();
 						if (newSelection == null) {
 
-							newSelection = currentNode.getPreviousNode();
+							newSelection = toBeRemoved.getPreviousNode();
 						}
 					}
 				}
@@ -578,6 +578,9 @@ public class BrowseView
 			currentNode = newSelection;
 			showNode(currentNode);
 		}
+		
+		// remove this node
+		model.removeNodeFromParent(toBeRemoved);
 	}
 
 	/** Get domain node by DataDomain. */
