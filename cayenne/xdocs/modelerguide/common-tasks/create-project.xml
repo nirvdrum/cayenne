@@ -4,7 +4,7 @@
 <body>
 	<section name="4. Common Modeling Tasks">
 	<subsection name="4.1 Create New Project">
- 	 	<p><strong>Start CayenneModeler</strong>. Start CayenneModeler as described
+ 	 	<p><strong>Prerequisites.</strong> Start CayenneModeler as described
  	 	<a href="../modeler-intro/runmodeler.html">earlier</a>.</p>
  	 	
  	    <p><strong>Start New Project</strong>. Select "File -> New Project" menu item or click
@@ -25,7 +25,7 @@
         <img src="/images/modelerguide/new-domain.jpg" width="400" height="240" border="0" align="middle"
 		alt="Create DataDomain"/>
  	 	
-		<p>After the domain is created you can assign it any name you want instead of the default
+		<p>After the domain is created, you can assign it any name you want instead of the default
 		"UntitledDomain1".
 		</p>
 		

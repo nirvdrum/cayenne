@@ -4,7 +4,30 @@
 <body>
 	<section name="4. Common Modeling Tasks">
 	<subsection name="4.3 Reverse Engineer Database">
- 	 	<p></p>
+ 	 	<p><strong>Prerequisites.</strong> Start CayenneModeler and <a href="create-project.html">create 
+ 	 	a new project</a> or open an existing one. <a href="create-data-node.html">Create DataNode</a> 
+ 	 	with the target database connection info.
+ 	 	</p>
+ 	 	
+ 	 	<p><strong>Start Reverse Engineering.</strong> On the left-hand side project tree 
+ 	 	select DataNode with connection information of the target database. Select "Tools -> 
+ 	 	Reengineer Database Schema" from the menu:</p>
+ 	 	
+ 	 	<img src="/images/modelerguide/reengineer-db.jpg" width="520" height="336" border="0" align="middle"
+		alt="Reengineer Database Schema"/>
+		
+ 	 	<p>A dialog pops up that allows to specify alternative connection parameters. Click OK. 
+ 	 	</p>
+ 	 	
+ 	 	<p><strong>Select Schema And Table Name Pattern.</strong> Modeler will show a dialog allowing to limit the
+ 	 	number of tables being processed. Table name pattern can be specified ("%" stands for match all
+ 	 	table names). Also if a database supports schemas, one of the schemas can be selected. After clicking "OK", it
+ 	 	may take Modeler from a few seconds to a few minutes to finish reengineering. After that a new DataMap will
+ 	 	be created:
+ 	 	</p>
+ 	 	
+ 	 	<img src="/images/modelerguide/reengineered-map.jpg" width="520" height="336" border="0" align="middle"
+		alt="Reengineered DataMap"/>
  	 	</subsection>
  	 	
     </section>

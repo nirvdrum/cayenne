@@ -4,7 +4,53 @@
 <body>
 	<section name="4. Common Modeling Tasks">
 	<subsection name="4.2 Create DataNode">
- 	 	<p></p>
+ 	 	<p><strong>Prerequisites.</strong> Start CayenneModeler and <a href="create-project.html">create 
+ 	 	a new project</a> or open an existing one.</p>
+ 	 	
+ 	    <p><strong>Create DataNode.</strong> DataNodes (or in other words, database server connections or
+ 	    physical data sources) are associated with DataDomains (logical data sources).
+ 	    Select one of the DataDomains on the left hand tree. Select "Project -> Create DataNode" menu item or click
+ 	    on "New DataNode" icon:</p>
+ 	    
+        <img src="/images/modelerguide/new-node.jpg" width="400" height="240" border="0" align="middle"
+		alt="Create DataNode"/>
+
+        <p>This will create a new DataNode under the selected domain. After the DataNode is created, 
+        you can assign it any name you want instead of the default
+		"UntitledDataNode1".
+		</p>
+		
+		<p><strong>Configure Data Source Factory</strong>. Depending on how you plan to deploy this Cayenne project, 
+		make a selection from the "Data source factory" dropdown. Select JNDIDataSourceFactory if you plan
+		to obtain DataSource via JNDI from deployment container. Select DriverDataSourceFactory to 
+		use JDBC driver.
+		</p>
+		
+		<panel name="Note:">
+			If you are planning JNDI deployment, you may still want to create another DataNode in the project 
+			configured to use JDBC driver for convenience. This will allow to store database connection 
+			information in the project and use it for reverse and forward engineering of the database schema.
+		</panel>
+		
+		<p><strong>Configure DataNode Location.</strong> Location field of the JNDI DataNode is a JNDI lookup
+		name for the javax.sql.DataSource object that should be available from the container
+		at the runtime. Type this JNDI name into the "Location" field. For driver nodes location is a path to the
+		XML file that stores connection information, relative to the project (cayenne.xml) directory. 
+		This field is not editable and is derived from the name of the DataNode.
+		</p>
+		
+		<p><strong>Configure DB Adapter.</strong> As <a href="../../userguide/design/crossdb.html">mentioned</a> 
+		in Cayenne User Guide, various RDBMS engines require special handling of some operations. Cayenne abstracts
+		these differences by implementaing a set of database-specific adapters. An adapter must be selected from a 
+		"DB adapter" dropdown regardless whether the DataNode is using JNDI or Driver factory.
+		Standard adapters distributed with Cayenne (including a generic JDBCAdapter) are listed in the dropdown.
+		If you created your own adapter, type the full class name of a class that implements DbAdapter interface instead.
+		</p>
+		
+		<p><strong>Configure Connection Information (Driver factory only).</strong> 
+		Type connection user name, password, JDBC driver class, and database URL in the fields provided. 
+		</p>
+		
     </subsection>
     </section>
 </body>
