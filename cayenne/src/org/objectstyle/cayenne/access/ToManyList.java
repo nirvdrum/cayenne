@@ -64,12 +64,12 @@ import org.objectstyle.cayenne.ObjectId;
 /**
  * Special List implementation to hold "to many" relationship data.
  *
- * Encapsulates a list via a weak reference. This means that Java VM garbage collector can cleanup a relationship
+ * <p>Encapsulates a list via a weak reference. This means that Java VM garbage collector can cleanup a relationship
  * list when it runs out of memory. This list can be restored later if it is requested again.
- * Such approach should prevent circular references between objects.
+ * Such approach should prevent circular references between objects.</p>
  *
- * To retain guaranteed immutable reference to the list, 
- * application might use "List.toArray()" method. 
+ * <p>To retain guaranteed immutable reference to the list, 
+ * application might use "List.toArray()" method.</p>
  * 
  * <p><i>For more information see <a href="../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
@@ -110,8 +110,9 @@ public class ToManyList implements List {
     }
     
     private List getObjectList() {
-        if(needsFetch())
+        if(needsFetch()) {
             listDataSource.updateListData(this);
+        }
         
         return (List)destObjects.get();
     }

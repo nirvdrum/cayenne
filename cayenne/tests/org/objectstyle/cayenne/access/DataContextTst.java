@@ -56,18 +56,17 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.*;
 import java.util.logging.Logger;
 
-import javax.sql.ConnectionPoolDataSource;
 import junit.framework.TestCase;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.TestOperationObserver;
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -207,8 +206,8 @@ public class DataContextTst extends TestCase {
 		q.addPrefetch("paintingArray");
 
 		SelectObserver o = new SelectObserver();
-		// o.setQueryLogLevel(Level.SEVERE);
 		ctxt.performQuery(q, o);
+		
 		assertEquals(2, o.getSelectCount());
 	}
 
@@ -228,9 +227,39 @@ public class DataContextTst extends TestCase {
 		q.addPrefetch("artistExhibitArray.toExhibit");
 
 		SelectObserver o = new SelectObserver();
-		// o.setQueryLogLevel(Level.SEVERE);
 		ctxt.performQuery(q, o);
+		
 		assertEquals(4, o.getSelectCount());
+	}
+	
+	
+	/** 
+	 * Test that a to-many relationship is initialized.
+	 */
+	public void testPrefetch3() throws Exception {
+		populatePaintings();
+		
+		SelectQuery q = new SelectQuery("Artist");
+		q.addPrefetch("paintingArray");
+
+		CayenneDataObject a1 = (CayenneDataObject)ctxt.performQuery(q).get(0);
+        ToManyList toMany = (ToManyList)a1.readPropertyDirectly("paintingArray");
+        // assertTrue(!toMany.needsFetch());
+	}
+	
+	/** 
+	 * Test that a to-one relationship is initialized.
+	 */
+	public void testPrefetch4() throws Exception {
+		populatePaintings();
+		
+		SelectQuery q = new SelectQuery("Painting");
+		q.addPrefetch("toArtist");
+
+		CayenneDataObject p1 = (CayenneDataObject)ctxt.performQuery(q).get(0);
+        CayenneDataObject a1 = (CayenneDataObject)p1.readPropertyDirectly("toArtist");
+        
+        assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
 	}
 
 	public void testPerformQueries() throws Exception {

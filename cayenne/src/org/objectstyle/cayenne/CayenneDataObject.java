@@ -132,8 +132,9 @@ public class CayenneDataObject implements DataObject {
 
 
     protected Object readProperty(String propName) {
-        if(persistenceState == PersistenceState.HOLLOW)
+        if(persistenceState == PersistenceState.HOLLOW) {
             dataContext.refetchObject(objectId);
+        }
 
         return readPropertyDirectly(propName);
     }
@@ -144,8 +145,9 @@ public class CayenneDataObject implements DataObject {
 
 
     protected void writeProperty(String propName, Object val) {
-        if(persistenceState == PersistenceState.COMMITTED)
+        if(persistenceState == PersistenceState.COMMITTED) {
             persistenceState = PersistenceState.MODIFIED;
+        }
 
         writePropertyDirectly(propName, val);
     }
@@ -158,12 +160,14 @@ public class CayenneDataObject implements DataObject {
         Object toOneTarget = readProperty(relName);
 
         // known to be NULL
-        if(toOneTarget == nullValue)
+        if(toOneTarget == nullValue) {
             return null;
+        }
 
         // known to be NOT NULL
-        if(toOneTarget != null)
+        if(toOneTarget != null) {
             return (DataObject)toOneTarget;
+        }
 
 
         // need to fetch
@@ -171,8 +175,9 @@ public class CayenneDataObject implements DataObject {
         List results = dataContext.performQuery(sel);
 
         // unexpected
-        if(results.size() > 1)
+        if(results.size() > 1) {
             throw new CayenneRuntimeException("error retrieving 'to one' target, found " + results.size());
+        }
 
         // null target
         if(results.size() == 0) {

@@ -9,25 +9,27 @@ http://objectstyle.org/cayenne/
 
 Changes in this release:
 ============================================
-1. Added ResultIterator - now it is possible to retrieve data rows one at a time.
+1. Added support for Data Rows.
 
-2. Added public method DataContext.objectFromDataRow (rather exposed 
+2. Added ResultIterator - now it is possible to retrieve data rows one at a time.
+
+3. Added public method DataContext.objectFromDataRow (rather exposed 
 another private method).
 
-3. Term "Snapshot" is changed to "DataRow" in most places.
+4. Term "Snapshot" is changed to "DataRow" in most places.
    - OperationObserver and its implementations: nextSnapshots became nextDataRows
    
-4. Removed public DataNode.snapshotsFromResultSet refactored into 
+5. Removed public DataNode.snapshotsFromResultSet refactored into 
 DefaultResultIterator
 
-5. It is no longer recommended to install Cayenne in JVM extension 
+6. It is no longer recommended to install Cayenne in JVM extension 
 directory due to resource loation issues.
 
-6. Split OperationObserver into OperationObserver and OperationHints for clearer API.
+7. Split OperationObserver into OperationObserver and OperationHints for clearer API.
 
-7. Renamed SelectOperationObserver to SelectObserver for consistency reasons.
+8. Renamed SelectOperationObserver to SelectObserver for consistency reasons.
 
-8. Updated User Guide
+9. Updated User Guide
 
-9. Now individual Query execution log level is set in the query itself, not
+10. Now individual Query execution log level is set in the query itself, not
 in DataContext. Corresponding DataContext methods are deprecated.

@@ -621,7 +621,8 @@ public class DataContext implements QueryEngine {
 	/** 
 	 * Delegates queries execution to parent QueryEngine. If there are select
 	 * queries that require prefetching relationships, will create additional
-	 * queries to perform necessary prefetching. */
+	 * queries to perform necessary prefetching. 
+	 */
 	public void performQueries(
 		List queries,
 		OperationObserver resultConsumer) {
