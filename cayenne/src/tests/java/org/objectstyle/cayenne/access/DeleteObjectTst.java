@@ -62,12 +62,12 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unit.RelationshipTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class DeleteObjectTst extends RelationshipTestCase {
+public class DeleteObjectTst extends CayenneTestCase {
     private DataContext context;
 
     protected void setUp() throws Exception {
@@ -78,8 +78,10 @@ public class DeleteObjectTst extends RelationshipTestCase {
     }
 
     public void testDeleteHollow() throws Exception {
-        populatePaintings();
+        createTestData("testDeleteHollow");
+
         List paintings = context.performQuery(new SelectQuery(Painting.class));
+
         Painting p = (Painting) paintings.get(0);
         Artist a = p.getToArtist();
 
