@@ -1,12 +1,31 @@
-<!ELEMENT datadomains (domain+)>
-<!ELEMENT domain (datanode+)>
+<!-- ========================================== -->
+<!-- Domains (cayenne.xml) DTD file.            -->
+<!-- Author: Andrei Adamchik                    -->
+<!-- ========================================== -->
+
+<!ELEMENT domains (domain*)>
+<!ELEMENT domain (map*, node*)>
 <!ATTLIST domain
 	name CDATA #REQUIRED
-	defaultFlag CDATA #IMPLIED
 >
-<!ELEMENT datanode (nodeConfigUrl, mapConfigUrl+)>
-<!ATTLIST datanode
+
+
+<!ELEMENT map>
+<!ATTLIST map
+	name CDATA #REQUIRED
+    location CDATA #REQUIRED
+>
+
+
+<!ELEMENT node (map-ref*)>
+<!ATTLIST node
+	name CDATA #REQUIRED
+    factory CDATA #REQUIRED
+    datasource CDATA #REQUIRED
+    adapter CDATA #IMPLIED 
+>
+
+<!ELEMENT map-ref>
+<!ATTLIST map-ref
 	name CDATA #REQUIRED
 >
-<!ELEMENT nodeConfigUrl (#PCDATA)>
-<!ELEMENT mapConfigUrl  (#PCDATA)>
