@@ -94,4 +94,23 @@ public class StringValidationFailure implements ValidationFailure {
     public Object getError() {
         return error;
     }
+
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+
+        buffer.append("Validation failure for ");
+        Object source = getSource();
+
+        if (source == null) {
+            buffer.append("[General]");
+        }
+        else {
+            String property = getProperty();
+            buffer.append(source.getClass().getName()).append('.').append(
+                (property == null ? "[General]" : property));
+        }
+        buffer.append(": ");
+        buffer.append(getDescription());
+        return buffer.toString();
+    }
 }

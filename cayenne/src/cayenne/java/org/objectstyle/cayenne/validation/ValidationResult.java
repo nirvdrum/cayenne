@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.validation;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -79,7 +80,7 @@ import org.apache.log4j.Logger;
  * @author Fabricio Voznika
  * @since 1.1
  */
-public class ValidationResult {
+public class ValidationResult implements Serializable {
     private static final Logger logObj = Logger.getLogger(ValidationResult.class);
 
     private Map errors = new SequencedHashMap();
@@ -115,7 +116,7 @@ public class ValidationResult {
         }
 
         if (logObj.isDebugEnabled()) {
-            logObj.log(Level.DEBUG, failureToString(failure));
+            logObj.log(Level.DEBUG, failure);
         }
 
         Tuple tuple = new Tuple(failure.getSource(), failure.getProperty());
@@ -255,31 +256,24 @@ public class ValidationResult {
 
     public String toString() {
         StringBuffer ret = new StringBuffer(1024);
-        String lineSep = System.getProperty("line.separator");
-        for (Iterator it = this.getFailures().iterator(); it.hasNext();) {
-            ValidationFailure error = (ValidationFailure) it.next();
-            ret.append(this.failureToString(error));
-            ret.append(lineSep);
-        }
-        return ret.toString();
-    }
+        String separator = System.getProperty("line.separator");
 
-    private String failureToString(ValidationFailure failure) {
-        StringBuffer ret = new StringBuffer("256");
-        ret.append("Validation failure for ");
-        Object s = failure.getSource();
-        String p = failure.getProperty();
-        ret.append(
-            s == null
-                ? "[General]"
-                : s.getClass().getName() + "." + (p == null ? "[General]" : p));
-        ret.append(": ");
-        ret.append(failure.getDescription());
+        Iterator it = getFailures().iterator();
+        while (it.hasNext()) {
+            if (ret.length() > 0) {
+                ret.append(separator);
+            }
+            
+            ret.append(it.next());
+        }
+
         return ret.toString();
     }
 
     //TODO: Move to a place where everyone can use it.
-    private static class Tuple {
+    private static class Tuple implements Serializable {
+        Object one;
+        Object two;
 
         public Tuple(Object one, Object two) {
             this.one = one;
@@ -308,11 +302,6 @@ public class ValidationResult {
             result = 29 * result + (two != null ? two.hashCode() : 0);
             return result;
         }
-
-        public Object one;
-
-        public Object two;
-
     }
 
 }

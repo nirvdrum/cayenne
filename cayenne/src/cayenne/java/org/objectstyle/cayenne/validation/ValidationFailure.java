@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.validation;
 
+import java.io.Serializable;
+
 /**
  * General purpose class to denote a failure when validating objects. This is currently used to validate Cayenne
  * objects when the <code>DataContext</code> is committed.
@@ -63,7 +65,7 @@ package org.objectstyle.cayenne.validation;
  * @author Fabricio Voznika
  * @since 1.1
  */
-public interface ValidationFailure {
+public interface ValidationFailure extends Serializable {
 
     /**
      * Returns the object that has generated the failure. For example, if a <code>Person</code>
