@@ -63,6 +63,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
@@ -181,7 +182,6 @@ public class ActionController extends ModelerController {
      */
     protected void enableProjectActions() {
         disableAllActions();
-        getAction(SaveAction.ACTION_NAME).setEnabled(false);
         getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
         getAction(ProjectAction.ACTION_NAME).setEnabled(true);
     }
