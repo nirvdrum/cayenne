@@ -87,6 +87,19 @@ public class DbLoader {
 		String uglyName = (toMany) ? dstName + "_ARRAY" : "to_" + dstName;
 		return NameConverter.undescoredToJava(uglyName, false);
 	}
+	
+	/** Creates a unique name for loaded relationship on the given entity.  Uses defaultDbRelName*/
+	private static String uniqueDbRelName(DbEntity entity, String dstName, boolean toMany) {
+		int currentSuffix = 1;
+		String baseRelName = defaultDbRelName(dstName, true);
+		String relName = baseRelName;
+
+		while (entity.getRelationship(relName) != null) {
+			relName = baseRelName + currentSuffix;
+			currentSuffix++;
+		}
+		return relName;
+	}
 
 	private Connection con;
 	private DbAdapter adapter;
@@ -419,7 +432,7 @@ public class DbLoader {
 					} else {
 						fwdRel =
 							new DbRelationship(
-								defaultDbRelName(fkEntName, true));
+								uniqueDbRelName(pkEnt, fkEntName, true));
 						fwdRel.setToMany(true);
 						fwdRel.setSourceEntity(pkEnt);
 						fwdRel.setTargetEntity(fkEnt);
@@ -427,7 +440,7 @@ public class DbLoader {
 
 						backRel =
 							new DbRelationship(
-								defaultDbRelName(pkEntName, false));
+								uniqueDbRelName(fkEnt, pkEntName, false));
 						backRel.setToMany(false);
 						backRel.setSourceEntity(fkEnt);
 						backRel.setTargetEntity(pkEnt);
