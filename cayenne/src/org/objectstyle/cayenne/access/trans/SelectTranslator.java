@@ -150,25 +150,22 @@ public class SelectTranslator extends SelectQueryAssembler {
 		// build column list
 		buildColumnList();
 
-		
 		QualifierTranslator tr =
 			adapter.getQualifierFactory().createTranslator(this);
 
-        // build parent qualifier
-        // Parent qualifier translation must PRECEED main qualifier
-        // since it will be appended first and its parameters must
-        // go first as well
+		// build parent qualifier
+		// Parent qualifier translation must PRECEED main qualifier
+		// since it will be appended first and its parameters must
+		// go first as well
 		String parentQualifierStr = null;
 		if (getSelectQuery().isQualifiedOnParent()) {
 			tr.setTranslateParentQual(true);
 			parentQualifierStr = tr.doTranslation();
 		}
-		
+
 		// build main qualifier
 		tr.setTranslateParentQual(false);
 		String qualifierStr = tr.doTranslation();
-
-
 
 		// build GROUP BY
 		buildGroupByList();
@@ -306,7 +303,13 @@ public class SelectTranslator extends SelectQueryAssembler {
 			List custAttrNames = q.getCustDbAttributes();
 			int len = custAttrNames.size();
 			for (int i = 0; i < len; i++) {
-				columnList.add(dbe.getAttribute((String) custAttrNames.get(i)));
+				Attribute attr =
+					dbe.getAttribute((String) custAttrNames.get(i));
+				if (attr == null) {
+					throw new CayenneRuntimeException(
+						"Attribute does not exist: " + custAttrNames.get(i));
+				}
+				columnList.add(attr);
 			}
 		} else {
 			// build a list of attributes mentioned in ObjEntity + PK's + FK's + GROUP BY's
@@ -316,7 +319,12 @@ public class SelectTranslator extends SelectQueryAssembler {
 			int len = attrs.size();
 			for (int i = 0; i < len; i++) {
 				ObjAttribute oa = (ObjAttribute) attrs.get(i);
-				columnList.add(oa.getDbAttribute());
+				Attribute attr = oa.getDbAttribute();
+				if (attr == null) {
+					throw new CayenneRuntimeException(
+						"ObjAttribute has no DbAttribute: " + oa.getName());
+				}
+				columnList.add(attr);
 			}
 
 			// relationship keys
