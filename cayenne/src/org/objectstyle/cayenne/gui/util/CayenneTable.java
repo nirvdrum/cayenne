@@ -70,29 +70,21 @@ import javax.swing.text.Document;
 
 import org.objectstyle.cayenne.gui.Editor;
 
-/**  Contains cludge to the JTable. It updates model every time
-  *  data is changed in the TextField editor. Also,
-  *  If user escapes (presses ESC), returns value in the model
-  *  to its original.
-  * 
-  * @author Michael Misha Shengaout
-  * @author Andrei Adamchik
-  */
+/**  
+ * Common superclass of tables used in Cayenne. COntains some common configuration
+ * settings and utility methods.
+ * 
+ * @author Michael Misha Shengaout
+ * @author Andrei Adamchik
+ */
 public class CayenneTable extends JTable {
 	static Logger logObj = Logger.getLogger(CayenneTable.class.getName());
 
-	public CayenneTable() {
-		super();
-		// Replace "cancel" action with custom table cancel
-		new CayenneTableCancelAction();
-	}
-
 	protected void createDefaultEditors() {
 		super.createDefaultEditors();
-		TextFieldCellEditor temp = new TextFieldCellEditor();
+		DefaultCellEditor  temp = new DefaultCellEditor (new JTextField());
 		setDefaultEditor(Object.class, temp);
 		setDefaultEditor(String.class, temp);
-		this.setDefaultRenderer(Boolean.class, new CayenneBooleanRenderer());
 	}
 
 	public CayenneTableModel getCayenneModel() {
@@ -120,133 +112,6 @@ public class CayenneTable extends JTable {
 
 		if (index >= 0) {
 			getSelectionModel().setSelectionInterval(index, index);
-		}
-	}
-
-	protected static class TextFieldCellEditor
-		extends DefaultCellEditor
-		implements TableCellEditor, DocumentListener {
-		private int row;
-		private int col;
-		private String originalValue;
-		private TableModel tableModel;
-
-		public TextFieldCellEditor() {
-			super(new JTextField());
-			JTextField field =
-				(JTextField) TextFieldCellEditor.this.getComponent();
-			field.getDocument().addDocumentListener(this);
-		}
-
-		public Component getTableCellEditorComponent(
-			JTable table,
-			Object value,
-			boolean isSelected,
-			int temp_row,
-			int temp_col) {
-
-			row = temp_row;
-			col = temp_col;
-			originalValue = value != null ? value.toString() : "";
-			tableModel = table.getModel();
-
-			String text = value != null ? value.toString() : "";
-			JTextField field =
-				(JTextField) TextFieldCellEditor.this.getComponent();
-			field.setText(text);
-			return field;
-		}
-
-		public void cancelCellEditing() {
-			JTextField field =
-				(JTextField) TextFieldCellEditor.this.getComponent();
-
-			if (!originalValue.equals(field.getText())) {
-				tableModel.setValueAt(originalValue.toString(), row, col);
-			}
-			super.cancelCellEditing();
-		}
-
-		public void insertUpdate(DocumentEvent e) {
-			textFieldChanged(e);
-		}
-		public void changedUpdate(DocumentEvent e) {
-			textFieldChanged(e);
-		}
-		public void removeUpdate(DocumentEvent e) {
-			textFieldChanged(e);
-		}
-
-		private void textFieldChanged(DocumentEvent e) {
-			Document doc = e.getDocument();
-			JTextField field =
-				(JTextField) TextFieldCellEditor.this.getComponent();
-			String text = field.getText();
-			Object obj = tableModel.getValueAt(row, col);
-			String modelText = (obj != null) ? obj.toString() : "";
-
-			// If initial loading of data, ignore.
-			if (modelText.equals(text)) {
-				return;
-			}
-
-			tableModel.setValueAt(text, row, col);
-		}
-	}
-
-	static private class CayenneBooleanRenderer
-		extends JCheckBox
-		implements TableCellRenderer {
-		public CayenneBooleanRenderer() {
-			super();
-			setHorizontalAlignment(JLabel.CENTER);
-		}
-
-		public Component getTableCellRendererComponent(
-			JTable table,
-			Object value,
-			boolean isSelected,
-			boolean hasFocus,
-			int row,
-			int column) {
-			if (isSelected) {
-				setForeground(table.getSelectionForeground());
-				super.setBackground(table.getSelectionBackground());
-			} else {
-				setForeground(table.getForeground());
-				setBackground(table.getBackground());
-			}
-			TableModel model = table.getModel();
-			setSelected((value != null && ((Boolean) value).booleanValue()));
-			setEnabled(model.isCellEditable(row, column));
-			return this;
-		}
-	}
-
-	private class CayenneTableCancelAction extends AbstractAction {
-		Action nextAction;
-
-		/** Creates chain of responsibilities. */
-		public CayenneTableCancelAction() {
-			nextAction = getActionMap().get("cancel");
-			getActionMap().put("cancel", this);
-		}
-
-		public void setNextAction(Action a) {
-			nextAction = a;
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			// Stop whatever editing may be taking place
-			int col = getEditingColumn();
-			int row = getEditingRow();
-			if (col >= 0 && row >= 0) {
-				TableCellEditor editor = getCellEditor(row, col);
-				if (editor != null) {
-					editor.cancelCellEditing();
-				}
-			}
-			nextAction.actionPerformed(e);
 		}
 	}
 }

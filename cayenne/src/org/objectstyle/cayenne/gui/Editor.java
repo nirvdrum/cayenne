@@ -437,7 +437,7 @@ public class Editor
 	 * Adds asterisk to the title of the window to indicate 
 	 * it is dirty. 
 	 */
-	public void setDirty(boolean flag) {
+	public void setDirty(boolean flag) {	   
 		String title = getTitle();
 		if (flag) {
 			getAction(SaveAction.ACTION_NAME).setEnabled(true);

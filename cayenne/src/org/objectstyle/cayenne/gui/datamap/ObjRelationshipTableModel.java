@@ -146,7 +146,7 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
 			return "";
 	}
 
-	public void setValueAt(Object aValue, int row, int column) {
+	public void setUpdatedValueAt(Object aValue, int row, int column) {
 		ObjRelationship rel = getRelationship(row);
 		
 		// If name column

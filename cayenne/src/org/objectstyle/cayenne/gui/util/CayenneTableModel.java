@@ -61,6 +61,7 @@ import javax.swing.table.AbstractTableModel;
 
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.util.PropertyComparator;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Superclass of CayenneModeler table model classes.
@@ -86,6 +87,18 @@ public abstract class CayenneTableModel extends AbstractTableModel {
 
 		orderList();
 	}
+
+	public void setValueAt(Object newVal, int row, int col) {
+        if(!Util.nullSafeEquals(newVal, getValueAt(row, col))) {
+        	setUpdatedValueAt(newVal, row, col);
+        }
+	}
+	
+	/**
+	 * Sets a new value after it is already checked by the superclass 
+	 * and it is determined that the value has changed.
+	 */ 
+	public abstract void setUpdatedValueAt(Object newVal, int row, int col);
 
 	/**
 	 * Orders internal object list. Key returned by 

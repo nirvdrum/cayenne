@@ -147,6 +147,7 @@ public class DbAttributePane
 			editParams.setEnabled(att instanceof DerivedDbAttribute);
 		}
 		
+		
 		mediator.fireDbAttributeDisplayEvent(new AttributeDisplayEvent(
 				this,
 				att,

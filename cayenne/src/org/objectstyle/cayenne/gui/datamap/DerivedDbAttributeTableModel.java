@@ -162,9 +162,9 @@ public class DerivedDbAttributeTableModel extends DbAttributeTableModel {
 		}
 	}
 	
-	public void setValueAt(Object newVal, int row, int col) {
+	public void setUpdatedValueAt(Object newVal, int row, int col) {
 		DerivedDbAttribute attr = (DerivedDbAttribute)getAttribute(row);
-		if (null == attr) {
+		if (attr == null) {
 			return;
 		}
 

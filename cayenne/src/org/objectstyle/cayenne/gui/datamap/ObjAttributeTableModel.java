@@ -176,7 +176,8 @@ public class ObjAttributeTableModel extends CayenneTableModel {
 		return "";
 	}
 
-	public void setValueAt(Object aValue, int row, int column) {
+	public void setUpdatedValueAt(Object aValue, int row, int column) {
+		
 		ObjAttribute attrib = getAttribute(row);
 		String text = (aValue != null) ? ((String) aValue).trim() : "";
 

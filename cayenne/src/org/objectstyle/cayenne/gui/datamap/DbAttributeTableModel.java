@@ -55,15 +55,17 @@
  */
 package org.objectstyle.cayenne.gui.datamap;
 
+import java.util.logging.Logger;
+
 import javax.swing.JOptionPane;
-import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.gui.event.AttributeEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.CayenneTableModel;
 import org.objectstyle.cayenne.gui.util.MapUtil;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
 
 /** 
  * Model for DbEntity attributes. Allows adding/removing 
@@ -73,6 +75,8 @@ import org.objectstyle.cayenne.map.*;
  * @author Andrei Adamchik
  */
 public class DbAttributeTableModel extends CayenneTableModel {
+	static Logger logObj = Logger.getLogger(DbAttributeTableModel.class.getName());
+	
 	// Columns
 	private static final int DB_ATTRIBUTE_NAME = 0;
 	private static final int DB_ATTRIBUTE_TYPE = 1;
@@ -180,9 +184,9 @@ public class DbAttributeTableModel extends CayenneTableModel {
 		}
 	}
 
-	public void setValueAt(Object newVal, int row, int col) {
+	public void setUpdatedValueAt(Object newVal, int row, int col) {
 		DbAttribute attr = getAttribute(row);
-		if (null == attr) {
+		if (attr == null) {
 			return;
 		}
 

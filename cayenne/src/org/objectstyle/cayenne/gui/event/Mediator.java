@@ -55,7 +55,9 @@
  */
 package org.objectstyle.cayenne.gui.event;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EventListener;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 import javax.swing.event.EventListenerList;
@@ -779,7 +781,9 @@ public class Mediator {
 	}
 
 	public void setDirty(boolean dirty) {
-		if (this.dirty != dirty) {
+	   logObj.severe("dirty: " + dirty);
+	   Thread.dumpStack();
+	   if (this.dirty != dirty) {
 			this.dirty = dirty;
 			Editor.getFrame().setDirty(dirty);
 		}

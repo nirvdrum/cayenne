@@ -149,7 +149,8 @@ public class DbRelationshipTableModel extends CayenneTableModel {
 		}
 	}
 
-	public void setValueAt(Object aValue, int row, int column) {
+	public void setUpdatedValueAt(Object aValue, int row, int column) {
+		
 		DbRelationship rel = getRelationship(row);
 		// If name column
 		if (column == NAME) {
