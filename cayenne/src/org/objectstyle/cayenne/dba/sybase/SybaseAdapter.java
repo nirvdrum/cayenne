@@ -55,8 +55,10 @@ package org.objectstyle.cayenne.dba.sybase;
  *
  */
 
+import java.sql.*;
 import java.util.HashMap;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -119,15 +121,14 @@ public class SybaseAdapter extends JdbcAdapter {
      *  @param node node that provides access to a DataSource.
      */
     public void createAutoPkSupport(DataNode node) throws Exception {
-        
+
         // need to drop procedure first
         pkGen.runSchemaUpdate(node, safePkProcDrop());
-        
+
         // create objects
         super.createAutoPkSupport(node);
         pkGen.runSchemaUpdate(node, unsafePkProcCreate());
     }
-    
 
     /** 
      * Drops database objects related to automatic primary
@@ -156,7 +157,38 @@ public class SybaseAdapter extends JdbcAdapter {
 
     public Object generatePkForDbEntity(DataNode dataNode, DbEntity dbEntity)
         throws Exception {
-        return super.generatePkForDbEntity(dataNode, dbEntity);
+
+        Connection con = dataNode.getDataSource().getConnection();
+
+        try {
+            CallableStatement st = con.prepareCall("{call auto_pk_for_table(?)}");
+
+            try {
+                st.setString(1, dbEntity.getName());
+                ResultSet rs = st.executeQuery();
+
+                Object pk = null;
+                if (rs.next()) {
+                    pk = new Integer(rs.getInt(1));
+                }
+
+                rs.close();
+
+                if (pk == null) {
+                    throw new CayenneRuntimeException(
+                        "Error generating pk for DbEntity " + dbEntity.getName());
+                }
+
+                return pk;
+            }
+            finally {
+                st.close();
+            }
+        }
+        finally {
+            con.close();
+        }
+        // return super.generatePkForDbEntity(dataNode, dbEntity);
     }
 
     private String safePkTableCreate() {
