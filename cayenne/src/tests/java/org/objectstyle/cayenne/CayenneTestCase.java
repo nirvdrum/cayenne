@@ -81,7 +81,7 @@ public class CayenneTestCase extends TestCase {
 
     static {
         probeJDKVersion();
-        // startDbConnections();
+        startDbConnections();
     }
 
     protected static void startDbConnections() {

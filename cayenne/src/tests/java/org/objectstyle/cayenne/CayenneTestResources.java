@@ -88,9 +88,11 @@ public class CayenneTestResources {
     public CayenneTestResources(String connectionKey) {
         sharedConnInfo =
             ConnectionProperties.getInstance().getConnectionInfo(connectionKey);
-        
-        createSharedDomain();
-        createTestDatabase();
+
+        if (sharedConnInfo != null) {
+            createSharedDomain();
+            createTestDatabase();
+        }
     }
 
     /** Unchecks connection from the pool. */
@@ -112,9 +114,10 @@ public class CayenneTestResources {
     }
 
     public DataSourceInfo getFreshConnInfo() throws Exception {
-        return (DataSourceInfo) Util.cloneViaSerialization(sharedConnInfo);
+        return (sharedConnInfo != null)
+            ? (DataSourceInfo) Util.cloneViaSerialization(sharedConnInfo)
+            : null;
     }
-    
 
     /**
      * Gets the sharedDatabaseSetup.
