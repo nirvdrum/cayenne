@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.access;
 
 import java.util.Map;
@@ -60,45 +60,48 @@ import java.util.Map;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.DataObject;
 
-
-
 /**
- * Defines API of an iterator over the records returned as a result
- * of SelectQuery execution. Usually a ResultIterator is supported by
- * an open java.sql.ResultSet, therefore most of the methods would throw
- * checked exceptions. ResultIterators must be explicitly closed when the
- * user is done working with them.
+ * Default implementation of ResultIterator interface.
  * 
  * <p><i>For more information see <a href="../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
  * 
  * @author Andrei Adamchik
  */
-public interface ResultIterator {
-	
+public class DefaultResultIterator implements ResultIterator {
+
+
 	/** 
 	 * Returns true if there is at least one more record
 	 * that can be read from the iterator.
 	 */
-	public boolean hasNextRow() throws CayenneException;
-    
-    /** 
+	public boolean hasNextRow() throws CayenneException {
+		throw new CayenneException("Not implemented yet.");
+	}
+
+	/** 
 	 * Returns the next result row as a Map.
 	 */
-    public Map nextDataRow() throws CayenneException;
-    
-    /** 
-     * Returns the next result row as a DataObject. DataContext
-     * passed as a <code>ctxt</code> parameter is used to instantiate 
-     * new DataObject.
-     */
-    public DataObject nextDataObject(DataContext ctxt) throws CayenneException;
-    
-    /** 
-     * Closes ResultIterator and associated ResultSet. This method must be
-     * called explicitly when the user is finished processing the records.
-     * Otherwise unused database resources will not be released properly.
-     */  
-    public void close() throws CayenneException;
-}
+	public Map nextDataRow() throws CayenneException {
+		throw new CayenneException("Not implemented yet.");
+	}
 
+	/** 
+	 * Returns the next result row as a DataObject. DataContext
+	 * passed as a <code>ctxt</code> parameter is used to instantiate 
+	 * new DataObject.
+	 */
+	public DataObject nextDataObject(DataContext ctxt)
+		throws CayenneException {
+		throw new CayenneException("Not implemented yet.");
+	}
+
+	/** 
+	 * Closes ResultIterator and associated ResultSet. This method must be
+	 * called explicitly when the user is finished processing the records.
+	 * Otherwise unused database resources will not be released properly.
+	 */
+	public void close() throws CayenneException {
+		throw new CayenneException("Not implemented yet.");
+	}
+}
