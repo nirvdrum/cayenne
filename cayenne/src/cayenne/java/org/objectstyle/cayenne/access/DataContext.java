@@ -81,7 +81,6 @@ import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.access.util.PrefetchHelper;
 import org.objectstyle.cayenne.access.util.QueryUtils;
-import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
@@ -97,7 +96,6 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ParameterizedQuery;
-import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
@@ -938,7 +936,7 @@ public class DataContext implements QueryEngine, Serializable {
      * @throws NullPointerException if object is null.
      */
     public void deleteObject(DataObject object) throws DeleteDenyException {
-        new ObjectDeleteHandler(object).performDelete();
+        new DataContextDeleteAction(this).performDelete(object);
     }
 
     /**
@@ -1029,7 +1027,7 @@ public class DataContext implements QueryEngine, Serializable {
                 getObjectStore().validateUncommittedObjects();
             }
 
-            ContextCommit worker = new ContextCommit(this);
+            DataContextCommitAction worker = new DataContextCommitAction(this);
 
             try {
                 worker.commit(logLevel);
@@ -1241,7 +1239,7 @@ public class DataContext implements QueryEngine, Serializable {
      *         {@link GenericSelectQuery#isFetchingDataRows()}.
      */
     public List performQuery(GenericSelectQuery query) {
-        return performQuery(query, query.getName(), query.isRefreshingObjects());
+        return new DataContextSelectAction(this).performQuery(query);
     }
 
     /**
@@ -1312,127 +1310,11 @@ public class DataContext implements QueryEngine, Serializable {
                     + query);
         }
 
-        return performQuery((GenericSelectQuery) query, query.getName(), refresh);
+        return new DataContextSelectAction(this).performQuery((GenericSelectQuery) query, query
+                .getName(), refresh);
     }
 
-    /**
-     * Worker method for executing GenericSelectQuery taking caching into account.
-     */
-    List performQuery(GenericSelectQuery query, String cacheKey, boolean refreshCache) {
 
-        // check if result pagination is requested
-        // let a list handle fetch in this case
-        if (query.getPageSize() > 0) {
-            return new IncrementalFaultList(this, query);
-        }
-
-        boolean localCache = GenericSelectQuery.LOCAL_CACHE
-                .equals(query.getCachePolicy());
-        boolean sharedCache = GenericSelectQuery.SHARED_CACHE.equals(query
-                .getCachePolicy());
-        boolean useCache = localCache || sharedCache;
-
-        String name = query.getName();
-
-        // sanity check
-        if (useCache && name == null) {
-            throw new CayenneRuntimeException(
-                    "Caching of unnamed queries is not supported.");
-        }
-
-        // get results from cache...
-        if (!refreshCache && useCache) {
-            List results = null;
-
-            if (localCache) {
-                // results should have been stored as rows or objects when
-                // they were originally cached... do no conversions now
-                results = getObjectStore().getCachedQueryResult(cacheKey);
-            }
-            else if (sharedCache) {
-
-                List rows = getObjectStore().getDataRowCache().getCachedSnapshots(
-                        cacheKey);
-                if (rows != null) {
-
-                    // decorate shared cached lists with immutable list to avoid messing
-                    // up the cache
-                    if (rows.size() == 0) {
-                        results = Collections.EMPTY_LIST;
-                    }
-                    else if (query.isFetchingDataRows()) {
-                        results = Collections.unmodifiableList(rows);
-                    }
-                    else {
-                        ObjEntity root = getEntityResolver().lookupObjEntity(query);
-                        results = objectsFromDataRows(root, rows, query
-                                .isRefreshingObjects(), query.isResolvingInherited());
-                    }
-                }
-            }
-
-            if (results != null) {
-                return results;
-            }
-        }
-
-        // must fetch...
-        SelectObserver observer = new SelectObserver(query.getLoggingLevel());
-        performQueries(queryWithPrefetches(query, observer), observer);
-
-        List results = (query.isFetchingDataRows())
-                ? observer.getResults(query)
-                : observer.getResultsAsObjects(this, query);
-
-        // cache results if needed
-        if (useCache) {
-            if (localCache) {
-                getObjectStore().cacheQueryResult(cacheKey, results);
-            }
-            else if (sharedCache) {
-                getObjectStore().getDataRowCache().cacheSnapshots(
-                        cacheKey,
-                        observer.getResults(query));
-            }
-        }
-
-        return results;
-    }
-
-    /**
-     * Expands a SelectQuery into a collection of queries, including prefetch queries if
-     * needed.
-     */
-    Collection queryWithPrefetches(GenericSelectQuery query, OperationObserver observer) {
-
-        // check conditions for prefetch...
-        if (observer.isIteratedResult()
-                || query.isFetchingDataRows()
-                || !(query instanceof SelectQuery)) {
-            return Collections.singletonList(query);
-        }
-
-        SelectQuery selectQuery = (SelectQuery) query;
-
-        Collection prefetchKeys = selectQuery.getPrefetches();
-        if (prefetchKeys.isEmpty()) {
-            return Collections.singletonList(query);
-        }
-
-        List queries = new ArrayList(prefetchKeys.size() + 1);
-        queries.add(query);
-
-        Iterator prefetchIt = prefetchKeys.iterator();
-        while (prefetchIt.hasNext()) {
-            PrefetchSelectQuery prefetchQuery = new PrefetchSelectQuery(
-                    getEntityResolver(),
-                    selectQuery,
-                    (String) prefetchIt.next());
-            queries.add(prefetchQuery);
-        }
-
-        return queries;
-    }
 
     // serialization support
     private void writeObject(ObjectOutputStream out) throws IOException {

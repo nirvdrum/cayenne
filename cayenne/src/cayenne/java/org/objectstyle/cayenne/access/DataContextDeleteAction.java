@@ -74,22 +74,19 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  * @since 1.2
  * @author Andrei Adamchik
  */
-class ObjectDeleteHandler {
+class DataContextDeleteAction {
 
-    int oldState;
-    DataObject object;
     DataContext dataContext;
 
-    ObjectDeleteHandler(DataObject object) {
-        this.object = object;
-        this.dataContext = object.getDataContext();
-        this.oldState = object.getPersistenceState();
+    DataContextDeleteAction(DataContext context) {
+        this.dataContext = context;
     }
 
     /**
      * Deletes internal DataObject from its DataContext, processing delete rules.
      */
-    boolean performDelete() throws DeleteDenyException {
+    boolean performDelete(DataObject object) throws DeleteDenyException {
+        int oldState = object.getPersistenceState();
         if (oldState == PersistenceState.DELETED
                 || oldState == PersistenceState.TRANSIENT) {
 
@@ -105,16 +102,17 @@ class ObjectDeleteHandler {
         object.resolveFault();
 
         if (oldState == PersistenceState.NEW) {
-            deleteNew();
+            deleteNew(object, oldState);
         }
         else {
-            deletePersistent();
+            deletePersistent(object, oldState);
         }
 
         return true;
     }
 
-    private void deletePersistent() throws DeleteDenyException {
+    private void deletePersistent(DataObject object, int oldState)
+            throws DeleteDenyException {
 
         // duplicating some code from ObjectStore.retainSnapshot, as we have to do it
         // in two phases, extracting snapshot here, but retaining it after the
@@ -130,15 +128,15 @@ class ObjectDeleteHandler {
         // bailing out (see above)
 
         object.setPersistenceState(PersistenceState.DELETED);
-        processDeleteRules();
+        processDeleteRules(object, oldState);
 
         // must retain snapshot for optimistic locking to work ...
         dataContext.getObjectStore().retainSnapshot(object, snapshot);
     }
 
-    private void deleteNew() throws DeleteDenyException {
+    private void deleteNew(DataObject object, int oldState) throws DeleteDenyException {
         object.setPersistenceState(PersistenceState.TRANSIENT);
-        processDeleteRules();
+        processDeleteRules(object, oldState);
 
         // if an object was NEW, we must throw it out of the ObjectStore
 
@@ -147,7 +145,8 @@ class ObjectDeleteHandler {
         object.setDataContext(null);
     }
 
-    private void processDeleteRules() throws DeleteDenyException {
+    private void processDeleteRules(DataObject object, int oldState)
+            throws DeleteDenyException {
         ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(object);
         Iterator it = entity.getRelationships().iterator();
         while (it.hasNext()) {
@@ -248,7 +247,8 @@ class ObjectDeleteHandler {
                     Iterator iterator = relatedObjects.iterator();
                     while (iterator.hasNext()) {
                         DataObject relatedObject = (DataObject) iterator.next();
-                        new ObjectDeleteHandler(relatedObject).performDelete();
+                        new DataContextDeleteAction(this.dataContext)
+                                .performDelete(relatedObject);
                     }
 
                     break;

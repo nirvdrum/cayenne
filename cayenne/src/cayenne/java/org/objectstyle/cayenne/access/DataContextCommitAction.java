@@ -89,15 +89,17 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
 
 /**
- * DataContext internally delegates commit operations to an instance of ContextCommit that
- * contains the actual commit logic. ContextCommit resolves primary key dependencies,
- * referential integrity dependencies (including multi-reflexive entities), generates
- * primary keys, creates batches for massive data modifications, assigns operations to
- * data nodes. It indirectly relies on graph algorithms provided by ASHWOOD library.
+ * A stateful commit handler used by DataContext to perform commit operation.
+ * DataContextCommitAction resolves primary key dependencies, referential integrity
+ * dependencies (including multi-reflexive entities), generates primary keys, creates
+ * batches for massive data modifications, assigns operations to data nodes. It indirectly
+ * relies on graph algorithms provided by ASHWOOD library.
  * 
  * @author Andriy Shapochka, Andrei Adamchik
+ * @since 1.2
  */
-class ContextCommit {
+// Renamed from ContextCommit in 1.1
+class DataContextCommitAction {
 
     private DataContext context;
     private Level logLevel;
@@ -112,7 +114,7 @@ class ContextCommit {
     private List delObjects; //event support
     private List updObjects; //event support
 
-    ContextCommit(DataContext contextToCommit) {
+    DataContextCommitAction(DataContext contextToCommit) {
         context = contextToCommit;
     }
 
@@ -140,7 +142,7 @@ class ContextCommit {
                 updObjects = new ArrayList();
 
                 for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
-                    NodeCommit nodeHelper = (NodeCommit) i.next();
+                    DataNodeCommitAction nodeHelper = (DataNodeCommitAction) i.next();
                     prepareInsertQueries(nodeHelper);
                     prepareFlattenedQueries(nodeHelper, nodeHelper
                             .getFlattenedInsertQueries());
@@ -176,13 +178,13 @@ class ContextCommit {
                     try {
                         Iterator i = nodeHelpers.iterator();
                         while (i.hasNext()) {
-                            NodeCommit nodeHelper = (NodeCommit) i.next();
+                            DataNodeCommitAction nodeHelper = (DataNodeCommitAction) i
+                                    .next();
                             List queries = nodeHelper.getQueries();
 
                             if (queries.size() > 0) {
                                 // note: observer throws on error
-                                nodeHelper.getNode().performQueries(
-                                        queries,
+                                nodeHelper.getNode().performQueries(queries,
                                         observer,
                                         transaction);
                             }
@@ -216,7 +218,8 @@ class ContextCommit {
         }
     }
 
-    private void prepareInsertQueries(NodeCommit commitHelper) throws CayenneException {
+    private void prepareInsertQueries(DataNodeCommitAction commitHelper)
+            throws CayenneException {
 
         List entities = commitHelper.getObjEntitiesForInsert();
         if (entities.isEmpty()) {
@@ -247,8 +250,7 @@ class ContextCommit {
                 boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
                 DbRelationship masterDependentDbRel = (isMasterDbEntity
                         ? null
-                        : findMasterToDependentDbRelationship(
-                                entity.getDbEntity(),
+                        : findMasterToDependentDbRelationship(entity.getDbEntity(),
                                 dbEntity));
 
                 List objects = (List) newObjectsByObjEntity.get(entity.getClassName());
@@ -264,8 +266,7 @@ class ContextCommit {
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
-                    Map snapshot = BatchQueryUtils.buildSnapshotForInsert(
-                            entity,
+                    Map snapshot = BatchQueryUtils.buildSnapshotForInsert(entity,
                             o,
                             masterDependentDbRel,
                             supportsGeneratedKeys);
@@ -280,7 +281,8 @@ class ContextCommit {
         }
     }
 
-    private void prepareDeleteQueries(NodeCommit commitHelper) throws CayenneException {
+    private void prepareDeleteQueries(DataNodeCommitAction commitHelper)
+            throws CayenneException {
 
         List entities = commitHelper.getObjEntitiesForDelete();
         if (entities.isEmpty()) {
@@ -311,8 +313,7 @@ class ContextCommit {
                 boolean isRootDbEntity = (entity.getDbEntity() == dbEntity);
                 DbRelationship masterDependentDbRel = (isRootDbEntity
                         ? null
-                        : findMasterToDependentDbRelationship(
-                                entity.getDbEntity(),
+                        : findMasterToDependentDbRelationship(entity.getDbEntity(),
                                 dbEntity));
 
                 List objects = (List) objectsToDeleteByObjEntity.get(entity
@@ -347,8 +348,7 @@ class ContextCommit {
                     if (optimisticLocking) {
                         // clone snapshot and add extra keys...
                         qualifierSnapshot = new HashMap(qualifierSnapshot);
-                        appendOptimisticLockingAttributes(
-                                qualifierSnapshot,
+                        appendOptimisticLockingAttributes(qualifierSnapshot,
                                 o,
                                 qualifierAttributes);
                     }
@@ -364,7 +364,7 @@ class ContextCommit {
                     }
 
                     List batchKey = Arrays.asList(new Object[] {
-                            nullQualifierNames
+                        nullQualifierNames
                     });
 
                     DeleteBatchQuery batch = (DeleteBatchQuery) batches.get(batchKey);
@@ -382,7 +382,7 @@ class ContextCommit {
                     batch.add(qualifierSnapshot);
 
                 }
-                
+
                 if (isRootDbEntity)
                     delObjects.addAll(objects);
 
@@ -391,7 +391,8 @@ class ContextCommit {
         }
     }
 
-    private void prepareUpdateQueries(NodeCommit commitHelper) throws CayenneException {
+    private void prepareUpdateQueries(DataNodeCommitAction commitHelper)
+            throws CayenneException {
         List entities = commitHelper.getObjEntitiesForUpdate();
         if (entities.isEmpty()) {
             return;
@@ -419,8 +420,7 @@ class ContextCommit {
 
                 DbRelationship masterDependentDbRel = (isRootDbEntity)
                         ? null
-                        : findMasterToDependentDbRelationship(
-                                entity.getDbEntity(),
+                        : findMasterToDependentDbRelationship(entity.getDbEntity(),
                                 dbEntity);
                 List objects = (List) objectsToUpdateByObjEntity.get(entity
                         .getClassName());
@@ -428,8 +428,7 @@ class ContextCommit {
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
 
-                    Map snapshot = BatchQueryUtils.buildSnapshotForUpdate(
-                            entity,
+                    Map snapshot = BatchQueryUtils.buildSnapshotForUpdate(entity,
                             o,
                             masterDependentDbRel);
 
@@ -458,8 +457,7 @@ class ContextCommit {
                     if (optimisticLocking) {
                         // clone snapshot and add extra keys...
                         qualifierSnapshot = new HashMap(qualifierSnapshot);
-                        appendOptimisticLockingAttributes(
-                                qualifierSnapshot,
+                        appendOptimisticLockingAttributes(qualifierSnapshot,
                                 o,
                                 qualifierAttributes);
                     }
@@ -495,8 +493,7 @@ class ContextCommit {
                     batch.add(qualifierSnapshot, snapshot);
 
                     if (isRootDbEntity) {
-                        updateId(
-                                idSnapshot,
+                        updateId(idSnapshot,
                                 o.getObjectId().getReplacementIdMap(),
                                 snapshot);
                         updObjects.add(o);
@@ -582,7 +579,7 @@ class ContextCommit {
     private void appendOptimisticLockingAttributes(
             Map qualifierSnapshot,
             DataObject dataObject,
-            List qualifierAttributes)  {
+            List qualifierAttributes) {
 
         Map snapshot = null;
 
@@ -607,7 +604,7 @@ class ContextCommit {
                                         + dataObject.getObjectId());
                     }
                 }
-                
+
                 qualifierSnapshot.put(name, snapshot.get(name));
             }
         }
@@ -660,27 +657,24 @@ class ContextCommit {
     }
 
     private void objectToInsert(DataObject o) throws CayenneException {
-        classifyByEntityAndNode(
-                o,
+        classifyByEntityAndNode(o,
                 newObjectsByObjEntity,
                 objEntitiesToInsert,
-                NodeCommit.INSERT);
+                DataNodeCommitAction.INSERT);
     }
 
     private void objectToDelete(DataObject o) throws CayenneException {
-        classifyByEntityAndNode(
-                o,
+        classifyByEntityAndNode(o,
                 objectsToDeleteByObjEntity,
                 objEntitiesToDelete,
-                NodeCommit.DELETE);
+                DataNodeCommitAction.DELETE);
     }
 
     private void objectToUpdate(DataObject o) throws CayenneException {
-        classifyByEntityAndNode(
-                o,
+        classifyByEntityAndNode(o,
                 objectsToUpdateByObjEntity,
                 objEntitiesToUpdate,
-                NodeCommit.UPDATE);
+                DataNodeCommitAction.UPDATE);
     }
 
     private RuntimeException attemptToCommitReadOnlyEntity(
@@ -719,7 +713,7 @@ class ContextCommit {
             objEntities.add(entity);
             DataNode responsibleNode = context.lookupDataNode(entity.getDataMap());
 
-            NodeCommit commitHelper = nodeHelper(responsibleNode);
+            DataNodeCommitAction commitHelper = nodeHelper(responsibleNode);
 
             commitHelper.addToEntityList(entity, operationType);
             objectsForObjEntity = new ArrayList();
@@ -748,7 +742,7 @@ class ContextCommit {
             DbEntity flattenedEntity = info.getJoinEntity();
             DataNode responsibleNode = context.lookupDataNode(flattenedEntity
                     .getDataMap());
-            NodeCommit commitHelper = nodeHelper(responsibleNode);
+            DataNodeCommitAction commitHelper = nodeHelper(responsibleNode);
             Map batchesByDbEntity = commitHelper.getFlattenedInsertQueries();
 
             InsertBatchQuery relationInsertQuery = (InsertBatchQuery) batchesByDbEntity
@@ -785,7 +779,7 @@ class ContextCommit {
 
             DataNode responsibleNode = context.lookupDataNode(flattenedEntity
                     .getDataMap());
-            NodeCommit commitHelper = nodeHelper(responsibleNode);
+            DataNodeCommitAction commitHelper = nodeHelper(responsibleNode);
             Map batchesByDbEntity = commitHelper.getFlattenedDeleteQueries();
 
             DeleteBatchQuery relationDeleteQuery = (DeleteBatchQuery) batchesByDbEntity
@@ -808,7 +802,9 @@ class ContextCommit {
         }
     }
 
-    private void prepareFlattenedQueries(NodeCommit commitHelper, Map flattenedBatches) {
+    private void prepareFlattenedQueries(
+            DataNodeCommitAction commitHelper,
+            Map flattenedBatches) {
 
         for (Iterator i = flattenedBatches.values().iterator(); i.hasNext();) {
             commitHelper.addToQueries((Query) i.next());
@@ -883,12 +879,12 @@ class ContextCommit {
      * Finds an existing helper for DataNode, creates a new one if no matching helper is
      * found.
      */
-    private NodeCommit nodeHelper(DataNode node) {
+    private DataNodeCommitAction nodeHelper(DataNode node) {
 
-        NodeCommit helper = null;
+        DataNodeCommitAction helper = null;
         Iterator it = nodeHelpers.iterator();
         while (it.hasNext()) {
-            NodeCommit itHelper = (NodeCommit) it.next();
+            DataNodeCommitAction itHelper = (DataNodeCommitAction) it.next();
             if (itHelper.getNode() == node) {
                 helper = itHelper;
                 break;
@@ -896,7 +892,7 @@ class ContextCommit {
         }
 
         if (helper == null) {
-            helper = new NodeCommit(node);
+            helper = new DataNodeCommitAction(node);
             nodeHelpers.add(helper);
         }
 

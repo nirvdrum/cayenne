@@ -65,12 +65,12 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * A helper class for ContextCommit.
+ * A helper class for DataContextCommitAction.
  * 
  * @since 1.2
  * @author Andrei Adamchik
  */
-class NodeCommit {
+class DataNodeCommitAction {
 
     static final int INSERT = 1;
     static final int UPDATE = 2;
@@ -84,7 +84,7 @@ class NodeCommit {
     Map flattenedDeleteQueries = new HashMap();
     List queries = new ArrayList();
 
-    NodeCommit(DataNode node) {
+    DataNodeCommitAction(DataNode node) {
         this.node = node;
     }
 

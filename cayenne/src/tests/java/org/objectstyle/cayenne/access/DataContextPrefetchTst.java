@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -64,14 +63,11 @@ import java.util.Map;
 import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
-import org.objectstyle.art.Exhibit;
-import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -84,73 +80,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Andrei Adamchik
  */
 public class DataContextPrefetchTst extends DataContextTestBase {
-
-    /**
-     * Tests that all queries specified in prefetch are executed in a more complex
-     * prefetch scenario.
-     */
-    public void testQueryWithPrefetches() throws Exception {
-        OperationObserver observer = new SelectObserver();
-        Expression e = ExpressionFactory.matchExp("artistName", "a");
-        SelectQuery q = new SelectQuery("Artist", e);
-
-        assertEquals(1, context.queryWithPrefetches(q, observer).size());
-        q.addPrefetch("paintingArray");
-        assertEquals(2, context.queryWithPrefetches(q, observer).size());
-
-        q.addPrefetch("paintingArray.toGallery");
-        assertEquals(3, context.queryWithPrefetches(q, observer).size());
-
-        q.addPrefetch("artistExhibitArray.toExhibit");
-        assertEquals(4, context.queryWithPrefetches(q, observer).size());
-    }
-
-    /**
-     * Tests that all queries specified in prefetch are executed in a more complex
-     * prefetch scenario with no reverse obj relationships.
-     */
-    //  TODO: this should probably be a part of PrefetchSelectQueryTst...
-    public void testQueryWithPrefetchesNoReverse() throws Exception {
-
-        OperationObserver observer = new SelectObserver();
-
-        org.objectstyle.cayenne.map.EntityResolver er = context.getEntityResolver();
-        ObjEntity paintingEntity = er.lookupObjEntity(Painting.class);
-        ObjEntity galleryEntity = er.lookupObjEntity(Gallery.class);
-        ObjEntity artistExhibitEntity = er.lookupObjEntity(ArtistExhibit.class);
-        ObjEntity exhibitEntity = er.lookupObjEntity(Exhibit.class);
-        ObjRelationship paintingToArtistRel = (ObjRelationship) paintingEntity
-                .getRelationship("toArtist");
-        paintingEntity.removeRelationship("toArtist");
-
-        ObjRelationship galleryToPaintingRel = (ObjRelationship) galleryEntity
-                .getRelationship("paintingArray");
-        galleryEntity.removeRelationship("paintingArray");
-
-        ObjRelationship artistExhibitToArtistRel = (ObjRelationship) artistExhibitEntity
-                .getRelationship("toArtist");
-        artistExhibitEntity.removeRelationship("toArtist");
-
-        ObjRelationship exhibitToArtistExhibitRel = (ObjRelationship) exhibitEntity
-                .getRelationship("artistExhibitArray");
-        exhibitEntity.removeRelationship("artistExhibitArray");
-
-        Expression e = ExpressionFactory.matchExp("artistName", "artist1");
-        SelectQuery q = new SelectQuery("Artist", e);
-        q.addPrefetch("paintingArray");
-        q.addPrefetch("paintingArray.toGallery");
-        q.addPrefetch("artistExhibitArray.toExhibit");
-
-        try {
-            assertEquals(4, context.queryWithPrefetches(q, observer).size());
-        }
-        finally {
-            paintingEntity.addRelationship(paintingToArtistRel);
-            galleryEntity.addRelationship(galleryToPaintingRel);
-            artistExhibitEntity.addRelationship(artistExhibitToArtistRel);
-            exhibitEntity.addRelationship(exhibitToArtistExhibitRel);
-        }
-    }
 
     /**
      * Test that a to-many relationship is initialized.
@@ -248,8 +177,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     public void testPrefetch3a() throws Exception {
         createTestData("testPaintings");
 
-        ObjEntity paintingEntity = context.getEntityResolver().lookupObjEntity(
-                Painting.class);
+        ObjEntity paintingEntity = context
+                .getEntityResolver()
+                .lookupObjEntity(Painting.class);
         ObjRelationship relationship = (ObjRelationship) paintingEntity
                 .getRelationship("toArtist");
         paintingEntity.removeRelationship("toArtist");
@@ -277,8 +207,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     public void testPrefetchOneWayToMany() throws Exception {
         createTestData("testPaintings");
 
-        ObjEntity paintingEntity = context.getEntityResolver().lookupObjEntity(
-                Painting.class);
+        ObjEntity paintingEntity = context
+                .getEntityResolver()
+                .lookupObjEntity(Painting.class);
         ObjRelationship relationship = (ObjRelationship) paintingEntity
                 .getRelationship("toArtist");
         paintingEntity.removeRelationship("toArtist");
@@ -327,8 +258,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
 
         Object toOnePrefetch = p1.readNestedProperty("toArtist");
         assertNotNull(toOnePrefetch);
-        assertTrue(
-                "Expected DataObject, got: " + toOnePrefetch.getClass().getName(),
+        assertTrue("Expected DataObject, got: " + toOnePrefetch.getClass().getName(),
                 toOnePrefetch instanceof DataObject);
 
         DataObject a1 = (DataObject) toOnePrefetch;
@@ -425,11 +355,6 @@ public class DataContextPrefetchTst extends DataContextTestBase {
 
         SelectQuery q = new SelectQuery(Painting.class, exp);
         q.addPrefetch("toArtist");
-
-        // test how prefetches are resolved in this case - this was a stumbling block for
-        // a while
-        Collection prefetches = context.queryWithPrefetches(q, new SelectObserver());
-        assertEquals(2, prefetches.size());
 
         // run the query ... see that it doesn't blow
         List paintings = context.performQuery(q);
