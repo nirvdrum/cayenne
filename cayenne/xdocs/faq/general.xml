@@ -15,11 +15,9 @@
     	</subsection>
     	
    		<subsection name="Q 1.2 How do I report a bug that I found in Cayenne?" anchor="bug_reports">
-    	<p>Cayenne is using SourceForge bug tracking system. Go to 
-    	<a href="http://sourceforge.net/tracker/?group_id=48132&amp;atid=452068">http://sourceforge.net/tracker/?group_id=48132&amp;atid=452068</a> 
-    	to submit Cayenne-related bugs. Reporting bugs is the most valuable contribution 
-    	Cayenne users can provide for the development team.
-    	</p>
+    	<p>Cayenne is using JIRA Issue Tracking system. Follow <a href="../bugs-features.html">this link</a> 
+    	to submit Cayenne-related bugs. 
+    	 </p>
     	</subsection>
     	
    		<subsection name="Q 1.3 How does Cayenne compare to XYZ O/R tool?" anchor="comparison">
@@ -30,10 +28,10 @@
     	</subsection>
 
   		<subsection name="Q 1.4 What License covers Cayenne source?" anchor="license">
-    	<p>This is a recast Apache (or BSD) license. In short - source code is avaliable, 
+    	<p>Cayenne license is a BSD/Apache style license. In short - source code is avaliable, 
     	modifications are allowed, modifications and products built with Cayenne can be 
-    	distributed unrestricted. The only requirement - give Cayenne authors a written 
-    	credit when using Cayenne in a derivative work.</p>
+    	distributed unrestricted. The only requirement - give Cayenne authors a written credit when 
+    	distributing Cayenne or using Cayenne in a derivative work.</p>
     	</subsection>
     	
     	<subsection name="Q 1.5 Cayenne History" anchor="history">
@@ -42,11 +40,11 @@
         development since December 2001.</p>
         
         <p>Later two of the original authors of Cayenne (Andrus and Misha)
-        started a company ObjectStyle LLC to provide commercial support and 
-        consulting services for the product.</p>
+        <a href="http://objectstyle.com">started a company</a> called ObjectStyle LLC to provide 
+        commercial support and consulting services for the product.</p>
         
-        <p>Nevertheless, core product is fully OpenSource under the most liberal license, 
-        and will stay that way. Right now Cayenne has a growing international user and developer community.</p>
+        <p>Core product is fully OpenSource under the most liberal license, and will stay that way. 
+        Right now Cayenne has a growing international user and developer community.</p>
     	</subsection>
     </section>
 </body>

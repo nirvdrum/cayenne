@@ -30,8 +30,11 @@
         to join the core team, current committers can vote to give you CVS write access 
         and other committer rights.</p>
         
+        http://sourceforge.net/cvs/?group_id=48132
+        
         <subsection name="How to Create a Patch">
-        <p>Preferred way to create a patch is to check out Cayenne source tree from CVS,
+        <p>Preferred way to create a patch is to <a href="http://sourceforge.net/cvs/?group_id=48132">check 
+        out Cayenne source tree</a> via anonymous CVS,
         make changes to the local copy, and then run the following command (GUI CVS clients
         usually have support for this feature as well):
         </p>
@@ -41,7 +44,17 @@ cvs diff -u > patch.txt
 </source>
 
 		<p>Resulting <code>patch.txt</code> file will contain changes to all Cayenne files
-		as compared to the latest CVS version.</p>
+		as compared to the latest CVS version. Patches should be submitted via <a href="bugs-features.html">Cayenne 
+		Issue Tracker</a> . There is no need to notify cayenne-devel mailing list, since all new issues are posted 
+		on this list automatically.</p>
+		
+		<p> </p>
+		<panel name="Anonymous CVS Note:">Anonymous CVS hosted by SourceForge.net has a few shorcomings.
+		It is being built by synchronizing with master repository every once in a while, so there may be stale data in it.
+		Also as of this writing (November 2003) anonymous CVS has been down most of the time. As an alternative 
+		you may use CVS snapshots of STABLE and HEAD brances taken at 6 hour intervals and available for download
+		from http://objectstyle.org/downloads/cayenne/cvs-snapshots/ .
+		</panel>
         </subsection>
         </section>
     </body>

@@ -7,7 +7,7 @@
         <item name="Home"       href="/index.html"/>
         <item name="Download"       href="/download.html"/>
         <item name="Contributors"   href="/contributors.html"/>
-        <item name="How Can I Help" href="/todo.html"/>
+        <item name="How Can I Help" href="/how-can-i-help.html"/>
         <item name="Success Stories" href="/poweredby.html"/>
         <item name="License"        href="/LICENSE"/>
     </menu>
@@ -18,15 +18,13 @@
         <item name="Modeler Guide" href="/modelerguide/index.html"/>
         <item name="Examples" href="/examples/index.html"/>
         <item name="Javadoc API" href="/api/index.html"/>
-        <item name="FAQ" href="/faq/index.html"/>
-        
+        <item name="FAQ" href="/faq/index.html"/>    
     </menu>
-
-
-    <menu name="DEVELOPER">
-        <item name="Developer Guide"  href="/developerguide/index.html"/>
-        <item name="Bugs"  href="/bugs.html"/>
+    
+    <menu name="COLLABORATION">
+        <item name="Bugs and Features" href="/bugs-features.html"/>
         <item name="Mailing Lists"  href="http://objectstyle.org/cayenne/lists.html"/>
+        <item name="Developer Guide"  href="/developerguide/index.html"/>
     </menu>
     
     <toc-user-guide name="User Guide"  href="/userguide/index.html">

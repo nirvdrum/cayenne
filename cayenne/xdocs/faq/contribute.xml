@@ -1,5 +1,5 @@
 <document>
-<title>Frequently Asked Questions: Deploy Cayenne Applications</title>
+<title>Frequently Asked Questions: Contribute to Cayenne</title>
 
 <body>
     <section name="FAQ 6. Contribute to Cayenne">
@@ -13,9 +13,9 @@
  
     	<subsection name="Q 6.2 I've fixed a few things in Cayenne. How do I submit a patch?" 
                     anchor="patch">
-		<p>Patches are submitted to cayenne-devel mailing list. A patch will be applied if there
-		is a "lazy" consensus among committers. <a href="../todo.html">This page</a> contains 
-		instructions on how to make a patch. 
+		<p>Patches should be submitted via <a href="../bugs-features.html">Cayenne Issue Tracker</a>. 
+		A patch will be applied if there is a "lazy" consensus among committers. For instructions on how to 
+		make a patch follow <a href="../how-can-i-help.html">this link</a>.
 		</p>
     	</subsection>
     </section>
