@@ -70,7 +70,7 @@
 		<copy tofile="${dist}/RELEASE-NOTES.txt" file="doc/release-notes/RELEASE-NOTES-${project.version}.txt"/>
 		<copy tofile="${dist}/UPGRADE.txt" file="doc/upgrade/UPGRADE-${project.version}.txt"/>
 		
-		<tar tarfile="${dist.base}/${project.name}-src-${project.version}.tar.gz" compression="gzip">
+		<tar tarfile="${dist.base}/${project.name}-${project.version}.tar.gz" compression="gzip">
 			<tarfileset dir="${dist.base}">
 				<include name="${project.name}-${project.version}/**"/>
 				<exclude name="${project.name}-${project.version}/**/*.sh"/>
