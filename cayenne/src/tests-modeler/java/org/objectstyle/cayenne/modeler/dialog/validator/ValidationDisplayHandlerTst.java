@@ -54,14 +54,14 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.modeler.validator;
+package org.objectstyle.cayenne.modeler.dialog.validator;
 
 import javax.swing.JFrame;
 
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
 
 /**
