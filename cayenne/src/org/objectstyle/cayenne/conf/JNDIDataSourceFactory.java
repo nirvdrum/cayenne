@@ -71,6 +71,8 @@ import javax.sql.DataSource;
 public class JNDIDataSourceFactory implements DataSourceFactory {
     static Logger logObj = Logger.getLogger(JNDIDataSourceFactory.class.getName());
 
+	protected Configuration parentConfig;
+	
     public JNDIDataSourceFactory() throws Exception {}
 
     /** Returns DataSource object corresponding to <code>location</code>.
@@ -78,6 +80,10 @@ public class JNDIDataSourceFactory implements DataSourceFactory {
     public DataSource getDataSource(String location) throws Exception {
         return getDataSource(location, Level.FINER);
     }
+    
+    public void setParentConfig(Configuration conf) {
+		this.parentConfig = conf;
+	}
 
     public DataSource getDataSource(String location, Level logLevel) throws Exception {
         if(logLevel == null)

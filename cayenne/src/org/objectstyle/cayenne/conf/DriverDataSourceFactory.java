@@ -83,6 +83,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 	protected DataSourceInfo driverInfo;
 	protected Level logLevel = Level.FINER;
 	protected ResourceLocator locator;
+	protected Configuration parentConfig;
 
 	public DriverDataSourceFactory() throws Exception {
 		parser = Util.createXmlReader();
@@ -97,6 +98,10 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 		// allows applications to control where resources 
 		// are loaded from.
 		locator.setClassLoader(Configuration.getResourceLoader());
+	}
+
+	public void setParentConfig(Configuration conf) {
+		this.parentConfig = conf;
 	}
 
 	/** Returns DataSource object corresponding to <code>location</code>.
@@ -125,19 +130,16 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 	}
 
 	protected InputStream getInputStream(String location) {
-
-		// webapp patch - first try WEB-INF in current directory
-		File webFile = locator.findFileInCurDir("/WEB-INF/" + location);
-		if (webFile != null) {
-			try {
-				return new FileInputStream(webFile);
-			} catch (IOException ioex) {
-				// ignore
-			}
+		// webapp patch - first lookup in WEB-INF
+		if (parentConfig != null
+			&& (parentConfig instanceof ServletConfiguration)) {
+			ServletConfiguration servlConf =
+				(ServletConfiguration) parentConfig;
+			return servlConf.getMapConfig(location);
 		}
-		
+
 		// if not a web app, return to normal behavior
-	    return locator.findResourceStream(location);
+		return locator.findResourceStream(location);
 	}
 
 	/** Loads driver information from the file at <code>location</code>.

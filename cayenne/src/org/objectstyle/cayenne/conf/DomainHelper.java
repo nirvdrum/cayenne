@@ -590,6 +590,7 @@ public class DomainHelper {
 							.forName(factoryName)
 							.newInstance();
 
+                localFactory.setParentConfig(DomainHelper.this.config);
 				DataSource ds =
 					localFactory.getDataSource(dataSrcLocation, logLevel);
 				if (ds != null) {

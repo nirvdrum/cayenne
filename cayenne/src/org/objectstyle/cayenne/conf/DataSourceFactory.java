@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conf;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,17 +53,23 @@ package org.objectstyle.cayenne.conf;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.conf;
 
 import java.util.logging.Level;
  
 import javax.sql.DataSource;
 
 
-/** Defines API to obtain a javax.sql.DataSource objects from configuration data. */
+/** Defines API to obtain a javax.sql.DataSource objects 
+ * from configuration data.
+ */
 public interface DataSourceFactory {
 
 	public static final String JNDI_FACTORY = "org.objectstyle.cayenne.conf.JNDIDataSourceFactory";
 	public static final String DIRECT_FACTORY = "org.objectstyle.cayenne.conf.DriverDataSourceFactory";
+    
+    /** Initializes factory with the parent configuration object. */
+    public void setParentConfig(Configuration conf);
     
     /** Returns DataSource object corresponding to <code>location</code>.
       * Concrete implementations may treat location differently - as a
