@@ -64,11 +64,9 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
 import org.objectstyle.cayenne.map.*;
 
@@ -78,95 +76,82 @@ import org.objectstyle.cayenne.map.*;
  * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
-public class GenerateDbDialog extends JDialog implements ActionListener {
+public class GenerateDbDialog extends CayenneDialog implements ActionListener {
 	static Logger logObj = Logger.getLogger(Editor.class.getName());
 
 	private static final int WIDTH = 380;
 	private static final int HEIGHT = 190;
 
-	Mediator mediator;
 	Connection conn;
 	DbAdapter adapter;
 	DbGenerator gen;
 
-	private JPanel sqlTextPanel;
 	private JTextArea sql;
-	private JPanel btnPanel;
 	private JButton generate = new JButton("Generate");
 	private JButton cancel = new JButton("Cancel");
 	private JButton saveSql = new JButton("Save SQL");
-
-	private JPanel optionsPane;
-	/** Drop the existing tables in the databases*/
+	
+	/** Drop the existing tables in the database. */
 	private JCheckBox dropTables;
-	/** Generate SQL text only without*/
-	// private JCheckBox sqlOnly;
 
-	public GenerateDbDialog(
-		Mediator temp_mediator,
-		Connection temp_conn,
-		DbAdapter temp_adapter) {
+
+	public GenerateDbDialog(Connection conn, DbAdapter adapter) {
 		super(Editor.getFrame(), "Generate Database", true);
-		if (temp_mediator.getCurrentDataMap() == null)
+		if (getMediator().getCurrentDataMap() == null) {
 			throw new IllegalStateException(
 				"Must have current data map to " + "allow db generation");
-		mediator = temp_mediator;
-		conn = temp_conn;
-		adapter = temp_adapter;
-		gen = new DbGenerator(conn, adapter);
+		}
+		
+		this.conn = conn ;
+		this.adapter = adapter;
+		this.gen = new DbGenerator(conn, adapter);
 
 		init();
 
 		dropTables.addActionListener(this);
-		//sqlOnly.addActionListener(this);
 		generate.addActionListener(this);
 		saveSql.addActionListener(this);
 		cancel.addActionListener(this);
 
 		setSize(WIDTH, HEIGHT);
-		JFrame frame = Editor.getFrame();
-		Point point = frame.getLocationOnScreen();
-		int width = frame.getWidth();
-		int x = (width - WIDTH) / 2;
-		int height = frame.getHeight();
-		int y = (height - HEIGHT) / 2;
-
-		point.setLocation(point.x + x, point.y + y);
-		this.setLocation(point);
+		this.pack();
+        this.centerWindow();
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setVisible(true);
 	}
 
 	private void init() {
-		getContentPane().setLayout(new GridLayout(2, 1));
-
-		Border border = BorderFactory.createTitledBorder("Options");
-		optionsPane = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 5));
-		optionsPane.setBorder(border);
+		Container contentPane = this.getContentPane();
+		contentPane.setLayout(new BorderLayout());
+		
+		JPanel optionsPane = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 5));
+		optionsPane.setBorder(BorderFactory.createTitledBorder("Options"));
 		dropTables = new JCheckBox("Drop Tables");
-		//sqlOnly = new JCheckBox("Generate SQL only");
 		optionsPane.add(dropTables);
-		//optionsPane.add(sqlOnly);
-		getContentPane().add(optionsPane);
+		contentPane.add(optionsPane, BorderLayout.NORTH);
 
-		sqlTextPanel = new JPanel(new BorderLayout());
 		sql = new JTextArea();
+	    sql.setRows(16);
+		sql.setColumns(40);
 		sql.setEditable(false);
 		sql.setLineWrap(true);
 		sql.setWrapStyleWord(true);
-		JScrollPane temp = new JScrollPane(sql);
-		temp.setHorizontalScrollBarPolicy(
-			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		sqlTextPanel.add(temp, BorderLayout.CENTER);
-		btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		btnPanel.add(generate);
-		btnPanel.add(cancel);
-		btnPanel.add(saveSql);
-		sqlTextPanel.add(btnPanel, BorderLayout.SOUTH);
-		getContentPane().add(sqlTextPanel);
+		
+		JScrollPane scrollPanel = new JScrollPane(
+				sql,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        JPanel sqlTextPanel = new JPanel(new BorderLayout());
+		sqlTextPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		sqlTextPanel.add(scrollPanel, BorderLayout.CENTER);
+		contentPane.add(sqlTextPanel, BorderLayout.CENTER);
+
+		
+		JPanel btnPanel = PanelFactory.createButtonPanel(new JButton[] {generate, cancel, saveSql});
+		contentPane.add(btnPanel, BorderLayout.SOUTH);
 
 		DbGenerator gen = new DbGenerator(conn, adapter);
-		DataMap map = mediator.getCurrentDataMap();
+		DataMap map = getMediator().getCurrentDataMap();
 		DbEntity[] arr = map.getDbEntities();
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < arr.length; i++) {
@@ -183,7 +168,7 @@ public class GenerateDbDialog extends JDialog implements ActionListener {
 		if (generate == src) {
 			try {
 				gen.createTables(
-					mediator.getCurrentDataMap(),
+					getMediator().getCurrentDataMap(),
 					dropTables.isSelected());
 			} catch (SQLException ex) {
 				logObj.severe(ex.getMessage());
@@ -201,7 +186,7 @@ public class GenerateDbDialog extends JDialog implements ActionListener {
 			dispose();
 		} else if (src == saveSql) {
 			try {
-				String proj_dir_str = mediator.getConfig().getProjDir();
+				String proj_dir_str = getMediator().getConfig().getProjDir();
 				File proj_dir = null;
 				if (proj_dir_str != null)
 					proj_dir = new File(proj_dir_str);

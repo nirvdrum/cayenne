@@ -147,11 +147,9 @@ public class GenerateDbAction extends CayenneAction {
 			}
 		}
 
-        Mediator mediator = getMediator();
-		DataMap map = mediator.getCurrentDataMap();
+		DataMap map = getMediator().getCurrentDataMap();
 		try {
-			GenerateDbDialog dialog;
-			dialog = new GenerateDbDialog(mediator, conn, adapter);
+			new GenerateDbDialog(conn, adapter);
 		} 
 		finally {
 			try {

@@ -55,12 +55,14 @@
  */
 package org.objectstyle.cayenne.gui;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 
-import javax.swing.*;
+import javax.swing.JDialog;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
+import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.BrowserControl;
 
 /**
@@ -101,5 +103,10 @@ public class CayenneDialog extends JDialog implements HyperlinkListener {
 		}
 	}
 	
-	
+	/**
+	 * Returns current CayenneModeler mediator.
+	 */
+	public Mediator getMediator() {
+		return getParentEditor().getMediator();
+	}
 }
