@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access.trans;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,35 +53,38 @@ package org.objectstyle.cayenne.access.trans;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access.trans;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.*;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 
-/** Class works as a translator of SELECT queries to JDBC statements. */
+/** 
+ * Class that serves as a translator of SELECT queries to JDBC statements.
+ * 
+ * @author Andrei Adamchik
+ */
 public class SelectTranslator extends SelectQueryAssembler {
     static Logger logObj = Logger.getLogger(SelectTranslator.class.getName());
 
-    private HashMap aliasLookup = new HashMap();
-    private ArrayList columnList = new ArrayList();
-    private ArrayList tableList = new ArrayList();
-    private ArrayList aliasList = new ArrayList();
-    private ArrayList dbRelList = new ArrayList();
+    private final HashMap aliasLookup = new HashMap();
+    private final ArrayList columnList = new ArrayList();
+    private final ArrayList tableList = new ArrayList();
+    private final ArrayList aliasList = new ArrayList();
+    private final ArrayList dbRelList = new ArrayList();
     private int aliasCounter;
 
-    /** If set to <code>true</code>, indicates that distinct
-     *  select query is required no matter what the original query 
-     *  settings where. This flag can be set when joins are created
-     *  using "to-many" relationships. */
+    /** 
+     * If set to <code>true</code>, indicates that distinct
+     * select query is required no matter what the original query 
+     * settings where. This flag can be set when joins are created
+     * using "to-many" relationships. 
+     */
     private boolean forceDistinct;
     
 
@@ -109,8 +111,10 @@ public class SelectTranslator extends SelectQueryAssembler {
         return desc;
     }
 
-    /** Returns ordered list of Java class names that should be used for fetched values.
-      * ResultSet types are ignored, types specified in the query are used instead. */
+    /** 
+     * Returns ordered list of Java class names that should be used for fetched values.
+     * ResultSet types are ignored, types specified in the query are used instead. 
+     */
     public String[] getResultTypes(ResultSet rs) {
         int len = columnList.size();
         if (len == 0) {
@@ -132,6 +136,9 @@ public class SelectTranslator extends SelectQueryAssembler {
         return types;
     }
 
+    /**
+     * Returns query translated to SQL. This is a main work method of the SelectTranslator.
+     */
     public String createSqlString() throws java.lang.Exception {
         forceDistinct = false;
 
@@ -203,6 +210,9 @@ public class SelectTranslator extends SelectQueryAssembler {
         return (SelectQuery) getQuery();
     }
 
+    /**
+     * Creates a list of columns used in the query.
+     */
     private void buildColumnList() {
         DbEntity dbEntity = getRootEntity().getDbEntity();
         String newAlias = "t" + aliasCounter++;
