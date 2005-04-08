@@ -109,7 +109,7 @@ final class ASTStack extends LinkedList {
     /** 
      * Returns a value from the stack without removing it.
      */
-    Object peek() {
+    public Object peek() {
         return get(size() - 1);
     }
 
