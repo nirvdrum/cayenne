@@ -84,12 +84,15 @@ public class EntityMergeSupport {
     public EntityMergeSupport(DataMap map) {
         this.map = map;
     }
+    
 
     /**
-     * Updates each one of the list of ObjEntities, adding attributes and relationships
+     * Updates each one of the collection of ObjEntities, adding attributes and relationships
      * based on the current state of its DbEntity.
+     * 
+     * @since 1.2 changed signature to use Collection instead of List.
      */
-    public void synchronizeWithDbEntities(List objEntities) {
+    public void synchronizeWithDbEntities(Collection objEntities) {
         Iterator it = objEntities.iterator();
         while (it.hasNext()) {
             this.synchronizeWithDbEntity((ObjEntity) it.next());
@@ -110,8 +113,21 @@ public class EntityMergeSupport {
         // against simulteneous modification of the map (like double-clicking on sync
         // button)
         synchronized (map) {
+            List removeAttributes = getAttributesToRemove(entity);
+            
+            // get rid of attributes that are now src attributes for relationships
+            Iterator rait = removeAttributes.iterator();
+            while (rait.hasNext()) {
+                DbAttribute da = (DbAttribute) rait.next();
+                ObjAttribute oa = entity.getAttributeForDbAttribute(da);
+                while (oa != null){
+                    String attrName = oa.getName();
+                    entity.removeAttribute(attrName);
+                    oa = entity.getAttributeForDbAttribute(da);
+                }
+            }
+            
             List addAttributes = getAttributesToAdd(entity);
-            List addRelationships = getRelationshipsToAdd(entity);
 
             // add missing attributes
             Iterator ait = addAttributes.iterator();
@@ -131,6 +147,8 @@ public class EntityMergeSupport {
                 oa.setDbAttribute(da);
                 entity.addAttribute(oa);
             }
+            
+            List addRelationships = getRelationshipsToAdd(entity);
 
             // add missing relationships
             Iterator rit = addRelationships.iterator();
@@ -144,10 +162,11 @@ public class EntityMergeSupport {
                     Entity mappedTarget = (Entity) targets.next();
 
                     // avoid duplicate names
-                    String relationshipName = NamedObjectFactory.createName(
+                    String relationshipName = NameConverter.undescoredToJava(dr.getName(), false);
+                    relationshipName = NamedObjectFactory.createName(
                             ObjRelationship.class,
                             entity,
-                            dr.getName());
+                            relationshipName);
 
                     ObjRelationship or = new ObjRelationship(relationshipName);
                     or.addDbRelationship(dr);
@@ -157,6 +176,33 @@ public class EntityMergeSupport {
                 }
             }
         }
+    }
+
+    /**
+     * Returns a list of src attributes for the DbEntity relationships (Foreign Keys), 
+     * these do not need to be attributes of the ObjEntity.
+     * 
+     * @since 1.2
+     */
+    protected List getAttributesToRemove(ObjEntity objEntity){
+        List removeList = new ArrayList();
+        Iterator it = objEntity.getDbEntity().getRelationships().iterator();
+        while (it.hasNext()) {
+            DbRelationship dbrel = (DbRelationship) it.next();
+            
+            // check if adding it makes sense at all
+            if (dbrel.getName() == null) {
+                continue;
+            }
+
+            // get all of the srcAttributes for the relationship
+            Iterator srcAttIterator = dbrel.getSourceAttributes().iterator();
+            while(srcAttIterator.hasNext()){
+                removeList.add(srcAttIterator.next());
+            }
+        }
+        
+        return removeList;        
     }
 
     /**
@@ -222,7 +268,7 @@ public class EntityMergeSupport {
 
         return missing;
     }
-
+    
     public DataMap getMap() {
         return map;
     }

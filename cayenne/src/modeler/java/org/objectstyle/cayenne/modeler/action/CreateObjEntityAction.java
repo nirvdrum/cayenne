@@ -84,7 +84,7 @@ public class CreateObjEntityAction extends CayenneAction {
     }
 
     public String getIconName() {
-        return "icon-objentity.gif";
+        return "icon-new_objentity.gif";
     }
 
     /**

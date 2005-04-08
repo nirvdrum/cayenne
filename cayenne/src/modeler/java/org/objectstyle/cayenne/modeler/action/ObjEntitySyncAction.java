@@ -81,10 +81,14 @@ public class ObjEntitySyncAction extends CayenneAction {
 	public ObjEntitySyncAction(Application application) {
 		super(getActionName(), application);
 	}
+	
+	public String getIconName() {
+        return "icon-sync.gif";
+    }
 
 	/**
-	 * @see org.objectstyle.cayenne.modeler.util.CayenneAction#performAction(ActionEvent)
-	 */
+     * @see org.objectstyle.cayenne.modeler.util.CayenneAction#performAction(ActionEvent)
+     */
 	public void performAction(ActionEvent e) {
 		synchObjEntity();
 	}

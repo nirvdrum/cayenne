@@ -116,6 +116,10 @@ public class ImportEOModelAction extends CayenneAction {
     public ImportEOModelAction(Application application) {
         super(getActionName(), application);
     }
+    
+    public String getIconName() {
+        return "icon-eomodel.gif";
+    }
 
     public void performAction(ActionEvent event) {
         importEOModel();

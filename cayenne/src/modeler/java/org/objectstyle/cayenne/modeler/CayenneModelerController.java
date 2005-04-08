@@ -146,7 +146,7 @@ public class CayenneModelerController extends CayenneController {
 
     public void startupAction() {
         initBindings();
-        frame.show();
+        frame.setVisible(true);
 
         // open project
         if (initialProject != null) {

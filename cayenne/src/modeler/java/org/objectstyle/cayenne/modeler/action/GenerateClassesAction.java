@@ -78,6 +78,10 @@ public class GenerateClassesAction extends CayenneAction {
     public GenerateClassesAction(Application application) {
         super(getActionName(), application);
     }
+    
+    public String getIconName() {
+        return "icon-gen_java.gif";
+    }
 
     /**
      * @see org.objectstyle.cayenne.modeler.util.CayenneAction#performAction(ActionEvent)
