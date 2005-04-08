@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestObjects type="java.util.ArrayList">
+  <Test type="org.objectstyle.cayenne.xml.TestObject">
+    <name type="java.lang.String">George</name>
+    <age type="java.lang.Integer">0</age>
+    <open type="java.lang.Boolean">false</open>
+    <children type="java.util.ArrayList">
+      <element type="java.lang.String">Bill</element>
+      <element type="java.lang.String">Sue</element>
+    </children>
+  </Test>
+  <element type="java.lang.String">Random String</element>
+  <Test type="org.objectstyle.cayenne.xml.TestObject">
+    <name type="java.lang.String" />
+    <age type="java.lang.Integer">31</age>
+    <open type="java.lang.Boolean">false</open>
+    <children type="java.util.ArrayList">
+      <element type="java.lang.String">Harry</element>
+    </children>
+  </Test>
+  <element type="java.util.ArrayList">
+    <element type="java.lang.String">Testing</element>
+    <element type="java.lang.String">embedded</element>
+    <element type="java.lang.String">list</element>
+    <Test type="org.objectstyle.cayenne.xml.TestObject">
+      <name type="java.lang.String" />
+      <age type="java.lang.Integer">31</age>
+      <open type="java.lang.Boolean">false</open>
+      <children type="java.util.ArrayList">
+        <element type="java.lang.String">Harry</element>
+      </children>
+    </Test>
+  </element>
+</TestObjects>
+

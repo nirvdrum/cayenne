@@ -7,7 +7,7 @@ import java.util.*;
  */
 public class TestObject implements XMLSerializable {
 
-    protected String name;
+    protected String name = "";
     protected int age;
     protected boolean open;
     protected List children = new ArrayList();
@@ -61,11 +61,28 @@ public class TestObject implements XMLSerializable {
         
         TestObject test = (TestObject) o;
         
-        return ((test.getAge() == age) && (test.getName().equals(name)) && (test.isOpen() == open));
+        return ((test.getAge() == age) && (name.equals(test.getName())) && (test.isOpen() == open));
     }
 
     public void encodeAsXML(XMLEncoder encoder) {
         encoder.setRoot("Test", this.getClass().getName());
-        encoder.encodeProperty("Children", children);
+        encoder.encodeProperty("name", name);
+        encoder.encodeProperty("age", new Integer(age));
+        encoder.encodeProperty("open", new Boolean(open));
+        encoder.encodeProperty("children", children);
+    }
+
+    public void decodeFromXML(XMLDecoder decoder) {
+        
+        if (null != decoder.decodeInteger("age")) {
+            age = decoder.decodeInteger("age").intValue();
+        }
+        
+        if (null != decoder.decodeBoolean("open")) {
+            open = decoder.decodeBoolean("open").booleanValue();
+        }
+        
+        name = decoder.decodeString("name");
+        children = (List) decoder.decodeObject("children");
     }
 }

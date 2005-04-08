@@ -116,14 +116,41 @@ public class XMLDecoderTst extends TestCase {
         assertEquals(false, test.isOpen());
     }
     
-    // TODO Test decode of collections.
-    public void testDecodeCollections() throws Exception {
+    public void testDecodeCollection() throws Exception {
         Reader xml = new FileReader(XML_DATA_DIR + "encoded-simple-collection.xml");
         Object object = decoder.decode(xml);
         
         assertTrue(object instanceof TestObject);
         TestObject test = (TestObject) object;
         assertEquals(2, test.getChildren().size());
+    }
+    
+    public void testDecodeComplexCollection() throws Exception {
+        Reader xml = new FileReader(XML_DATA_DIR + "encoded-complex-collection.xml");
+        List testObjects = (List) decoder.decode(xml);
+        
+        assertEquals(4, testObjects.size());
+        
+        List embeddedList = (List) testObjects.get(3);
+        
+        TestObject obj1 = new TestObject();
+        obj1.setName("George");
+        obj1.addChild("Bill");
+        obj1.addChild("Sue");
+        
+        TestObject obj2 = new TestObject();
+        obj2.setAge(31);
+        obj2.setOpen(false);
+        obj2.addChild("Harry");
+        
+        assertEquals(obj1, testObjects.get(0));
+        assertEquals("Random String", testObjects.get(1));
+        assertEquals(obj2, testObjects.get(2));
+        
+        assertEquals(4, embeddedList.size());
+        assertEquals("Testing", embeddedList.get(0));
+        assertEquals("embedded", embeddedList.get(1));
+        assertEquals("list", embeddedList.get(2));
     }
     
     // TODO Test decode with mapping file & data context.
@@ -139,5 +166,19 @@ public class XMLDecoderTst extends TestCase {
         assertEquals("n1", test.getName());
         assertEquals(5, test.getAge());
         assertEquals(true, test.isOpen());
+    }
+    
+    public void testDecodeMappedCollection() throws Exception {
+        Reader xml = new FileReader(XML_DATA_DIR + "collection-mapped.xml");
+        Object object = decoder.decode(xml, XML_DATA_DIR + "collection-mapping.xml");
+        
+        assertTrue(object instanceof TestObject);
+        TestObject test = (TestObject) object;
+        assertEquals("George", test.getName());
+        
+        List children = test.getChildren();
+        assertEquals(2, children.size());
+        assertEquals("Bill", children.get(0));
+        assertEquals("Sue", children.get(1));
     }
 }

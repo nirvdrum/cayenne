@@ -68,4 +68,6 @@ public interface XMLSerializable {
      * @since 1.1
      */
     public void encodeAsXML(XMLEncoder encoder);
+    
+    public void decodeFromXML(XMLDecoder decoder);
 }

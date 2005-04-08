@@ -68,6 +68,7 @@ import java.util.StringTokenizer;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -79,6 +80,7 @@ import org.objectstyle.cayenne.util.PropertyComparator;
 import org.objectstyle.cayenne.validation.BeanValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationResult;
+import org.objectstyle.cayenne.xml.XMLDecoder;
 import org.objectstyle.cayenne.xml.XMLEncoder;
 import org.objectstyle.cayenne.xml.XMLSerializable;
 
@@ -757,6 +759,30 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
             ObjAttribute att = (ObjAttribute) it.next();
             String name = att.getName();
             encoder.encodeProperty(name, readNestedProperty(name));
+        }
+    }
+    
+    public void decodeFromXML(XMLDecoder decoder) {
+        ObjEntity object = null;
+        
+        // TODO: relying on singleton Configuration is a bad idea... 
+        // Probably decoder itself can optionally store a DataContext or an EntityResolver
+        // to provide "context" appropriate for a given environment
+        for (Iterator it = Configuration.getSharedConfiguration().getDomain().getDataNodes().iterator(); it.hasNext();) {
+            DataNode dn = (DataNode) it.next();
+            
+            EntityResolver er = dn.getEntityResolver();
+            object = er.lookupObjEntity(getClass());
+            
+            if (null != object) {
+                break;
+            }
+        }
+
+        for (Iterator it = object.getDeclaredAttributes().iterator(); it.hasNext();) {
+            ObjAttribute att = (ObjAttribute) it.next();
+            String name = att.getName();
+            writeProperty(name, decoder.decodeObject(name));
         }
     }
 }

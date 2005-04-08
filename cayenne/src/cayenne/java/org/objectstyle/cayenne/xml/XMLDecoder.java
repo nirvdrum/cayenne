@@ -63,7 +63,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.beanutils.ConstructorUtils;
-import org.apache.commons.beanutils.PropertyUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -124,7 +123,13 @@ public class XMLDecoder {
      * @return The tag's value.
      */
     public Boolean decodeBoolean(String xmlTag) {
-        return Boolean.valueOf(decodeString(xmlTag));
+        String val = decodeString(xmlTag);
+        
+        if (null == val) {
+            return null;
+        }
+        
+        return Boolean.valueOf(val);
     }
 
     /**
@@ -134,7 +139,13 @@ public class XMLDecoder {
      * @return The tag's value.
      */
     public Double decodeDouble(String xmlTag) {
-        return Double.valueOf(decodeString(xmlTag));
+        String val = decodeString(xmlTag);
+        
+        if (null == val) {
+            return null;
+        }
+        
+        return Double.valueOf(val);
     }
 
     /**
@@ -144,7 +155,13 @@ public class XMLDecoder {
      * @return The tag's value.
      */
     public Float decodeFloat(String xmlTag) {
-        return Float.valueOf(decodeString(xmlTag));
+        String val = decodeString(xmlTag);
+        
+        if (null == val) {
+            return null;
+        }
+                
+        return Float.valueOf(val);
     }
 
     /**
@@ -154,7 +171,13 @@ public class XMLDecoder {
      * @return The tag's value.
      */
     public Integer decodeInteger(String xmlTag) {
-        return Integer.valueOf(decodeString(xmlTag));
+        String val = decodeString(xmlTag);
+        
+        if (null == val) {
+            return null;
+        }
+        
+        return Integer.valueOf(val);
     }
 
     public Object decodeObject(String xmlTag) {
@@ -171,7 +194,11 @@ public class XMLDecoder {
      * @return The tag's value.
      */
     protected Object decodeObject(Element child) {
-
+        
+        if (null == child) {
+            return null;
+        }
+        
         String type = child.getAttributeValue("type");
         if (type == null) {
             // TODO should we use String by default? Or guess from the property type?
@@ -198,8 +225,11 @@ public class XMLDecoder {
                 return decodeCollection(child, objectClass);
             }
             
-            else if (ConstructorUtils.getAccessibleConstructor(objectClass, XMLDecoder.class) != null) {
-                return ConstructorUtils.invokeConstructor(objectClass, new XMLDecoder(dc));
+            else if (XMLSerializable.class.isAssignableFrom(objectClass)) {
+                XMLSerializable ret = (XMLSerializable) objectClass.newInstance();
+                ret.decodeFromXML(this);
+                
+                return ret;
             }
             
             else if (ConstructorUtils.getAccessibleConstructor(objectClass, String.class) != null) { 
@@ -247,7 +277,7 @@ public class XMLDecoder {
         Document data = parse(in);
 
         // Delegate to the decode() method that works on JDOM elements.
-        return decodeXml(data.getRootElement());
+        return decode(data.getRootElement());
     }
 
     /**
@@ -258,10 +288,11 @@ public class XMLDecoder {
      * @param dc DataContext to register the decoded object with.
      * @return The decoded object.
      */
-    protected Object decodeXml(Element xml) throws CayenneRuntimeException {
+    public Object decode(Element xml) throws CayenneRuntimeException {
 
         // Update root to be the supplied xml element. This is necessary as
         // root is used for decoding properties.
+        Element oldRoot = root;
         root = xml;
 
         // Create the object we're ultimately returning. It is represented
@@ -269,43 +300,18 @@ public class XMLDecoder {
         Object object;
 
         try {
-            object = Class.forName(root.getAttributeValue("type")).newInstance();
+            object = decodeObject(xml);
         }
         catch (Throwable th) {
             throw new CayenneRuntimeException("Error instantiating object", th);
-        }
-
-        // Each child of root corresponds to a property in the object to be
-        // returned. So, set each one in turn . . .
-        for (Iterator it = root.getChildren().iterator(); it.hasNext();) {
-            Element e = (Element) it.next();
-
-            // Get the property's name. There is a 1:1 mapping between
-            // property name and xml tag name.
-            String child = e.getName();
-
-            // Decode the XML element into an object that can be set as the
-            // property.
-            Object childObject = decodeObject(child);
-            try {
-                if(dc != null && childObject instanceof DataObject) {
-                    dc.registerNewObject((DataObject) childObject);
-                }
-                
-                PropertyUtils.setNestedProperty(object, child, childObject);
-            }
-            catch (Exception ex) {
-                throw new CayenneRuntimeException("Error setting property '"
-                        + child
-                        + "'", ex);
-            }
-
         }
 
         if (dc != null && object instanceof DataObject) {
             dc.registerNewObject((DataObject) object);
         }
 
+        root = oldRoot;
+        
         return object;
     }
 
@@ -361,7 +367,7 @@ public class XMLDecoder {
         for (Iterator it = xml.getChildren().iterator(); it.hasNext();) {
             // Decode the object.
             Element e = (Element) it.next();
-            Object o = decodeObject(e);
+            Object o = decode(e);
 
             if (dc != null && o instanceof DataObject) {
                 dc.registerNewObject((DataObject) o);

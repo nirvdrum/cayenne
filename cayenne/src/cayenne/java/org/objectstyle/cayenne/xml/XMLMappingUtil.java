@@ -193,10 +193,15 @@ public class XMLMappingUtil {
             if (getEntityNames().contains(xmlTag) == false) {
                 // Otherwise, create a new child for the returned xml item, encoding
                 // the passed in object's property.
-                Element e = new Element(xmlTag);
+                
+                XMLEncoder encoder = new XMLEncoder();
+                Element e;
                 String propertyName = property.getAttributeValue("name");
                 try {
-                    e.setText(BeanUtils.getNestedProperty(object, propertyName));
+                    encoder.encodeProperty(xmlTag, PropertyUtils
+                            .getNestedProperty(object, propertyName));
+                    e = encoder.getRoot();
+                    e.removeAttribute("type");
                 }
                 catch (Exception ex) {
                     throw new CayenneRuntimeException("Error reading property '"
@@ -355,8 +360,7 @@ public class XMLMappingUtil {
         Object ret = newInstance(getRootEntity().getAttributeValue("name"));
 
         // We want to read each value from the XML file and then set the corresponding
-        // property value
-        // in the object to be returned.
+        // property value in the object to be returned.
         for (Iterator it = values.iterator(); it.hasNext();) {
             Element value = (Element) it.next();
 

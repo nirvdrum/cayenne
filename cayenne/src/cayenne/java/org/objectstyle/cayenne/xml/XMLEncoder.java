@@ -113,9 +113,10 @@ public class XMLEncoder {
         
         if (property instanceof XMLSerializable) {
             XMLSerializable element = (XMLSerializable) property;
-            Element rootCopy = (Element) root.clone();
+            Element rootCopy = root;
+            root = null;
             element.encodeAsXML(this);
-            temp.addContent(root);
+            temp = root;
             root = rootCopy;
         }
         else if (property instanceof Collection) {
@@ -127,7 +128,12 @@ public class XMLEncoder {
             temp.setText(property.toString());
         }
         
-        root.addContent(temp);
+        if (null != root) {
+            root.addContent(temp);
+        }
+        else {
+            root = temp;
+        }
     }
 
     // TODO Should this be made protected now that encodeProperty does the right thing w/ regards to collections?
@@ -135,7 +141,7 @@ public class XMLEncoder {
         XMLEncoder encoder = new XMLEncoder();
         encoder.setRoot(xmlTag, c.getClass().getName());
 
-        for (Iterator it = c.iterator(); it.hasNext();) {    
+        for (Iterator it = c.iterator(); it.hasNext();) {
             encoder.encodeProperty("element", it.next());
         }
 

@@ -1,0 +1,6 @@
+<model>
+    <entity name="org.objectstyle.cayenne.xml.TestObject" xmlTag="Test">
+        <property name="name" xmlTag="Name"/>
+        <property name="children" xmlTag="Children"/>
+    </entity>
+</model>

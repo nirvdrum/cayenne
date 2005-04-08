@@ -57,6 +57,8 @@ package org.objectstyle.cayenne.xml;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -87,5 +89,74 @@ public class XMLEncoderTst extends TestCase {
         }
         
         assertEquals(comp.toString(), encoder.getXml());
+    }
+    
+    public void testEncodeComplexCollection() throws Exception {
+        List testObjects = new ArrayList();
+        
+        List embeddedList = new ArrayList();
+        embeddedList.add("Testing");
+        embeddedList.add("embedded");
+        embeddedList.add("list");
+        
+        TestObject obj1 = new TestObject();
+        obj1.setName("George");
+        obj1.addChild("Bill");
+        obj1.addChild("Sue");
+        
+        TestObject obj2 = new TestObject();
+        obj2.setAge(31);
+        obj2.setOpen(false);
+        obj2.addChild("Harry");
+        embeddedList.add(obj2);       
+        
+        testObjects.add(obj1);
+        testObjects.add("Random String");
+        testObjects.add(obj2);
+        testObjects.add(embeddedList);
+        
+        encoder.encodeProperty("TestObjects", testObjects);
+        
+        BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR + "encoded-complex-collection.xml"));
+        StringBuffer comp = new StringBuffer();
+        while (in.ready()) {
+            comp.append(in.readLine()).append("\r\n");
+        }
+        
+        assertEquals(comp.toString(), encoder.getXml());
+    }
+    
+    public void testSimpleMapping() throws Exception {
+        TestObject test = new TestObject();
+        test.setAge(57);
+        test.setName("George");
+        test.setOpen(false);
+        
+        encoder.encode(test, XML_DATA_DIR + "simple-mapping.xml");
+        
+        BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR + "simple-mapped.xml"));
+        StringBuffer comp = new StringBuffer();
+        while (in.ready()) {
+            comp.append(in.readLine()).append("\r\n");
+        }
+        
+        assertEquals(comp.toString(), encoder.getXml());        
+    }
+    
+    public void testCollectionMapping() throws Exception {
+        TestObject test = new TestObject();
+        test.setName("George");
+        test.addChild("Bill");
+        test.addChild("Sue");
+        
+        encoder.encode(test, XML_DATA_DIR + "collection-mapping.xml");
+        
+        BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR + "collection-mapped.xml"));
+        StringBuffer comp = new StringBuffer();
+        while (in.ready()) {
+            comp.append(in.readLine()).append("\r\n");
+        }
+        System.out.print(encoder.getXml());
+        assertEquals(comp.toString(), encoder.getXml());        
     }
 }

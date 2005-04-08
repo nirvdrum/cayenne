@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Test>
+  <Name>George</Name>
+  <Children>
+    <element type="java.lang.String">Bill</element>
+    <element type="java.lang.String">Sue</element>
+  </Children>
+</Test>
+

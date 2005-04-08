@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Test>
-  <Age>57</Age>
   <Name>George</Name>
-  <IsOpen>False</IsOpen>
+  <Age>57</Age>
+  <IsOpen>false</IsOpen>
 </Test>
+
