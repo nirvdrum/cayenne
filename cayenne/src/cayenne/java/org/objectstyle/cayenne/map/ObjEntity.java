@@ -97,6 +97,9 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     protected Expression qualifier;
     protected boolean readOnly;
     protected int lockType = LOCK_TYPE_NONE;
+    
+    protected String clientClassName;
+    protected String clientSuperClassName;
 
     public ObjEntity() {
         super();
@@ -126,6 +129,11 @@ public class ObjEntity extends Entity implements ObjEntityListener,
             encoder.print("\" className=\"");
             encoder.print(getClassName());
         }
+        
+        if (getClientClassName() != null) {
+            encoder.print("\" clientClassName=\"");
+            encoder.print(getClientClassName());
+        }
 
         if (isReadOnly()) {
             encoder.print("\" readOnly=\"true");
@@ -143,6 +151,11 @@ public class ObjEntity extends Entity implements ObjEntityListener,
         if (getSuperEntityName() == null && getSuperClassName() != null) {
             encoder.print("\" superClassName=\"");
             encoder.print(getSuperClassName());
+        }
+        
+        if (getSuperEntityName() == null && getClientSuperClassName() != null) {
+            encoder.print("\" clientSuperClassName=\"");
+            encoder.print(getClientSuperClassName());
         }
 
         encoder.println("\">");
@@ -282,6 +295,26 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     public void setClassName(String className) {
         this.className = className;
     }
+    
+
+    /** 
+     * Returns the name of ClientDataObject class described by this entity.
+     * 
+     * @since 1.2
+     */
+    public String getClientClassName() {
+        return clientClassName;
+    }
+
+    /** 
+     * Sets the name of the ClientDataObject class described by this entity.
+     * 
+     * @since 1.2
+     */
+    public void setClientClassName(String clientClassName) {
+        this.clientClassName = clientClassName;
+    }
+    
 
     /**
      * Returns a fully-qualified name of the super class of the DataObject class.
@@ -302,6 +335,34 @@ public class ObjEntity extends Entity implements ObjEntityListener,
      */
     public void setSuperClassName(String superClassName) {
         this.superClassName = superClassName;
+    }
+    
+    /**
+     * Returns a fully-qualified name of the client-side super class of the DataObject
+     * class. This value is used as a hint for class generation. If the entity inherits
+     * from another entity, a superclass is the class of that entity.
+     * 
+     * @since 1.2
+     */
+    public String getClientSuperClassName() {
+        ObjEntity superEntity = getSuperEntity();
+        return (superEntity != null)
+                ? superEntity.getClientSuperClassName()
+                : clientSuperClassName;
+    }
+
+    /**
+     * Sets a fully-qualified name of the client-side super class of the ClientDataObject
+     * class. This value is used as a hint for class generation.
+     * <p>
+     * <i>An attempt to set superclass on an inherited entity has no effect, since a class
+     * of the super entity is always used as a superclass. </i>
+     * </p>
+     * 
+     * @since 1.2
+     */
+    public void setClientSuperClassName(String clientSuperClassName) {
+        this.clientSuperClassName = clientSuperClassName;
     }
 
     /**

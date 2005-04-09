@@ -18,7 +18,7 @@ may reference objects from other DataMaps.
 <!-- ===================================================
 A generic property used by other configuration objects.
 -->
-<!ELEMENT property>
+<!ELEMENT property EMPTY>
 <!ATTLIST property
 	name CDATA #REQUIRED
 	value CDATA #REQUIRED
@@ -89,6 +89,8 @@ hierarchy.
 	dbEntityName CDATA #REQUIRED
 	superEntityName CDATA #IMPLIED
 	superClassName CDATA #IMPLIED
+	clientClassName CDATA #IMPLIED
+	clientSuperClassName CDATA #IMPLIED
 	readOnly (true | false) "false"
 	lock-type (optimistic | none) "none"
 >
@@ -101,7 +103,7 @@ hierarchy.
 	lock (true | false) "false"
 >
 
-<!ELEMENT obj-relationship>
+<!ELEMENT obj-relationship EMPTY>
 <!ATTLIST obj-relationship
 	name CDATA #REQUIRED
 	source CDATA #REQUIRED
@@ -147,7 +149,7 @@ hierarchy.
 Defines a Cayenne Query that can be either at the DataMap
 level, or linked to an entity or procedure.
 -->
-<!ELEMENT query (property*, result-column*, (sql* | (qualifier?, ordering*, prefetch*)? )>
+<!ELEMENT query (property*, result-column*, (sql* | (qualifier?, ordering*, prefetch*)?) >
 <!ATTLIST query
         name CDATA #REQUIRED
         factory CDATA #REQUIRED

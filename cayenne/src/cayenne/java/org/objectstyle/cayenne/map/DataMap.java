@@ -755,6 +755,16 @@ public class DataMap implements XMLSerializable, MappingNamespace,
     public void setDefaultLockType(int defaultLockType) {
         this.defaultLockType = defaultLockType;
     }
+    
+    /**
+     * Returns default server package with ".client" suffix.
+     * 
+     * @since 1.2
+     */
+    public String getDefaultClientPackage() {
+        return Util.isEmptyString(getDefaultPackage()) ? null : getDefaultPackage()
+                + ".client";
+    }
 
     /**
      * @since 1.1

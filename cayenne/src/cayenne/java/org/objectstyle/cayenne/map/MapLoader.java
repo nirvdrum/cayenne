@@ -523,6 +523,7 @@ public class MapLoader extends DefaultHandler {
     private void processStartObjEntity(Attributes atts) {
         objEntity = new ObjEntity(atts.getValue("", "name"));
         objEntity.setClassName(atts.getValue("", "className"));
+        objEntity.setClientClassName(atts.getValue("", "clientClassName"));
 
         String readOnly = atts.getValue("", "readOnly");
         objEntity.setReadOnly(TRUE.equalsIgnoreCase(readOnly));
@@ -539,6 +540,7 @@ public class MapLoader extends DefaultHandler {
         else {
             objEntity.setDbEntityName(atts.getValue("", "dbEntityName"));
             objEntity.setSuperClassName(atts.getValue("", "superClassName"));
+            objEntity.setClientSuperClassName(atts.getValue("", "clientSuperClassName"));
         }
 
         dataMap.addObjEntity(objEntity);

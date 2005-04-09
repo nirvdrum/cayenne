@@ -130,6 +130,9 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
     protected JCheckBox readOnly;
     protected JCheckBox optimisticLocking;
 
+    protected TextAdapter clientClassName;
+    protected TextAdapter clientSuperClassName;
+
     public ObjEntityTab(ProjectController mediator) {
         this.mediator = mediator;
         initView();
@@ -138,12 +141,15 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
 
     private void initView() {
         this.setLayout(new BorderLayout());
-        
+
         JToolBar toolBar = new JToolBar();
         Application app = Application.getInstance();
         toolBar.add(app.getAction(ObjEntitySyncAction.getActionName()).buildButton());
         toolBar.add(app.getAction(CreateAttributeAction.getActionName()).buildButton());
-        toolBar.add(app.getAction(CreateRelationshipAction.getActionName()).buildButton());
+        toolBar
+                .add(app
+                        .getAction(CreateRelationshipAction.getActionName())
+                        .buildButton());
         add(toolBar, BorderLayout.NORTH);
 
         // create widgets
@@ -169,6 +175,19 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
 
             protected void updateModel(String text) {
                 setQualifier(text);
+            }
+        };
+
+        clientClassName = new TextAdapter(new JTextField()) {
+
+            protected void updateModel(String text) {
+                setClientClassName(text);
+            }
+        };
+        clientSuperClassName = new TextAdapter(new JTextField()) {
+
+            protected void updateModel(String text) {
+                setClientSuperClassName(text);
             }
         };
 
@@ -201,6 +220,10 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         builder.append("Qualifier", qualifier.getComponent(), 3);
         builder.append("Read-Only:", readOnly, 3);
         builder.append("Optimistic Locking:", optimisticLocking, 3);
+
+        builder.appendSeparator("Java Client");
+        builder.append("Client Java Class:", clientClassName.getComponent(), 3);
+        builder.append("Client Superclass:", clientSuperClassName.getComponent(), 3);
 
         add(builder.getPanel(), BorderLayout.CENTER);
     }
@@ -275,8 +298,9 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
             }
         });
 
-        syncWithDbEntityButton.addActionListener(new ObjEntitySyncAction(mediator.getApplication()));
-        
+        syncWithDbEntityButton.addActionListener(new ObjEntitySyncAction(mediator
+                .getApplication()));
+
         readOnly.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
@@ -311,10 +335,13 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         qualifier.getComponent().setBackground(Color.WHITE);
 
         name.setText(entity.getName());
-        superClassName.setText(entity.getSuperClassName() != null ? entity
-                .getSuperClassName() : "");
-        className.setText(entity.getClassName() != null ? entity.getClassName() : "");
+        superClassName.setText(entity.getSuperClassName());
+        className.setText(entity.getClassName());
         readOnly.setSelected(entity.isReadOnly());
+        
+        clientClassName.setText(entity.getClientClassName());
+        clientSuperClassName.setText(entity.getClientSuperClassName());
+        
 
         StringConvertor convertor = StringConvertors.forClass(Expression.class);
         qualifier.setText(convertor.valueAsString(entity.getDeclaredQualifier()));
@@ -355,9 +382,9 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
             }
         };
 
-        Object[] objEntities = CollectionUtils.select(
-                map.getNamespace().getObjEntities(),
-                inheritanceFilter).toArray();
+        Object[] objEntities = CollectionUtils
+                .select(map.getNamespace().getObjEntities(), inheritanceFilter)
+                .toArray();
         Arrays.sort(objEntities, Comparators.getDataMapChildrenComparator());
         Object[] finalObjEntities = new Object[objEntities.length + 1];
         finalObjEntities[0] = noInheritance;
@@ -393,6 +420,35 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
 
         if (ent != null && !Util.nullSafeEquals(ent.getSuperClassName(), text)) {
             ent.setSuperClassName(text);
+            mediator.fireObjEntityEvent(new EntityEvent(this, ent));
+        }
+    }
+
+    void setClientClassName(String className) {
+        if (className != null && className.trim().length() == 0) {
+            className = null;
+        }
+
+        ObjEntity entity = mediator.getCurrentObjEntity();
+
+        // "ent" may be null if we quit editing by changing tree selection
+        if (entity != null
+                && !Util.nullSafeEquals(entity.getClientClassName(), className)) {
+            entity.setClientClassName(className);
+            mediator.fireObjEntityEvent(new EntityEvent(this, entity));
+        }
+    }
+
+    void setClientSuperClassName(String text) {
+
+        if (text != null && text.trim().length() == 0) {
+            text = null;
+        }
+
+        ObjEntity ent = mediator.getCurrentObjEntity();
+
+        if (ent != null && !Util.nullSafeEquals(ent.getClientSuperClassName(), text)) {
+            ent.setClientSuperClassName(text);
             mediator.fireObjEntityEvent(new EntityEvent(this, ent));
         }
     }
@@ -448,16 +504,16 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
 
             // suggest to update class name
             String suggestedClassName = suggestedClassName(entity);
-            
+
             // make sure the current class name is not the default name or blank
             String entityClassName = entity.getClassName();
             if (entityClassName == null
                     || entityClassName.length() == 0
-                    || entityClassName.endsWith("UntitledObjEntity")){
+                    || entityClassName.endsWith("UntitledObjEntity")) {
                 className.setText(suggestedClassName);
                 entity.setClassName(suggestedClassName);
             }
-            
+
             if (suggestedClassName != null
                     && !suggestedClassName.equals(entity.getClassName())) {
                 JOptionPane pane = new JOptionPane(
@@ -472,7 +528,9 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
                                 "Change", "Cancel"
                         });
 
-                pane.createDialog(Application.getFrame(), "Update Class Name").setVisible(true);
+                pane
+                        .createDialog(Application.getFrame(), "Update Class Name")
+                        .setVisible(true);
                 if ("Change".equals(pane.getValue())) {
                     className.setText(suggestedClassName);
                     setClassName(suggestedClassName);
@@ -525,9 +583,11 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
     void activateFields(boolean active) {
         superClassName.getComponent().setEnabled(active);
         superClassName.getComponent().setEditable(active);
+        clientSuperClassName.getComponent().setEnabled(active);
+        clientSuperClassName.getComponent().setEditable(active);
         dbEntityCombo.setEnabled(active);
     }
-    
+
     public void processExistingSelection(EventObject e) {
         EntityDisplayEvent ede = new EntityDisplayEvent(this, mediator
                 .getCurrentObjEntity(), mediator.getCurrentDataMap(), mediator
