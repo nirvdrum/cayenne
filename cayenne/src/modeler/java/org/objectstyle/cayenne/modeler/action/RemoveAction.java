@@ -107,6 +107,10 @@ public class RemoveAction extends CayenneAction {
         super(getActionName(), application);
     }
 
+    protected RemoveAction(String actionName, Application application){
+        super(actionName, application);
+    }
+
     public String getIconName() {
         return "icon-trash.gif";
     }
