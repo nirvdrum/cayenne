@@ -58,11 +58,14 @@ package org.objectstyle.cayenne.modeler.editor;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.EventObject;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.JToolBar;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
@@ -74,7 +77,10 @@ import org.objectstyle.cayenne.map.DerivedDbAttribute;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DbAttributeListener;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
+import org.objectstyle.cayenne.modeler.action.RemoveAttributeAction;
 import org.objectstyle.cayenne.modeler.dialog.EditDerivedParamsDialog;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
@@ -102,6 +108,7 @@ public class DbEntityAttributeTab
     protected ProjectController mediator;
     protected CayenneTable table;
     protected JButton editParams;
+    protected boolean fireEvent = false;
 
     public DbEntityAttributeTab(ProjectController temp_mediator) {
         super();
@@ -116,7 +123,15 @@ public class DbEntityAttributeTab
     }
 
     private void init() {
-        setLayout(new BorderLayout());
+        this.setLayout(new BorderLayout());
+        
+        JToolBar toolBar = new JToolBar();
+        Application app = Application.getInstance();
+        toolBar.add(app.getAction(CreateAttributeAction.getActionName()).buildButton());
+        toolBar.addSeparator();
+        toolBar.add(app.getAction(RemoveAttributeAction.getActionName()).buildButton());
+        
+        add(toolBar, BorderLayout.NORTH);
 
         // Create table with two columns and no rows.
         table = new CayenneTable();
@@ -134,14 +149,14 @@ public class DbEntityAttributeTab
 
                 EditDerivedParamsDialog dialog =
                     new EditDerivedParamsDialog((DerivedDbAttribute) attr);
-                dialog.show();
+                dialog.setVisible(true);
                 dialog.dispose();
             }
         }
     }
 
     public void valueChanged(ListSelectionEvent e) {
-        processExistingSelection();
+        processExistingSelection(e);
     }
 
     /**
@@ -149,8 +164,11 @@ public class DbEntityAttributeTab
       */
     public void selectAttribute(DbAttribute attr) {
         if (attr == null) {
+            Application.getInstance().getAction(RemoveAttributeAction.getActionName()).setEnabled(false);
             return;
         }
+        // enable the remove button
+        Application.getInstance().getAction(RemoveAttributeAction.getActionName()).setEnabled(true);
 
         DbAttributeTableModel model = (DbAttributeTableModel) table.getModel();
         java.util.List attrs = model.getObjectList();
@@ -159,8 +177,11 @@ public class DbEntityAttributeTab
             table.select(attrPos);
         }
     }
-
-    public void processExistingSelection() {
+        
+    public void processExistingSelection(EventObject e) {
+        if (e instanceof ChangeEvent) {
+            table.clearSelection();
+        }
         DbAttribute att = null;
         if (table.getSelectedRow() >= 0) {
             DbAttributeTableModel model = (DbAttributeTableModel) table.getModel();

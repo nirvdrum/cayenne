@@ -582,7 +582,13 @@ public class ProjectController extends CayenneController {
      */
     public void fireObjEntityEvent(EntityEvent e) {
         EventListener[] list = listenerList.getListeners(ObjEntityListener.class);
+        
         setDirty(true);
+
+        if (currentMap != null && e.getId() == EntityEvent.CHANGE){
+            currentMap.objEntityChanged(e);
+        }
+
         if (e.getId() == DataMapEvent.REMOVE) {
             refreshNamespace();
         }
@@ -612,7 +618,13 @@ public class ProjectController extends CayenneController {
      */
     public void fireDbEntityEvent(EntityEvent e) {
         EventListener[] list = listenerList.getListeners(DbEntityListener.class);
+        
         setDirty(true);
+        
+        if (currentMap != null && e.getId() == EntityEvent.CHANGE){
+            currentMap.dbEntityChanged(e);
+        }
+
         if (e.getId() == DataMapEvent.REMOVE) {
             refreshNamespace();
         }
@@ -724,8 +736,10 @@ public class ProjectController extends CayenneController {
     }
 
     public void fireObjEntityDisplayEvent(EntityDisplayEvent e) {
-        if (currentObjEntity == e.getEntity())
+        if (currentObjEntity == e.getEntity()){
             e.setEntityChanged(false);
+            return;
+        }
         clearState();
         currentDomain = e.getDomain();
         currentNode = e.getDataNode();
@@ -812,6 +826,11 @@ public class ProjectController extends CayenneController {
     /** Notifies all listeners of the change(add, remove) and does the change. */
     public void fireDbAttributeEvent(AttributeEvent e) {
         setDirty(true);
+
+        if (currentMap != null && e.getId() == AttributeEvent.CHANGE){
+            currentMap.dbAttributeChanged(e);
+        }
+
         EventListener[] list = listenerList.getListeners(DbAttributeListener.class);
         for (int i = 0; i < list.length; i++) {
             DbAttributeListener temp = (DbAttributeListener) list[i];
@@ -829,7 +848,7 @@ public class ProjectController extends CayenneController {
                     throw new IllegalArgumentException("Invalid AttributeEvent type: "
                             + e.getId());
             }
-        }
+        }        
     }
 
     public void fireDbAttributeDisplayEvent(AttributeDisplayEvent e) {
@@ -871,6 +890,10 @@ public class ProjectController extends CayenneController {
                             + e.getId());
             }
         }
+        
+        if (currentMap != null && e.getId() == AttributeEvent.CHANGE){
+            currentMap.objAttributeChanged(e);
+        }
     }
 
     public void fireObjAttributeDisplayEvent(AttributeDisplayEvent e) {
@@ -909,6 +932,10 @@ public class ProjectController extends CayenneController {
                     throw new IllegalArgumentException("Invalid RelationshipEvent type: "
                             + e.getId());
             }
+        }
+        
+        if (currentMap != null && e.getId() == RelationshipEvent.CHANGE){
+            currentMap.dbRelationshipChanged(e);
         }
     }
 
@@ -950,6 +977,10 @@ public class ProjectController extends CayenneController {
                     throw new IllegalArgumentException("Invalid RelationshipEvent type: "
                             + e.getId());
             }
+        }
+        
+        if (currentMap != null && e.getId() == RelationshipEvent.CHANGE){
+            currentMap.objRelationshipChanged(e);
         }
     }
 

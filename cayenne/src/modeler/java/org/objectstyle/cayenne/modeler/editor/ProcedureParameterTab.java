@@ -59,12 +59,14 @@ package org.objectstyle.cayenne.modeler.editor;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.EventObject;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -113,7 +115,7 @@ public class ProcedureParameterTab
 
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
-                ProcedureParameterTab.this.processExistingSelection();
+                processExistingSelection(e);
             }
         });
         
@@ -133,8 +135,11 @@ public class ProcedureParameterTab
             PanelFactory.createTablePanel(table, new JButton[] { moveUp, moveDown });
         add(panel, BorderLayout.CENTER);
     }
-
-    public void processExistingSelection() {
+    
+    public void processExistingSelection(EventObject e) {
+        if (e instanceof ChangeEvent){
+            table.clearSelection();
+        }
 
         ProcedureParameter parameter = null;
         boolean enableButtons = false;
@@ -155,14 +160,14 @@ public class ProcedureParameterTab
         moveUp.setEnabled(enableButtons);
         moveDown.setEnabled(enableButtons);
 
-        ProcedureParameterDisplayEvent e =
+        ProcedureParameterDisplayEvent ppde =
             new ProcedureParameterDisplayEvent(
                 this,
                 parameter,
                 eventController.getCurrentProcedure(),
                 eventController.getCurrentDataMap(),
                 eventController.getCurrentDataDomain());
-        eventController.fireProcedureParameterDisplayEvent(e);
+        eventController.fireProcedureParameterDisplayEvent(ppde);
     }
 
     /**

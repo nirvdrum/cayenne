@@ -81,6 +81,7 @@ import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateProcedureAction;
 import org.objectstyle.cayenne.modeler.action.CreateQueryAction;
 import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
+import org.objectstyle.cayenne.modeler.action.DbEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.GenerateClassesAction;
@@ -247,9 +248,12 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         toolBar.add(getAction(CreateDbEntityAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateDerivedDbEntityAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateProcedureAction.getActionName()).buildButton());
+
+        toolBar.addSeparator();
+
         toolBar.add(getAction(CreateObjEntityAction.getActionName()).buildButton());
-        toolBar.add(getAction(CreateAttributeAction.getActionName()).buildButton());
-        toolBar.add(getAction(CreateRelationshipAction.getActionName()).buildButton());
+        //toolBar.add(getAction(CreateAttributeAction.getActionName()).buildButton());
+        //toolBar.add(getAction(CreateRelationshipAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateQueryAction.getActionName()).buildButton());
 
         getContentPane().add(toolBar, BorderLayout.NORTH);
@@ -371,7 +375,8 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         enableDataMapMenu();
         getAction(CreateAttributeAction.getActionName()).setEnabled(true);
         getAction(CreateRelationshipAction.getActionName()).setEnabled(true);
-
+        getAction(DbEntitySyncAction.getActionName()).setEnabled(true);
+        
         if (controller.getProjectController().getCurrentDbEntity() instanceof DerivedDbEntity) {
             getAction(DerivedEntitySyncAction.getActionName()).setEnabled(true);
         }

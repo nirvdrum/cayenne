@@ -56,6 +56,8 @@
 
 package org.objectstyle.cayenne.modeler.editor;
 
+import java.util.EventObject;
+
 /** 
  * Callback interface for panes of detail views to process existing 
  * selections. When tab is selected processExistingSelection() is 
@@ -70,5 +72,6 @@ public interface ExistingSelectionProcessor {
      * For example, it is useful when we want to reset "Remove" button 
      * if the tab has attributes (relationships) already selected. 
      */
-    public void processExistingSelection();
+    public void processExistingSelection(EventObject e);
+
 }

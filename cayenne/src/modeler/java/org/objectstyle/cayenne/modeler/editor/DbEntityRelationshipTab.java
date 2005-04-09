@@ -59,6 +59,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.EventObject;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultCellEditor;
@@ -67,6 +68,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JToolBar;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -83,7 +86,10 @@ import org.objectstyle.cayenne.map.event.DbEntityListener;
 import org.objectstyle.cayenne.map.event.DbRelationshipListener;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
+import org.objectstyle.cayenne.modeler.action.RemoveRelationshipAction;
 import org.objectstyle.cayenne.modeler.dialog.ResolveDbRelationshipDialog;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
@@ -121,7 +127,15 @@ public class DbEntityRelationshipTab extends JPanel implements ActionListener,
     }
 
     protected void init() {
-        setLayout(new BorderLayout());
+        this.setLayout(new BorderLayout());
+        
+        JToolBar toolBar = new JToolBar();
+        Application app = Application.getInstance();
+        toolBar.add(app.getAction(CreateRelationshipAction.getActionName()).buildButton());
+        toolBar.addSeparator();
+        toolBar.add(app.getAction(RemoveRelationshipAction.getActionName()).buildButton());
+        add(toolBar, BorderLayout.NORTH);
+
         table = new CayenneTable();
         table.setDefaultRenderer(DbEntity.class, new EntityRenderer());
         resolve = new JButton("Database Mapping");
@@ -139,7 +153,7 @@ public class DbEntityRelationshipTab extends JPanel implements ActionListener,
     }
 
     public void valueChanged(ListSelectionEvent e) {
-        processExistingSelection();
+        processExistingSelection(e);
     }
 
     public void tableChanged(TableModelEvent e) {
@@ -156,8 +170,11 @@ public class DbEntityRelationshipTab extends JPanel implements ActionListener,
      */
     public void selectRelationship(DbRelationship rel) {
         if (rel == null) {
+            Application.getInstance().getAction(RemoveRelationshipAction.getActionName()).setEnabled(false);
             return;
         }
+        // enable the remove button
+        Application.getInstance().getAction(RemoveRelationshipAction.getActionName()).setEnabled(true);
 
         DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
         java.util.List rels = model.getObjectList();
@@ -166,8 +183,11 @@ public class DbEntityRelationshipTab extends JPanel implements ActionListener,
             table.select(relPos);
         }
     }
-
-    public void processExistingSelection() {
+    
+    public void processExistingSelection(EventObject e) {
+        if (e instanceof ChangeEvent) {
+            table.clearSelection();
+        }
         DbRelationship rel = null;
         if (table.getSelectedRow() >= 0) {
             DbRelationshipTableModel model;

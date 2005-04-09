@@ -66,7 +66,10 @@ import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.action.RemoveAttributeAction;
+import org.objectstyle.cayenne.modeler.action.RemoveRelationshipAction;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjAttributeDisplayListener;
@@ -103,9 +106,10 @@ public class ObjEntityTabbedView extends JTabbedPane implements ObjEntityDisplay
 
         ObjEntityTab entityPanel = new ObjEntityTab(mediator);
         addTab("Entity", new JScrollPane(entityPanel));
-
+        
         attributesPanel = new ObjEntityAttributeTab(mediator);
         addTab("Attributes", attributesPanel);
+        
         relationshipsPanel = new ObjEntityRelationshipTab(mediator);
         addTab("Relationships", relationshipsPanel);
     }
@@ -118,26 +122,34 @@ public class ObjEntityTabbedView extends JTabbedPane implements ObjEntityDisplay
         addChangeListener(new ChangeListener() {
 
             public void stateChanged(ChangeEvent e) {
+                resetRemoveButtons();
                 Component selected = getSelectedComponent();
                 while (selected instanceof JScrollPane) {
                     selected = ((JScrollPane) selected).getViewport().getView();
                 }
 
-                ((ExistingSelectionProcessor) selected).processExistingSelection();
+                ((ExistingSelectionProcessor) selected).processExistingSelection(e);
             }
         });
     }
 
+    /** Reset the remove buttons */
+    private void resetRemoveButtons(){
+        Application app = Application.getInstance();
+        app.getAction(RemoveAttributeAction.getActionName()).setEnabled(false);
+        app.getAction(RemoveRelationshipAction.getActionName()).setEnabled(false);
+    }
+
     public void currentObjEntityChanged(EntityDisplayEvent e) {
+        resetRemoveButtons();
+        
         if (e.getEntity() == null) {
             setVisible(false);
         }
-        
         else {
             if (e.isTabReset()) {
                 setSelectedIndex(0);
             }
-
             setVisible(true);
         }
     }
@@ -152,9 +164,6 @@ public class ObjEntityTabbedView extends JTabbedPane implements ObjEntityDisplay
         if (rel instanceof ObjRelationship) {
             relationshipsPanel.selectRelationship((ObjRelationship) rel);
         }
-
-        // Display relationship tab
-        setSelectedIndex(2);
     }
 
     public void currentObjAttributeChanged(AttributeDisplayEvent e) {
@@ -166,9 +175,5 @@ public class ObjEntityTabbedView extends JTabbedPane implements ObjEntityDisplay
         if (attr instanceof ObjAttribute) {
             attributesPanel.selectAttribute((ObjAttribute) attr);
         }
-
-        // Display attribute tab
-        setSelectedIndex(1);
-        getSelectedComponent();
     }
 }

@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
-import org.objectstyle.cayenne.modeler.util.ProjectUtil;
+//import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 
 /**
  * Table model for DbRelationship table.
@@ -159,14 +159,14 @@ public class DbRelationshipTableModel extends CayenneTableModel {
         DbRelationship rel = getRelationship(row);
         // If name column
         if (column == NAME) {
-            String text = (String) aValue;
-            String old_name = rel.getName();
-            ProjectUtil.setRelationshipName(entity, rel, text);
             RelationshipEvent e = new RelationshipEvent(
                     eventSource,
                     rel,
                     entity,
-                    old_name);
+                    rel.getName());
+            rel.setName((String)aValue);
+            //String text = (String) aValue;
+            //ProjectUtil.setRelationshipName(entity, rel, text);
             mediator.fireDbRelationshipEvent(e);
             fireTableCellUpdated(row, column);
         }

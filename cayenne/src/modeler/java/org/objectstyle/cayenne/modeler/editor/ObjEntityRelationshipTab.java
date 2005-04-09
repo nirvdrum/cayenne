@@ -61,6 +61,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
+import java.util.EventObject;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
@@ -68,6 +69,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JToolBar;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -86,7 +89,10 @@ import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
+import org.objectstyle.cayenne.modeler.action.RemoveRelationshipAction;
 import org.objectstyle.cayenne.modeler.dialog.objentity.ObjRelationshipInfoController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
@@ -127,7 +133,16 @@ public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplay
         initController();
     }
 
-    private void init() {
+    private void init() {     
+        this.setLayout(new BorderLayout());
+        
+        JToolBar toolBar = new JToolBar();
+        Application app = Application.getInstance();
+        toolBar.add(app.getAction(CreateRelationshipAction.getActionName()).buildButton());
+        toolBar.addSeparator();
+        toolBar.add(app.getAction(RemoveRelationshipAction.getActionName()).buildButton());
+        add(toolBar, BorderLayout.NORTH);
+
         table = new CayenneTable();
         table.setDefaultRenderer(String.class, new StringRenderer());
         table.setDefaultRenderer(ObjEntity.class, new EntityRenderer());
@@ -137,8 +152,6 @@ public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplay
         JPanel panel = PanelFactory.createTablePanel(table, new JButton[] {
             resolve
         });
-
-        this.setLayout(new BorderLayout());
         add(panel, BorderLayout.CENTER);
     }
 
@@ -170,7 +183,7 @@ public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplay
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
             public void valueChanged(ListSelectionEvent e) {
-                processExistingSelection();
+                processExistingSelection(e);
             }
         });
     }
@@ -180,8 +193,11 @@ public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplay
      */
     public void selectRelationship(ObjRelationship rel) {
         if (rel == null) {
+            Application.getInstance().getAction(RemoveRelationshipAction.getActionName()).setEnabled(false);
             return;
         }
+        // enable the remove button
+        Application.getInstance().getAction(RemoveRelationshipAction.getActionName()).setEnabled(true);
 
         ObjRelationshipTableModel model = (ObjRelationshipTableModel) table.getModel();
         java.util.List rels = model.getObjectList();
@@ -190,8 +206,11 @@ public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplay
             table.select(relPos);
         }
     }
-
-    public void processExistingSelection() {
+    
+    public void processExistingSelection(EventObject e) {
+        if (e instanceof ChangeEvent) {
+            table.clearSelection();
+        }
         ObjRelationship rel = null;
         if (table.getSelectedRow() >= 0) {
             ObjRelationshipTableModel model = (ObjRelationshipTableModel) table
@@ -210,10 +229,11 @@ public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplay
         }
         else
             resolve.setEnabled(false);
-
+        
         RelationshipDisplayEvent ev = new RelationshipDisplayEvent(this, rel, mediator
                 .getCurrentObjEntity(), mediator.getCurrentDataMap(), mediator
                 .getCurrentDataDomain());
+
         mediator.fireObjRelationshipDisplayEvent(ev);
     }
 
@@ -222,7 +242,7 @@ public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplay
         if (e.getSource() == this) {
             return;
         }
-
+        
         ObjEntity entity = (ObjEntity) e.getEntity();
         // Important: process event even if this is the same entity,
         // since the inheritance structure might have changed
@@ -290,8 +310,9 @@ public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplay
      * ObjRelationships were deleted.
      */
     private void reloadEntityList(EntityEvent e) {
-        if (e.getSource() == this)
-            return;
+        if (e.getSource() != this){
+            return;   
+        }
 
         // If current model added/removed, do nothing.
         ObjEntity entity = mediator.getCurrentObjEntity();

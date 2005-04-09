@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.modeler.action;
 import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.Application;
@@ -66,6 +67,8 @@ import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.util.EntityMergeSupport;
+import org.objectstyle.cayenne.util.NameConverter;
 
 /**
  * @author Andrei Adamchik
@@ -106,6 +109,18 @@ public class CreateObjEntityAction extends CayenneAction {
         entity.setSuperClassName(dataMap.getDefaultSuperclass());
         entity.setDeclaredLockType(dataMap.getDefaultLockType());
 
+        DbEntity dbEntity = mediator.getCurrentDbEntity();
+        if (dbEntity != null){
+            entity.setDbEntity(dbEntity);
+            String eName = NameConverter.undescoredToJava(dbEntity.getName(), true);
+            String entityName = eName;
+            int i = 1;
+            while(dataMap.getObjEntity(entityName) != null){
+                entityName = eName + String.valueOf(i);
+            }
+            entity.setName(entityName);
+        }
+        
         String pkg = dataMap.getDefaultPackage();
         if (pkg != null) {
             if (!pkg.endsWith(".")) {
@@ -116,6 +131,11 @@ public class CreateObjEntityAction extends CayenneAction {
         }
 
         dataMap.addObjEntity(entity);
+
+        // perform the merge
+        EntityMergeSupport merger = new EntityMergeSupport(dataMap);
+		merger.synchronizeWithDbEntity(entity);
+
         mediator.fireObjEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
         EntityDisplayEvent displayEvent = new EntityDisplayEvent(
                 this,

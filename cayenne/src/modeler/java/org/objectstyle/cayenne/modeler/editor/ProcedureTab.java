@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.modeler.editor;
 import java.awt.BorderLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.EventObject;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -161,14 +162,14 @@ public class ProcedureTab extends JPanel implements ProcedureDisplayListener,
 
         eventController.addProcedureDisplayListener(this);
     }
-
-    public void processExistingSelection() {
-        ProcedureDisplayEvent e = new ProcedureDisplayEvent(
+    
+    public void processExistingSelection(EventObject e) {
+        ProcedureDisplayEvent pde = new ProcedureDisplayEvent(
                 this,
                 eventController.getCurrentProcedure(),
                 eventController.getCurrentDataMap(),
                 eventController.getCurrentDataDomain());
-        eventController.fireProcedureDisplayEvent(e);
+        eventController.fireProcedureDisplayEvent(pde);
     }
 
     /**

@@ -61,6 +61,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EventObject;
 import java.util.Iterator;
 
 import javax.swing.DefaultComboBoxModel;
@@ -72,6 +73,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.JToolBar;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
@@ -80,7 +82,12 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbKeyGenerator;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
+import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
+import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
+import org.objectstyle.cayenne.modeler.action.DbEntitySyncAction;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
@@ -127,6 +134,17 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
     }
 
     private void initView() {
+        this.setLayout(new BorderLayout());
+        
+        JToolBar toolBar = new JToolBar();
+        Application app = Application.getInstance();
+        toolBar.add(app.getAction(CreateObjEntityAction.getActionName()).buildButton());
+        toolBar.add(app.getAction(DbEntitySyncAction.getActionName()).buildButton());
+        toolBar.addSeparator();
+
+        toolBar.add(app.getAction(CreateAttributeAction.getActionName()).buildButton());
+        toolBar.add(app.getAction(CreateRelationshipAction.getActionName()).buildButton());
+        add(toolBar, BorderLayout.NORTH);
 
         // create widgets
         name = new TextAdapter(new JTextField()) {
@@ -159,7 +177,6 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
         customPKSize = CayenneWidgetFactory.createTextField();
 
         // assemble
-        setLayout(new BorderLayout());
         FormLayout layout = new FormLayout(
                 "right:max(50dlu;pref), 3dlu, fill:max(200dlu;pref)",
                 "");
@@ -211,14 +228,14 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
         parentLabel.addActionListener(this);
         customPKGenerator.addActionListener(this);
     }
-
-    public void processExistingSelection() {
-        EntityDisplayEvent e = new EntityDisplayEvent(
+    
+    public void processExistingSelection(EventObject e) {
+        EntityDisplayEvent ede = new EntityDisplayEvent(
                 this,
                 mediator.getCurrentDbEntity(),
                 mediator.getCurrentDataMap(),
                 mediator.getCurrentDataDomain());
-        mediator.fireDbEntityDisplayEvent(e);
+        mediator.fireDbEntityDisplayEvent(ede);
     }
 
     public void currentDbEntityChanged(EntityDisplayEvent e) {
@@ -355,7 +372,8 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
         else if (entity.getDataMap().getDbEntity(newName) == null) {
             // completely new name, set new name for entity
             EntityEvent e = new EntityEvent(this, entity, entity.getName());
-            ProjectUtil.setDbEntityName(entity, newName);
+            entity.setName(newName);
+            //ProjectUtil.setDbEntityName(entity, newName);
             mediator.fireDbEntityEvent(e);
         }
         else {

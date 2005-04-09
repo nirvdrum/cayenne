@@ -104,7 +104,7 @@ public class ProcedureTabbedView
                     selected = ((JScrollPane) selected).getViewport().getView();
                 }
 
-                ((ExistingSelectionProcessor) selected).processExistingSelection();
+                ((ExistingSelectionProcessor) selected).processExistingSelection(e);
             }
         });
     }

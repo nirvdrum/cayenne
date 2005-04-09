@@ -66,7 +66,10 @@ import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.action.RemoveAttributeAction;
+import org.objectstyle.cayenne.modeler.action.RemoveRelationshipAction;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DbAttributeDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
@@ -107,8 +110,17 @@ public class DbEntityTabbedView extends JTabbedPane implements ChangeListener,
         addChangeListener(this);
     }
 
+    /** Reset the remove buttons */
+    private void resetRemoveButtons(){
+        Application app = Application.getInstance();
+        app.getAction(RemoveAttributeAction.getActionName()).setEnabled(false);
+        app.getAction(RemoveRelationshipAction.getActionName()).setEnabled(false);
+    }
+    
     /** Handle focus when tab changes. */
     public void stateChanged(ChangeEvent e) {
+        resetRemoveButtons();
+        
         // find source view
         Component selected = getSelectedComponent();
         while (selected instanceof JScrollPane) {
@@ -116,11 +128,13 @@ public class DbEntityTabbedView extends JTabbedPane implements ChangeListener,
         }
 
         ExistingSelectionProcessor proc = (ExistingSelectionProcessor) selected;
-        proc.processExistingSelection();
+        proc.processExistingSelection(e);
     }
 
     /** If entity is null hides it's contents, otherwise makes it visible. */
     public void currentDbEntityChanged(EntityDisplayEvent e) {
+        resetRemoveButtons();
+        
         if (e.getEntity() == null)
             setVisible(false);
         else {
@@ -140,9 +154,6 @@ public class DbEntityTabbedView extends JTabbedPane implements ChangeListener,
         if (rel instanceof DbRelationship) {
             relationshipsPanel.selectRelationship((DbRelationship) rel);
         }
-
-        // Display relationship tab
-        setSelectedIndex(2);
     }
 
     public void currentDbAttributeChanged(AttributeDisplayEvent e) {
@@ -154,8 +165,5 @@ public class DbEntityTabbedView extends JTabbedPane implements ChangeListener,
         if (attr instanceof DbAttribute) {
             attributesPanel.selectAttribute((DbAttribute) attr);
         }
-
-        // Display attribute tab
-        setSelectedIndex(1);
     }
 }

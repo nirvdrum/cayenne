@@ -204,7 +204,8 @@ public class DbAttributeTableModel extends CayenneTableModel {
         switch (col) {
             case DB_ATTRIBUTE_NAME:
                 e.setOldName(attr.getName());
-                setAttributeName((String) newVal, attr);
+                attr.setName((String)newVal);
+                //setAttributeName((String) newVal, attr);
                 fireTableCellUpdated(row, col);
                 break;
             case DB_ATTRIBUTE_TYPE:

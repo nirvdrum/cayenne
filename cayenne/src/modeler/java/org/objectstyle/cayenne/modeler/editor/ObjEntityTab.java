@@ -61,6 +61,7 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import java.util.EventObject;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -69,6 +70,7 @@ import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.JToolBar;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -81,12 +83,15 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
+import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
+import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
-import org.objectstyle.cayenne.modeler.util.ProjectUtil;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.modeler.util.TextAdapter;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
@@ -119,6 +124,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
     protected TextAdapter superClassName;
     protected TextAdapter qualifier;
     protected JComboBox dbEntityCombo;
+    protected JButton syncWithDbEntityButton;
     protected JComboBox superEntityCombo;
     protected JButton tableLabel;
     protected JCheckBox readOnly;
@@ -131,6 +137,15 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
     }
 
     private void initView() {
+        this.setLayout(new BorderLayout());
+        
+        JToolBar toolBar = new JToolBar();
+        Application app = Application.getInstance();
+        toolBar.add(app.getAction(ObjEntitySyncAction.getActionName()).buildButton());
+        toolBar.add(app.getAction(CreateAttributeAction.getActionName()).buildButton());
+        toolBar.add(app.getAction(CreateRelationshipAction.getActionName()).buildButton());
+        add(toolBar, BorderLayout.NORTH);
+
         // create widgets
         name = new TextAdapter(new JTextField()) {
 
@@ -164,27 +179,28 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         optimisticLocking = new JCheckBox();
 
         tableLabel = CayenneWidgetFactory.createLabelButton("Table/View:");
+        syncWithDbEntityButton = CayenneWidgetFactory.createButton("Sync w/DbEntity");
+        syncWithDbEntityButton.setIcon(ModelerUtil.buildIcon("icon-sync.gif"));
 
         // assemble
-        setLayout(new BorderLayout());
         FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, fill:max(200dlu;pref)",
+                "right:max(50dlu;pref), 3dlu, fill:max(200dlu;pref), 3dlu, fill:140",
                 "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
         builder.appendSeparator("ObjEntity Configuration");
-        builder.append("ObjEntity Name:", name.getComponent());
-        builder.append("Inheritance:", superEntityCombo);
-        builder.append(tableLabel, dbEntityCombo);
+        builder.append("ObjEntity Name:", name.getComponent(), 3);
+        builder.append("Inheritance:", superEntityCombo, 3);
+        builder.append(tableLabel, dbEntityCombo, syncWithDbEntityButton);
 
         builder.appendSeparator();
 
-        builder.append("Java Class:", className.getComponent());
-        builder.append("Superclass:", superClassName.getComponent());
-        builder.append("Qualifier", qualifier.getComponent());
-        builder.append("Read-Only:", readOnly);
-        builder.append("Optimistic Locking:", optimisticLocking);
+        builder.append("Java Class:", className.getComponent(), 3);
+        builder.append("Superclass:", superClassName.getComponent(), 3);
+        builder.append("Qualifier", qualifier.getComponent(), 3);
+        builder.append("Read-Only:", readOnly, 3);
+        builder.append("Optimistic Locking:", optimisticLocking, 3);
 
         add(builder.getPanel(), BorderLayout.CENTER);
     }
@@ -259,6 +275,8 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
             }
         });
 
+        syncWithDbEntityButton.addActionListener(new ObjEntitySyncAction(mediator.getApplication()));
+        
         readOnly.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
@@ -424,11 +442,22 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         else if (entity.getDataMap().getObjEntity(newName) == null) {
             // completely new name, set new name for entity
             EntityEvent e = new EntityEvent(this, entity, entity.getName());
-            ProjectUtil.setObjEntityName(entity.getDataMap(), entity, newName);
+            entity.setName(newName);
+
             mediator.fireObjEntityEvent(e);
 
             // suggest to update class name
             String suggestedClassName = suggestedClassName(entity);
+            
+            // make sure the current class name is not the default name or blank
+            String entityClassName = entity.getClassName();
+            if (entityClassName == null
+                    || entityClassName.length() == 0
+                    || entityClassName.endsWith("UntitledObjEntity")){
+                className.setText(suggestedClassName);
+                entity.setClassName(suggestedClassName);
+            }
+            
             if (suggestedClassName != null
                     && !suggestedClassName.equals(entity.getClassName())) {
                 JOptionPane pane = new JOptionPane(
@@ -443,7 +472,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
                                 "Change", "Cancel"
                         });
 
-                pane.createDialog(Application.getFrame(), "Update Class Name").show();
+                pane.createDialog(Application.getFrame(), "Update Class Name").setVisible(true);
                 if ("Change".equals(pane.getValue())) {
                     className.setText(suggestedClassName);
                     setClassName(suggestedClassName);
@@ -498,12 +527,12 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         superClassName.getComponent().setEditable(active);
         dbEntityCombo.setEnabled(active);
     }
-
-    public void processExistingSelection() {
-        EntityDisplayEvent e = new EntityDisplayEvent(this, mediator
+    
+    public void processExistingSelection(EventObject e) {
+        EntityDisplayEvent ede = new EntityDisplayEvent(this, mediator
                 .getCurrentObjEntity(), mediator.getCurrentDataMap(), mediator
                 .getCurrentDataDomain());
-        mediator.fireObjEntityDisplayEvent(e);
+        mediator.fireObjEntityDisplayEvent(ede);
     }
 
     public void currentObjEntityChanged(EntityDisplayEvent e) {

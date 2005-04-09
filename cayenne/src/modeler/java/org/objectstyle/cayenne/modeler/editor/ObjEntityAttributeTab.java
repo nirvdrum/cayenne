@@ -58,11 +58,14 @@ package org.objectstyle.cayenne.modeler.editor;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.util.EventObject;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JToolBar;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -74,7 +77,10 @@ import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.ObjAttributeListener;
 import org.objectstyle.cayenne.map.event.ObjEntityListener;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
+import org.objectstyle.cayenne.modeler.action.RemoveAttributeAction;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
@@ -104,11 +110,19 @@ public class ObjEntityAttributeTab extends JPanel implements ObjEntityDisplayLis
     }
 
     private void init() {
+        this.setLayout(new BorderLayout());
+        
+        JToolBar toolBar = new JToolBar();
+        Application app = Application.getInstance();
+        toolBar.add(app.getAction(CreateAttributeAction.getActionName()).buildButton());
+        toolBar.addSeparator();
+        toolBar.add(app.getAction(RemoveAttributeAction.getActionName()).buildButton());
+        add(toolBar, BorderLayout.NORTH);
+
         table = new CayenneTable();
         table.setDefaultRenderer(String.class, new CellRenderer());
 
-        setLayout(new BorderLayout());
-        add(PanelFactory.createTablePanel(table, null), BorderLayout.CENTER);
+        add(PanelFactory.createTablePanel(table, null) , BorderLayout.CENTER);
     }
 
     private void initController() {
@@ -119,7 +133,7 @@ public class ObjEntityAttributeTab extends JPanel implements ObjEntityDisplayLis
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
             public void valueChanged(ListSelectionEvent e) {
-                processExistingSelection();
+                processExistingSelection(e);
             }
         });
     }
@@ -129,8 +143,11 @@ public class ObjEntityAttributeTab extends JPanel implements ObjEntityDisplayLis
      */
     public void selectAttribute(ObjAttribute attr) {
         if (attr == null) {
+            Application.getInstance().getAction(RemoveAttributeAction.getActionName()).setEnabled(false);
             return;
         }
+        // enable the remove button
+        Application.getInstance().getAction(RemoveAttributeAction.getActionName()).setEnabled(true);
 
         ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
         java.util.List attrs = model.getObjectList();
@@ -139,8 +156,11 @@ public class ObjEntityAttributeTab extends JPanel implements ObjEntityDisplayLis
             table.select(attrPos);
         }
     }
-
-    public void processExistingSelection() {
+    
+    public void processExistingSelection(EventObject e) {
+        if (e instanceof ChangeEvent) {
+            table.clearSelection();
+        }
         ObjAttribute attribute = null;
         if (table.getSelectedRow() >= 0) {
             ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
@@ -149,11 +169,12 @@ public class ObjEntityAttributeTab extends JPanel implements ObjEntityDisplayLis
             // scroll table
             UIUtil.scrollToSelectedRow(table);
         }
+
         AttributeDisplayEvent ev = new AttributeDisplayEvent(this, attribute, mediator
                 .getCurrentObjEntity(), mediator.getCurrentDataMap(), mediator
                 .getCurrentDataDomain());
 
-        mediator.fireObjAttributeDisplayEvent(ev);
+        mediator.fireObjAttributeDisplayEvent(ev);            
     }
 
     public void objAttributeChanged(AttributeEvent e) {

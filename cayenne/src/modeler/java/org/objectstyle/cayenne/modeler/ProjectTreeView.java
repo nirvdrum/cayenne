@@ -267,10 +267,12 @@ public class ProjectTreeView extends JTree implements DomainDisplayListener,
     }
 
     public void currentObjEntityChanged(EntityDisplayEvent e) {
+        e.setEntityChanged(true);
         currentEntityChanged(e);
     }
 
     public void currentDbEntityChanged(EntityDisplayEvent e) {
+        e.setEntityChanged(true);
         currentEntityChanged(e);
     }
 
