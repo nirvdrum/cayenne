@@ -67,6 +67,12 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.event.AttributeEvent;
+import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.map.event.ObjAttributeListener;
+import org.objectstyle.cayenne.map.event.ObjEntityListener;
+import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
+import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
@@ -78,7 +84,9 @@ import org.objectstyle.cayenne.util.XMLEncoder;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class ObjEntity extends Entity {
+public class ObjEntity extends Entity implements ObjEntityListener, 
+												ObjAttributeListener, 
+												ObjRelationshipListener {
     final public static int LOCK_TYPE_NONE = 0;
     final public static int LOCK_TYPE_OPTIMISTIC = 1;
 
@@ -714,4 +722,78 @@ public class ObjEntity extends Entity {
     public void setDbEntityName(String string) {
         dbEntityName = string;
     }
+    
+    /**
+     * ObjEntity property changed. 
+	 * May be name, attribute or relationship added or removed, etc. 
+	 * Attribute and relationship property changes are handled in
+	 * respective listeners.
+	 * @since 1.2 
+	 */
+    public void objEntityChanged(EntityEvent e){
+        if ((e == null) || (e.getEntity() != this)) {
+            // not our concern
+            return;
+        }
+        
+        // handle entity name changes
+	    if (e.getId() == EntityEvent.CHANGE && e.isNameChange()){
+	        String oldName = e.getOldName();
+	        String newName = e.getNewName();
+	        
+	        DataMap map = getDataMap();
+	        if (map != null) {
+               ObjEntity oe = (ObjEntity) e.getEntity();
+               Iterator rit = oe.getRelationships().iterator();
+               while (rit.hasNext()){
+                   ObjRelationship or = (ObjRelationship) rit.next();
+                   or = or.getReverseRelationship();
+                   if (null != or && or.targetEntityName.equals(oldName)){
+                       or.targetEntityName = newName;
+                   }
+               }
+	        }
+	    }
+	}
+    
+	/** New entity has been created/added.*/
+	public void objEntityAdded(EntityEvent e){
+	    // does nothing currently
+	}
+	
+	/** Entity has been removed.*/
+	public void objEntityRemoved(EntityEvent e){
+	    // does nothing currently
+	}
+
+	/** Attribute property changed. */
+	public void objAttributeChanged(AttributeEvent e){
+	    // does nothing currently
+	}
+	
+	/** New attribute has been created/added.*/
+	public void objAttributeAdded(AttributeEvent e){
+	    // does nothing currently
+	}
+	
+	/** Attribute has been removed.*/
+	public void objAttributeRemoved(AttributeEvent e){
+	    // does nothing currently
+	}
+
+	/** Relationship property changed. */
+    public void objRelationshipChanged(RelationshipEvent e){
+	    // does nothing currently
+	}
+
+    /** Relationship has been created/added. */
+    public void objRelationshipAdded(RelationshipEvent e){
+	    // does nothing currently
+	}
+
+    /** Relationship has been removed. */
+    public void objRelationshipRemoved(RelationshipEvent e){
+	    // does nothing currently
+	}
+    
 }
