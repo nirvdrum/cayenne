@@ -111,6 +111,12 @@ public class SQLTemplateAction implements SQLAction {
         SQLTemplate sqlTemplate = (SQLTemplate) query;
 
         String template = extractTemplateString(sqlTemplate);
+        
+        // sanity check -  misconfigured templates
+        if (template == null) {
+            throw new CayenneException("No template string configured for adapter "
+                    + getAdapter().getClass().getName());
+        }
 
         boolean loggable = QueryLogger.isLoggable(sqlTemplate.getLoggingLevel());
         int size = sqlTemplate.parametersSize();
