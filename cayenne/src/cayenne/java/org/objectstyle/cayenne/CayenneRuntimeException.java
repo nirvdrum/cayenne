@@ -66,7 +66,7 @@ package org.objectstyle.cayenne;
  * @author Andrei Adamchik
  */
 public class CayenneRuntimeException extends RuntimeException {
-    private Throwable cause;
+    private Throwable _cause;
 
     /** 
      * Creates new CayenneRuntimeException without detail message. 
@@ -92,14 +92,14 @@ public class CayenneRuntimeException extends RuntimeException {
 
     public CayenneRuntimeException(String msg, Throwable th) {
         super(msg);
-        this.cause = th;
+        this._cause = th;
     }
 
     /**
      * Returns an exception that was the underlying cause of this exception.
      */
     public Throwable getCause() {
-        return cause;
+        return _cause;
     }
     
     /**

@@ -86,7 +86,7 @@ public class CayenneException extends Exception {
         return exceptionLabel;
     }
 
-    private Throwable cause;
+    private Throwable _cause;
 
     /**
      * Creates new <code>CayenneException</code> without detail message.
@@ -112,14 +112,14 @@ public class CayenneException extends Exception {
 
     public CayenneException(String msg, Throwable th) {
         super(msg);
-        this.cause = th;
+        this._cause = th;
     }
 
     /**
      * @see java.lang.Throwable#getCause()
      */
     public Throwable getCause() {
-        return cause;
+        return _cause;
     }
     
     /**
