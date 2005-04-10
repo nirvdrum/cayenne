@@ -120,14 +120,14 @@ public class CayenneGenerator extends Task {
         try {
             processMap();
         }
-        catch (Exception ex) {
-            Throwable th = Util.unwindException(ex);
+        catch (Throwable th) {
+            th = Util.unwindException(th);
 
-            String message = "Error generating classes";
-
-            if (th.getLocalizedMessage() != null) {
-                message += ": " + th.getLocalizedMessage();
-            }
+            String thMessage = th.getLocalizedMessage();
+            String message = "Error generating classes: ";
+            message += (!Util.isEmptyString(thMessage)) ? th.getLocalizedMessage() : th
+                    .getClass()
+                    .getName();
 
             super.log(message);
             throw new BuildException(message, th);
