@@ -125,7 +125,7 @@ public class CayenneGenerator extends Task {
 
             String thMessage = th.getLocalizedMessage();
             String message = "Error generating classes: ";
-            message += (!Util.isEmptyString(thMessage)) ? th.getLocalizedMessage() : th
+            message += (!Util.isEmptyString(thMessage)) ? thMessage : th
                     .getClass()
                     .getName();
 
@@ -215,7 +215,7 @@ public class CayenneGenerator extends Task {
     public void setSuperpkg(String superpkg) {
         generator.setSuperPkg(superpkg);
     }
-    
+
     /**
      * Sets <code>encoding</code> property that allows to generate files using
      * non-default encoding.
