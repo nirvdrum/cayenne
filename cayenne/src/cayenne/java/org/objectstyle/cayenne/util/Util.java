@@ -268,13 +268,13 @@ public class Util {
     public static Throwable unwindException(Throwable th) {
         if (th instanceof CayenneException) {
             CayenneException e = (CayenneException) th;
-            if (e.getCause() != null) {
+            if (e.getCause() != null && e.getCause() != e) {
                 return unwindException(e.getCause());
             }
         }
         else if (th instanceof CayenneRuntimeException) {
             CayenneRuntimeException e = (CayenneRuntimeException) th;
-            if (e.getCause() != null) {
+            if (e.getCause() != null && e.getCause() != e) {
                 return unwindException(e.getCause());
             }
         }
