@@ -65,6 +65,7 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
@@ -79,12 +80,16 @@ import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
 import org.objectstyle.cayenne.map.event.ProcedureParameterListener;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.action.CreateProcedureParameterAction;
+import org.objectstyle.cayenne.modeler.action.RemoveProcedureParameterAction;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.modeler.util.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.UIUtil;
 
@@ -102,6 +107,7 @@ public class ProcedureParameterTab
     protected ProjectController eventController;
 
     protected CayenneTable table;
+    protected JButton removeParameterButton;
     protected JButton moveUp;
     protected JButton moveDown;
 
@@ -126,14 +132,27 @@ public class ProcedureParameterTab
     protected void init() {
         setLayout(new BorderLayout());
 
-        moveUp = new JButton("Up");
-        moveDown = new JButton("Down");
+        JToolBar toolBar = new JToolBar();
+
+        Application app = Application.getInstance();
+        toolBar.add(app.getAction(CreateProcedureParameterAction.getActionName()).buildButton());
+        removeParameterButton = app.getAction(RemoveProcedureParameterAction.getActionName()).buildButton();
+        toolBar.add(removeParameterButton);
+        toolBar.addSeparator();
+
+        moveUp = new JButton();
+        moveUp.setIcon(ModelerUtil.buildIcon("icon-move_up.gif"));
+        toolBar.add(moveUp);
+        
+        moveDown = new JButton();
+        moveDown.setIcon(ModelerUtil.buildIcon("icon-move_down.gif"));
+        toolBar.add(moveDown);
+        
+        add(toolBar, BorderLayout.NORTH);
 
         // Create table with two columns and no rows.
         table = new CayenneTable();
-        JPanel panel =
-            PanelFactory.createTablePanel(table, new JButton[] { moveUp, moveDown });
-        add(panel, BorderLayout.CENTER);
+        add(PanelFactory.createTablePanel(table, null), BorderLayout.CENTER);
     }
     
     public void processExistingSelection(EventObject e) {
@@ -142,9 +161,13 @@ public class ProcedureParameterTab
         }
 
         ProcedureParameter parameter = null;
-        boolean enableButtons = false;
+        boolean enableUp = false;
+        boolean enableDown = false;
+        boolean enableRemoveButton = false;
 
-        if (table.getSelectedRow() >= 0) {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow >= 0) {
+            enableRemoveButton = true;
             ProcedureParameterTableModel model =
                 (ProcedureParameterTableModel) table.getModel();
             parameter = model.getParameter(table.getSelectedRow());
@@ -152,13 +175,16 @@ public class ProcedureParameterTab
             // scroll table
             UIUtil.scrollToSelectedRow(table);
 
-            if (table.getRowCount() > 1) {
-                enableButtons = true;
+            int rowCount = table.getRowCount();
+            if (rowCount > 1){
+                if (selectedRow >0) enableUp = true;
+                if (selectedRow < (rowCount - 1)) enableDown = true;
             }
         }
 
-        moveUp.setEnabled(enableButtons);
-        moveDown.setEnabled(enableButtons);
+        removeParameterButton.setEnabled(enableRemoveButton);
+        moveUp.setEnabled(enableUp);
+        moveDown.setEnabled(enableDown);
 
         ProcedureParameterDisplayEvent ppde =
             new ProcedureParameterDisplayEvent(
@@ -266,7 +292,8 @@ public class ProcedureParameterTab
     public void actionPerformed(ActionEvent e) {
         ProcedureParameterTableModel model =
             (ProcedureParameterTableModel) table.getModel();
-        ProcedureParameter parameter = eventController.getCurrentProcedureParameter();
+        ProcedureParameter parameter = model.getParameter(table.getSelectedRow());
+        
         int index = -1;
 
         if (e.getSource() == moveUp) {
@@ -280,9 +307,9 @@ public class ProcedureParameterTab
             table.select(index);
             
             // note that 'setCallParameters' is donw by copy internally
-			parameter.getProcedure().setCallParameters(model.getObjectList());
+            parameter.getProcedure().setCallParameters(model.getObjectList());
             eventController.fireProcedureEvent(
                 new ProcedureEvent(this, parameter.getProcedure(), MapEvent.CHANGE));
         }
-    }
+    }    
 }

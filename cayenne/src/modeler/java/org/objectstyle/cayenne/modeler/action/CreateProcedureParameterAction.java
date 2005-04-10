@@ -57,111 +57,79 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DerivedDbAttribute;
-import org.objectstyle.cayenne.map.DerivedDbEntity;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.event.AttributeEvent;
+import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.ProcedureParameter;
+import org.objectstyle.cayenne.map.event.MapEvent;
+import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
+ * @author Garry Watkins
  * @author Andrei Adamchik
  */
-public class CreateAttributeAction extends CayenneAction {
+public class CreateProcedureParameterAction extends CayenneAction {
 
     public static String getActionName() {
-    	return "Create Attribute";
+    	return "Create Parameter";
     }
 
     /**
-     * Constructor for CreateAttributeAction.
+     * Constructor for CreateProcedureParameterAction.
      * @param name
      */
-    public CreateAttributeAction(Application application) {
+    public CreateProcedureParameterAction(Application application) {
         super(getActionName(), application);
     }
 
     public String getIconName() {
-        return "icon-attribute.gif";
+        return "icon-plus.gif";
     }
 
     /**
-     * Creates ObjAttribute, DbAttribute depending on context.
+     * Creates ProcedureParameter depending on context.
      */
     public void performAction(ActionEvent e) {
-        if (getProjectController().getCurrentObjEntity() != null) {
-            createObjAttribute();
-        }
-        else if (getProjectController().getCurrentDbEntity() != null) {
-            createDbAttribute();
+        if (getProjectController().getCurrentProcedure() != null) {
+            createProcedureParameter();
         }
     }
 
-    public void createObjAttribute() {
-        ProjectController mediator = getProjectController();
-        ObjEntity objEntity = mediator.getCurrentObjEntity();
+    public void createProcedureParameter() {
+        Procedure procedure = getProjectController().getCurrentProcedure();
 
-        ObjAttribute attr =
-            (ObjAttribute) NamedObjectFactory.createObject(ObjAttribute.class, objEntity);
-        objEntity.addAttribute(attr);
-        mediator.fireObjAttributeEvent(
-            new AttributeEvent(this, attr, objEntity, AttributeEvent.ADD));
-
-        mediator.fireObjAttributeDisplayEvent(
-            new AttributeDisplayEvent(
-                this,
-                attr,
-                objEntity,
-                mediator.getCurrentDataMap(),
-                mediator.getCurrentDataDomain()));
-    }
-
-    public void createDbAttribute() {
-        Class attrClass = null;
-
-        DbEntity dbEntity = getProjectController().getCurrentDbEntity();
-        if (dbEntity instanceof DerivedDbEntity) {
-            if (((DerivedDbEntity) dbEntity).getParentEntity() == null) {
-                return;
-            }
-            attrClass = DerivedDbAttribute.class;
-        }
-        else {
-            attrClass = DbAttribute.class;
-        }
-
-        DbAttribute attr =
-            (DbAttribute) NamedObjectFactory.createObject(attrClass, dbEntity);
-        dbEntity.addAttribute(attr);
+        ProcedureParameter parameter =
+            (ProcedureParameter) NamedObjectFactory.createObject(
+                ProcedureParameter.class,
+                procedure);
+                
+        procedure.addCallParameter(parameter);
 
         ProjectController mediator = getProjectController();
-        mediator.fireDbAttributeEvent(
-            new AttributeEvent(this, attr, dbEntity, AttributeEvent.ADD));
-        mediator.fireDbAttributeDisplayEvent(
-            new AttributeDisplayEvent(
+        mediator.fireProcedureParameterEvent(
+            new ProcedureParameterEvent(this, parameter, MapEvent.ADD));
+
+        mediator.fireProcedureParameterDisplayEvent(
+            new ProcedureParameterDisplayEvent(
                 this,
-                attr,
-                dbEntity,
+                parameter,
+                procedure,
                 mediator.getCurrentDataMap(),
                 mediator.getCurrentDataDomain()));
     }
 
     /**
-     * Returns <code>true</code> if path contains an Entity object.
+     * Returns <code>true</code> if path contains a Procedure object.
      */
     public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;
         }
 
-        return path.firstInstanceOf(Entity.class) != null;
+        return path.firstInstanceOf(Procedure.class) != null;
     }
 }

@@ -54,85 +54,45 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.modeler.editor;
+package org.objectstyle.cayenne.modeler.action;
 
-import java.awt.Component;
-
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.modeler.action.RemoveProcedureParameterAction;
-import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
-import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
+import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
- * Tabbed panel for stored procedure editing.
- * 
- * @author Andrei Adamchik
+ * Removes currently selected parameter from the current procedure.
+ *
+ * @author Garry Watkins 
  */
-public class ProcedureTabbedView
-    extends JTabbedPane
-    implements ProcedureDisplayListener, ProcedureParameterDisplayListener {
-
-    protected ProjectController eventController;
-    protected ProcedureTab procedurePanel;
-    protected ProcedureParameterTab procedureParameterPanel;
-
-    public ProcedureTabbedView(ProjectController eventController) {
-        this.eventController = eventController;
-
-        // init view
-        setTabPlacement(JTabbedPane.TOP);
-        procedurePanel = new ProcedureTab(eventController);
-        addTab("Procedure", new JScrollPane(procedurePanel));
-        procedureParameterPanel = new ProcedureParameterTab(eventController);
-        addTab("Parameters", procedureParameterPanel);
-
-        // init listeners
-        eventController.addProcedureDisplayListener(this);
-        eventController.addProcedureParameterDisplayListener(this);
-        this.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                // find source view
-                Component selected = ProcedureTabbedView.this.getSelectedComponent();
-                while (selected instanceof JScrollPane) {
-                    selected = ((JScrollPane) selected).getViewport().getView();
-                }
-
-                ((ExistingSelectionProcessor) selected).processExistingSelection(e);
-            }
-        });
+public class RemoveProcedureParameterAction extends RemoveAction {
+    private final static String ACTION_NAME = "Remove Parameter";
+    
+    public static String getActionName() {
+        return ACTION_NAME;
     }
 
+    public RemoveProcedureParameterAction(Application application) {
+        super(ACTION_NAME, application);
+    }
+    
     /**
-     * Invoked when currently selected Procedure object is changed.
+     * Returns <code>true</code> if last object in the path contains a removable parameter.
      */
-    public void currentProcedureChanged(ProcedureDisplayEvent e) {
-        Application.getInstance().getAction(RemoveProcedureParameterAction.getActionName()).setEnabled(false);
-        
-        if (e.getProcedure() == null)
-            setVisible(false);
-        else {
-            if (e.isTabReset()) {
-                this.setSelectedIndex(0);
-            }
-            this.setVisible(true);
+    public boolean enableForPath(ProjectPath path) {
+        if (path == null) {
+            return false;
+        }
+        Object lastObject = path.getObject();
+
+        return lastObject instanceof ProcedureParameter;
+    }
+    
+    public void performAction(ActionEvent e) {
+        if (getProjectController().getCurrentProcedure() != null) {
+            removeProcedureParameter();
         }
     }
-
-    public void currentProcedureParameterChanged(ProcedureParameterDisplayEvent e) {
-        if (e.getProcedureParameter() == null)
-            return;
-
-        ProcedureParameter parameter = e.getProcedureParameter();
-        procedureParameterPanel.selectParameter(parameter);
-    }
-
 }

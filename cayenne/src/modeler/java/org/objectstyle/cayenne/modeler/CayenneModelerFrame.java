@@ -79,6 +79,7 @@ import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
 import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
 import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateProcedureAction;
+import org.objectstyle.cayenne.modeler.action.CreateProcedureParameterAction;
 import org.objectstyle.cayenne.modeler.action.CreateQueryAction;
 import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
 import org.objectstyle.cayenne.modeler.action.DbEntitySyncAction;
@@ -292,11 +293,6 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
 
         if (e.getProcedure() != null) {
             getAction(RemoveAction.getActionName()).setName("Remove Stored Procedure");
-            getAction(CreateAttributeAction.getActionName()).setName(
-                    "Create Procedure Parameter");
-        }
-        else {
-            getAction(CreateAttributeAction.getActionName()).setName("Create Attribute");
         }
     }
 
@@ -310,15 +306,7 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
     public void currentProcedureParameterChanged(ProcedureParameterDisplayEvent e) {
         enableProcedureMenu();
         if (e.getProcedureParameter() != null) {
-            getAction(RemoveAction.getActionName()).setName("Remove Procedure Parameter");
-        }
-
-        if (e.getProcedure() != null) {
-            getAction(CreateAttributeAction.getActionName()).setName(
-                    "Create Procedure Parameter");
-        }
-        else {
-            getAction(CreateAttributeAction.getActionName()).setName("Create Attribute");
+            getAction(RemoveAction.getActionName()).setName("Remove Parameter");
         }
     }
 
@@ -384,7 +372,7 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
 
     private void enableProcedureMenu() {
         enableDataMapMenu();
-        getAction(CreateAttributeAction.getActionName()).setEnabled(true);
+        getAction(CreateProcedureParameterAction.getActionName()).setEnabled(true);
     }
 
     private void enableDataNodeMenu() {

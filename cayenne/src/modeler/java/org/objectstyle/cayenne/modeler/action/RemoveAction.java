@@ -265,10 +265,12 @@ public class RemoveAction extends CayenneAction {
         ProjectController mediator = getProjectController();
         ProcedureParameter parameter = mediator.getCurrentProcedureParameter();
         mediator.getCurrentProcedure().removeCallParameter(parameter.getName());
+        
         ProcedureParameterEvent e = new ProcedureParameterEvent(
                 Application.getFrame(),
                 parameter,
                 MapEvent.REMOVE);
+
         mediator.fireProcedureParameterEvent(e);
     }
 
@@ -365,6 +367,12 @@ public class RemoveAction extends CayenneAction {
             return true;
         }
         else if (lastObject instanceof Relationship) {
+            return true;
+        }
+        else if (lastObject instanceof Procedure) {
+            return true;
+        }
+        else if (lastObject instanceof ProcedureParameter) {
             return true;
         }
         else {

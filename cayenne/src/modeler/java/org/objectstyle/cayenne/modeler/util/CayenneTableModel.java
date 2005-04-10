@@ -197,14 +197,12 @@ public abstract class CayenneTableModel extends AbstractTableModel {
         }
 
         int ind = objectList.indexOf(row);
-        if (ind <= 0) {
+        // not valid if it is not found or it is at the end of the list
+        if (ind < 0 || (ind + 1) >= len) {
             return -1;
         }
 
         int neighborIndex = ind + 1;
-        if (neighborIndex >= len) {
-            neighborIndex = 0;
-        }
 
         swapRows(ind, neighborIndex);
         return neighborIndex;
