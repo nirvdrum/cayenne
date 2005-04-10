@@ -196,6 +196,10 @@ public class SQLTemplateMainTab extends JPanel {
         }
 
         Query query = getQuery();
+        
+        if(query == null) {
+            return;
+        }
 
         if (Util.nullSafeEquals(newName, query.getName())) {
             return;
