@@ -61,19 +61,17 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * Represents a result of a validation execution. Contains a set of 
- * {@link ValidationFailure ValidationFailures} that occured in a given 
- * context. All failures are kept in the same order they were added.
+ * Represents a result of a validation execution. Contains a set of
+ * {@link ValidationFailure ValidationFailures}that occured in a given context. All
+ * failures are kept in the same order they were added.
  * 
  * @author Fabricio Voznika
  * @since 1.1
  */
 public class ValidationResult implements Serializable {
-    private static final Logger logObj = Logger.getLogger(ValidationResult.class);
 
     private List failures;
 
@@ -83,7 +81,7 @@ public class ValidationResult implements Serializable {
 
     /**
      * Add a failure to the validation result.
-     *
+     * 
      * @param failure failure to be added. It may not be null.
      * @see ValidationFailure
      */
@@ -92,24 +90,19 @@ public class ValidationResult implements Serializable {
             throw new IllegalArgumentException("failure cannot be null.");
         }
 
-        if (logObj.isDebugEnabled()) {
-            logObj.debug(failure);
-        }
-
         failures.add(failure);
     }
 
     /**
-     * Returns all failures added to this result, or empty list is result
-     * has no failures.
+     * Returns all failures added to this result, or empty list is result has no failures.
      */
     public List getFailures() {
         return Collections.unmodifiableList(failures);
     }
 
     /**
-     * Returns all failures related to the <code>source</code> object, or an empty
-     * list if there are no such failures.
+     * Returns all failures related to the <code>source</code> object, or an empty list
+     * if there are no such failures.
      * 
      * @param source it may be null.
      * @see ValidationFailure#getSource()
@@ -129,7 +122,8 @@ public class ValidationResult implements Serializable {
     }
 
     /**
-     * Returns true if at least one failure has been added to this result. False otherwise.
+     * Returns true if at least one failure has been added to this result. False
+     * otherwise.
      */
     public boolean hasFailures() {
         return !failures.isEmpty();
@@ -137,7 +131,8 @@ public class ValidationResult implements Serializable {
 
     /**
      * @param source it may be null.
-     * @return true if there is at least one failure for <code>source</code>. False otherwise.
+     * @return true if there is at least one failure for <code>source</code>. False
+     *         otherwise.
      */
     public boolean hasFailures(Object source) {
         Iterator it = failures.iterator();
@@ -147,7 +142,7 @@ public class ValidationResult implements Serializable {
                 return true;
             }
         }
-        
+
         return false;
     }
 
