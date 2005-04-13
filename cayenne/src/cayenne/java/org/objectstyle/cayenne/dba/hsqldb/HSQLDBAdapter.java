@@ -97,7 +97,8 @@ public class HSQLDBAdapter extends JdbcAdapter {
                     "Can't create UNIQUE constraint - no columns specified.");
         }
 
-        String srcName = source.getFullyQualifiedName();
+        // hsqldb doesn't support schema namespaces
+        String srcName = source.getName();
 
         StringBuffer buf = new StringBuffer();
 
@@ -133,8 +134,9 @@ public class HSQLDBAdapter extends JdbcAdapter {
         StringBuffer buf = new StringBuffer();
         StringBuffer refBuf = new StringBuffer();
 
-        String srcName = ((DbEntity) rel.getSourceEntity()).getFullyQualifiedName();
-        String dstName = ((DbEntity) rel.getTargetEntity()).getFullyQualifiedName();
+        // hsqldb doesn't support schema namespaces
+        String srcName = ((DbEntity) rel.getSourceEntity()).getName();
+        String dstName = ((DbEntity) rel.getTargetEntity()).getName();
 
         buf.append("ALTER TABLE ");
         buf.append(srcName);
@@ -176,7 +178,19 @@ public class HSQLDBAdapter extends JdbcAdapter {
     }
 
     /**
+     * Returns a SQL string to drop a table corresponding
+     * to <code>ent</code> DbEntity.
+     * 
+     * @since 1.2
+     */
+    public String dropTable(DbEntity ent) {
+        // hsqldb doesn't support schema namespaces, so remove if found
+        return "DROP TABLE " + ent.getName();
+    }
+
+    /**
      * Uses "CREATE CACHED TABLE" instead of "CREATE TABLE".
+     * Uses unqualified entity names.
      * 
      * @since 1.2
      */
@@ -185,6 +199,12 @@ public class HSQLDBAdapter extends JdbcAdapter {
 
         if (sql != null && sql.toUpperCase().startsWith("CREATE TABLE ")) {
             sql = "CREATE CACHED TABLE " + sql.substring("CREATE TABLE ".length());
+        }
+ 
+        // hsqldb doesn't support schema namespaces, so remove if found
+        String fqnCreate = "CREATE CACHED TABLE " + ent.getFullyQualifiedName() + " (";
+        if (sql != null && sql.toUpperCase().startsWith(fqnCreate)) {
+            sql = "CREATE CACHED TABLE " + ent.getName() + " (" + sql.substring(fqnCreate.length());
         }
 
         return sql;
