@@ -148,7 +148,7 @@
     <!-- ========================================== -->
     <target name="clean" depends="clean-java" description="cleans temporary build and distribution directories">
         <delete dir="${dist.base}"/>
-        <delete file="velocity.log"/>
+        <delete file="velocity.log" failonerror="false"/>
     </target>
     
     <target name="clean-java" description="cleans all build directories, preserving the docs and such">
