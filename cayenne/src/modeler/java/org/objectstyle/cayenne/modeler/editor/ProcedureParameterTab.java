@@ -142,10 +142,12 @@ public class ProcedureParameterTab
 
         moveUp = new JButton();
         moveUp.setIcon(ModelerUtil.buildIcon("icon-move_up.gif"));
+        moveUp.setToolTipText("Move Parameter Up");
         toolBar.add(moveUp);
         
         moveDown = new JButton();
         moveDown.setIcon(ModelerUtil.buildIcon("icon-move_down.gif"));
+        moveDown.setToolTipText("Move Parameter Down");
         toolBar.add(moveDown);
         
         add(toolBar, BorderLayout.NORTH);

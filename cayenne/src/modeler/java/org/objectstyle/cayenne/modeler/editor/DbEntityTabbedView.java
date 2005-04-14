@@ -152,6 +152,10 @@ public class DbEntityTabbedView extends JTabbedPane implements ChangeListener,
         // update relationship selection
         Relationship rel = e.getRelationship();
         if (rel instanceof DbRelationship) {
+            if (e.isTabReset() && getSelectedComponent() != relationshipsPanel){
+                setSelectedComponent(relationshipsPanel);
+                relationshipsPanel.setVisible(true);
+            }
             relationshipsPanel.selectRelationship((DbRelationship) rel);
         }
     }
@@ -163,6 +167,10 @@ public class DbEntityTabbedView extends JTabbedPane implements ChangeListener,
         // update relationship selection
         Attribute attr = e.getAttribute();
         if (attr instanceof DbAttribute) {
+            if (e.isTabReset() && getSelectedComponent() != attributesPanel){
+                setSelectedComponent(attributesPanel);
+                attributesPanel.setVisible(true);
+            }
             attributesPanel.selectAttribute((DbAttribute) attr);
         }
     }

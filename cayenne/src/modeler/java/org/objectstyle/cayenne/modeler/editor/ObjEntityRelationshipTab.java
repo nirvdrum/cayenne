@@ -92,6 +92,7 @@ import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
+import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.RemoveRelationshipAction;
 import org.objectstyle.cayenne.modeler.dialog.objentity.ObjRelationshipInfoController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
@@ -100,6 +101,7 @@ import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.modeler.util.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.UIUtil;
 
@@ -139,7 +141,17 @@ public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplay
         JToolBar toolBar = new JToolBar();
         Application app = Application.getInstance();
         toolBar.add(app.getAction(CreateRelationshipAction.getActionName()).buildButton());
+        toolBar.add(app.getAction(ObjEntitySyncAction.getActionName()).buildButton());
+
         toolBar.addSeparator();
+
+        resolve = new JButton();
+        resolve.setIcon(ModelerUtil.buildIcon("icon-info.gif"));
+        resolve.setToolTipText("Edit Relationship");
+        toolBar.add(resolve);
+
+        toolBar.addSeparator();
+        
         toolBar.add(app.getAction(RemoveRelationshipAction.getActionName()).buildButton());
         add(toolBar, BorderLayout.NORTH);
 
@@ -147,12 +159,7 @@ public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplay
         table.setDefaultRenderer(String.class, new StringRenderer());
         table.setDefaultRenderer(ObjEntity.class, new EntityRenderer());
 
-        resolve = new JButton("Edit Relationship");
-
-        JPanel panel = PanelFactory.createTablePanel(table, new JButton[] {
-            resolve
-        });
-        add(panel, BorderLayout.CENTER);
+        add(PanelFactory.createTablePanel(table, null), BorderLayout.CENTER);
     }
 
     private void initController() {

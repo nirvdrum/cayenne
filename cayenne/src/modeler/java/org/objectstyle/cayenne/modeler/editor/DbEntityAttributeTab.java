@@ -80,6 +80,7 @@ import org.objectstyle.cayenne.map.event.DbAttributeListener;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
+import org.objectstyle.cayenne.modeler.action.DbEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAttributeAction;
 import org.objectstyle.cayenne.modeler.dialog.EditDerivedParamsDialog;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
@@ -87,6 +88,7 @@ import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.modeler.util.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.UIUtil;
 
@@ -108,7 +110,6 @@ public class DbEntityAttributeTab
     protected ProjectController mediator;
     protected CayenneTable table;
     protected JButton editParams;
-    protected boolean fireEvent = false;
 
     public DbEntityAttributeTab(ProjectController temp_mediator) {
         super();
@@ -128,16 +129,27 @@ public class DbEntityAttributeTab
         JToolBar toolBar = new JToolBar();
         Application app = Application.getInstance();
         toolBar.add(app.getAction(CreateAttributeAction.getActionName()).buildButton());
+        toolBar.add(app.getAction(DbEntitySyncAction.getActionName()).buildButton());
+        
         toolBar.addSeparator();
+
+        /*
+         * Not sure why this will not show up???
+         */
+        editParams = new JButton();
+        editParams.setIcon(ModelerUtil.buildIcon("icon-info.gif"));
+        editParams.setToolTipText("Edit Parameters");
+        toolBar.add(editParams);
+
+        toolBar.addSeparator();
+        
         toolBar.add(app.getAction(RemoveAttributeAction.getActionName()).buildButton());
         
         add(toolBar, BorderLayout.NORTH);
 
         // Create table with two columns and no rows.
         table = new CayenneTable();
-        editParams = new JButton("Edit Parameters");
-        JPanel panel = PanelFactory.createTablePanel(table, new JButton[] { editParams });
-        add(panel, BorderLayout.CENTER);
+        add(PanelFactory.createTablePanel(table, null), BorderLayout.CENTER);
     }
 
     public void actionPerformed(ActionEvent e) {

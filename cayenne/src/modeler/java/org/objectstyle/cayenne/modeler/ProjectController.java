@@ -443,9 +443,7 @@ public class ProjectController extends CayenneController {
     }
 
     public void fireDomainDisplayEvent(DomainDisplayEvent e) {
-        if (e.getDomain() == currentDomain) {
-            e.setDomainChanged(false);
-        }
+        e.setDomainChanged(e.getDomain() != currentDomain);
 
         clearState();
 
@@ -488,11 +486,13 @@ public class ProjectController extends CayenneController {
     }
 
     public void fireDataNodeDisplayEvent(DataNodeDisplayEvent e) {
-        if (e.getDataNode() == this.getCurrentDataNode())
-            e.setDataNodeChanged(false);
+        e.setDataNodeChanged(e.getDataNode() != currentNode);
+        
         clearState();
+        
         currentDomain = e.getDomain();
         currentNode = e.getDataNode();
+        
         EventListener[] list = listenerList.getListeners(DataNodeDisplayListener.class);
         for (int i = 0; i < list.length; i++) {
             ((DataNodeDisplayListener) list[i]).currentDataNodeChanged(e);
@@ -528,35 +528,36 @@ public class ProjectController extends CayenneController {
                             + e.getId());
             }
         }
-
     }
 
     public void fireDataMapDisplayEvent(DataMapDisplayEvent e) {
-        if (e.getDataMap() == this.getCurrentDataMap())
-            e.setDataMapChanged(false);
+        e.setDataMapChanged(e.getDataMap() != currentMap);
+
         clearState();
-        currentMap = e.getDataMap();
+        
         currentDomain = e.getDomain();
         currentNode = e.getDataNode();
+        currentMap = e.getDataMap();
+        
         EventListener[] list = listenerList.getListeners(DataMapDisplayListener.class);
         for (int i = 0; i < list.length; i++) {
             DataMapDisplayListener temp = (DataMapDisplayListener) list[i];
             temp.currentDataMapChanged(e);
         }
-
     }
 
     /**
      * Informs all listeners of the DataMapEvent. Does not send the event to its
      * originator.
      */
-    public void fireDataMapEvent(DataMapEvent e) {
-        EventListener[] list = listenerList.getListeners(DataMapListener.class);
+    public void fireDataMapEvent(DataMapEvent e) {  
         setDirty(true);
+        
         if (e.getId() == DataMapEvent.REMOVE) {
             refreshNamespace();
         }
 
+        EventListener[] list = listenerList.getListeners(DataMapListener.class);
         for (int i = 0; i < list.length; i++) {
             DataMapListener listener = (DataMapListener) list[i];
             switch (e.getId()) {
@@ -581,8 +582,6 @@ public class ProjectController extends CayenneController {
      * originator.
      */
     public void fireObjEntityEvent(EntityEvent e) {
-        EventListener[] list = listenerList.getListeners(ObjEntityListener.class);
-        
         setDirty(true);
 
         if (currentMap != null && e.getId() == EntityEvent.CHANGE){
@@ -593,6 +592,7 @@ public class ProjectController extends CayenneController {
             refreshNamespace();
         }
 
+        EventListener[] list = listenerList.getListeners(ObjEntityListener.class);
         for (int i = 0; i < list.length; i++) {
             ObjEntityListener temp = (ObjEntityListener) list[i];
             switch (e.getId()) {
@@ -617,8 +617,6 @@ public class ProjectController extends CayenneController {
      * originator.
      */
     public void fireDbEntityEvent(EntityEvent e) {
-        EventListener[] list = listenerList.getListeners(DbEntityListener.class);
-        
         setDirty(true);
         
         if (currentMap != null && e.getId() == EntityEvent.CHANGE){
@@ -629,6 +627,7 @@ public class ProjectController extends CayenneController {
             refreshNamespace();
         }
 
+        EventListener[] list = listenerList.getListeners(DbEntityListener.class);
         for (int i = 0; i < list.length; i++) {
             DbEntityListener temp = (DbEntityListener) list[i];
             switch (e.getId()) {
@@ -653,12 +652,13 @@ public class ProjectController extends CayenneController {
      * originator.
      */
     public void fireQueryEvent(QueryEvent e) {
-        EventListener[] list = listenerList.getListeners(QueryListener.class);
         setDirty(true);
+        
         if (e.getId() == DataMapEvent.REMOVE) {
             refreshNamespace();
         }
 
+        EventListener[] list = listenerList.getListeners(QueryListener.class);
         for (int i = 0; i < list.length; i++) {
             QueryListener listener = (QueryListener) list[i];
             switch (e.getId()) {
@@ -683,12 +683,13 @@ public class ProjectController extends CayenneController {
      * originator.
      */
     public void fireProcedureEvent(ProcedureEvent e) {
-        EventListener[] list = listenerList.getListeners(ProcedureListener.class);
         setDirty(true);
+        
         if (e.getId() == DataMapEvent.REMOVE) {
             refreshNamespace();
         }
 
+        EventListener[] list = listenerList.getListeners(ProcedureListener.class);
         for (int i = 0; i < list.length; i++) {
             ProcedureListener listener = (ProcedureListener) list[i];
             switch (e.getId()) {
@@ -714,8 +715,8 @@ public class ProjectController extends CayenneController {
      */
     public void fireProcedureParameterEvent(ProcedureParameterEvent e) {
         setDirty(true);
-        EventListener[] list = listenerList
-                .getListeners(ProcedureParameterListener.class);
+        
+        EventListener[] list = listenerList.getListeners(ProcedureParameterListener.class);
         for (int i = 0; i < list.length; i++) {
             ProcedureParameterListener listener = (ProcedureParameterListener) list[i];
             switch (e.getId()) {
@@ -736,16 +737,15 @@ public class ProjectController extends CayenneController {
     }
 
     public void fireObjEntityDisplayEvent(EntityDisplayEvent e) {
-        if (currentObjEntity == e.getEntity()){
-            e.setEntityChanged(false);
-            return;
-        }
+        e.setEntityChanged(e.getEntity() != currentObjEntity);;
+
         clearState();
+        
         currentDomain = e.getDomain();
         currentNode = e.getDataNode();
         currentMap = e.getDataMap();
-
         currentObjEntity = (ObjEntity) e.getEntity();
+        
         EventListener[] list = listenerList.getListeners(ObjEntityDisplayListener.class);
         for (int i = 0; i < list.length; i++) {
             ObjEntityDisplayListener temp = (ObjEntityDisplayListener) list[i];
@@ -754,9 +754,7 @@ public class ProjectController extends CayenneController {
     }
 
     public void fireQueryDisplayEvent(QueryDisplayEvent e) {
-        if (currentQuery == e.getQuery()) {
-            e.setQueryChanged(false);
-        }
+        e.setQueryChanged(e.getQuery() != currentQuery);
 
         clearState();
 
@@ -772,8 +770,7 @@ public class ProjectController extends CayenneController {
     }
 
     public void fireProcedureDisplayEvent(ProcedureDisplayEvent e) {
-        if (currentProcedure == e.getProcedure())
-            e.setProcedureChanged(false);
+        e.setProcedureChanged(e.getProcedure() != currentProcedure);
 
         clearState();
 
@@ -789,9 +786,6 @@ public class ProjectController extends CayenneController {
     }
 
     public void fireProcedureParameterDisplayEvent(ProcedureParameterDisplayEvent e) {
-        if (currentProcedure == e.getProcedure())
-            e.setProcedureChanged(false);
-
         clearState();
 
         currentDomain = e.getDomain();
@@ -799,8 +793,7 @@ public class ProjectController extends CayenneController {
         currentProcedure = e.getProcedure();
         currentProcedureParameter = e.getProcedureParameter();
 
-        EventListener[] list = listenerList
-                .getListeners(ProcedureParameterDisplayListener.class);
+        EventListener[] list = listenerList.getListeners(ProcedureParameterDisplayListener.class);
         for (int i = 0; i < list.length; i++) {
             ProcedureParameterDisplayListener listener = (ProcedureParameterDisplayListener) list[i];
             listener.currentProcedureParameterChanged(e);
@@ -809,13 +802,15 @@ public class ProjectController extends CayenneController {
     }
 
     public void fireDbEntityDisplayEvent(EntityDisplayEvent e) {
-        if (currentDbEntity == e.getEntity())
-            e.setEntityChanged(false);
+        e.setEntityChanged(e.getEntity() != currentDbEntity);
+        
         clearState();
+
         currentDomain = e.getDomain();
         currentNode = e.getDataNode();
         currentMap = e.getDataMap();
         currentDbEntity = (DbEntity) e.getEntity();
+        
         EventListener[] list = listenerList.getListeners(DbEntityDisplayListener.class);
         for (int i = 0; i < list.length; i++) {
             DbEntityDisplayListener temp = (DbEntityDisplayListener) list[i];
@@ -852,17 +847,14 @@ public class ProjectController extends CayenneController {
     }
 
     public void fireDbAttributeDisplayEvent(AttributeDisplayEvent e) {
-        this.fireDbEntityDisplayEvent(e);
         clearState();
-        // Must follow DbEntityDisplayEvent,
-        // as it resets curr Attr and Rel values to null.
-        this.currentDbAttr = (DbAttribute) e.getAttribute();
-        this.currentDbEntity = (DbEntity) e.getEntity();
-        this.currentMap = e.getDataMap();
-        this.currentDomain = e.getDomain();
 
-        EventListener[] list = listenerList
-                .getListeners(DbAttributeDisplayListener.class);
+        currentDomain = e.getDomain();
+        currentMap = e.getDataMap();
+        currentDbEntity = (DbEntity) e.getEntity();
+        currentDbAttr = (DbAttribute) e.getAttribute();
+        
+        EventListener[] list = listenerList.getListeners(DbAttributeDisplayListener.class);
         for (int i = 0; i < list.length; i++) {
             DbAttributeDisplayListener temp = (DbAttributeDisplayListener) list[i];
             temp.currentDbAttributeChanged(e);
@@ -872,6 +864,11 @@ public class ProjectController extends CayenneController {
     /** Notifies all listeners of the change (add, remove) and does the change. */
     public void fireObjAttributeEvent(AttributeEvent e) {
         setDirty(true);
+        
+        if (currentMap != null && e.getId() == AttributeEvent.CHANGE){
+            currentMap.objAttributeChanged(e);
+        }
+        
         EventListener[] list = listenerList.getListeners(ObjAttributeListener.class);
         for (int i = 0; i < list.length; i++) {
             ObjAttributeListener temp = (ObjAttributeListener) list[i];
@@ -890,22 +887,17 @@ public class ProjectController extends CayenneController {
                             + e.getId());
             }
         }
-        
-        if (currentMap != null && e.getId() == AttributeEvent.CHANGE){
-            currentMap.objAttributeChanged(e);
-        }
     }
 
     public void fireObjAttributeDisplayEvent(AttributeDisplayEvent e) {
-        this.fireObjEntityDisplayEvent(e);
-        // Must follow ObjEntityDisplayEvent,
-        // as it resets curr Attr and Rel values to null.
-        this.currentObjAttr = (ObjAttribute) e.getAttribute();
-        this.currentObjEntity = (ObjEntity) e.getEntity();
-        this.currentMap = e.getDataMap();
-        this.currentDomain = e.getDomain();
-        EventListener[] list = listenerList
-                .getListeners(ObjAttributeDisplayListener.class);
+        clearState();
+
+        currentDomain = e.getDomain();
+        currentMap = e.getDataMap();
+        currentObjEntity = (ObjEntity) e.getEntity();
+        currentObjAttr = (ObjAttribute) e.getAttribute();
+        
+        EventListener[] list = listenerList.getListeners(ObjAttributeDisplayListener.class);
         for (int i = 0; i < list.length; i++) {
             ObjAttributeDisplayListener temp = (ObjAttributeDisplayListener) list[i];
             temp.currentObjAttributeChanged(e);
@@ -915,6 +907,11 @@ public class ProjectController extends CayenneController {
     /** Notifies all listeners of the change(add, remove) and does the change. */
     public void fireDbRelationshipEvent(RelationshipEvent e) {
         setDirty(true);
+        
+        if (currentMap != null && e.getId() == RelationshipEvent.CHANGE){
+            currentMap.dbRelationshipChanged(e);
+        }
+
         EventListener[] list = listenerList.getListeners(DbRelationshipListener.class);
         for (int i = 0; i < list.length; i++) {
             DbRelationshipListener temp = (DbRelationshipListener) list[i];
@@ -933,24 +930,19 @@ public class ProjectController extends CayenneController {
                             + e.getId());
             }
         }
-        
-        if (currentMap != null && e.getId() == RelationshipEvent.CHANGE){
-            currentMap.dbRelationshipChanged(e);
-        }
     }
 
     public void fireDbRelationshipDisplayEvent(RelationshipDisplayEvent e) {
-        if (e.getRelationship() == this.getCurrentDbRelationship())
-            e.setRelationshipChanged(false);
-        this.fireDbEntityDisplayEvent(e);
-        this.currentDbEntity = (DbEntity) e.getEntity();
-        this.currentMap = e.getDataMap();
-        this.currentDomain = e.getDomain();
-        // Must follow DbEntityDisplayEvent,
-        // as it resets curr Attr and Rel values to null.
+        e.setRelationshipChanged(e.getRelationship() != currentDbRel);
+        
+        clearState();
+
+        currentDomain = e.getDomain();
+        currentMap = e.getDataMap();
+        currentDbEntity = (DbEntity) e.getEntity();
         currentDbRel = (DbRelationship) e.getRelationship();
-        EventListener[] list = listenerList
-                .getListeners(DbRelationshipDisplayListener.class);
+        
+        EventListener[] list = listenerList.getListeners(DbRelationshipDisplayListener.class);
         for (int i = 0; i < list.length; i++) {
             DbRelationshipDisplayListener temp = (DbRelationshipDisplayListener) list[i];
             temp.currentDbRelationshipChanged(e);
@@ -960,6 +952,11 @@ public class ProjectController extends CayenneController {
     /** Notifies all listeners of the change(add, remove) and does the change. */
     public void fireObjRelationshipEvent(RelationshipEvent e) {
         setDirty(true);
+        
+        if (currentMap != null && e.getId() == RelationshipEvent.CHANGE){
+            currentMap.objRelationshipChanged(e);
+        }
+
         EventListener[] list = listenerList.getListeners(ObjRelationshipListener.class);
         for (int i = 0; i < list.length; i++) {
             ObjRelationshipListener temp = (ObjRelationshipListener) list[i];
@@ -978,24 +975,19 @@ public class ProjectController extends CayenneController {
                             + e.getId());
             }
         }
-        
-        if (currentMap != null && e.getId() == RelationshipEvent.CHANGE){
-            currentMap.objRelationshipChanged(e);
-        }
     }
 
     public void fireObjRelationshipDisplayEvent(RelationshipDisplayEvent e) {
-        if (e.getRelationship() == this.getCurrentObjRelationship())
-            e.setRelationshipChanged(false);
-        this.fireObjEntityDisplayEvent(e);
-        // Must follow DbEntityDisplayEvent,
-        // as it resets curr Attr and Rel values to null.
+        e.setRelationshipChanged(e.getRelationship() != currentObjRel);
+        
+        clearState();
+
+        currentDomain = e.getDomain();
+        currentMap = e.getDataMap();
+        currentObjEntity = (ObjEntity) e.getEntity();
         currentObjRel = (ObjRelationship) e.getRelationship();
-        this.currentObjEntity = (ObjEntity) e.getEntity();
-        this.currentMap = e.getDataMap();
-        this.currentDomain = e.getDomain();
-        EventListener[] list = listenerList
-                .getListeners(ObjRelationshipDisplayListener.class);
+        
+        EventListener[] list = listenerList.getListeners(ObjRelationshipDisplayListener.class);
         for (int i = 0; i < list.length; i++) {
             ObjRelationshipDisplayListener temp = (ObjRelationshipDisplayListener) list[i];
             temp.currentObjRelationshipChanged(e);

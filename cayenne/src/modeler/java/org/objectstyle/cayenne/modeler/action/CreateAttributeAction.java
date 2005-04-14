@@ -112,16 +112,21 @@ public class CreateAttributeAction extends CayenneAction {
         ObjAttribute attr =
             (ObjAttribute) NamedObjectFactory.createObject(ObjAttribute.class, objEntity);
         objEntity.addAttribute(attr);
+        
         mediator.fireObjAttributeEvent(
             new AttributeEvent(this, attr, objEntity, AttributeEvent.ADD));
-
-        mediator.fireObjAttributeDisplayEvent(
-            new AttributeDisplayEvent(
+        
+        AttributeDisplayEvent ade = new AttributeDisplayEvent(
                 this,
                 attr,
                 objEntity,
                 mediator.getCurrentDataMap(),
-                mediator.getCurrentDataDomain()));
+                mediator.getCurrentDataDomain());
+        
+        // tell the tabbed view to switch to the attributes tab if necessary
+        ade.setTabReset(true);
+        
+        mediator.fireObjAttributeDisplayEvent(ade);
     }
 
     public void createDbAttribute() {
@@ -145,13 +150,18 @@ public class CreateAttributeAction extends CayenneAction {
         ProjectController mediator = getProjectController();
         mediator.fireDbAttributeEvent(
             new AttributeEvent(this, attr, dbEntity, AttributeEvent.ADD));
-        mediator.fireDbAttributeDisplayEvent(
-            new AttributeDisplayEvent(
+
+        AttributeDisplayEvent ade = new AttributeDisplayEvent(
                 this,
                 attr,
                 dbEntity,
                 mediator.getCurrentDataMap(),
-                mediator.getCurrentDataDomain()));
+                mediator.getCurrentDataDomain());
+        
+        // tell the tabbed view to switch to the attributes tab if necessary
+        ade.setTabReset(true);
+
+        mediator.fireDbAttributeDisplayEvent(ade);
     }
 
     /**

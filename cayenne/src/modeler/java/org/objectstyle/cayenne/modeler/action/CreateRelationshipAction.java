@@ -117,13 +117,18 @@ public class CreateRelationshipAction extends CayenneAction {
 
         mediator.fireObjRelationshipEvent(
             new RelationshipEvent(this, rel, objEnt, RelationshipEvent.ADD));
-        mediator.fireObjRelationshipDisplayEvent(
-            new RelationshipDisplayEvent(
+        
+        RelationshipDisplayEvent rde = new RelationshipDisplayEvent(
                 this,
                 rel,
                 objEnt,
                 mediator.getCurrentDataMap(),
-                mediator.getCurrentDataDomain()));
+                mediator.getCurrentDataDomain());
+
+        // tell the Tabbed View controller to switch to the relationship tab
+        rde.setTabReset(true);
+        
+        mediator.fireObjRelationshipDisplayEvent(rde);
     }
 
     public void createDbRelationship(DbEntity dbEnt) {
@@ -137,13 +142,18 @@ public class CreateRelationshipAction extends CayenneAction {
 
         mediator.fireDbRelationshipEvent(
             new RelationshipEvent(this, rel, dbEnt, RelationshipEvent.ADD));
-        mediator.fireDbRelationshipDisplayEvent(
-            new RelationshipDisplayEvent(
+
+        RelationshipDisplayEvent rde = new RelationshipDisplayEvent(
                 this,
                 rel,
                 dbEnt,
                 mediator.getCurrentDataMap(),
-                mediator.getCurrentDataDomain()));
+                mediator.getCurrentDataDomain());
+
+        // tell the Tabbed View controller to switch to the relationship tab
+        rde.setTabReset(true);
+        
+        mediator.fireDbRelationshipDisplayEvent(rde);
     }
 
     /**

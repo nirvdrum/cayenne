@@ -80,6 +80,7 @@ import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
+import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAttributeAction;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
@@ -115,6 +116,7 @@ public class ObjEntityAttributeTab extends JPanel implements ObjEntityDisplayLis
         JToolBar toolBar = new JToolBar();
         Application app = Application.getInstance();
         toolBar.add(app.getAction(CreateAttributeAction.getActionName()).buildButton());
+        toolBar.add(app.getAction(ObjEntitySyncAction.getActionName()).buildButton());
         toolBar.addSeparator();
         toolBar.add(app.getAction(RemoveAttributeAction.getActionName()).buildButton());
         add(toolBar, BorderLayout.NORTH);
