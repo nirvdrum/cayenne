@@ -154,7 +154,7 @@ public class DataSourceWizard extends CayenneController {
         view.setModal(true);
         makeCloseableOnEscape();
         centerView();
-        view.show();
+        view.setVisible(true);
 
         return !canceled;
     }

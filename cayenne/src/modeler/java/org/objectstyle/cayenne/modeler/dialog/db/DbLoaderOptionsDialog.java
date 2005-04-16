@@ -211,12 +211,12 @@ public class DbLoaderOptionsDialog extends CayenneDialog {
 
     private void processSelect() {
         choice = SELECT;
-        hide();
+        setVisible(false);
     }
 
     private void processCancel() {
         choice = CANCEL;
-        hide();
+        setVisible(false);
     }
 
     /**

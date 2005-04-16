@@ -158,7 +158,7 @@ public class DataSourceCreator extends CayenneController {
         makeCloseableOnEscape();
         centerView();
 
-        view.show();
+        view.setVisible(true);
         return createDataSource();
     }
 

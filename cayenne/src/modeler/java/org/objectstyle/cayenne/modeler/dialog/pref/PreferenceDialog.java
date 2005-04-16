@@ -202,7 +202,7 @@ public class PreferenceDialog extends CayenneController {
 
         view.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         view.setModal(true);
-        view.show();
+        view.setVisible(true);
 
     }
 

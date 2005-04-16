@@ -200,10 +200,10 @@ public class EditDerivedParamsDialog extends CayenneDialog implements ActionList
                 attr.getEntity(),
                 AttributeEvent.CHANGE));
 
-        hide();
+        setVisible(false);
     }
 
     protected void cancel() {
-        hide();
+        setVisible(false);
     }
 }

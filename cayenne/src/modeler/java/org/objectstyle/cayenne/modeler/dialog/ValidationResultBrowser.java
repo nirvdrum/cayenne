@@ -54,7 +54,7 @@ public class ValidationResultBrowser extends CayenneController {
         view.setModal(true);
         makeCloseableOnEscape();
         centerView();
-        view.show();
+        view.setVisible(true);
     }
 
     /**

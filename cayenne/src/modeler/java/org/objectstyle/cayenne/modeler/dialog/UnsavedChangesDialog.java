@@ -87,7 +87,7 @@ public class UnsavedChangesDialog {
         pane.setOptions(OPTIONS);
 
         JDialog dialog = pane.createDialog(parent, "Unsaved Changes");
-        dialog.show();
+        dialog.setVisible(true);
 
         Object selectedValue = pane.getValue();
         // need to do an if..else chain, since

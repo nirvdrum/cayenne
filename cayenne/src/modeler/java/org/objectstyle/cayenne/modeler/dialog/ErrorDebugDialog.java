@@ -99,7 +99,7 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
 
         ErrorDebugDialog dialog =
             new ErrorDebugDialog(Application.getFrame(), "CayenneModeler Error", th, true);
-        dialog.show();
+        dialog.setVisible(true);
     }
 
     public static void guiWarning(Throwable th, String message) {
@@ -108,7 +108,7 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
         }
 
         WarningDialog dialog = new WarningDialog(Application.getFrame(), message, th, false);
-        dialog.show();
+        dialog.setVisible(true);
     }
 
     /**

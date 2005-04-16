@@ -185,7 +185,7 @@ public class DbLoaderHelper {
             SwingUtilities.invokeAndWait(new Runnable() {
 
                 public void run() {
-                    dialog.show();
+                    dialog.setVisible(true);
                     dialog.dispose();
                 }
             });
@@ -243,8 +243,8 @@ public class DbLoaderHelper {
                 DbLoaderMergeDialog dialog = DbLoaderHelper.getMergeDialogInstance();
                 dialog.initFromModel(DbLoaderHelper.this, ent.getName());
                 dialog.centerWindow();
-                dialog.show();
-                dialog.hide();
+                dialog.setVisible(true);
+                dialog.setVisible(false);
             }
 
             if (stoppingReverseEngineering) {

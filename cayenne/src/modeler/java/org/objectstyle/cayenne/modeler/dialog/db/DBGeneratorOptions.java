@@ -232,7 +232,7 @@ public class DBGeneratorOptions extends CayenneController {
         view.setModal(true);
         makeCloseableOnEscape();
         centerView();
-        view.show();
+        view.setVisible(true);
     }
 
     public void refreshGeneratorAction() {

@@ -88,7 +88,7 @@ public class OverwriteDialog {
         pane.setOptions(OPTIONS);
 
         JDialog dialog = pane.createDialog(parent, "File exists");
-        dialog.show();
+        dialog.setVisible(true);
 
         Object selectedValue = pane.getValue();
         result = (selectedValue != null) ? selectedValue.toString() : CANCEL;

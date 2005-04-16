@@ -153,7 +153,7 @@ public class DbLoaderMergeDialog extends CayenneDialog {
             helper.setStoppingReverseEngineering(stop);
         }
 
-        this.hide();
+        this.setVisible(false);
     }
 
     public void initFromModel(DbLoaderHelper helper, String tableName) {

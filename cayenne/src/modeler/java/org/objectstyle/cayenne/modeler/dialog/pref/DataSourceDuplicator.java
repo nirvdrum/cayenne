@@ -151,7 +151,7 @@ public class DataSourceDuplicator extends CayenneController {
         makeCloseableOnEscape();
         centerView();
 
-        view.show();
+        view.setVisible(true);
         return createDataSource();
     }
 

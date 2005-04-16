@@ -251,7 +251,7 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
 
             public void actionPerformed(ActionEvent e) {
                 cancelPressed = true;
-                hide();
+                setVisible(false);
             }
         });
     }
