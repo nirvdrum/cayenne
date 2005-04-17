@@ -55,8 +55,6 @@ package org.objectstyle.cayenne.modeler.event;
  * <http://objectstyle.org/>.
  */
 
-import java.util.EventObject;
-
 import org.objectstyle.cayenne.access.DataDomain;
 
 /**
@@ -65,7 +63,7 @@ import org.objectstyle.cayenne.access.DataDomain;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DomainDisplayEvent extends EventObject {
+public class DomainDisplayEvent extends DisplayEvent {
 	protected DataDomain domain;
 	protected boolean domainChanged = true;
 

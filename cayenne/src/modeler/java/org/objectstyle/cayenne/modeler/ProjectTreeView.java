@@ -249,7 +249,7 @@ public class ProjectTreeView extends JTree implements DomainDisplayListener,
     }
 
     public void currentProcedureChanged(ProcedureDisplayEvent e) {
-        if (e.getSource() == this || !e.isProcedureChanged())
+        if ((e.getSource() == this || !e.isProcedureChanged()) && !e.isRefired())
             return;
 
         showNode(new Object[] {
@@ -277,7 +277,7 @@ public class ProjectTreeView extends JTree implements DomainDisplayListener,
     }
 
     protected void currentEntityChanged(EntityDisplayEvent e) {
-        if (e.getSource() == this || !e.isEntityChanged()) {
+        if ((e.getSource() == this || !e.isEntityChanged()) && !e.isRefired()) {
             return;
         }
         showNode(new Object[] {

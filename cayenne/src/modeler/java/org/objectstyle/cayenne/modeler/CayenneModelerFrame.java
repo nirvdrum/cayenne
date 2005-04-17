@@ -90,6 +90,8 @@ import org.objectstyle.cayenne.modeler.action.GenerateDBAction;
 import org.objectstyle.cayenne.modeler.action.ImportDataMapAction;
 import org.objectstyle.cayenne.modeler.action.ImportDBAction;
 import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
+import org.objectstyle.cayenne.modeler.action.NavigateBackwardAction;
+import org.objectstyle.cayenne.modeler.action.NavigateForwardAction;
 import org.objectstyle.cayenne.modeler.action.NewProjectAction;
 import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
@@ -253,9 +255,12 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         toolBar.addSeparator();
 
         toolBar.add(getAction(CreateObjEntityAction.getActionName()).buildButton());
-        //toolBar.add(getAction(CreateAttributeAction.getActionName()).buildButton());
-        //toolBar.add(getAction(CreateRelationshipAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateQueryAction.getActionName()).buildButton());
+
+        toolBar.addSeparator();
+
+        toolBar.add(getAction(NavigateBackwardAction.getActionName()).buildButton());
+        toolBar.add(getAction(NavigateForwardAction.getActionName()).buildButton());
 
         getContentPane().add(toolBar, BorderLayout.NORTH);
     }

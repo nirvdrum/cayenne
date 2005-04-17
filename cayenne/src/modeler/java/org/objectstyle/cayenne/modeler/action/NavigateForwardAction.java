@@ -53,84 +53,42 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.event;
+package org.objectstyle.cayenne.modeler.action;
 
+import java.awt.event.ActionEvent;
 import java.util.EventObject;
 
-import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.modeler.Application;
+import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
 
 /**
- * @author Andrei Adamchik
+ * @author Garry Watkins
  */
-public class DisplayEvent extends EventObject {
-    protected boolean refired;
-    protected boolean changed;
-    protected ProjectPath path;
+public class NavigateForwardAction extends CayenneAction {
+
+    public static final String getActionName() {
+        return "Move Forward";
+    }
 
     /**
-     * Constructor for DisplayEvent.
-     * @param source
+     * Constructor for Move Forward Action
+     * @param name
      */
-    public DisplayEvent(Object source) {
-        super(source);
-        refired = false;
-        changed = true;
+    public NavigateForwardAction(Application application) {
+        super(getActionName(), application);
+    }
+
+    public String getIconName() {
+        return "icon-forward_nav.gif";
     }
 
     /**
-     * Constructor for DisplayEvent.
-     * @param source
+     * Moves to the previous element in the navigation history
      */
-    public DisplayEvent(Object source, ProjectPath path) {
-        super(source);
-        refired = false;
-        changed = true;
-        this.path = path;
-    }
-
-    public ProjectPath getPath() {
-        return path;
-    }
-
-    public void setPath(ProjectPath path) {
-        this.path = path;
-    }
-
-    /**
-    * Returns the last object in the path.
-    */
-    public Object getObject() {
-        return (path != null) ? path.getObject() : null;
-    }
-
-    /**
-     * Returns true if the path's last object has changed.
-     */
-    public boolean isChanged() {
-        return changed;
-    }
-
-    public void setChanged(boolean changed) {
-        this.changed = changed;
-    }
-
-    /**
-     * Returns true if the event has been refired
-     */
-    public boolean isRefired() {
-        return refired;
-    }
-
-    public void setRefired(boolean refired) {
-        this.refired = refired;
-    }
-
-    public boolean pointsTo(Class nodeClass) {
-        if (nodeClass == null) {
-            return false;
-        }
-
-        Object last = getObject();
-        return (last != null) ? last.getClass() == nodeClass : false;
+    public void performAction(ActionEvent e) {
+        ProjectController mediator = getProjectController();
+        EventObject newEvent = new EventObject(this);
+        mediator.fireNavigationEvent(newEvent);
     }
 }

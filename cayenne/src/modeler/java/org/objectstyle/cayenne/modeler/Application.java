@@ -89,6 +89,8 @@ import org.objectstyle.cayenne.modeler.action.GenerateDBAction;
 import org.objectstyle.cayenne.modeler.action.ImportDataMapAction;
 import org.objectstyle.cayenne.modeler.action.ImportDBAction;
 import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
+import org.objectstyle.cayenne.modeler.action.NavigateBackwardAction;
+import org.objectstyle.cayenne.modeler.action.NavigateForwardAction;
 import org.objectstyle.cayenne.modeler.action.NewProjectAction;
 import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
@@ -340,6 +342,8 @@ public class Application {
         registerAction(new AboutAction(this)).setAlwaysOn(true);
         registerAction(new ConfigurePreferencesAction(this)).setAlwaysOn(true);
         registerAction(new ExitAction(this)).setAlwaysOn(true);
+        registerAction(new NavigateBackwardAction(this)).setAlwaysOn(true);
+        registerAction(new NavigateForwardAction(this)).setAlwaysOn(true);
     }
 
     private CayenneAction registerAction(CayenneAction action) {
