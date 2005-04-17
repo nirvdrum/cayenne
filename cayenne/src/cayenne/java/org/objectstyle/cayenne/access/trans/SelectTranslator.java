@@ -570,7 +570,8 @@ public class SelectTranslator extends QueryAssembler {
                         + customAttributes.get(i));
             }
 
-            columns.add(new ColumnDescriptor(attribute, null));
+            String alias = aliasForTable((DbEntity) attribute.getEntity());
+            columns.add(new ColumnDescriptor(attribute, alias));
         }
 
         return columns;
