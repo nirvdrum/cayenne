@@ -207,15 +207,19 @@ public class DataRowStore implements Serializable {
         // init event bridge only if we are notifying remote listeners
         if (notifyingRemoteListeners) {
             try {
-                EventBridgeFactory factory = (EventBridgeFactory) Class.forName(
-                        eventBridgeFactory).newInstance();
-                this.remoteNotificationsHandler = factory.createEventBridge(
-                        getSnapshotEventSubject(),
-                        properties);
+                EventBridgeFactory factory = (EventBridgeFactory) Class
+                        .forName(eventBridgeFactory)
+                        .newInstance();
+                this.remoteNotificationsHandler = factory
+                        .createEventBridge(getSnapshotEventSubject(), properties);
 
-                // listen to EventBridge
-                EventManager.getDefaultManager().addListener(
-                        this,
+                // listen to EventBridge ... must add itself as non-blocking listener
+                // otherwise a deadlock can occur as "processRemoteEvent" will attempt to
+                // obtain a lock on this object when the dispatch queue is locked... And
+                // another commit thread may have this object locked and attempt to lock
+                // dispatch queue
+
+                EventManager.getDefaultManager().addNonBlockingListener(this,
                         "processRemoteEvent",
                         SnapshotEvent.class,
                         getSnapshotEventSubject(),
@@ -223,8 +227,7 @@ public class DataRowStore implements Serializable {
 
                 // start EventBridge - it will listen to all event sources for this
                 // subject
-                remoteNotificationsHandler.startup(
-                        EventManager.getDefaultManager(),
+                remoteNotificationsHandler.startup(EventManager.getDefaultManager(),
                         EventBridge.RECEIVE_LOCAL_EXTERNAL);
             }
             catch (Exception ex) {

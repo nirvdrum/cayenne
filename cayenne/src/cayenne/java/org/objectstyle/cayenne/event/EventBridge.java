@@ -207,9 +207,9 @@ public abstract class EventBridge implements EventListener {
                 event.setSource(this);
             }
 
-            // inject external eveny to the event manager queue, but do it asynchronously
-            // to avoid locking conflicts
-            eventManager.postNonBlockingEvent(event, localSubject);
+            // inject external eveny to the event manager queue.. leave it up to the
+            // listeners to figure out correct synchronization.
+            eventManager.postEvent(event, localSubject);
         }
         else {
             throw new IllegalStateException(
