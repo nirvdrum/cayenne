@@ -148,7 +148,7 @@ public class CircularArray extends Object {
      * @param obj the object to be checked
      */
     public boolean contains(Object obj){
-        return indexOf(obj) > 0;
+        return indexOf(obj) >= 0;
     }
     
     /**
@@ -178,6 +178,129 @@ public class CircularArray extends Object {
         }
         // not found
         return -1;
+    }
+
+    /**
+     * Removes the specified object from the array
+     * 
+     * @param i the index of the object to be removed
+     */
+    public void remove(Object obj) {        
+        if (count == 0) return;
+        int i = indexOf(obj);
+
+        while (i >= 0){
+            // convert from logical to physical location
+            int pos = convert(i);
+    
+            if (pos == head){
+                // move the head up one
+                head = (head+1) % capacity;
+                array[pos] = null;
+                count--;
+            }
+            else if (pos == tail){
+                // move the tail back one
+                tail = (tail -1 + capacity) % capacity;
+                array[pos] = null;
+                count--;
+            }
+            else {
+                // create a brand new array and start it back out at zero
+                Object[] a = new Object[capacity];
+                int destPos = 0;
+                int len = 0;
+                
+                if (head == tail) {
+                    // most likeley scenario when it is full
+                    if (head < pos){
+                        // copy from head to position
+                        len = pos - head;
+                        System.arraycopy(array, head, a, destPos, len);
+                        destPos += len;
+
+                        // copy from pos +1 to end
+                        len = (capacity -1) - pos;
+                        if (len > 0){
+                            System.arraycopy(array, pos+1, a, destPos, len);
+                            destPos += len;                            
+                        }
+                        
+                        // copy from zero to head
+                        len = head;
+                        if (len > 0){
+                            System.arraycopy(array, 0 , a, destPos, len);                            
+                        }                        
+                    }
+                    else if (head > pos){
+                        // copy from head to end of array
+                        len = capacity - head;
+                        System.arraycopy(array, head, a, destPos, len);
+                        destPos += len;
+                        
+                        // copy from zero to pos -1
+                        len = pos;
+                        if (len > 0){
+                            System.arraycopy(array, 0, a, destPos, len);
+                            destPos += len;                            
+                        }
+                        // copy from pos + 1 to tail
+                        len = tail - pos - 1;
+                        if (len > 0){
+                            System.arraycopy(array, pos+1, a, destPos, len);                            
+                        }
+                    }
+                }
+                else if (head < tail){
+                    // copy from head to position -1
+                    len = pos - head;
+                    System.arraycopy(array, head, a, destPos, len);
+                    destPos += len;                        
+
+                    // copy from position + 1 to tail
+                    len = tail - pos;
+                    System.arraycopy(array, pos+1, a, destPos, len);
+                    destPos += len;                        
+                }
+                else if (head > tail) {
+                    if (head < pos){
+                        // copy from head to position
+                        len = pos - head;
+                        System.arraycopy(array, head, a, destPos, len);
+                        destPos += len;
+
+                        // copy from pos +1 to end
+                        len = capacity -1 - pos;
+                        System.arraycopy(array, pos+1 , a, destPos, len);
+                        destPos += len;
+                        
+                        // copy from beginning to tail
+                        len = tail;
+                        System.arraycopy(array, 0 , a, destPos, len);
+                    }
+                    else if (head > pos){
+                        // copy from head to end of array
+                        len = capacity - head;
+                        System.arraycopy(array, head, a, destPos, len);
+                        destPos += len;
+                        
+                        // copy from zero to pos -1
+                        len = pos -1;
+                        System.arraycopy(array, 0, a, destPos, len);
+                        destPos += len;
+                        
+                        // copy from pos+1 to tail
+                        len = tail - pos;
+                        System.arraycopy(array, pos+1, a, destPos, len);
+                    }
+                }
+                count--;
+                array = a;
+                head = 0;
+                tail = count;
+            }
+            i = indexOf(obj);
+        }
     }
 
     /**
@@ -219,30 +342,175 @@ public class CircularArray extends Object {
      * Converts the array to an Object array.
      */
     public Object[] toArray(){
-        Object o[] = new Object[count];
-        for (int i=0; i<count; i++){
+        Object[] o = new Object[capacity];
+        for (int i=0; i<capacity; i++){
              o[i] = array[convert(i)];
         }
         return o;
     }
     
+    public String internalRep(){
+        Object o = null;
+        
+        StringBuffer sb = new StringBuffer();
+        sb.append("\n");
+        for (int i=0; i<array.length; i++){
+            sb.append('(').append(i).append(")  ");
+                        
+            o = array[i];
+            if (o == null) {
+                sb.append("null");
+            }
+            else {
+                sb.append(o.toString());
+            }
+            if (i == head || i == tail){
+                sb.append('<');
+                if (i == head) sb.append("h");
+                if (i == tail) sb.append("t");
+            }            
+            sb.append("\n");
+        }
+        
+        sb.append("count = [");
+        sb.append(count);
+        sb.append("]");
+
+        sb.append("\nhead  = [");
+        sb.append(head);
+        sb.append("]");
+
+        sb.append("\ntail  = [");
+        sb.append(tail);
+        sb.append("]");
+
+        return sb.toString();        
+    }
+    
+    public String toString(){
+        Object[] oa = toArray();
+        Object o = null;
+        
+        StringBuffer sb = new StringBuffer();
+        sb.append("[");
+        for (int i=0; i<oa.length; i++){
+            o = oa[i];
+            if (i>0){
+                sb.append(", ");
+            }
+            if (o == null) {
+                sb.append("null");
+            }
+            else {
+                sb.append(o.toString());
+            }
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+    
+    public static void test(CircularArray a, String expected){
+        String actual = a.toString();
+        if (!actual.equals(expected)){
+            System.out.println("toString() should be \"" + expected + "\" instead got \"" + actual + "\"");
+        }
+    }
+
+    public static void testAdd(CircularArray a, Object obj, String expected, boolean debug){
+        String before = a.internalRep();
+        a.add(obj);
+        String after = a.internalRep();
+        String actual = a.toString();
+        if (debug || !actual.equals(expected)){
+            System.out.println("\n\nAdding = [" + obj + "]");
+            System.out.println("Before =" + before);
+            System.out.println("\nAfter  =" + after);
+            System.out.println("toString() should be \"" + expected + "\" instead got \"" + actual + "\"");
+        }
+    }
+
+    public static void testRemove(CircularArray a, Object obj, String expected, boolean debug){
+        int i = a.indexOf(obj);
+        i = a.convert(i);
+        String before = a.internalRep();
+        a.remove(obj);
+        String after = a.internalRep();
+        String actual = a.toString();
+        if (debug || !actual.equals(expected)){
+            System.out.println("\n\nRemoving = [" + obj + "] pos = [" + String.valueOf(i) + "]");
+            System.out.println("Before =" + before);
+            System.out.println("\nAfter  =" + after);
+            System.out.println("toString() should be \"" + expected + "\" instead got \"" + actual + "\"");
+        }
+    }
+
     public static void main(String[] args) {
         // The following are some unit tests for this class.  I don't know how to use JUnit, so I did these in a main class.
         // Maybe someday I will get some time to learn JUnit.
-        CircularArray q = new CircularArray(3);
-        
         String a = "A";
         String b = "B";
         String c = "C";
         String d = "D";
         String e = "E";
+        String f = "F";
+        String g = "G";
+        String h = "H";
         
+        String s = null;
+        
+        CircularArray q = new CircularArray(5);
+        boolean debug = true;
+
+        test(q, "[null, null, null, null, null]");
+        
+        testAdd(q, a, "[A, null, null, null, null]", debug);
+        testRemove(q, a, "[null, null, null, null, null]", debug);
+        testAdd(q, a, "[A, null, null, null, null]", debug);
+
+        testAdd(q, b, "[A, B, null, null, null]", debug);
+        testRemove(q, b, "[A, null, null, null, null]", debug);
+        testAdd(q, b, "[A, B, null, null, null]", debug);
+        
+        testAdd(q, c, "[A, B, C, null, null]", debug);
+        testRemove(q, c, "[A, B, null, null, null]", debug);
+        testAdd(q, c, "[A, B, C, null, null]", debug);
+
+        testAdd(q, d, "[A, B, C, D, null]", debug);
+        testRemove(q, d, "[A, B, C, null, null]", debug);
+        testAdd(q, d, "[A, B, C, D, null]", debug);
+        
+        testAdd(q, e, "[A, B, C, D, E]", debug);
+        testRemove(q, e, "[A, B, C, D, null]", debug);
+        testAdd(q, e, "[A, B, C, D, E]", debug);
+        
+        testAdd(q, f, "[B, C, D, E, F]", debug);
+        testRemove(q, f, "[B, C, D, E, null]", debug);
+        testAdd(q, f, "[B, C, D, E, F]", debug);
+        
+
+        testAdd(q, g, "[C, D, E, F, G]", debug);
+        
+        testRemove(q, e, "[C, D, F, G, null]", debug);
+        
+        testAdd(q, h, "[C, D, F, G, H]", debug);
+        
+        testRemove(q, c, "[D, F, G, H, null]", debug);
+
+        testRemove(q, h, "[D, F, G, null, null]", debug);
+
+        testRemove(q, f, "[D, G, null, null, null]", debug);
+        
+        testRemove(q, g, "[D, null, null, null, null]", debug);
+
+        testRemove(q, d, "[null, null, null, null, null]", debug);
+                
+        q = new CircularArray(3);
         q.add(a);
         int i = q.indexOf(a);
         if (i != 0){
             System.out.println("indexOf(a) should be zero instead got [" + String.valueOf(i) + "]");
         }
-        String s = (String) q.get(0);
+        s = (String) q.get(0);
         if (s != a){
             System.out.println("get(0) should be 'a' instead got [" + s + "]");
         }
@@ -286,8 +554,7 @@ public class CircularArray extends Object {
         s = (String) q.get(2);
         if (s != c){
             System.out.println("get(1) should be 'c' instead got [" + s + "]");
-        }
-        
+        }        
         i = q.size();
         if (i != 3){
             System.out.println("size() should be 3 instead got [" + String.valueOf(i) + "]");

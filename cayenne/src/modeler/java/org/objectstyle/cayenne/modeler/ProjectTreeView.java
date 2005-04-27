@@ -230,7 +230,7 @@ public class ProjectTreeView extends JTree implements DomainDisplayListener,
     }
 
     public void currentDomainChanged(DomainDisplayEvent e) {
-        if (e.getSource() == this) {
+        if ((e.getSource() == this || !e.isDomainChanged()) && !e.isRefired()){
             return;
         }
 
@@ -240,26 +240,19 @@ public class ProjectTreeView extends JTree implements DomainDisplayListener,
     }
 
     public void currentDataNodeChanged(DataNodeDisplayEvent e) {
-        if (e.getSource() == this || !e.isDataNodeChanged())
+        if ((e.getSource() == this || !e.isDataNodeChanged()) && !e.isRefired()){
             return;
+        }
 
         showNode(new Object[] {
                 e.getDomain(), e.getDataNode()
         });
     }
 
-    public void currentProcedureChanged(ProcedureDisplayEvent e) {
-        if ((e.getSource() == this || !e.isProcedureChanged()) && !e.isRefired())
-            return;
-
-        showNode(new Object[] {
-                e.getDomain(), e.getDataMap(), e.getProcedure()
-        });
-    }
-
     public void currentDataMapChanged(DataMapDisplayEvent e) {
-        if (e.getSource() == this || !e.isDataMapChanged())
+        if ((e.getSource() == this || !e.isDataMapChanged()) && !e.isRefired()){
             return;
+        }
 
         showNode(new Object[] {
                 e.getDomain(), e.getDataMap()
@@ -280,8 +273,29 @@ public class ProjectTreeView extends JTree implements DomainDisplayListener,
         if ((e.getSource() == this || !e.isEntityChanged()) && !e.isRefired()) {
             return;
         }
+        
         showNode(new Object[] {
                 e.getDomain(), e.getDataMap(), e.getEntity()
+        });
+    }
+
+    public void currentProcedureChanged(ProcedureDisplayEvent e) {
+        if ((e.getSource() == this || !e.isProcedureChanged()) && !e.isRefired()){
+            return;
+        }
+
+        showNode(new Object[] {
+                e.getDomain(), e.getDataMap(), e.getProcedure()
+        });
+    }
+
+    public void currentQueryChanged(QueryDisplayEvent e) {
+        if ((e.getSource() == this || !e.isQueryChanged()) && !e.isRefired()){
+            return;
+        }
+
+        showNode(new Object[] {
+                e.getDomain(), e.getDataMap(), e.getQuery()
         });
     }
 
@@ -358,12 +372,6 @@ public class ProjectTreeView extends JTree implements DomainDisplayListener,
         removeNode(new Object[] {
                 mediator.getCurrentDataDomain(), mediator.getCurrentDataMap(),
                 e.getQuery()
-        });
-    }
-
-    public void currentQueryChanged(QueryDisplayEvent e) {
-        showNode(new Object[] {
-                e.getDomain(), e.getDataMap(), e.getQuery()
         });
     }
 
@@ -602,7 +610,7 @@ public class ProjectTreeView extends JTree implements DomainDisplayListener,
 
         DefaultMutableTreeNode currentNode = new DefaultMutableTreeNode(entity, false);
         positionNode(mapNode, currentNode, Comparators.getDataMapChildrenComparator());
-        showNode(currentNode);
+        //showNode(currentNode);
     }
 
     /**
