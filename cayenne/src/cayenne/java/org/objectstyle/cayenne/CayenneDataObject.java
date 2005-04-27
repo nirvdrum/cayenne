@@ -311,6 +311,10 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
     }
 
     public void addToManyTarget(String relName, DataObject value, boolean setReverse) {
+        if (value == null) {
+            throw new NullPointerException("Attempt to add null target DataObject.");
+        }
+
         willConnect(relName, value);
         
         ObjRelationship relationship = this.getRelationshipNamed(relName);
