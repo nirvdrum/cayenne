@@ -1137,15 +1137,16 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
                 DataRow diff = (DataRow) entry.getValue();
 
-                // we are lazy, just turn COMMITTED object into HOLLOW instead
-                // of actually updating it
+                // perform same steps as resolveHollow()
                 if (object.getPersistenceState() == PersistenceState.COMMITTED) {
                     // consult delegate if it exists
                     DataContextDelegate delegate = object
                             .getDataContext()
                             .nonNullDelegate();
                     if (delegate.shouldMergeChanges(object, diff)) {
-                        object.setPersistenceState(PersistenceState.HOLLOW);
+                        ObjEntity entity = object.getDataContext().getEntityResolver().lookupObjEntity(object);
+                        DataRow snapshot = getSnapshot(object.getObjectId(), object.getDataContext());
+                        DataRowUtils.refreshObjectWithSnapshot(entity, object, snapshot, true); 
                         delegate.finishedMergeChanges(object);
                     }
                     continue;
