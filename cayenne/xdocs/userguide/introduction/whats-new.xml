@@ -46,7 +46,7 @@
 						Cayenne and supports a dozen or so runtime 
 						parameters.</p>
 				</subsection>
-				<subsection name="1.1.5 Ant DbGenerator">
+				<subsection name="1.1.5 cdbgen: Ant DbGenerator">
 					<p>Ant task to generate a database from Cayenne DataMap: <a href="../ant/cdbgen.html">cdbgen</a>.</p>
 				</subsection>
 				<subsection name="1.1.6 Joint Prefetches">
@@ -72,6 +72,11 @@
 						specified in the Modeler in Preferences and as an 
 						"encoding" attribute of the cgen Ant task. This is helpful 
 						in cross-platform development situations.</p>
+				</subsection>
+				<subsection name="1.1.9 Antlib descriptor of Cayenne Ant Tasks">
+					<p>cayenne.jar ships with an Antlib descriptor to simplify importing Cayenne
+						Ant tasks into a build file. Read more about this <a 
+						href="../ant/antlib.html">in the Ant chapter</a>.</p>
 				</subsection>
 			</subsection>
 		</section>

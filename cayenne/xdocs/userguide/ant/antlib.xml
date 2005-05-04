@@ -1,0 +1,30 @@
+<document>
+	<title>User Guide - Ant Tasks</title>
+	<toc name="toc-user-guide" chapter="13. Ant Tasks"/>
+	<body>
+		<section name="13. Ant Tasks">
+			<subsection name="13.4 Antlib">
+ 
+      <p>
+        <a href="http://ant.apache.org/manual/CoreTypes/antlib.html">Antlib</a> is a feature of Ant 1.6+
+        to allow 3rd party Ant tasks and types to be defined easily.  Cayenne has an embedded
+        <code>antlib.xml</code> descriptor file
+        in the package <code>org.objectstyle.cayenne.tools</code>.  All of Cayenne's Ant tasks
+        can be defined at once using the following definition in your Ant build file:
+      </p>
+      
+<source>
+&amp;lt;typedef resource="org/objectstyle/cayenne/tools/antlib.xml"&amp;gt;
+  &amp;lt;classpath refid="classpath"/&amp;gt;
+&amp;lt;/typedef&amp;gt;
+</source>
+
+       <p>
+         When using the Antlib construct, omit the <code>&lt;taskdef&gt;</code> elements shown
+         in the examples of each task, as the antlib.xml file defines all of the Cayenne Ant tasks.
+       </p>
+
+			</subsection>
+		</section>
+	</body>
+</document>
