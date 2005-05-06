@@ -127,6 +127,7 @@
 		<javac	srcdir="src/${subproj}/java" 
 				destdir="build/${subproj}/classes" 
 				debug="on" 
+				source="1.3" 
 				deprecation="on">
 			<classpath refid="classpath-${subproj}"/>
 		</javac>
