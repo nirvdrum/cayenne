@@ -192,7 +192,7 @@ public class DefaultConfiguration extends Configuration {
 				.append("[")
 				.append(this.getClass().getName())
 				.append("] : Domain configuration file \"")
-				.append(DEFAULT_DOMAIN_FILE)
+				.append(this.getDomainConfigurationName())
 				.append("\" is not found.");
 
 			throw new ConfigurationException(msg.toString());
