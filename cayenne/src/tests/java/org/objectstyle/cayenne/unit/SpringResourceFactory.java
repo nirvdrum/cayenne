@@ -62,6 +62,7 @@ import java.io.InputStream;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.InputStreamResource;
 
 /**
  * A bean that loads other Spring beans from the specified location.
@@ -80,7 +81,7 @@ public class SpringResourceFactory implements FactoryBean {
     public Object getObject() throws Exception {
         if (factory == null) {
             InputStream in = new FileInputStream(new File(location));
-            this.factory = new XmlBeanFactory(in);
+            this.factory = new XmlBeanFactory(new InputStreamResource(in));
         }
         return factory;
     }

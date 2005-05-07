@@ -68,6 +68,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.query.Query;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.InputStreamResource;
 
 /**
  * DataSetFactory that loads DataSets from XML using Spring.
@@ -155,7 +156,7 @@ public class XMLDataSetFactory implements DataSetFactory {
                 throw new RuntimeException("Error loading");
             }
 
-            factory = new XmlBeanFactory(in);
+            factory = new XmlBeanFactory(new InputStreamResource(in));
             dataSets.put(testCase, factory);
         }
 

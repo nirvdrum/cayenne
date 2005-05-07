@@ -76,6 +76,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.InputStreamResource;
 
 /**
  * Initializes connections for Cayenne unit tests.
@@ -137,7 +138,7 @@ public class CayenneTestResources implements BeanFactoryAware {
             logObj.error("Can't open test resources..." + testResources, ioex);
             throw new RuntimeException("Error loading", ioex);
         }
-        BeanFactory factory = new XmlBeanFactory(in);
+        BeanFactory factory = new XmlBeanFactory(new InputStreamResource(in));
         resources = (CayenneTestResources) factory.getBean(
                 "TestResources",
                 CayenneTestResources.class);
