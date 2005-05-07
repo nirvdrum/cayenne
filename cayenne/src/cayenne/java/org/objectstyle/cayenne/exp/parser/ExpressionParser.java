@@ -59,9 +59,6 @@
  */
 package org.objectstyle.cayenne.exp.parser;
 
-import java.io.*;
-import java.util.*;
-import java.math.*;
 import org.objectstyle.cayenne.exp.*;
 
 /**

@@ -55,9 +55,6 @@
  * <http://objectstyle.org/>.
  */
 package org.objectstyle.cayenne.wocompat.parser;
-import org.apache.log4j.Logger;
-import java.io.*;
-import java.util.*;
 
 public class ParserTokenManager implements ParserConstants
 {
