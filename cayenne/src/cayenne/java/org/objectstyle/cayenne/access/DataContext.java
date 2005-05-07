@@ -949,6 +949,16 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public DataObject refetchObject(ObjectId oid) {
 
+        if (oid == null) {
+            throw new NullPointerException("Null ObjectId");
+        }
+
+        if (oid.isTemporary()) {
+            throw new CayenneRuntimeException("Can't refetch ObjectId "
+                    + oid
+                    + ", as it is a temporary id.");
+        }
+
         synchronized (getObjectStore()) {
             DataObject object = objectStore.getObject(oid);
 
@@ -963,8 +973,8 @@ public class DataContext implements QueryEngine, Serializable {
 
         if (results.size() != 1) {
             String msg = (results.size() == 0)
-                    ? "No matching objects found for ObjectId " + oid
-                    : "More than 1 object found for ObjectId "
+                    ? "Refetch failure: no matching objects found for ObjectId " + oid
+                    : "Refetch failure: more than 1 object found for ObjectId "
                             + oid
                             + ". Fetch matched "
                             + results.size()

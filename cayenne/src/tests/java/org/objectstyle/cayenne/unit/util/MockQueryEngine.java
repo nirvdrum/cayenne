@@ -82,6 +82,14 @@ public class MockQueryEngine implements QueryEngine {
     protected Map results = new HashMap();
     protected EntityResolver entityResolver;
     protected int runCount;
+    
+    public MockQueryEngine(QueryEngine engine) {
+        this(engine.getEntityResolver());
+    }
+
+    public MockQueryEngine(EntityResolver resolver) {
+        this.entityResolver = resolver;
+    }
 
     public void reset() {
         runCount = 0;
@@ -127,10 +135,6 @@ public class MockQueryEngine implements QueryEngine {
 
     public EntityResolver getEntityResolver() {
         return entityResolver;
-    }
-
-    public void setEntityResolver(EntityResolver resolver) {
-        this.entityResolver = resolver;
     }
 
     public Collection getDataMaps() {

@@ -80,9 +80,7 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         super.setUp();
 
         // assemble mockup context
-        this.engine = new MockQueryEngine();
-        this.engine.setEntityResolver(getDomain().getEntityResolver());
-
+        this.engine = new MockQueryEngine(getDomain());
         this.dataRowCache = new DataRowStore("test");
         this.dataRowCache.setNotifyingRemoteListeners(false);
 

@@ -97,14 +97,11 @@ public class ObjectStoreValidationTst extends CayenneTestCase {
 
     public void testValidateUncommittedObjectsConcurrency() throws Exception {
         ObjectStore store = new ObjectStore(new DataRowStore("test"));
-        DataObject updated1 = createActiveValidatingObject(
-                store,
+        DataObject updated1 = createActiveValidatingObject(store,
                 PersistenceState.MODIFIED);
-        DataObject updated2 = createActiveValidatingObject(
-                store,
+        DataObject updated2 = createActiveValidatingObject(store,
                 PersistenceState.MODIFIED);
-        DataObject updated3 = createActiveValidatingObject(
-                store,
+        DataObject updated3 = createActiveValidatingObject(store,
                 PersistenceState.MODIFIED);
 
         store.addObject(updated1);
@@ -131,8 +128,7 @@ public class ObjectStoreValidationTst extends CayenneTestCase {
     }
 
     private DataContext createMockupDataContext(ObjectStore objectStore) {
-        MockQueryEngine qe = new MockQueryEngine();
-        qe.setEntityResolver(getDomain().getEntityResolver());
+        MockQueryEngine qe = new MockQueryEngine(getDomain());
         MockDataDomain dd = new MockDataDomain(qe);
         return new DataContext(dd, objectStore);
     }
