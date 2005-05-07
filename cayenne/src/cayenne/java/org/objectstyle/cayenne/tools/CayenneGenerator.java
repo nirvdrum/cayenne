@@ -153,7 +153,7 @@ public class CayenneGenerator extends Task {
      * Throws BuildException if attributes are invalid.
      */
     protected void validateAttributes() throws BuildException {
-        if (map == null && project == null) {
+        if (map == null && this.getProject() == null) {
             throw new BuildException("either 'map' or 'project' is required.");
         }
     }
