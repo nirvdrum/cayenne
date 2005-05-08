@@ -83,7 +83,7 @@
     </target>
         
     <!-- ========================================== -->
-    <!-- Runs Cayenne Unit Tests   -->
+    <!-- Runs Cayenne Unit Tests                    -->
     <!-- ========================================== -->
     <target name="test" description="runs JUnit tests">
     	<!-- Cayenne must be fully built -->
@@ -96,7 +96,15 @@
 
 		<ant antfile="build-dvmodeler.xml" target="dist-bin"/>
     </target>
-    
+
+    <!-- ========================================== -->
+    <!-- Runs Unit Test Coverage Analysis           -->
+    <!-- ========================================== -->
+    <target name="testcoverage" description="create JUnit test coverage report">
+    	<property name="coverage.enabled" value="true"/>
+		<antcall target="test"/>
+    </target>
+
     <!-- ========================================== -->
     <!-- Runs Cayenne Performance Tests             -->
     <!-- ========================================== -->
