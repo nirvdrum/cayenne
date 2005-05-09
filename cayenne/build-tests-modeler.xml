@@ -4,6 +4,7 @@
 <!-- CayenneModeler tests subproject buildfile. -->
 <!-- ========================================== -->
 <project default="test">
+
     <property file="default.properties" />
 	<property name="test.build" value="build/tests-modeler"/>
 	<property name="test.output" value="${test.build}/out"/>
@@ -11,7 +12,12 @@
 	<property name="test.filter" value="**/*Tst.class"/>
 	
 	<path id="classpath">
-    	<fileset dir="${otherlib.dir}" includes="${junit.jar}"/>
+    	<fileset dir="${otherlib.dir}">
+			<include name="${ant-junit.jar}"/>
+			<include name="${emma.jar}"/>
+			<include name="${emma.ant.jar}"/>
+			<include name="${junit.jar}"/>
+    	</fileset>
 	   	<fileset dir="${ant.home}/lib" includes="ant*.jar,optional.jar"/>
 		<fileset dir="${dist}/lib" includes="**/*.jar"/>
 		
@@ -20,7 +26,11 @@
 		<pathelement path="build/tests/deps"/>
 		<pathelement path="${test.env.CLASSPATH}"/>
     </path>
-    
+
+	<!-- emma code coverage -->
+	<property name="coverage.dir" value="${test.build}/coverage"/>
+	<taskdef resource="emma_ant.properties" classpathref="classpath" />
+
 	<target name="compile">
 		<ant antfile="build-subproj.xml" target="compile">
 			<property name="subproj" value="tests-modeler"/>
@@ -33,16 +43,42 @@
     <!-- ============================================= -->
     <target name="test" depends="compile">
         <!-- Run Java on itself to avoid classloader weirdness in JUnit -->
-    	<java fork="true" classname="org.apache.tools.ant.Main" failonerror="true">
+    	<emmajava
+    		enabled="${coverage.enabled}"
+    		verbosity="quiet"
+    		fork="true"
+    		libclasspathref="classpath"
+    		classname="org.apache.tools.ant.Main"
+    		failonerror="true">
+
+			<!-- sources to include -->
+			<sourcepath>
+				<pathelement path="src/cayenne/java"/>
+				<pathelement path="src/modeler/java"/>
+			</sourcepath>
+
+    		<!-- modeler tests have no connection, so use test output dir -->
+			<html
+				outfile="${coverage.dir}/coverage.html"
+				sort="+name, +line"
+			/>
+
+			<!-- do not instrument test classes -->
+			<filter includes="org.objectstyle.cayenne.*"/>
+			<filter	excludes="*Tst*,*Test*,*test*,org.objectstyle.cayenne.unit.*"/>
+
     		<arg value="-f"/>
     		<arg value="build-tests-modeler.xml"/>
     		<arg value="unit-test-report"/>
-    		
+
+			<jvmarg value="-Xms64m"/>
+			<jvmarg value="-Xmx64m"/>
+
 			<sysproperty key="ant.home" value="${ant.home}"/>
 			<sysproperty key="dist" value="${dist}"/>
 			<sysproperty key="test.filter" value="${test.filter}"/>
 			<classpath refid="classpath"/>
-    	</java>
+    	</emmajava>
     </target>    
     
     <!-- ============================================= -->
@@ -63,8 +99,6 @@
                haltonfailure="no" 
                errorProperty="test.modeler.failure"
                failureProperty="test.modeler.failure">
-               
-            <classpath refid="classpath"/>
             
             <formatter type="xml" usefile="true"/>
             <batchtest todir="${test.output}">

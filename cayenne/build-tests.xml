@@ -87,9 +87,13 @@
     		verbosity="quiet"
     		fork="true"
     		libclasspathref="classpath"
-    		sourcepath="src/cayenne/java"
     		classname="org.apache.tools.ant.Main"
     		failonerror="true">
+
+			<!-- sources to include -->
+			<sourcepath>
+				<pathelement path="src/cayenne/java"/>
+			</sourcepath>
 
     		<!-- put the coverage report into a connection-specific subdir -->
 			<html
