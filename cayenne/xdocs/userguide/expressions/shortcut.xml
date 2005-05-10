@@ -82,7 +82,7 @@
         </ul>		
 		</subsection>
 		
-		<subsection name="10.3.2 Chanining Expressions">
+		<subsection name="10.3.2 Chaining Expressions">
 		<p>Expression class itself provides a set of convenience methods to chain expressions
 		as they are built from smaller parts. Note that each of these methods does not modify
 		the original expression, rather it builds and returns a new instance of the expression.</p>
