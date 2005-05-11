@@ -1,11 +1,10 @@
 <document>
-<title>CDataPort task</title>
-<toc name="toc-examples" chapter="3. DataPort"/>
-<body>
-    <section name="3. DataPort">
-    <subsection name="3.2 CDataPort Ant Task">
+	<title>User Guide - Ant Tasks</title>
+	<toc name="toc-user-guide" chapter="13. Ant Tasks"/>
+	<body>
+		<section name="13. Ant Tasks">
+			<subsection name="13.4 cdataport: Porting Database Data">
 			<h3>Description</h3>
-			
 			<p>Sometimes it is necessary to recreate a database, copying data
             from another existing database. For instance, recreating development database 
             instance from production data, etc. While most RDBMS provide data import/export
@@ -80,12 +79,12 @@
 			<p>Here is an example of using <code>CDataPort</code> to port data using all
 			source DataMaps, excluding DBEntities with name matching "BILL_*":</p>
 <source>
-&amp;lt;taskdef name="cdataport" classname="org.objectstyle.cayenne.dataport.ant.CayenneDataPort"&amp;gt;
+&amp;lt;taskdef name="cdataport" classname="org.objectstyle.cayenne.tools.DataPortTask"&amp;gt;
      &amp;lt;classpath refid="classpath"/&amp;gt;
 &amp;lt;/taskdef&amp;gt;
 &amp;lt;cdataport projectFile="subdir/cayenne.xml" srcNode="ProductionNode" destNode="DevNode" excludeTables="BILL_*"/&amp;gt;
 </source>
 	</subsection>
     </section>
-</body>
+	</body>
 </document>

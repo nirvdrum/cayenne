@@ -68,9 +68,13 @@ import org.objectstyle.cayenne.project.ProjectException;
 import org.objectstyle.cayenne.util.Util;
 
 /**
+ * A "cdeploy" Ant task providing an Ant frontend to
+ * org.objectstyle.cayenne.project.ProjectConfigurator.
+ * 
  * @author Andrei Adamchik
  */
 public class DeploymentConfigurator extends Task {
+
     static {
         // init logging properties
         Configuration.configureCommonLogging();
@@ -98,20 +102,24 @@ public class DeploymentConfigurator extends Task {
 
         try {
             processProject();
-        } catch (Exception ex) {
-        	Throwable th = Util.unwindException(ex);
+        }
+        catch (Exception ex) {
+            Throwable th = Util.unwindException(ex);
             String message = th.getMessage();
             StringBuffer buf = new StringBuffer();
 
             if (message != null && message.trim().length() > 0) {
                 buf.append("Error: [").append(message).append("].");
-            } else {
+            }
+            else {
                 buf.append("Error reconfiguring jar file.");
             }
 
-            buf.append(" Source: ").append(info.getSourceJar()).append(
-                "; target: ").append(
-                info.getDestJar());
+            buf
+                    .append(" Source: ")
+                    .append(info.getSourceJar())
+                    .append("; target: ")
+                    .append(info.getDestJar());
 
             String errorMessage = buf.toString();
             super.log(errorMessage);
@@ -120,8 +128,7 @@ public class DeploymentConfigurator extends Task {
     }
 
     /**
-     * Performs validation of task attributes. Throws BuildException if
-     * validation fails.
+     * Performs validation of task attributes. Throws BuildException if validation fails.
      */
     protected void validateAttributes() throws BuildException {
         if (info.getSourceJar() == null) {
@@ -129,14 +136,11 @@ public class DeploymentConfigurator extends Task {
         }
 
         if (!info.getSourceJar().isFile()) {
-            throw new BuildException(
-                "'src' must be a valid file: " + info.getSourceJar());
+            throw new BuildException("'src' must be a valid file: " + info.getSourceJar());
         }
 
-        if (info.getAltProjectFile() != null
-            && !info.getAltProjectFile().isFile()) {
-            throw new BuildException(
-                "'altProjectFile' must be a valid file: "
+        if (info.getAltProjectFile() != null && !info.getAltProjectFile().isFile()) {
+            throw new BuildException("'altProjectFile' must be a valid file: "
                     + info.getAltProjectFile());
         }
 
@@ -148,11 +152,11 @@ public class DeploymentConfigurator extends Task {
             }
 
             if (node.getDataSource() != null && node.getDriverFile() != null) {
-                throw new BuildException("'node.dataSource' and 'node.driverFile' are mutually exclusive.");
+                throw new BuildException(
+                        "'node.dataSource' and 'node.driverFile' are mutually exclusive.");
             }
 
-            if (node.getDriverFile() != null
-                && !node.getDriverFile().isFile()) {
+            if (node.getDriverFile() != null && !node.getDriverFile().isFile()) {
                 throw new BuildException("'node.driverFile' does not exist.");
             }
         }
