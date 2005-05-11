@@ -106,9 +106,14 @@ public class DataPortTask extends Task {
         configureLogging();
         validateParameters();
 
-        FileConfiguration configuration = new FileConfiguration();
-        configuration.addFilesystemPath(projectFile.getParentFile());
-        Configuration.initializeSharedConfiguration(configuration);
+        FileConfiguration configuration = new FileConfiguration(projectFile);
+        try {
+            configuration.initialize();
+        }
+        catch (Exception ex) {
+            throw new BuildException("Error loading Cayenne configuration from "
+                    + projectFile);
+        }
 
         // perform project validation
         DataNode source = findNode(configuration, srcNode);
