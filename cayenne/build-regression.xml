@@ -9,7 +9,7 @@
 	<property name="regression.src" value="src/regression/java"/>
 	<property environment="regression.env"/>
     
-    <path id="classpath">
+    <path id="agnostic-classpath">
     	<fileset dir="${otherlib.dir}">
 			<include name="${bcel.jar}"/>
 		</fileset>
@@ -22,10 +22,51 @@
     </path>
     
     
+    <target name="use-embedded-hsqldb" unless="cayenne.test.connection">
+	    <echo message="using internal_embedded_datasource for test connection."/>
+	    <property name="cayenne.test.connection" value="internal_embedded_datasource"/>
+        <path id="classpath">
+            <path refid="agnostic-classpath"/>
+            <fileset dir="${otherlib.dir}">
+    			<include name="${hsqldb.jar}"/>
+    		</fileset>
+        </path>
+    </target>
+
+    <target name="use-specified-connection" if="cayenne.test.connection">
+        <path id="classpath">
+          <path refid="agnostic-classpath"/>
+        </path>
+    </target>
+
+    <!-- This is a simple property check, misspelled property can still -->
+    <!-- lead to failed connection to the test database. -->
+    <!-- dependency order is important as use-embedded-hsqldb sets the conditional -->
+    <target name="check-connection" depends="use-specified-connection,use-embedded-hsqldb">
+    </target>
+
+    <!-- ========================================== -->
+    <!-- Set of regression tests                    -->
+    <!-- ========================================== -->
+    <target name="test"
+            description="Run regression tests."
+            depends="testTemplating,testRandomDomainBuilderAndDataModificationRobot">
+    </target>
+
+    <!-- ========================================== -->
+    <!-- Test Class Generation Templating           -->
+    <!-- ========================================== -->
+    <target name="testTemplating"
+            description="Test class-generation templating."
+            depends="">
+    </target>
+
     <!-- ========================================== -->
     <!-- Build targets.                             -->
     <!-- ========================================== -->
-    <target name="test" depends="compile">
+    <target name="testRandomDomainBuilderAndDataModificationRobot"
+            description="test RandomDomainBuilder and DataModificationRobot."
+            depends="compile,check-connection">
 		<java fork="true" 
 		      failonerror="true"
 		      classname="org.objectstyle.cayenne.regression.AntMain">
