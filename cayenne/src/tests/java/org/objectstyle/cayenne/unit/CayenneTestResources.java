@@ -96,13 +96,6 @@ public class CayenneTestResources implements BeanFactoryAware {
     public static final String SCHEMA_SETUP_STACK = "SchemaSetupStack";
     public static final String SQL_TEMPLATE_CUSTOMIZER = "SQLTemplateCustomizer";
 
-    public static final String EMBEDDED_DATASOURCE = "internal_embedded_datasource";
-    public static final String EMBEDDED_DATASOURCE_DBADAPTER = "org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter";
-    public static final String EMBEDDED_DATASOURCE_USERNAME = "sa";
-    public static final String EMBEDDED_DATASOURCE_PASSWORD = "";
-    public static final String EMBEDDED_DATASOURCE_URL = "jdbc:hsqldb:mem:aname";
-    public static final String EMBEDDED_DATASOURCE_JDBC_DRIVER = "org.hsqldb.jdbcDriver";
-
     private static CayenneTestResources resources;
 
     static {
@@ -199,19 +192,8 @@ public class CayenneTestResources implements BeanFactoryAware {
             throw new RuntimeException("Null connection key.");
         }
         
-        if (EMBEDDED_DATASOURCE.equals(connectionKey)) {
-            // Create embedded data source instead
-            connectionInfo = new DataSourceInfo();
-            connectionInfo.setAdapterClassName(EMBEDDED_DATASOURCE_DBADAPTER);
-            connectionInfo.setUserName(EMBEDDED_DATASOURCE_USERNAME);
-            connectionInfo.setPassword(EMBEDDED_DATASOURCE_PASSWORD);
-            connectionInfo.setDataSourceUrl(EMBEDDED_DATASOURCE_URL);
-            connectionInfo.setJdbcDriver(EMBEDDED_DATASOURCE_JDBC_DRIVER);
-        }
-        else {
-            connectionInfo = ConnectionProperties.getInstance().getConnectionInfo(
-                    connectionKey);
-        }
+        connectionInfo = ConnectionProperties.getInstance().getConnectionInfo(
+                connectionKey);
 
         if (connectionInfo == null) {
             throw new RuntimeException("Null connection info for key: " + connectionKey);

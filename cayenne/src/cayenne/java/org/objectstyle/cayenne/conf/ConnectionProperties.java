@@ -82,6 +82,13 @@ import org.objectstyle.cayenne.project.CayenneUserDir;
 public class ConnectionProperties {
     static final Logger logObj = Logger.getLogger(ConnectionProperties.class);
 
+    public static final String EMBEDDED_DATASOURCE = "internal_embedded_datasource";
+    public static final String EMBEDDED_DATASOURCE_DBADAPTER = "org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter";
+    public static final String EMBEDDED_DATASOURCE_USERNAME = "sa";
+    public static final String EMBEDDED_DATASOURCE_PASSWORD = "";
+    public static final String EMBEDDED_DATASOURCE_URL = "jdbc:hsqldb:mem:aname";
+    public static final String EMBEDDED_DATASOURCE_JDBC_DRIVER = "org.hsqldb.jdbcDriver";
+
     public static final String PROPERTIES_FILE = "connection.properties";
     public static final String ADAPTER_KEY = "cayenne.adapter";
     public static final String USER_NAME_KEY = "jdbc.username";
@@ -190,6 +197,18 @@ public class ConnectionProperties {
      * If name does not match an existing object, returns null.
      */
     public DataSourceInfo getConnectionInfo(String name) {
+        
+        if (EMBEDDED_DATASOURCE.equals(name)) {
+            // Create embedded data source instead
+            DataSourceInfo connectionInfo = new DataSourceInfo();
+            connectionInfo.setAdapterClassName(EMBEDDED_DATASOURCE_DBADAPTER);
+            connectionInfo.setUserName(EMBEDDED_DATASOURCE_USERNAME);
+            connectionInfo.setPassword(EMBEDDED_DATASOURCE_PASSWORD);
+            connectionInfo.setDataSourceUrl(EMBEDDED_DATASOURCE_URL);
+            connectionInfo.setJdbcDriver(EMBEDDED_DATASOURCE_JDBC_DRIVER);
+            return connectionInfo;
+        }
+
         synchronized (connectionInfos) {
             return (DataSourceInfo) connectionInfos.get(name);
         }
