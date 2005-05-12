@@ -58,12 +58,9 @@ package org.objectstyle.cayenne.tools;
 import java.io.File;
 import java.sql.Driver;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
-import org.apache.tools.ant.Task;
 import org.objectstyle.cayenne.access.DbGenerator;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conn.DriverDataSource;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -80,7 +77,7 @@ import org.xml.sax.InputSource;
  * @since 1.2
  */
 // TODO: support classpath attribute for loading the driver
-public class DbGeneratorTask extends Task {
+public class DbGeneratorTask extends CayenneTask {
 
     protected DbAdapter adapter;
     protected File map;
@@ -97,16 +94,8 @@ public class DbGeneratorTask extends Task {
     protected boolean createPK = true;
     protected boolean createFK = true;
 
-    /**
-     * Sets up logging to be in line with the Ant logging system.
-     */
-    protected void configureLogging() {
-        Configuration.setLoggingConfigured(true);
-        BasicConfigurator.configure(new AntAppender(this));
-    }
 
     public void execute() {
-
         configureLogging();
 
         // prepare defaults

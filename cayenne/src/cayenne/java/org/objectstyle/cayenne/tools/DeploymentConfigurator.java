@@ -59,8 +59,6 @@ import java.io.File;
 import java.util.Iterator;
 
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.project.DataNodeConfigInfo;
 import org.objectstyle.cayenne.project.ProjectConfigInfo;
 import org.objectstyle.cayenne.project.ProjectConfigurator;
@@ -73,12 +71,7 @@ import org.objectstyle.cayenne.util.Util;
  * 
  * @author Andrei Adamchik
  */
-public class DeploymentConfigurator extends Task {
-
-    static {
-        // init logging properties
-        Configuration.configureCommonLogging();
-    }
+public class DeploymentConfigurator extends CayenneTask {
 
     protected ProjectConfigInfo info;
 
@@ -98,6 +91,8 @@ public class DeploymentConfigurator extends Task {
      * Executes the task. It will be called by ant framework.
      */
     public void execute() throws BuildException {
+        configureLogging();
+        
         validateAttributes();
 
         try {

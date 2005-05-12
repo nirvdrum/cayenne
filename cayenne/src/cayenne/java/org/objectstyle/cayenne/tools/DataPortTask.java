@@ -60,10 +60,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
-import org.apache.tools.ant.Task;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataPort;
@@ -79,7 +77,7 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  * @since 1.2: Prior to 1.2 DataPort classes were a part of cayenne-examples package.
  */
-public class DataPortTask extends Task {
+public class DataPortTask extends CayenneTask {
 
     protected File projectFile;
     protected String maps;
@@ -94,19 +92,15 @@ public class DataPortTask extends Task {
         this.cleanDest = true;
     }
 
-    /**
-     * Sets up logging to be in line with the Ant logging system.
-     */
-    protected void configureLogging() {
-        Configuration.setLoggingConfigured(true);
-        BasicConfigurator.configure(new AntAppender(this));
-    }
-
     public void execute() throws BuildException {
         configureLogging();
         validateParameters();
 
         FileConfiguration configuration = new FileConfiguration(projectFile);
+
+        // setup the right ClassLoader
+        configuration.setClassLoader(getClass().getClassLoader());
+
         try {
             configuration.initialize();
         }

@@ -55,48 +55,31 @@
  */
 package org.objectstyle.cayenne.tools;
 
-import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.spi.LoggingEvent;
-import org.apache.tools.ant.Project;
+import org.apache.log4j.BasicConfigurator;
 import org.apache.tools.ant.Task;
+import org.objectstyle.cayenne.conf.Configuration;
 
 /**
- * A bridge between Log4J and Ant logging system.
+ * A superclass of Cayenne Ant tasks. Performs some common setup
  * 
- * @since 1.2
  * @author Andrei Adamchik
+ * @since 1.2
  */
-class AntAppender extends AppenderSkeleton {
-
-    Task task;
-
-    AntAppender(Task task) {
-        if (task == null) {
-            throw new NullPointerException("Null Task");
-        }
-
-        this.task = task;
-    }
+public abstract class CayenneTask extends Task {
 
     /**
-     * Logs Log4J message at Ant level "Project.MSG_VERBOSE" so that framework messages
-     * are not displayed during the normal build.
+     * Sets up logging to be in line with the Ant logging system. It should be called by
+     * subclasses from the "execute" method.
      */
-    protected void append(LoggingEvent event) {
-        Object message = event.getMessage();
-        if (message == null) {
-            return;
-        }
+    protected void configureLogging() {
+        Configuration.setLoggingConfigured(true);
 
-        // downgrade framework messages to VERBOSE
-        task.log(message.toString(), Project.MSG_VERBOSE);
-    }
+        // reset is needed since when multiple Cayenne tasks are loaded via Antlib each
+        // one adds its own appender..
 
-    public void close() {
-
-    }
-
-    public boolean requiresLayout() {
-        return false;
+        // TODO: this is a really a bad solution ... each task would have to reset shared
+        // resource whenever its execution starts...
+        BasicConfigurator.resetConfiguration();
+        BasicConfigurator.configure(new AntAppender(this));
     }
 }

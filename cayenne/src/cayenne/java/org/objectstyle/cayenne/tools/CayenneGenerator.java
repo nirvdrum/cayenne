@@ -58,10 +58,7 @@ package org.objectstyle.cayenne.tools;
 import java.io.File;
 import java.util.ArrayList;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.gen.AntClassGenerator;
 import org.objectstyle.cayenne.gen.ClassGenerator;
 import org.objectstyle.cayenne.gen.DefaultClassGenerator;
@@ -76,7 +73,7 @@ import org.xml.sax.InputSource;
  * 
  * @author Andrei Adamchik
  */
-public class CayenneGenerator extends Task {
+public class CayenneGenerator extends CayenneTask {
 
     protected File map;
     protected DefaultClassGenerator generator;
@@ -84,16 +81,6 @@ public class CayenneGenerator extends Task {
     public CayenneGenerator() {
         bootstrapVelocity();
         generator = createGenerator();
-    }
-
-    /**
-     * Sets up logging to be in line with the Ant logging system.
-     * 
-     * @since 1.1
-     */
-    protected void configureLogging() {
-        Configuration.setLoggingConfigured(true);
-        BasicConfigurator.configure(new AntAppender(this));
     }
 
     /**

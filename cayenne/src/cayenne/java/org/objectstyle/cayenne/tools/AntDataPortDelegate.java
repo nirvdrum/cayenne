@@ -274,7 +274,7 @@ class AntDataPortDelegate implements DataPortDelegate {
             DataPort portTool,
             DbEntity entity,
             GenericSelectQuery query) {
-        parentTask.log("  Porting '" + entity.getName() + "'");
+        parentTask.log("Porting '" + entity.getName() + "'");
         lastEntity = entity;
         timestamp = System.currentTimeMillis();
 
@@ -289,7 +289,7 @@ class AntDataPortDelegate implements DataPortDelegate {
 
         String label = (rowCount == 1) ? "1 row transferred" : rowCount
                 + " rows transferred";
-        parentTask.log("  Done porting "
+        parentTask.log("Done porting "
                 + entity.getName()
                 + ", "
                 + label
@@ -301,7 +301,7 @@ class AntDataPortDelegate implements DataPortDelegate {
     }
 
     public Query willCleanData(DataPort portTool, DbEntity entity, Query query) {
-        parentTask.log("  Deleting " + entity.getName(), Project.MSG_VERBOSE);
+        parentTask.log("Deleting " + entity.getName(), Project.MSG_VERBOSE);
         lastEntity = entity;
         timestamp = System.currentTimeMillis();
         return query;
@@ -314,7 +314,7 @@ class AntDataPortDelegate implements DataPortDelegate {
         }
 
         String label = (rowCount == 1) ? "1 row deleted" : rowCount + " rows deleted";
-        parentTask.log("  Done deleting "
+        parentTask.log("Done deleting "
                 + entity.getName()
                 + ", "
                 + label
