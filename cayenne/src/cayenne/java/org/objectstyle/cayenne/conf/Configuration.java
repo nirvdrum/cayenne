@@ -80,20 +80,21 @@ import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.dataview.DataView;
 
 /**
- * This class is an entry point to Cayenne. It loads all
- * configuration files and instantiates main Cayenne objects. Used as a
- * singleton via the {@link #getSharedConfiguration} method.
- *
- * <p>To use a custom subclass of Configuration, Java applications must
- * call {@link #initializeSharedConfiguration} with the subclass as argument.
- * This will create and initialize a Configuration singleton instance of the
- * specified class. By default {@link DefaultConfiguration} is instantiated.
+ * This class is an entry point to Cayenne. It loads all configuration files and
+ * instantiates main Cayenne objects. Used as a singleton via the
+ * {@link #getSharedConfiguration}method.
+ * <p>
+ * To use a custom subclass of Configuration, Java applications must call
+ * {@link #initializeSharedConfiguration}with the subclass as argument. This will create
+ * and initialize a Configuration singleton instance of the specified class. By default
+ * {@link DefaultConfiguration}is instantiated.
  * </p>
- *
+ * 
  * @author Andrei Adamchik
  * @author Holger Hoffstaette
  */
 public abstract class Configuration {
+
     private static Logger logObj = Logger.getLogger(Configuration.class);
 
     public static final String DEFAULT_LOGGING_PROPS_FILE = ".cayenne/cayenne-log.properties";
@@ -104,61 +105,69 @@ public abstract class Configuration {
     private static boolean loggingConfigured = false;
 
     public static final Predicate ACCEPT_ALL_DATAVIEWS = new Predicate() {
-      public boolean evaluate(Object dataViewName) {
-        return true;
-      }
+
+        public boolean evaluate(Object dataViewName) {
+            return true;
+        }
     };
 
     /**
-     * Defines a ClassLoader to use for resource lookup.
-     * Configuration objects that are using ClassLoaders
-     * to locate resources may need to be bootstrapped
-     * explicitly.
+     * Defines a ClassLoader to use for resource lookup. Configuration objects that are
+     * using ClassLoaders to locate resources may need to be bootstrapped explicitly.
      */
-	protected static ClassLoader resourceLoader;
+    protected static ClassLoader resourceLoader;
 
-	/**
-	 * Stores ClassLoader set up for the current thread.
-	 * @since 1.2
-	 */
-	protected static ThreadLocal threadClassLoader = new ThreadLocal();
-	
+    /**
+     * Stores ClassLoader set up for the current thread.
+     * 
+     * @since 1.2
+     */
+    protected static ThreadLocal threadClassLoader = new ThreadLocal();
 
     /** Lookup map that stores DataDomains with names as keys. */
-	protected CayenneMap dataDomains = new CayenneMap(this);
-	protected Collection dataDomainsRef = Collections.unmodifiableCollection(dataDomains.values());
-	protected DataSourceFactory overrideFactory;
-	protected ConfigStatus loadStatus = new ConfigStatus();
-	protected String domainConfigurationName = DEFAULT_DOMAIN_FILE;
-	protected boolean ignoringLoadFailures;
+    protected CayenneMap dataDomains = new CayenneMap(this);
+    protected Collection dataDomainsRef = Collections.unmodifiableCollection(dataDomains
+            .values());
+    protected DataSourceFactory overrideFactory;
+    protected ConfigStatus loadStatus = new ConfigStatus();
+    protected String domainConfigurationName = DEFAULT_DOMAIN_FILE;
+    protected boolean ignoringLoadFailures;
     protected ConfigLoaderDelegate loaderDelegate;
     protected ConfigurationShutdownHook configurationShutdownHook = new ConfigurationShutdownHook();
     protected Map dataViewLocations = new HashMap();
     protected String projectVersion;
-
-	/**
-	 * Sets <code>cl</code> class's ClassLoader to serve
-	 * as shared configuration resource ClassLoader.
-	 * If shared Configuration object does not use ClassLoader,
-	 * this method call will have no effect on how resources are loaded.
-	 */
-	public static void bootstrapSharedConfiguration(Class cl) {
-		if(cl.getClassLoader() != null) {
-		    resourceLoader = cl.getClassLoader();
-		}
-		else {
-			logObj.debug("An attempt to bootstrap configuration with null class loader for class " + cl.getName());
-		}
-	}
+    
+    /**
+     * Stores instance ClassLoader.
+     * 
+     * @since 1.2
+     */
+    protected ClassLoader classLoader;
 
     /**
-     * Configures Cayenne logging properties.
-     * Search for the properties file called <code>cayenne-log.properties</code>
-     * is first done in $HOME/.cayenne, then in CLASSPATH.
+     * Sets <code>cl</code> class's ClassLoader to serve as shared configuration
+     * resource ClassLoader. If shared Configuration object does not use ClassLoader, this
+     * method call will have no effect on how resources are loaded.
+     */
+    public static void bootstrapSharedConfiguration(Class cl) {
+        if (cl.getClassLoader() != null) {
+            resourceLoader = cl.getClassLoader();
+        }
+        else {
+            logObj
+                    .debug("An attempt to bootstrap configuration with null class loader for class "
+                            + cl.getName());
+        }
+    }
+
+    /**
+     * Configures Cayenne logging properties. Search for the properties file called
+     * <code>cayenne-log.properties</code> is first done in $HOME/.cayenne, then in
+     * CLASSPATH.
      */
     public synchronized static void configureCommonLogging() {
         if (!Configuration.isLoggingConfigured()) {
-			// create a simple CLASSPATH/$HOME locator
+            // create a simple CLASSPATH/$HOME locator
             ResourceLocator locator = new ResourceLocator();
             locator.setSkipAbsolutePath(true);
             locator.setSkipClasspath(false);
@@ -167,7 +176,7 @@ public abstract class Configuration {
 
             // and load the default logging config file
             URL configURL = locator.findResource(DEFAULT_LOGGING_PROPS_FILE);
-			Configuration.configureCommonLogging(configURL);
+            Configuration.configureCommonLogging(configURL);
         }
     }
 
@@ -178,215 +187,216 @@ public abstract class Configuration {
         if (!Configuration.isLoggingConfigured()) {
             if (propsFile != null) {
                 PropertyConfigurator.configure(propsFile);
-				logObj.debug("configured log4j from: " + propsFile);
-            } else {
+                logObj.debug("configured log4j from: " + propsFile);
+            }
+            else {
                 BasicConfigurator.configure();
                 logObj.debug("configured log4j with BasicConfigurator.");
             }
 
-			// remember configuration success
+            // remember configuration success
             Configuration.setLoggingConfigured(true);
         }
     }
 
-	/**
-	 * Indicates whether Log4j has been initialized, either by cayenne
-	 * or otherwise. If an external setup has been detected,
-	 * {@link #setLoggingConfigured} will be called to remember this.
-	 */
-	public static boolean isLoggingConfigured() {
-		if (!loggingConfigured) {
-			// check for existing log4j setup
-			if (Logger.getRootLogger().getAllAppenders().hasMoreElements()) {
-				Configuration.setLoggingConfigured(true);
-			}
-		}
+    /**
+     * Indicates whether Log4j has been initialized, either by cayenne or otherwise. If an
+     * external setup has been detected, {@link #setLoggingConfigured}will be called to
+     * remember this.
+     */
+    public static boolean isLoggingConfigured() {
+        if (!loggingConfigured) {
+            // check for existing log4j setup
+            if (Logger.getRootLogger().getAllAppenders().hasMoreElements()) {
+                Configuration.setLoggingConfigured(true);
+            }
+        }
 
-		return loggingConfigured;
-	}
+        return loggingConfigured;
+    }
 
-	/**
-	 * Indicate whether Log4j has been initialized. Can be used when
-	 * subclasses customize the initialization process, or to configure
-     * Log4J outside of Cayenne.
-	 */
-	public synchronized static void setLoggingConfigured(boolean state) {
-		loggingConfigured = state;
-	}
+    /**
+     * Indicate whether Log4j has been initialized. Can be used when subclasses customize
+     * the initialization process, or to configure Log4J outside of Cayenne.
+     */
+    public synchronized static void setLoggingConfigured(boolean state) {
+        loggingConfigured = state;
+    }
 
-	/**
-	 * Use this method as an entry point to all Cayenne access objects.
-	 * <p>Note that if you want to provide a custom Configuration,
-	 * make sure you call one of the {@link #initializeSharedConfiguration} methods
-	 * before your application code has a chance to call this method.
-	 */
-	public synchronized static Configuration getSharedConfiguration() {
-		if (Configuration.sharedConfiguration == null) {
-			Configuration.initializeSharedConfiguration();
-		}
+    /**
+     * Use this method as an entry point to all Cayenne access objects.
+     * <p>
+     * Note that if you want to provide a custom Configuration, make sure you call one of
+     * the {@link #initializeSharedConfiguration}methods before your application code has
+     * a chance to call this method.
+     */
+    public synchronized static Configuration getSharedConfiguration() {
+        if (Configuration.sharedConfiguration == null) {
+            Configuration.initializeSharedConfiguration();
+        }
 
-		return Configuration.sharedConfiguration;
-	}
+        return Configuration.sharedConfiguration;
+    }
 
-	/**
-	 * Returns the ClassLoader used to load resources. Since Cayenne 1.2 this
-	 * method implements different logic for providing a class loader. First it 
-	 * checks whether a thread-local ClassLoader was provided via "setThreadClassLoader",
-	 * then it checked static resourceLoader, and finally it returns current thread 
-	 * context ClassLoader.
-	 */
+    /**
+     * Returns the ClassLoader used to load resources. Since Cayenne 1.2 this method
+     * implements different logic for providing a class loader. First it checks whether a
+     * thread-local ClassLoader was provided via "setThreadClassLoader", then it checked
+     * static resourceLoader, and finally it returns current thread context ClassLoader.
+     */
     public static ClassLoader getResourceLoader() {
         ClassLoader loader = (ClassLoader) threadClassLoader.get();
-        if(loader == null) {
+        if (loader == null) {
             loader = Configuration.resourceLoader;
         }
-        
-        if(loader == null) {
+
+        if (loader == null) {
             loader = Thread.currentThread().getContextClassLoader();
         }
-        
+
         return loader;
     }
-    
+
     public static void setThreadClassLoader(ClassLoader classLoader) {
         threadClassLoader.set(classLoader);
     }
 
     /**
-     * Returns default log level for loading configuration.
-     * Log level is made static so that applications can set it
-     * before shared Configuration object is instantiated.
+     * Returns default log level for loading configuration. Log level is made static so
+     * that applications can set it before shared Configuration object is instantiated.
      */
     public static Level getLoggingLevel() {
-    	Level l = logObj.getLevel();
-    	return (l != null ? l : Level.DEBUG);
+        Level l = logObj.getLevel();
+        return (l != null ? l : Level.DEBUG);
     }
 
     /**
      * Sets the default log level for loading a configuration.
      */
     public static void setLoggingLevel(Level logLevel) {
-		logObj.setLevel(logLevel);
+        logObj.setLevel(logLevel);
     }
 
-	/**
-	 * Creates and initializes shared Configuration object.
-	 * By default {@link DefaultConfiguration} will be
-	 * instantiated and assigned to a singleton instance of
-	 * Configuration.
-	 */
-	public static void initializeSharedConfiguration() {
-		Configuration.initializeSharedConfiguration(DEFAULT_CONFIGURATION_CLASS);
-	}
+    /**
+     * Creates and initializes shared Configuration object. By default
+     * {@link DefaultConfiguration}will be instantiated and assigned to a singleton
+     * instance of Configuration.
+     */
+    public static void initializeSharedConfiguration() {
+        Configuration.initializeSharedConfiguration(DEFAULT_CONFIGURATION_CLASS);
+    }
 
-	/**
-	 * Creates and initializes a shared Configuration object of a
-	 * custom Configuration subclass.
-	 */
-	public static void initializeSharedConfiguration(Class configurationClass) {
-		Configuration conf = null;
+    /**
+     * Creates and initializes a shared Configuration object of a custom Configuration
+     * subclass.
+     */
+    public static void initializeSharedConfiguration(Class configurationClass) {
+        Configuration conf = null;
 
-		try {
-			conf = (Configuration)configurationClass.newInstance();
-		} catch (Exception ex) {
-			logObj.error("Error creating shared Configuration: ", ex);
-			throw new ConfigurationException("Error creating shared Configuration." + ex.getMessage(), ex);
-		}
+        try {
+            conf = (Configuration) configurationClass.newInstance();
+        }
+        catch (Exception ex) {
+            logObj.error("Error creating shared Configuration: ", ex);
+            throw new ConfigurationException("Error creating shared Configuration."
+                    + ex.getMessage(), ex);
+        }
 
-		Configuration.initializeSharedConfiguration(conf);
-	}
+        Configuration.initializeSharedConfiguration(conf);
+    }
 
-	/**
-	 * Sets the shared Configuration object to a new Configuration object.
-	 * First calls {@link #canInitialize} and - if permitted -
-	 * {@link #initialize} followed by {@link #didInitialize}.
-	 */
-	public static void initializeSharedConfiguration(Configuration conf) {
-		// check to see whether we can proceed
-		if (!conf.canInitialize()) {
-			throw new ConfigurationException("Configuration of class "
-								+ conf.getClass().getName()
-								+ " refused to be initialized.");
-		}
+    /**
+     * Sets the shared Configuration object to a new Configuration object. First calls
+     * {@link #canInitialize}and - if permitted -{@link #initialize}followed by
+     * {@link #didInitialize}.
+     */
+    public static void initializeSharedConfiguration(Configuration conf) {
+        // check to see whether we can proceed
+        if (!conf.canInitialize()) {
+            throw new ConfigurationException("Configuration of class "
+                    + conf.getClass().getName()
+                    + " refused to be initialized.");
+        }
 
-		try {
-			// initialize configuration
-			conf.initialize();
+        try {
+            // initialize configuration
+            conf.initialize();
 
-			// call post-initialization hook
-			conf.didInitialize();
+            // call post-initialization hook
+            conf.didInitialize();
 
-			// set the initialized Configuration only after success
-			Configuration.sharedConfiguration = conf;
-		} catch (Exception ex) {
-			throw new ConfigurationException("Error during Configuration initialization. " + ex.getMessage(), ex);
-		}
-	}
+            // set the initialized Configuration only after success
+            Configuration.sharedConfiguration = conf;
+        }
+        catch (Exception ex) {
+            throw new ConfigurationException(
+                    "Error during Configuration initialization. " + ex.getMessage(),
+                    ex);
+        }
+    }
 
-	/**
-	 * Default constructor for new Configuration instances.
-	 * Simply calls {@link Configuration#Configuration(String)}.
-	 * @see Configuration#Configuration(String)
-	 */
-	protected Configuration() {
-		this(DEFAULT_DOMAIN_FILE);
-	}
+    /**
+     * Default constructor for new Configuration instances. Simply calls
+     * {@link Configuration#Configuration(String)}.
+     * 
+     * @see Configuration#Configuration(String)
+     */
+    protected Configuration() {
+        this(DEFAULT_DOMAIN_FILE);
+    }
 
-	/**
-	 * Default constructor for new Configuration instances using the
-	 * given resource name as the main domain file.
-	 * First calls {@link #configureLogging}, then {@link #setDomainConfigurationName}
-	 * with the given domain configuration resource name.
-	 */
-	protected Configuration(String domainConfigurationName) {
-		super();
+    /**
+     * Default constructor for new Configuration instances using the given resource name
+     * as the main domain file. First calls {@link #configureLogging}, then
+     * {@link #setDomainConfigurationName}with the given domain configuration resource
+     * name.
+     */
+    protected Configuration(String domainConfigurationName) {
+        super();
 
-		// set up logging
-		this.configureLogging();
+        // set up logging
+        this.configureLogging();
 
-		// set domain configuration name
-		this.setDomainConfigurationName(domainConfigurationName);
-	}
+        // set domain configuration name
+        this.setDomainConfigurationName(domainConfigurationName);
+    }
 
-	/**
-	 * Indicates whether {@link #initialize} can be called.
-	 * Returning <code>false</code> allows new instances to delay
-	 * or refuse the initialization process.
-	 */
-	public abstract boolean canInitialize();
+    /**
+     * Indicates whether {@link #initialize}can be called. Returning <code>false</code>
+     * allows new instances to delay or refuse the initialization process.
+     */
+    public abstract boolean canInitialize();
 
-	/**
-	 * Initializes the new instance.
-	 * @throws Exception
-	 */
-	public abstract void initialize() throws Exception;
+    /**
+     * Initializes the new instance.
+     * 
+     * @throws Exception
+     */
+    public abstract void initialize() throws Exception;
 
-	/**
-	 * Called after successful completion of {@link #initialize}.
-	 */
-	public abstract void didInitialize();
+    /**
+     * Called after successful completion of {@link #initialize}.
+     */
+    public abstract void didInitialize();
 
-	/**
-	 * Returns the resource locator used for finding and loading resources.
-	 */
-	protected abstract ResourceLocator getResourceLocator();
+    /**
+     * Returns the resource locator used for finding and loading resources.
+     */
+    protected abstract ResourceLocator getResourceLocator();
 
-	/**
-	 * Returns a DataDomain as a stream or <code>null</code>
-	 * if it cannot be found.
-	 */
-	// TODO: this method is only used in sublcass (DefaultConfiguration),
-	// should we remove it from here?
-	protected abstract InputStream getDomainConfiguration();
+    /**
+     * Returns a DataDomain as a stream or <code>null</code> if it cannot be found.
+     */
+    // TODO: this method is only used in sublcass (DefaultConfiguration),
+    // should we remove it from here?
+    protected abstract InputStream getDomainConfiguration();
 
-	/**
-	 * Returns a DataMap with the given name or <code>null</code>
-	 * if it cannot be found.
-	 */
-	protected abstract InputStream getMapConfiguration(String name);
+    /**
+     * Returns a DataMap with the given name or <code>null</code> if it cannot be found.
+     */
+    protected abstract InputStream getMapConfiguration(String name);
 
     protected abstract InputStream getViewConfiguration(String location);
-
 
     /**
      * Configures log4J. This implementation calls
@@ -396,22 +406,23 @@ public abstract class Configuration {
         Configuration.configureCommonLogging();
     }
 
-	/**
-	 * Returns the name of the main domain configuration resource.
-	 * Defaults to {@link Configuration#DEFAULT_DOMAIN_FILE}.
-	 */
-	public String getDomainConfigurationName() {
-		return this.domainConfigurationName;
-	}
+    /**
+     * Returns the name of the main domain configuration resource. Defaults to
+     * {@link Configuration#DEFAULT_DOMAIN_FILE}.
+     */
+    public String getDomainConfigurationName() {
+        return this.domainConfigurationName;
+    }
 
-	/**
-	 * Sets the name of the main domain configuration resource.
-	 * @param domainConfigurationName the name of the resource that contains
-	 * this Configuration's domain(s).
-	 */
-	protected void setDomainConfigurationName(String domainConfigurationName) {
-		this.domainConfigurationName = domainConfigurationName;
-	}
+    /**
+     * Sets the name of the main domain configuration resource.
+     * 
+     * @param domainConfigurationName the name of the resource that contains this
+     *            Configuration's domain(s).
+     */
+    protected void setDomainConfigurationName(String domainConfigurationName) {
+        this.domainConfigurationName = domainConfigurationName;
+    }
 
     /**
      * @since 1.1
@@ -419,7 +430,7 @@ public abstract class Configuration {
     public String getProjectVersion() {
         return projectVersion;
     }
-    
+
     /**
      * @since 1.1
      */
@@ -428,11 +439,10 @@ public abstract class Configuration {
     }
 
     /**
-     * Returns an internal property for the DataSource factory that
-     * will override any settings configured in XML.
-     * Subclasses may override this method to provide a special factory for
-     * DataSource creation that will take precedence over any factories
-     * configured in a cayenne project.
+     * Returns an internal property for the DataSource factory that will override any
+     * settings configured in XML. Subclasses may override this method to provide a
+     * special factory for DataSource creation that will take precedence over any
+     * factories configured in a cayenne project.
      */
     public DataSourceFactory getDataSourceFactory() {
         return this.overrideFactory;
@@ -447,32 +457,35 @@ public abstract class Configuration {
      */
     public void addDomain(DataDomain domain) {
         this.dataDomains.put(domain.getName(), domain);
-		logObj.debug("added domain: " + domain.getName());
+        logObj.debug("added domain: " + domain.getName());
     }
 
     /**
-     * Returns registered domain matching <code>name</code>
-     * or <code>null</code> if no such domain is found.
+     * Returns registered domain matching <code>name</code> or <code>null</code> if no
+     * such domain is found.
      */
     public DataDomain getDomain(String name) {
-        return (DataDomain)this.dataDomains.get(name);
+        return (DataDomain) this.dataDomains.get(name);
     }
 
     /**
-     * Returns default domain of this configuration. If no domains are
-     * configured, <code>null</code> is returned. If more than one domain
-     * exists in this configuration, a CayenneRuntimeException is thrown,
-     * indicating that the domain name must be explicitly specified.
-     * In such cases {@link #getDomain(String name)} must be used instead.
+     * Returns default domain of this configuration. If no domains are configured,
+     * <code>null</code> is returned. If more than one domain exists in this
+     * configuration, a CayenneRuntimeException is thrown, indicating that the domain name
+     * must be explicitly specified. In such cases {@link #getDomain(String name)}must be
+     * used instead.
      */
     public DataDomain getDomain() {
         int size = this.dataDomains.size();
         if (size == 0) {
             return null;
-        } else if (size == 1) {
-            return (DataDomain)this.dataDomains.values().iterator().next();
-        } else {
-            throw new CayenneRuntimeException("More than one domain is configured; use 'getDomain(String name)' instead.");
+        }
+        else if (size == 1) {
+            return (DataDomain) this.dataDomains.values().iterator().next();
+        }
+        else {
+            throw new CayenneRuntimeException(
+                    "More than one domain is configured; use 'getDomain(String name)' instead.");
         }
     }
 
@@ -484,18 +497,19 @@ public abstract class Configuration {
      */
     public void removeDomain(String name) {
         this.dataDomains.remove(name);
-		logObj.debug("removed domain: " + name);
+        logObj.debug("removed domain: " + name);
     }
 
-	/**
-	 * Returns an unmodifiable collection of registered {@link DataDomain} objects.
-	 */
-	public Collection getDomains() {
-		return this.dataDomainsRef;
-	}
+    /**
+     * Returns an unmodifiable collection of registered {@link DataDomain}objects.
+     */
+    public Collection getDomains() {
+        return this.dataDomainsRef;
+    }
 
     /**
      * Returns whether to ignore any failures during map loading or not.
+     * 
      * @return boolean
      */
     public boolean isIgnoringLoadFailures() {
@@ -504,33 +518,35 @@ public abstract class Configuration {
 
     /**
      * Sets whether to ignore any failures during map loading or not.
+     * 
      * @param ignoringLoadFailures <code>true</code> or <code>false</code>
      */
     protected void setIgnoringLoadFailures(boolean ignoringLoadFailures) {
         this.ignoringLoadFailures = ignoringLoadFailures;
     }
 
-	/**
-	 * Returns the load status.
-	 * @return ConfigStatus
-	 */
-	public ConfigStatus getLoadStatus() {
-		return this.loadStatus;
-	}
+    /**
+     * Returns the load status.
+     * 
+     * @return ConfigStatus
+     */
+    public ConfigStatus getLoadStatus() {
+        return this.loadStatus;
+    }
 
-	/**
-	 * Sets the load status.
-	 */
-	protected void setLoadStatus(ConfigStatus status) {
-		this.loadStatus = status;
-	}
+    /**
+     * Sets the load status.
+     */
+    protected void setLoadStatus(ConfigStatus status) {
+        this.loadStatus = status;
+    }
 
-	/**
-	 * Returns a delegate used for controlling the loading of configuration elements.
-	 */
-	public ConfigLoaderDelegate getLoaderDelegate() {
-		return loaderDelegate;
-	}
+    /**
+     * Returns a delegate used for controlling the loading of configuration elements.
+     */
+    public ConfigLoaderDelegate getLoaderDelegate() {
+        return loaderDelegate;
+    }
 
     /**
      * @since 1.1
@@ -571,8 +587,8 @@ public abstract class Configuration {
      * @since 1.1
      */
     public boolean loadDataView(DataView dataView, Predicate dataViewNameFilter)
-        throws IOException {
-            
+            throws IOException {
+
         Validate.notNull(dataView, "DataView cannot be null.");
 
         if (dataViewLocations.size() == 0 || dataViewLocations.size() > 512) {
@@ -584,9 +600,7 @@ public abstract class Configuration {
 
         List viewXMLSources = new ArrayList(dataViewLocations.size());
         int index = 0;
-        for (Iterator i = dataViewLocations.entrySet().iterator();
-            i.hasNext();
-            index++) {
+        for (Iterator i = dataViewLocations.entrySet().iterator(); i.hasNext(); index++) {
             Map.Entry entry = (Map.Entry) i.next();
             String name = (String) entry.getKey();
             if (!dataViewNameFilter.evaluate(name))
@@ -600,9 +614,8 @@ public abstract class Configuration {
         if (viewXMLSources.isEmpty())
             return false;
 
-        dataView.load(
-            (InputStream[]) viewXMLSources.toArray(
-                new InputStream[viewXMLSources.size()]));
+        dataView.load((InputStream[]) viewXMLSources
+                .toArray(new InputStream[viewXMLSources.size()]));
         return true;
     }
 
@@ -611,13 +624,14 @@ public abstract class Configuration {
      */
     public void shutdown() {
         Collection domains = getDomains();
-        for (Iterator i = domains.iterator(); i.hasNext(); ) {
-            DataDomain domain = (DataDomain)i.next();
+        for (Iterator i = domains.iterator(); i.hasNext();) {
+            DataDomain domain = (DataDomain) i.next();
             domain.shutdown();
         }
     }
 
     private class ConfigurationShutdownHook extends Thread {
+
         public void run() {
             shutdown();
         }
@@ -630,5 +644,22 @@ public abstract class Configuration {
 
     public void uninstallConfigurationShutdownHook() {
         Runtime.getRuntime().removeShutdownHook(configurationShutdownHook);
+    }
+    
+    /**
+     * Returns ClassLoader set for this instance if it is not null. Otherwise returns
+     * static ClassLoader by calling "Configuration.getResourceLoader()".
+     * 
+     * @since 1.2
+     */
+    public ClassLoader getClassLoader() {
+        return classLoader != null ? classLoader : Configuration.getResourceLoader();
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
     }
 }
