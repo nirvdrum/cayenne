@@ -46,9 +46,9 @@ public class ClassGeneratorSuperTemplateTst extends ClassGeneratorTestBase {
     public void testNoImports() throws Exception {
         // setup fixture
         ObjEntity testEntity = new ObjEntity("Test");
-        cgen.setClassName("JavaClass");
-        cgen.setSuperPrefix("*");
-        cgen.setSuperClassName("123.567.Super");
+        cgen.getClassGenerationInfo().setClassName("JavaClass");
+        cgen.getClassGenerationInfo().setSuperPrefix("*");
+        cgen.getClassGenerationInfo().setSuperClassName("123.567.Super");
 
         String generated = generatedString(testEntity);
         assertNotNull(generated);
@@ -68,9 +68,9 @@ public class ClassGeneratorSuperTemplateTst extends ClassGeneratorTestBase {
         };
 
         testEntity.addRelationship(toMany);
-        cgen.setClassName("JavaClass");
-        cgen.setSuperPrefix("*");
-        cgen.setSuperClassName("123.567.Super");
+        cgen.getClassGenerationInfo().setClassName("JavaClass");
+        cgen.getClassGenerationInfo().setSuperPrefix("*");
+        cgen.getClassGenerationInfo().setSuperClassName("123.567.Super");
 
         String generated = generatedString(testEntity);
         assertNotNull(generated);
@@ -82,9 +82,9 @@ public class ClassGeneratorSuperTemplateTst extends ClassGeneratorTestBase {
     public void testClassStructure() throws Exception {
         // setup fixture
         ObjEntity testEntity = new ObjEntity("Test");
-        cgen.setClassName("JavaClass");
-        cgen.setSuperPrefix("*");
-        cgen.setSuperClassName("123.567.Super");
+        cgen.getClassGenerationInfo().setClassName("JavaClass");
+        cgen.getClassGenerationInfo().setSuperPrefix("*");
+        cgen.getClassGenerationInfo().setSuperClassName("123.567.Super");
 
         String generated = generatedString(testEntity);
         assertNotNull(generated);
@@ -109,9 +109,9 @@ public class ClassGeneratorSuperTemplateTst extends ClassGeneratorTestBase {
         a2.setType("dummy2");
         testEntity.addAttribute(a2);
 
-        cgen.setClassName("C");
-        cgen.setSuperPrefix("*");
-        cgen.setSuperClassName("SC");
+        cgen.getClassGenerationInfo().setClassName("C");
+        cgen.getClassGenerationInfo().setSuperPrefix("*");
+        cgen.getClassGenerationInfo().setSuperClassName("SC");
 
         String generated = generatedString(testEntity);
         assertNotNull(generated);
@@ -130,9 +130,9 @@ public class ClassGeneratorSuperTemplateTst extends ClassGeneratorTestBase {
         ObjAttribute attribute = new ObjAttribute("abstract");
         attribute.setType("dummy");
         testEntity.addAttribute(attribute);
-        cgen.setClassName("C");
-        cgen.setSuperPrefix("*");
-        cgen.setSuperClassName("SC");
+        cgen.getClassGenerationInfo().setClassName("C");
+        cgen.getClassGenerationInfo().setSuperPrefix("*");
+        cgen.getClassGenerationInfo().setSuperClassName("SC");
 
         String generated = generatedString(testEntity);
         assertNotNull(generated);

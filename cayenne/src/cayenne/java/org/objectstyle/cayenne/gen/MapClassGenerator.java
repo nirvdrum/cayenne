@@ -121,7 +121,7 @@ public abstract class MapClassGenerator {
 
     /**
      * Closes writer after class code has been successfully written by
-     * ClassGenerator.
+     * ClassGenerationInfo.
      */
     public abstract void closeWriter(Writer out) throws Exception;
 
@@ -147,8 +147,11 @@ public abstract class MapClassGenerator {
         String superPrefix)
         throws Exception {
 
-        ClassGenerator mainGen = new ClassGenerator(classTemplate);
-        ClassGenerator superGen = new ClassGenerator(superTemplate);
+        ClassGenerator mainGenSetup = new ClassGenerator(classTemplate);
+        ClassGenerator superGenSetup = new ClassGenerator(superTemplate);
+
+        ClassGenerationInfo mainGen = mainGenSetup.getClassGenerationInfo();
+        ClassGenerationInfo superGen = superGenSetup.getClassGenerationInfo();
 
         // prefix is needed for both generators
         mainGen.setSuperPrefix(superPrefix);
@@ -168,7 +171,7 @@ public abstract class MapClassGenerator {
                     superPrefix + superGen.getClassName());
 
             if (superOut != null) {
-                superGen.generateClass(superOut, ent);
+                superGenSetup.generateClass(superOut, ent);
                 closeWriter(superOut);
             }
 
@@ -177,7 +180,7 @@ public abstract class MapClassGenerator {
             Writer mainOut =
                 openWriter(ent, mainGen.getPackageName(), mainGen.getClassName());
             if (mainOut != null) {
-                mainGen.generateClass(mainOut, ent);
+                mainGenSetup.generateClass(mainOut, ent);
                 closeWriter(mainOut);
             }
         }
@@ -201,8 +204,8 @@ public abstract class MapClassGenerator {
         Iterator it = objEntities.iterator();
         while (it.hasNext()) {
             ObjEntity ent = (ObjEntity) it.next();
-            initClassGenerator(gen, ent, false);
-            Writer out = openWriter(ent, gen.getPackageName(), gen.getClassName());
+            initClassGenerator(gen.getClassGenerationInfo(), ent, false);
+            Writer out = openWriter(ent, gen.getClassGenerationInfo().getPackageName(), gen.getClassGenerationInfo().getClassName());
             if (out == null) {
                 continue;
             }
@@ -212,9 +215,9 @@ public abstract class MapClassGenerator {
         }
     }
 
-    /** Initializes ClassGenerator with class name and package of a generated class. */
+    /** Initializes ClassGenerationInfo with class name and package of a generated class. */
     protected void initClassGenerator(
-        ClassGenerator gen,
+        ClassGenerationInfo gen,
         ObjEntity entity,
         boolean superclass) {
 

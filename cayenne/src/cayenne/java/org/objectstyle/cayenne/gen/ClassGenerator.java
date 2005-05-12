@@ -57,11 +57,7 @@
 package org.objectstyle.cayenne.gen;
 
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -72,14 +68,12 @@ import org.apache.velocity.runtime.log.NullLogSystem;
 import org.apache.velocity.runtime.resource.loader.JarResourceLoader;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.Relationship;
-import org.objectstyle.cayenne.util.NameConverter;
 import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
  * Class generation engine for ObjEntities based on <a
  * href="http://jakarta.apache.org/velocity/" target="_blank">Velocity templates
- * </a>. Instance of ClassGenerator is available inside Velocity template under
+ * </a>. Instance of ClassGenerationInfo is available inside Velocity template under
  * the key "classGen".
  * 
  * @author Andrei Adamchik
@@ -88,20 +82,10 @@ public class ClassGenerator {
 
     private static boolean initDone;
 
-    private static Set reservedKeywords = new HashSet(Arrays.asList(new Object[] {
-            "abstract", "default", "if", "private", "this", "boolean", "do",
-            "implements", "protected", "throw", "break", "double", "import", "public",
-            "throws", "byte", "else", "instanceof", "return", "transient", "case",
-            "extends", "int", "short", "try", "catch", "final", "interface", "static",
-            "void", "char", "finally", "long", "strictfp", "volatile", "class", "float",
-            "native", "super", "while", "const", "for", "new", "switch", "continue",
-            "goto", "package", "synchronized"
-    }));
-
     /**
-     * Configures ClassGenerator to load class templates using ClassLoader of a
+     * Configures ClassGenerationInfo to load class templates using ClassLoader of a
      * specified class. It is a responsibility of a class caller to invoke this
-     * method before ClassGenerator is used.
+     * method before ClassGenerationInfo is used.
      * 
      * <p>
      * This method affects Velocity configuration when called for the first
@@ -167,25 +151,20 @@ public class ClassGenerator {
 
     protected Template classTemplate;
     protected Context velCtxt;
-    protected ObjEntity entity;
 
-    // template substitution values
-    protected String packageName;
-    protected String className;
-    protected String superPrefix;
-    protected String prop;
-    protected String superPackageName;
-    protected String superClassName;
-
+    protected ClassGenerationInfo classGenerationInfo;
     /**
-     * Creates a new ClassGenerator that uses a specified Velocity template.
+     * Creates a new ClassGenerationInfo that uses a specified Velocity template.
      */
     public ClassGenerator(String template) throws Exception {
         if (!initDone) {
             bootstrapVelocity(this.getClass());
         }
+        
+        classGenerationInfo = new ClassGenerationInfo();
+        
         velCtxt = new VelocityContext();
-        velCtxt.put("classGen", this);
+        velCtxt.put("classGen", classGenerationInfo);
 
         classTemplate = Velocity.getTemplate(template);
     }
@@ -195,197 +174,222 @@ public class ClassGenerator {
      * Writer.
      */
     public void generateClass(Writer out, ObjEntity entity) throws Exception {
-        this.entity = entity;
+        classGenerationInfo.setObjEntity(entity);
         classTemplate.merge(velCtxt, out);
     }
 
     /**
+     * @return Returns the classGenerationInfo in template.
+     */
+    public ClassGenerationInfo getClassGenerationInfo() {
+        return classGenerationInfo;
+    }
+
+    // deprecated, delegated methods previously used internally in cayenne
+    /**
      * Returns Java package name of the class associated with this generator.
+     * @deprecated use getClassGenerationInfo().getPackageName()
      */
     public String getPackageName() {
-        return packageName;
+        return classGenerationInfo.getPackageName();
     }
-
-    public void setPackageName(String packageName) {
-        this.packageName = packageName;
-    }
-
+    
     /**
-     * Returns <code>superPackageName</code> property that defines a
-     * superclass's package name.
+     * Sets Java package name of the class associated with this generator.
+     * @deprecated use getClassGenerationInfo().setPackageName()
      */
-    public String getSuperPackageName() {
-        return superPackageName;
+    public void setPackageName(String packageName) {
+        classGenerationInfo.setPackageName(packageName);
     }
 
     /**
      * Sets <code>superPackageName</code> property that defines a superclass's
      * package name.
+     * @deprecated use getClassGenerationInfo().setSuperPackageName()
      */
     public void setSuperPackageName(String superPackageName) {
-        this.superPackageName = superPackageName;
+        classGenerationInfo.setSuperPackageName(superPackageName);
     }
 
     /**
      * Returns class name (without a package) of the class associated with this
      * generator.
+     * @deprecated use getClassGenerationInfo().getClassName()
      */
     public String getClassName() {
-        return className;
+        return classGenerationInfo.getClassName();
     }
-
     /**
      * Sets class name of the class associated with this
      * generator. Class name must not include a package.
+     * @deprecated use getClassGenerationInfo().setClassName()
      */
     public void setClassName(String className) {
-        this.className = className;
+        classGenerationInfo.setClassName(className);
     }
-
-    public void setSuperPrefix(String superPrefix) {
-        this.superPrefix = superPrefix;
-    }
-
-    public String formatJavaType(String type) {
-        if (type != null) {
-            if (type.startsWith("java.lang.") && type.indexOf(10, '.') < 0) {
-                return type.substring("java.lang.".length());
-            }
-
-            if (packageName != null
-                    && type.startsWith(packageName + '.')
-                    && type.indexOf(packageName.length() + 1, '.') < 0) {
-                return type.substring(packageName.length() + 1);
-            }
-        }
-
-        return type;
-    }
-
-    public String formatVariableName(String variableName) {
-        if (reservedKeywords.contains(variableName)) {
-            return "_" + variableName;
-        } else {
-            return variableName;
-        }
+    
+    /**
+     * Sets the fully qualified super class of the data object class associated
+     * with this generator
+     * @deprecated use getClassGenerationInfo().setSuperClassName()
+     */
+    public void setSuperClassName(String value) {
+        classGenerationInfo.setSuperClassName(value);
     }
 
     /**
      * Returns prefix used to distinguish between superclass and subclass when
      * generating classes in pairs.
+     * @deprecated use getClassGenerationInfo().setSuperPrefix()
      */
-    public String getSuperPrefix() {
-        return superPrefix;
+    public void setSuperPrefix(String superPrefix) {
+        classGenerationInfo.setSuperPrefix(superPrefix);
+    }
+    
+    // deprecated, delegated methods not used internally in cayenne
+
+    /**
+     * Returns <code>superPackageName</code> property that defines a
+     * superclass's package name.
+     * @deprecated use getClassGenerationInfo().getSuperPackageName()
+     */
+    public String getSuperPackageName()
+    {
+        return classGenerationInfo.getSuperPackageName();
+    }
+
+    /**
+     * @deprecated use getClassGenerationInfo().formatJavaType(String)
+     */
+    public String formatJavaType(String type)
+    {
+        return classGenerationInfo.formatJavaType(type);
+    }
+
+    /**
+     * @deprecated use getClassGenerationInfo().formatVariableName(String)
+     */
+    public String formatVariableName(String variableName)
+    {
+        return classGenerationInfo.formatVariableName(variableName);
+    }
+
+    /**
+     * Returns prefix used to distinguish between superclass and subclass when
+     * generating classes in pairs.
+     * @deprecated use getClassGenerationInfo().getSuperPrefix()
+     */
+    public String getSuperPrefix()
+    {
+        return classGenerationInfo.getSuperPrefix();
     }
 
     /**
      * Sets current class property name. This method is called during template
      * parsing for each of the class properties.
+     * @deprecated use getClassGenerationInfo().setProp(String)
      */
-    public void setProp(String prop) {
-        this.prop = prop;
+    public void setProp(String prop)
+    {
+        classGenerationInfo.setProp(prop);
     }
 
-    public String getProp() {
-        return prop;
+    /**
+     * @deprecated use getClassGenerationInfo().getProp()
+     */
+    public String getProp()
+    {
+        return classGenerationInfo.getProp();
     }
-    
+
     /**
      * Capitalizes the first letter of the property name.
      * 
      * @since 1.1
+     * @deprecated use getClassGenerationInfo().capitalized(String)
      */
-    public String capitalized(String name) {
-        if (name == null || name.length() == 0)
-            return name;
-
-        char c = Character.toUpperCase(name.charAt(0));
-        return (name.length() == 1) ? Character.toString(c) : c + name.substring(1);
+    public String capitalized(String name)
+    {
+        return classGenerationInfo.capitalized(name);
     }
-    
+
     /**
      * Converts property name to Java constants naming convention.
      * 
      * @since 1.1
+     * @deprecated use getClassGenerationInfo().capitalizedAsConstant(String)
      */
-    public String capitalizedAsConstant(String name) {
-        if (name == null || name.length() == 0)
-            return name;
-
-        return NameConverter.javaToUnderscored(name);
+    public String capitalizedAsConstant(String name)
+    {
+        return classGenerationInfo.capitalizedAsConstant(name);
     }
 
-    /** Returns current property name with capitalized first letter */
-    public String getCappedProp() {
-        return capitalized(prop);
+    /** Returns current property name with capitalized first letter
+     * @deprecated use getClassGenerationInfo().getCappedProp()
+     */
+    public String getCappedProp()
+    {
+        return classGenerationInfo.getCappedProp();
     }
-    
+
     /**
      * @return a current property name converted to a format used by java static
      *         final variables - all capitalized with underscores.
      * 
      * @since 1.0.3
+     * @deprecated use getClassGenerationInfo().getPropAsConstantName()
      */
-    public String getPropAsConstantName() {
-        return capitalizedAsConstant(prop);
+    public String getPropAsConstantName()
+    {
+        return classGenerationInfo.getPropAsConstantName();
     }
 
     /**
      * Returns true if current entity contains at least one List property.
      * 
      * @since 1.1
+     * @deprecated use getClassGenerationInfo().isContainingListProperties()
      */
-    public boolean isContainingListProperties() {
-        if (entity == null) {
-            return false;
-        }
-        
-        Iterator it = entity.getRelationships().iterator();
-        while(it.hasNext()) {
-            Relationship r = (Relationship) it.next();
-            if(r.isToMany()) {
-                return true;
-            }
-        }
-
-        return false;
+    public boolean isContainingListProperties()
+    {
+        return classGenerationInfo.isContainingListProperties();
     }
 
     /**
      * Returns <code>true</code> if a class associated with this generator is
      * located in a package.
+     * @deprecated use getClassGenerationInfo().isUsingPackage()
      */
-    public boolean isUsingPackage() {
-        return packageName != null;
+    public boolean isUsingPackage()
+    {
+        return classGenerationInfo.isUsingPackage();
     }
 
     /**
      * Returns <code>true</code> if a superclass class associated with this
      * generator is located in a package.
+     * @deprecated use getClassGenerationInfo().isUsingSuperPackage()
      */
-    public boolean isUsingSuperPackage() {
-        return superPackageName != null;
+    public boolean isUsingSuperPackage()
+    {
+        return classGenerationInfo.isUsingSuperPackage();
     }
 
-    /** Returns entity for the class associated with this generator. */
-    public ObjEntity getEntity() {
-        return entity;
+    /** Returns entity for the class associated with this generator.
+     * @deprecated use getClassGenerationInfo().getEntity()
+     */
+    public ObjEntity getEntity()
+    {
+        return classGenerationInfo.getEntity();
     }
 
     /**
      * Returns the fully qualified super class of the data object class
      * associated with this generator
+     * @deprecated use getClassGenerationInfo().getSuperClassName()
      */
-    public String getSuperClassName() {
-        return superClassName;
-    }
-
-    /**
-     * Sets the fully qualified super class of the data object class associated
-     * with this generator
-     */
-    public void setSuperClassName(String value) {
-        this.superClassName = value;
-    }
-
+    public String getSuperClassName()
+    {
+        return classGenerationInfo.getSuperClassName();
+    }    
 }

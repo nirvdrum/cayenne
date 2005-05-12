@@ -54,17 +54,17 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**
- * ClassGenerator tests that are not template-specific.
+ * ClassGenerationInfo tests that are not template-specific.
  * 
  * @author Andrei Adamchik
  */
 public class ClassGeneratorTst extends BasicTestCase {
 
-    protected ClassGenerator cgen;
+    protected ClassGenerationInfo cgen;
 
     protected void setUp() throws Exception {
         super.setUp();
-        cgen = new ClassGenerator(MapClassGenerator.SUBCLASS_TEMPLATE);
+        cgen = new ClassGenerationInfo();
     }
 
     public void testFormatVariableName() {

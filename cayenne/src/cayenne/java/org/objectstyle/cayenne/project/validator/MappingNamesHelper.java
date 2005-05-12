@@ -67,7 +67,7 @@ import java.util.StringTokenizer;
  */
 class MappingNamesHelper {
 
-    // TODO: also defined as provate static in ClassGenerator... need to refactor..
+    // TODO: also defined as provate static in ClassGenerationInfo... need to refactor..
     static final Collection RESERVED_JAVA_KEYWORDS = Arrays.asList(new Object[] {
             "abstract", "assert", "default", "if", "private", "this", "boolean", "do",
             "implements", "protected", "throw", "break", "double", "import", "public",
