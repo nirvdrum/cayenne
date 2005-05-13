@@ -65,9 +65,9 @@ import java.util.StringTokenizer;
  * @author Andrei Adamchik
  * @since 1.1
  */
-class MappingNamesHelper {
+public class MappingNamesHelper {
 
-    // TODO: also defined as provate static in ClassGenerationInfo... need to refactor..
+    // TODO: used by StringUtils and ClassGenerationInfo... need to refactor..
     static final Collection RESERVED_JAVA_KEYWORDS = Arrays.asList(new Object[] {
             "abstract", "assert", "default", "if", "private", "this", "boolean", "do",
             "implements", "protected", "throw", "break", "double", "import", "public",
@@ -78,6 +78,11 @@ class MappingNamesHelper {
             "goto", "package", "synchronized"
     });
 
+    public boolean isReservedJavaKeyword(String word)
+    {
+        return RESERVED_JAVA_KEYWORDS.contains(word);
+    }
+    
     // a property is considered invalid if there is a getter or a setter for it in
     // java.lang.Object or CayenneDataObject
     static final Collection INVALID_JAVA_PROPERTIES = Arrays.asList(new Object[] {
@@ -90,7 +95,7 @@ class MappingNamesHelper {
     /**
      * Returns shared instance of the validator.
      */
-    static MappingNamesHelper getInstance() {
+    public static MappingNamesHelper getInstance() {
         return sharedInstance;
     }
 

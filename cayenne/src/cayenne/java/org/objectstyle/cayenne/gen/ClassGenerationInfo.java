@@ -56,13 +56,11 @@
 
 package org.objectstyle.cayenne.gen;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.project.validator.MappingNamesHelper;
 import org.objectstyle.cayenne.util.NameConverter;
 
 /**
@@ -74,16 +72,6 @@ import org.objectstyle.cayenne.util.NameConverter;
  * @author Andrei Adamchik
  */
 public class ClassGenerationInfo {
-
-    private static Set reservedKeywords = new HashSet(Arrays.asList(new Object[] {
-            "abstract", "default", "if", "private", "this", "boolean", "do",
-            "implements", "protected", "throw", "break", "double", "import", "public",
-            "throws", "byte", "else", "instanceof", "return", "transient", "case",
-            "extends", "int", "short", "try", "catch", "final", "interface", "static",
-            "void", "char", "finally", "long", "strictfp", "volatile", "class", "float",
-            "native", "super", "while", "const", "for", "new", "switch", "continue",
-            "goto", "package", "synchronized"
-    }));
 
     protected ObjEntity entity;
 
@@ -162,7 +150,7 @@ public class ClassGenerationInfo {
     }
 
     public String formatVariableName(String variableName) {
-        if (reservedKeywords.contains(variableName)) {
+        if (MappingNamesHelper.getInstance().isReservedJavaKeyword(variableName)) {
             return "_" + variableName;
         } else {
             return variableName;
