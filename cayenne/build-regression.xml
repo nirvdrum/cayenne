@@ -5,7 +5,7 @@
 <!-- ================================================= -->
 <project default="compile">
     <property name="resources.test.classgeneration" value="src/tests/resources/test-resources/ClassGeneration"/>
-    <property name="testrun.classgeneration" value="test-run/regression/ClassGeneration"/>
+    <property name="testrun.classgeneration" value="testrun/regression/ClassGeneration"/>
 	<property name="regression.dist.src" value="${dist}/src/regression"/>
 	<property name="regression.build" value="build/regression"/>
 	<property name="regression.src" value="src/regression/java"/>
@@ -76,24 +76,28 @@
             <mkdir dir="${testrun.classgeneration}/1_2/pairclass"/>
 
             <cgen map="${resources.test.classgeneration}/testmap.map.xml"
+                version="1.1"
                 destDir="${testrun.classgeneration}/1_1/singleclass"
                 makepairs="false"
                 overwrite="true"
                 usepkgpath="false"
                 superpkg="org.objectstyle.art.auto"/>
             <cgen map="${resources.test.classgeneration}/testmap.map.xml"
+                version="1.1"
                 destDir="${testrun.classgeneration}/1_1/pairclass"
                 makepairs="true"
                 overwrite="true"
                 usepkgpath="false"
                 superpkg="org.objectstyle.art.auto"/>
             <cgen map="${resources.test.classgeneration}/testmap.map.xml"
+                version="1.1"
                 destDir="${testrun.classgeneration}/1_1/singleclass"
                 makepairs="false"
                 overwrite="true"
                 usepkgpath="true"
                 superpkg="org.objectstyle.art.auto"/>
             <cgen map="${resources.test.classgeneration}/testmap.map.xml"
+                version="1.1"
                 destDir="${testrun.classgeneration}/1_1/pairclass"
                 makepairs="true"
                 overwrite="true"
@@ -101,24 +105,28 @@
                 superpkg="org.objectstyle.art.auto"/>
 
             <cgen map="${resources.test.classgeneration}/testmap.map.xml"
+                version="1.2"
                 destDir="${testrun.classgeneration}/1_2/singleclass"
                 makepairs="false"
                 overwrite="true"
                 usepkgpath="false"
                 superpkg="org.objectstyle.art.auto"/>
             <cgen map="${resources.test.classgeneration}/testmap.map.xml"
+                version="1.2"
                 destDir="${testrun.classgeneration}/1_2/pairclass"
                 makepairs="true"
                 overwrite="true"
                 usepkgpath="false"
                 superpkg="org.objectstyle.art.auto"/>
             <cgen map="${resources.test.classgeneration}/testmap.map.xml"
+                version="1.2"
                 destDir="${testrun.classgeneration}/1_2/singleclass"
                 makepairs="false"
                 overwrite="true"
                 usepkgpath="true"
                 superpkg="org.objectstyle.art.auto"/>
             <cgen map="${resources.test.classgeneration}/testmap.map.xml"
+                version="1.2"
                 destDir="${testrun.classgeneration}/1_2/pairclass"
                 makepairs="true"
                 overwrite="true"
