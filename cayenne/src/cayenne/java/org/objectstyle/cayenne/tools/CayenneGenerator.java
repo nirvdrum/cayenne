@@ -204,6 +204,15 @@ public class CayenneGenerator extends CayenneTask {
     }
 
     /**
+     * Sets <code>version</code> property.
+     * 
+     * @since 1.2
+     */
+    public void setVersion(String versionString) {
+        generator.setVersionString(versionString);
+    }
+
+    /**
      * Sets <code>encoding</code> property that allows to generate files using
      * non-default encoding.
      * 

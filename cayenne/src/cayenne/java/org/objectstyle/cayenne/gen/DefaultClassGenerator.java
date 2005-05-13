@@ -148,6 +148,10 @@ public class DefaultClassGenerator extends MapClassGenerator {
         if (makePairs && superTemplate != null && !superTemplate.canRead()) {
             throw new Exception("Can't read super template from " + superTemplate);
         }
+        
+        if ( (false == VERSION_1_1.equals(versionString)) && (false == VERSION_1_2.equals(versionString)) ) {
+            throw new Exception("'version' must be '" + VERSION_1_1 + "' or '" + VERSION_1_2 + "'.");
+        }
     }
 
     /**
