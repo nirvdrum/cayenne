@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.tools;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.tools.ant.BuildException;
 import org.objectstyle.cayenne.gen.AntClassGenerator;
@@ -74,6 +75,9 @@ import org.xml.sax.InputSource;
  * @author Andrei Adamchik
  */
 public class CayenneGenerator extends CayenneTask {
+    
+    protected String includeEntitiesPattern;
+    protected String excludeEntitiesPattern;
 
     protected File map;
     protected DefaultClassGenerator generator;
@@ -122,9 +126,16 @@ public class CayenneGenerator extends CayenneTask {
     }
 
     protected void processMap() throws Exception {
+
         DataMap dataMap = loadDataMap();
+
+        List entityList = new ArrayList(dataMap.getObjEntities());
+
+        NamePatternMatcher namePatternMatcher = new NamePatternMatcher(this, includeEntitiesPattern, excludeEntitiesPattern);
+        namePatternMatcher.filter(entityList);
+
         generator.setTimestamp(map.lastModified());
-        generator.setObjEntities(new ArrayList(dataMap.getObjEntities()));
+        generator.setObjEntities(entityList);
         generator.validateAttributes();
         generator.execute();
     }
@@ -215,7 +226,7 @@ public class CayenneGenerator extends CayenneTask {
             throw new BuildException(e.getMessage(), e);
 		}
     }
-
+    
     /**
      * Sets <code>encoding</code> property that allows to generate files using
      * non-default encoding.
@@ -224,5 +235,23 @@ public class CayenneGenerator extends CayenneTask {
      */
     public void setEncoding(String encoding) {
         generator.setEncoding(encoding);
+    }
+    
+    /**
+     * Sets <code>excludeEntitiesPattern</code> property.
+     * 
+     * @since 1.2
+     */
+    public void setExcludeEntities(String excludeEntitiesPattern) {
+        this.excludeEntitiesPattern = excludeEntitiesPattern;
+    }
+    
+    /**
+     * Sets <code>includeEntitiesPattern</code> property.
+     * 
+     * @since 1.2
+     */
+    public void setIncludeEntities(String includeEntitiesPattern) {
+        this.includeEntitiesPattern = includeEntitiesPattern;
     }
 }
