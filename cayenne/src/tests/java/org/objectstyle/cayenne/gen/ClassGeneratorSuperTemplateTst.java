@@ -40,7 +40,7 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 public class ClassGeneratorSuperTemplateTst extends ClassGeneratorTestBase {
 
     protected ClassGenerator createGenerator() throws Exception {
-        return new ClassGenerator(MapClassGenerator.SUPERCLASS_TEMPLATE);
+        return new ClassGenerator(MapClassGenerator.SUPERCLASS_TEMPLATE, MapClassGenerator.DEFAULT_VERSION);
     }
 
     public void testNoImports() throws Exception {
