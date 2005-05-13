@@ -21,6 +21,7 @@
 		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="ARTIST_NAME" type="CHAR" isMandatory="true" length="254"/>
 		<db-attribute name="DATE_OF_BIRTH" type="DATE"/>
+		<db-attribute name="DATE_OF_BIRTH2" type="DATE"/>
 	</db-entity>
 	<db-entity name="ARTIST_EXHIBIT">
 		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
@@ -276,6 +277,10 @@
 	<obj-entity name="ROArtist" className="org.objectstyle.art.ROArtist" readOnly="true" dbEntityName="ARTIST">
 		<obj-attribute name="artistName" type="java.lang.String" db-attribute-path="ARTIST_NAME"/>
 		<obj-attribute name="dateOfBirth" type="java.sql.Date" db-attribute-path="DATE_OF_BIRTH"/>
+	</obj-entity>
+	<obj-entity name="ROArtist2" className="org.objectstyle.art.ROArtist2" readOnly="true" dbEntityName="ARTIST">
+		<obj-attribute name="utilDateOfBirth" type="java.util.Date" db-attribute-path="DATE_OF_BIRTH2"/>
+		<obj-attribute name="sqlDateOfBirth" type="java.sql.Date" db-attribute-path="DATE_OF_BIRTH"/>
 	</obj-entity>
 	<obj-entity name="ROPainting" className="org.objectstyle.art.ROPainting" readOnly="true" dbEntityName="PAINTING">
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-path="ESTIMATED_PRICE"/>
