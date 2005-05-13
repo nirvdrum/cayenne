@@ -79,7 +79,14 @@ import org.objectstyle.cayenne.util.ResourceLocator;
  * @author Andrei Adamchik
  */
 public class ClassGenerator {
-
+    protected static final String VERSION_1_1 = "1.1";
+    protected static final String VERSION_1_2 = "1.2";
+    
+    protected String versionString;
+    protected Template classTemplate;
+    protected Context velCtxt;
+    protected ClassGenerationInfo classGenerationInfo;  // only used for VERSION_1_1
+    
     private static boolean initDone;
 
     /**
@@ -149,22 +156,30 @@ public class ClassGenerator {
         }
     }
 
-    protected Template classTemplate;
-    protected Context velCtxt;
+    /**
+     * Creates a new ClassGenerationInfo that uses a specified Velocity template.
+     * @deprecated Use ClassGenerator(String template, String versionString) instead.
+     */
+    public ClassGenerator(String template) throws Exception {
+        this(template, "1.1");
+    }
 
-    protected ClassGenerationInfo classGenerationInfo;
     /**
      * Creates a new ClassGenerationInfo that uses a specified Velocity template.
      */
-    public ClassGenerator(String template) throws Exception {
+    public ClassGenerator(String template, String versionString) throws Exception {
         if (!initDone) {
             bootstrapVelocity(this.getClass());
         }
         
-        classGenerationInfo = new ClassGenerationInfo();
+        this.versionString = versionString;
         
         velCtxt = new VelocityContext();
-        velCtxt.put("classGen", classGenerationInfo);
+        
+        if (VERSION_1_1.equals(versionString)) {
+            classGenerationInfo = new ClassGenerationInfo();
+            velCtxt.put("classGen", classGenerationInfo);
+        }
 
         classTemplate = Velocity.getTemplate(template);
     }
@@ -174,10 +189,32 @@ public class ClassGenerator {
      * Writer.
      */
     public void generateClass(Writer out, ObjEntity entity) throws Exception {
+        if (false == VERSION_1_1.equals(versionString)) {
+            throw new IllegalStateException("Illegal Version in generateClass(Writer,ObjEntity): " + versionString);
+        }
+        
         classGenerationInfo.setObjEntity(entity);
         classTemplate.merge(velCtxt, out);
     }
 
+    /**
+     * Generates Java code for the ObjEntity. Output is written to the provided
+     * Writer.
+     */
+    public void generateClass(Writer out, ObjEntity entity, String fqnBaseClass, String fqnSuperClass, String fqnSubClass) throws Exception {
+        if (false == VERSION_1_2.equals(versionString)) {
+            throw new IllegalStateException("Illegal Version in generateClass(Writer,ObjEntity,String,String,String): " + versionString);
+        }
+
+        velCtxt.put("objEntity", entity);
+        velCtxt.put("stringUtils", StringUtils.getInstance());
+        velCtxt.put("entityUtils", new EntityUtils(entity, fqnBaseClass, fqnSuperClass, fqnSubClass));
+        velCtxt.put("importUtils", new ImportUtils());
+        
+        classTemplate.merge(velCtxt, out);
+    }
+
+    // deprecated, delegated methods previously used internally in cayenne
     /**
      * @return Returns the classGenerationInfo in template.
      */
@@ -185,7 +222,6 @@ public class ClassGenerator {
         return classGenerationInfo;
     }
 
-    // deprecated, delegated methods previously used internally in cayenne
     /**
      * Returns Java package name of the class associated with this generator.
      * @deprecated use getClassGenerationInfo().getPackageName()
