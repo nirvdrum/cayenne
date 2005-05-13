@@ -2,7 +2,9 @@ package org.objectstyle.art;
 
 import java.util.List;
 
-public class Gallery extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class Gallery extends CayenneDataObject {
 
     public static final String GALLERY_NAME_PROPERTY = "galleryName";
     public static final String EXHIBIT_ARRAY_PROPERTY = "exhibitArray";

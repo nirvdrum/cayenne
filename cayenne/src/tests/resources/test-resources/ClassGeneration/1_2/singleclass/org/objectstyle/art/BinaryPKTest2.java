@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class BinaryPKTest2 extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class BinaryPKTest2 extends CayenneDataObject {
 
     public static final String DETAIL_NAME_PROPERTY = "detailName";
     public static final String TO_BINARY_PKMASTER_PROPERTY = "toBinaryPKMaster";

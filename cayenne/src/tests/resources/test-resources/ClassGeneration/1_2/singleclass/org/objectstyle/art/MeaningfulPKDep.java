@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class MeaningfulPKDep extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class MeaningfulPKDep extends CayenneDataObject {
 
     public static final String DESCR_PROPERTY = "descr";
     public static final String TO_MEANINGFUL_PK_PROPERTY = "toMeaningfulPK";

@@ -1,6 +1,10 @@
 package org.objectstyle.art;
 
-public class DateTest extends org.objectstyle.cayenne.CayenneDataObject {
+import java.util.Date;
+
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class DateTest extends CayenneDataObject {
 
     public static final String DATE_COLUMN_PROPERTY = "dateColumn";
     public static final String TIME_COLUMN_PROPERTY = "timeColumn";
@@ -8,27 +12,27 @@ public class DateTest extends org.objectstyle.cayenne.CayenneDataObject {
 
     public static final String DATE_TEST_ID_PK_COLUMN = "DATE_TEST_ID";
 
-    public void setDateColumn(java.util.Date dateColumn) {
+    public void setDateColumn(Date dateColumn) {
         writeProperty("dateColumn", dateColumn);
     }
-    public java.util.Date getDateColumn() {
-        return (java.util.Date)readProperty("dateColumn");
+    public Date getDateColumn() {
+        return (Date)readProperty("dateColumn");
     }
     
     
-    public void setTimeColumn(java.util.Date timeColumn) {
+    public void setTimeColumn(Date timeColumn) {
         writeProperty("timeColumn", timeColumn);
     }
-    public java.util.Date getTimeColumn() {
-        return (java.util.Date)readProperty("timeColumn");
+    public Date getTimeColumn() {
+        return (Date)readProperty("timeColumn");
     }
     
     
-    public void setTimestampColumn(java.util.Date timestampColumn) {
+    public void setTimestampColumn(Date timestampColumn) {
         writeProperty("timestampColumn", timestampColumn);
     }
-    public java.util.Date getTimestampColumn() {
-        return (java.util.Date)readProperty("timestampColumn");
+    public Date getTimestampColumn() {
+        return (Date)readProperty("timestampColumn");
     }
     
     

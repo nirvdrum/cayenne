@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class CompoundFkTest extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class CompoundFkTest extends CayenneDataObject {
 
     public static final String NAME_PROPERTY = "name";
     public static final String TO_COMPOUND_PK_PROPERTY = "toCompoundPk";

@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class Painting extends org.objectstyle.art.ArtDataObject {
+import java.math.BigDecimal;
+
+public class Painting extends ArtDataObject {
 
     public static final String ESTIMATED_PRICE_PROPERTY = "estimatedPrice";
     public static final String PAINTING_TITLE_PROPERTY = "paintingTitle";
@@ -10,11 +12,11 @@ public class Painting extends org.objectstyle.art.ArtDataObject {
 
     public static final String PAINTING_ID_PK_COLUMN = "PAINTING_ID";
 
-    public void setEstimatedPrice(java.math.BigDecimal estimatedPrice) {
+    public void setEstimatedPrice(BigDecimal estimatedPrice) {
         writeProperty("estimatedPrice", estimatedPrice);
     }
-    public java.math.BigDecimal getEstimatedPrice() {
-        return (java.math.BigDecimal)readProperty("estimatedPrice");
+    public BigDecimal getEstimatedPrice() {
+        return (BigDecimal)readProperty("estimatedPrice");
     }
     
     

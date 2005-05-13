@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class BitTest extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class BitTest extends CayenneDataObject {
 
     public static final String BIT_COLUMN_PROPERTY = "bitColumn";
 

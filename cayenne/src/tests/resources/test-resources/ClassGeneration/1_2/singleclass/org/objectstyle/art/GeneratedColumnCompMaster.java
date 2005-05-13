@@ -2,7 +2,9 @@ package org.objectstyle.art;
 
 import java.util.List;
 
-public class GeneratedColumnCompMaster extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class GeneratedColumnCompMaster extends CayenneDataObject {
 
     public static final String NAME_PROPERTY = "name";
     public static final String TO_DETAIL_PROPERTY = "toDetail";

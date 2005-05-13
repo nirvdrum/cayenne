@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class BlobTest extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class BlobTest extends CayenneDataObject {
 
     public static final String BLOB_COL_PROPERTY = "blobCol";
 

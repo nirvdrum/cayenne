@@ -1,8 +1,11 @@
 package org.objectstyle.art;
 
+import java.util.Date;
 import java.util.List;
 
-public class Exhibit extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class Exhibit extends CayenneDataObject {
 
     public static final String CLOSING_DATE_PROPERTY = "closingDate";
     public static final String OPENING_DATE_PROPERTY = "openingDate";
@@ -11,19 +14,19 @@ public class Exhibit extends org.objectstyle.cayenne.CayenneDataObject {
 
     public static final String EXHIBIT_ID_PK_COLUMN = "EXHIBIT_ID";
 
-    public void setClosingDate(java.util.Date closingDate) {
+    public void setClosingDate(Date closingDate) {
         writeProperty("closingDate", closingDate);
     }
-    public java.util.Date getClosingDate() {
-        return (java.util.Date)readProperty("closingDate");
+    public Date getClosingDate() {
+        return (Date)readProperty("closingDate");
     }
     
     
-    public void setOpeningDate(java.util.Date openingDate) {
+    public void setOpeningDate(Date openingDate) {
         writeProperty("openingDate", openingDate);
     }
-    public java.util.Date getOpeningDate() {
-        return (java.util.Date)readProperty("openingDate");
+    public Date getOpeningDate() {
+        return (Date)readProperty("openingDate");
     }
     
     

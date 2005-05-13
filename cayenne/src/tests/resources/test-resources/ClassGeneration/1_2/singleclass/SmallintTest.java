@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class SmallintTest extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class SmallintTest extends CayenneDataObject {
 
     public static final String SMALLINT_COL_PROPERTY = "smallintCol";
 

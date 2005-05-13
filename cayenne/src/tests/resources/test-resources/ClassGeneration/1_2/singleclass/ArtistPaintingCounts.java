@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class ArtistPaintingCounts extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class ArtistPaintingCounts extends CayenneDataObject {
 
     public static final String PAINTINGS_COUNT_PROPERTY = "paintingsCount";
 

@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class ArtistExhibit extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class ArtistExhibit extends CayenneDataObject {
 
     public static final String TO_ARTIST_PROPERTY = "toArtist";
     public static final String TO_EXHIBIT_PROPERTY = "toExhibit";

@@ -1,6 +1,10 @@
 package org.objectstyle.art;
 
-public class ArtistAssets extends org.objectstyle.cayenne.CayenneDataObject {
+import java.math.BigDecimal;
+
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class ArtistAssets extends CayenneDataObject {
 
     public static final String ESTIMATED_PRICE_PROPERTY = "estimatedPrice";
     public static final String PAINTINGS_COUNT_PROPERTY = "paintingsCount";
@@ -8,11 +12,11 @@ public class ArtistAssets extends org.objectstyle.cayenne.CayenneDataObject {
 
     public static final String ARTIST_ID_PK_COLUMN = "ARTIST_ID";
 
-    public void setEstimatedPrice(java.math.BigDecimal estimatedPrice) {
+    public void setEstimatedPrice(BigDecimal estimatedPrice) {
         writeProperty("estimatedPrice", estimatedPrice);
     }
-    public java.math.BigDecimal getEstimatedPrice() {
-        return (java.math.BigDecimal)readProperty("estimatedPrice");
+    public BigDecimal getEstimatedPrice() {
+        return (BigDecimal)readProperty("estimatedPrice");
     }
     
     

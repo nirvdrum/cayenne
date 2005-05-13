@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class PaintingInfo extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class PaintingInfo extends CayenneDataObject {
 
     public static final String IMAGE_BLOB_PROPERTY = "imageBlob";
     public static final String TEXT_REVIEW_PROPERTY = "textReview";

@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class GeneratedColumnCompKey extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class GeneratedColumnCompKey extends CayenneDataObject {
 
     public static final String NAME_PROPERTY = "name";
     public static final String TO_MASTER_PROPERTY = "toMaster";

@@ -1,8 +1,11 @@
 package org.objectstyle.art;
 
+import java.util.Date;
 import java.util.List;
 
-public class Artist extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class Artist extends CayenneDataObject {
 
     public static final String ARTIST_NAME_PROPERTY = "artistName";
     public static final String DATE_OF_BIRTH_PROPERTY = "dateOfBirth";
@@ -20,11 +23,11 @@ public class Artist extends org.objectstyle.cayenne.CayenneDataObject {
     }
     
     
-    public void setDateOfBirth(java.util.Date dateOfBirth) {
+    public void setDateOfBirth(Date dateOfBirth) {
         writeProperty("dateOfBirth", dateOfBirth);
     }
-    public java.util.Date getDateOfBirth() {
-        return (java.util.Date)readProperty("dateOfBirth");
+    public Date getDateOfBirth() {
+        return (Date)readProperty("dateOfBirth");
     }
     
     

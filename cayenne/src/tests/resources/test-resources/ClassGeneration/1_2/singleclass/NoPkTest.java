@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class NoPkTest extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class NoPkTest extends CayenneDataObject {
 
     public static final String ATTRIBUTE1_PROPERTY = "attribute1";
 

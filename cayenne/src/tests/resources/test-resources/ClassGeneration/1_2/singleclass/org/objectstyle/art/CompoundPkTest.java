@@ -2,7 +2,9 @@ package org.objectstyle.art;
 
 import java.util.List;
 
-public class CompoundPkTest extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class CompoundPkTest extends CayenneDataObject {
 
     public static final String KEY1_PROPERTY = "key1";
     public static final String KEY2_PROPERTY = "key2";

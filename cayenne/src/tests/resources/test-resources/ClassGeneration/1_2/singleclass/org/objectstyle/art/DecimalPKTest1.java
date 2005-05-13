@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class DecimalPKTest1 extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class DecimalPKTest1 extends CayenneDataObject {
 
     public static final String DECIMAL_PK_PROPERTY = "decimalPK";
     public static final String NAME_PROPERTY = "name";

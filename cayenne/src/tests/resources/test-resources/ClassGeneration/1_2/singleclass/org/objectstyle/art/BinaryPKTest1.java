@@ -2,7 +2,9 @@ package org.objectstyle.art;
 
 import java.util.List;
 
-public class BinaryPKTest1 extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class BinaryPKTest1 extends CayenneDataObject {
 
     public static final String NAME_PROPERTY = "name";
     public static final String BINARY_PKDETAILS_PROPERTY = "binaryPKDetails";

@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class SubPainting extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class SubPainting extends CayenneDataObject {
 
     public static final String PAINTING_TITLE_PROPERTY = "paintingTitle";
 

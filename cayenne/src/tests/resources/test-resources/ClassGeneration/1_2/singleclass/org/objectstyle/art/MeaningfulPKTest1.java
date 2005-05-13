@@ -2,7 +2,9 @@ package org.objectstyle.art;
 
 import java.util.List;
 
-public class MeaningfulPKTest1 extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class MeaningfulPKTest1 extends CayenneDataObject {
 
     public static final String DESCR_PROPERTY = "descr";
     public static final String PK_ATTRIBUTE_PROPERTY = "pkAttribute";

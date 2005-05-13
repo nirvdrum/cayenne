@@ -2,7 +2,9 @@ package org.objectstyle.art;
 
 import java.util.List;
 
-public class CharPkTest extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class CharPkTest extends CayenneDataObject {
 
     public static final String OTHER_COL_PROPERTY = "otherCol";
     public static final String PK_COL_PROPERTY = "pkCol";

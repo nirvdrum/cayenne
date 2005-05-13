@@ -2,7 +2,9 @@ package org.objectstyle.art;
 
 import java.util.List;
 
-public class ArtGroup extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.cayenne.CayenneDataObject;
+
+public class ArtGroup extends CayenneDataObject {
 
     public static final String NAME_PROPERTY = "name";
     public static final String ARTIST_ARRAY_PROPERTY = "artistArray";
