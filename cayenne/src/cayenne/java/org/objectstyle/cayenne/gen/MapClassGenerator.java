@@ -457,7 +457,7 @@ public abstract class MapClassGenerator {
      */
     public void setVersionString(String versionString) {
         if ((false == VERSION_1_1.equals(versionString)) && (false == VERSION_1_2.equals(versionString))) {
-            throw new IllegalStateException("Illegal Version in setVersionString: " + versionString);
+            throw new IllegalStateException("'version' must be '" + VERSION_1_1 + "' or '" + VERSION_1_2 + "', but was '" + versionString + "'");
         }
         this.versionString = versionString;
     }

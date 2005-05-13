@@ -209,7 +209,11 @@ public class CayenneGenerator extends CayenneTask {
      * @since 1.2
      */
     public void setVersion(String versionString) {
-        generator.setVersionString(versionString);
+        try {
+			generator.setVersionString(versionString);
+		} catch (IllegalStateException e) {
+            throw new BuildException(e.getMessage(), e);
+		}
     }
 
     /**
