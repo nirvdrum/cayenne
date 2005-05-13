@@ -55,10 +55,8 @@
  */
 package org.objectstyle.cayenne.tools;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.apache.oro.text.perl.Perl5Util;
 import org.apache.tools.ant.Project;
@@ -83,80 +81,21 @@ class AntDataPortDelegate implements DataPortDelegate {
     private static final String[] emptyArray = new String[0];
 
     protected Task parentTask;
+    
     protected String[] mapFilters;
-    protected String[] entityIncludeFilters;
-    protected String[] entityExcludeFilters;
 
     protected long timestamp;
     protected DbEntity lastEntity;
 
+    protected NamePatternMatcher namePatternMatcher;
+    
     public AntDataPortDelegate(Task parentTask, String mapsPattern,
             String includeEntitiesPattern, String excludeEntitiesPattern) {
         this.parentTask = parentTask;
 
-        mapFilters = tokenizePattern(mapsPattern);
-        entityIncludeFilters = tokenizePattern(includeEntitiesPattern);
-        entityExcludeFilters = tokenizePattern(excludeEntitiesPattern);
-    }
+        this.namePatternMatcher = new NamePatternMatcher(parentTask, includeEntitiesPattern, excludeEntitiesPattern);
 
-    /**
-     * Returns an array of valid Jakarta ORO regular expressions. Takes a comma-separated
-     * list of patterns, attempting to convert them to the ORO syntax. E.g.
-     * <p>
-     * <code>"billing_*,user?"</code> will become a set of two expressions:
-     * <p>
-     * <code>/billing_.* /</code><br>
-     * <code>/user.?/</code><br>
-     */
-    protected String[] tokenizePattern(String pattern) {
-        if (pattern != null && pattern.length() > 0) {
-            StringTokenizer toks = new StringTokenizer(pattern, ",");
-
-            int len = toks.countTokens();
-            if (len == 0) {
-                return emptyArray;
-            }
-
-            List patterns = new ArrayList(len);
-            for (int i = 0; i < len; i++) {
-                String nextPattern = toks.nextToken();
-                StringBuffer buffer = new StringBuffer();
-
-                // convert * into regex syntax
-                // e.g. abc*x becomes /^abc.*x$/
-                // or abc?x becomes /^abc.?x$/
-                buffer.append("/^");
-                for (int j = 0; j < nextPattern.length(); j++) {
-                    char nextChar = nextPattern.charAt(j);
-                    if (nextChar == '*' || nextChar == '?') {
-                        buffer.append('.');
-                    }
-                    buffer.append(nextChar);
-                }
-                buffer.append("$/");
-
-                String finalPattern = buffer.toString();
-
-                // test the pattern
-                try {
-                    regexUtil.match(finalPattern, "abc_123");
-                }
-                catch (Exception e) {
-                    parentTask.log("Ignoring invalid pattern ["
-                            + nextPattern
-                            + "], reason: "
-                            + e.getMessage(), Project.MSG_WARN);
-                    continue;
-                }
-
-                patterns.add(finalPattern);
-            }
-
-            return (String[]) patterns.toArray(new String[patterns.size()]);
-        }
-        else {
-            return emptyArray;
-        }
+        this.mapFilters = namePatternMatcher.tokenizePattern(mapsPattern);
     }
 
     /**
@@ -168,9 +107,7 @@ class AntDataPortDelegate implements DataPortDelegate {
             return entities;
         }
 
-        if (mapFilters.length == 0
-                && entityIncludeFilters.length == 0
-                && entityExcludeFilters.length == 0) {
+        if (mapFilters.length == 0) {
             return entities;
         }
 
@@ -182,18 +119,10 @@ class AntDataPortDelegate implements DataPortDelegate {
                 it.remove();
                 continue;
             }
-
-            if (!passedEntityIncludeFilter(entity)) {
-                it.remove();
-                continue;
-            }
-
-            if (!passedEntityExcludeFilter(entity)) {
-                it.remove();
-                continue;
-            }
         }
 
+        namePatternMatcher.filter(entities);
+        
         return entities;
     }
 
@@ -219,44 +148,6 @@ class AntDataPortDelegate implements DataPortDelegate {
         }
 
         return false;
-    }
-
-    /**
-     * Returns true if the entity matches any one of the "include" patterns, or if there
-     * is no "include" patterns defined.
-     */
-    protected boolean passedEntityIncludeFilter(DbEntity entity) {
-        if (entityIncludeFilters.length == 0) {
-            return true;
-        }
-
-        String entityName = entity.getName();
-        for (int i = 0; i < entityIncludeFilters.length; i++) {
-            if (regexUtil.match(entityIncludeFilters[i], entityName)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns true if the entity does not match any one of the "exclude" patterns, or if
-     * there is no "exclude" patterns defined.
-     */
-    protected boolean passedEntityExcludeFilter(DbEntity entity) {
-        if (entityExcludeFilters.length == 0) {
-            return true;
-        }
-
-        String entityName = entity.getName();
-        for (int i = 0; i < entityExcludeFilters.length; i++) {
-            if (regexUtil.match(entityExcludeFilters[i], entityName)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /**
