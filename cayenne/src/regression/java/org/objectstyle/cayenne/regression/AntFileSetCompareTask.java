@@ -173,7 +173,7 @@ public class AntFileSetCompareTask extends MatchingTask {
                 }
                 catch (BuildException e) {
                     if (failOnError) {
-                        throw new BuildException(baseName + ": " + e.getMessage());
+                        throw new BuildException(file1.getAbsolutePath() + " & " + file2.getAbsolutePath() + ": " + e.getMessage());
                     }
                     log(baseName + ": " + e.getMessage());
                     continue;
