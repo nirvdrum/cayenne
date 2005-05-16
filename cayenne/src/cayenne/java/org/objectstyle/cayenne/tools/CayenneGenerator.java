@@ -254,4 +254,13 @@ public class CayenneGenerator extends CayenneTask {
     public void setIncludeEntities(String includeEntitiesPattern) {
         this.includeEntitiesPattern = includeEntitiesPattern;
     }
+
+    /**
+     * Sets <code>outputPattern</code> property.
+     * 
+     * @since 1.2
+     */
+    public void setOutputPattern(String outputPattern) {
+        generator.setOutputPattern(outputPattern);
+    }    
 }

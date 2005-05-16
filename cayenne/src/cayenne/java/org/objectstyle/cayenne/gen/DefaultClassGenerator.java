@@ -66,6 +66,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.tools.NamePatternMatcher;
 
 /**
  * Extends MapClassGenerator to allow target-specific filesystem locations where the files
@@ -83,7 +84,9 @@ public class DefaultClassGenerator extends MapClassGenerator {
     protected File template;
     protected File superTemplate;
     protected long timestamp = System.currentTimeMillis();
-
+    private static final String WILDCARD = "*";
+    protected String outputPattern = "*.java";
+    
     /**
      * Stores the encoding of the generated file.
      * 
@@ -196,6 +199,13 @@ public class DefaultClassGenerator extends MapClassGenerator {
         this.usePkgPath = usePkgPath;
     }
 
+    /**
+     * Sets <code>outputPattern</code> property.
+     */
+    public void setOutputPattern(String outputPattern) {
+        this.outputPattern = outputPattern;
+    }
+
     public void closeWriter(Writer out) throws Exception {
         out.close();
     }
@@ -228,7 +238,8 @@ public class DefaultClassGenerator extends MapClassGenerator {
      */
     protected File fileForSuperclass(String pkgName, String className) throws Exception {
 
-        File dest = new File(mkpath(destDir, pkgName), className + ".java");
+        String filename = NamePatternMatcher.replaceWildcardInStringWithString(WILDCARD, outputPattern, className);
+        File dest = new File(mkpath(destDir, pkgName), filename);
 
         // Ignore if the destination is newer than the map
         // (internal timestamp), i.e. has been generated after the map was
@@ -249,7 +260,8 @@ public class DefaultClassGenerator extends MapClassGenerator {
      */
     protected File fileForClass(String pkgName, String className) throws Exception {
 
-        File dest = new File(mkpath(destDir, pkgName), className + ".java");
+        String filename = NamePatternMatcher.replaceWildcardInStringWithString(WILDCARD, outputPattern, className);
+        File dest = new File(mkpath(destDir, pkgName), filename);
 
         if (dest.exists()) {
             // no overwrite of subclasses

@@ -80,15 +80,17 @@ public class NamePatternMatcher {
     protected String[] itemIncludeFilters;
     protected String[] itemExcludeFilters;
 
-    public NamePatternMatcher(Task parentTask, String includePattern, String excludePattern) {
+    public NamePatternMatcher(Task parentTask, String includePattern,
+            String excludePattern) {
         this.parentTask = parentTask;
         this.itemIncludeFilters = tokenizePattern(includePattern);
         this.itemExcludeFilters = tokenizePattern(excludePattern);
     }
 
     /**
-     * Returns an array of valid Jakarta ORO regular expressions. Takes a comma-separated
-     * list of patterns, attempting to convert them to the ORO syntax. E.g.
+     * Returns an array of valid Jakarta ORO regular expressions. Takes a
+     * comma-separated list of patterns, attempting to convert them to the ORO
+     * syntax. E.g.
      * <p>
      * <code>"billing_*,user?"</code> will become a set of two expressions:
      * <p>
@@ -147,15 +149,15 @@ public class NamePatternMatcher {
     }
 
     /**
-     * Applies preconfigured list of filters to the list, removing entities that do not
-     * pass the filter.
+     * Applies preconfigured list of filters to the list, removing entities that
+     * do not pass the filter.
      */
     protected List filter(List items) {
         if (items == null || items.isEmpty()) {
             return items;
         }
 
-        if ((itemIncludeFilters.length == 0) && (itemExcludeFilters.length == 0))  {
+        if ((itemIncludeFilters.length == 0) && (itemExcludeFilters.length == 0)) {
             return items;
         }
 
@@ -178,8 +180,8 @@ public class NamePatternMatcher {
     }
 
     /**
-     * Returns true if the entity matches any one of the "include" patterns, or if there
-     * is no "include" patterns defined.
+     * Returns true if the entity matches any one of the "include" patterns, or
+     * if there is no "include" patterns defined.
      */
     protected boolean passedIncludeFilter(CayenneMapEntry item) {
         if (itemIncludeFilters.length == 0) {
@@ -197,8 +199,8 @@ public class NamePatternMatcher {
     }
 
     /**
-     * Returns true if the entity does not match any one of the "exclude" patterns, or if
-     * there is no "exclude" patterns defined.
+     * Returns true if the entity does not match any one of the "exclude"
+     * patterns, or if there is no "exclude" patterns defined.
      */
     protected boolean passedExcludeFilter(CayenneMapEntry item) {
         if (itemExcludeFilters.length == 0) {
@@ -213,5 +215,31 @@ public class NamePatternMatcher {
         }
 
         return true;
+    }
+
+    public static String replaceWildcardInStringWithString(
+            String wildcard,
+            String pattern,
+            String replacement) {
+        if (null == pattern || null == wildcard)
+            return pattern;
+
+        StringBuffer buffer = new StringBuffer();
+        int lastPos = 0;
+        int wildCardPos = pattern.indexOf(wildcard);
+        while (-1 != wildCardPos) {
+            if (lastPos != wildCardPos) {
+                buffer.append(pattern.substring(lastPos, wildCardPos));
+            }
+            buffer.append(replacement);
+            lastPos += wildCardPos + wildcard.length();
+            wildCardPos = pattern.indexOf(wildcard, lastPos);
+        }
+
+        if (lastPos < pattern.length()) {
+            buffer.append(pattern.substring(lastPos));
+        }
+
+        return buffer.toString();
     }
 }
