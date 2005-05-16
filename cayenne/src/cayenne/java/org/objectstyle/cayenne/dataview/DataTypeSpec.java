@@ -189,12 +189,12 @@ public class DataTypeSpec {
 
     Object v = null;
     String strUntypedValue = null;
-    boolean isStringUntypedValue;
+    boolean isStringUntypedValue = untypedValue instanceof String;
     Number numUntypedValue = null;
-    boolean isNumberUntypedValue;
-    if (isStringUntypedValue = untypedValue instanceof String)
+    boolean isNumberUntypedValue = untypedValue instanceof Number;
+    if (isStringUntypedValue)
       strUntypedValue = (String)untypedValue;
-    if (isNumberUntypedValue = untypedValue instanceof Number)
+    if (isNumberUntypedValue)
       numUntypedValue = (Number)untypedValue;
 
     switch (dataType.getValue()) {
@@ -259,21 +259,21 @@ public class DataTypeSpec {
       return typedValue;
 
     String strTypedValue = null;
-    boolean isStringTypedValue;
+    boolean isStringTypedValue = typedValue instanceof String;
     Number numTypedValue = null;
-    boolean isNumberTypedValue;
+    boolean isNumberTypedValue = typedValue instanceof Number;
     Boolean boolTypedValue = null;
-    boolean isBooleanTypedValue;
+    boolean isBooleanTypedValue = typedValue instanceof Boolean;
     Date dateTypedValue = null;
-    boolean isDateTypedValue;
+    boolean isDateTypedValue = typedValue instanceof Date;
 
-    if (isStringTypedValue = typedValue instanceof String)
+    if (isStringTypedValue)
       strTypedValue = (String)typedValue;
-    if (isNumberTypedValue = typedValue instanceof Number)
+    if (isNumberTypedValue)
       numTypedValue = (Number)typedValue;
-    if (isBooleanTypedValue = typedValue instanceof Boolean)
+    if (isBooleanTypedValue)
       boolTypedValue = (Boolean)typedValue;
-    if (isDateTypedValue = typedValue instanceof Date)
+    if (isDateTypedValue)
       dateTypedValue = (Date)typedValue;
 
     Object v = null;
