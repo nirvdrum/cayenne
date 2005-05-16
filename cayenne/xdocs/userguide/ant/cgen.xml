@@ -14,7 +14,7 @@
 			overwritten. Subclasses are never overwritten and may be later customized by the user.
 			If "makepairs" is set to "false", a single class will be generated for each ObjEntity.
 			</p>
-
+            <p>By creating custom templates, <code>Cgen</code> can also be used to generate other output (such as web pages, reports, specialized code templates) based on DataMap information.</p>
 			<h3>Parameters</h3>
 			
 			<table border="1" cellpadding="2" cellspacing="0">
@@ -50,14 +50,14 @@
 				<tr>
 					<td valign="top">template</td>
 					<td valign="top">Location of Velocity template file for Java class
-					generation. If ommitted, default template is used.</td>
+					generation. If omitted, default template is used.</td>
 					<td valign="top" align="center">No</td>
 				</tr>
 				<tr>
 					<td valign="top">supertemplate</td>
 					<td valign="top">Location of Velocity template file for Java superclass 
 					generation. Ignored unless "makepairs" set to "true".
-					If ommitted, default template is used.</td>
+					If omitted, default template is used.</td>
 					<td valign="top" align="center">No</td>
 				</tr>
 				<tr>
@@ -82,13 +82,34 @@
 				</tr>
 				<tr>
 					<td valign="top">encoding</td>
-					<td valign="top">Allows to specify generated file encoding 
+					<td valign="top">Specify generated file encoding 
 						if different from the default on current platform. 
 						Target encoding must be supported by the JVM running 
 						Ant build. Standard encodings supported by Java on all 
 						platforms are US-ASCII, ISO-8859-1, UTF-8, UTF-16BE, 
 						UTF-16LE, UTF-16. See Sun Java Docs for 
 						java.nio.charset.Charset for more information. </td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">version</td>
+					<td valign="top">Specifies template location and generator behavior.   "1.1" is the old behavior, with templates located in "dotemplates" and "classgen" as the only velocity context attribute.
+					"1.2" is the new behavior, with templates located in "dotemplates/v1.2" and "objEntity", "entityUtils", "stringUtils", and "importUtils" in the velocity context. (Default is "1.1")</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">excludeEntities</td>
+					<td valign="top">Entities (expressed as a perl5 regex) to exclude from template generation. (Default is to include all entities in the DataMap)</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">includeEntities</td>
+					<td valign="top">Entities (expressed as a perl5 regex) to include in template generation. (Default is to include all entities in the DataMap)</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">outputPattern</td>
+					<td valign="top">Name of file for generated output. (Default is "*.java")</td>
 					<td valign="top" align="center">No</td>
 				</tr>
 			</table>
@@ -103,6 +124,13 @@
      &amp;lt;classpath refid="classpath"/&amp;gt;
 &amp;lt;/taskdef&amp;gt;
 &amp;lt;cgen map="src/datamap.xml" destDir="src/java/dobj" usepkgpath="false"/&amp;gt;
+</source>
+			<p>Here is an example of using <code>CGen</code> to generate html pages for all entities starting with "Artist" in the DataMap:</p>
+<source>
+&amp;lt;taskdef name="cgen" classname="org.objectstyle.cayenne.tools.CayenneGenerator"&amp;gt;
+     &amp;lt;classpath refid="classpath"/&amp;gt;
+&amp;lt;/taskdef&amp;gt;
+&amp;lt;cgen map="src/datamap.xml" destDir="src/doc/web" makepairs="false" usepkgpath="false" template="EntityReport.vm" includeEntities="Artist*" outputPattern="*Report.html"/&amp;gt;
 </source>
 			</subsection>
 		</section>
