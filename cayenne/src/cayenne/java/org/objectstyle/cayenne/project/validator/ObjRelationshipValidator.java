@@ -94,7 +94,7 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
         // check if there are attributes having the same name
         else if (rel.getSourceEntity().getAttribute(rel.getName()) != null) {
             validator.registerWarning(
-                    "ObjRelationship has the same name as one of ObjAttributes",
+                    "ObjRelationship " + objRelationshipIdentifier(rel) + " has the same name as one of ObjAttributes",
                     path);
         }
         else {
@@ -103,25 +103,24 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
 
             if (invalidChars != null) {
                 validator.registerWarning(
-                        "ObjRelationship name contains invalid characters: "
+                        "ObjRelationship " + objRelationshipIdentifier(rel) + " name contains invalid characters: "
                                 + invalidChars,
                         path);
             }
             else if (helper.invalidDataObjectProperty(rel.getName())) {
-                validator.registerWarning("ObjRelationship name is invalid: "
-                        + rel.getName(), path);
+                validator.registerWarning("ObjRelationship " + objRelationshipIdentifier(rel) + " name is invalid.", path);
             }
         }
 
         if (rel.getTargetEntity() == null) {
-            validator.registerWarning("ObjRelationship has no target entity.", path);
+            validator.registerWarning("ObjRelationship " + objRelationshipIdentifier(rel) + " has no target entity.", path);
         }
         else {
             // check for missing DbRelationship mappings
             List dbRels = rel.getDbRelationships();
             if (dbRels.size() == 0) {
                 validator.registerWarning(
-                        "ObjRelationship has no DbRelationship mapping.",
+                        "ObjRelationship " + objRelationshipIdentifier(rel) + " has no DbRelationship mapping.",
                         path);
             }
             else {
@@ -133,7 +132,7 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
                         || ((DbRelationship) dbRels.get(dbRels.size() - 1))
                                 .getTargetEntity() != expectedTarget) {
                     validator.registerWarning(
-                            "ObjRelationship has incomplete DbRelationship mapping.",
+                            "ObjRelationship " + objRelationshipIdentifier(rel) + " has incomplete DbRelationship mapping.",
                             path);
                 }
             }
@@ -155,13 +154,16 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
                     if (pair.getSource().isMandatory()) {
                         validator
                                 .registerWarning(
-                                        "ObjRelationship "
-                                                + rel.getName()
-                                                + " has a Nullify delete rule and a mandatory reverse relationship ",
+                                        "ObjRelationship " + objRelationshipIdentifier(rel) + " has a Nullify delete rule and a mandatory reverse relationship ",
                                         path);
                     }
                 }
             }
         }
+    }
+    
+    public String objRelationshipIdentifier(ObjRelationship rel)
+    {
+        return "<" + rel.getSourceEntity().getName() + "." + rel.getName() + ">";
     }
 }
