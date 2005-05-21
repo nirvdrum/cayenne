@@ -104,5 +104,4 @@ public class MockOperationObserver extends DefaultOperationObserver {
     public void nextQueryException(Query query, Exception ex) {
         throw new CayenneRuntimeException(ex);
     }
-
 }

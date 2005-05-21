@@ -68,13 +68,13 @@ import org.objectstyle.cayenne.query.BatchQuery;
  */
 class OracleBatchAction extends BatchAction {
 
-    OracleBatchAction(DbAdapter adapter, EntityResolver entityResolver) {
-        super(adapter, entityResolver);
+    OracleBatchAction(BatchQuery batchQuery, DbAdapter adapter, EntityResolver entityResolver) {
+        super(batchQuery, adapter, entityResolver);
     }
 
-    protected BatchQueryBuilder createBuilder(BatchQuery batch) throws CayenneException {
+    protected BatchQueryBuilder createBuilder() throws CayenneException {
         // intercept super call to configure the builder...
-        BatchQueryBuilder builder = super.createBuilder(batch);
+        BatchQueryBuilder builder = super.createBuilder();
         builder.setTrimFunction(OracleAdapter.TRIM_FUNCTION);
         return builder;
     }

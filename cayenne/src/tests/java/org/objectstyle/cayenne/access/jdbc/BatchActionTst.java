@@ -73,15 +73,14 @@ public class BatchActionTst extends CayenneTestCase {
 
         // test with adapter that supports keys
         DbAdapter adapter = buildAdapter(true);
-        BatchAction action = new BatchAction(adapter, resolver);
 
         InsertBatchQuery batch1 = new InsertBatchQuery(resolver
                 .lookupDbEntity(GeneratedColumnTest.class), 5);
-        assertTrue(action.hasGeneratedKeys(batch1));
+        assertTrue(new BatchAction(batch1, adapter, resolver).hasGeneratedKeys());
 
         InsertBatchQuery batch2 = new InsertBatchQuery(resolver
                 .lookupDbEntity(Artist.class), 5);
-        assertFalse(action.hasGeneratedKeys(batch2));
+        assertFalse(new BatchAction(batch2, adapter, resolver).hasGeneratedKeys());
     }
 
     public void testHasGeneratedKeys2() throws Exception {
@@ -89,15 +88,14 @@ public class BatchActionTst extends CayenneTestCase {
 
         // test with adapter that does not support keys...
         DbAdapter adapter = buildAdapter(false);
-        BatchAction action = new BatchAction(adapter, resolver);
 
         InsertBatchQuery batch1 = new InsertBatchQuery(resolver
                 .lookupDbEntity(GeneratedColumnTest.class), 5);
-        assertFalse(action.hasGeneratedKeys(batch1));
+        assertFalse(new BatchAction(batch1, adapter, resolver).hasGeneratedKeys());
 
         InsertBatchQuery batch2 = new InsertBatchQuery(resolver
                 .lookupDbEntity(Artist.class), 5);
-        assertFalse(action.hasGeneratedKeys(batch2));
+        assertFalse(new BatchAction(batch2, adapter, resolver).hasGeneratedKeys());
     }
 
     DbAdapter buildAdapter(boolean supportGeneratedKeys) {

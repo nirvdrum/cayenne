@@ -71,10 +71,8 @@ import org.objectstyle.cayenne.access.jdbc.RowDescriptor;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.ProcedureQuery;
 
 /**
  * Oracle-specific ProcedureAction that supports ResultSet OUT parameters.
@@ -84,8 +82,9 @@ import org.objectstyle.cayenne.query.Query;
  */
 class OracleProcedureAction extends ProcedureAction {
 
-    OracleProcedureAction(DbAdapter adapter, EntityResolver entityResolver) {
-        super(adapter, entityResolver);
+    OracleProcedureAction(ProcedureQuery query, DbAdapter adapter,
+            EntityResolver entityResolver) {
+        super(query, adapter, entityResolver);
     }
 
     /**
@@ -93,15 +92,13 @@ class OracleProcedureAction extends ProcedureAction {
      */
     protected void readProcedureOutParameters(
             CallableStatement statement,
-            Procedure procedure,
-            Query query,
             OperationObserver delegate) throws SQLException, Exception {
 
         long t1 = System.currentTimeMillis();
 
         // build result row...
         Map result = null;
-        List parameters = procedure.getCallParameters();
+        List parameters = getProcedure().getCallParameters();
         for (int i = 0; i < parameters.size(); i++) {
             ProcedureParameter parameter = (ProcedureParameter) parameters.get(i);
 
@@ -116,7 +113,7 @@ class OracleProcedureAction extends ProcedureAction {
                 try {
                     RowDescriptor rsDescriptor = new RowDescriptor(rs, getAdapter()
                             .getExtendedTypes());
-                    readResultSet(rs, rsDescriptor, (GenericSelectQuery) query, delegate);
+                    readResultSet(rs, rsDescriptor, query, delegate);
                 }
                 finally {
                     try {
@@ -133,8 +130,9 @@ class OracleProcedureAction extends ProcedureAction {
                 }
 
                 ColumnDescriptor descriptor = new ColumnDescriptor(parameter);
-                ExtendedType type = getAdapter().getExtendedTypes().getRegisteredType(
-                        descriptor.getJavaClass());
+                ExtendedType type = getAdapter()
+                        .getExtendedTypes()
+                        .getRegisteredType(descriptor.getJavaClass());
                 Object val = type.materializeObject(statement, i + 1, descriptor
                         .getJdbcType());
 

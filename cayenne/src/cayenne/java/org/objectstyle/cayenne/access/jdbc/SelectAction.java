@@ -61,7 +61,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
@@ -71,32 +70,25 @@ import org.objectstyle.cayenne.access.util.DistinctResultIterator;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.Query;
 
 /**
- * A stateless execution plan for SelectQueries.
+ * A SQLAction for SelectQueries.
  * 
  * @since 1.2
  * @author Andrei Adamchik
  */
 public class SelectAction extends BaseSQLAction {
 
-    public SelectAction(DbAdapter adapter, EntityResolver entityResolver) {
+    protected GenericSelectQuery query;
+
+    public SelectAction(GenericSelectQuery query, DbAdapter adapter,
+            EntityResolver entityResolver) {
         super(adapter, entityResolver);
+        this.query = query;
     }
 
-    public void performAction(
-            Connection connection,
-            Query query,
-            OperationObserver observer) throws SQLException, Exception {
-
-        // sanity check
-        if (!(query instanceof GenericSelectQuery)) {
-            throw new CayenneException("Query unsupported by the execution plan: "
-                    + query);
-        }
-
-        GenericSelectQuery selectQuery = (GenericSelectQuery) query;
+    public void performAction(Connection connection, OperationObserver observer)
+            throws SQLException, Exception {
 
         long t1 = System.currentTimeMillis();
 
@@ -108,14 +100,15 @@ public class SelectAction extends BaseSQLAction {
         ResultSet rs = prepStmt.executeQuery();
 
         SelectTranslator selectTranslator = (SelectTranslator) translator;
-        RowDescriptor descriptor = new RowDescriptor(selectTranslator
-                .getResultColumns(), getAdapter().getExtendedTypes());
+        RowDescriptor descriptor = new RowDescriptor(
+                selectTranslator.getResultColumns(),
+                getAdapter().getExtendedTypes());
         JDBCResultIterator workerIterator = new JDBCResultIterator(
                 connection,
                 prepStmt,
                 rs,
                 descriptor,
-                selectQuery.getFetchLimit());
+                query.getFetchLimit());
 
         ResultIterator it = workerIterator;
 

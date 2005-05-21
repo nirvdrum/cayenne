@@ -94,6 +94,15 @@ public class InsertQuery extends AbstractQuery {
         this.setRoot(objEntityName);
     }
 
+    /**
+     * Calls "makeUpdate" on the visitor.
+     * 
+     * @since 1.2
+     */
+    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+        return visitor.makeUpdate(this);
+    }
+
     public Map getObjectSnapshot() {
         return objectSnapshot;
     }

@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.SQLAction;
 
 /**
  * A convenience superclass for SQLAction implementations.

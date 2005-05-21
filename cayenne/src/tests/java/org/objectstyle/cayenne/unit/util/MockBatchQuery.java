@@ -34,7 +34,7 @@
  *    or "Cayenne", nor may "ObjectStyle" or "Cayenne" appear in their
  *    names without prior written permission.
  * 
- * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
@@ -53,26 +53,43 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.postgres;
+package org.objectstyle.cayenne.unit.util;
 
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.sqlserver.SQLServerProcedureAction;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.ProcedureQuery;
+import java.util.List;
+
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
- * Current implementation simply relies on SQLServerProcedureAction superclass behavior.
- * Namely that CallableStatement.execute() rewinds result set pointer so
- * CallableStatement.getMoreResults() shouldn't be invoked until the first result set is
- * processed.
- * 
- * @since 1.2
  * @author Andrei Adamchik
  */
-class PostgresProcedureAction extends SQLServerProcedureAction {
+public class MockBatchQuery extends BatchQuery {
 
-    PostgresProcedureAction(ProcedureQuery query, DbAdapter adapter,
-            EntityResolver entityResolver) {
-        super(query, adapter, entityResolver);
+    public MockBatchQuery() {
+        super(new DbEntity("dummy"));
     }
+
+    public MockBatchQuery(DbEntity dbEntity) {
+        super(dbEntity);
+    }
+
+    public List getDbAttributes() {
+        return null;
+    }
+
+    public void reset() {
+    }
+
+    public boolean next() {
+        return false;
+    }
+
+    public Object getValue(int valueIndex) {
+        return null;
+    }
+
+    public int size() {
+        return 0;
+    }
+
 }

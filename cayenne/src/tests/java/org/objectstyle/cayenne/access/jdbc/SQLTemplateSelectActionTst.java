@@ -74,15 +74,18 @@ import org.objectstyle.cayenne.unit.util.MockOperationObserver;
  * @author Andrei Adamchik
  */
 public class SQLTemplateSelectActionTst extends CayenneTestCase {
+
     protected void setUp() throws Exception {
         super.setUp();
         deleteTestData();
     }
 
-    public void testAdapter() throws Exception {
+    public void testProperties() throws Exception {
         DbAdapter adapter = new JdbcAdapter();
-        SQLTemplateSelectAction plan = new SQLTemplateSelectAction(adapter);
-        assertSame(adapter, plan.getAdapter());
+        SQLTemplate template = new SQLTemplate(Object.class, "AAAAA", true);
+        SQLTemplateSelectAction action = new SQLTemplateSelectAction(template, adapter);
+        assertSame(adapter, action.getAdapter());
+        assertSame(template, action.getQuery());
     }
 
     public void testExecuteSelect() throws Exception {
@@ -97,13 +100,13 @@ public class SQLTemplateSelectActionTst extends CayenneTestCase {
         template.setParameters(bindings);
 
         DbAdapter adapter = getAccessStackAdapter().getAdapter();
-        SQLTemplateSelectAction plan = new SQLTemplateSelectAction(adapter);
+        SQLTemplateSelectAction plan = new SQLTemplateSelectAction(template, adapter);
 
         MockOperationObserver observer = new MockOperationObserver();
         Connection c = getConnection();
 
         try {
-            plan.performAction(c, template, observer);
+            plan.performAction(c, observer);
         }
         finally {
             c.close();
@@ -124,8 +127,7 @@ public class SQLTemplateSelectActionTst extends CayenneTestCase {
         // update data set to include dates....
         setDate(new Date(), 33006);
 
-        String templateString =
-            "SELECT #result('DATE_OF_BIRTH' 'java.util.Date' 'DOB') "
+        String templateString = "SELECT #result('DATE_OF_BIRTH' 'java.util.Date' 'DOB') "
                 + "FROM ARTIST WHERE ARTIST_ID = #bind($id)";
         SQLTemplate template = new SQLTemplate(Object.class, templateString, true);
         getSQLTemplateBuilder().updateSQLTemplate(template);
@@ -135,13 +137,13 @@ public class SQLTemplateSelectActionTst extends CayenneTestCase {
         template.setParameters(bindings);
 
         DbAdapter adapter = getAccessStackAdapter().getAdapter();
-        SQLTemplateSelectAction plan = new SQLTemplateSelectAction(adapter);
+        SQLTemplateSelectAction plan = new SQLTemplateSelectAction(template, adapter);
 
         MockOperationObserver observer = new MockOperationObserver();
         Connection c = getConnection();
 
         try {
-            plan.performAction(c, template, observer);
+            plan.performAction(c, observer);
         }
         finally {
             c.close();
@@ -161,8 +163,7 @@ public class SQLTemplateSelectActionTst extends CayenneTestCase {
         // update data set to include dates....
         setDate(new Date(), 33006);
 
-        String templateString =
-            "SELECT #result('DATE_OF_BIRTH' 'java.sql.Date' 'DOB') "
+        String templateString = "SELECT #result('DATE_OF_BIRTH' 'java.sql.Date' 'DOB') "
                 + "FROM ARTIST WHERE ARTIST_ID = #bind($id)";
         SQLTemplate template = new SQLTemplate(Object.class, templateString, true);
         getSQLTemplateBuilder().updateSQLTemplate(template);
@@ -172,13 +173,13 @@ public class SQLTemplateSelectActionTst extends CayenneTestCase {
         template.setParameters(bindings);
 
         DbAdapter adapter = getAccessStackAdapter().getAdapter();
-        SQLTemplateSelectAction plan = new SQLTemplateSelectAction(adapter);
+        SQLTemplateSelectAction plan = new SQLTemplateSelectAction(template, adapter);
 
         MockOperationObserver observer = new MockOperationObserver();
         Connection c = getConnection();
 
         try {
-            plan.performAction(c, template, observer);
+            plan.performAction(c, observer);
         }
         finally {
             c.close();
@@ -198,8 +199,7 @@ public class SQLTemplateSelectActionTst extends CayenneTestCase {
         // update data set to include dates....
         setDate(new Date(), 33006);
 
-        String templateString =
-            "SELECT #result('DATE_OF_BIRTH' 'java.sql.Timestamp' 'DOB') "
+        String templateString = "SELECT #result('DATE_OF_BIRTH' 'java.sql.Timestamp' 'DOB') "
                 + "FROM ARTIST WHERE ARTIST_ID = #bind($id)";
         SQLTemplate template = new SQLTemplate(Object.class, templateString, true);
         getSQLTemplateBuilder().updateSQLTemplate(template);
@@ -209,13 +209,13 @@ public class SQLTemplateSelectActionTst extends CayenneTestCase {
         template.setParameters(bindings);
 
         DbAdapter adapter = getAccessStackAdapter().getAdapter();
-        SQLTemplateSelectAction plan = new SQLTemplateSelectAction(adapter);
+        SQLTemplateSelectAction action = new SQLTemplateSelectAction(template, adapter);
 
         MockOperationObserver observer = new MockOperationObserver();
         Connection c = getConnection();
 
         try {
-            plan.performAction(c, template, observer);
+            action.performAction(c, observer);
         }
         finally {
             c.close();
@@ -232,8 +232,7 @@ public class SQLTemplateSelectActionTst extends CayenneTestCase {
     }
 
     private void setDate(Date date, int artistId) {
-        String templateString =
-            "UPDATE ARTIST SET DATE_OF_BIRTH #bindEqual($date 'DATE') "
+        String templateString = "UPDATE ARTIST SET DATE_OF_BIRTH #bindEqual($date 'DATE') "
                 + "WHERE ARTIST_ID = #bind($id)";
         SQLTemplate template = new SQLTemplate(Object.class, templateString, false);
 

@@ -69,12 +69,12 @@ import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * Implements a stateless strategy for execution of updating {@link SQLTemplate}queries.
+ * Implements a strategy for execution of updating SQLTemplates.
  * 
  * @author Andrei Adamchik
  * @since 1.2 replaces SQLTemplateExecutionPlan
@@ -83,8 +83,10 @@ public class SQLTemplateAction implements SQLAction {
 
     protected DbAdapter adapter;
     protected boolean removingLineBreaks;
+    protected SQLTemplate query;
 
-    public SQLTemplateAction(DbAdapter adapter) {
+    public SQLTemplateAction(SQLTemplate query, DbAdapter adapter) {
+        this.query = query;
         this.adapter = adapter;
     }
 
@@ -98,35 +100,26 @@ public class SQLTemplateAction implements SQLAction {
     /**
      * Runs a SQLTemplate query as an update.
      */
-    public void performAction(
-            Connection connection,
-            Query query,
-            OperationObserver observer) throws SQLException, Exception {
+    public void performAction(Connection connection, OperationObserver observer)
+            throws SQLException, Exception {
 
-        if (!(query instanceof SQLTemplate)) {
-            throw new CayenneException("Query unsupported by the execution plan: "
-                    + query);
-        }
+        String template = extractTemplateString();
 
-        SQLTemplate sqlTemplate = (SQLTemplate) query;
-
-        String template = extractTemplateString(sqlTemplate);
-        
-        // sanity check -  misconfigured templates
+        // sanity check - misconfigured templates
         if (template == null) {
             throw new CayenneException("No template string configured for adapter "
                     + getAdapter().getClass().getName());
         }
 
-        boolean loggable = QueryLogger.isLoggable(sqlTemplate.getLoggingLevel());
-        int size = sqlTemplate.parametersSize();
+        boolean loggable = QueryLogger.isLoggable(query.getLoggingLevel());
+        int size = query.parametersSize();
 
         SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
 
         // zero size indicates a one-shot query with no parameters
         // so fake a single entry batch...
         int[] counts = new int[size > 0 ? size : 1];
-        Iterator it = (size > 0) ? sqlTemplate.parametersIterator() : IteratorUtils
+        Iterator it = (size > 0) ? query.parametersIterator() : IteratorUtils
                 .singletonIterator(Collections.EMPTY_MAP);
         for (int i = 0; i < counts.length; i++) {
             Map nextParameters = (Map) it.next();
@@ -135,9 +128,8 @@ public class SQLTemplateAction implements SQLAction {
                     nextParameters);
 
             if (loggable) {
-                QueryLogger.logQuery(sqlTemplate.getLoggingLevel(),
-                        compiled.getSql(),
-                        Arrays.asList(compiled.getBindings()));
+                QueryLogger.logQuery(query.getLoggingLevel(), compiled.getSql(), Arrays
+                        .asList(compiled.getBindings()));
             }
 
             // TODO: we may cache prep statements for this loop, using merged string as a
@@ -147,14 +139,14 @@ public class SQLTemplateAction implements SQLAction {
             try {
                 bind(statement, compiled.getBindings());
                 counts[i] = statement.executeUpdate();
-                QueryLogger.logUpdateCount(sqlTemplate.getLoggingLevel(), counts[i]);
+                QueryLogger.logUpdateCount(query.getLoggingLevel(), counts[i]);
             }
             finally {
                 statement.close();
             }
         }
 
-        observer.nextBatchCount(sqlTemplate, counts);
+        observer.nextBatchCount(query, counts);
     }
 
     /**
@@ -163,8 +155,8 @@ public class SQLTemplateAction implements SQLAction {
      * 
      * @since 1.2
      */
-    protected String extractTemplateString(SQLTemplate template) {
-        String sql = template.getTemplate(getAdapter().getClass().getName());
+    protected String extractTemplateString() {
+        String sql = query.getTemplate(getAdapter().getClass().getName());
         return isRemovingLineBreaks() ? Util.stripLineBreaks(sql, " ") : sql;
     }
 
@@ -196,5 +188,12 @@ public class SQLTemplateAction implements SQLAction {
 
     public void setRemovingLineBreaks(boolean removingLineBreaks) {
         this.removingLineBreaks = removingLineBreaks;
+    }
+
+    /**
+     * Returns a SQLTemplate for this action.
+     */
+    public SQLTemplate getQuery() {
+        return query;
     }
 }

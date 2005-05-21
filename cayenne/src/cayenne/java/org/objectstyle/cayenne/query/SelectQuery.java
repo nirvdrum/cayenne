@@ -76,9 +76,9 @@ import org.objectstyle.cayenne.util.XMLSerializable;
 /**
  * SelectQuery is a Query object describing what rows to retrieve from the database and
  * how to convert them to objects. SelectQuery is defined in terms of object mapping.
- * During execution Cayenne transaclates it to SQL dialect of the target database.
- * SelectQuery defines a set of parameters for the fetch. Most important parameters are
- * the "root", "qualifier", and "ordering".
+ * During execution Cayenne translates it to SQL PreparedStatements using a SQL dialect of
+ * the target database. SelectQuery defines a set of parameters for the fetch. Most
+ * important parameters are the "root", "qualifier", and "ordering".
  * 
  * @author Andrei Adamchik
  */
@@ -181,6 +181,15 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     private void init(Object root, Expression qualifier) {
         this.setRoot(root);
         this.setQualifier(qualifier);
+    }
+
+    /**
+     * Calls "makeSelect" on the visitor.
+     * 
+     * @since 1.2
+     */
+    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+        return visitor.makeSelect(this);
     }
 
     /**
@@ -288,7 +297,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
                 encoder.println("</prefetch>");
             }
         }
-        
+
         // TODO: encode join prefetches...
 
         encoder.indent(-1);
@@ -325,7 +334,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         if (prefetches != null) {
             query.addPrefetches(prefetches);
         }
-        
+
         if (orderings != null) {
             query.addOrderings(orderings);
         }
@@ -338,7 +347,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         if (qualifier != null) {
             query.setQualifier(qualifier.expWithParameters(parameters, pruneMissing));
         }
-        
+
         // TODO: implement algorithm for building the name based on the original name and
         // the hashcode of the map of parameters. This way query clone can take advantage
         // of caching.
@@ -405,8 +414,8 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         orderings = null;
     }
 
-    /** 
-     * Returns true if this query returns distinct rows. 
+    /**
+     * Returns true if this query returns distinct rows.
      */
     public boolean isDistinct() {
         return distinct;
@@ -435,7 +444,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
                 DbAttribute attribute = (DbAttribute) it.next();
                 attributeNames.add(attribute.getName());
             }
-            
+
             return attributeNames;
         }
         else {
@@ -471,46 +480,47 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         return (getRoot() instanceof DbEntity)
                 || (customDbAttributes != null && !customDbAttributes.isEmpty());
     }
-    
+
     /**
      * Returns a list that internally stores custom db attributes, creating it on demand.
      * 
      * @since 1.2
      */
     List nonNullCustomDbAttributes() {
-        if(customDbAttributes == null) {
+        if (customDbAttributes == null) {
             customDbAttributes = new ArrayList();
         }
-        
+
         return customDbAttributes;
     }
-    
+
     /**
      * Returns a list that internally stores orderings, creating it on demand.
      * 
      * @since 1.2
      */
     List nonNullOrderings() {
-        if(orderings == null) {
+        if (orderings == null) {
             orderings = new ArrayList();
         }
-        
+
         return orderings;
     }
-    
+
     /**
-     * Returns a collection that internally stores prefetches, creating such collection on demand.
+     * Returns a collection that internally stores prefetches, creating such collection on
+     * demand.
      * 
      * @since 1.2
      */
     Collection nonNullPrefetches() {
-        if(prefetches == null) {
+        if (prefetches == null) {
             prefetches = new HashSet();
         }
-        
+
         return prefetches;
     }
-    
+
     /**
      * Returns a collection of joint prefetches.
      * 
@@ -519,7 +529,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     public Collection getJointPrefetches() {
         return selectProperties.getJointPrefetches();
     }
-    
+
     /**
      * Adds a joint prefetch.
      * 
@@ -528,7 +538,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     public void addJointPrefetch(String relationshipPath) {
         selectProperties.addJointPrefetch(relationshipPath);
     }
-    
+
     /**
      * Adds all joint prefetches from a provided collection.
      * 
@@ -537,7 +547,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     public void addJointPrefetches(Collection relationshipPaths) {
         selectProperties.addJointPrefetches(relationshipPaths);
     }
-    
+
     /**
      * Clears all joint prefetches.
      * 
@@ -546,7 +556,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     public void clearJointPrefetches() {
         selectProperties.clearJointPrefetches();
     }
-    
+
     /**
      * Removes joint prefetch.
      * 
@@ -555,7 +565,6 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     public void removeJointPrefetch(String relationshipPath) {
         selectProperties.removeJointPrefetch(relationshipPath);
     }
-    
 
     /**
      * Returns a collection of String paths indicating relationships to objects that are
@@ -581,7 +590,6 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         nonNullPrefetches().addAll(relationshipPaths);
     }
 
-    
     /**
      * Clears all stored prefetch paths.
      */

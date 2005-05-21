@@ -61,13 +61,14 @@ import java.util.List;
 
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.jdbc.SQLAction;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBBatchQueryWrapper;
 import org.objectstyle.cayenne.access.util.BatchQueryUtils;
 import org.objectstyle.cayenne.query.BatchQuery;
+import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 
 /**
  * DataNode subclass customized for Oracle database engine.
@@ -98,7 +99,7 @@ public class OracleDataNode extends DataNode {
         if (OracleAdapter.isSupportsOracleLOB()
                 && BatchQueryUtils.updatesLOBColumns(query)) {
 
-            action = new OracleLOBBatchAction(getAdapter());
+            action = new OracleLOBBatchAction(query, getAdapter());
         }
         else {
 
@@ -108,13 +109,14 @@ public class OracleDataNode extends DataNode {
 
             boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
             OracleBatchAction batchAction = new OracleBatchAction(
+                    query,
                     getAdapter(),
                     getEntityResolver());
             batchAction.setBatch(runningAsBatch);
             action = batchAction;
         }
 
-        action.performAction(connection, query, observer);
+        action.performAction(connection, observer);
     }
 
     /**
@@ -125,10 +127,10 @@ public class OracleDataNode extends DataNode {
             Query query,
             OperationObserver observer) throws SQLException, Exception {
 
-        new OracleProcedureAction(getAdapter(), getEntityResolver()).performAction(
-                con,
-                query,
-                observer);
+        new OracleProcedureAction(
+                (ProcedureQuery) query,
+                getAdapter(),
+                getEntityResolver()).performAction(con, observer);
     }
 
     /**
@@ -142,7 +144,7 @@ public class OracleDataNode extends DataNode {
             BatchQuery query,
             OperationObserver delegate) throws SQLException, Exception {
 
-        new OracleLOBBatchAction(getAdapter()).performAction(con, query, delegate);
+        new OracleLOBBatchAction(query, getAdapter()).performAction(con, delegate);
     }
 
     /**
@@ -156,8 +158,7 @@ public class OracleDataNode extends DataNode {
             LOBBatchQueryWrapper selectQuery,
             List qualifierAttributes) throws SQLException, Exception {
 
-        new OracleLOBBatchAction(getAdapter()).processLOBRow(
-                con,
+        new OracleLOBBatchAction(null, getAdapter()).processLOBRow(con,
                 queryBuilder,
                 selectQuery,
                 qualifierAttributes);

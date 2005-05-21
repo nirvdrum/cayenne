@@ -78,7 +78,6 @@ import org.objectstyle.cayenne.query.Query;
 class AntDataPortDelegate implements DataPortDelegate {
 
     private static final Perl5Util regexUtil = new Perl5Util();
-    private static final String[] emptyArray = new String[0];
 
     protected Task parentTask;
     

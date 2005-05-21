@@ -58,37 +58,39 @@ package org.objectstyle.cayenne.query;
 import org.objectstyle.cayenne.exp.Expression;
 
 /**
- * An abstract superclass of queries that have qualifiers. Those include select,
- * update and delete queries.
+ * An abstract superclass of queries with Expression qualifiers.
  * 
  * @author Andrei Adamchik
  */
 public abstract class QualifiedQuery extends AbstractQuery {
-	protected Expression qualifier;
 
-	/** Setter for query qualifier. */
-	public void setQualifier(Expression qualifier) {
-		this.qualifier = qualifier;
-	}
+    protected Expression qualifier;
 
-	/** Getter for query qualifier. */
-	public Expression getQualifier() {
-		return qualifier;
-	}
+    /**
+     * Sets new query qualifier.
+     */
+    public void setQualifier(Expression qualifier) {
+        this.qualifier = qualifier;
+    }
 
-	/**
-	 * Adds specified qualifier to the existing qualifier
-	 * joining it using "AND".
-	 */
-	public void andQualifier(Expression e) {
+    /**
+     * Returns query qualifier.
+     */
+    public Expression getQualifier() {
+        return qualifier;
+    }
+
+    /**
+     * Adds specified qualifier to the existing qualifier joining it using "AND".
+     */
+    public void andQualifier(Expression e) {
         qualifier = (qualifier != null) ? qualifier.andExp(e) : e;
-	}
+    }
 
-	/**
-	* Adds specified qualifier to the existing qualifier
-	* joining it using "OR".
-	*/
-	public void orQualifier(Expression e) {
-       qualifier = (qualifier != null) ? qualifier.orExp(e) : e;
-	}
+    /**
+     * Adds specified qualifier to the existing qualifier joining it using "OR".
+     */
+    public void orQualifier(Expression e) {
+        qualifier = (qualifier != null) ? qualifier.orExp(e) : e;
+    }
 }

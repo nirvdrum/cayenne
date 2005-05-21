@@ -52,7 +52,7 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne.query;
 
 import java.util.HashMap;
@@ -61,72 +61,89 @@ import java.util.Map;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
 
-/** Object encapsulating an UPDATE statement. Note that updated attributes
- *  are expressed in terms of DbAttribute names.  */
+/**
+ * Object encapsulating an UPDATE statement. Note that updated attributes are expressed in
+ * terms of DbAttribute names.
+ */
 public class UpdateQuery extends QualifiedQuery {
-    
+
     protected Map updAttributes = new HashMap();
-    
+
     /** Creates empty UpdateQuery. */
-    public UpdateQuery() {}
-    
-    private void init(Object root, Expression qualifier) {
-    	setRoot(root);
-    	setQualifier(qualifier);
+    public UpdateQuery() {
     }
-    
+
+    private void init(Object root, Expression qualifier) {
+        setRoot(root);
+        setQualifier(qualifier);
+    }
+
     /**
      * Creates a UpdateQuery with null qualifier, for the specifed ObjEntity
+     * 
      * @param root the ObjEntity this UpdateQuery is for.
      */
     public UpdateQuery(ObjEntity root) {
-    	this(root, null);
+        this(root, null);
     }
-    
-     /**
-     * Creates a UpdateQuery  for the specifed ObjEntity with the given qualifier
+
+    /**
+     * Creates a UpdateQuery for the specifed ObjEntity with the given qualifier
+     * 
      * @param root the ObjEntity this UpdateQuery is for.
      * @param qualifier an Expression indicating which objects will be updated
      */
-   public UpdateQuery(ObjEntity root, Expression qualifier) {
-		init(root, qualifier);
+    public UpdateQuery(ObjEntity root, Expression qualifier) {
+        init(root, qualifier);
     }
-    
-     /**
-     * Creates a UpdateQuery with null qualifier, for the entity which uses the given class.
+
+    /**
+     * Creates a UpdateQuery with null qualifier, for the entity which uses the given
+     * class.
      * 
      * @param rootClass the Class of objects this UpdateQuery is for.
      */
-   public UpdateQuery(Class rootClass) {
-    	this(rootClass, null);
+    public UpdateQuery(Class rootClass) {
+        this(rootClass, null);
     }
-    
-	/**
-	 * Creates a UpdateQuery for the entity which uses the given class, with the given qualifier.
+
+    /**
+     * Creates a UpdateQuery for the entity which uses the given class, with the given
+     * qualifier.
      * 
-	 * @param rootClass the Class of objects this UpdateQuery is for.
+     * @param rootClass the Class of objects this UpdateQuery is for.
      * @param qualifier an Expression indicating which objects will be updated
      */
-   public UpdateQuery(Class rootClass, Expression qualifier) {
-    	init(rootClass, qualifier);
+    public UpdateQuery(Class rootClass, Expression qualifier) {
+        init(rootClass, qualifier);
     }
-    
-    
+
     /** Creates UpdateQuery with <code>objEntityName</code> parameter. */
     public UpdateQuery(String objEntityName) {
         this(objEntityName, null);
     }
-    
-    /** Creates UpdateQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
+
+    /**
+     * Creates UpdateQuery with <code>objEntityName</code> and <code>qualifier</code>
+     * parameters.
+     */
     public UpdateQuery(String objEntityName, Expression qualifier) {
         init(objEntityName, qualifier);
     }
-    
+
+    /**
+     * Calls "makeUpdate" on the visitor.
+     * 
+     * @since 1.2
+     */
+    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+        return visitor.makeUpdate(this);
+    }
+
     public void addUpdAttribute(String attrName, Object updatedValue) {
         updAttributes.put(attrName, updatedValue);
     }
-    
-    
+
     /** Returns a map of updated attributes */
     public Map getUpdAttributes() {
         return updAttributes;

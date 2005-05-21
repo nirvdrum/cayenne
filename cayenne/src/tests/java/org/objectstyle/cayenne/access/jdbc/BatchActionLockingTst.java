@@ -62,19 +62,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Level;
-import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.OptimisticLockException;
-import org.objectstyle.cayenne.access.ResultIterator;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.DeleteBatchQuery;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.testdo.locking.SimpleLockingTest;
 import org.objectstyle.cayenne.unit.LockingTestCase;
+import org.objectstyle.cayenne.unit.util.MockOperationObserver;
 
 import com.mockrunner.jdbc.PreparedStatementResultSetHandler;
 import com.mockrunner.mock.jdbc.MockConnection;
@@ -89,47 +86,42 @@ public class BatchActionLockingTst extends LockingTestCase {
 
         // test with adapter that supports keys...
         DbAdapter adapter = buildAdapter(true);
-        BatchAction action = new BatchAction(adapter, resolver);
 
         DbEntity dbEntity = resolver.lookupDbEntity(SimpleLockingTest.class);
 
-        List qualifierAttributes =
-            Arrays.asList(
-                new Object[] {
-                        dbEntity.getAttribute("LOCKING_TEST_ID"),
-                        dbEntity.getAttribute("NAME")});
+        List qualifierAttributes = Arrays.asList(new Object[] {
+                dbEntity.getAttribute("LOCKING_TEST_ID"), dbEntity.getAttribute("NAME")
+        });
 
         Collection nullAttributeNames = Collections.singleton("NAME");
-        
+
         Map qualifierSnapshot = new HashMap();
         qualifierSnapshot.put("LOCKING_TEST_ID", new Integer(1));
-        
-        DeleteBatchQuery batchQuery = new DeleteBatchQuery(dbEntity, qualifierAttributes, nullAttributeNames, 5);
+
+        DeleteBatchQuery batchQuery = new DeleteBatchQuery(
+                dbEntity,
+                qualifierAttributes,
+                nullAttributeNames,
+                5);
         batchQuery.setUsingOptimisticLocking(true);
         batchQuery.add(qualifierSnapshot);
 
         DeleteBatchQueryBuilder batchQueryBuilder = new DeleteBatchQueryBuilder(adapter);
 
         MockConnection mockConnection = new MockConnection();
-        PreparedStatementResultSetHandler preparedStatementResultSetHandler = mockConnection.getPreparedStatementResultSetHandler();
+        PreparedStatementResultSetHandler preparedStatementResultSetHandler = mockConnection
+                .getPreparedStatementResultSetHandler();
         preparedStatementResultSetHandler.setExactMatch(false);
         preparedStatementResultSetHandler.setCaseSensitive(false);
         preparedStatementResultSetHandler.prepareUpdateCount("DELETE", 1);
 
-        OperationObserver operationObserver = new OperationObserver() {
-            public void nextCount(Query query, int resultCount) {}
-            public void nextBatchCount(Query query, int[] resultCount) {}
-            public void nextDataRows(Query query, List dataRows) {}
-            public void nextDataRows(Query q, ResultIterator it) {}
-            public void nextGeneratedDataRows(Query query, ResultIterator keysIterator) {}
-            public void nextQueryException(Query query, Exception ex) {}
-            public void nextGlobalException(Exception ex) {}
-            public Level getLoggingLevel() { return null; }
-            public boolean isIteratedResult() { return false; }
-        };
         boolean generatesKeys = false;
-        
-        action.runAsIndividualQueries(mockConnection, batchQuery, batchQueryBuilder, operationObserver, generatesKeys);
+
+        BatchAction action = new BatchAction(batchQuery, adapter, resolver);
+        action.runAsIndividualQueries(mockConnection,
+                batchQueryBuilder,
+                new MockOperationObserver(),
+                generatesKeys);
         assertEquals(0, mockConnection.getNumberCommits());
         assertEquals(0, mockConnection.getNumberRollbacks());
     }
@@ -139,51 +131,46 @@ public class BatchActionLockingTst extends LockingTestCase {
 
         // test with adapter that supports keys...
         DbAdapter adapter = buildAdapter(true);
-        BatchAction action = new BatchAction(adapter, resolver);
 
         DbEntity dbEntity = resolver.lookupDbEntity(SimpleLockingTest.class);
 
-        List qualifierAttributes =
-            Arrays.asList(
-                new Object[] {
-                        dbEntity.getAttribute("LOCKING_TEST_ID"),
-                        dbEntity.getAttribute("NAME")});
+        List qualifierAttributes = Arrays.asList(new Object[] {
+                dbEntity.getAttribute("LOCKING_TEST_ID"), dbEntity.getAttribute("NAME")
+        });
 
         Collection nullAttributeNames = Collections.singleton("NAME");
-        
+
         Map qualifierSnapshot = new HashMap();
         qualifierSnapshot.put("LOCKING_TEST_ID", new Integer(1));
-        
-        DeleteBatchQuery batchQuery = new DeleteBatchQuery(dbEntity, qualifierAttributes, nullAttributeNames, 5);
+
+        DeleteBatchQuery batchQuery = new DeleteBatchQuery(
+                dbEntity,
+                qualifierAttributes,
+                nullAttributeNames,
+                5);
         batchQuery.setUsingOptimisticLocking(true);
         batchQuery.add(qualifierSnapshot);
 
         DeleteBatchQueryBuilder batchQueryBuilder = new DeleteBatchQueryBuilder(adapter);
 
         MockConnection mockConnection = new MockConnection();
-        PreparedStatementResultSetHandler preparedStatementResultSetHandler = mockConnection.getPreparedStatementResultSetHandler();
+        PreparedStatementResultSetHandler preparedStatementResultSetHandler = mockConnection
+                .getPreparedStatementResultSetHandler();
         preparedStatementResultSetHandler.setExactMatch(false);
         preparedStatementResultSetHandler.setCaseSensitive(false);
         preparedStatementResultSetHandler.prepareUpdateCount("DELETE", 0);
 
-        OperationObserver operationObserver = new OperationObserver() {
-            public void nextCount(Query query, int resultCount) {}
-            public void nextBatchCount(Query query, int[] resultCount) {}
-            public void nextDataRows(Query query, List dataRows) {}
-            public void nextDataRows(Query q, ResultIterator it) {}
-            public void nextGeneratedDataRows(Query query, ResultIterator keysIterator) {}
-            public void nextQueryException(Query query, Exception ex) {}
-            public void nextGlobalException(Exception ex) {}
-            public Level getLoggingLevel() { return null; }
-            public boolean isIteratedResult() { return false; }
-        };
         boolean generatesKeys = false;
-        
+        BatchAction action = new BatchAction(batchQuery, adapter, resolver);
         try {
-			action.runAsIndividualQueries(mockConnection, batchQuery, batchQueryBuilder, operationObserver, generatesKeys);
+            action.runAsIndividualQueries(mockConnection,
+                    batchQueryBuilder,
+                    new MockOperationObserver(),
+                    generatesKeys);
             fail("No OptimisticLockingFailureException thrown.");
-		}
-        catch (OptimisticLockException e) {}
+        }
+        catch (OptimisticLockException e) {
+        }
         assertEquals(0, mockConnection.getNumberCommits());
         assertEquals(0, mockConnection.getNumberRollbacks());
     }

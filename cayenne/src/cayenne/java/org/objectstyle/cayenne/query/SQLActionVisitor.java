@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -54,38 +54,41 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.access.jdbc;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.query.SQLTemplate;
+package org.objectstyle.cayenne.query;
 
 /**
- * Implements a stateless strategy for execution of updating {@link SQLTemplate} 
+ * A query "visitor" interface that defines methods for creating various SQLActions from
  * queries.
  * 
+ * @since 1.2
  * @author Andrei Adamchik
- * @since 1.1
- * @deprecated Since 1.2 replaced with SQLTemplateAction for naming consistency.
  */
-public class SQLTemplateExecutionPlan extends SQLTemplateAction {
+public interface SQLActionVisitor {
 
-    public SQLTemplateExecutionPlan(DbAdapter adapter) {
-        super(adapter);
-    }
-    
     /**
-     * @deprecated Since 1.2 a generic "execute" is used.
+     * Executes a generic update query.
      */
-    public void execute(
-            Connection connection,
-            SQLTemplate query,
-            OperationObserver observer)
-            throws SQLException, Exception {
-        
-        this.performAction(connection, query, observer);
-    }
+    SQLAction makeUpdate(Query query);
+
+    /**
+     * Executes a batch update query.
+     */
+    SQLAction makeBatchUpdate(BatchQuery query);
+
+    /**
+     * Executes a select query.
+     */
+    SQLAction makeSelect(GenericSelectQuery query);
+
+    /**
+     * Executes a SQLTemplate query.
+     */
+    // TODO: we should probably remove this method and let select and update methods
+    // handle it.. Currently this mimicks DataNode displatch methods.
+    SQLAction makeSQL(SQLTemplate query);
+
+    /**
+     * Executes a ProcedureQuery.
+     */
+    SQLAction makeProcedure(ProcedureQuery query);
 }

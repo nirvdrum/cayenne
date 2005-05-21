@@ -164,6 +164,15 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
         setRoot(procedureName);
         setResultClassName(resultType != null ? resultType.getName() : null);
     }
+    
+    /**
+     * Calls "makeProcedure" on the visitor.
+     * 
+     * @since 1.2
+     */
+    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+        return visitor.makeProcedure(this);
+    }
 
     /**
      * Initializes query parameters using a set of properties.

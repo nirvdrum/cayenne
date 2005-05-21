@@ -37,17 +37,12 @@ package org.objectstyle.cayenne.query;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.util.MockQualifiedQuery;
 
 public class QualifiedQueryTst extends CayenneTestCase {
 
-    protected QualifiedQuery query;
-
-    public void setUp() throws Exception {
-        query = new QualifiedQuery() {
-        };
-    }
-
-    public void testSetQualifier() throws Exception {
+    public void testSetQualifier() {
+        QualifiedQuery query = new MockQualifiedQuery();
         assertNull(query.getQualifier());
 
         Expression qual = ExpressionFactory.expressionOfType(Expression.AND);
@@ -56,7 +51,8 @@ public class QualifiedQueryTst extends CayenneTestCase {
         assertSame(qual, query.getQualifier());
     }
 
-    public void testAndQualifier() throws Exception {
+    public void testAndQualifier() {
+        QualifiedQuery query = new MockQualifiedQuery();
         assertNull(query.getQualifier());
 
         Expression e1 = ExpressionFactory.expressionOfType(Expression.EQUAL_TO);
@@ -68,7 +64,8 @@ public class QualifiedQueryTst extends CayenneTestCase {
         assertEquals(Expression.AND, query.getQualifier().getType());
     }
 
-    public void testOrQualifier() throws Exception {
+    public void testOrQualifier() {
+        QualifiedQuery query = new MockQualifiedQuery();
         assertNull(query.getQualifier());
 
         Expression e1 = ExpressionFactory.expressionOfType(Expression.EQUAL_TO);

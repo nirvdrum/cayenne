@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
+import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -94,10 +95,10 @@ public class SQLServerDataNode extends DataNode {
             Query query,
             OperationObserver observer) throws SQLException, Exception {
 
-        new SQLServerProcedureAction(getAdapter(), getEntityResolver()).performAction(
-                con,
-                query,
-                observer);
+        new SQLServerProcedureAction(
+                (ProcedureQuery) query,
+                getAdapter(),
+                getEntityResolver()).performAction(con, observer);
     }
 
     /**
@@ -116,8 +117,7 @@ public class SQLServerDataNode extends DataNode {
                     + query.getDbEntity().getFullyQualifiedName()
                     + " ON";
 
-            QueryLogger.logQuery(
-                    query.getLoggingLevel(),
+            QueryLogger.logQuery(query.getLoggingLevel(),
                     configSQL,
                     Collections.EMPTY_LIST);
 

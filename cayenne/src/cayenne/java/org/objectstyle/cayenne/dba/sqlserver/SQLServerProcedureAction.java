@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.access.jdbc.RowDescriptor;
 import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -88,14 +88,13 @@ import org.objectstyle.cayenne.query.Query;
  */
 public class SQLServerProcedureAction extends ProcedureAction {
 
-    public SQLServerProcedureAction(DbAdapter adapter, EntityResolver entityResolver) {
-        super(adapter, entityResolver);
+    public SQLServerProcedureAction(ProcedureQuery query, DbAdapter adapter,
+            EntityResolver entityResolver) {
+        super(query, adapter, entityResolver);
     }
 
-    public void performAction(
-            Connection connection,
-            Query query,
-            OperationObserver observer) throws SQLException, Exception {
+    public void performAction(Connection connection, OperationObserver observer)
+            throws SQLException, Exception {
 
         ProcedureTranslator transl = (ProcedureTranslator) getAdapter()
                 .getQueryTranslator(query);
@@ -125,11 +124,7 @@ public class SQLServerProcedureAction extends ProcedureAction {
                     try {
                         RowDescriptor descriptor = new RowDescriptor(rs, getAdapter()
                                 .getExtendedTypes());
-                        readResultSet(
-                                rs,
-                                descriptor,
-                                (GenericSelectQuery) query,
-                                localObserver);
+                        readResultSet(rs, descriptor, query, localObserver);
                     }
                     finally {
                         try {
@@ -152,7 +147,7 @@ public class SQLServerProcedureAction extends ProcedureAction {
             }
 
             // read out parameters to the main observer ... AFTER the main result set
-            readProcedureOutParameters(statement, transl.getProcedure(), query, observer);
+            readProcedureOutParameters(statement, observer);
 
             // add results back to main observer
             localObserver.flushResults(query);

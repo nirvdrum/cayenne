@@ -74,6 +74,15 @@ public abstract class BatchQuery extends AbstractQuery {
     }
 
     /**
+     * Calls "makeBatchUpdate" on the visitor.
+     * 
+     * @since 1.2
+     */
+    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+        return visitor.makeBatchUpdate(this);
+    }
+
+    /**
      * Returns true if the batch query uses optimistic locking.
      * 
      * @since 1.1

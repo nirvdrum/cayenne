@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.query;
 
+import java.io.Serializable;
+
 import org.apache.log4j.Level;
 
 /**
@@ -69,7 +71,7 @@ import org.apache.log4j.Level;
  * @see org.objectstyle.cayenne.access.QueryEngine
  * @author Andrei Adamchik
  */
-public interface Query {
+public interface Query extends Serializable {
 
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
 
@@ -104,4 +106,13 @@ public interface Query {
      * Sets the root of the query.
      */
     void setRoot(Object root);
+
+    /**
+     * A "visit" method that allows a concrete query implementation to pick an appropriate
+     * method building a SQLAction, or even replace itself with another query that should
+     * be used for SQLAction construction.
+     * 
+     * @since 1.2
+     */
+    SQLAction toSQLAction(SQLActionVisitor visitor);
 }

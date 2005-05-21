@@ -183,11 +183,13 @@ public class ToManyList implements List, Serializable {
     }
 
     public boolean equals(Object o) {
-        if (o == null)
+        if (o == null) {
             return false;
+        }
 
-        if (o.getClass() != ToManyList.class)
+        if (!(o instanceof ToManyList)) {
             return false;
+        }
 
         return resolvedObjectList().equals(((ToManyList) o).resolvedObjectList());
     }

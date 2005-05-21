@@ -165,6 +165,15 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
         setRoot(objEntityName);
         setDefaultTemplate(defaultTemplate);
     }
+    
+    /**
+     * Calls "makeSQL" on the visitor.
+     * 
+     * @since 1.2
+     */
+    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+        return visitor.makeSQL(this);
+    }
 
     /**
      * Prints itself as XML to the provided PrintWriter.

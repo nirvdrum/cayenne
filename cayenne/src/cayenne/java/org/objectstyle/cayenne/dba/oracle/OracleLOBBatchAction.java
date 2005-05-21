@@ -74,7 +74,6 @@ import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.jdbc.SQLAction;
 import org.objectstyle.cayenne.access.trans.LOBBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBBatchQueryWrapper;
 import org.objectstyle.cayenne.access.trans.LOBInsertBatchQueryBuilder;
@@ -83,7 +82,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
 import org.objectstyle.cayenne.util.Util;
 
@@ -93,10 +92,12 @@ import org.objectstyle.cayenne.util.Util;
  */
 class OracleLOBBatchAction implements SQLAction {
 
+    BatchQuery query;
     DbAdapter adapter;
 
-    OracleLOBBatchAction(DbAdapter adapter) {
+    OracleLOBBatchAction(BatchQuery query, DbAdapter adapter) {
         this.adapter = adapter;
+        this.query = query;
     }
 
     DbAdapter getAdapter() {
@@ -105,27 +106,18 @@ class OracleLOBBatchAction implements SQLAction {
 
     public void performAction(
             Connection connection,
-            Query query,
             OperationObserver observer) throws SQLException, Exception {
 
-        // sanity check
-        if (!(query instanceof BatchQuery)) {
-            throw new CayenneException("Query unsupported by the execution plan: "
-                    + query);
-        }
-
-        BatchQuery batch = (BatchQuery) query;
-
         LOBBatchQueryBuilder queryBuilder;
-        if (batch instanceof InsertBatchQuery) {
+        if (query instanceof InsertBatchQuery) {
             queryBuilder = new LOBInsertBatchQueryBuilder(getAdapter());
         }
-        else if (batch instanceof UpdateBatchQuery) {
+        else if (query instanceof UpdateBatchQuery) {
             queryBuilder = new LOBUpdateBatchQueryBuilder(getAdapter());
         }
         else {
             throw new CayenneException(
-                    "Unsupported batch type for special LOB processing: " + batch);
+                    "Unsupported batch type for special LOB processing: " + query);
         }
 
         queryBuilder.setTrimFunction(OracleAdapter.TRIM_FUNCTION);
@@ -136,16 +128,16 @@ class OracleLOBBatchAction implements SQLAction {
         // for each batch set, since prepared statements
         // may be different depending on whether LOBs are NULL or not..
 
-        LOBBatchQueryWrapper selectQuery = new LOBBatchQueryWrapper(batch);
+        LOBBatchQueryWrapper selectQuery = new LOBBatchQueryWrapper(query);
         List qualifierAttributes = selectQuery.getDbAttributesForLOBSelectQualifier();
 
         Level logLevel = query.getLoggingLevel();
         boolean isLoggable = QueryLogger.isLoggable(logLevel);
 
-        batch.reset();
+        query.reset();
         while (selectQuery.next()) {
             int updated = 0;
-            String updateStr = queryBuilder.createSqlString(batch);
+            String updateStr = queryBuilder.createSqlString(query);
 
             // 1. run row update
             QueryLogger.logQuery(logLevel, updateStr, Collections.EMPTY_LIST);
@@ -153,11 +145,11 @@ class OracleLOBBatchAction implements SQLAction {
             try {
 
                 if (isLoggable) {
-                    List bindings = queryBuilder.getValuesForLOBUpdateParameters(batch);
+                    List bindings = queryBuilder.getValuesForLOBUpdateParameters(query);
                     QueryLogger.logQueryParameters(logLevel, "bind", bindings);
                 }
 
-                queryBuilder.bindParameters(statement, batch);
+                queryBuilder.bindParameters(statement, query);
                 updated = statement.executeUpdate();
                 QueryLogger.logUpdateCount(logLevel, updated);
             }

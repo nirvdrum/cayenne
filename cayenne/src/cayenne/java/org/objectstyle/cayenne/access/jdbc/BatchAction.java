@@ -80,7 +80,6 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.DeleteBatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
 
 /**
@@ -90,9 +89,12 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
 public class BatchAction extends BaseSQLAction {
 
     protected boolean batch;
+    protected BatchQuery query;
 
-    public BatchAction(DbAdapter adapter, EntityResolver entityResolver) {
+    public BatchAction(BatchQuery batchQuery, DbAdapter adapter,
+            EntityResolver entityResolver) {
         super(adapter, entityResolver);
+        this.query = batchQuery;
     }
 
     public boolean isBatch() {
@@ -103,54 +105,37 @@ public class BatchAction extends BaseSQLAction {
         this.batch = runningAsBatch;
     }
 
-    public void performAction(
-            Connection connection,
-            Query query,
-            OperationObserver observer) throws SQLException, Exception {
+    public void performAction(Connection connection, OperationObserver observer)
+            throws SQLException, Exception {
 
-        // sanity check
-        if (!(query instanceof BatchQuery)) {
-            throw new CayenneException("Query unsupported by the execution plan: "
-                    + query);
-        }
-
-        BatchQuery batchQuery = (BatchQuery) query;
-        BatchQueryBuilder queryBuilder = createBuilder(batchQuery);
-
-        boolean generatesKeys = hasGeneratedKeys(batchQuery);
+        BatchQueryBuilder queryBuilder = createBuilder();
+        boolean generatesKeys = hasGeneratedKeys();
 
         if (batch && !generatesKeys) {
-            runAsBatch(connection, batchQuery, queryBuilder, observer);
+            runAsBatch(connection, queryBuilder, observer);
         }
         else {
-            runAsIndividualQueries(
-                    connection,
-                    batchQuery,
-                    queryBuilder,
-                    observer,
-                    generatesKeys);
+            runAsIndividualQueries(connection, queryBuilder, observer, generatesKeys);
         }
     }
 
-    // TODO: move all query translation logic to adapter.getQueryTranslator()
-    protected BatchQueryBuilder createBuilder(BatchQuery batch) throws CayenneException {
-        if (batch instanceof InsertBatchQuery) {
+    protected BatchQueryBuilder createBuilder() throws CayenneException {
+        if (query instanceof InsertBatchQuery) {
             return new InsertBatchQueryBuilder(getAdapter());
         }
-        else if (batch instanceof UpdateBatchQuery) {
+        else if (query instanceof UpdateBatchQuery) {
             return new UpdateBatchQueryBuilder(getAdapter());
         }
-        else if (batch instanceof DeleteBatchQuery) {
+        else if (query instanceof DeleteBatchQuery) {
             return new DeleteBatchQueryBuilder(getAdapter());
         }
         else {
-            throw new CayenneException("Unsupported batch query: " + batch);
+            throw new CayenneException("Unsupported batch query: " + query);
         }
     }
 
     protected void runAsBatch(
             Connection con,
-            BatchQuery query,
             BatchQueryBuilder queryBuilder,
             OperationObserver delegate) throws SQLException, Exception {
 
@@ -199,7 +184,6 @@ public class BatchAction extends BaseSQLAction {
      */
     protected void runAsIndividualQueries(
             Connection connection,
-            BatchQuery query,
             BatchQueryBuilder queryBuilder,
             OperationObserver delegate,
             boolean generatesKeys) throws SQLException, Exception {
@@ -216,9 +200,9 @@ public class BatchAction extends BaseSQLAction {
         // run batch queries one by one
         query.reset();
 
-        PreparedStatement statement = (generatesKeys) ? connection.prepareStatement(
-                queryStr,
-                Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(queryStr);
+        PreparedStatement statement = (generatesKeys) ? connection
+                .prepareStatement(queryStr, Statement.RETURN_GENERATED_KEYS) : connection
+                .prepareStatement(queryStr);
         try {
             while (query.next()) {
                 if (isLoggable) {
@@ -232,12 +216,10 @@ public class BatchAction extends BaseSQLAction {
                 if (useOptimisticLock && updated != 1) {
 
                     Map snapshot = Collections.EMPTY_MAP;
-                    if (query instanceof UpdateBatchQuery)
-                    {
+                    if (query instanceof UpdateBatchQuery) {
                         snapshot = ((UpdateBatchQuery) query).getCurrentQualifier();
                     }
-                    else if (query instanceof DeleteBatchQuery)
-                    {
+                    else if (query instanceof DeleteBatchQuery) {
                         snapshot = ((DeleteBatchQuery) query).getCurrentQualifier();
                     }
 
@@ -250,7 +232,7 @@ public class BatchAction extends BaseSQLAction {
                 delegate.nextCount(query, updated);
 
                 if (generatesKeys) {
-                    processGeneratedKeys(query, statement, delegate);
+                    processGeneratedKeys(statement, delegate);
                 }
 
                 if (isLoggable) {
@@ -270,7 +252,7 @@ public class BatchAction extends BaseSQLAction {
     /**
      * Returns whether BatchQuery generates any keys.
      */
-    protected boolean hasGeneratedKeys(BatchQuery query) {
+    protected boolean hasGeneratedKeys() {
         // see if we are configured to support generated keys
         if (!adapter.supportsGeneratedKeys()) {
             return false;
@@ -294,10 +276,8 @@ public class BatchAction extends BaseSQLAction {
     /**
      * Implements generated keys extraction supported since JDBC 3.0 specification.
      */
-    protected void processGeneratedKeys(
-            BatchQuery query,
-            Statement statement,
-            OperationObserver observer) throws SQLException, CayenneException {
+    protected void processGeneratedKeys(Statement statement, OperationObserver observer)
+            throws SQLException, CayenneException {
 
         ResultSet keysRS = statement.getGeneratedKeys();
         RowDescriptor descriptor = new RowDescriptor(keysRS, getAdapter()

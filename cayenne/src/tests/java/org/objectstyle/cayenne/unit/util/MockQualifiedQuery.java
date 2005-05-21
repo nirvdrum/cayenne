@@ -53,27 +53,19 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.jdbc;
+package org.objectstyle.cayenne.unit.util;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QualifiedQuery;
+import org.objectstyle.cayenne.query.SQLAction;
+import org.objectstyle.cayenne.query.SQLActionVisitor;
 
 /**
- * Defines API for query execution strategy over JDBC connection (as in Strategy Pattern).
- * SQLAction unified interface allows a high degree of customization for JDBC
- * interactions.
- * 
- * @since 1.2
  * @author Andrei Adamchik
  */
-public interface SQLAction {
+public class MockQualifiedQuery extends QualifiedQuery {
 
-    /**
-     * Executes a query using a strategy defined by the implementation.
-     */
-    public void performAction(Connection connection, Query query, OperationObserver observer)
-            throws SQLException, Exception;
+    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+        return null;
+    }
+
 }

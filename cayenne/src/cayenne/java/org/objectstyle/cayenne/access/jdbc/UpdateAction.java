@@ -72,11 +72,14 @@ import org.objectstyle.cayenne.query.Query;
  */
 public class UpdateAction extends BaseSQLAction {
 
-    public UpdateAction(DbAdapter adapter, EntityResolver entityResolver) {
+    protected Query query;
+
+    public UpdateAction(Query query, DbAdapter adapter, EntityResolver entityResolver) {
         super(adapter, entityResolver);
+        this.query = query;
     }
 
-    public void performAction(Connection connection, Query query, OperationObserver observer)
+    public void performAction(Connection connection, OperationObserver observer)
             throws SQLException, Exception {
 
         QueryTranslator translator = getAdapter().getQueryTranslator(query);

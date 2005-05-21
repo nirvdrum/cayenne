@@ -74,7 +74,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.jdbc.BatchAction;
 import org.objectstyle.cayenne.access.jdbc.ProcedureAction;
 import org.objectstyle.cayenne.access.jdbc.RowDescriptor;
-import org.objectstyle.cayenne.access.jdbc.SQLAction;
 import org.objectstyle.cayenne.access.jdbc.SQLTemplateAction;
 import org.objectstyle.cayenne.access.jdbc.SQLTemplateSelectAction;
 import org.objectstyle.cayenne.access.jdbc.SelectAction;
@@ -87,11 +86,11 @@ import org.objectstyle.cayenne.map.AshwoodEntitySorter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.EntitySorter;
-import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
@@ -124,12 +123,16 @@ public class DataNode implements QueryEngine {
     private Collection dataMapsValuesRef = Collections.unmodifiableCollection(dataMaps
             .values());
 
-    /** Creates unnamed DataNode. */
+    /**
+     * Creates a new unnamed DataNode.
+     */
     public DataNode() {
         this(null);
     }
 
-    /** Creates DataNode and assigns <code>name</code> to it. */
+    /**
+     * Creates a new DataNode, assigning it a name.
+     */
     public DataNode(String name) {
         this.name = name;
 
@@ -296,7 +299,7 @@ public class DataNode implements QueryEngine {
         Iterator it = queries.iterator();
         while (it.hasNext()) {
             Query nextQuery = (Query) it.next();
-            
+
             // catch exceptions for each individual query
             try {
 
@@ -335,7 +338,7 @@ public class DataNode implements QueryEngine {
             }
         }
     }
-    
+
     /**
      * Executes a SQLTemplate query.
      * 
@@ -347,11 +350,10 @@ public class DataNode implements QueryEngine {
             OperationObserver resultConsumer) throws SQLException, Exception {
 
         SQLAction executionPlan = (sqlTemplate.isSelecting())
-                ? new SQLTemplateSelectAction(getAdapter())
-                : new SQLTemplateAction(getAdapter());
-        executionPlan.performAction(connection, sqlTemplate, resultConsumer);
+                ? new SQLTemplateSelectAction(sqlTemplate, getAdapter())
+                : new SQLTemplateAction(sqlTemplate, getAdapter());
+        executionPlan.performAction(connection, resultConsumer);
     }
-    
 
     /**
      * Executes a generic select query.
@@ -361,10 +363,8 @@ public class DataNode implements QueryEngine {
             Query query,
             OperationObserver observer) throws SQLException, Exception {
 
-        new SelectAction(getAdapter(), getEntityResolver()).performAction(
-                connection,
-                query,
-                observer);
+        new SelectAction((GenericSelectQuery) query, getAdapter(), getEntityResolver())
+                .performAction(connection, observer);
     }
 
     /**
@@ -373,9 +373,7 @@ public class DataNode implements QueryEngine {
     protected void runUpdate(Connection con, Query query, OperationObserver delegate)
             throws SQLException, Exception {
 
-        new UpdateAction(getAdapter(), getEntityResolver()).performAction(
-                con,
-                query,
+        new UpdateAction(query, getAdapter(), getEntityResolver()).performAction(con,
                 delegate);
     }
 
@@ -393,9 +391,9 @@ public class DataNode implements QueryEngine {
         boolean useOptimisticLock = query.isUsingOptimisticLocking();
 
         boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
-        BatchAction action = new BatchAction(getAdapter(), getEntityResolver());
+        BatchAction action = new BatchAction(query, getAdapter(), getEntityResolver());
         action.setBatch(runningAsBatch);
-        action.performAction(connection, query, observer);
+        action.performAction(connection, observer);
     }
 
     /**
@@ -408,7 +406,7 @@ public class DataNode implements QueryEngine {
             BatchQuery query,
             BatchQueryBuilder queryBuilder,
             OperationObserver delegate) throws SQLException, Exception {
-        new TempBatchAction(true).runAsBatch(con, query, queryBuilder, delegate);
+        new TempBatchAction(query, true).runAsBatch(con, queryBuilder, delegate);
     }
 
     /**
@@ -423,7 +421,7 @@ public class DataNode implements QueryEngine {
             BatchQueryBuilder queryBuilder,
             OperationObserver delegate) throws SQLException, Exception {
 
-        new TempBatchAction(false).runAsBatch(con, query, queryBuilder, delegate);
+        new TempBatchAction(query, false).runAsBatch(con, queryBuilder, delegate);
     }
 
     protected void runStoredProcedure(
@@ -431,10 +429,8 @@ public class DataNode implements QueryEngine {
             Query query,
             OperationObserver delegate) throws SQLException, Exception {
 
-        new ProcedureAction(getAdapter(), getEntityResolver()).performAction(
-                con,
-                query,
-                delegate);
+        new ProcedureAction((ProcedureQuery) query, getAdapter(), getEntityResolver())
+                .performAction(con, delegate);
     }
 
     /**
@@ -449,12 +445,8 @@ public class DataNode implements QueryEngine {
             OperationObserver delegate) throws SQLException, Exception {
 
         // method is deprecated, so keep this ugly piece here as a placeholder
-        Procedure procedure = (Procedure) query.getRoot();
-        new TempProcedureAction().readProcedureOutParameters(
-                statement,
-                procedure,
-                query,
-                delegate);
+        new TempProcedureAction((ProcedureQuery) query)
+                .readProcedureOutParameters(statement, delegate);
     }
 
     /**
@@ -471,8 +463,10 @@ public class DataNode implements QueryEngine {
         // method is deprecated, so keep this ugly piece here as a placeholder
         RowDescriptor rowDescriptor = new RowDescriptor(resultSet, getAdapter()
                 .getExtendedTypes());
-        new TempProcedureAction()
-                .readResultSet(resultSet, rowDescriptor, query, delegate);
+        new TempProcedureAction((ProcedureQuery) query).readResultSet(resultSet,
+                rowDescriptor,
+                query,
+                delegate);
     }
 
     /**
@@ -523,17 +517,15 @@ public class DataNode implements QueryEngine {
     // DataNode methods are removed
     final class TempProcedureAction extends ProcedureAction {
 
-        public TempProcedureAction() {
-            super(DataNode.this.adapter, DataNode.this.entityResolver);
+        public TempProcedureAction(ProcedureQuery query) {
+            super(query, DataNode.this.adapter, DataNode.this.entityResolver);
         }
 
         // changing access to public
         public void readProcedureOutParameters(
                 CallableStatement statement,
-                Procedure procedure,
-                Query query,
                 OperationObserver delegate) throws SQLException, Exception {
-            super.readProcedureOutParameters(statement, procedure, query, delegate);
+            super.readProcedureOutParameters(statement, delegate);
         }
 
         // changing access to public
@@ -551,27 +543,25 @@ public class DataNode implements QueryEngine {
     // DataNode methods are removed
     final class TempBatchAction extends BatchAction {
 
-        public TempBatchAction(boolean runningAsBatch) {
-            super(DataNode.this.adapter, DataNode.this.entityResolver);
+        public TempBatchAction(BatchQuery batchQuery, boolean runningAsBatch) {
+            super(batchQuery, DataNode.this.adapter, DataNode.this.entityResolver);
             setBatch(runningAsBatch);
         }
 
         // making public to access from DataNode
         protected void runAsBatch(
                 Connection con,
-                BatchQuery query,
                 BatchQueryBuilder queryBuilder,
                 OperationObserver delegate) throws SQLException, Exception {
-            super.runAsBatch(con, query, queryBuilder, delegate);
+            super.runAsBatch(con, queryBuilder, delegate);
         }
 
         // making public to access from DataNode
         public void runAsIndividualQueries(
                 Connection con,
-                BatchQuery query,
                 BatchQueryBuilder queryBuilder,
                 OperationObserver delegate) throws SQLException, Exception {
-            super.runAsIndividualQueries(con, query, queryBuilder, delegate, false);
+            super.runAsIndividualQueries(con, queryBuilder, delegate, false);
         }
     }
 

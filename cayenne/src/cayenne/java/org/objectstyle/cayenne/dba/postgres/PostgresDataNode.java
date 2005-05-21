@@ -60,6 +60,7 @@ import java.sql.SQLException;
 
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -84,8 +85,9 @@ public class PostgresDataNode extends DataNode {
             Query query,
             OperationObserver observer) throws SQLException, Exception {
 
-        new PostgresProcedureAction(getAdapter(), getEntityResolver()).performAction(con,
-                query,
-                observer);
+        new PostgresProcedureAction(
+                (ProcedureQuery) query,
+                getAdapter(),
+                getEntityResolver()).performAction(con, observer);
     }
 }

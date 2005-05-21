@@ -72,8 +72,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.ProcedureQuery;
 
 /**
  * @since 1.2
@@ -81,14 +80,16 @@ import org.objectstyle.cayenne.query.Query;
  */
 public class ProcedureAction extends BaseSQLAction {
 
-    public ProcedureAction(DbAdapter adapter, EntityResolver entityResolver) {
+    protected ProcedureQuery query;
+
+    public ProcedureAction(ProcedureQuery query, DbAdapter adapter,
+            EntityResolver entityResolver) {
         super(adapter, entityResolver);
+        this.query = query;
     }
 
-    public void performAction(
-            Connection connection,
-            Query query,
-            OperationObserver observer) throws SQLException, Exception {
+    public void performAction(Connection connection, OperationObserver observer)
+            throws SQLException, Exception {
 
         ProcedureTranslator transl = (ProcedureTranslator) getAdapter()
                 .getQueryTranslator(query);
@@ -105,7 +106,7 @@ public class ProcedureAction extends BaseSQLAction {
             statement.execute();
 
             // read out parameters
-            readProcedureOutParameters(statement, transl.getProcedure(), query, observer);
+            readProcedureOutParameters(statement, observer);
 
             // read the rest of the query
             while (true) {
@@ -115,11 +116,7 @@ public class ProcedureAction extends BaseSQLAction {
                     try {
                         RowDescriptor descriptor = new RowDescriptor(rs, getAdapter()
                                 .getExtendedTypes());
-                        readResultSet(
-                                rs,
-                                descriptor,
-                                (GenericSelectQuery) query,
-                                observer);
+                        readResultSet(rs, descriptor, query, observer);
                     }
                     finally {
                         try {
@@ -150,19 +147,24 @@ public class ProcedureAction extends BaseSQLAction {
     }
 
     /**
+     * Returns stored procedure for an internal query.
+     */
+    public Procedure getProcedure() {
+        return getEntityResolver().lookupProcedure(query);
+    }
+
+    /**
      * Helper method that reads OUT parameters of a CallableStatement.
      */
     protected void readProcedureOutParameters(
             CallableStatement statement,
-            Procedure procedure,
-            Query query,
             OperationObserver delegate) throws SQLException, Exception {
 
         long t1 = System.currentTimeMillis();
 
         // build result row...
         Map result = null;
-        List parameters = procedure.getCallParameters();
+        List parameters = getProcedure().getCallParameters();
         for (int i = 0; i < parameters.size(); i++) {
             ProcedureParameter parameter = (ProcedureParameter) parameters.get(i);
 
@@ -175,8 +177,9 @@ public class ProcedureAction extends BaseSQLAction {
             }
 
             ColumnDescriptor descriptor = new ColumnDescriptor(parameter);
-            ExtendedType type = getAdapter().getExtendedTypes().getRegisteredType(
-                    descriptor.getJavaClass());
+            ExtendedType type = getAdapter()
+                    .getExtendedTypes()
+                    .getRegisteredType(descriptor.getJavaClass());
             Object val = type.materializeObject(statement, i + 1, descriptor
                     .getJdbcType());
 

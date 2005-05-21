@@ -89,11 +89,11 @@ public class DB2DataNode extends DataNode {
             OperationObserver resultConsumer) throws SQLException, Exception {
 
         SQLTemplateAction executionPlan = (sqlTemplate.isSelecting())
-                ? new SQLTemplateSelectAction(getAdapter())
-                : new SQLTemplateAction(getAdapter());
+                ? new SQLTemplateSelectAction(sqlTemplate, getAdapter())
+                : new SQLTemplateAction(sqlTemplate, getAdapter());
 
         // DB2 requires single line queries...
         executionPlan.setRemovingLineBreaks(true);
-        executionPlan.performAction(connection, sqlTemplate, resultConsumer);
+        executionPlan.performAction(connection, resultConsumer);
     }
 }

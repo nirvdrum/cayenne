@@ -66,57 +66,45 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.IteratorUtils;
-import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
- * Implements a stateless strategy for execution of selecting {@link SQLTemplate}queries.
+ * Implements a strategy for execution of selecting {@link SQLTemplate}queries.
  * 
  * @since 1.2 replaces SQLTemplateSelectExecutionPlan.
  * @author Andrei Adamchik
  */
 public class SQLTemplateSelectAction extends SQLTemplateAction {
 
-    public SQLTemplateSelectAction(DbAdapter adapter) {
-        super(adapter);
+    public SQLTemplateSelectAction(SQLTemplate query, DbAdapter adapter) {
+        super(query, adapter);
     }
 
     /**
      * Runs a SQLTemplate query as a select.
      */
-    public void performAction(
-            Connection connection,
-            Query query,
-            OperationObserver observer) throws SQLException, Exception {
-
-        if (!(query instanceof SQLTemplate)) {
-            throw new CayenneException("Query unsupported by the execution plan: "
-                    + query);
-        }
-
-        SQLTemplate sqlTemplate = (SQLTemplate) query;
+    public void performAction(Connection connection, OperationObserver observer)
+            throws SQLException, Exception {
 
         SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
-        String template = extractTemplateString(sqlTemplate);
+        String template = extractTemplateString();
         boolean loggable = QueryLogger.isLoggable(query.getLoggingLevel());
 
-        int size = sqlTemplate.parametersSize();
+        int size = query.parametersSize();
 
         // zero size indicates a one-shot query with no parameters
         // so fake a single entry batch...
-        Iterator it = (size > 0) ? sqlTemplate.parametersIterator() : IteratorUtils
+        Iterator it = (size > 0) ? query.parametersIterator() : IteratorUtils
                 .singletonIterator(Collections.EMPTY_MAP);
         while (it.hasNext()) {
             Map nextParameters = (Map) it.next();
 
-            SQLSelectStatement compiled = templateProcessor.processSelectTemplate(
-                    template,
-                    nextParameters);
+            SQLSelectStatement compiled = templateProcessor
+                    .processSelectTemplate(template, nextParameters);
 
             if (loggable) {
                 QueryLogger.logQuery(query.getLoggingLevel(), compiled.getSql(), Arrays
@@ -144,14 +132,13 @@ public class SQLTemplateSelectAction extends SQLTemplateAction {
                     statement,
                     rs,
                     descriptor,
-                    sqlTemplate.getFetchLimit());
-            
+                    query.getFetchLimit());
+
             if (!observer.isIteratedResult()) {
                 // note that we don't need to close ResultIterator
                 // since "dataRows" will do it internally
                 List resultRows = result.dataRows(true);
-                QueryLogger.logSelectCount(
-                        query.getLoggingLevel(),
+                QueryLogger.logSelectCount(query.getLoggingLevel(),
                         resultRows.size(),
                         System.currentTimeMillis() - t1);
 

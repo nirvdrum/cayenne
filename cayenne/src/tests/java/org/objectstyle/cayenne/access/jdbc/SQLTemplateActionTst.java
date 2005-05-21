@@ -90,14 +90,15 @@ public class SQLTemplateActionTst extends CayenneTestCase {
         bindings.put("dob", new Date(System.currentTimeMillis()));
         template.setParameters(bindings);
 
-        SQLTemplateAction plan = new SQLTemplateAction(getAccessStackAdapter()
-                .getAdapter());
-        assertSame(getAccessStackAdapter().getAdapter(), plan.getAdapter());
+        SQLTemplateAction action = new SQLTemplateAction(
+                template,
+                getAccessStackAdapter().getAdapter());
+        assertSame(getAccessStackAdapter().getAdapter(), action.getAdapter());
 
         Connection c = getConnection();
         try {
             MockOperationObserver observer = new MockOperationObserver();
-            plan.performAction(c, template, observer);
+            action.performAction(c, observer);
 
             int[] batches = observer.countsForQuery(template);
             assertNotNull(batches);
@@ -126,14 +127,14 @@ public class SQLTemplateActionTst extends CayenneTestCase {
 
         SQLTemplate template = new SQLTemplate(Object.class, "delete from ARTIST", false);
 
-        SQLTemplateAction plan = new SQLTemplateAction(getAccessStackAdapter()
+        SQLTemplateAction plan = new SQLTemplateAction(template, getAccessStackAdapter()
                 .getAdapter());
         assertSame(getAccessStackAdapter().getAdapter(), plan.getAdapter());
 
         Connection c = getConnection();
         try {
             MockOperationObserver observer = new MockOperationObserver();
-            plan.performAction(c, template, observer);
+            plan.performAction(c, observer);
 
             int[] batches = observer.countsForQuery(template);
             assertNotNull(batches);
@@ -163,14 +164,16 @@ public class SQLTemplateActionTst extends CayenneTestCase {
                 bindings1, bindings2
         });
 
-        SQLTemplateAction plan = new SQLTemplateAction(getAccessStackAdapter()
-                .getAdapter());
-        assertSame(getAccessStackAdapter().getAdapter(), plan.getAdapter());
+        SQLTemplateAction action = new SQLTemplateAction(
+                template,
+                getAccessStackAdapter().getAdapter());
+        assertSame(getAccessStackAdapter().getAdapter(), action.getAdapter());
+        assertSame(template, action.getQuery());
 
         Connection c = getConnection();
         try {
             MockOperationObserver observer = new MockOperationObserver();
-            plan.performAction(c, template, observer);
+            action.performAction(c, observer);
 
             int[] batches = observer.countsForQuery(template);
             assertNotNull(batches);
@@ -203,15 +206,15 @@ public class SQLTemplateActionTst extends CayenneTestCase {
     }
 
     public void testExtractTemplateString() throws Exception {
-        SQLTemplateAction action = new SQLTemplateAction(getAccessStackAdapter()
-                .getAdapter());
-
         SQLTemplate template = new SQLTemplate(Artist.class, "A\nBC", false);
+        SQLTemplateAction action = new SQLTemplateAction(
+                template,
+                getAccessStackAdapter().getAdapter());
 
         action.setRemovingLineBreaks(false);
-        assertEquals("A\nBC", action.extractTemplateString(template));
+        assertEquals("A\nBC", action.extractTemplateString());
 
         action.setRemovingLineBreaks(true);
-        assertEquals("A BC", action.extractTemplateString(template));
+        assertEquals("A BC", action.extractTemplateString());
     }
 }

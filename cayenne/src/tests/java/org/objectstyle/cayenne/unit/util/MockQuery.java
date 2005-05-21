@@ -57,11 +57,14 @@ package org.objectstyle.cayenne.unit.util;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
+import org.objectstyle.cayenne.query.SQLActionVisitor;
 
 /**
  * @author Andrei Adamchik
  */
 public class MockQuery implements Query {
+
     protected String name;
 
     public MockQuery() {
@@ -97,5 +100,9 @@ public class MockQuery implements Query {
 
     public void setRoot(Object value) {
 
+    }
+
+    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+        return null;
     }
 }

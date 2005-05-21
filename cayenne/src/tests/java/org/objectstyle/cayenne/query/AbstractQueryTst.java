@@ -39,23 +39,20 @@ import junit.framework.TestCase;
 import org.apache.log4j.Level;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.unit.util.MockAbstractQuery;
 
-public class QueryTst extends TestCase {
-
-    protected Query query;
-
-    protected void setUp() throws Exception {
-        query = new AbstractQuery() {
-        };
-    }
+public class AbstractQueryTst extends TestCase {
 
     public void testSetRootEntityName() {
+        AbstractQuery query = new MockAbstractQuery();
         assertNull(query.getRoot());
         query.setRoot("SomeEntity");
         assertSame("SomeEntity", query.getRoot());
     }
 
     public void testSetRootObjEntity() {
+        AbstractQuery query = new MockAbstractQuery();
+
         assertNull(query.getRoot());
         ObjEntity e = new ObjEntity("ABC");
         query.setRoot(e);
@@ -63,12 +60,14 @@ public class QueryTst extends TestCase {
     }
 
     public void testSetRootClass() {
+        AbstractQuery query = new MockAbstractQuery();
         assertNull(query.getRoot());
         query.setRoot(Artist.class);
         assertSame(Artist.class, query.getRoot());
     }
 
     public void testSetInvalidRoot() {
+        AbstractQuery query = new MockAbstractQuery();
         assertNull(query.getRoot());
         try {
             query.setRoot(new Integer(1));
@@ -79,8 +78,8 @@ public class QueryTst extends TestCase {
     }
 
     public void testLoggingLevel() throws Exception {
-        Query query = new AbstractQuery() {
-        };
+        AbstractQuery query = new MockAbstractQuery();
+
         assertEquals(Query.DEFAULT_LOG_LEVEL, query.getLoggingLevel());
 
         query.setLoggingLevel(Level.ERROR);
@@ -88,4 +87,3 @@ public class QueryTst extends TestCase {
     }
 
 }
-

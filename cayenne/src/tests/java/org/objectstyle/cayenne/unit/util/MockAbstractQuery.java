@@ -34,7 +34,7 @@
  *    or "Cayenne", nor may "ObjectStyle" or "Cayenne" appear in their
  *    names without prior written permission.
  * 
- * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
@@ -53,26 +53,20 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.postgres;
+package org.objectstyle.cayenne.unit.util;
 
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.sqlserver.SQLServerProcedureAction;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.ProcedureQuery;
+import org.objectstyle.cayenne.query.AbstractQuery;
+import org.objectstyle.cayenne.query.SQLAction;
+import org.objectstyle.cayenne.query.SQLActionVisitor;
+
 
 /**
- * Current implementation simply relies on SQLServerProcedureAction superclass behavior.
- * Namely that CallableStatement.execute() rewinds result set pointer so
- * CallableStatement.getMoreResults() shouldn't be invoked until the first result set is
- * processed.
- * 
- * @since 1.2
  * @author Andrei Adamchik
  */
-class PostgresProcedureAction extends SQLServerProcedureAction {
+public class MockAbstractQuery extends AbstractQuery {
 
-    PostgresProcedureAction(ProcedureQuery query, DbAdapter adapter,
-            EntityResolver entityResolver) {
-        super(query, adapter, entityResolver);
+    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+        return null;
     }
+
 }
