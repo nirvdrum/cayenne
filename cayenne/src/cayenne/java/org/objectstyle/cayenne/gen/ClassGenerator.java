@@ -224,7 +224,7 @@ public class ClassGenerator {
 
     /**
      * Returns Java package name of the class associated with this generator.
-     * @deprecated use getClassGenerationInfo().getPackageName()
+     * @deprecated Since 1.2 use getClassGenerationInfo().getPackageName()
      */
     public String getPackageName() {
         return classGenerationInfo.getPackageName();
@@ -232,7 +232,8 @@ public class ClassGenerator {
     
     /**
      * Sets Java package name of the class associated with this generator.
-     * @deprecated use getClassGenerationInfo().setPackageName()
+     * 
+     * @deprecated Since 1.2 use getClassGenerationInfo().setPackageName()
      */
     public void setPackageName(String packageName) {
         classGenerationInfo.setPackageName(packageName);
@@ -241,7 +242,8 @@ public class ClassGenerator {
     /**
      * Sets <code>superPackageName</code> property that defines a superclass's
      * package name.
-     * @deprecated use getClassGenerationInfo().setSuperPackageName()
+     * 
+     * @deprecated Since 1.2 use getClassGenerationInfo().setSuperPackageName()
      */
     public void setSuperPackageName(String superPackageName) {
         classGenerationInfo.setSuperPackageName(superPackageName);
@@ -250,7 +252,8 @@ public class ClassGenerator {
     /**
      * Returns class name (without a package) of the class associated with this
      * generator.
-     * @deprecated use getClassGenerationInfo().getClassName()
+     * 
+     * @deprecated Since 1.2 use getClassGenerationInfo().getClassName()
      */
     public String getClassName() {
         return classGenerationInfo.getClassName();
@@ -258,7 +261,8 @@ public class ClassGenerator {
     /**
      * Sets class name of the class associated with this
      * generator. Class name must not include a package.
-     * @deprecated use getClassGenerationInfo().setClassName()
+     * 
+     * @deprecated Since 1.2 use getClassGenerationInfo().setClassName()
      */
     public void setClassName(String className) {
         classGenerationInfo.setClassName(className);
@@ -267,7 +271,7 @@ public class ClassGenerator {
     /**
      * Sets the fully qualified super class of the data object class associated
      * with this generator
-     * @deprecated use getClassGenerationInfo().setSuperClassName()
+     * @deprecated Since 1.2 use getClassGenerationInfo().setSuperClassName()
      */
     public void setSuperClassName(String value) {
         classGenerationInfo.setSuperClassName(value);
@@ -276,7 +280,8 @@ public class ClassGenerator {
     /**
      * Returns prefix used to distinguish between superclass and subclass when
      * generating classes in pairs.
-     * @deprecated use getClassGenerationInfo().setSuperPrefix()
+     * 
+     * @deprecated Since 1.2 use getClassGenerationInfo().setSuperPrefix()
      */
     public void setSuperPrefix(String superPrefix) {
         classGenerationInfo.setSuperPrefix(superPrefix);
@@ -287,7 +292,8 @@ public class ClassGenerator {
     /**
      * Returns <code>superPackageName</code> property that defines a
      * superclass's package name.
-     * @deprecated use getClassGenerationInfo().getSuperPackageName()
+     * 
+     * @deprecated Since 1.2 use getClassGenerationInfo().getSuperPackageName()
      */
     public String getSuperPackageName()
     {
@@ -303,7 +309,7 @@ public class ClassGenerator {
     }
 
     /**
-     * @deprecated use getClassGenerationInfo().formatVariableName(String)
+     * @deprecated Since 1.2 use getClassGenerationInfo().formatVariableName(String)
      */
     public String formatVariableName(String variableName)
     {
@@ -313,7 +319,8 @@ public class ClassGenerator {
     /**
      * Returns prefix used to distinguish between superclass and subclass when
      * generating classes in pairs.
-     * @deprecated use getClassGenerationInfo().getSuperPrefix()
+     * 
+     * @deprecated Since 1.2 use getClassGenerationInfo().getSuperPrefix()
      */
     public String getSuperPrefix()
     {
@@ -323,7 +330,8 @@ public class ClassGenerator {
     /**
      * Sets current class property name. This method is called during template
      * parsing for each of the class properties.
-     * @deprecated use getClassGenerationInfo().setProp(String)
+     * 
+     * @deprecated Since 1.2 use getClassGenerationInfo().setProp(String)
      */
     public void setProp(String prop)
     {
@@ -331,7 +339,7 @@ public class ClassGenerator {
     }
 
     /**
-     * @deprecated use getClassGenerationInfo().getProp()
+     * @deprecated Since 1.2 use getClassGenerationInfo().getProp()
      */
     public String getProp()
     {
@@ -342,7 +350,7 @@ public class ClassGenerator {
      * Capitalizes the first letter of the property name.
      * 
      * @since 1.1
-     * @deprecated use getClassGenerationInfo().capitalized(String)
+     * @deprecated Since 1.2 use getClassGenerationInfo().capitalized(String)
      */
     public String capitalized(String name)
     {
@@ -353,7 +361,7 @@ public class ClassGenerator {
      * Converts property name to Java constants naming convention.
      * 
      * @since 1.1
-     * @deprecated use getClassGenerationInfo().capitalizedAsConstant(String)
+     * @deprecated Since 1.2 use getClassGenerationInfo().capitalizedAsConstant(String)
      */
     public String capitalizedAsConstant(String name)
     {
@@ -361,7 +369,7 @@ public class ClassGenerator {
     }
 
     /** Returns current property name with capitalized first letter
-     * @deprecated use getClassGenerationInfo().getCappedProp()
+     * @deprecated Since 1.2 use getClassGenerationInfo().getCappedProp()
      */
     public String getCappedProp()
     {
@@ -373,7 +381,7 @@ public class ClassGenerator {
      *         final variables - all capitalized with underscores.
      * 
      * @since 1.0.3
-     * @deprecated use getClassGenerationInfo().getPropAsConstantName()
+     * @deprecated Since 1.2 use getClassGenerationInfo().getPropAsConstantName()
      */
     public String getPropAsConstantName()
     {
@@ -384,7 +392,7 @@ public class ClassGenerator {
      * Returns true if current entity contains at least one List property.
      * 
      * @since 1.1
-     * @deprecated use getClassGenerationInfo().isContainingListProperties()
+     * @deprecated Since 1.2 use getClassGenerationInfo().isContainingListProperties()
      */
     public boolean isContainingListProperties()
     {
@@ -394,7 +402,7 @@ public class ClassGenerator {
     /**
      * Returns <code>true</code> if a class associated with this generator is
      * located in a package.
-     * @deprecated use getClassGenerationInfo().isUsingPackage()
+     * @deprecated Since 1.2 use getClassGenerationInfo().isUsingPackage()
      */
     public boolean isUsingPackage()
     {
@@ -404,15 +412,16 @@ public class ClassGenerator {
     /**
      * Returns <code>true</code> if a superclass class associated with this
      * generator is located in a package.
-     * @deprecated use getClassGenerationInfo().isUsingSuperPackage()
+     * @deprecated Since 1.2 use getClassGenerationInfo().isUsingSuperPackage()
      */
     public boolean isUsingSuperPackage()
     {
         return classGenerationInfo.isUsingSuperPackage();
     }
 
-    /** Returns entity for the class associated with this generator.
-     * @deprecated use getClassGenerationInfo().getEntity()
+    /** 
+     * Returns entity for the class associated with this generator.
+     * @deprecated Since 1.2 use getClassGenerationInfo().getEntity()
      */
     public ObjEntity getEntity()
     {
@@ -422,7 +431,7 @@ public class ClassGenerator {
     /**
      * Returns the fully qualified super class of the data object class
      * associated with this generator
-     * @deprecated use getClassGenerationInfo().getSuperClassName()
+     * @deprecated Since 1.2 use getClassGenerationInfo().getSuperClassName()
      */
     public String getSuperClassName()
     {
