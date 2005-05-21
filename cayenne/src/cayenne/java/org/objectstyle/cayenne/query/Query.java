@@ -58,12 +58,13 @@ package org.objectstyle.cayenne.query;
 import org.apache.log4j.Level;
 
 /**
- * Defining a generic query that can be executed by Cayenne. The main parameter of a
- * Cayenne query is its root that can be a String, an ObjEntity, a DbEntity or a Class.
- * Root serves as hint to Cayenne runtime on how to handle the query. E.g. root is used to
- * determine which one of multiple databases should be chosen for query execution; also it
- * is used as a key to find Cayenne mapping objects describing databse tables
- * participating in the query and Java objects that should be returned from such query.
+ * A generic query that can be executed via Cayenne QueryEngine, such as DataContext. The
+ * main parameter of a Cayenne query is its root that can be a String, an ObjEntity, a
+ * DbEntity or a Class. Root serves as hint to Cayenne runtime on how to handle the query.
+ * E.g. root is used to determine which one of multiple databases should be chosen for
+ * query execution; also it is used as a key to find Cayenne mapping objects describing
+ * databse tables participating in the query and Java objects that should be returned from
+ * such query.
  * 
  * @see org.objectstyle.cayenne.access.QueryEngine
  * @author Andrei Adamchik
@@ -77,30 +78,30 @@ public interface Query {
      * 
      * @since 1.1
      */
-    public String getName();
+    String getName();
 
     /**
      * Sets a symbolic name of the query.
      * 
      * @since 1.1
      */
-    public void setName(String name);
+    void setName(String name);
 
     /**
      * Returns the <code>logLevel</code> property of this query. Log level is a hint to
      * QueryEngine that performs this query to log execution with a certain priority.
      */
-    public Level getLoggingLevel();
+    Level getLoggingLevel();
 
-    public void setLoggingLevel(Level level);
+    void setLoggingLevel(Level level);
 
     /**
-     * Returns the root object of this query.
+     * Returns the root object of the query.
      */
-    public Object getRoot();
+    Object getRoot();
 
     /**
      * Sets the root of the query.
      */
-    public void setRoot(Object root);
+    void setRoot(Object root);
 }
