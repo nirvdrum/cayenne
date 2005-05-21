@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * A DataContext helper for handling select query execution.
+ * A DataContext helper that handles select query execution.
  * 
  * @since 1.2
  * @author Andrei Adamchik

@@ -270,6 +270,7 @@ public abstract class MapClassGenerator {
 
             StringUtils stringUtils = StringUtils.getInstance();
             
+            // TODO: the following two variables are unused. Can they be removed?
             String baseClassName = stringUtils.stripPackageName(fqnBaseClass);
             String basePackageName = stringUtils.stripClass(fqnBaseClass);
             String subClassName = stringUtils.stripPackageName(fqnSubClass);

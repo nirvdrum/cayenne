@@ -58,7 +58,12 @@ package org.objectstyle.cayenne.query;
 import org.apache.log4j.Level;
 
 /**
- * Defining a generic selecting or updating query that can be executed in Cayenne.
+ * Defining a generic query that can be executed by Cayenne. The main parameter of a
+ * Cayenne query is its root that can be a String, an ObjEntity, a DbEntity or a Class.
+ * Root serves as hint to Cayenne runtime on how to handle the query. E.g. root is used to
+ * determine which one of multiple databases should be chosen for query execution; also it
+ * is used as a key to find Cayenne mapping objects describing databse tables
+ * participating in the query and Java objects that should be returned from such query.
  * 
  * @see org.objectstyle.cayenne.access.QueryEngine
  * @author Andrei Adamchik
@@ -90,17 +95,12 @@ public interface Query {
     public void setLoggingLevel(Level level);
 
     /**
-     * Returns the root object of this query. Might be a String, ObjEntity, DbEntity or
-     * Class, depending on the query in question
-     * 
-     * @return Object
+     * Returns the root object of this query.
      */
     public Object getRoot();
 
     /**
      * Sets the root of the query.
-     * 
-     * @param value The new root
      */
-    public void setRoot(Object value);
+    public void setRoot(Object root);
 }

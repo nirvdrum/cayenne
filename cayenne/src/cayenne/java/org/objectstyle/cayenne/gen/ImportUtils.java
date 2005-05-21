@@ -117,7 +117,7 @@ public class ImportUtils {
             
             if (importTypesMap.containsKey(typeClassName))
             {
-                if (typeName.equals((String)importTypesMap.get(typeClassName)))  return typeClassName;
+                if (typeName.equals(importTypesMap.get(typeClassName)))  return typeClassName;
             }
             
             String typePackageName = stringUtils.stripClass(typeName);
