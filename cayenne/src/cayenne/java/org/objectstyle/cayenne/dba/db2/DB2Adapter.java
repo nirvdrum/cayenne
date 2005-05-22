@@ -74,6 +74,8 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
@@ -83,33 +85,24 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  * use with DB2 are shown below:
  * 
  * <pre>
- * 
- *  
- *   test-db2.cayenne.adapter = org.objectstyle.cayenne.dba.db2.DB2Adapter
- *   test-db2.jdbc.username = test
- *   test-db2.jdbc.password = secret
- *   test-db2.jdbc.url = jdbc:db2://servername:50000/databasename
- *   test-db2.jdbc.driver = com.ibm.db2.jcc.DB2Driver
- *   
- *  
+ *     test-db2.cayenne.adapter = org.objectstyle.cayenne.dba.db2.DB2Adapter
+ *     test-db2.jdbc.username = test
+ *     test-db2.jdbc.password = secret
+ *     test-db2.jdbc.url = jdbc:db2://servername:50000/databasename
+ *     test-db2.jdbc.driver = com.ibm.db2.jcc.DB2Driver
  * </pre>
  * 
  * @author Holger Hoffstaette
  */
 public class DB2Adapter extends JdbcAdapter {
 
-    public DB2Adapter() {
-    }
-
     /**
-     * Returns an instance of DB2DataNode.
+     * Uses DB2ActionBuilder to create the right action.
      * 
      * @since 1.2
      */
-    public DataNode createDataNode(String name) {
-        DataNode node = new DB2DataNode(name);
-        node.setAdapter(this);
-        return node;
+    public SQLAction getAction(Query query, DataNode node) {
+        return query.toSQLAction(new DB2ActionBuilder(this, node.getEntityResolver()));
     }
 
     /**

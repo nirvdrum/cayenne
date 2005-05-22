@@ -89,18 +89,20 @@ import org.objectstyle.cayenne.query.DeleteQuery;
 import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * A generic DbAdapter implementation. Can be used as a default adapter or as
- * a superclass of a concrete adapter implementation.
- *
+ * A generic DbAdapter implementation. Can be used as a default adapter or as a superclass
+ * of a concrete adapter implementation.
+ * 
  * @author Andrei Adamchik
  */
 public class JdbcAdapter implements DbAdapter {
+
     protected PkGenerator pkGenerator;
     protected TypesHandler typesHandler;
     protected ExtendedTypeMap extendedTypes;
@@ -126,6 +128,7 @@ public class JdbcAdapter implements DbAdapter {
 
     /**
      * Returns default separator - a semicolon.
+     * 
      * @since 1.0.4
      */
     public String getBatchTerminator() {
@@ -133,22 +136,20 @@ public class JdbcAdapter implements DbAdapter {
     }
 
     /**
-     * Locates and returns a named adapter resource. A resource can be an XML
-     * file, etc. 
-     * 
-     * <p>This implementation is based on the premise 
-     * that each adapter is located in its own Java package and all
-     * resources are in the same package as well. Resource lookup
-     * is recursive, so that if DbAdapter is a subclass of another
-     * adapter, parent adapter package is searched as a failover.</p>
+     * Locates and returns a named adapter resource. A resource can be an XML file, etc.
+     * <p>
+     * This implementation is based on the premise that each adapter is located in its own
+     * Java package and all resources are in the same package as well. Resource lookup is
+     * recursive, so that if DbAdapter is a subclass of another adapter, parent adapter
+     * package is searched as a failover.
+     * </p>
      * 
      * @since 1.1
      */
     public URL findAdapterResource(String name) {
         Class adapterClass = this.getClass();
 
-        while (adapterClass != null
-            && JdbcAdapter.class.isAssignableFrom(adapterClass)) {
+        while (adapterClass != null && JdbcAdapter.class.isAssignableFrom(adapterClass)) {
 
             String path = Util.getPackagePath(adapterClass.getName()) + name;
             URL url = ResourceLocator.findURLInClasspath(path);
@@ -163,8 +164,8 @@ public class JdbcAdapter implements DbAdapter {
     }
 
     /**
-     * Installs appropriate ExtendedTypes as converters for passing values
-     * between JDBC and Java layers. Called from default constructor.
+     * Installs appropriate ExtendedTypes as converters for passing values between JDBC
+     * and Java layers. Called from default constructor.
      */
     protected void configureExtendedTypes(ExtendedTypeMap map) {
         // Create a default CHAR handler with some generic settings.
@@ -180,16 +181,16 @@ public class JdbcAdapter implements DbAdapter {
     }
 
     /**
-     * Creates and returns a primary key generator. This factory
-     * method should be overriden by JdbcAdapter subclasses to
-     * provide custom implementations of PKGenerator.
+     * Creates and returns a primary key generator. This factory method should be
+     * overriden by JdbcAdapter subclasses to provide custom implementations of
+     * PKGenerator.
      */
     protected PkGenerator createPkGenerator() {
         return new JdbcPkGenerator();
     }
 
-    /** 
-     * Returns primary key generator associated with this DbAdapter. 
+    /**
+     * Returns primary key generator associated with this DbAdapter.
      */
     public PkGenerator getPkGenerator() {
         return pkGenerator;
@@ -214,16 +215,15 @@ public class JdbcAdapter implements DbAdapter {
             return t;
         }
         catch (Exception ex) {
-            throw new CayenneRuntimeException(
-                "Can't load translator class: " + queryClass);
+            throw new CayenneRuntimeException("Can't load translator class: "
+                    + queryClass);
         }
     }
 
     /**
-     * Returns a class of the query translator that
-     * should be used to translate the query <code>q</code>
-     * to SQL. Exists mainly for the benefit of subclasses
-     * that can override this method providing their own translator.
+     * Returns a class of the query translator that should be used to translate the query
+     * <code>q</code> to SQL. Exists mainly for the benefit of subclasses that can
+     * override this method providing their own translator.
      */
     protected Class queryTranslatorClass(Query q) {
         if (q == null) {
@@ -245,13 +245,13 @@ public class JdbcAdapter implements DbAdapter {
             return ProcedureTranslator.class;
         }
         else {
-            throw new CayenneRuntimeException(
-                "Unrecognized query class..." + q.getClass().getName());
+            throw new CayenneRuntimeException("Unrecognized query class..."
+                    + q.getClass().getName());
         }
     }
 
-    /** 
-     * Returns true. 
+    /**
+     * Returns true.
      */
     public boolean supportsFkConstraints() {
         return supportsFkConstraints;
@@ -264,8 +264,8 @@ public class JdbcAdapter implements DbAdapter {
         this.supportsFkConstraints = flag;
     }
 
-    /** 
-     * Returns true. 
+    /**
+     * Returns true.
      * 
      * @since 1.1
      */
@@ -281,16 +281,15 @@ public class JdbcAdapter implements DbAdapter {
     }
 
     /**
-     * Returns a SQL string to drop a table corresponding
-     * to <code>ent</code> DbEntity.
+     * Returns a SQL string to drop a table corresponding to <code>ent</code> DbEntity.
      */
     public String dropTable(DbEntity ent) {
         return "DROP TABLE " + ent.getFullyQualifiedName();
     }
 
     /**
-     * Returns a SQL string that can be used to create database table
-     * corresponding to <code>ent</code> parameter.
+     * Returns a SQL string that can be used to create database table corresponding to
+     * <code>ent</code> parameter.
      */
     public String createTable(DbEntity ent) {
         // later we may support view creation
@@ -355,12 +354,13 @@ public class JdbcAdapter implements DbAdapter {
             sqlBuffer.append(')');
         }
         sqlBuffer.append(')');
-        
+
         return sqlBuffer.toString();
     }
-    
+
     /**
      * Appends SQL for column creation to CREATE TABLE buffer.
+     * 
      * @since 1.2
      */
     protected void createTableAppendColumn(StringBuffer sqlBuffer, DbAttribute column) {
@@ -406,20 +406,22 @@ public class JdbcAdapter implements DbAdapter {
     }
 
     /**
-     * Returns a DDL string to create a unique constraint over a set 
-     * of columns.
+     * Returns a DDL string to create a unique constraint over a set of columns.
      * 
      * @since 1.1
      */
     public String createUniqueConstraint(DbEntity source, Collection columns) {
         if (columns == null || columns.isEmpty()) {
-            throw new CayenneRuntimeException("Can't create UNIQUE constraint - no columns specified.");
+            throw new CayenneRuntimeException(
+                    "Can't create UNIQUE constraint - no columns specified.");
         }
 
         StringBuffer buf = new StringBuffer();
 
-        buf.append("ALTER TABLE ").append(source.getFullyQualifiedName()).append(
-            " ADD UNIQUE (");
+        buf
+                .append("ALTER TABLE ")
+                .append(source.getFullyQualifiedName())
+                .append(" ADD UNIQUE (");
 
         Iterator it = columns.iterator();
         DbAttribute first = (DbAttribute) it.next();
@@ -437,17 +439,15 @@ public class JdbcAdapter implements DbAdapter {
     }
 
     /**
-     * Returns a SQL string that can be used to create
-     * a foreign key constraint for the relationship.
+     * Returns a SQL string that can be used to create a foreign key constraint for the
+     * relationship.
      */
     public String createFkConstraint(DbRelationship rel) {
         StringBuffer buf = new StringBuffer();
         StringBuffer refBuf = new StringBuffer();
 
-        buf
-            .append("ALTER TABLE ")
-            .append(((DbEntity) rel.getSourceEntity()).getFullyQualifiedName())
-            .append(" ADD FOREIGN KEY (");
+        buf.append("ALTER TABLE ").append(((DbEntity) rel.getSourceEntity())
+                .getFullyQualifiedName()).append(" ADD FOREIGN KEY (");
 
         Iterator jit = rel.getJoins().iterator();
         boolean first = true;
@@ -465,11 +465,11 @@ public class JdbcAdapter implements DbAdapter {
         }
 
         buf
-            .append(") REFERENCES ")
-            .append(((DbEntity) rel.getTargetEntity()).getFullyQualifiedName())
-            .append(" (")
-            .append(refBuf.toString())
-            .append(')');
+                .append(") REFERENCES ")
+                .append(((DbEntity) rel.getTargetEntity()).getFullyQualifiedName())
+                .append(" (")
+                .append(refBuf.toString())
+                .append(')');
         return buf.toString();
     }
 
@@ -482,12 +482,12 @@ public class JdbcAdapter implements DbAdapter {
     }
 
     public DbAttribute buildAttribute(
-        String name,
-        String typeName,
-        int type,
-        int size,
-        int precision,
-        boolean allowNulls) {
+            String name,
+            String typeName,
+            int type,
+            int size,
+            int precision,
+            boolean allowNulls) {
 
         DbAttribute attr = new DbAttribute();
         attr.setName(name);
@@ -522,6 +522,9 @@ public class JdbcAdapter implements DbAdapter {
 
     /**
      * Creates an instance of DataNode class.
+     * 
+     * @deprecated since 1.2 this method is not used as node behavior customization is
+     *             done via SQLActionVisitor.
      */
     public DataNode createDataNode(String name) {
         DataNode node = new DataNode(name);
@@ -529,20 +532,28 @@ public class JdbcAdapter implements DbAdapter {
         return node;
     }
 
+    /**
+     * Uses JdbcActionBuilder to create the right action.
+     * 
+     * @since 1.2
+     */
+    public SQLAction getAction(Query query, DataNode node) {
+        return query.toSQLAction(new JdbcActionBuilder(this, node.getEntityResolver()));
+    }
+
     public void bindParameter(
-        PreparedStatement statement,
-        Object object,
-        int pos,
-        int sqlType,
-        int precision)
-        throws SQLException, Exception {
+            PreparedStatement statement,
+            Object object,
+            int pos,
+            int sqlType,
+            int precision) throws SQLException, Exception {
 
         if (object == null) {
             statement.setNull(pos, sqlType);
         }
         else {
-            ExtendedType typeProcessor =
-                getExtendedTypes().getRegisteredType(object.getClass());
+            ExtendedType typeProcessor = getExtendedTypes().getRegisteredType(object
+                    .getClass());
             typeProcessor.setJdbcObject(statement, object, pos, sqlType, precision);
         }
     }
@@ -554,14 +565,14 @@ public class JdbcAdapter implements DbAdapter {
     public void setSupportsBatchUpdates(boolean flag) {
         this.supportsBatchUpdates = flag;
     }
-    
+
     /**
      * @since 1.2
      */
     public boolean supportsGeneratedKeys() {
         return supportsGeneratedKeys;
     }
-    
+
     /**
      * @since 1.2
      */
@@ -575,11 +586,10 @@ public class JdbcAdapter implements DbAdapter {
      * @deprecated Since 1.2 this method is obsolete and is ignored across Cayenne.
      */
     public boolean shouldRunBatchQuery(
-        DataNode node,
-        Connection con,
-        BatchQuery query,
-        OperationObserver delegate)
-        throws SQLException, Exception {
+            DataNode node,
+            Connection con,
+            BatchQuery query,
+            OperationObserver delegate) throws SQLException, Exception {
         return true;
     }
 }

@@ -53,47 +53,39 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.db2;
+package org.objectstyle.cayenne.dba.sqlserver;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.jdbc.SQLTemplateAction;
-import org.objectstyle.cayenne.access.jdbc.SQLTemplateSelectAction;
-import org.objectstyle.cayenne.query.SQLTemplate;
+import org.objectstyle.cayenne.access.jdbc.BatchAction;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.JdbcActionBuilder;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.BatchQuery;
+import org.objectstyle.cayenne.query.ProcedureQuery;
+import org.objectstyle.cayenne.query.SQLAction;
 
 /**
- * DB2-specific subclass of DataNode.
- * 
  * @since 1.2
  * @author Andrei Adamchik
  */
-public class DB2DataNode extends DataNode {
+public class SQLServerActionBuilder extends JdbcActionBuilder {
 
-    public DB2DataNode() {
-        super();
+    public SQLServerActionBuilder(DbAdapter adapter, EntityResolver resolver) {
+        super(adapter, resolver);
     }
 
-    public DB2DataNode(String name) {
-        super(name);
+    public SQLAction makeBatchUpdate(BatchQuery query) {
+        // check run strategy...
+
+        // optimistic locking is not supported in batches due to JDBC driver limitations
+        boolean useOptimisticLock = query.isUsingOptimisticLocking();
+
+        boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
+        BatchAction action = new SQLServerBatchAction(query, adapter, entityResolver);
+        action.setBatch(runningAsBatch);
+        return action;
     }
 
-    /**
-     * Installs an alternative action for processing SQLTemplate.
-     */
-    protected void runSQLTemplate(
-            Connection connection,
-            SQLTemplate sqlTemplate,
-            OperationObserver resultConsumer) throws SQLException, Exception {
-
-        SQLTemplateAction executionPlan = (sqlTemplate.isSelecting())
-                ? new SQLTemplateSelectAction(sqlTemplate, getAdapter())
-                : new SQLTemplateAction(sqlTemplate, getAdapter());
-
-        // DB2 requires single line queries...
-        executionPlan.setRemovingLineBreaks(true);
-        executionPlan.performAction(connection, resultConsumer);
+    public SQLAction makeProcedure(ProcedureQuery query) {
+        return new SQLServerProcedureAction(query, getAdapter(), getEntityResolver());
     }
 }

@@ -61,6 +61,8 @@ import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
 import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 
 /**
  * Cayenne DbAdapter implementation for <a
@@ -123,6 +125,17 @@ public class SQLServerAdapter extends SybaseAdapter {
         this.setSupportsGeneratedKeys(true);
     }
     
+
+    /**
+     * Uses SQLServerActionBuilder to create the right action.
+     * 
+     * @since 1.2
+     */
+    public SQLAction getAction(Query query, DataNode node) {
+        return query.toSQLAction(new SQLServerActionBuilder(this, node.getEntityResolver()));
+    }
+
+    
     /**
      * Returns a trimming translator.
      */
@@ -132,17 +145,7 @@ public class SQLServerAdapter extends SybaseAdapter {
                 SQLServerAdapter.TRIM_FUNCTION);
     }
 
-    /**
-     * Returns an instance of SQLServerDataNode.
-     * 
-     * @since 1.2
-     */
-    public DataNode createDataNode(String name) {
-        DataNode node = new SQLServerDataNode(name);
-        node.setAdapter(this);
-        return node;
-    }
-
+    
     /**
      * Overrides super implementation to correctly set up identity columns.
      * 

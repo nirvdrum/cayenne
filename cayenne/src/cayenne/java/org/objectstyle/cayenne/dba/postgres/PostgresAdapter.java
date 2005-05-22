@@ -72,29 +72,44 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 
 /**
- * DbAdapter implementation for <a href="http://www.postgresql.org">PostgreSQL RDBMS</a>.
- * Sample <a target="_top" href="../../../../../../../developerguide/unit-tests.html">connection 
- * settings</a> to use with PostgreSQL are shown below:
+ * DbAdapter implementation for <a href="http://www.postgresql.org">PostgreSQL RDBMS </a>.
+ * Sample <a target="_top"
+ * href="../../../../../../../developerguide/unit-tests.html">connection settings </a> to
+ * use with PostgreSQL are shown below:
  * 
-<pre>
-test-postgresql.cayenne.adapter = org.objectstyle.cayenne.dba.postgres.PostgresAdapter
-test-postgresql.jdbc.username = test
-test-postgresql.jdbc.password = secret
-test-postgresql.jdbc.url = jdbc:postgresql://serverhostname/cayenne
-test-postgresql.jdbc.driver = org.postgresql.Driver
-</pre>
+ * <pre>
+ * 
+ *   test-postgresql.cayenne.adapter = org.objectstyle.cayenne.dba.postgres.PostgresAdapter
+ *   test-postgresql.jdbc.username = test
+ *   test-postgresql.jdbc.password = secret
+ *   test-postgresql.jdbc.url = jdbc:postgresql://serverhostname/cayenne
+ *   test-postgresql.jdbc.driver = org.postgresql.Driver
+ *  
+ * </pre>
  * 
  * @author Dirk Olmes
  * @author Holger Hoffstaette
  * @author Andrus Adamchik
  */
 public class PostgresAdapter extends JdbcAdapter {
-    
+
     /**
-     * Installs appropriate ExtendedTypes as converters for passing values
-     * between JDBC and Java layers.
+     * Uses PostgresActionBuilder to create the right action.
+     * 
+     * @since 1.2
+     */
+    public SQLAction getAction(Query query, DataNode node) {
+        return query
+                .toSQLAction(new PostgresActionBuilder(this, node.getEntityResolver()));
+    }
+
+    /**
+     * Installs appropriate ExtendedTypes as converters for passing values between JDBC
+     * and Java layers.
      */
     protected void configureExtendedTypes(ExtendedTypeMap map) {
         super.configureExtendedTypes(map);
@@ -106,25 +121,13 @@ public class PostgresAdapter extends JdbcAdapter {
         map.registerType(new PostgresByteArrayType(true, false));
     }
 
-    /**
-     * Returns an instance of PostgresDataNode.
-     * 
-     * @since 1.2
-     */
-    public DataNode createDataNode(String name) {
-        DataNode node = new PostgresDataNode(name);
-        node.setAdapter(this);
-        return node;
-    }
-
-    
     public DbAttribute buildAttribute(
-        String name,
-        String typeName,
-        int type,
-        int size,
-        int precision,
-        boolean allowNulls) {
+            String name,
+            String typeName,
+            int type,
+            int size,
+            int precision,
+            boolean allowNulls) {
 
         // "bytea" maps to pretty much any binary type, so
         // it is up to us to select the most sensible default.
@@ -133,7 +136,7 @@ public class PostgresAdapter extends JdbcAdapter {
             type = Types.LONGVARBINARY;
         }
         // somehow the driver reverse-engineers "text" as VARCHAR, must be CLOB
-        else if("text".equalsIgnoreCase(typeName)) {
+        else if ("text".equalsIgnoreCase(typeName)) {
             type = Types.CLOB;
         }
 
@@ -141,9 +144,9 @@ public class PostgresAdapter extends JdbcAdapter {
     }
 
     /**
-     * Customizes table creating procedure for PostgreSQL. One difference
-     * with generic implementation is that "bytea" type has no explicit length
-     * unlike similar binary types in other databases.
+     * Customizes table creating procedure for PostgreSQL. One difference with generic
+     * implementation is that "bytea" type has no explicit length unlike similar binary
+     * types in other databases.
      * 
      * @since 1.0.2
      */
@@ -152,8 +155,9 @@ public class PostgresAdapter extends JdbcAdapter {
         // later we may support view creation
         // for derived DbEntities
         if (ent instanceof DerivedDbEntity) {
-            throw new CayenneRuntimeException(
-                "Can't create table for derived DbEntity '" + ent.getName() + "'.");
+            throw new CayenneRuntimeException("Can't create table for derived DbEntity '"
+                    + ent.getName()
+                    + "'.");
         }
 
         StringBuffer buf = new StringBuffer();
@@ -165,7 +169,8 @@ public class PostgresAdapter extends JdbcAdapter {
         while (it.hasNext()) {
             if (first) {
                 first = false;
-            } else {
+            }
+            else {
                 buf.append(", ");
             }
 
@@ -173,8 +178,7 @@ public class PostgresAdapter extends JdbcAdapter {
 
             // attribute may not be fully valid, do a simple check
             if (at.getType() == TypesMapping.NOT_DEFINED) {
-                throw new CayenneRuntimeException(
-                    "Undefined type for attribute '"
+                throw new CayenneRuntimeException("Undefined type for attribute '"
                         + ent.getFullyQualifiedName()
                         + "."
                         + at.getName()
@@ -183,8 +187,7 @@ public class PostgresAdapter extends JdbcAdapter {
 
             String[] types = externalTypesForJdbcType(at.getType());
             if (types == null || types.length == 0) {
-                throw new CayenneRuntimeException(
-                    "Undefined type for attribute '"
+                throw new CayenneRuntimeException("Undefined type for attribute '"
                         + ent.getFullyQualifiedName()
                         + "."
                         + at.getName()
@@ -218,7 +221,8 @@ public class PostgresAdapter extends JdbcAdapter {
 
             if (at.isMandatory()) {
                 buf.append(" NOT NULL");
-            } else {
+            }
+            else {
                 buf.append(" NULL");
             }
         }
@@ -264,6 +268,7 @@ public class PostgresAdapter extends JdbcAdapter {
 
     /**
      * Adds the CASCADE option to the DROP TABLE clause.
+     * 
      * @see JdbcAdapter#dropTable(DbEntity)
      */
     public String dropTable(DbEntity ent) {
@@ -283,12 +288,11 @@ public class PostgresAdapter extends JdbcAdapter {
     protected PkGenerator createPkGenerator() {
         return new PostgresPkGenerator();
     }
-    
-    
+
     /**
-     * PostgresByteArrayType is a byte[] type handler that patches the problem with PostgreSQL 
-     * JDBC driver. Namely the fact that for some misterious reason PostgreSQL JDBC driver 
-     * (as of 7.3.5) completely ignores the existence of LONGVARCHAR type. 
+     * PostgresByteArrayType is a byte[] type handler that patches the problem with
+     * PostgreSQL JDBC driver. Namely the fact that for some misterious reason PostgreSQL
+     * JDBC driver (as of 7.3.5) completely ignores the existence of LONGVARCHAR type.
      * 
      * @since 1.0.4
      */
@@ -297,16 +301,15 @@ public class PostgresAdapter extends JdbcAdapter {
         public PostgresByteArrayType(boolean trimmingBytes, boolean usingBlobs) {
             super(trimmingBytes, usingBlobs);
         }
-        
+
         public void setJdbcObject(
-            PreparedStatement st,
-            Object val,
-            int pos,
-            int type,
-            int precision)
-            throws Exception {
-                
-            // patch PGSQL driver LONGVARBINARY ignorance 
+                PreparedStatement st,
+                Object val,
+                int pos,
+                int type,
+                int precision) throws Exception {
+
+            // patch PGSQL driver LONGVARBINARY ignorance
             if (type == Types.LONGVARBINARY) {
                 type = Types.VARBINARY;
             }

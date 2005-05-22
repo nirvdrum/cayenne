@@ -66,6 +66,7 @@ import java.util.Map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Exhibit;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -180,33 +181,34 @@ public class DataNodeQueriesTst extends CayenneTestCase {
         String templateString = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME)"
                 + "\n"
                 + "VALUES (1, 'A')";
-        runMultiLineSQLTemplateLine(templateString);
+        runSQL(templateString);
     }
 
     public void testRunMultiLineSQLTemplateWindows() throws Exception {
         String templateString = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME)"
                 + "\r\n"
                 + "VALUES (1, 'A')";
-        runMultiLineSQLTemplateLine(templateString);
+        runSQL(templateString);
     }
 
     public void testRunMultiLineSQLTemplateMac() throws Exception {
         String templateString = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME)"
                 + "\r"
                 + "VALUES (1, 'A')";
-        runMultiLineSQLTemplateLine(templateString);
+        runSQL(templateString);
     }
 
     /**
      * Testing that SQLTemplate that is entered on multiple lines can be executed. CAY-269
      * shows that some databases are very picky about it.
      */
-    private void runMultiLineSQLTemplateLine(String templateString) throws Exception {
+    private void runSQL(String templateString) throws Exception {
         SQLTemplate template = new SQLTemplate(Object.class, templateString, false);
+        SQLAction action = getNode().getAdapter().getAction(template, getNode());
 
         Connection c = getConnection();
         try {
-            getNode().runSQLTemplate(c, template, new MockOperationObserver());
+            action.performAction(c, new MockOperationObserver());
         }
         finally {
             c.close();

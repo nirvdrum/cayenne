@@ -206,8 +206,8 @@ public class PerformMain {
                 adapterClass = Class.forName(dsi.getAdapterClassName());
             }
  
-            DbAdapter adapter = (DbAdapter) adapterClass.newInstance();
-			DataNode node = adapter.createDataNode("node");
+			DataNode node = new DataNode("node");
+			node.setAdapter((DbAdapter) adapterClass.newInstance());
 			node.setDataSource(ds);
             node.addDataMap(map);
 

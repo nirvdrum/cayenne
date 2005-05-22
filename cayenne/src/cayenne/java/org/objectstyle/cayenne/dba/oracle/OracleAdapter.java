@@ -83,6 +83,7 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
@@ -296,14 +297,15 @@ public class OracleAdapter extends JdbcAdapter {
                 queryAssembler,
                 OracleAdapter.TRIM_FUNCTION);
     }
+    
 
     /**
-     * Creates an instance of OracleDataNode.
+     * Uses OracleActionBuilder to create the right action.
+     * 
+     * @since 1.2
      */
-    public DataNode createDataNode(String name) {
-        DataNode node = new OracleDataNode(name);
-        node.setAdapter(this);
-        return node;
+    public SQLAction getAction(Query query, DataNode node) {
+        return query.toSQLAction(new OracleActionBuilder(this, node.getEntityResolver()));
     }
 
     /**

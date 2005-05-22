@@ -270,7 +270,7 @@ public class CayenneTestResources implements BeanFactoryAware {
         AccessStackAdapter adapter = getAccessStackAdapter(Class.forName(connectionInfo
                 .getAdapterClassName()));
 
-        DataNode node = adapter.getAdapter().createDataNode(name);
+        DataNode node = new DataNode(name);
         node.setDataSource(dataSource);
         node.setAdapter(adapter.getAdapter());
         return node;

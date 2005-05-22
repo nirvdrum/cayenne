@@ -69,6 +69,9 @@ public class JdbcAdapterTst extends CayenneTestCase {
         adapter = new JdbcAdapter();
     }
 
+    /**
+     * @deprecated Since 1.2 "createDataNode" is deprecated.
+     */
     public void testCreateDataNode() throws Exception {
         DataNode node = adapter.createDataNode("1234");
         assertNotNull(node);

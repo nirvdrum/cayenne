@@ -583,7 +583,7 @@ public class DbGenerator {
 
         // sort table list
         if (tables.size() > 1) {
-            DataNode node = adapter.createDataNode("temp");
+            DataNode node = new DataNode("temp");
             node.addDataMap(map);
             node.getEntitySorter().sortDbEntities(tables, false);
         }

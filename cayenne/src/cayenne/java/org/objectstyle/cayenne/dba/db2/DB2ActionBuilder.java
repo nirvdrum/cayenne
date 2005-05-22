@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,85 +53,36 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.dba.db2;
 
-package org.objectstyle.cayenne.regression;
-
-import javax.sql.DataSource;
-
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.conn.DataSourceInfo;
-import org.objectstyle.cayenne.conn.PoolDataSource;
-import org.objectstyle.cayenne.conn.PoolManager;
+import org.objectstyle.cayenne.access.jdbc.SQLTemplateAction;
+import org.objectstyle.cayenne.access.jdbc.SQLTemplateSelectAction;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.JdbcActionBuilder;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.SQLAction;
+import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
- * Runs regression test based on a set of properties
  * @author Andrei Adamchik
  */
-public class AntMain extends Main {
+public class DB2ActionBuilder extends JdbcActionBuilder {
 
-    /**
-     * Uses System properties to configure regression tests.
-     */
-    public static void main(String[] args) {
-        TestPreferences prefs;
-
-        Configuration.configureCommonLogging();
-
-        try {
-            prefs = new TestPreferences(System.getProperties());
-        } catch (Exception ex) {
-            System.out.println("Fatal Error: " + ex.getMessage());
-            System.exit(1);
-            return;
-        }
-
-        if (new AntMain(prefs).execute()) {
-            System.exit(1);
-        }
-
-        System.exit(0);
+    public DB2ActionBuilder(DbAdapter adapter, EntityResolver resolver) {
+        super(adapter, resolver);
     }
 
     /**
-     * Constructor for AntMain.
+     * Creates a SQLTemplate handling action that removes line breaks from SQL template
+     * string to satisfy DB2 JDBC driver.
      */
-    public AntMain(TestPreferences prefs) {
-        super(prefs);
-    }
+    public SQLAction makeSQL(SQLTemplate query) {
+        SQLTemplateAction action = (query.isSelecting()) ? new SQLTemplateSelectAction(
+                query,
+                adapter) : new SQLTemplateAction(query, adapter);
 
-    protected DataDomain createDomain() throws Exception {
-        ClassLoader loader = new DOStubClassLoader();
-        Configuration.bootstrapSharedConfiguration(loader.loadClass("Table"));
-
-        DataSourceInfo info = ((TestPreferences) prefs).getConnectionInfo();
-
-        // data source
-        PoolDataSource poolDS =
-            new PoolDataSource(info.getJdbcDriver(), info.getDataSourceUrl());
-        DataSource ds =
-            new PoolManager(
-                poolDS,
-                1,
-                1,
-                info.getUserName(),
-                info.getPassword());
-
-        Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
-
-        if (info.getAdapterClassName() != null) {
-            adapterClass = Class.forName(info.getAdapterClassName());
-        }
-        
-        DataNode node = new DataNode("node");
-        node.setAdapter((DbAdapter) adapterClass.newInstance());
-        node.setDataSource(ds);
-
-        // domain
-        DataDomain domain = new DataDomain("domain");
-        domain.addNode(node);
-        return domain;
+        // DB2 requires single line queries...
+        action.setRemovingLineBreaks(true);
+        return action;
     }
 }

@@ -64,15 +64,12 @@ import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBBatchQueryWrapper;
-import org.objectstyle.cayenne.access.util.BatchQueryUtils;
 import org.objectstyle.cayenne.query.BatchQuery;
-import org.objectstyle.cayenne.query.ProcedureQuery;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SQLAction;
 
 /**
  * DataNode subclass customized for Oracle database engine.
  * 
+ * @deprecated Since 1.2 DataNode customization is done entirely via DbAdapter.
  * @author Andrei Adamchik
  */
 public class OracleDataNode extends DataNode {
@@ -85,59 +82,10 @@ public class OracleDataNode extends DataNode {
         super(name);
     }
 
-    /**
-     * @since 1.2
-     */
-    protected void runBatchUpdate(
-            Connection connection,
-            BatchQuery query,
-            OperationObserver observer) throws SQLException, Exception {
-
-        SQLAction action;
-
-        // special handling for LOB updates
-        if (OracleAdapter.isSupportsOracleLOB()
-                && BatchQueryUtils.updatesLOBColumns(query)) {
-
-            action = new OracleLOBBatchAction(query, getAdapter());
-        }
-        else {
-
-            // optimistic locking is not supported in batches due to JDBC driver
-            // limitations
-            boolean useOptimisticLock = query.isUsingOptimisticLocking();
-
-            boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
-            OracleBatchAction batchAction = new OracleBatchAction(
-                    query,
-                    getAdapter(),
-                    getEntityResolver());
-            batchAction.setBatch(runningAsBatch);
-            action = batchAction;
-        }
-
-        action.performAction(connection, observer);
-    }
-
-    /**
-     * @since 1.2
-     */
-    protected void runStoredProcedure(
-            Connection con,
-            Query query,
-            OperationObserver observer) throws SQLException, Exception {
-
-        new OracleProcedureAction(
-                (ProcedureQuery) query,
-                getAdapter(),
-                getEntityResolver()).performAction(con, observer);
-    }
-
+ 
     /**
      * Special update method that is called from OracleAdapter if LOB columns are to be
      * updated.
-     * 
-     * @deprecated Since 1.2 replaced with SQLAction.
      */
     public void runBatchUpdateWithLOBColumns(
             Connection con,
@@ -149,8 +97,6 @@ public class OracleDataNode extends DataNode {
 
     /**
      * Selects a LOB row and writes LOB values.
-     * 
-     * @deprecated since 1.2 OracleLOBBatchAction is used.
      */
     protected void processLOBRow(
             Connection con,
@@ -167,8 +113,6 @@ public class OracleDataNode extends DataNode {
     /**
      * Configures BatchQueryBuilder to trim CHAR column values, and then invokes super
      * implementation.
-     * 
-     * @deprecated Since 1.2 super implementation is deprecated.
      */
     protected void runBatchUpdateAsBatch(
             Connection con,
@@ -183,8 +127,6 @@ public class OracleDataNode extends DataNode {
     /**
      * Configures BatchQueryBuilder to trim CHAR column values, and then invokes super
      * implementation.
-     * 
-     * @deprecated Since 1.2 super implementation is deprecated.
      */
     protected void runBatchUpdateAsIndividualQueries(
             Connection con,

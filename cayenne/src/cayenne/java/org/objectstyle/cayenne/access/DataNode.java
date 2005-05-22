@@ -74,8 +74,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.jdbc.BatchAction;
 import org.objectstyle.cayenne.access.jdbc.ProcedureAction;
 import org.objectstyle.cayenne.access.jdbc.RowDescriptor;
-import org.objectstyle.cayenne.access.jdbc.SQLTemplateAction;
-import org.objectstyle.cayenne.access.jdbc.SQLTemplateSelectAction;
 import org.objectstyle.cayenne.access.jdbc.SelectAction;
 import org.objectstyle.cayenne.access.jdbc.UpdateAction;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
@@ -91,7 +89,6 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLAction;
-import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
  * Describes a single physical data source. This can be a database server, LDAP server,
@@ -303,27 +300,10 @@ public class DataNode implements QueryEngine {
             // catch exceptions for each individual query
             try {
 
-                // TODO: need to externalize this big switch into maybe a config file
-                // to allow easy plugging of alt. actions for nodes
-
-                // figure out query type and call appropriate worker method
-                if (nextQuery instanceof SQLTemplate) {
-                    runSQLTemplate(connection, (SQLTemplate) nextQuery, resultConsumer);
-                }
-                else if (nextQuery instanceof ProcedureQuery) {
-                    runStoredProcedure(connection, nextQuery, resultConsumer);
-                }
-                // Important: check for GenericSelectQuery AFTER all specific
-                // implementations are checked...
-                else if (nextQuery instanceof GenericSelectQuery) {
-                    runSelect(connection, nextQuery, resultConsumer);
-                }
-                else if (nextQuery instanceof BatchQuery) {
-                    runBatchUpdate(connection, (BatchQuery) nextQuery, resultConsumer);
-                }
-                else {
-                    runUpdate(connection, nextQuery, resultConsumer);
-                }
+                // actual query translation and execution happens in the following two
+                // lines:
+                SQLAction action = adapter.getAction(nextQuery, this);
+                action.performAction(connection, resultConsumer);
             }
             catch (Exception queryEx) {
                 QueryLogger.logQueryError(logLevel, queryEx);
@@ -340,23 +320,9 @@ public class DataNode implements QueryEngine {
     }
 
     /**
-     * Executes a SQLTemplate query.
-     * 
-     * @since 1.2
-     */
-    protected void runSQLTemplate(
-            Connection connection,
-            SQLTemplate sqlTemplate,
-            OperationObserver resultConsumer) throws SQLException, Exception {
-
-        SQLAction executionPlan = (sqlTemplate.isSelecting())
-                ? new SQLTemplateSelectAction(sqlTemplate, getAdapter())
-                : new SQLTemplateAction(sqlTemplate, getAdapter());
-        executionPlan.performAction(connection, resultConsumer);
-    }
-
-    /**
      * Executes a generic select query.
+     * 
+     * @deprecated since 1.2
      */
     protected void runSelect(
             Connection connection,
@@ -369,6 +335,8 @@ public class DataNode implements QueryEngine {
 
     /**
      * Executes a non-batched updating query.
+     * 
+     * @deprecated since 1.2
      */
     protected void runUpdate(Connection con, Query query, OperationObserver delegate)
             throws SQLException, Exception {
@@ -379,6 +347,8 @@ public class DataNode implements QueryEngine {
 
     /**
      * Executes a batch updating query.
+     * 
+     * @deprecated since 1.2
      */
     protected void runBatchUpdate(
             Connection connection,
@@ -424,6 +394,9 @@ public class DataNode implements QueryEngine {
         new TempBatchAction(query, false).runAsBatch(con, queryBuilder, delegate);
     }
 
+    /**
+     * @deprecated since 1.2
+     */
     protected void runStoredProcedure(
             Connection con,
             Query query,

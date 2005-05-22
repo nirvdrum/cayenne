@@ -22,14 +22,14 @@ import org.objectstyle.cayenne.query.SQLTemplate;
  * @since 1.2
  * @author Andrei Adamchik
  */
-public class JdbcQueryDispatcher implements SQLActionVisitor {
+public class JdbcActionBuilder implements SQLActionVisitor {
 
     protected DbAdapter adapter;
-    protected EntityResolver resolver;
+    protected EntityResolver entityResolver;
 
-    public JdbcQueryDispatcher(DbAdapter adapter, EntityResolver resolver) {
+    public JdbcActionBuilder(DbAdapter adapter, EntityResolver resolver) {
         this.adapter = adapter;
-        this.resolver = resolver;
+        this.entityResolver = resolver;
     }
 
     public SQLAction makeBatchUpdate(BatchQuery query) {
@@ -39,17 +39,17 @@ public class JdbcQueryDispatcher implements SQLActionVisitor {
         boolean useOptimisticLock = query.isUsingOptimisticLocking();
 
         boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
-        BatchAction action = new BatchAction(query, adapter, resolver);
+        BatchAction action = new BatchAction(query, adapter, entityResolver);
         action.setBatch(runningAsBatch);
         return action;
     }
 
     public SQLAction makeProcedure(ProcedureQuery query) {
-        return new ProcedureAction(query, adapter, resolver);
+        return new ProcedureAction(query, adapter, entityResolver);
     }
 
     public SQLAction makeSelect(GenericSelectQuery query) {
-        return new SelectAction(query, adapter, resolver);
+        return new SelectAction(query, adapter, entityResolver);
     }
 
     public SQLAction makeSQL(SQLTemplate query) {
@@ -59,6 +59,14 @@ public class JdbcQueryDispatcher implements SQLActionVisitor {
     }
 
     public SQLAction makeUpdate(Query query) {
-        return new UpdateAction(query, adapter, resolver);
+        return new UpdateAction(query, adapter, entityResolver);
+    }
+
+    public DbAdapter getAdapter() {
+        return adapter;
+    }
+
+    public EntityResolver getEntityResolver() {
+        return entityResolver;
     }
 }

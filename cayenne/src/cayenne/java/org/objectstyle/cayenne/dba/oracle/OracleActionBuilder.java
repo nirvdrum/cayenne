@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,41 +53,52 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.postgres;
+package org.objectstyle.cayenne.dba.oracle;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.util.BatchQueryUtils;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.JdbcActionBuilder;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 
 /**
  * @since 1.2
  * @author Andrei Adamchik
  */
-public class PostgresDataNode extends DataNode {
+public class OracleActionBuilder extends JdbcActionBuilder {
 
-    public PostgresDataNode() {
-        super();
+    public OracleActionBuilder(DbAdapter adapter, EntityResolver resolver) {
+        super(adapter, resolver);
     }
 
-    public PostgresDataNode(String name) {
-        super(name);
+    public SQLAction makeBatchUpdate(BatchQuery query) {
+
+        // special handling for LOB updates
+        if (OracleAdapter.isSupportsOracleLOB()
+                && BatchQueryUtils.updatesLOBColumns(query)) {
+
+            return new OracleLOBBatchAction(query, getAdapter());
+        }
+        else {
+
+            // optimistic locking is not supported in batches due to JDBC driver
+            // limitations
+            boolean useOptimisticLock = query.isUsingOptimisticLocking();
+            boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
+
+            OracleBatchAction action = new OracleBatchAction(
+                    query,
+                    getAdapter(),
+                    getEntityResolver());
+            action.setBatch(runningAsBatch);
+            return action;
+        }
+
     }
 
-    /**
-     * Executes stored procedure with PostgreSQL specific action.
-     */
-    protected void runStoredProcedure(
-            Connection con,
-            Query query,
-            OperationObserver observer) throws SQLException, Exception {
-
-        new PostgresProcedureAction(
-                (ProcedureQuery) query,
-                getAdapter(),
-                getEntityResolver()).performAction(con, observer);
+    public SQLAction makeProcedure(ProcedureQuery query) {
+        return new OracleProcedureAction(query, getAdapter(), getEntityResolver());
     }
 }

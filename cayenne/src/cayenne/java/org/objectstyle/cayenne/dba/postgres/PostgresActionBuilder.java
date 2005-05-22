@@ -53,85 +53,25 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.dba.postgres;
 
-package org.objectstyle.cayenne.regression;
-
-import javax.sql.DataSource;
-
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.conn.DataSourceInfo;
-import org.objectstyle.cayenne.conn.PoolDataSource;
-import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.JdbcActionBuilder;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.ProcedureQuery;
+import org.objectstyle.cayenne.query.SQLAction;
 
 /**
- * Runs regression test based on a set of properties
+ * @since 1.2
  * @author Andrei Adamchik
  */
-public class AntMain extends Main {
+public class PostgresActionBuilder extends JdbcActionBuilder {
 
-    /**
-     * Uses System properties to configure regression tests.
-     */
-    public static void main(String[] args) {
-        TestPreferences prefs;
-
-        Configuration.configureCommonLogging();
-
-        try {
-            prefs = new TestPreferences(System.getProperties());
-        } catch (Exception ex) {
-            System.out.println("Fatal Error: " + ex.getMessage());
-            System.exit(1);
-            return;
-        }
-
-        if (new AntMain(prefs).execute()) {
-            System.exit(1);
-        }
-
-        System.exit(0);
+    public PostgresActionBuilder(DbAdapter adapter, EntityResolver resolver) {
+        super(adapter, resolver);
     }
 
-    /**
-     * Constructor for AntMain.
-     */
-    public AntMain(TestPreferences prefs) {
-        super(prefs);
-    }
-
-    protected DataDomain createDomain() throws Exception {
-        ClassLoader loader = new DOStubClassLoader();
-        Configuration.bootstrapSharedConfiguration(loader.loadClass("Table"));
-
-        DataSourceInfo info = ((TestPreferences) prefs).getConnectionInfo();
-
-        // data source
-        PoolDataSource poolDS =
-            new PoolDataSource(info.getJdbcDriver(), info.getDataSourceUrl());
-        DataSource ds =
-            new PoolManager(
-                poolDS,
-                1,
-                1,
-                info.getUserName(),
-                info.getPassword());
-
-        Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
-
-        if (info.getAdapterClassName() != null) {
-            adapterClass = Class.forName(info.getAdapterClassName());
-        }
-        
-        DataNode node = new DataNode("node");
-        node.setAdapter((DbAdapter) adapterClass.newInstance());
-        node.setDataSource(ds);
-
-        // domain
-        DataDomain domain = new DataDomain("domain");
-        domain.addNode(node);
-        return domain;
+    public SQLAction makeProcedure(ProcedureQuery query) {
+        return new PostgresProcedureAction(query, getAdapter(), getEntityResolver());
     }
 }

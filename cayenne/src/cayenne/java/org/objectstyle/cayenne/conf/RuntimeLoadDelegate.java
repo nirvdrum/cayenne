@@ -321,7 +321,8 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             dbAdapter = new JdbcAdapter();
         }
 
-        DataNode node = dbAdapter.createDataNode(nodeName);
+        DataNode node = new DataNode(nodeName);
+        node.setAdapter(dbAdapter);
         node.setDataSourceFactory(factory);
         node.setDataSourceLocation(dataSource);
 

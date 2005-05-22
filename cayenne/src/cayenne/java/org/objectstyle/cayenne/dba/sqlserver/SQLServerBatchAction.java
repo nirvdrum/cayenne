@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -61,57 +61,32 @@ import java.sql.Statement;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.access.jdbc.BatchAction;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
-import org.objectstyle.cayenne.query.ProcedureQuery;
-import org.objectstyle.cayenne.query.Query;
 
 /**
- * SQLServer-specific DataNode implementation that handles certain issues like identity
- * columns, etc.
- * 
  * @since 1.2
  * @author Andrei Adamchik
  */
-public class SQLServerDataNode extends DataNode {
+public class SQLServerBatchAction extends BatchAction {
 
-    public SQLServerDataNode() {
-        super();
+    public SQLServerBatchAction(BatchQuery batchQuery, DbAdapter adapter,
+            EntityResolver entityResolver) {
+        super(batchQuery, adapter, entityResolver);
     }
 
-    public SQLServerDataNode(String name) {
-        super(name);
-    }
+    public void performAction(Connection connection, OperationObserver observer)
+            throws SQLException, Exception {
 
-    /**
-     * Executes stored procedure with SQLServer specific action.
-     */
-    protected void runStoredProcedure(
-            Connection con,
-            Query query,
-            OperationObserver observer) throws SQLException, Exception {
-
-        new SQLServerProcedureAction(
-                (ProcedureQuery) query,
-                getAdapter(),
-                getEntityResolver()).performAction(con, observer);
-    }
-
-    /**
-     * Implements handling of identity PK columns.
-     */
-    protected void runBatchUpdate(
-            Connection connection,
-            BatchQuery query,
-            OperationObserver delegate) throws SQLException, Exception {
-
-        // this condition checks if identity coilumns are present in the query and adapter
+        //      this condition checks if identity coilumns are present in the query and adapter
         // is not ready to process them... e.g. if we are using a MS driver...
-        if (expectsToOverrideIdentityColumns(query)) {
+        if (expectsToOverrideIdentityColumns()) {
 
             String configSQL = "SET IDENTITY_INSERT "
                     + query.getDbEntity().getFullyQualifiedName()
@@ -134,13 +109,13 @@ public class SQLServerDataNode extends DataNode {
             }
         }
 
-        super.runBatchUpdate(connection, query, delegate);
+        super.performAction(connection, observer);
     }
 
     /**
      * Returns whether a table has identity columns.
      */
-    protected boolean expectsToOverrideIdentityColumns(BatchQuery query) {
+    protected boolean expectsToOverrideIdentityColumns() {
         // jTDS driver supports identity columns, no need for tricks...
         if (getAdapter().supportsGeneratedKeys()) {
             return false;
