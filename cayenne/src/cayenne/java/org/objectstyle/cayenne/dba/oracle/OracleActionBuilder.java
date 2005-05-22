@@ -73,7 +73,7 @@ public class OracleActionBuilder extends JdbcActionBuilder {
         super(adapter, resolver);
     }
 
-    public SQLAction makeBatchUpdate(BatchQuery query) {
+    public SQLAction batchAction(BatchQuery query) {
 
         // special handling for LOB updates
         if (OracleAdapter.isSupportsOracleLOB()
@@ -98,7 +98,7 @@ public class OracleActionBuilder extends JdbcActionBuilder {
 
     }
 
-    public SQLAction makeProcedure(ProcedureQuery query) {
+    public SQLAction procedureAction(ProcedureQuery query) {
         return new OracleProcedureAction(query, getAdapter(), getEntityResolver());
     }
 }

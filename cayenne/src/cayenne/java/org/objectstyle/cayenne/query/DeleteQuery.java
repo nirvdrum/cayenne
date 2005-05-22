@@ -109,6 +109,6 @@ public class DeleteQuery extends QualifiedQuery {
      * @since 1.2
      */
     public SQLAction toSQLAction(SQLActionVisitor visitor) {
-        return visitor.makeUpdate(this);
+        return visitor.updateAction(this);
     }
 }

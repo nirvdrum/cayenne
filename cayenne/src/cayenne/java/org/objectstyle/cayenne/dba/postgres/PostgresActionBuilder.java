@@ -71,7 +71,7 @@ public class PostgresActionBuilder extends JdbcActionBuilder {
         super(adapter, resolver);
     }
 
-    public SQLAction makeProcedure(ProcedureQuery query) {
+    public SQLAction procedureAction(ProcedureQuery query) {
         return new PostgresProcedureAction(query, getAdapter(), getEntityResolver());
     }
 }

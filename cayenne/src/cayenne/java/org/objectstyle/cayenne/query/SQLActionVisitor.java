@@ -68,27 +68,20 @@ public interface SQLActionVisitor {
     /**
      * Executes a generic update query.
      */
-    SQLAction makeUpdate(Query query);
+    SQLAction updateAction(Query query);
 
     /**
      * Executes a batch update query.
      */
-    SQLAction makeBatchUpdate(BatchQuery query);
+    SQLAction batchAction(BatchQuery query);
 
     /**
      * Executes a select query.
      */
-    SQLAction makeSelect(GenericSelectQuery query);
-
-    /**
-     * Executes a SQLTemplate query.
-     */
-    // TODO: we should probably remove this method and let select and update methods
-    // handle it.. Currently this mimicks DataNode displatch methods.
-    SQLAction makeSQL(SQLTemplate query);
+    SQLAction selectAction(GenericSelectQuery query);
 
     /**
      * Executes a ProcedureQuery.
      */
-    SQLAction makeProcedure(ProcedureQuery query);
+    SQLAction procedureAction(ProcedureQuery query);
 }

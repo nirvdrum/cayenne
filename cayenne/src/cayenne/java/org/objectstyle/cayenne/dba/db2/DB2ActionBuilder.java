@@ -56,12 +56,12 @@
 package org.objectstyle.cayenne.dba.db2;
 
 import org.objectstyle.cayenne.access.jdbc.SQLTemplateAction;
-import org.objectstyle.cayenne.access.jdbc.SQLTemplateSelectAction;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcActionBuilder;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLAction;
-import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
  * @author Andrei Adamchik
@@ -76,13 +76,20 @@ public class DB2ActionBuilder extends JdbcActionBuilder {
      * Creates a SQLTemplate handling action that removes line breaks from SQL template
      * string to satisfy DB2 JDBC driver.
      */
-    public SQLAction makeSQL(SQLTemplate query) {
-        SQLTemplateAction action = (query.isSelecting()) ? new SQLTemplateSelectAction(
-                query,
-                adapter) : new SQLTemplateAction(query, adapter);
+    protected SQLAction interceptRawSQL(SQLAction action) {
 
         // DB2 requires single line queries...
-        action.setRemovingLineBreaks(true);
+        if (action instanceof SQLTemplateAction) {
+            ((SQLTemplateAction) action).setRemovingLineBreaks(true);
+        }
         return action;
+    }
+
+    public SQLAction selectAction(GenericSelectQuery query) {
+        return interceptRawSQL(super.selectAction(query));
+    }
+
+    public SQLAction updateAction(Query query) {
+        return interceptRawSQL(super.updateAction(query));
     }
 }

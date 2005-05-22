@@ -189,7 +189,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public SQLAction toSQLAction(SQLActionVisitor visitor) {
-        return visitor.makeSelect(this);
+        return visitor.selectAction(this);
     }
 
     /**

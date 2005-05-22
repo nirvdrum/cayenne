@@ -73,7 +73,7 @@ public class SQLServerActionBuilder extends JdbcActionBuilder {
         super(adapter, resolver);
     }
 
-    public SQLAction makeBatchUpdate(BatchQuery query) {
+    public SQLAction batchAction(BatchQuery query) {
         // check run strategy...
 
         // optimistic locking is not supported in batches due to JDBC driver limitations
@@ -85,7 +85,7 @@ public class SQLServerActionBuilder extends JdbcActionBuilder {
         return action;
     }
 
-    public SQLAction makeProcedure(ProcedureQuery query) {
+    public SQLAction procedureAction(ProcedureQuery query) {
         return new SQLServerProcedureAction(query, getAdapter(), getEntityResolver());
     }
 }

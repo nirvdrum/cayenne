@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,77 +53,136 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba;
+package org.objectstyle.cayenne.unit.util;
 
-import org.objectstyle.cayenne.access.jdbc.BatchAction;
-import org.objectstyle.cayenne.access.jdbc.ProcedureAction;
-import org.objectstyle.cayenne.access.jdbc.SQLTemplateAction;
-import org.objectstyle.cayenne.access.jdbc.SQLTemplateSelectAction;
-import org.objectstyle.cayenne.access.jdbc.SelectAction;
-import org.objectstyle.cayenne.access.jdbc.UpdateAction;
-import org.objectstyle.cayenne.map.EntityResolver;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Collection;
+
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.QueryTranslator;
+import org.objectstyle.cayenne.access.trans.QualifierTranslator;
+import org.objectstyle.cayenne.access.trans.QueryAssembler;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.query.BatchQuery;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLAction;
-import org.objectstyle.cayenne.query.SQLActionVisitor;
-import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
- * A factory of default SQLActions. Adapters usually subclass JdbcActionBuilder to provide
- * custom actions for various query types.
- * 
- * @since 1.2
  * @author Andrei Adamchik
  */
-public class JdbcActionBuilder implements SQLActionVisitor {
+public class MockDbAdapter implements DbAdapter {
 
-    protected DbAdapter adapter;
-    protected EntityResolver entityResolver;
-
-    public JdbcActionBuilder(DbAdapter adapter, EntityResolver resolver) {
-        this.adapter = adapter;
-        this.entityResolver = resolver;
+    public MockDbAdapter() {
+        super();
     }
 
-    public SQLAction batchAction(BatchQuery query) {
-        // check run strategy...
-
-        // optimistic locking is not supported in batches due to JDBC driver limitations
-        boolean useOptimisticLock = query.isUsingOptimisticLocking();
-
-        boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
-        BatchAction action = new BatchAction(query, adapter, entityResolver);
-        action.setBatch(runningAsBatch);
-        return action;
+    public String getBatchTerminator() {
+        return null;
     }
 
-    public SQLAction procedureAction(ProcedureQuery query) {
-        return new ProcedureAction(query, adapter, entityResolver);
+    /**
+     * @deprecated Since 1.2
+     */
+    public DataNode createDataNode(String name) {
+        return null;
     }
 
-    public SQLAction selectAction(GenericSelectQuery query) {
-        if (query instanceof SQLTemplate) {
-            return new SQLTemplateSelectAction((SQLTemplate) query, adapter);
-        }
-
-        return new SelectAction(query, adapter, entityResolver);
+    public QueryTranslator getQueryTranslator(Query query) throws Exception {
+        return null;
     }
 
-    public SQLAction updateAction(Query query) {
-        if (query instanceof SQLTemplate) {
-            return new SQLTemplateAction((SQLTemplate) query, adapter);
-        }
-
-        return new UpdateAction(query, adapter, entityResolver);
+    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
+        return null;
     }
 
-    public DbAdapter getAdapter() {
-        return adapter;
+    public SQLAction getAction(Query query, DataNode node) {
+        return null;
     }
 
-    public EntityResolver getEntityResolver() {
-        return entityResolver;
+    public boolean supportsFkConstraints() {
+        return false;
     }
+
+    public boolean supportsUniqueConstraints() {
+        return false;
+    }
+
+    public boolean supportsGeneratedKeys() {
+        return false;
+    }
+
+    public boolean supportsBatchUpdates() {
+        return false;
+    }
+
+    public String dropTable(DbEntity ent) {
+        return null;
+    }
+
+    public String createTable(DbEntity ent) {
+        return null;
+    }
+
+    public String createUniqueConstraint(DbEntity source, Collection columns) {
+        return null;
+    }
+
+    public String createFkConstraint(DbRelationship rel) {
+        return null;
+    }
+
+    public String[] externalTypesForJdbcType(int type) {
+        return null;
+    }
+
+    public ExtendedTypeMap getExtendedTypes() {
+        return null;
+    }
+
+    public PkGenerator getPkGenerator() {
+        return null;
+    }
+
+    public DbAttribute buildAttribute(
+            String name,
+            String typeName,
+            int type,
+            int size,
+            int precision,
+            boolean allowNulls) {
+        return null;
+    }
+
+    public void bindParameter(
+            PreparedStatement statement,
+            Object object,
+            int pos,
+            int sqlType,
+            int precision) throws SQLException, Exception {
+    }
+
+    public String tableTypeForTable() {
+        return null;
+    }
+
+    public String tableTypeForView() {
+        return null;
+    }
+
+    public boolean shouldRunBatchQuery(
+            DataNode node,
+            Connection con,
+            BatchQuery query,
+            OperationObserver delegate) throws SQLException, Exception {
+        return false;
+    }
+
 }

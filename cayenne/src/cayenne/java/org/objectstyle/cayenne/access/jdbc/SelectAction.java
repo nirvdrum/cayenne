@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 /**
- * A SQLAction for SelectQueries.
+ * A SQLAction that handles SelectQuery execution.
  * 
  * @since 1.2
  * @author Andrei Adamchik

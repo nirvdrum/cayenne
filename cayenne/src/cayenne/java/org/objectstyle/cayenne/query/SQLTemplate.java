@@ -84,7 +84,9 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * </p>
  * 
  * <pre>
- *   SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
+ * 
+ *    SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
+ *  
  * </pre>
  * 
  * <p>
@@ -165,14 +167,14 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
         setRoot(objEntityName);
         setDefaultTemplate(defaultTemplate);
     }
-    
+
     /**
      * Calls "makeSQL" on the visitor.
      * 
      * @since 1.2
      */
     public SQLAction toSQLAction(SQLActionVisitor visitor) {
-        return visitor.makeSQL(this);
+        return isSelecting() ? visitor.selectAction(this) : visitor.updateAction(this);
     }
 
     /**
@@ -491,7 +493,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
     public void setSelecting(boolean b) {
         selecting = b;
     }
-    
+
     /**
      * Returns a collection of joint prefetches.
      * 
@@ -500,7 +502,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
     public Collection getJointPrefetches() {
         return selectProperties.getJointPrefetches();
     }
-    
+
     /**
      * Adds a joint prefetch.
      * 
@@ -509,7 +511,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
     public void addJointPrefetch(String relationshipPath) {
         selectProperties.addJointPrefetch(relationshipPath);
     }
-    
+
     /**
      * Adds all joint prefetches from a provided collection.
      * 
@@ -518,7 +520,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
     public void addJointPrefetches(Collection relationshipPaths) {
         selectProperties.addJointPrefetches(relationshipPaths);
     }
-    
+
     /**
      * Clears all joint prefetches.
      * 
@@ -527,7 +529,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
     public void clearJointPrefetches() {
         selectProperties.clearJointPrefetches();
     }
-    
+
     /**
      * Removes joint prefetch.
      * 
