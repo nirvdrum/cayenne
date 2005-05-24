@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.gen;
 
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -96,6 +97,9 @@ public abstract class MapClassGenerator {
     protected static final String VERSION_1_2 = ClassGenerator.VERSION_1_2;
 
     protected static final String DEFAULT_VERSION = VERSION_1_1;
+    
+    protected static final String MODE_DATAMAP = "datamap";
+    protected static final String MODE_ENTITY = "entity";
 
     protected String versionString = DEFAULT_VERSION;
 
@@ -103,6 +107,7 @@ public abstract class MapClassGenerator {
     protected String superPkg;
     protected DataMap dataMap;
     protected VPPConfig vppConfig;
+    protected String mode = MODE_ENTITY;
 
     public MapClassGenerator() {}
 
@@ -227,7 +232,24 @@ public abstract class MapClassGenerator {
         mainGen.setSuperPrefix(superPrefix);
         superGen.setSuperPrefix(superPrefix);
         
+        // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
+        if (MODE_ENTITY.equals(mode))
+        {
+            it = objEntities.iterator();
+        }
+        else
+        {
+            if (objEntities.isEmpty())
+            {
+                it = objEntities.iterator();
+            }
+            else
+            {
+                it = Collections.singleton(objEntities.get(0)).iterator();
+            }
+        }
+        
         while (it.hasNext()) {
             ObjEntity ent = (ObjEntity) it.next();
 
@@ -273,7 +295,24 @@ public abstract class MapClassGenerator {
         ClassGenerator mainGenSetup = new ClassGenerator(classTemplate, versionString, vppConfig);
         ClassGenerator superGenSetup = new ClassGenerator(superTemplate, versionString, vppConfig);
 
+        // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
+        if (MODE_ENTITY.equals(mode))
+        {
+            it = objEntities.iterator();
+        }
+        else
+        {
+            if (objEntities.isEmpty())
+            {
+                it = objEntities.iterator();
+            }
+            else
+            {
+                it = Collections.singleton(objEntities.get(0)).iterator();
+            }
+        }
+        
         while (it.hasNext()) {
             ObjEntity ent = (ObjEntity) it.next();
 
@@ -326,7 +365,24 @@ public abstract class MapClassGenerator {
     private void generateSingleClasses_1_1(String classTemplate) throws Exception {
         ClassGenerator gen = new ClassGenerator(classTemplate, versionString);
 
+        // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
+        if (MODE_ENTITY.equals(mode))
+        {
+            it = objEntities.iterator();
+        }
+        else
+        {
+            if (objEntities.isEmpty())
+            {
+                it = objEntities.iterator();
+            }
+            else
+            {
+                it = Collections.singleton(objEntities.get(0)).iterator();
+            }
+        }
+        
         while (it.hasNext()) {
             ObjEntity ent = (ObjEntity) it.next();
             
@@ -348,7 +404,24 @@ public abstract class MapClassGenerator {
     private void generateSingleClasses_1_2(String classTemplate) throws Exception {
         ClassGenerator gen = new ClassGenerator(classTemplate, versionString, vppConfig);
 
+        // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
+        if (MODE_ENTITY.equals(mode))
+        {
+            it = objEntities.iterator();
+        }
+        else
+        {
+            if (objEntities.isEmpty())
+            {
+                it = objEntities.iterator();
+            }
+            else
+            {
+                it = Collections.singleton(objEntities.get(0)).iterator();
+            }
+        }
+        
         while (it.hasNext()) {
             ObjEntity ent = (ObjEntity) it.next();
             
@@ -497,5 +570,15 @@ public abstract class MapClassGenerator {
      */
     public void setVppConfig(VPPConfig vppConfig) {
         this.vppConfig = vppConfig;
+    }
+
+    /**
+     * @param mode use "entity" for per-entity generation and "datamap" for per-datamap generation.
+     */
+    public void setMode(String mode) {
+        if ((false == MODE_ENTITY.equals(mode)) && (false == MODE_DATAMAP.equals(mode))) {
+            throw new IllegalStateException("'mode' must be '" + MODE_ENTITY + "' or '" + MODE_DATAMAP + "', but was '" + mode + "'");
+        }
+        this.mode = mode;
     }
 }

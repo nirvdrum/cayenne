@@ -112,9 +112,16 @@
 					<td valign="top">Name of file for generated output. (Default is "*.java")</td>
 					<td valign="top" align="center">No</td>
 				</tr>
+				<tr>
+					<td valign="top">mode</td>
+					<td valign="top">Specifies generator iteration target.   "entity" performs one iteration for each selected entity.
+					"datamap" performs one iteration per datamap (This is always one iteration since cgen currently supports specifying one-and-only-one datamap). (Default is "entity")</td>
+					<td valign="top" align="center">No</td>
+				</tr>
 			</table>
 			
 			<h3>Parameters specified as nested elements</h3>
+			<h4>config</h4>
 			<p><code>CGen</code> with version="1.2" also supports <a href="http://vpp.sourceforge.net/">VPP</a>
 			<code>config</code>
 			nested elements for configuring the velocity template engine and adding objects to the velocity template. 

@@ -80,6 +80,7 @@
                 superpkg="org.objectstyle.art.auto"/>
             <cgen11 map="${resources.test.classgeneration}/testmap.map.xml"
                 version="1.1"
+                mode="entity"
                 destDir="${testrun.classgeneration}/1_1/pairclass"
                 makepairs="true"
                 overwrite="true"
@@ -108,6 +109,12 @@
                     dir1="${testrun.classgeneration}/1_1"
                     dir2="${resources.test.classgeneration}/1_1">
  			    <fileset dir="${resources.test.classgeneration}/1_1"/>
+            </fileCompare>
+            
+            <fileCompare failOnError="true"
+                    dir1="${resources.test.classgeneration}/1_1"
+                    dir2="${testrun.classgeneration}/1_1">
+ 			    <fileset dir="${testrun.classgeneration}/1_1"/>
             </fileCompare>
             
             <path id="classpathPlusVpp">
@@ -156,6 +163,7 @@
                 makepairs="true"
                 overwrite="true"
                 usepkgpath="false"
+                mode="entity"
                 superpkg="org.objectstyle.art.auto"/>
             <cgen12 map="${resources.test.classgeneration}/testmap.map.xml"
                 version="1.2"
@@ -176,6 +184,12 @@
                     dir1="${testrun.classgeneration}/1_2"
                     dir2="${resources.test.classgeneration}/1_2">
  			    <fileset dir="${resources.test.classgeneration}/1_2"/>
+            </fileCompare>
+            
+            <fileCompare failOnError="true"
+                    dir1="${resources.test.classgeneration}/1_2"
+                    dir2="${testrun.classgeneration}/1_2">
+ 			    <fileset dir="${testrun.classgeneration}/1_2"/>
             </fileCompare>
             
                 

@@ -274,14 +274,34 @@ public class CayenneGenerator extends CayenneTask {
         generator.setOutputPattern(outputPattern);
     }
 
-  public Object createConfig() {
-      this.vppConfig = new VPPConfig();
-      return this.vppConfig;
-  }
+    /**
+     * Sets <code>outputPattern</code> property.
+     * 
+     * @since 1.2
+     */
+    public void setMode(String mode) {
+        generator.setMode(mode);
+    }
 
+    /**
+     * Provides a <code>VPPConfig</code> objec to configure.
+     * (Written with createConfig() instead of addConfig() to avoid run-time dependency on VPP).
+     * 
+     * @since 1.2
+     */
+    public Object createConfig() {
+        this.vppConfig = new VPPConfig();
+        return this.vppConfig;
+    }
+
+    /**
+     * If no VppConfig element specified, use the default one.
+     * 
+     * @since 1.2
+     */
     private void initializeVppConfig() {
-        if(vppConfig == null) {
-        	vppConfig = VPPConfig.getDefaultConfig(getProject());
+        if (vppConfig == null) {
+            vppConfig = VPPConfig.getDefaultConfig(getProject());
         }
     }
 
