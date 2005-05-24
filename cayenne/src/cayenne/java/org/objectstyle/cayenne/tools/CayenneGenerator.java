@@ -68,6 +68,8 @@ import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.InputSource;
 
+import foundrylogic.vpp.VPPConfig;
+
 /**
  * Ant task to perform class generation from data map. This class is an Ant adapter to
  * DefaultClassGenerator class.
@@ -78,6 +80,7 @@ public class CayenneGenerator extends CayenneTask {
     
     protected String includeEntitiesPattern;
     protected String excludeEntitiesPattern;
+    protected VPPConfig vppConfig;
 
     protected File map;
     protected DefaultClassGenerator generator;
@@ -134,7 +137,14 @@ public class CayenneGenerator extends CayenneTask {
         NamePatternMatcher namePatternMatcher = new NamePatternMatcher(this, includeEntitiesPattern, excludeEntitiesPattern);
         namePatternMatcher.filter(entityList);
 
+        if (false == ClassGenerator.VERSION_1_1.equals(generator.getVersionString()))
+        {
+            initializeVppConfig();
+            generator.setVppConfig(vppConfig);
+        }
+
         generator.setTimestamp(map.lastModified());
+        generator.setDataMap(dataMap);
         generator.setObjEntities(entityList);
         generator.validateAttributes();
         generator.execute();
@@ -262,5 +272,17 @@ public class CayenneGenerator extends CayenneTask {
      */
     public void setOutputPattern(String outputPattern) {
         generator.setOutputPattern(outputPattern);
-    }    
+    }
+
+  public Object createConfig() {
+      this.vppConfig = new VPPConfig();
+      return this.vppConfig;
+  }
+
+    private void initializeVppConfig() {
+        if(vppConfig == null) {
+        	vppConfig = VPPConfig.getDefaultConfig(getProject());
+        }
+    }
+
 }

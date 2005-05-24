@@ -56,8 +56,11 @@
 
 package org.objectstyle.cayenne.gen;
 
+import java.util.Collections;
 import java.util.Iterator;
 
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Relationship;
 
@@ -78,7 +81,9 @@ public class EntityUtils {
 
     protected ObjEntity objEntity;
     
-    public EntityUtils(ObjEntity objEntity, String fqnBaseClass, String fqnSuperClass, String fqnSubClass)
+    protected EntityResolver entityResolver;
+
+    public EntityUtils(DataMap dataMap, ObjEntity objEntity, String fqnBaseClass, String fqnSuperClass, String fqnSubClass)
     {
         super();
         
@@ -90,6 +95,8 @@ public class EntityUtils {
         this.superPackageName = stringUtils.stripClass(fqnSuperClass);
         this.subClassName = stringUtils.stripPackageName(fqnSubClass);
         this.subPackageName = stringUtils.stripClass(fqnSubClass);
+
+        this.entityResolver = new EntityResolver(Collections.singleton(dataMap));
         
         this.objEntity = objEntity;
     }
@@ -142,16 +149,34 @@ public class EntityUtils {
     }
 
     /**
-     * Returns true if current entity contains at least one toMany relationship.
+     * Returns true if current ObjEntity contains at least one toMany relationship.
      * 
-     * @since 1.1
+     * @since 1.2
+     */
+    public EntityResolver getEntityResolver() {
+        return entityResolver;
+    }
+
+    /**
+     * Returns true if current ObjEntity contains at least one toMany relationship.
+     * 
+     * @since 1.2
      */
     public boolean hasToManyRelationships() {
-        if (objEntity == null) {
+        return hasToManyRelationships(objEntity);
+    }
+
+    /**
+     * Returns true if an ObjEntity contains at least one toMany relationship.
+     * 
+     * @since 1.2
+     */
+    public boolean hasToManyRelationships(ObjEntity anObjEntity) {
+        if (anObjEntity == null) {
             return false;
         }
         
-        Iterator it = objEntity.getRelationships().iterator();
+        Iterator it = anObjEntity.getRelationships().iterator();
         while(it.hasNext()) {
             Relationship r = (Relationship) it.next();
             if(r.isToMany()) {
@@ -163,16 +188,25 @@ public class EntityUtils {
     }
     
     /**
-     * Returns true if current entity contains at least one toOne relationship.
+     * Returns true if current ObjEntity contains at least one toOne relationship.
      * 
-     * @since 1.1
+     * @since 1.2
      */
     public boolean hasToOneRelationships() {
-        if (objEntity == null) {
+        return hasToOneRelationships(objEntity);
+    }
+    
+    /**
+     * Returns true if an ObjEntity contains at least one toOne relationship.
+     * 
+     * @since 1.2
+     */
+    public boolean hasToOneRelationships(ObjEntity anObjEntity) {
+        if (anObjEntity == null) {
             return false;
         }
         
-        Iterator it = objEntity.getRelationships().iterator();
+        Iterator it = anObjEntity.getRelationships().iterator();
         while(it.hasNext()) {
             Relationship r = (Relationship) it.next();
             if(false == r.isToMany()) {

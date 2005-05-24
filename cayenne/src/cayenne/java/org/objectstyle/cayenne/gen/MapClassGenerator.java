@@ -65,6 +65,8 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 
+import foundrylogic.vpp.VPPConfig;
+
 /**
  * Generates Java source code for ObjEntities in the DataMap. This class is
  * abstract and does not deal with filesystem issues directly. Concrete
@@ -99,15 +101,25 @@ public abstract class MapClassGenerator {
 
     protected List objEntities;
     protected String superPkg;
+    protected DataMap dataMap;
+    protected VPPConfig vppConfig;
 
     public MapClassGenerator() {}
 
-    public MapClassGenerator(DataMap map) {
-        this(new ArrayList(map.getObjEntities()));
+    public MapClassGenerator(DataMap dataMap) {
+        this(dataMap, new ArrayList(dataMap.getObjEntities()));
     }
 
-    public MapClassGenerator(List objEntities) {
-        this.objEntities = objEntities;
+    public MapClassGenerator(DataMap dataMap, List selectedObjEntities) {
+        this.dataMap = dataMap;
+        this.objEntities = selectedObjEntities;
+    }
+
+    /**
+     * @deprecated Use MapClassGenerator(DataMap, List) to provide support for v1.2 templates.
+     */
+    public MapClassGenerator(List selectedObjEntities) {
+        this.objEntities = selectedObjEntities;
     }
 
     protected String defaultSingleClassTemplate() {
@@ -258,8 +270,8 @@ public abstract class MapClassGenerator {
         String superPrefix)
         throws Exception {
 
-        ClassGenerator mainGenSetup = new ClassGenerator(classTemplate, versionString);
-        ClassGenerator superGenSetup = new ClassGenerator(superTemplate, versionString);
+        ClassGenerator mainGenSetup = new ClassGenerator(classTemplate, versionString, vppConfig);
+        ClassGenerator superGenSetup = new ClassGenerator(superTemplate, versionString, vppConfig);
 
         Iterator it = objEntities.iterator();
         while (it.hasNext()) {
@@ -270,9 +282,6 @@ public abstract class MapClassGenerator {
 
             StringUtils stringUtils = StringUtils.getInstance();
             
-            // TODO: the following two variables are unused. Can they be removed?
-            String baseClassName = stringUtils.stripPackageName(fqnBaseClass);
-            String basePackageName = stringUtils.stripClass(fqnBaseClass);
             String subClassName = stringUtils.stripPackageName(fqnSubClass);
             String subPackageName = stringUtils.stripClass(fqnSubClass);
      
@@ -288,7 +297,7 @@ public abstract class MapClassGenerator {
                     superClassName);
 
             if (superOut != null) {
-                superGenSetup.generateClass(superOut, ent, fqnBaseClass, fqnSuperClass, fqnSubClass);
+                superGenSetup.generateClass(superOut, dataMap, ent, fqnBaseClass, fqnSuperClass, fqnSubClass);
                 closeWriter(superOut);
             }
 
@@ -296,7 +305,7 @@ public abstract class MapClassGenerator {
             Writer mainOut =
                 openWriter(ent, subPackageName, subClassName);
             if (mainOut != null) {
-                mainGenSetup.generateClass(mainOut, ent, fqnBaseClass, fqnSuperClass, fqnSubClass);
+                mainGenSetup.generateClass(mainOut, dataMap, ent, fqnBaseClass, fqnSuperClass, fqnSubClass);
                 closeWriter(mainOut);
             }
         }
@@ -337,7 +346,7 @@ public abstract class MapClassGenerator {
      * each ObjEntity in the map. 
      */
     private void generateSingleClasses_1_2(String classTemplate) throws Exception {
-        ClassGenerator gen = new ClassGenerator(classTemplate, versionString);
+        ClassGenerator gen = new ClassGenerator(classTemplate, versionString, vppConfig);
 
         Iterator it = objEntities.iterator();
         while (it.hasNext()) {
@@ -359,7 +368,7 @@ public abstract class MapClassGenerator {
                 continue;
             }
 
-            gen.generateClass(out, ent, fqnBaseClass, fqnSubClass, fqnSubClass);
+            gen.generateClass(out, dataMap, ent, fqnBaseClass, fqnSubClass, fqnSubClass);
             closeWriter(out);
         }
     }
@@ -439,6 +448,20 @@ public abstract class MapClassGenerator {
         this.superPkg = superPkg;
     }
 
+    /**
+     * @return Returns the dataMap.
+     */
+    public DataMap getDataMap() {
+        return dataMap;
+    }
+
+    /**
+     * @param dataMap The dataMap to set.
+     */
+    public void setDataMap(DataMap dataMap) {
+        this.dataMap = dataMap;
+    }
+
     public List getObjEntities() {
         return objEntities;
     }
@@ -462,5 +485,17 @@ public abstract class MapClassGenerator {
         }
         this.versionString = versionString;
     }
-
+    
+    /**
+     * @return Returns the vppConfig.
+     */
+    public VPPConfig getVppConfig() {
+        return vppConfig;
+    }
+    /**
+     * @param vppConfig The vppConfig to set.
+     */
+    public void setVppConfig(VPPConfig vppConfig) {
+        this.vppConfig = vppConfig;
+    }
 }

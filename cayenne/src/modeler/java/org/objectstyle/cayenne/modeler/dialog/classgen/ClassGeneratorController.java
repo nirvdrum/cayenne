@@ -203,7 +203,7 @@ public class ClassGeneratorController extends BasicController {
         }
 
         List selected = model.getSelectedEntities();
-        DefaultClassGenerator generator = new DefaultClassGenerator(selected);
+        DefaultClassGenerator generator = new DefaultClassGenerator(model.getMap(), selected);
 
         // configure encoding from preferences
         Domain generatorPrefs = Application

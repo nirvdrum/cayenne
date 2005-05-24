@@ -101,16 +101,25 @@ public class DefaultClassGenerator extends MapClassGenerator {
      * Creates class generator and initializes it with DataMap. This will ensure
      * generation of classes for all ObjEntities in the DataMap.
      */
-    public DefaultClassGenerator(DataMap map) {
-        this(new ArrayList(map.getObjEntities()));
+    public DefaultClassGenerator(DataMap dataMap) {
+        this(dataMap, new ArrayList(dataMap.getObjEntities()));
     }
 
     /**
      * Creates class generator and initializes it with the list of ObjEntities that will
      * be used in class generation.
      */
-    public DefaultClassGenerator(List objEntities) {
-        super(objEntities);
+    public DefaultClassGenerator(DataMap dataMap, List selectedObjEntities) {
+        super(dataMap, selectedObjEntities);
+    }
+
+    /**
+     * Creates class generator and initializes it with the list of ObjEntities that will
+     * be used in class generation.
+     * @deprecated Use DefaultClassGenerator(DataMap, List) to provide support for v1.2 templates.
+     */
+    public DefaultClassGenerator(List selectedObjEntities) {
+        super(selectedObjEntities);
     }
 
     /** Runs class generation. */

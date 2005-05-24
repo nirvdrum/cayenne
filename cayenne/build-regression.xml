@@ -62,72 +62,39 @@
             description="Test class-generation templating."
             depends="compile">
                 
-            <taskdef name="cgen" classname="org.objectstyle.cayenne.tools.CayenneGenerator">
+            <taskdef name="cgen11" classname="org.objectstyle.cayenne.tools.CayenneGenerator">
                  <classpath refid="classpath"/>
             </taskdef>
             
             <delete dir="${testrun.classgeneration}/1_1"/>
-            <delete dir="${testrun.classgeneration}/1_2"/>
-            
+
             <mkdir dir="${testrun.classgeneration}/1_1/singleclass"/>
             <mkdir dir="${testrun.classgeneration}/1_1/pairclass"/>
 
-            <mkdir dir="${testrun.classgeneration}/1_2/singleclass"/>
-            <mkdir dir="${testrun.classgeneration}/1_2/pairclass"/>
-
-            <cgen map="${resources.test.classgeneration}/testmap.map.xml"
+            <cgen11 map="${resources.test.classgeneration}/testmap.map.xml"
                 version="1.1"
                 destDir="${testrun.classgeneration}/1_1/singleclass"
                 makepairs="false"
                 overwrite="true"
                 usepkgpath="false"
                 superpkg="org.objectstyle.art.auto"/>
-            <cgen map="${resources.test.classgeneration}/testmap.map.xml"
+            <cgen11 map="${resources.test.classgeneration}/testmap.map.xml"
                 version="1.1"
                 destDir="${testrun.classgeneration}/1_1/pairclass"
                 makepairs="true"
                 overwrite="true"
                 usepkgpath="false"
                 superpkg="org.objectstyle.art.auto"/>
-            <cgen map="${resources.test.classgeneration}/testmap.map.xml"
+            <cgen11 map="${resources.test.classgeneration}/testmap.map.xml"
                 version="1.1"
                 destDir="${testrun.classgeneration}/1_1/singleclass"
                 makepairs="false"
                 overwrite="true"
                 usepkgpath="true"
                 superpkg="org.objectstyle.art.auto"/>
-            <cgen map="${resources.test.classgeneration}/testmap.map.xml"
+            <cgen11 map="${resources.test.classgeneration}/testmap.map.xml"
                 version="1.1"
                 destDir="${testrun.classgeneration}/1_1/pairclass"
-                makepairs="true"
-                overwrite="true"
-                usepkgpath="true"
-                superpkg="org.objectstyle.art.auto"/>
-
-            <cgen map="${resources.test.classgeneration}/testmap.map.xml"
-                version="1.2"
-                destDir="${testrun.classgeneration}/1_2/singleclass"
-                makepairs="false"
-                overwrite="true"
-                usepkgpath="false"
-                superpkg="org.objectstyle.art.auto"/>
-            <cgen map="${resources.test.classgeneration}/testmap.map.xml"
-                version="1.2"
-                destDir="${testrun.classgeneration}/1_2/pairclass"
-                makepairs="true"
-                overwrite="true"
-                usepkgpath="false"
-                superpkg="org.objectstyle.art.auto"/>
-            <cgen map="${resources.test.classgeneration}/testmap.map.xml"
-                version="1.2"
-                destDir="${testrun.classgeneration}/1_2/singleclass"
-                makepairs="false"
-                overwrite="true"
-                usepkgpath="true"
-                superpkg="org.objectstyle.art.auto"/>
-            <cgen map="${resources.test.classgeneration}/testmap.map.xml"
-                version="1.2"
-                destDir="${testrun.classgeneration}/1_2/pairclass"
                 makepairs="true"
                 overwrite="true"
                 usepkgpath="true"
@@ -143,6 +110,68 @@
  			    <fileset dir="${resources.test.classgeneration}/1_1"/>
             </fileCompare>
             
+            <path id="classpathPlusVpp">
+                <path refid="classpath"/>
+                <fileset dir="${otherlib.dir}">
+    			    <include name="${vpp.jar}"/>
+    		    </fileset>
+            </path>
+            
+            <delete dir="${testrun.classgeneration}/1_2"/>
+            
+            <mkdir dir="${testrun.classgeneration}/1_2/singleclass"/>
+            <mkdir dir="${testrun.classgeneration}/1_2/pairclass"/>
+
+            <taskdef name="cgen12"
+                 loaderref="classpathPlusVpp.loader"
+                 classname="org.objectstyle.cayenne.tools.CayenneGenerator">
+                 <classpath refid="classpathPlusVpp"/>
+            </taskdef>
+        
+            <typedef name="vppconfig"
+                 classname="foundrylogic.vpp.VPPConfig"
+                 loaderref="classpathPlusVpp.loader">
+                 <classpath refid="classpathPlusVpp"/>
+            </typedef>
+            <vppconfig id="vppconfig0" >
+                <context>
+                    <property key="foo" value="bar" />
+                    <tool key="StringBuffer" className="java.lang.StringBuffer" />
+                </context>
+            </vppconfig>
+
+            <cgen12 map="${resources.test.classgeneration}/testmap.map.xml"
+                version="1.2"
+                destDir="${testrun.classgeneration}/1_2/singleclass"
+                makepairs="false"
+                overwrite="true"
+                usepkgpath="false"
+                superpkg="org.objectstyle.art.auto">
+                <config refid="vppconfig0" />
+            </cgen12>
+            
+            <cgen12 map="${resources.test.classgeneration}/testmap.map.xml"
+                version="1.2"
+                destDir="${testrun.classgeneration}/1_2/pairclass"
+                makepairs="true"
+                overwrite="true"
+                usepkgpath="false"
+                superpkg="org.objectstyle.art.auto"/>
+            <cgen12 map="${resources.test.classgeneration}/testmap.map.xml"
+                version="1.2"
+                destDir="${testrun.classgeneration}/1_2/singleclass"
+                makepairs="false"
+                overwrite="true"
+                usepkgpath="true"
+                superpkg="org.objectstyle.art.auto"/>
+            <cgen12 map="${resources.test.classgeneration}/testmap.map.xml"
+                version="1.2"
+                destDir="${testrun.classgeneration}/1_2/pairclass"
+                makepairs="true"
+                overwrite="true"
+                usepkgpath="true"
+                superpkg="org.objectstyle.art.auto"/>
+
             <fileCompare failOnError="true"
                     dir1="${testrun.classgeneration}/1_2"
                     dir2="${resources.test.classgeneration}/1_2">

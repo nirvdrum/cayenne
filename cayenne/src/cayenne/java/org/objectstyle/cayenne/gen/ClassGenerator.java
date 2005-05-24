@@ -67,8 +67,11 @@ import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.log.NullLogSystem;
 import org.apache.velocity.runtime.resource.loader.JarResourceLoader;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.util.ResourceLocator;
+
+import foundrylogic.vpp.VPPConfig;
 
 /**
  * Class generation engine for ObjEntities based on <a
@@ -79,8 +82,8 @@ import org.objectstyle.cayenne.util.ResourceLocator;
  * @author Andrei Adamchik
  */
 public class ClassGenerator {
-    protected static final String VERSION_1_1 = "1.1";
-    protected static final String VERSION_1_2 = "1.2";
+    public static final String VERSION_1_1 = "1.1";
+    public static final String VERSION_1_2 = "1.2";
     
     protected String versionString;
     protected Template classTemplate;
@@ -174,13 +177,31 @@ public class ClassGenerator {
         
         this.versionString = versionString;
         
-        velCtxt = new VelocityContext();
-        
-        if (VERSION_1_1.equals(versionString)) {
-            classGenerationInfo = new ClassGenerationInfo();
-            velCtxt.put("classGen", classGenerationInfo);
+        if (false == VERSION_1_1.equals(versionString)) {
+            throw new IllegalStateException("Illegal Version in generateClass(Writer,ObjEntity): " + versionString);
         }
 
+        velCtxt = new VelocityContext();
+        classGenerationInfo = new ClassGenerationInfo();
+        velCtxt.put("classGen", classGenerationInfo);
+        classTemplate = Velocity.getTemplate(template);
+    }
+
+    /**
+     * Creates a new ClassGenerationInfo that uses a specified Velocity template.
+     */
+    public ClassGenerator(String template, String versionString, VPPConfig vppConfig) throws Exception {
+        if (!initDone) {
+            bootstrapVelocity(this.getClass());
+        }
+        
+        this.versionString = versionString;
+        
+        if (false == VERSION_1_2.equals(versionString)) {
+            throw new IllegalStateException("Illegal Version in generateClass(Writer,ObjEntity): " + versionString);
+        }
+
+        velCtxt = vppConfig.getVelocityContext();
         classTemplate = Velocity.getTemplate(template);
     }
 
@@ -201,14 +222,18 @@ public class ClassGenerator {
      * Generates Java code for the ObjEntity. Output is written to the provided
      * Writer.
      */
-    public void generateClass(Writer out, ObjEntity entity, String fqnBaseClass, String fqnSuperClass, String fqnSubClass) throws Exception {
+    public void generateClass(Writer out, DataMap dataMap, ObjEntity entity, String fqnBaseClass, String fqnSuperClass, String fqnSubClass) throws Exception {
         if (false == VERSION_1_2.equals(versionString)) {
             throw new IllegalStateException("Illegal Version in generateClass(Writer,ObjEntity,String,String,String): " + versionString);
+        }
+        
+        if (null == dataMap) {
+            throw new IllegalStateException("DataMap MapClassGenerator constructor required for v1.2 templating.");
         }
 
         velCtxt.put("objEntity", entity);
         velCtxt.put("stringUtils", StringUtils.getInstance());
-        velCtxt.put("entityUtils", new EntityUtils(entity, fqnBaseClass, fqnSuperClass, fqnSubClass));
+        velCtxt.put("entityUtils", new EntityUtils(dataMap, entity, fqnBaseClass, fqnSuperClass, fqnSubClass));
         velCtxt.put("importUtils", new ImportUtils());
         
         classTemplate.merge(velCtxt, out);
