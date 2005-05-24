@@ -24,6 +24,7 @@
 	<classpathentry exported="true" kind="lib" path="otherlib/commons-pool-1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/ejb-2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/forms-1.0.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="otherlib/foundrylogic-vpp-2.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/hsqldb-1.7.3.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/pdf/itext-1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/jdom-1.0.jar"/>
