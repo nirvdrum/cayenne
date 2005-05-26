@@ -55,37 +55,66 @@
  */
 package org.objectstyle.cayenne.access.types;
 
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
- * Superclass of concrete ExtendedType implementations.
+ * A convenience superclass of ExtendedType implementations. Implements
+ * {@link #setJdbcObject(PreparedStatement, Object, int, int, int)}in a generic fashion
+ * by calling "setObject(..)" on PreparedStatement. Some adapters may need to override
+ * this behavior as it doesn't work consistently across all JDBC drivers.
  * 
  * @author Andrei Adamchik
  */
 public abstract class AbstractType implements ExtendedType {
-    
+
+    /**
+     * Calls "PreparedStatement.setObject(..)". Some DbAdapters may need to override this
+     * behavior for at least some of the object types, as it doesn't work consistently
+     * across all JDBC drivers.
+     */
     public void setJdbcObject(
-        PreparedStatement st,
-        Object val,
-        int pos,
-        int type,
-        int precision)
-        throws Exception {
+            PreparedStatement st,
+            Object val,
+            int pos,
+            int type,
+            int precision) throws Exception {
+
         if (precision != -1) {
-			st.setObject(pos, val, type, precision);
+            st.setObject(pos, val, type, precision);
         }
         else {
-			st.setObject(pos, val, type);
+            st.setObject(pos, val, type);
         }
     }
 
+    public abstract String getClassName();
+
+    public abstract Object materializeObject(CallableStatement rs, int index, int type)
+            throws Exception;
+
+    public abstract Object materializeObject(ResultSet rs, int index, int type)
+            throws Exception;
+
+    /**
+     * Always returns true. Simplifies subclass implementation, as only some of the types
+     * can perform the validation.
+     */
+    public boolean validateProperty(
+            Object source,
+            String property,
+            Object value,
+            DbAttribute dbAttribute,
+            ValidationResult validationResult) {
+        return true;
+    }
+
     public String toString() {
-        StringBuffer buf = new StringBuffer();
-        buf
-            .append("ExtendedType [")
-            .append(getClass().getName())
-            .append("], handling ")
-            .append(getClassName());
-        return buf.toString();
+        return new ToStringBuilder(this).append("className", getClassName()).toString();
     }
 }

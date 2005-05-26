@@ -60,15 +60,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 /**
- * Addresses bugs in certain JDBC drivers that do not handle java.lang.Byte 
- * properly. Recasts java.lang.Byte to java.lang.Integer when 
- * binding values to PreparedStatement. Drivers that are proven to have issues with
- * short values are Sybase and Oracle (Mac OS X only).
+ * Addresses bugs in certain JDBC drivers that do not handle java.lang.Byte properly.
+ * Recasts java.lang.Byte to java.lang.Integer when binding values to PreparedStatement.
+ * Drivers that are proven to have issues with short values are Sybase and Oracle (Mac OS
+ * X only).
  * 
  * @author Andrei Adamchik
  * @since 1.0.3
  */
-public class ByteType extends DefaultType {
+public class ByteType extends AbstractType {
+
     protected boolean widenBytes;
 
     public ByteType(boolean widenBytes) {
@@ -85,18 +86,17 @@ public class ByteType extends DefaultType {
     }
 
     public Object materializeObject(CallableStatement st, int index, int type)
-        throws Exception {
+            throws Exception {
         byte b = st.getByte(index);
         return (st.wasNull()) ? null : new Byte(b);
     }
 
     public void setJdbcObject(
-        PreparedStatement st,
-        Object val,
-        int pos,
-        int type,
-        int precision)
-        throws Exception {
+            PreparedStatement st,
+            Object val,
+            int pos,
+            int type,
+            int precision) throws Exception {
 
         if (widenBytes && (val instanceof Byte)) {
             val = new Integer(((Byte) val).intValue());

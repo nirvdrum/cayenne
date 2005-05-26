@@ -56,16 +56,14 @@
 
 package org.objectstyle.cayenne.dba.db2;
 
-import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
-import org.objectstyle.cayenne.access.types.AbstractType;
+import org.objectstyle.cayenne.access.types.BooleanType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -76,7 +74,6 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLAction;
-import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
  * DbAdapter implementation for the <a href="http://www.ibm.com/db2/"> DB2 RDBMS </a>.
@@ -85,11 +82,13 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  * use with DB2 are shown below:
  * 
  * <pre>
- *     test-db2.cayenne.adapter = org.objectstyle.cayenne.dba.db2.DB2Adapter
- *     test-db2.jdbc.username = test
- *     test-db2.jdbc.password = secret
- *     test-db2.jdbc.url = jdbc:db2://servername:50000/databasename
- *     test-db2.jdbc.driver = com.ibm.db2.jcc.DB2Driver
+ * 
+ *      test-db2.cayenne.adapter = org.objectstyle.cayenne.dba.db2.DB2Adapter
+ *      test-db2.jdbc.username = test
+ *      test-db2.jdbc.password = secret
+ *      test-db2.jdbc.url = jdbc:db2://servername:50000/databasename
+ *      test-db2.jdbc.driver = com.ibm.db2.jcc.DB2Driver
+ *  
  * </pre>
  * 
  * @author Holger Hoffstaette
@@ -231,35 +230,7 @@ public class DB2Adapter extends JdbcAdapter {
         return new DB2QualifierTranslator(queryAssembler, "RTRIM");
     }
 
-    final class DB2BooleanType extends AbstractType {
-
-        public String getClassName() {
-            return Boolean.class.getName();
-        }
-
-        /**
-         * @since 1.1
-         */
-        public boolean validateProperty(
-                Object source,
-                String property,
-                Object value,
-                DbAttribute dbAttribute,
-                ValidationResult validationResult) {
-            return true;
-        }
-
-        public Object materializeObject(ResultSet rs, int index, int type)
-                throws Exception {
-            boolean b = rs.getBoolean(index);
-            return (rs.wasNull()) ? null : b ? Boolean.TRUE : Boolean.FALSE;
-        }
-
-        public Object materializeObject(CallableStatement st, int index, int type)
-                throws Exception {
-            boolean b = st.getBoolean(index);
-            return (st.wasNull()) ? null : b ? Boolean.TRUE : Boolean.FALSE;
-        }
+    final class DB2BooleanType extends BooleanType {
 
         public void setJdbcObject(
                 PreparedStatement st,

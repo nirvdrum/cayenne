@@ -55,66 +55,48 @@
  */
 package org.objectstyle.cayenne.access.types;
 
-import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.Types;
+
+import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.unit.util.MockAbstractType;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
+import com.mockrunner.mock.jdbc.MockConnection;
+import com.mockrunner.mock.jdbc.MockPreparedStatement;
+
 /**
- * Defines methods to read Java objects from JDBC ResultSets and write as parameters of
- * PreparedStatements.
- * 
  * @author Andrei Adamchik
  */
-public interface ExtendedType {
+public class AbstractTypeTst extends TestCase {
 
-    /**
-     * Returns a full name of Java class that this ExtendedType supports.
-     */
-    String getClassName();
+    public void testValidateProperty() {
 
-    /**
-     * Performs validation of an object property. Property is considered valid if this it
-     * satisfies the database constraints known to this ExtendedType. In case of
-     * validation failure, failures are appended to the ValidationResult object and
-     * <code>false</code> is returned.
-     * 
-     * @since 1.1
-     */
-    boolean validateProperty(
-            Object source,
-            String property,
-            Object value,
-            DbAttribute dbAttribute,
-            ValidationResult validationResult);
+        // should always return true... not sure how else to test it?
+        MockAbstractType type = new MockAbstractType("testclass");
+        assertTrue(type.validateProperty(new Object(),
+                "dummy",
+                new Object(),
+                new DbAttribute("test"),
+                new ValidationResult()));
+    }
 
-    /**
-     * Initializes a single parameter of a PreparedStatement with object value.
-     */
-    void setJdbcObject(
-            PreparedStatement statement,
-            Object value,
-            int pos,
-            int type,
-            int precision) throws Exception;
+    public void testToString() {
+        MockAbstractType type = new MockAbstractType("testclass");
+        String string = type.toString();
+        assertNotNull(string);
+        assertTrue(string.indexOf("testclass") > 0);
+    }
 
-    /**
-     * Reads an object from JDBC ResultSet column, converting it to class returned by
-     * 'getClassName' method.
-     * 
-     * @throws Exception if read error ocurred, or an object can't be converted to a
-     *             target Java class.
-     */
-    Object materializeObject(ResultSet rs, int index, int type) throws Exception;
+    public void testSetJdbcObject() throws Exception {
+        MockConnection c = new MockConnection();
+        MockPreparedStatement st = new MockPreparedStatement(c, "");
+        Object value = new Object();
 
-    /**
-     * Reads an object from a stored procedure OUT parameter, converting it to class
-     * returned by 'getClassName' method.
-     * 
-     * @throws Exception if read error ocurred, or an object can't be converted to a
-     *             target Java class.
-     */
-    Object materializeObject(CallableStatement rs, int index, int type) throws Exception;
+        MockAbstractType type = new MockAbstractType("testclass");
+        type.setJdbcObject(st, value, 35, Types.INTEGER, -1);
+
+        assertSame(value, st.getParameter(35));
+    }
 }

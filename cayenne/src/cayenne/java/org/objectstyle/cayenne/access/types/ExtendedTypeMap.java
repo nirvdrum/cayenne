@@ -61,27 +61,29 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-/** 
- * Contains a map of ExtendedType objects, that serve as handlers for converting
- * values between Java application and JDBC layer.
- * 
- * <p>Class uses singleton model, since mapping is usually shared within the
- * application.</p>
+/**
+ * Contains a map of ExtendedType objects, that serve as handlers for converting values
+ * between Java application and JDBC layer.
+ * <p>
+ * Class uses singleton model, since mapping is usually shared within the application.
+ * </p>
  * 
  * @author Andrei Adamchik
  */
 public class ExtendedTypeMap {
+
     protected Map typeMap = new HashMap();
     protected DefaultType defaultType = new DefaultType();
 
+    /**
+     * Creates new ExtendedTypeMap, populating it with default JDBC-compatible types.
+     */
     public ExtendedTypeMap() {
         this.initDefaultTypes();
     }
 
-    /** 
-     * Registers default extended types. This method is called from
-     * constructor and exists mainly for the benefit of subclasses that can
-     * override it and configure their own extended types.
+    /**
+     * Registers default extended types. This method is called from constructor.
      */
     protected void initDefaultTypes() {
         // register default types
@@ -91,20 +93,26 @@ public class ExtendedTypeMap {
         }
     }
 
-    /** Adds new type to the list of registered types. */
+    /**
+     * Adds a new type to the list of registered types. If there is another type
+     * registered for a class described by the <code>type</code> argument, the old
+     * handler is overwriden by the new one.
+     */
     public void registerType(ExtendedType type) {
         typeMap.put(type.getClassName(), type);
     }
 
+    /**
+     * Returns a default ExtendedType that is used to handle unmapped types.
+     */
     public ExtendedType getDefaultType() {
         return defaultType;
     }
 
     /**
-     * Returns a type registered for the class name. If no such type exists,
-     * returns the default type. It is guaranteed that this method returns a
-     * non-null ExtendedType instance. Note that for array types class name must
-     * be in the form 'MyClass[]'.
+     * Returns a type registered for the class name. If no such type exists, returns the
+     * default type. It is guaranteed that this method returns a non-null ExtendedType
+     * instance. Note that for array types class name must be in the form 'MyClass[]'.
      */
     public ExtendedType getRegisteredType(String javaClassName) {
         ExtendedType type = (ExtendedType) typeMap.get(javaClassName);
@@ -112,17 +120,18 @@ public class ExtendedTypeMap {
     }
 
     /**
-      * Returns a type registered for the class name. If no such type exists,
-      * returns the default type. It is guaranteed that this method returns a
-      * non-null ExtendedType instance.
-      */
+     * Returns a type registered for the class name. If no such type exists, returns the
+     * default type. It is guaranteed that this method returns a non-null ExtendedType
+     * instance.
+     */
     public ExtendedType getRegisteredType(Class javaClass) {
         String name = null;
 
         if (javaClass.isArray()) {
             // only support single dimensional arrays now
             name = javaClass.getComponentType() + "[]";
-        } else {
+        }
+        else {
             name = javaClass.getName();
         }
 
@@ -130,17 +139,16 @@ public class ExtendedTypeMap {
         return (type != null) ? type : defaultType;
     }
 
-    /** 
-     * Removes registered ExtendedType object corresponding to
-     * <code>javaClassName</code> parameter. 
+    /**
+     * Removes registered ExtendedType object corresponding to <code>javaClassName</code>
+     * parameter.
      */
     public void unregisterType(String javaClassName) {
         typeMap.remove(javaClassName);
     }
 
-    /** 
-     * Returns array of Java class names supported by Cayenne 
-     * for JDBC mapping. 
+    /**
+     * Returns array of Java class names supported by Cayenne for JDBC mapping.
      */
     public String[] getRegisteredTypeNames() {
         Set keys = typeMap.keySet();

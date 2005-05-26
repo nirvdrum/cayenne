@@ -74,6 +74,7 @@ import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
 import org.objectstyle.cayenne.access.trans.UpdateTranslator;
+import org.objectstyle.cayenne.access.types.BooleanType;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedType;
@@ -168,6 +169,10 @@ public class JdbcAdapter implements DbAdapter {
      * and Java layers. Called from default constructor.
      */
     protected void configureExtendedTypes(ExtendedTypeMap map) {
+        // use BooleanType to ensure that returned booleans are an enum of Boolean.TRUE
+        // and Boolean.FALSE
+        map.registerType(new BooleanType());
+
         // Create a default CHAR handler with some generic settings.
         // Subclasses may need to install their own CharType or reconfigure
         // this one to work better with the target database.

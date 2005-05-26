@@ -56,65 +56,31 @@
 package org.objectstyle.cayenne.access.types;
 
 import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.validation.ValidationResult;
-
 /**
- * Defines methods to read Java objects from JDBC ResultSets and write as parameters of
- * PreparedStatements.
+ * A Boolean type handler. One of the features of this handler is that it ensures that
+ * "materizalize" methods return either Boolean.TRUE or Boolean.FALSE, instead of creating
+ * new Boolean instances using contructor. Therefore it makes possible identity comparison
+ * such as <code>object.getBooleanProperty() == Boolean.TRUE</code>.
  * 
+ * @since 1.2
  * @author Andrei Adamchik
  */
-public interface ExtendedType {
+public class BooleanType extends AbstractType {
 
-    /**
-     * Returns a full name of Java class that this ExtendedType supports.
-     */
-    String getClassName();
+    public String getClassName() {
+        return Boolean.class.getName();
+    }
 
-    /**
-     * Performs validation of an object property. Property is considered valid if this it
-     * satisfies the database constraints known to this ExtendedType. In case of
-     * validation failure, failures are appended to the ValidationResult object and
-     * <code>false</code> is returned.
-     * 
-     * @since 1.1
-     */
-    boolean validateProperty(
-            Object source,
-            String property,
-            Object value,
-            DbAttribute dbAttribute,
-            ValidationResult validationResult);
+    public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
+        boolean b = rs.getBoolean(index);
+        return (rs.wasNull()) ? null : b ? Boolean.TRUE : Boolean.FALSE;
+    }
 
-    /**
-     * Initializes a single parameter of a PreparedStatement with object value.
-     */
-    void setJdbcObject(
-            PreparedStatement statement,
-            Object value,
-            int pos,
-            int type,
-            int precision) throws Exception;
-
-    /**
-     * Reads an object from JDBC ResultSet column, converting it to class returned by
-     * 'getClassName' method.
-     * 
-     * @throws Exception if read error ocurred, or an object can't be converted to a
-     *             target Java class.
-     */
-    Object materializeObject(ResultSet rs, int index, int type) throws Exception;
-
-    /**
-     * Reads an object from a stored procedure OUT parameter, converting it to class
-     * returned by 'getClassName' method.
-     * 
-     * @throws Exception if read error ocurred, or an object can't be converted to a
-     *             target Java class.
-     */
-    Object materializeObject(CallableStatement rs, int index, int type) throws Exception;
+    public Object materializeObject(CallableStatement st, int index, int type)
+            throws Exception {
+        boolean b = st.getBoolean(index);
+        return (st.wasNull()) ? null : b ? Boolean.TRUE : Boolean.FALSE;
+    }
 }

@@ -74,6 +74,9 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  */
 public class UtilDateType extends AbstractType {
 
+    /**
+     * Always returns java.util.Date class.
+     */
     public String getClassName() {
         return Date.class.getName();
     }

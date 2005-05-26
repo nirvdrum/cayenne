@@ -68,7 +68,7 @@ import java.sql.ResultSet;
  * @author Andrei Adamchik
  * @since 1.0.2
  */
-public class ShortType extends DefaultType {
+public class ShortType extends AbstractType {
     protected boolean widenShorts;
 
     public ShortType(boolean widenShorts) {

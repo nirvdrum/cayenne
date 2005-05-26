@@ -75,6 +75,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class NumericTypesTst extends CayenneTestCase {
+
     protected DataContext context;
 
     protected void setUp() throws Exception {
@@ -97,8 +98,8 @@ public class NumericTypesTst extends CayenneTestCase {
     }
 
     public void testShortInInsert() throws Exception {
-        SmallintTest object =
-            (SmallintTest) context.createAndRegisterNewObject("SmallintTest");
+        SmallintTest object = (SmallintTest) context
+                .createAndRegisterNewObject("SmallintTest");
         object.setSmallintCol(new Short("1"));
         context.commitChanges();
     }
@@ -116,8 +117,8 @@ public class NumericTypesTst extends CayenneTestCase {
     }
 
     public void testTinyintInInsert() throws Exception {
-        TinyintTest object =
-            (TinyintTest) context.createAndRegisterNewObject("TinyintTest");
+        TinyintTest object = (TinyintTest) context
+                .createAndRegisterNewObject("TinyintTest");
         object.setTinyintCol(new Byte((byte) 1));
         context.commitChanges();
     }
@@ -134,43 +135,36 @@ public class NumericTypesTst extends CayenneTestCase {
         // this will clear cache as a side effect
         context = createDataContext();
 
-        Expression qual = ExpressionFactory.matchExp("bitColumn", Boolean.TRUE);
-        List objects = context.performQuery(new SelectQuery(BitTest.class, qual));
-        assertEquals(1, objects.size());
+        // fetch true...
+        Expression trueQ = ExpressionFactory.matchExp("bitColumn", Boolean.TRUE);
+        List trueResult = context.performQuery(new SelectQuery(BitTest.class, trueQ));
+        assertEquals(1, trueResult.size());
 
-        BitTest object = (BitTest) objects.get(0);
-        assertEquals(Boolean.TRUE, object.getBitColumn());
+        BitTest trueRefetched = (BitTest) trueResult.get(0);
+        assertEquals(Boolean.TRUE, trueRefetched.getBitColumn());
+
+        // CAY-320. Simplifying the use of booleans to allow identity comparison.
+        assertNotSame(trueRefetched, trueObject);
+        assertSame(Boolean.TRUE, trueRefetched.getBitColumn());
+
+        // fetch false
+        Expression falseQ = ExpressionFactory.matchExp("bitColumn", Boolean.FALSE);
+        List falseResult = context.performQuery(new SelectQuery(BitTest.class, falseQ));
+        assertEquals(1, falseResult.size());
+
+        BitTest falseRefetched = (BitTest) falseResult.get(0);
+        assertEquals(Boolean.FALSE, falseRefetched.getBitColumn());
+
+        // CAY-320. Simplifying the use of booleans to allow identity comparison.
+        assertNotSame(falseRefetched, falseObject);
+        assertSame(Boolean.FALSE, falseRefetched.getBitColumn());
     }
-
-    // mapping bit as an integer doesn't work on most databases (except for MySQL, as always),
-    // this test case is commented out just in case we need to do more testing with it
-    /*
-    
-    public void testNumericBit() throws Exception {
-    
-        // populate (testing insert as well)
-        BitNumberTest trueObject = (BitNumberTest) context.createAndRegisterNewObject("BitNumberTest");
-        trueObject.setBitColumn(new Integer(1));
-        BitNumberTest falseObject = (BitNumberTest) context.createAndRegisterNewObject("BitNumberTest");
-        falseObject.setBitColumn(new Integer(0));
-        context.commitChanges();
-    
-        // this will clear cache as a side effect
-        context = createDataContext();
-    
-        Expression qual = ExpressionFactory.matchExp("bitColumn", new Integer(1));
-        List objects = context.performQuery(new SelectQuery(BitNumberTest.class, qual));
-        assertEquals(1, objects.size());
-    
-        BitNumberTest object = (BitNumberTest) objects.get(0);
-        assertEquals(new Integer(1), object.getBitColumn());
-    } */
 
     public void testDecimalPK() throws Exception {
 
         // populate (testing insert as well)
-        DecimalPKTest object =
-            (DecimalPKTest) context.createAndRegisterNewObject(DecimalPKTest.class);
+        DecimalPKTest object = (DecimalPKTest) context
+                .createAndRegisterNewObject(DecimalPKTest.class);
 
         object.setName("o1");
         object.setDecimalPK(new BigDecimal("1.25"));
@@ -184,8 +178,8 @@ public class NumericTypesTst extends CayenneTestCase {
     public void testDecimalPK1() throws Exception {
 
         // populate (testing insert as well)
-        DecimalPKTest1 object =
-            (DecimalPKTest1) context.createAndRegisterNewObject(DecimalPKTest1.class);
+        DecimalPKTest1 object = (DecimalPKTest1) context
+                .createAndRegisterNewObject(DecimalPKTest1.class);
 
         object.setName("o2");
         object.setDecimalPK(new Double(1.25));
