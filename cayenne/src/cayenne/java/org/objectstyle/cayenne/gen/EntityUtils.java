@@ -83,7 +83,7 @@ public class EntityUtils {
     
     protected EntityResolver entityResolver;
 
-    public EntityUtils(DataMap dataMap, ObjEntity objEntity, String fqnBaseClass, String fqnSuperClass, String fqnSubClass)
+    public EntityUtils(DataMap dataMap, DataMap additionalDataMaps[], ObjEntity objEntity, String fqnBaseClass, String fqnSuperClass, String fqnSubClass)
     {
         super();
         
@@ -97,6 +97,9 @@ public class EntityUtils {
         this.subPackageName = stringUtils.stripClass(fqnSubClass);
 
         this.entityResolver = new EntityResolver(Collections.singleton(dataMap));
+        for (int i = 0; i < additionalDataMaps.length; i++) {
+            this.entityResolver.addDataMap(additionalDataMaps[i]);
+        }
         
         this.objEntity = objEntity;
     }

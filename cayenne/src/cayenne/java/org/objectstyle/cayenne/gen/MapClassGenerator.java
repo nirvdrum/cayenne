@@ -106,6 +106,7 @@ public abstract class MapClassGenerator {
     protected List objEntities;
     protected String superPkg;
     protected DataMap dataMap;
+    protected DataMap additionalDataMaps[] = new DataMap[0];
     protected VPPConfig vppConfig;
     protected String mode = MODE_ENTITY;
 
@@ -336,7 +337,7 @@ public abstract class MapClassGenerator {
                     superClassName);
 
             if (superOut != null) {
-                superGenSetup.generateClass(superOut, dataMap, ent, fqnBaseClass, fqnSuperClass, fqnSubClass);
+                superGenSetup.generateClass(superOut, dataMap, additionalDataMaps, ent, fqnBaseClass, fqnSuperClass, fqnSubClass);
                 closeWriter(superOut);
             }
 
@@ -344,7 +345,7 @@ public abstract class MapClassGenerator {
             Writer mainOut =
                 openWriter(ent, subPackageName, subClassName);
             if (mainOut != null) {
-                mainGenSetup.generateClass(mainOut, dataMap, ent, fqnBaseClass, fqnSuperClass, fqnSubClass);
+                mainGenSetup.generateClass(mainOut, dataMap, additionalDataMaps, ent, fqnBaseClass, fqnSuperClass, fqnSubClass);
                 closeWriter(mainOut);
             }
         }
@@ -441,7 +442,7 @@ public abstract class MapClassGenerator {
                 continue;
             }
 
-            gen.generateClass(out, dataMap, ent, fqnBaseClass, fqnSubClass, fqnSubClass);
+            gen.generateClass(out, dataMap, additionalDataMaps, ent, fqnBaseClass, fqnSubClass, fqnSubClass);
             closeWriter(out);
         }
     }
@@ -580,5 +581,17 @@ public abstract class MapClassGenerator {
             throw new IllegalStateException("'mode' must be '" + MODE_ENTITY + "' or '" + MODE_DATAMAP + "', but was '" + mode + "'");
         }
         this.mode = mode;
+    }
+    /**
+     * @return Returns the additionalDataMaps.
+     */
+    public DataMap[] getAdditionalDataMaps() {
+        return additionalDataMaps;
+    }
+    /**
+     * @param additionalDataMaps The additionalDataMaps to set.
+     */
+    public void setAdditionalDataMaps(DataMap[] additionalDataMaps) {
+        this.additionalDataMaps = additionalDataMaps;
     }
 }

@@ -222,7 +222,7 @@ public class ClassGenerator {
      * Generates Java code for the ObjEntity. Output is written to the provided
      * Writer.
      */
-    public void generateClass(Writer out, DataMap dataMap, ObjEntity entity, String fqnBaseClass, String fqnSuperClass, String fqnSubClass) throws Exception {
+    public void generateClass(Writer out, DataMap dataMap, DataMap additionalDataMaps[], ObjEntity entity, String fqnBaseClass, String fqnSuperClass, String fqnSubClass) throws Exception {
         if (false == VERSION_1_2.equals(versionString)) {
             throw new IllegalStateException("Illegal Version in generateClass(Writer,ObjEntity,String,String,String): " + versionString);
         }
@@ -233,7 +233,7 @@ public class ClassGenerator {
 
         velCtxt.put("objEntity", entity);
         velCtxt.put("stringUtils", StringUtils.getInstance());
-        velCtxt.put("entityUtils", new EntityUtils(dataMap, entity, fqnBaseClass, fqnSuperClass, fqnSubClass));
+        velCtxt.put("entityUtils", new EntityUtils(dataMap, additionalDataMaps, entity, fqnBaseClass, fqnSuperClass, fqnSubClass));
         velCtxt.put("importUtils", new ImportUtils());
         
         classTemplate.merge(velCtxt, out);

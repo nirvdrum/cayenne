@@ -83,6 +83,7 @@ public class CayenneGenerator extends CayenneTask {
     protected VPPConfig vppConfig;
 
     protected File map;
+    protected File additionalMaps[];
     protected DefaultClassGenerator generator;
 
     public CayenneGenerator() {
@@ -131,6 +132,7 @@ public class CayenneGenerator extends CayenneTask {
     protected void processMap() throws Exception {
 
         DataMap dataMap = loadDataMap();
+        DataMap additionalDataMaps[] = loadAdditionalDataMaps();
 
         List entityList = new ArrayList(dataMap.getObjEntities());
 
@@ -145,15 +147,35 @@ public class CayenneGenerator extends CayenneTask {
 
         generator.setTimestamp(map.lastModified());
         generator.setDataMap(dataMap);
+        generator.setAdditionalDataMaps(additionalDataMaps);
         generator.setObjEntities(entityList);
         generator.validateAttributes();
         generator.execute();
     }
 
+    /** Loads and returns a DataMap by File. */
+    protected DataMap loadDataMap(File mapName) throws Exception {
+        InputSource in = new InputSource(mapName.getCanonicalPath());
+        return new MapLoader().loadDataMap(in);
+    }
+
     /** Loads and returns DataMap based on <code>map</code> attribute. */
     protected DataMap loadDataMap() throws Exception {
-        InputSource in = new InputSource(map.getCanonicalPath());
-        return new MapLoader().loadDataMap(in);
+        return loadDataMap(map);
+    }
+
+    /** Loads and returns DataMap based on <code>map</code> attribute. */
+    protected DataMap[] loadAdditionalDataMaps() throws Exception {
+        if (null == additionalMaps)
+        {
+            return new DataMap[0];
+        }
+        
+        DataMap dataMaps[] = new DataMap[additionalMaps.length];
+        for (int i = 0; i < additionalMaps.length; i++) {
+            dataMaps[i] = loadDataMap(additionalMaps[i]);
+        }
+        return dataMaps;
     }
 
     /**
@@ -173,6 +195,15 @@ public class CayenneGenerator extends CayenneTask {
      */
     public void setMap(File map) {
         this.map = map;
+    }
+
+    /**
+     * Sets the additional DataMaps.
+     * 
+     * @param map The map to set
+     */
+    public void setAdditionalMaps(File additionalMaps[]) {
+        this.additionalMaps = additionalMaps;
     }
 
     /**
