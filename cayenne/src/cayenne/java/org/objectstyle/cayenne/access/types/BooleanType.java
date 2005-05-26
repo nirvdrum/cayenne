@@ -60,7 +60,7 @@ import java.sql.ResultSet;
 
 /**
  * A Boolean type handler. One of the features of this handler is that it ensures that
- * "materizalize" methods return either Boolean.TRUE or Boolean.FALSE, instead of creating
+ * "materialize" methods return either Boolean.TRUE or Boolean.FALSE, instead of creating
  * new Boolean instances using contructor. Therefore it makes possible identity comparison
  * such as <code>object.getBooleanProperty() == Boolean.TRUE</code>.
  * 
