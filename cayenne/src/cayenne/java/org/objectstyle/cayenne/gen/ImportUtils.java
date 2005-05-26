@@ -88,6 +88,9 @@ public class ImportUtils {
     
     public void addType(String typeName)
     {
+        // Not sure why this would ever happen, but it did
+        if (null == typeName)  return;
+        
         StringUtils stringUtils = StringUtils.getInstance();
         String typeClassName = stringUtils.stripPackageName(typeName);
         String typePackageName = stringUtils.stripClass(typeName);
