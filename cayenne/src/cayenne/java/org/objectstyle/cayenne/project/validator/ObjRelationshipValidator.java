@@ -164,6 +164,10 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
     
     public String objRelationshipIdentifier(ObjRelationship rel)
     {
+        if (null == rel.getSourceEntity())
+        {
+            return "<[null source entity]." + rel.getName() + ">";
+        }
         return "<" + rel.getSourceEntity().getName() + "." + rel.getName() + ">";
     }
 }

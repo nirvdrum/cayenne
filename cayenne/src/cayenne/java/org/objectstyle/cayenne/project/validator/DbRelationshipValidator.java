@@ -77,10 +77,10 @@ public class DbRelationshipValidator extends TreeNodeValidator {
     public void validateObject(ProjectPath path, Validator validator) {
         DbRelationship rel = (DbRelationship) path.getObject();
         if (rel.getTargetEntity() == null) {
-            validator.registerWarning("DbRelationship has no target entity.", path);
+            validator.registerWarning("DbRelationship " + dbRelationshipIdentifier(rel) + " has no target entity.", path);
         }
         else if (rel.getJoins().size() == 0) {
-            validator.registerWarning("DbRelationship has no joins.", path);
+            validator.registerWarning("DbRelationship " + dbRelationshipIdentifier(rel) + " has no joins.", path);
         }
         else {
             // validate joins
@@ -90,17 +90,17 @@ public class DbRelationshipValidator extends TreeNodeValidator {
                 if (join.getSource() == null && join.getTarget() == null) {
                     validator
                             .registerWarning(
-                                    "DbRelationship join has no source and target attributes selected.",
+                                    "DbRelationship " + dbRelationshipIdentifier(rel) + " join has no source and target attributes selected.",
                                     path);
                 }
                 else if (join.getSource() == null) {
                     validator.registerWarning(
-                            "DbRelationship join has no source attribute selected.",
+                            "DbRelationship " + dbRelationshipIdentifier(rel) + " join has no source attribute selected.",
                             path);
                 }
                 else if (join.getTarget() == null) {
                     validator.registerWarning(
-                            "DbRelationship join has no target attribute selected.",
+                            "DbRelationship " + dbRelationshipIdentifier(rel) + " join has no target attribute selected.",
                             path);
                 }
             }
@@ -109,7 +109,7 @@ public class DbRelationshipValidator extends TreeNodeValidator {
             if (rel.getReverseRelationship() == null) {
                 validator
                         .registerWarning(
-                                "Missing reverse DbRelationship (currently required by Cayenne).",
+                                "Missing reverse DbRelationship " + dbRelationshipIdentifier(rel) + " (currently required by Cayenne).",
                                 path);
             }
         }
@@ -120,7 +120,7 @@ public class DbRelationshipValidator extends TreeNodeValidator {
         // check if there are attributes having the same name
         else if (rel.getSourceEntity().getAttribute(rel.getName()) != null) {
             validator.registerWarning(
-                    "DbRelationship has the same name as one of DbAttributes",
+                    "DbRelationship " + dbRelationshipIdentifier(rel) + " has the same name as one of DbAttributes",
                     path);
         }
         else {
@@ -130,10 +130,19 @@ public class DbRelationshipValidator extends TreeNodeValidator {
             if (invalidChars != null) {
                 validator
                         .registerWarning(
-                                "DbRelationship name contains invalid characters: "
+                                "DbRelationship " + dbRelationshipIdentifier(rel) + " name contains invalid characters: "
                                         + invalidChars,
                                 path);
             }
         }
+    }
+    
+    public String dbRelationshipIdentifier(DbRelationship rel)
+    {
+        if (null == rel.getSourceEntity())
+        {
+            return "<[null source entity]." + rel.getName() + ">";
+        }
+        return "<" + rel.getSourceEntity().getName() + "." + rel.getName() + ">";
     }
 }
