@@ -76,6 +76,8 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 public class RelationshipQuery extends AbstractQuery implements GenericSelectQuery {
 
     protected DataObject object;
+
+    // TODO: ObjRelationship is not serializable ... need to serialize its name instead
     protected ObjRelationship relationship;
 
     /**
@@ -149,8 +151,8 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
     }
 
     /**
-     * Creates a SelectQuery for relationship and delegates action creation to
-     * SelectQuery.
+     * Creates a SelectQuery for relationship, delegating SQLAction creation to this newly
+     * created query.
      */
     public SQLAction toSQLAction(SQLActionVisitor visitor) {
 
