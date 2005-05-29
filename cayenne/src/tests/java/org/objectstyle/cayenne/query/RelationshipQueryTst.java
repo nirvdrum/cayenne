@@ -53,85 +53,34 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.jdbc;
+package org.objectstyle.cayenne.query;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
+import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.SQLAction;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.unit.util.MockDataObject;
 
 /**
- * A convenience superclass for SQLAction implementations.
- * 
- * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-public abstract class BaseSQLAction implements SQLAction {
+public class RelationshipQueryTst extends TestCase {
 
-    protected DbAdapter adapter;
-    protected EntityResolver entityResolver;
+    public void testConstructor() {
+        final ObjEntity target = new ObjEntity("test");
+        DataObject object = new MockDataObject();
+        ObjRelationship relationship = new ObjRelationship() {
 
-    public BaseSQLAction(DbAdapter adapter, EntityResolver entityResolver) {
-        this.adapter = adapter;
-        this.entityResolver = entityResolver;
-    }
-
-    public DbAdapter getAdapter() {
-        return adapter;
-    }
-
-    public EntityResolver getEntityResolver() {
-        return entityResolver;
-    }
-
-    /**
-     * Helper method to process a ResultSet.
-     */
-    protected void readResultSet(
-            ResultSet resultSet,
-            RowDescriptor descriptor,
-            GenericSelectQuery query,
-            OperationObserver delegate) throws SQLException, Exception {
-
-        long t1 = System.currentTimeMillis();
-        JDBCResultIterator resultReader = new JDBCResultIterator(
-                null,
-                null,
-                resultSet,
-                descriptor,
-                query.getFetchLimit());
-
-        if (!delegate.isIteratedResult()) {
-            List resultRows = resultReader.dataRows(false);
-            QueryLogger.logSelectCount(query.getLoggingLevel(), resultRows.size(), System
-                    .currentTimeMillis()
-                    - t1);
-
-            delegate.nextDataRows(query, resultRows);
-        }
-        else {
-            try {
-                resultReader.setClosingConnection(true);
-                delegate.nextDataRows(query, resultReader);
+            public Entity getTargetEntity() {
+                return target;
             }
-            catch (Exception ex) {
+        };
 
-                try {
-                    resultReader.close();
-                }
-                catch (CayenneException cex) {
-                    // ignore...
-                }
-                
-                throw ex;
-            }
-        }
+        RelationshipQuery query = new RelationshipQuery(object, relationship);
+        assertSame(object, query.getObject());
+        assertSame(target, query.getRoot());
+        assertSame(relationship, query.getRelationship());
     }
 }

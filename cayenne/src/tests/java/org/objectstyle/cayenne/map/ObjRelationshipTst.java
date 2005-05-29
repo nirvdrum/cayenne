@@ -1,56 +1,34 @@
-/* ====================================================================
- * 
- * The ObjectStyle Group Software License, version 1.1
- * ObjectStyle Group - http://objectstyle.org/
- * 
- * Copyright (c) 2002-2005, Andrei (Andrus) Adamchik and individual authors
- * of the software. All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 
- * 3. The end-user documentation included with the redistribution, if any,
- *    must include the following acknowlegement:
- *    "This product includes software developed by independent contributors
- *    and hosted on ObjectStyle Group web site (http://objectstyle.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- * 
- * 4. The names "ObjectStyle Group" and "Cayenne" must not be used to endorse
- *    or promote products derived from this software without prior written
- *    permission. For written permission, email
- *    "andrus at objectstyle dot org".
- * 
- * 5. Products derived from this software may not be called "ObjectStyle"
- *    or "Cayenne", nor may "ObjectStyle" or "Cayenne" appear in their
- *    names without prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- * 
- * This software consists of voluntary contributions made by many
- * individuals and hosted on ObjectStyle Group web site.  For more
- * information on the ObjectStyle Group, please see
+/*
+ * ==================================================================== The ObjectStyle
+ * Group Software License, version 1.1 ObjectStyle Group - http://objectstyle.org/
+ * Copyright (c) 2002-2005, Andrei (Andrus) Adamchik and individual authors of the
+ * software. All rights reserved. Redistribution and use in source and binary forms, with
+ * or without modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer. 2. Redistributions in binary form must
+ * reproduce the above copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the distribution.
+ * 3. The end-user documentation included with the redistribution, if any, must include
+ * the following acknowlegement: "This product includes software developed by independent
+ * contributors and hosted on ObjectStyle Group web site (http://objectstyle.org/)."
+ * Alternately, this acknowlegement may appear in the software itself, if and wherever
+ * such third-party acknowlegements normally appear. 4. The names "ObjectStyle Group" and
+ * "Cayenne" must not be used to endorse or promote products derived from this software
+ * without prior written permission. For written permission, email "andrus at objectstyle
+ * dot org". 5. Products derived from this software may not be called "ObjectStyle" or
+ * "Cayenne", nor may "ObjectStyle" or "Cayenne" appear in their names without prior
+ * written permission. THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE OBJECTSTYLE
+ * GROUP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ==================================================================== This software
+ * consists of voluntary contributions made by many individuals and hosted on ObjectStyle
+ * Group web site. For more information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
 package org.objectstyle.cayenne.map;
@@ -62,7 +40,6 @@ import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class ObjRelationshipTst extends CayenneTestCase {
-    protected ObjRelationship relationship;
 
     protected DbEntity artistDBEntity = getDbEntity("ARTIST");
     protected DbEntity artistExhibitDBEntity = getDbEntity("ARTIST_EXHIBIT");
@@ -70,11 +47,23 @@ public class ObjRelationshipTst extends CayenneTestCase {
     protected DbEntity paintingDbEntity = getDbEntity("PAINTING");
     protected DbEntity galleryDBEntity = getDbEntity("GALLERY");
 
-    public void setUp() throws Exception {
-        relationship = new ObjRelationship();
+    public void testGetReverseDbRealtionshipPath() {
+        ObjEntity artistObjEnt = getObjEntity("Artist");
+        ObjEntity paintingObjEnt = getObjEntity("Painting");
+
+        // start with "to many"
+        ObjRelationship r1 = (ObjRelationship) artistObjEnt
+                .getRelationship("paintingArray");
+
+        assertEquals("toArtist", r1.getReverseDbRelationshipPath());
+
+        ObjRelationship r2 = (ObjRelationship) paintingObjEnt.getRelationship("toArtist");
+
+        assertEquals("paintingArray", r2.getReverseDbRelationshipPath());
     }
 
-    public void testSetDbRelationshipPath() throws Exception {
+    public void testSetDbRelationshipPath() {
+        ObjRelationship relationship = new ObjRelationship();
         relationship.dbRelationshipsRefreshNeeded = false;
 
         relationship.setDbRelationshipPath("dummy.path");
@@ -84,7 +73,8 @@ public class ObjRelationshipTst extends CayenneTestCase {
         assertTrue(relationship.dbRelationshipsRefreshNeeded);
     }
 
-    public void testRefreshFromPath() throws Exception {
+    public void testRefreshFromPath() {
+        ObjRelationship relationship = new ObjRelationship();
         relationship.setDbRelationshipPath("dummy.path");
 
         // attempt to resolve must fail - relationship is outside of context,
@@ -138,7 +128,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
         assertSame(pathR, resolvedPath.get(1));
     }
 
-    public void testCalculateToMany() throws Exception {
+    public void testCalculateToMany() {
         // assemble fixture....
         DataMap map = new DataMap();
         ObjEntity entity = new ObjEntity("Test");
@@ -160,6 +150,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
         dbEntity1.addRelationship(dummyR);
         dbEntity2.addRelationship(pathR);
 
+        ObjRelationship relationship = new ObjRelationship();
         relationship.setSourceEntity(entity);
 
         // test how toMany changes dependending on the underlying DbRelationships
@@ -185,7 +176,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
         assertTrue(relationship.isToMany());
     }
 
-    public void testCalculateToManyFromPath() throws Exception {
+    public void testCalculateToManyFromPath() {
         // assemble fixture....
         DataMap map = new DataMap();
         ObjEntity entity = new ObjEntity("Test");
@@ -207,6 +198,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
         dbEntity1.addRelationship(dummyR);
         dbEntity2.addRelationship(pathR);
 
+        ObjRelationship relationship = new ObjRelationship();
         relationship.setSourceEntity(entity);
 
         // test how toMany changes when the path is set as a string
@@ -236,6 +228,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
     }
 
     public void testTargetEntity() throws Exception {
+        ObjRelationship relationship = new ObjRelationship();
         relationship.setTargetEntityName("targ");
 
         try {
@@ -260,20 +253,21 @@ public class ObjRelationshipTst extends CayenneTestCase {
         assertSame(target, relationship.getTargetEntity());
     }
 
-    public void testGetReverseRel1() throws Exception {
+    public void testGetReverseRel1() {
+
         ObjEntity artistObjEnt = getObjEntity("Artist");
         ObjEntity paintingObjEnt = getObjEntity("Painting");
 
         // start with "to many"
-        ObjRelationship r1 =
-            (ObjRelationship) artistObjEnt.getRelationship("paintingArray");
+        ObjRelationship r1 = (ObjRelationship) artistObjEnt
+                .getRelationship("paintingArray");
         ObjRelationship r2 = r1.getReverseRelationship();
 
         assertNotNull(r2);
         assertSame(paintingObjEnt.getRelationship("toArtist"), r2);
     }
 
-    public void testGetReverseRel2() throws Exception {
+    public void testGetReverseRel2() {
         ObjEntity artistEnt = getObjEntity("Artist");
         ObjEntity paintingEnt = getObjEntity("Painting");
 
@@ -286,6 +280,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
     }
 
     public void testSingleDbRelationship() {
+        ObjRelationship relationship = new ObjRelationship();
         DbRelationship r1 = new DbRelationship();
         relationship.addDbRelationship(r1);
         assertEquals(1, relationship.getDbRelationships().size());
@@ -297,7 +292,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
         assertEquals(0, relationship.getDbRelationships().size());
     }
 
-    public void testFlattenedRelationship() throws Exception {
+    public void testFlattenedRelationship() {
         DbRelationship r1 = new DbRelationship();
         DbRelationship r2 = new DbRelationship();
 
@@ -309,6 +304,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
         r2.setTargetEntity(exhibitDBEntity);
         r2.setToMany(false);
 
+        ObjRelationship relationship = new ObjRelationship();
         relationship.addDbRelationship(r1);
         relationship.addDbRelationship(r2);
         assertTrue(relationship.isToMany());
@@ -328,7 +324,8 @@ public class ObjRelationshipTst extends CayenneTestCase {
     }
 
     public void testReadOnlyMoreThan3DbRelsRelationship() {
-        //Readonly is a flattened relationship that isn't over a single many->many link table
+        //Readonly is a flattened relationship that isn't over a single many->many link
+        // table
         DbRelationship r1 = new DbRelationship();
         DbRelationship r2 = new DbRelationship();
         DbRelationship r3 = new DbRelationship();
@@ -343,6 +340,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
         r3.setTargetEntity(galleryDBEntity);
         r3.setToMany(false);
 
+        ObjRelationship relationship = new ObjRelationship();
         relationship.addDbRelationship(r1);
         relationship.addDbRelationship(r2);
         relationship.addDbRelationship(r3);
@@ -353,7 +351,8 @@ public class ObjRelationshipTst extends CayenneTestCase {
 
     }
 
-    //Test for a read-only flattened relationship that is readonly because it's dbrel sequence is "incorrect" (or rather, unsupported)
+    //Test for a read-only flattened relationship that is readonly because it's dbrel
+    // sequence is "incorrect" (or rather, unsupported)
     public void testIncorrectSequenceReadOnlyRelationship() {
         DbRelationship r1 = new DbRelationship();
         DbRelationship r2 = new DbRelationship();
@@ -365,6 +364,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
         r2.setTargetEntity(galleryDBEntity);
         r2.setToMany(false);
 
+        ObjRelationship relationship = new ObjRelationship();
         relationship.addDbRelationship(r1);
         relationship.addDbRelationship(r2);
 
@@ -376,14 +376,16 @@ public class ObjRelationshipTst extends CayenneTestCase {
     //Test a relationship loaded from the test datamap that we know should be flattened
     public void testKnownFlattenedRelationship() {
         ObjEntity artistEnt = getObjEntity("Artist");
-        ObjRelationship theRel =
-            (ObjRelationship) artistEnt.getRelationship("groupArray");
+        ObjRelationship theRel = (ObjRelationship) artistEnt
+                .getRelationship("groupArray");
         assertNotNull(theRel);
         assertTrue(theRel.isFlattened());
         assertFalse(theRel.isReadOnly());
     }
 
     public void testBadDeleteRuleValue() {
+        ObjRelationship relationship = new ObjRelationship();
+
         try {
             relationship.setDeleteRule(999);
             fail("Should have failed with IllegalArgumentException");
@@ -394,6 +396,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
     }
 
     public void testOkDeleteRuleValue() {
+        ObjRelationship relationship = new ObjRelationship();
         try {
             relationship.setDeleteRule(DeleteRule.CASCADE);
             relationship.setDeleteRule(DeleteRule.DENY);
@@ -406,6 +409,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
     }
 
     public void testWatchesDbRelChanges() {
+        ObjRelationship relationship = new ObjRelationship();
         DbRelationship r1 = new DbRelationship();
         r1.setToMany(true);
         relationship.addDbRelationship(r1);

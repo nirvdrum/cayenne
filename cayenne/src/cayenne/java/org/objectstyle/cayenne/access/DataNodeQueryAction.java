@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,85 +53,81 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.jdbc;
 
-import java.sql.ResultSet;
+package org.objectstyle.cayenne.access;
+
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.apache.log4j.Level;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLAction;
 
 /**
- * A convenience superclass for SQLAction implementations.
+ * A helper that executes a sequence of queries, providing correct mapping of the results
+ * to the original query. Note that this class is not thread-safe as it stores current
+ * query execution state.
  * 
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-public abstract class BaseSQLAction implements SQLAction {
+class DataNodeQueryAction implements OperationObserver {
 
-    protected DbAdapter adapter;
-    protected EntityResolver entityResolver;
+    OperationObserver observer;
+    DataNode node;
 
-    public BaseSQLAction(DbAdapter adapter, EntityResolver entityResolver) {
-        this.adapter = adapter;
-        this.entityResolver = entityResolver;
+    private Query currentQuery;
+
+    public DataNodeQueryAction(DataNode node, OperationObserver observer) {
+        this.observer = observer;
+        this.node = node;
     }
 
-    public DbAdapter getAdapter() {
-        return adapter;
+    public void runQuery(Connection connection, Query query) throws SQLException,
+            Exception {
+
+        // remember root query ... it will be used to map the results, even if SQLAction
+        // uses query substitute...
+        this.currentQuery = query;
+
+        SQLAction action = node.getAdapter().getAction(query, node);
+        action.performAction(connection, this);
     }
 
-    public EntityResolver getEntityResolver() {
-        return entityResolver;
+    public void nextBatchCount(Query query, int[] resultCount) {
+        observer.nextBatchCount(currentQuery, resultCount);
     }
 
-    /**
-     * Helper method to process a ResultSet.
-     */
-    protected void readResultSet(
-            ResultSet resultSet,
-            RowDescriptor descriptor,
-            GenericSelectQuery query,
-            OperationObserver delegate) throws SQLException, Exception {
+    public void nextCount(Query query, int resultCount) {
+        observer.nextCount(currentQuery, resultCount);
+    }
 
-        long t1 = System.currentTimeMillis();
-        JDBCResultIterator resultReader = new JDBCResultIterator(
-                null,
-                null,
-                resultSet,
-                descriptor,
-                query.getFetchLimit());
+    public void nextDataRows(Query query, List dataRows) {
+        observer.nextDataRows(currentQuery, dataRows);
+    }
 
-        if (!delegate.isIteratedResult()) {
-            List resultRows = resultReader.dataRows(false);
-            QueryLogger.logSelectCount(query.getLoggingLevel(), resultRows.size(), System
-                    .currentTimeMillis()
-                    - t1);
+    public void nextDataRows(Query q, ResultIterator it) {
+        observer.nextDataRows(currentQuery, it);
+    }
 
-            delegate.nextDataRows(query, resultRows);
-        }
-        else {
-            try {
-                resultReader.setClosingConnection(true);
-                delegate.nextDataRows(query, resultReader);
-            }
-            catch (Exception ex) {
+    public void nextGeneratedDataRows(Query query, ResultIterator keysIterator) {
+        observer.nextGeneratedDataRows(currentQuery, keysIterator);
+    }
 
-                try {
-                    resultReader.close();
-                }
-                catch (CayenneException cex) {
-                    // ignore...
-                }
-                
-                throw ex;
-            }
-        }
+    public void nextGlobalException(Exception ex) {
+        observer.nextGlobalException(ex);
+    }
+
+    public void nextQueryException(Query query, Exception ex) {
+        observer.nextQueryException(currentQuery, ex);
+    }
+
+    public Level getLoggingLevel() {
+        return observer.getLoggingLevel();
+    }
+
+    public boolean isIteratedResult() {
+        return observer.isIteratedResult();
     }
 }

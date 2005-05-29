@@ -55,10 +55,12 @@
  */
 package org.objectstyle.cayenne.map;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /** Superclass of metadata relationship classes. */
 public abstract class Relationship extends MapObject {
+
     protected String targetEntityName;
     protected boolean toMany;
 
@@ -71,15 +73,15 @@ public abstract class Relationship extends MapObject {
         this.setName(name);
     }
 
-    /** 
-     * Returns relationship source entity. 
+    /**
+     * Returns relationship source entity.
      */
     public Entity getSourceEntity() {
         return (Entity) this.getParent();
     }
 
-    /** 
-     * Sets relationship source entity. 
+    /**
+     * Sets relationship source entity.
      */
     public void setSourceEntity(Entity sourceEntity) {
         setParent(sourceEntity);
@@ -88,9 +90,8 @@ public abstract class Relationship extends MapObject {
     /** Returns relationship target entity. */
     public abstract Entity getTargetEntity();
 
-    /** 
-     * Sets relationship target entity. Internally
-     * calls <code>setTargetEntityName</code>.
+    /**
+     * Sets relationship target entity. Internally calls <code>setTargetEntityName</code>.
      */
     public void setTargetEntity(Entity targetEntity) {
         if (targetEntity != null) {
@@ -103,6 +104,7 @@ public abstract class Relationship extends MapObject {
 
     /**
      * Returns the targetEntityName.
+     * 
      * @return String
      */
     public String getTargetEntityName() {
@@ -111,19 +113,19 @@ public abstract class Relationship extends MapObject {
 
     /**
      * Sets the targetEntityName.
+     * 
      * @param targetEntityName The targetEntityName to set
      */
     public void setTargetEntityName(String targetEntityName) {
         this.targetEntityName = targetEntityName;
     }
 
-    /** 
-     * Tells whether relationship from source to target is to-one or to-many.
-     * If one-to-many, getxxx() method of the data object class would 
-     * return a list, otherwise it returns a single DataObject
-     * There is explicitly no setToMany on Relationship.. only DbRelationship
-     * supports such a notion, and ObjRelationship derives it's value from the
-     * underlying DbRelationship(s) 
+    /**
+     * Tells whether relationship from source to target is to-one or to-many. If
+     * one-to-many, getxxx() method of the data object class would return a list,
+     * otherwise it returns a single DataObject There is explicitly no setToMany on
+     * Relationship.. only DbRelationship supports such a notion, and ObjRelationship
+     * derives it's value from the underlying DbRelationship(s)
      */
     public boolean isToMany() {
         return toMany;
@@ -133,10 +135,15 @@ public abstract class Relationship extends MapObject {
         Entity entity = getSourceEntity();
 
         if (entity == null) {
-            throw new CayenneRuntimeException(
-                "Relationship '" + getName() + "' has no parent Entity.");
+            throw new CayenneRuntimeException("Relationship '"
+                    + getName()
+                    + "' has no parent Entity.");
         }
 
         return entity.getNonNullNamespace();
+    }
+
+    public String toString() {
+        return new ToStringBuilder(this).append("name", getName()).toString();
     }
 }

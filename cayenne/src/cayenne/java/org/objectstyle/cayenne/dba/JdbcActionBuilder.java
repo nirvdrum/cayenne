@@ -119,10 +119,16 @@ public class JdbcActionBuilder implements SQLActionVisitor {
         return new UpdateAction(query, adapter, entityResolver);
     }
 
+    /**
+     * Returns DbAdapter used associated with this action builder.
+     */
     public DbAdapter getAdapter() {
         return adapter;
     }
 
+    /**
+     * Returns EntityResolver that can be used to gain access to the mapping objects.
+     */
     public EntityResolver getEntityResolver() {
         return entityResolver;
     }

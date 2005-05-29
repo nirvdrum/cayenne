@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.query;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -149,5 +150,10 @@ public abstract class AbstractQuery implements Query {
         }
         
         this.root = value;
+    }
+    
+    public String toString() {
+        return new ToStringBuilder(this).append("root", getRoot()).append("name",
+                getName()).toString();
     }
 }

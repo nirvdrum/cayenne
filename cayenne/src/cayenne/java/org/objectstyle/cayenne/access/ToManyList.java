@@ -65,10 +65,8 @@ import java.util.ListIterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.util.QueryUtils;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.RelationshipQuery;
 
 /**
  * A list that holds objects for to-many relationships. All operations, except for
@@ -294,21 +292,17 @@ public class ToManyList implements List, Serializable {
                         localList = new LinkedList();
                     }
                     else {
-                        ObjectId oid = source.getObjectId();
-                        if (oid.isTemporary()) {
+                        if (source.getObjectId().isTemporary()) {
                             throw new CayenneRuntimeException(
                                     "Can't resolve relationship for temporary id: "
                                             + source.getObjectId());
                         }
 
-                        DataContext context = source.getDataContext();
-
-                        SelectQuery sel =
-                            QueryUtils.selectRelationshipObjects(
-                                context,
-                                context.registeredObject(oid),
+                        RelationshipQuery query = new RelationshipQuery(
+                                source,
                                 relationship);
-                        localList = context.performQuery(sel);
+
+                        localList = source.getDataContext().performQuery(query);
                     }
 
                     mergeLocalChanges(localList);

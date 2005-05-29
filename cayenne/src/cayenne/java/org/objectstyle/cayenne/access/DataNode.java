@@ -88,7 +88,6 @@ import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SQLAction;
 
 /**
  * Describes a single physical data source. This can be a database server, LDAP server,
@@ -276,7 +275,7 @@ public class DataNode implements QueryEngine {
                                 + listSize);
             }
 
-            // check out connection, create statement
+            // check out connection
             connection = this.getDataSource().getConnection();
             transaction.addConnection(connection);
         }
@@ -293,17 +292,14 @@ public class DataNode implements QueryEngine {
             return;
         }
 
+        DataNodeQueryAction queryRunner = new DataNodeQueryAction(this, resultConsumer);
         Iterator it = queries.iterator();
         while (it.hasNext()) {
             Query nextQuery = (Query) it.next();
 
             // catch exceptions for each individual query
             try {
-
-                // actual query translation and execution happens in the following two
-                // lines:
-                SQLAction action = adapter.getAction(nextQuery, this);
-                action.performAction(connection, resultConsumer);
+                queryRunner.runQuery(connection, nextQuery);
             }
             catch (Exception queryEx) {
                 QueryLogger.logQueryError(logLevel, queryEx);

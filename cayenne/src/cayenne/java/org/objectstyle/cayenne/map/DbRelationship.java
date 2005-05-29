@@ -73,22 +73,24 @@ import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
- * A DbRelationship is a descriptor of a database inter-table relationship
- * based on one or more primary key/foreign key pairs.
+ * A DbRelationship is a descriptor of a database inter-table relationship based on one or
+ * more primary key/foreign key pairs.
  * 
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
 public class DbRelationship extends Relationship {
+
     //DbRelationship events
-    public static final EventSubject PROPERTY_DID_CHANGE =
-        EventSubject.getSubject(DbRelationship.class, "PropertyDidChange");
+    public static final EventSubject PROPERTY_DID_CHANGE = EventSubject
+            .getSubject(DbRelationship.class, "PropertyDidChange");
 
     // The columns through which the join is implemented.
     protected List joins = new ArrayList();
 
     // Is relationship from source to target points to dependent primary
-    //  key (primary key column of destination table that is also a FK to the source column)
+    //  key (primary key column of destination table that is also a FK to the source
+    // column)
     protected boolean toDependentPK;
 
     public DbRelationship() {
@@ -131,9 +133,8 @@ public class DbRelationship extends Relationship {
     }
 
     /**
-     * Returns a target of this relationship. If relationship is not attached
-     * to a DbEntity, and DbEntity doesn't have a namcespace, and exception
-     * is thrown.
+     * Returns a target of this relationship. If relationship is not attached to a
+     * DbEntity, and DbEntity doesn't have a namcespace, and exception is thrown.
      */
     public Entity getTargetEntity() {
         String targetName = getTargetEntityName();
@@ -171,8 +172,8 @@ public class DbRelationship extends Relationship {
     }
 
     /**
-     * Creates a new relationship with the same set of joins,
-     * but going in the opposite direction.
+     * Creates a new relationship with the same set of joins, but going in the opposite
+     * direction.
      * 
      * @since 1.0.5
      */
@@ -197,10 +198,10 @@ public class DbRelationship extends Relationship {
         return reverse;
     }
 
-    /** 
-     * Returns DbRelationship that is the opposite of this DbRelationship.
-     * This means a relationship from this target entity to this source entity with the same
-     * join semantics. Returns null if no such relationship exists. 
+    /**
+     * Returns DbRelationship that is the opposite of this DbRelationship. This means a
+     * relationship from this target entity to this source entity with the same join
+     * semantics. Returns null if no such relationship exists.
      */
     public DbRelationship getReverseRelationship() {
         Entity target = this.getTargetEntity();
@@ -210,12 +211,12 @@ public class DbRelationship extends Relationship {
         }
 
         Entity src = this.getSourceEntity();
-        
+
         // special case - relationship to self with no joins...
-        if(target == src && joins.size() == 0) {
+        if (target == src && joins.size() == 0) {
             return null;
         }
-        
+
         TestJoin testJoin = new TestJoin(this);
         Iterator it = target.getRelationships().iterator();
         while (it.hasNext()) {
@@ -246,13 +247,13 @@ public class DbRelationship extends Relationship {
                 return rel;
             }
         }
-        
+
         return null;
     }
 
     /**
-     * Returns true if the relationship points to at least one of the PK 
-     * columns of the target entity.
+     * Returns true if the relationship points to at least one of the PK columns of the
+     * target entity.
      * 
      * @since 1.1
      */
@@ -260,10 +261,10 @@ public class DbRelationship extends Relationship {
         Iterator it = getJoins().iterator();
         while (it.hasNext()) {
             DbJoin join = (DbJoin) it.next();
-            if(join.getTarget() == null) {
-                return false;    
+            if (join.getTarget() == null) {
+                return false;
             }
-            
+
             if (join.getTarget().isPrimaryKey()) {
                 return true;
             }
@@ -272,9 +273,9 @@ public class DbRelationship extends Relationship {
         return false;
     }
 
-    /** 
-     * Returns <code>true</code> if a method <code>isToDependentPK</code> 
-     * of reverse relationship of this relationship returns <code>true</code>. 
+    /**
+     * Returns <code>true</code> if a method <code>isToDependentPK</code> of reverse
+     * relationship of this relationship returns <code>true</code>.
      */
     public boolean isToMasterPK() {
         if (isToMany() || isToDependentPK()) {
@@ -285,11 +286,10 @@ public class DbRelationship extends Relationship {
         return (revRel != null) ? revRel.isToDependentPK() : false;
     }
 
-    /** 
-     * Returns <code>true</code> if relationship from source to 
-     * target points to dependent primary key. Dependent PK is
-     * a primary key column of the destination table that is 
-     * also a FK to the source column. 
+    /**
+     * Returns <code>true</code> if relationship from source to target points to
+     * dependent primary key. Dependent PK is a primary key column of the destination
+     * table that is also a FK to the source column.
      */
     public boolean isToDependentPK() {
         return toDependentPK;
@@ -315,7 +315,7 @@ public class DbRelationship extends Relationship {
             DbAttribute source = join.getSource();
 
             if ((target != null && !target.isPrimaryKey())
-                || (source != null && !source.isPrimaryKey())) {
+                    || (source != null && !source.isPrimaryKey())) {
                 return false;
             }
         }
@@ -324,14 +324,14 @@ public class DbRelationship extends Relationship {
     }
 
     /**
-     * Returns a list of joins. List is returned by reference, so 
-     * any modifications of the list will affect this relationship.
+     * Returns a list of joins. List is returned by reference, so any modifications of the
+     * list will affect this relationship.
      */
     public List getJoins() {
         return joins;
     }
 
-    /** 
+    /**
      * Adds a join.
      * 
      * @since 1.1
@@ -352,24 +352,24 @@ public class DbRelationship extends Relationship {
 
     public void setJoins(Collection newJoins) {
         this.removeAllJoins();
-        
+
         if (newJoins != null) {
             joins.addAll(newJoins);
         }
     }
 
-    /** 
-     * Creates a snapshot of primary key attributes of a target
-     * object of this relationship based on a snapshot of a source.
-     * Only "to-one" relationships are supported.
-     * Returns null if relationship does not point to an object.
-     * Throws CayenneRuntimeException if relationship is "to many" or
-     * if snapshot is missing id components. 
+    /**
+     * Creates a snapshot of primary key attributes of a target object of this
+     * relationship based on a snapshot of a source. Only "to-one" relationships are
+     * supported. Returns null if relationship does not point to an object. Throws
+     * CayenneRuntimeException if relationship is "to many" or if snapshot is missing id
+     * components.
      */
     public Map targetPkSnapshotWithSrcSnapshot(Map srcSnapshot) {
 
         if (isToMany()) {
-            throw new CayenneRuntimeException("Only 'to one' relationships support this method.");
+            throw new CayenneRuntimeException(
+                    "Only 'to one' relationships support this method.");
         }
 
         Map idMap;
@@ -417,9 +417,9 @@ public class DbRelationship extends Relationship {
         }
     }
 
-    /** 
-     * Common code to srcSnapshotWithTargetSnapshot. Both are functionally the
-     * same, except for the name, and whether they operate on a toMany or a toOne.
+    /**
+     * Common code to srcSnapshotWithTargetSnapshot. Both are functionally the same,
+     * except for the name, and whether they operate on a toMany or a toOne.
      */
     private Map srcSnapshotWithTargetSnapshot(Map targetSnapshot) {
         int len = joins.size();
@@ -436,7 +436,7 @@ public class DbRelationship extends Relationship {
             return Collections.singletonMap(join.getSourceName(), val);
 
         }
-        
+
         // general case
         Map idMap = new HashMap(len * 2);
         for (int i = 0; i < len; i++) {
@@ -462,25 +462,26 @@ public class DbRelationship extends Relationship {
     public Map srcFkSnapshotWithTargetSnapshot(Map targetSnapshot) {
 
         if (isToMany())
-            throw new CayenneRuntimeException("Only 'to one' relationships support this method.");
+            throw new CayenneRuntimeException(
+                    "Only 'to one' relationships support this method.");
         return srcSnapshotWithTargetSnapshot(targetSnapshot);
     }
 
-    /** 
-     * Creates a snapshot of primary key attributes of a source
-     * object of this relationship based on a snapshot of a target.
-     * Only "to-many" relationships are supported.
-     * Throws CayenneRuntimeException if relationship is "to one" or
-     * if snapshot is missing id components.
+    /**
+     * Creates a snapshot of primary key attributes of a source object of this
+     * relationship based on a snapshot of a target. Only "to-many" relationships are
+     * supported. Throws CayenneRuntimeException if relationship is "to one" or if
+     * snapshot is missing id components.
      */
     public Map srcPkSnapshotWithTargetSnapshot(Map targetSnapshot) {
         if (!isToMany())
-            throw new CayenneRuntimeException("Only 'to many' relationships support this method.");
+            throw new CayenneRuntimeException(
+                    "Only 'to many' relationships support this method.");
         return srcSnapshotWithTargetSnapshot(targetSnapshot);
     }
 
-    /** 
-     * Sets relationship multiplicity. 
+    /**
+     * Sets relationship multiplicity.
      */
     public void setToMany(boolean toMany) {
         this.toMany = toMany;
@@ -488,31 +489,35 @@ public class DbRelationship extends Relationship {
     }
 
     protected void firePropertyDidChange() {
-        RelationshipEvent event =
-            new RelationshipEvent(this, this, this.getSourceEntity());
+        RelationshipEvent event = new RelationshipEvent(this, this, this
+                .getSourceEntity());
         EventManager.getDefaultManager().postEvent(event, PROPERTY_DID_CHANGE);
     }
 
     final static class JoinTransformers {
+
         static final Transformer targetExtractor = new Transformer() {
+
             public Object transform(Object input) {
                 return (input instanceof DbJoin) ? ((DbJoin) input).getTarget() : input;
             }
         };
 
         static final Transformer sourceExtractor = new Transformer() {
+
             public Object transform(Object input) {
                 return (input instanceof DbJoin) ? ((DbJoin) input).getSource() : input;
             }
         };
     }
-    
+
     // a join used for comparison
     final static class TestJoin extends DbJoin {
+
         TestJoin(DbRelationship relationship) {
             super(relationship);
         }
-        
+
         public boolean equals(Object o) {
             if (o == null) {
                 return false;

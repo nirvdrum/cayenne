@@ -60,7 +60,9 @@ import java.util.Collections;
 import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.event.EventManager;
@@ -224,8 +226,7 @@ public class ObjRelationship extends Relationship implements EventListener {
             }
         }
 
-        EventManager.getDefaultManager().addListener(
-                this,
+        EventManager.getDefaultManager().addListener(this,
                 "dbRelationshipDidChange",
                 RelationshipEvent.class,
                 DbRelationship.PROPERTY_DID_CHANGE,
@@ -245,8 +246,7 @@ public class ObjRelationship extends Relationship implements EventListener {
 
         dbRelationships.remove(dbRel);
         //Do not listen any more
-        EventManager.getDefaultManager().removeListener(
-                this,
+        EventManager.getDefaultManager().removeListener(this,
                 DbRelationship.PROPERTY_DID_CHANGE,
                 dbRel);
 
@@ -407,6 +407,43 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
+     * Reverses dbRelationship path.
+     * 
+     * @since 1.2
+     */
+    public String getReverseDbRelationshipPath() throws ExpressionException {
+
+        List relationships = getDbRelationships();
+        if (relationships == null || relationships.isEmpty()) {
+            return null;
+        }
+
+        StringBuffer buffer = new StringBuffer();
+
+        // iterate in reverse order
+        ListIterator it = relationships.listIterator(relationships.size());
+        while (it.hasPrevious()) {
+
+            DbRelationship relationship = (DbRelationship) it.previous();
+            DbRelationship reverse = relationship.getReverseRelationship();
+
+            // another sanity check
+            if (reverse == null) {
+                throw new CayenneRuntimeException("No reverse relationship exist for "
+                        + relationship);
+            }
+
+            if (buffer.length() > 0) {
+                buffer.append(Entity.PATH_SEPARATOR);
+            }
+
+            buffer.append(reverse.getName());
+        }
+
+        return buffer.toString();
+    }
+
+    /**
      * Sets mapped DbRelationships as a dot-separated path.
      */
     public void setDbRelationshipPath(String relationshipPath) {
@@ -472,8 +509,7 @@ public class ObjRelationship extends Relationship implements EventListener {
             Iterator removeIt = dbRelationships.iterator();
             while (removeIt.hasNext()) {
                 DbRelationship relationship = (DbRelationship) removeIt.next();
-                eventLoop.removeListener(
-                        this,
+                eventLoop.removeListener(this,
                         DbRelationship.PROPERTY_DID_CHANGE,
                         relationship);
 
@@ -497,8 +533,7 @@ public class ObjRelationship extends Relationship implements EventListener {
                         DbRelationship relationship = (DbRelationship) it.next();
 
                         // listen for changes
-                        eventLoop.addListener(
-                                this,
+                        eventLoop.addListener(this,
                                 "dbRelationshipDidChange",
                                 RelationshipEvent.class,
                                 DbRelationship.PROPERTY_DID_CHANGE,
@@ -575,17 +610,24 @@ public class ObjRelationship extends Relationship implements EventListener {
         }
 
         // allow modifications if the joins are from FKs
-        if(!secondRel.isToPK()) {
+        if (!secondRel.isToPK()) {
             this.readOnly = true;
             return;
         }
-        
+
         DbRelationship firstReverseRel = firstRel.getReverseRelationship();
-        if(firstReverseRel == null || !firstReverseRel.isToPK()) {
+        if (firstReverseRel == null || !firstReverseRel.isToPK()) {
             this.readOnly = true;
             return;
         }
 
         this.readOnly = false;
+    }
+
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("name", getName())
+                .append("dbRelationshipPath", dbRelationshipPath)
+                .toString();
     }
 }

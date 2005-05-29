@@ -60,13 +60,12 @@ import java.util.List;
 
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ToManyList;
-import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.RelationshipQuery;
 
 /**
  * Represents a placeholder for an unresolved relationship from a source object. Fault is
@@ -135,17 +134,12 @@ public abstract class Fault implements Serializable {
             ObjEntity targetEntity = (ObjEntity) relationship.getTargetEntity();
             if (relationship.isSourceIndependentFromTargetChange()) {
 
-                // TODO: stop using selecteRelationshipObjects, since it performs
-                // extra lookups for objects that have been resolved here
-
                 // can't create HOLLOW, do a fetch
-                SelectQuery select = QueryUtils.selectRelationshipObjects(
-                        context,
-                        sourceObject,
-                        relationshipName);
-                select.setFetchLimit(2);
 
-                List objects = context.performQuery(select);
+                RelationshipQuery query = new RelationshipQuery(
+                        sourceObject,
+                        relationship);
+                List objects = context.performQuery(query);
 
                 if (objects.isEmpty()) {
                     return null;

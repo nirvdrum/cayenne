@@ -84,9 +84,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * </p>
  * 
  * <pre>
- * 
  *    SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
- *  
  * </pre>
  * 
  * <p>
@@ -95,7 +93,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * <code>"COLUMN_X = ?"</code> must be replaced with <code>"COLUMN_X IS NULL"</code>.
  * </p>
  * <p>
- * <strong>Customizing Template by DB. </strong>
+ * <strong>Customizing Template by DB.</strong>
  * </p>
  * <p>
  * SQLTemplate has a {@link #getDefaultTemplate() default template script}, but also it

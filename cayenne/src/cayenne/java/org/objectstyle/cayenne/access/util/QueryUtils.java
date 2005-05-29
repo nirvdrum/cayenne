@@ -71,29 +71,26 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * Implements helper methods that perform different query-related operations.
- * <i>May be deprecated in the future, after its functionality is moved to the 
- * places where it is used now.</i>
+ * Implements helper methods that perform different query-related operations. <i>May be
+ * deprecated in the future, after its functionality is moved to the places where it is
+ * used now. </i>
  * 
  * @author Andrei Adamchik
- *
  */
 public class QueryUtils {
 
-    /** 
-     * Creates and returns a select query that can be used to 
-     * fetch an object given an ObjectId.
+    /**
+     * Creates and returns a select query that can be used to fetch an object given an
+     * ObjectId.
      */
     public static SelectQuery selectObjectForId(ObjectId oid) {
-        return new SelectQuery(
-            oid.getObjectClass(),
-            ExpressionFactory.matchAllDbExp(oid.getIdSnapshot(), Expression.EQUAL_TO));
+        return new SelectQuery(oid.getObjectClass(), ExpressionFactory.matchAllDbExp(oid
+                .getIdSnapshot(), Expression.EQUAL_TO));
     }
 
-    /** 
-     * Creates and returns a select query that can be used to 
-     * fetch a list of objects given a list of ObjectIds.
-     * All ObjectIds must belong to the same entity.
+    /**
+     * Creates and returns a select query that can be used to fetch a list of objects
+     * given a list of ObjectIds. All ObjectIds must belong to the same entity.
      */
     public static SelectQuery selectQueryForIds(List oids) {
         if (oids == null || oids.size() == 0) {
@@ -106,32 +103,29 @@ public class QueryUtils {
         Iterator it = oids.iterator();
 
         ObjectId firstId = (ObjectId) it.next();
-        Expression exp =
-            ExpressionFactory.matchAllDbExp(firstId.getIdSnapshot(), Expression.EQUAL_TO);
+        Expression exp = ExpressionFactory.matchAllDbExp(firstId.getIdSnapshot(),
+                Expression.EQUAL_TO);
 
         while (it.hasNext()) {
             ObjectId anId = (ObjectId) it.next();
-            exp =
-                exp.orExp(
-                    ExpressionFactory.matchAllDbExp(
-                        anId.getIdSnapshot(),
-                        Expression.EQUAL_TO));
+            exp = exp.orExp(ExpressionFactory.matchAllDbExp(anId.getIdSnapshot(),
+                    Expression.EQUAL_TO));
         }
 
         sel.setQualifier(exp);
         return sel;
     }
 
- 
     /**
-     * Generates a SelectQuery that can be used to fetch 
-     * relationship destination objects given a source object
-     * of a to-many relationship. 
+     * Generates a SelectQuery that can be used to fetch relationship destination objects
+     * given a source object of a to-many relationship.
+     * 
+     * @deprecated since 1.2 Use RelationshipQuery.
      */
     public static SelectQuery selectRelationshipObjects(
-        QueryEngine e,
-        DataObject source,
-        String relName) {
+            QueryEngine e,
+            DataObject source,
+            String relName) {
 
         ObjEntity ent = e.getEntityResolver().lookupObjEntity(source);
         ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
@@ -141,8 +135,9 @@ public class QueryUtils {
 
         // sanity check
         if (dbRels == null || dbRels.size() == 0) {
-            throw new CayenneRuntimeException(
-                "ObjRelationship '" + rel.getName() + "' is unmapped.");
+            throw new CayenneRuntimeException("ObjRelationship '"
+                    + rel.getName()
+                    + "' is unmapped.");
         }
 
         // build a reverse DB path
@@ -159,8 +154,7 @@ public class QueryUtils {
 
             // another sanity check
             if (reverse == null) {
-                throw new CayenneRuntimeException(
-                    "DbRelationship '"
+                throw new CayenneRuntimeException("DbRelationship '"
                         + dbRel.getName()
                         + "' has no reverse relationship");
             }
