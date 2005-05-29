@@ -109,8 +109,9 @@ public interface Query extends Serializable {
 
     /**
      * A "visit" method that allows a concrete query implementation to pick an appropriate
-     * method building a SQLAction, or even replace itself with another query that should
-     * be used for SQLAction construction.
+     * method building a SQLAction, create a custom SQLAction on its own, or even
+     * substitute itself with another query that should be used for SQLAction
+     * construction.
      * 
      * @since 1.2
      */

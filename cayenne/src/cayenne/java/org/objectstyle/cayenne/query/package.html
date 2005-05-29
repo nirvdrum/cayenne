@@ -1,7 +1,13 @@
 <html>
 <body>
-Provides classes to build database queries in object terms. 
-Other parts of Cayenne may translate them to the target database SQL syntax.
+Defines a number of standard queries supported by Cayenne. Most of these queries are used by Cayenne internally. 
+In most cases Cayenne users would only care about these three query classes: SelectQuery, SQLTemplate and ProcedureQuery. 
+
+<p>A custom Query and GenericSelectQuery implementations can be used to extend and/or customize standard query set.
+To make such query runnable with Cayenne, users must provide a meaningful implementation of Query.toSQLAction() method. 
+Such implemmentation would normally either create a query from a standard Cayenne set, and delegate the execution to it
+(acting as a sort of "query builder"),
+or can implement its own non-standard SQLAction.</p>
 
 <p><i>For more information see <a href="../../../../../../index.html"
 target="_top">Cayenne User Guide.</a></i></p>
