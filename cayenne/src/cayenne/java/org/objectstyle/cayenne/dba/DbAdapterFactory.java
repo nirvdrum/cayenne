@@ -59,9 +59,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 /**
- * Defines a conditional factory for a specific DbAdapter. Note that predicate can
- * potentially be used to implement versioning of the same adapter and other
- * customizations.
+ * Defines a conditional factory for a specific DbAdapter. Note that the factory can
+ * potentially return different (or differently configured) DbAdapters for the same
+ * database based on version information and other metadata.
  * 
  * @since 1.2
  * @author Andrei Adamchik

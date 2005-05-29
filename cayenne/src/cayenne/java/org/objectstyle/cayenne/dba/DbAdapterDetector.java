@@ -72,14 +72,14 @@ import org.objectstyle.cayenne.dba.postgres.PostgresSniffer;
 /**
  * Guesses correct DbAdapter for an unknown database. This implementation obtains
  * DatabaseMetaData object from the DataSource and passes it to a chain of conditional
- * factories. The first DbAdapterFactory in the chain that "recoginzes" the database would
+ * factories. The first DbAdapterFactory in the chain that "recognizes" the database would
  * instantiate a DbAdapter that is returned to the user.
  * 
  * @since 1.2
  * @author Andrei Adamchik
  */
-// TODO: how can custom adapters be autodetected? I.e. what is an easy way to configure a
-// custom predicate
+// TODO: how can custom adapters be autodetected? I.e. is there a way to plug a
+// custom factory into configuration loading process?
 public class DbAdapterDetector {
 
     private static Logger logObj = Logger.getLogger(DbAdapterDetector.class);
@@ -162,7 +162,7 @@ public class DbAdapterDetector {
             }
         }
 
-        logObj.info("Can't determine adapter for database '"
+        logObj.info("Unrecognized database '"
                 + md.getDatabaseProductName()
                 + "', using default adapter.");
 
