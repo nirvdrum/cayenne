@@ -549,15 +549,14 @@ public class DataDomain implements QueryEngine {
                 // try DbEntity root
                 DataMap dataMap = getEntityResolver().lookupDataMap(nextQuery);
                 if (dataMap == null) {
-                    throw new CayenneRuntimeException(
-                        "No DataMap found for query with root: " + nextQuery.getRoot());
+                    throw new CayenneRuntimeException("No DataMap found for query "
+                            + nextQuery);
                 }
 
                 node = lookupDataNode(dataMap);
                 if (node == null) {
                     throw new CayenneRuntimeException(
-                        "No suitable DataNode to handle query with root: "
-                            + nextQuery.getRoot());
+                            "No suitable DataNode to handle query " + nextQuery);
                 }
 
                 if (singleNode == null) {
@@ -565,8 +564,7 @@ public class DataDomain implements QueryEngine {
                 }
                 else if (singleNode != node) {
                     throw new CayenneRuntimeException(
-                        "No suitable DataNode to handle query with root: "
-                            + nextQuery.getRoot());
+                            "No suitable DataNode to handle query " + nextQuery);
                 }
             }
 
@@ -581,15 +579,14 @@ public class DataDomain implements QueryEngine {
                 Query nextQuery = (Query) it.next();
                 DataMap dataMap = getEntityResolver().lookupDataMap(nextQuery);
                 if (dataMap == null) {
-                    throw new CayenneRuntimeException(
-                        "No DataMap found for query with root: " + nextQuery.getRoot());
+                    throw new CayenneRuntimeException("No DataMap found for query "
+                            + nextQuery);
                 }
 
                 DataNode node  = lookupDataNode(dataMap);
                 if (node == null) {
                     throw new CayenneRuntimeException(
-                        "No suitable DataNode to handle query with root: "
-                            + nextQuery.getRoot());
+                            "No suitable DataNode to handle query " + nextQuery);
                 }
 
                 List nodeQueries = (List) queryMap.get(node);
