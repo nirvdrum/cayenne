@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.access.trans.SelectTranslator;
 import org.objectstyle.cayenne.access.util.DistinctResultIterator;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * A SQLAction that handles SelectQuery execution.
@@ -79,9 +79,9 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
  */
 public class SelectAction extends BaseSQLAction {
 
-    protected GenericSelectQuery query;
+    protected SelectQuery query;
 
-    public SelectAction(GenericSelectQuery query, DbAdapter adapter,
+    public SelectAction(SelectQuery query, DbAdapter adapter,
             EntityResolver entityResolver) {
         super(adapter, entityResolver);
         this.query = query;
@@ -92,7 +92,10 @@ public class SelectAction extends BaseSQLAction {
 
         long t1 = System.currentTimeMillis();
 
+        // TODO: since the type of query is known,
+        // we need to take this logic out of adapter and into selectaction itself...
         QueryTranslator translator = getAdapter().getQueryTranslator(query);
+
         translator.setEntityResolver(getEntityResolver());
         translator.setConnection(connection);
 

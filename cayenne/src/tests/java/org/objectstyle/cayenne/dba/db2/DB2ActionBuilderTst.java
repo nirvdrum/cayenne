@@ -94,7 +94,7 @@ public class DB2ActionBuilderTst extends TestCase {
                 new MockDbAdapter(),
                 new EntityResolver());
 
-        SQLAction action = builder.selectAction(new SQLTemplate(true));
+        SQLAction action = builder.sqlAction(new SQLTemplate(true));
 
         assertTrue(action instanceof SQLTemplateSelectAction);
         assertTrue(((SQLTemplateSelectAction) action).isRemovingLineBreaks());

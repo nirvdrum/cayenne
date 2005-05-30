@@ -1,11 +1,11 @@
 <html>
 <body>
-Defines a number of standard queries supported by Cayenne. Most of these queries are used by Cayenne internally. 
-In most cases Cayenne users would only care about these three query classes: SelectQuery, SQLTemplate and ProcedureQuery. 
+Defines a number of standard extensible queries supported by Cayenne. Most of these queries are used by the framework internally. 
+INormally users would only care about three query classes: SelectQuery, SQLTemplate and ProcedureQuery. 
 
-<p>A custom Query and GenericSelectQuery implementations can be used to extend and/or customize standard query set.
-To make such query runnable with Cayenne, users must provide a meaningful implementation of Query.toSQLAction() method. 
-Such implemmentation would normally either create a query from a standard Cayenne set, and delegate the execution to it
+<p>Custom Query and GenericSelectQuery implementations can be used to extend and/or customize standard query set.
+To make such queries runnable with Cayenne, users must provide a meaningful implementation of Query.toSQLAction() method. 
+Such implementation would normally either create a query from a standard Cayenne set, and delegate the execution to it
 (acting as a sort of "query builder"),
 or can implement its own non-standard SQLAction.</p>
 

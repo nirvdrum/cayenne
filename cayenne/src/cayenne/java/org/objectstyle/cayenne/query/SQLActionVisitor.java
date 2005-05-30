@@ -56,7 +56,6 @@
 
 package org.objectstyle.cayenne.query;
 
-
 /**
  * A query "visitor" interface that defines methods for creating various SQLActions from
  * queries.
@@ -77,9 +76,14 @@ public interface SQLActionVisitor {
     SQLAction batchAction(BatchQuery query);
 
     /**
-     * Executes a select query.
+     * Executes a SelectQuery.
      */
-    SQLAction selectAction(GenericSelectQuery query);
+    SQLAction objectSelectAction(SelectQuery query);
+
+    /**
+     * Executes a SQLTemplate.
+     */
+    SQLAction sqlAction(SQLTemplate query);
 
     /**
      * Executes a ProcedureQuery.

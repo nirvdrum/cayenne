@@ -88,6 +88,7 @@ import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * Describes a single physical data source. This can be a database server, LDAP server,
@@ -316,7 +317,7 @@ public class DataNode implements QueryEngine {
     }
 
     /**
-     * Executes a generic select query.
+     * Executes a SelectQuery.
      * 
      * @deprecated since 1.2
      */
@@ -325,7 +326,7 @@ public class DataNode implements QueryEngine {
             Query query,
             OperationObserver observer) throws SQLException, Exception {
 
-        new SelectAction((GenericSelectQuery) query, getAdapter(), getEntityResolver())
+        new SelectAction((SelectQuery) query, getAdapter(), getEntityResolver())
                 .performAction(connection, observer);
     }
 

@@ -59,9 +59,9 @@ import org.objectstyle.cayenne.access.jdbc.SQLTemplateAction;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcActionBuilder;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLAction;
+import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
  * @author Andrei Adamchik
@@ -85,11 +85,13 @@ public class DB2ActionBuilder extends JdbcActionBuilder {
         return action;
     }
 
-    public SQLAction selectAction(GenericSelectQuery query) {
-        return interceptRawSQL(super.selectAction(query));
+    public SQLAction sqlAction(SQLTemplate query) {
+        return interceptRawSQL(super.sqlAction(query));
     }
 
     public SQLAction updateAction(Query query) {
+        // normally SQLTemplates are executed via "sqlAction", but there is a possibility
+        // that this method will be called with SQLTemplate as well.
         return interceptRawSQL(super.updateAction(query));
     }
 }

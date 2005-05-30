@@ -63,12 +63,12 @@ import org.objectstyle.cayenne.access.jdbc.SelectAction;
 import org.objectstyle.cayenne.access.jdbc.UpdateAction;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.BatchQuery;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.query.SQLActionVisitor;
 import org.objectstyle.cayenne.query.SQLTemplate;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * A factory of default SQLActions. Adapters usually subclass JdbcActionBuilder to provide
@@ -103,12 +103,14 @@ public class JdbcActionBuilder implements SQLActionVisitor {
         return new ProcedureAction(query, adapter, entityResolver);
     }
 
-    public SQLAction selectAction(GenericSelectQuery query) {
-        if (query instanceof SQLTemplate) {
-            return new SQLTemplateSelectAction((SQLTemplate) query, adapter);
-        }
-
+    public SQLAction objectSelectAction(SelectQuery query) {
         return new SelectAction(query, adapter, entityResolver);
+    }
+
+    public SQLAction sqlAction(SQLTemplate query) {
+        return query.isSelecting()
+                ? new SQLTemplateSelectAction(query, adapter)
+                : new SQLTemplateAction(query, adapter);
     }
 
     public SQLAction updateAction(Query query) {
