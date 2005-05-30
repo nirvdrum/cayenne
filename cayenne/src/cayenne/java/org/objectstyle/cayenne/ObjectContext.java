@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,83 +53,103 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.log4j.Level;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * A generic query that can be executed via Cayenne QueryEngine, such as DataContext. The
- * main parameter of a Cayenne query is its root that can be a String, an ObjEntity, a
- * DbEntity or a Class. Root serves as hint to Cayenne runtime on how to handle the query.
- * E.g. root is used to determine which one of multiple databases should be chosen for
- * query execution; also it is used as a key to find Cayenne mapping objects describing
- * databse tables participating in the query and Java objects that should be returned from
- * such query.
+ * Defines a persistent context abstraction. Instances of ObjectContext is what users are
+ * dealing with when accessing Cayenne. ObjectContext methods can be broken down to the
+ * three logical categories:
+ * <ul>
+ * <li>Query methods - perform*Query(..)</li>
+ * <li>Methods for examining internal state - new/deleted/modifiedObjects()</li>
+ * <li>Object lifecycle methods - commitChanges*(..), objectWill*(..).
+ * </ul>
+ * <p>
+ * <i>Currently this interface is only used by client-side objects. The plan is to merge
+ * it with DataContext. </i>
+ * </p>
  * 
- * @see org.objectstyle.cayenne.access.QueryEngine
- * @author Andrei Adamchik
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public interface Query extends Serializable {
+public interface ObjectContext extends Serializable {
 
-    public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
-
-    /**
-     * Returns a symbolic name of the query.
-     * 
-     * @since 1.1
-     */
-    String getName();
+    // ==== methods for examining internal state.
 
     /**
-     * Sets a symbolic name of the query.
-     * 
-     * @since 1.1
+     * Returns a list of objects that are registered with this ObjectContext and have a
+     * state PersistenceState.NEW
      */
-    void setName(String name);
+    Collection newObjects();
 
     /**
-     * Returns the <code>logLevel</code> property of this query. Log level is a hint to
-     * QueryEngine that performs this query to log execution with a certain priority.
+     * Returns a list of objects that are registered with this ObjectContext and have a
+     * state PersistenceState.DELETED
      */
-    Level getLoggingLevel();
-
-    void setLoggingLevel(Level level);
+    Collection deletedObjects();
 
     /**
-     * Returns the root object of the query.
+     * Returns a list of objects that are registered with this ObjectContext and have a
+     * state PersistenceState.MODIFIED
      */
-    // TODO: deprecate this... with new routing mechanism, not all queries need a root.
-    Object getRoot();
+    Collection modifiedObjects();
+
+    // ==== query methods
 
     /**
-     * Sets the root of the query.
+     * Executes a selecting query, returning the result.
      */
-    //  TODO: deprecate this... with new routing mechanism, not all queries need a root.
-    void setRoot(Object root);
+    List performQuery(GenericSelectQuery query);
 
     /**
-     * A "visit" method that allows a concrete query implementation to decide how it
-     * should be handled at the JDBC level. Implementors can pick an appropriate method of
-     * the SQLActionVisitor to handle itself, create a custom SQLAction on its own, or
-     * even substitute itself with another query that should be used for SQLAction
-     * construction.
-     * 
-     * @since 1.2
+     * Executes a named selecting query.
      */
-    SQLAction toSQLAction(SQLActionVisitor visitor);
+    List performQuery(String queryName, Map parameters, boolean refresh);
 
     /**
-     * A "visit" method that lets query to decide which query engine to use out of a set
-     * of QueryEngines provided by QueryRouter.
-     * 
-     * @throws org.objectstyle.cayenne.CayenneRuntimeException if a QueryEngine can't be
-     *             found.
-     * @since 1.2
+     * Executes a non-se;ecting query returning result counts.
      */
-    // TODO: simplify QueryEngine and stick it in the query package
-    QueryEngine routeQuery(QueryRouter router, EntityResolver resolver);
+    public int[] performNonSelectingQuery(Query query);
+
+    /**
+     * Executes a named non-selecting query.
+     */
+    int[] performNonSelectingQuery(String queryName, Map parameters);
+
+    // ==== Lifecycle methods
+
+    /**
+     * Commits changes made to this ObjectContext persistent objects.
+     */
+    void commitChanges();
+
+    /**
+     * Merges changes from the ObjectContext parameter. This method is used by child
+     * ObjectContexts to commit their objects to parent.
+     */
+    void commitChangesInContext(ObjectContext context);
+
+    /**
+     * A callback method that is invoked whenver a persistent object property is about to
+     * be read. Allows ObjectContext to resolve faults on demand.
+     */
+    void objectWillRead(Persistent persistent, String property);
+
+    /**
+     * A callback method that is invoked whenver a persistent object property is about to
+     * be changed. Allows ObjectContext to track object changes.
+     */
+    void objectWillWrite(
+            Persistent persistent,
+            String property,
+            Object oldValue,
+            Object newValue);
 }

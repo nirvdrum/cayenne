@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,83 +53,73 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne.client;
 
-import java.io.Serializable;
-
-import org.apache.log4j.Level;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.map.EntityResolver;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.Persistent;
 
 /**
- * A generic query that can be executed via Cayenne QueryEngine, such as DataContext. The
- * main parameter of a Cayenne query is its root that can be a String, an ObjEntity, a
- * DbEntity or a Class. Root serves as hint to Cayenne runtime on how to handle the query.
- * E.g. root is used to determine which one of multiple databases should be chosen for
- * query execution; also it is used as a key to find Cayenne mapping objects describing
- * databse tables participating in the query and Java objects that should be returned from
- * such query.
+ * A base superclass for client-side Persistent objects.
  * 
- * @see org.objectstyle.cayenne.access.QueryEngine
- * @author Andrei Adamchik
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public interface Query extends Serializable {
+public abstract class ClientDataObject implements Persistent {
 
-    public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
-
-    /**
-     * Returns a symbolic name of the query.
-     * 
-     * @since 1.1
-     */
-    String getName();
+    protected ObjectId objectId;
+    protected int persistenceState;
+    protected transient ObjectContext objectContext;
 
     /**
-     * Sets a symbolic name of the query.
-     * 
-     * @since 1.1
+     * Notifies parent ObjectContext that this object is about to access a property.
      */
-    void setName(String name);
+    protected void willRead(String property) {
+        if (objectContext != null) {
+            objectContext.objectWillRead(this, property);
+        }
+    }
 
     /**
-     * Returns the <code>logLevel</code> property of this query. Log level is a hint to
-     * QueryEngine that performs this query to log execution with a certain priority.
+     * Notifies parent ObjectContext that this object is about to modify a property.
      */
-    Level getLoggingLevel();
+    protected void willWrite(String property, Object oldValue, Object newValue) {
+        if (objectContext != null) {
+            objectContext.objectWillWrite(this, property, oldValue, newValue);
+        }
+    }
 
-    void setLoggingLevel(Level level);
+    public int getPersistenceState() {
+        return persistenceState;
+    }
 
-    /**
-     * Returns the root object of the query.
-     */
-    // TODO: deprecate this... with new routing mechanism, not all queries need a root.
-    Object getRoot();
+    public void setPersistenceState(int persistenceState) {
+        this.persistenceState = persistenceState;
 
-    /**
-     * Sets the root of the query.
-     */
-    //  TODO: deprecate this... with new routing mechanism, not all queries need a root.
-    void setRoot(Object root);
+        if (persistenceState == PersistenceState.TRANSIENT) {
+            this.objectContext = null;
+        }
+    }
 
-    /**
-     * A "visit" method that allows a concrete query implementation to decide how it
-     * should be handled at the JDBC level. Implementors can pick an appropriate method of
-     * the SQLActionVisitor to handle itself, create a custom SQLAction on its own, or
-     * even substitute itself with another query that should be used for SQLAction
-     * construction.
-     * 
-     * @since 1.2
-     */
-    SQLAction toSQLAction(SQLActionVisitor visitor);
+    public ObjectContext getObjectContext() {
+        return objectContext;
+    }
 
-    /**
-     * A "visit" method that lets query to decide which query engine to use out of a set
-     * of QueryEngines provided by QueryRouter.
-     * 
-     * @throws org.objectstyle.cayenne.CayenneRuntimeException if a QueryEngine can't be
-     *             found.
-     * @since 1.2
-     */
-    // TODO: simplify QueryEngine and stick it in the query package
-    QueryEngine routeQuery(QueryRouter router, EntityResolver resolver);
+    public void setObjectContext(ObjectContext objectContext) {
+        this.objectContext = objectContext;
+    }
+
+    public ObjectId getObjectId() {
+        return objectId;
+    }
+
+    public void setObjectId(ObjectId objectId) {
+        this.objectId = objectId;
+    }
+
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
 }

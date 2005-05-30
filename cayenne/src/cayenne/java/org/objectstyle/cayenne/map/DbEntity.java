@@ -524,8 +524,8 @@ public class DbEntity extends Entity implements DbEntityListener,
 	}
 
     /**
-     * Returns true if there is full replacement id is attached to an ObjectId, i.e. if
-     * all PK columns are present and only PK columns are present.
+     * Returns true if there is full replacement id is attached to an ObjectId. "Full" means
+     * that all PK columns are present and only PK columns are present.
      * 
      * @since 1.2
      */

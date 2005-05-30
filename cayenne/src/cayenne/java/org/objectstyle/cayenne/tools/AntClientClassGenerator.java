@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,83 +53,87 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne.tools;
 
-import java.io.Serializable;
-
-import org.apache.log4j.Level;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.map.EntityResolver;
+import org.apache.tools.ant.Task;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.client.ClientDataObject;
+import org.objectstyle.cayenne.gen.AntClassGenerator;
+import org.objectstyle.cayenne.gen.ClassGenerator;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
- * A generic query that can be executed via Cayenne QueryEngine, such as DataContext. The
- * main parameter of a Cayenne query is its root that can be a String, an ObjEntity, a
- * DbEntity or a Class. Root serves as hint to Cayenne runtime on how to handle the query.
- * E.g. root is used to determine which one of multiple databases should be chosen for
- * query execution; also it is used as a key to find Cayenne mapping objects describing
- * databse tables participating in the query and Java objects that should be returned from
- * such query.
- * 
- * @see org.objectstyle.cayenne.access.QueryEngine
- * @author Andrei Adamchik
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public interface Query extends Serializable {
+//TODO: integrate with Antlib and new cgen code by Mike K. (hopefully new cgen features
+//will make this class redundant)
+class AntClientClassGenerator extends AntClassGenerator {
 
-    public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+    static final String CLIENT_SUBCLASS_TEMPLATE = "dotemplates/client-subclass.vm";
+    static final String CLIENT_SUPERCLASS_TEMPLATE = "dotemplates/client-superclass.vm";
 
-    /**
-     * Returns a symbolic name of the query.
-     * 
-     * @since 1.1
-     */
-    String getName();
+    AntClientClassGenerator(Task task) {
+        setParentTask(task);
+    }
 
-    /**
-     * Sets a symbolic name of the query.
-     * 
-     * @since 1.1
-     */
-    void setName(String name);
+    protected String defaultSubclassTemplate() {
+        return CLIENT_SUBCLASS_TEMPLATE;
+    }
 
-    /**
-     * Returns the <code>logLevel</code> property of this query. Log level is a hint to
-     * QueryEngine that performs this query to log execution with a certain priority.
-     */
-    Level getLoggingLevel();
-
-    void setLoggingLevel(Level level);
+    protected String defaultSuperclassTemplate() {
+        return CLIENT_SUPERCLASS_TEMPLATE;
+    }
 
     /**
-     * Returns the root object of the query.
+     * Overrides superclass settings to provide client-side values to the ClassGenerator.
      */
-    // TODO: deprecate this... with new routing mechanism, not all queries need a root.
-    Object getRoot();
+    protected void initClassGenerator(
+            ClassGenerator generator,
+            ObjEntity entity,
+            boolean superclass) {
 
-    /**
-     * Sets the root of the query.
-     */
-    //  TODO: deprecate this... with new routing mechanism, not all queries need a root.
-    void setRoot(Object root);
+        // figure out generator properties
+        String fullClassName = entity.getClientClassName();
+        if (fullClassName == null) {
+            fullClassName = entity.getClassName();
+        }
 
-    /**
-     * A "visit" method that allows a concrete query implementation to decide how it
-     * should be handled at the JDBC level. Implementors can pick an appropriate method of
-     * the SQLActionVisitor to handle itself, create a custom SQLAction on its own, or
-     * even substitute itself with another query that should be used for SQLAction
-     * construction.
-     * 
-     * @since 1.2
-     */
-    SQLAction toSQLAction(SQLActionVisitor visitor);
+        int i = fullClassName.lastIndexOf(".");
 
-    /**
-     * A "visit" method that lets query to decide which query engine to use out of a set
-     * of QueryEngines provided by QueryRouter.
-     * 
-     * @throws org.objectstyle.cayenne.CayenneRuntimeException if a QueryEngine can't be
-     *             found.
-     * @since 1.2
-     */
-    // TODO: simplify QueryEngine and stick it in the query package
-    QueryEngine routeQuery(QueryRouter router, EntityResolver resolver);
+        String pkg = null;
+        String spkg = null;
+        String cname = null;
+
+        // dot in first or last position is invalid
+        if (i == 0 || i + 1 == fullClassName.length()) {
+            throw new CayenneRuntimeException("Invalid class mapping: " + fullClassName);
+        }
+        else if (i < 0) {
+            pkg = (superclass) ? superPkg : null;
+            spkg = (superclass) ? null : superPkg;
+            cname = fullClassName;
+        }
+        else {
+            cname = fullClassName.substring(i + 1);
+            pkg = (superclass && superPkg != null) ? superPkg : fullClassName
+                    .substring(0, i);
+
+            spkg = (!superclass && superPkg != null && !pkg.equals(superPkg))
+                    ? superPkg
+                    : null;
+        }
+
+        // init generator
+        generator.setPackageName(pkg);
+        generator.setClassName(cname);
+        if (entity.getClientSuperClassName() != null) {
+            generator.setSuperClassName(entity.getClientSuperClassName());
+        }
+        else {
+            generator.setSuperClassName(ClientDataObject.class.getName());
+        }
+
+        generator.setSuperPackageName(spkg);
+    }
 }

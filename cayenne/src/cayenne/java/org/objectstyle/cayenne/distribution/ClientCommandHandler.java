@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,83 +53,28 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
-
-import java.io.Serializable;
-
-import org.apache.log4j.Level;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.map.EntityResolver;
+package org.objectstyle.cayenne.distribution;
 
 /**
- * A generic query that can be executed via Cayenne QueryEngine, such as DataContext. The
- * main parameter of a Cayenne query is its root that can be a String, an ObjEntity, a
- * DbEntity or a Class. Root serves as hint to Cayenne runtime on how to handle the query.
- * E.g. root is used to determine which one of multiple databases should be chosen for
- * query execution; also it is used as a key to find Cayenne mapping objects describing
- * databse tables participating in the query and Java objects that should be returned from
- * such query.
+ * A visitor interface for client command self-dispatching. ClientCommandHandler defines
+ * methods for each supported command type. So command implementations can call an
+ * appropraite handler method, while concrete handler implementations can provide the
+ * actual execution logic.
+ * <p>
+ * <i>Note: One of the benefits of using the Visitor pattern here is in eliminating
+ * dependency of client-side command on server side classes. </i>
+ * </p>
  * 
- * @see org.objectstyle.cayenne.access.QueryEngine
- * @author Andrei Adamchik
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public interface Query extends Serializable {
+public interface ClientCommandHandler {
 
-    public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+    public Object executeQuery(QueryCommand command);
 
-    /**
-     * Returns a symbolic name of the query.
-     * 
-     * @since 1.1
-     */
-    String getName();
+    public Object executeNamedQuery(NamedQueryCommand command);
 
-    /**
-     * Sets a symbolic name of the query.
-     * 
-     * @since 1.1
-     */
-    void setName(String name);
+    public Object executeCommit(CommitCommand command);
 
-    /**
-     * Returns the <code>logLevel</code> property of this query. Log level is a hint to
-     * QueryEngine that performs this query to log execution with a certain priority.
-     */
-    Level getLoggingLevel();
-
-    void setLoggingLevel(Level level);
-
-    /**
-     * Returns the root object of the query.
-     */
-    // TODO: deprecate this... with new routing mechanism, not all queries need a root.
-    Object getRoot();
-
-    /**
-     * Sets the root of the query.
-     */
-    //  TODO: deprecate this... with new routing mechanism, not all queries need a root.
-    void setRoot(Object root);
-
-    /**
-     * A "visit" method that allows a concrete query implementation to decide how it
-     * should be handled at the JDBC level. Implementors can pick an appropriate method of
-     * the SQLActionVisitor to handle itself, create a custom SQLAction on its own, or
-     * even substitute itself with another query that should be used for SQLAction
-     * construction.
-     * 
-     * @since 1.2
-     */
-    SQLAction toSQLAction(SQLActionVisitor visitor);
-
-    /**
-     * A "visit" method that lets query to decide which query engine to use out of a set
-     * of QueryEngines provided by QueryRouter.
-     * 
-     * @throws org.objectstyle.cayenne.CayenneRuntimeException if a QueryEngine can't be
-     *             found.
-     * @since 1.2
-     */
-    // TODO: simplify QueryEngine and stick it in the query package
-    QueryEngine routeQuery(QueryRouter router, EntityResolver resolver);
+    public Object executeSynchronize(SyncCommand command);
 }

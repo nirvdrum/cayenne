@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,83 +53,112 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne.distribution;
 
-import java.io.Serializable;
-
-import org.apache.log4j.Level;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.map.EntityResolver;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
- * A generic query that can be executed via Cayenne QueryEngine, such as DataContext. The
- * main parameter of a Cayenne query is its root that can be a String, an ObjEntity, a
- * DbEntity or a Class. Root serves as hint to Cayenne runtime on how to handle the query.
- * E.g. root is used to determine which one of multiple databases should be chosen for
- * query execution; also it is used as a key to find Cayenne mapping objects describing
- * databse tables participating in the query and Java objects that should be returned from
- * such query.
+ * A ClientCommand that describes a call to a server-side named query.
  * 
- * @see org.objectstyle.cayenne.access.QueryEngine
- * @author Andrei Adamchik
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public interface Query extends Serializable {
+public class NamedQueryCommand implements ClientCommand {
 
-    public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+    protected String queryName;
+    protected String[] parameterKeys;
+    protected Object[] parameterValues;
+    protected boolean selecting;
+    protected boolean refresh;
 
-    /**
-     * Returns a symbolic name of the query.
-     * 
-     * @since 1.1
-     */
-    String getName();
+    public NamedQueryCommand(String name, Map parameters, boolean selecting,
+            boolean refresh) {
 
-    /**
-     * Sets a symbolic name of the query.
-     * 
-     * @since 1.1
-     */
-    void setName(String name);
+        this.queryName = name;
+        this.selecting = selecting;
+        this.refresh = refresh;
 
-    /**
-     * Returns the <code>logLevel</code> property of this query. Log level is a hint to
-     * QueryEngine that performs this query to log execution with a certain priority.
-     */
-    Level getLoggingLevel();
+        parametersFromMap(parameters);
+    }
 
-    void setLoggingLevel(Level level);
+    public NamedQueryCommand(String name, String[] parameterKeys,
+            String[] parameterValues, boolean selecting, boolean refresh) {
 
-    /**
-     * Returns the root object of the query.
-     */
-    // TODO: deprecate this... with new routing mechanism, not all queries need a root.
-    Object getRoot();
+        this.queryName = name;
+        this.parameterKeys = parameterKeys;
+        this.parameterValues = parameterValues;
+        this.selecting = selecting;
+        this.refresh = refresh;
+    }
 
     /**
-     * Sets the root of the query.
+     * Converts a map of parameters to the internal representation as arrays of keys and
+     * values.
      */
-    //  TODO: deprecate this... with new routing mechanism, not all queries need a root.
-    void setRoot(Object root);
+    protected void parametersFromMap(Map parameters) {
+        int size = (parameters != null) ? parameters.size() : 0;
 
-    /**
-     * A "visit" method that allows a concrete query implementation to decide how it
-     * should be handled at the JDBC level. Implementors can pick an appropriate method of
-     * the SQLActionVisitor to handle itself, create a custom SQLAction on its own, or
-     * even substitute itself with another query that should be used for SQLAction
-     * construction.
-     * 
-     * @since 1.2
-     */
-    SQLAction toSQLAction(SQLActionVisitor visitor);
+        if (size == 0) {
+            this.parameterKeys = null;
+            this.parameterValues = null;
+            return;
+        }
 
-    /**
-     * A "visit" method that lets query to decide which query engine to use out of a set
-     * of QueryEngines provided by QueryRouter.
-     * 
-     * @throws org.objectstyle.cayenne.CayenneRuntimeException if a QueryEngine can't be
-     *             found.
-     * @since 1.2
-     */
-    // TODO: simplify QueryEngine and stick it in the query package
-    QueryEngine routeQuery(QueryRouter router, EntityResolver resolver);
+        String[] keys = new String[size];
+        Object[] values = new Object[size];
+
+        Iterator it = parameters.entrySet().iterator();
+        for (int i = 0; i < size; i++) {
+            Map.Entry entry = (Map.Entry) it.next();
+
+            if (entry.getKey() != null) {
+                keys[i] = entry.getKey().toString();
+            }
+
+            values[i] = entry.getValue();
+        }
+
+        this.parameterKeys = keys;
+        this.parameterValues = values;
+    }
+
+    public Map getParameters() {
+        if (parameterKeys == null) {
+            return Collections.EMPTY_MAP;
+        }
+
+        Map map = new HashMap();
+        for (int i = 0; i < parameterKeys.length; i++) {
+            map.put(parameterKeys[i], parameterValues[i]);
+        }
+
+        return map;
+    }
+
+    public Object dispatchCommand(ClientCommandHandler handler) {
+        return handler.executeNamedQuery(this);
+    }
+
+    public String getQueryName() {
+        return queryName;
+    }
+
+    public String[] getParameterKeys() {
+        return parameterKeys;
+    }
+
+    public Object[] getParameterValues() {
+        return parameterValues;
+    }
+
+    public boolean isRefresh() {
+        return refresh;
+    }
+
+    public boolean isSelecting() {
+        return selecting;
+    }
 }
