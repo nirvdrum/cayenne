@@ -210,6 +210,10 @@ public class JdbcAdapter implements DbAdapter {
         this.pkGenerator = pkGenerator;
     }
 
+    /**
+     * @deprecated since 1.2 this method is unneeded as customizations are done via custom
+     *             SQLActions.
+     */
     public QueryTranslator getQueryTranslator(Query query) throws Exception {
         Class queryClass = queryTranslatorClass(query);
 
@@ -229,6 +233,9 @@ public class JdbcAdapter implements DbAdapter {
      * Returns a class of the query translator that should be used to translate the query
      * <code>q</code> to SQL. Exists mainly for the benefit of subclasses that can
      * override this method providing their own translator.
+     * 
+     * @deprecated since 1.2 this method is unneeded as customizations are done via custom
+     *             SQLActions.
      */
     protected Class queryTranslatorClass(Query q) {
         if (q == null) {

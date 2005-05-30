@@ -66,12 +66,13 @@ import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * Superclass of test cases that require JDBC Connection facilities. Contains
- * setup and cleanup methods to release connections, etc.
+ * Superclass of test cases that require JDBC Connection facilities. Contains setup and
+ * cleanup methods to release connections, etc.
  * 
  * @author Andrei Adamchik
  */
 public abstract class JDBCAccessTestCase extends CayenneTestCase {
+
     protected Connection connection;
     protected PreparedStatement st;
     protected QueryTranslator translator;
@@ -89,7 +90,7 @@ public abstract class JDBCAccessTestCase extends CayenneTestCase {
         getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
     }
 
-    /** 
+    /**
      * Initializes internal state.
      */
     protected void init() throws Exception {
@@ -98,6 +99,7 @@ public abstract class JDBCAccessTestCase extends CayenneTestCase {
         query = new SelectQuery(Artist.class);
         query.addOrdering("artistName", true);
 
+        // TODO: this API is deprecated, need to refactor these test cases...
         translator = getNode().getAdapter().getQueryTranslator(query);
         translator.setEntityResolver(getNode().getEntityResolver());
         translator.setConnection(connection);

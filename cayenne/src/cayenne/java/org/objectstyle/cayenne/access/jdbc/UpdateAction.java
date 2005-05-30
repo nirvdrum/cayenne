@@ -59,12 +59,19 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
+import org.objectstyle.cayenne.access.trans.DeleteTranslator;
+import org.objectstyle.cayenne.access.trans.InsertTranslator;
+import org.objectstyle.cayenne.access.trans.UpdateTranslator;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.DeleteQuery;
+import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.UpdateQuery;
 
 /**
  * @since 1.2
@@ -79,12 +86,34 @@ public class UpdateAction extends BaseSQLAction {
         this.query = query;
     }
 
+    protected QueryTranslator createTranslator(Connection connection) {
+        QueryTranslator translator;
+        if (query instanceof UpdateQuery) {
+            translator = new UpdateTranslator();
+        }
+        else if (query instanceof InsertQuery) {
+            translator = new InsertTranslator();
+        }
+        else if (query instanceof DeleteQuery) {
+            translator = new DeleteTranslator();
+        }
+        else {
+            throw new CayenneRuntimeException("Can't make a translator for query "
+                    + query);
+        }
+
+        translator.setAdapter(getAdapter());
+        translator.setQuery(query);
+        translator.setEntityResolver(getEntityResolver());
+        translator.setConnection(connection);
+
+        return translator;
+    }
+
     public void performAction(Connection connection, OperationObserver observer)
             throws SQLException, Exception {
 
-        QueryTranslator translator = getAdapter().getQueryTranslator(query);
-        translator.setEntityResolver(getEntityResolver());
-        translator.setConnection(connection);
+        QueryTranslator translator = createTranslator(connection);
 
         PreparedStatement statement = translator.createStatement(query.getLoggingLevel());
 

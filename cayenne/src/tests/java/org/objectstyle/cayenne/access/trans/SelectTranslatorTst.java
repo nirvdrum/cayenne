@@ -567,6 +567,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
     }
 
     SelectTranslator makeTranslator(Query q) throws Exception {
+        // TODO: this API is deprecated, need to refactor test cases...
         SelectTranslator transl = (SelectTranslator) getNode()
                 .getAdapter()
                 .getQueryTranslator(q);

@@ -96,8 +96,9 @@ public class SQLServerProcedureAction extends ProcedureAction {
     public void performAction(Connection connection, OperationObserver observer)
             throws SQLException, Exception {
 
-        ProcedureTranslator transl = (ProcedureTranslator) getAdapter()
-                .getQueryTranslator(query);
+        ProcedureTranslator transl = new ProcedureTranslator();
+        transl.setAdapter(getAdapter());
+        transl.setQuery(query);
         transl.setEntityResolver(this.getEntityResolver());
         transl.setConnection(connection);
 

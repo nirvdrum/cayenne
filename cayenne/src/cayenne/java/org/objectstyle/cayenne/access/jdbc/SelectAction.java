@@ -63,7 +63,6 @@ import java.util.List;
 
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.ResultIterator;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
 import org.objectstyle.cayenne.access.util.DistinctResultIterator;
@@ -87,24 +86,26 @@ public class SelectAction extends BaseSQLAction {
         this.query = query;
     }
 
+    protected SelectTranslator createTranslator(Connection connection) {
+        SelectTranslator translator = new SelectTranslator();
+        translator.setQuery(query);
+        translator.setAdapter(adapter);
+        translator.setEntityResolver(getEntityResolver());
+        translator.setConnection(connection);
+        return translator;
+    }
+
     public void performAction(Connection connection, OperationObserver observer)
             throws SQLException, Exception {
 
         long t1 = System.currentTimeMillis();
 
-        // TODO: since the type of query is known,
-        // we need to take this logic out of adapter and into selectaction itself...
-        QueryTranslator translator = getAdapter().getQueryTranslator(query);
-
-        translator.setEntityResolver(getEntityResolver());
-        translator.setConnection(connection);
-
+        SelectTranslator translator = createTranslator(connection);
         PreparedStatement prepStmt = translator.createStatement(query.getLoggingLevel());
         ResultSet rs = prepStmt.executeQuery();
 
-        SelectTranslator selectTranslator = (SelectTranslator) translator;
         RowDescriptor descriptor = new RowDescriptor(
-                selectTranslator.getResultColumns(),
+                translator.getResultColumns(),
                 getAdapter().getExtendedTypes());
         JDBCResultIterator workerIterator = new JDBCResultIterator(
                 connection,
@@ -116,9 +117,8 @@ public class SelectAction extends BaseSQLAction {
         ResultIterator it = workerIterator;
 
         // wrap result iterator if distinct has to be suppressed
-        if (selectTranslator.isSuppressingDistinct()) {
-            it = new DistinctResultIterator(workerIterator, selectTranslator
-                    .getRootDbEntity());
+        if (translator.isSuppressingDistinct()) {
+            it = new DistinctResultIterator(workerIterator, translator.getRootDbEntity());
         }
 
         // TODO: Should do something about closing ResultSet and PreparedStatement in this

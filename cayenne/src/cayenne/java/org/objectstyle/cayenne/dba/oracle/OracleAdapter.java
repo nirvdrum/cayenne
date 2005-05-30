@@ -94,11 +94,13 @@ import org.objectstyle.cayenne.util.Util;
  * 
  * <pre>
  * 
- *  test-oracle.cayenne.adapter = org.objectstyle.cayenne.dba.oracle.OracleAdapter
- *  test-oracle.jdbc.username = test
- *  test-oracle.jdbc.password = secret
- *  test-oracle.jdbc.url = jdbc:oracle:thin:@192.168.0.20:1521:ora1 
- *  test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
+ *  
+ *   test-oracle.cayenne.adapter = org.objectstyle.cayenne.dba.oracle.OracleAdapter
+ *   test-oracle.jdbc.username = test
+ *   test-oracle.jdbc.password = secret
+ *   test-oracle.jdbc.url = jdbc:oracle:thin:@192.168.0.20:1521:ora1 
+ *   test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
+ *   
  *  
  * </pre>
  * 
@@ -138,13 +140,13 @@ public class OracleAdapter extends JdbcAdapter {
             Field cursorField = oraTypes.getField("CURSOR");
             oracleCursorType = cursorField.getInt(null);
 
-            outputStreamFromBlobMethod = Class.forName("oracle.sql.BLOB").getMethod(
-                    "getBinaryOutputStream",
-                    new Class[0]);
+            outputStreamFromBlobMethod = Class
+                    .forName("oracle.sql.BLOB")
+                    .getMethod("getBinaryOutputStream", new Class[0]);
 
-            writerFromClobMethod = Class.forName("oracle.sql.CLOB").getMethod(
-                    "getCharacterOutputStream",
-                    new Class[0]);
+            writerFromClobMethod = Class
+                    .forName("oracle.sql.CLOB")
+                    .getMethod("getCharacterOutputStream", new Class[0]);
             supportsOracleLOB = true;
 
         }
@@ -248,8 +250,7 @@ public class OracleAdapter extends JdbcAdapter {
             int precision,
             boolean allowNulls) {
 
-        DbAttribute attr = super.buildAttribute(
-                name,
+        DbAttribute attr = super.buildAttribute(name,
                 typeName,
                 type,
                 size,
@@ -279,6 +280,8 @@ public class OracleAdapter extends JdbcAdapter {
 
     /**
      * Returns Oracle-specific translator for object SELECT queries.
+     * 
+     * @deprecated Since 1.2 this is done via custom SQLActions.
      */
     protected Class queryTranslatorClass(Query q) {
         if (q instanceof SelectQuery) {
@@ -297,7 +300,6 @@ public class OracleAdapter extends JdbcAdapter {
                 queryAssembler,
                 OracleAdapter.TRIM_FUNCTION);
     }
-    
 
     /**
      * Uses OracleActionBuilder to create the right action.

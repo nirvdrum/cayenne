@@ -102,7 +102,7 @@ public interface DbAdapter {
      *             done via SQLActionVisitor.
      */
     public DataNode createDataNode(String name);
-    
+
     /**
      * Creates and returns a QueryTranslator appropriate for the specified
      * <code>query</code> parameter. Sets translator "query" and "adapter" property.
@@ -110,13 +110,15 @@ public interface DbAdapter {
      * This factory method allows subclasses to specify their own translators that
      * implement vendor-specific optimizations.
      * </p>
+     * 
+     * @deprecated since 1.2 this method is unneeded as customizations are done via custom
+     *             SQLActions.
      */
-    // TODO: deprecate and move into SQLAction implementation
     public QueryTranslator getQueryTranslator(Query query) throws Exception;
 
     // TODO: deprecate and move into SQLAction implementation
     public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler);
-    
+
     /**
      * Returns an instance of SQLAction that should handle the query.
      * 
@@ -192,7 +194,6 @@ public interface DbAdapter {
      * Returns primary key generator associated with this DbAdapter.
      */
     public PkGenerator getPkGenerator();
-
 
     /**
      * Creates and returns a DbAttribute based on supplied parameters (usually obtained
