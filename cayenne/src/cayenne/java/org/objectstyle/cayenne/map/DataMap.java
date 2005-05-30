@@ -327,9 +327,7 @@ public class DataMap implements XMLSerializable, MappingNamespace,
     }
 
     public String toString() {
-        ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append(getName());
-        return builder.toString();
+        return new ToStringBuilder(this).append("name", getName()).toString();
     }
 
     /**

@@ -53,65 +53,25 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.query;
 
-package org.objectstyle.cayenne.access;
-
-import java.util.Collection;
-
+import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
- * Defines methods used to run Cayenne queries.
- * <p>
- * <i>For more information see <a href="../../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide. </a> </i>
- * </p>
+ * An interface used by Queries to route themselves to an appropriate QueryEngine. As of
+ * 1.2 QueryRouter only supports routing by DataMap.
  * 
- * @author Andrei Adamchik
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public interface QueryEngine {
+public interface QueryRouter {
 
     /**
-     * Executes queries in the transactional context provided by the caller. It is
-     * caller's responsibility to commit or rollback the Transaction and close any
-     * connections that were added to it.
+     * Returns a QueryEngine that should handle a given DataMap.
      * 
-     * @since 1.1
-     * @see OperationObserver
-     * @see Transaction
+     * @throws CayenneRuntimeException if an engine can't be found.
+     * @throws NullPointerException if a map parameter is null.
      */
-    public void performQueries(
-            Collection queries,
-            OperationObserver resultConsumer,
-            Transaction transaction);
-
-    /**
-     * Executes a list of queries wrapping them in its own transaction. Results of
-     * execution are passed to {@link OperationObserver}object via its callback methods.
-     * 
-     * @since 1.1 The signiture has changed from List to Collection.
-     */
-    public void performQueries(Collection queries, OperationObserver resultConsumer);
-
-    /**
-     * Returns a DataNode that should handle queries for all DataMap components.
-     * 
-     * @since 1.1
-     */
-    // TODO: since 1.2 this method is not used for routing (its original intention),
-    // however many classes in Cayenne use it to pick at the DataNode... eventually we
-    // should clean this up and deprecate this method.
-    public DataNode lookupDataNode(DataMap dataMap);
-
-    /**
-     * Returns a resolver for this query engine that is capable of resolving between
-     * classes, entity names, and obj/db entities
-     */
-    public EntityResolver getEntityResolver();
-
-    /**
-     * Returns a collection of DataMaps associated with this QueryEngine.
-     */
-    public Collection getDataMaps();
+    QueryEngine engineForDataMap(DataMap map);
 }

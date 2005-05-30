@@ -58,19 +58,23 @@ package org.objectstyle.cayenne.query;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Level;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 
-/** 
+/**
  * Superclass of Cayenne queries.
  * 
  * @author Andrei Adamchik
  */
 public abstract class AbstractQuery implements Query {
-    /** 
-     * The root object this query. May be an entity name, Java class, ObjEntity or 
+
+    /**
+     * The root object this query. May be an entity name, Java class, ObjEntity or
      * DbEntity, depending on the specific query and how it was constructed.
      */
     protected Object root;
@@ -86,7 +90,7 @@ public abstract class AbstractQuery implements Query {
     public String getName() {
         return name;
     }
-    
+
     /**
      * Sets a symbolic name of the query.
      * 
@@ -96,11 +100,9 @@ public abstract class AbstractQuery implements Query {
         this.name = name;
     }
 
-
     /**
-     * Returns the <code>logLevel</code> property of this query.
-     * Log level is a hint to QueryEngine that performs this query
-     * to log execution with a certain priority.
+     * Returns the <code>logLevel</code> property of this query. Log level is a hint to
+     * QueryEngine that performs this query to log execution with a certain priority.
      */
     public Level getLoggingLevel() {
         return logLevel;
@@ -115,6 +117,7 @@ public abstract class AbstractQuery implements Query {
 
     /**
      * Returns the root of this query
+     * 
      * @return Object
      */
     public Object getRoot() {
@@ -123,37 +126,55 @@ public abstract class AbstractQuery implements Query {
 
     /**
      * Sets the root of the query
+     * 
      * @param value The new root
      * @throws IllegalArgumentException if value is not a String, ObjEntity, DbEntity,
-     * Procedure, DataMap, Class or null.
+     *             Procedure, DataMap, Class or null.
      */
     public void setRoot(Object value) {
-        if(value == null) {
+        if (value == null) {
             this.root = null;
         }
-        
+
         // sanity check
         if (!((value instanceof String)
-            || (value instanceof ObjEntity)
-            || (value instanceof DbEntity)
-            || (value instanceof Class)
-            || (value instanceof Procedure)
-            || (value instanceof DataMap))) {
+                || (value instanceof ObjEntity)
+                || (value instanceof DbEntity)
+                || (value instanceof Class)
+                || (value instanceof Procedure) || (value instanceof DataMap))) {
 
             String rootClass = (value != null) ? value.getClass().getName() : "null";
 
             throw new IllegalArgumentException(
-                getClass().getName()
-                    + ": \"setRoot(..)\" takes a DataMap, String, ObjEntity, DbEntity, Procedure, "
-                    + "or Class. It was passed a "
-                    + rootClass);
+                    getClass().getName()
+                            + ": \"setRoot(..)\" takes a DataMap, String, ObjEntity, DbEntity, Procedure, "
+                            + "or Class. It was passed a "
+                            + rootClass);
         }
-        
+
         this.root = value;
     }
-    
+
     public String toString() {
         return new ToStringBuilder(this).append("root", getRoot()).append("name",
                 getName()).toString();
+    }
+
+    /**
+     * Implements default routing mechanism relying on the EntityResolver to find DataMap
+     * based on the query root. This mechanism should be sufficient for most queries that
+     * "know" their root.
+     * 
+     * @since 1.2
+     */
+    public QueryEngine routeQuery(QueryRouter router, EntityResolver resolver) {
+        DataMap map = resolver.lookupDataMap(this);
+
+        if (map == null) {
+            throw new CayenneRuntimeException("No DataMap found, can't route query "
+                    + this);
+        }
+        
+        return router.engineForDataMap(map);
     }
 }

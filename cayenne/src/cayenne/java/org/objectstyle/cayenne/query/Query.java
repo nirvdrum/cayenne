@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.query;
 import java.io.Serializable;
 
 import org.apache.log4j.Level;
+import org.objectstyle.cayenne.access.QueryEngine;
+import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
  * A generic query that can be executed via Cayenne QueryEngine, such as DataContext. The
@@ -108,12 +110,24 @@ public interface Query extends Serializable {
     void setRoot(Object root);
 
     /**
-     * A "visit" method that allows a concrete query implementation to pick an appropriate
-     * method building a SQLAction, create a custom SQLAction on its own, or even
-     * substitute itself with another query that should be used for SQLAction
+     * A "visit" method that allows a concrete query implementation to decide how it
+     * should be handled at the JDBC level. Implementors can pick an appropriate method of
+     * the SQLActionVisitor to handle itself, create a custom SQLAction on its own, or
+     * even substitute itself with another query that should be used for SQLAction
      * construction.
      * 
      * @since 1.2
      */
     SQLAction toSQLAction(SQLActionVisitor visitor);
+
+    /**
+     * A "visit" method that lets query to decide which query engine to use out of a set
+     * of QueryEngines provided by QueryRouter.
+     * 
+     * @throws org.objectstyle.cayenne.CayenneRuntimeException if a QueryEngine can't be
+     *             found.
+     * @since 1.2
+     */
+    // TODO: simplify QueryEngine and stick it in the query package
+    QueryEngine routeQuery(QueryRouter router, EntityResolver resolver);
 }

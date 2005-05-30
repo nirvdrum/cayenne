@@ -70,31 +70,31 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryRouter;
 
 /**
- * DataDomain performs query routing functions in Cayenne. DataDomain creates
- * single data source abstraction hiding multiple physical data sources from the
- * user. When a child DataContext sends a query to the DataDomain, it is transparently
- * routed to an appropriate DataNode.
- *
- * <p><i>For more information see <a href="../../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide.</a></i></p>
- *
+ * DataDomain performs query routing functions in Cayenne. DataDomain creates single data
+ * source abstraction hiding multiple physical data sources from the user. When a child
+ * DataContext sends a query to the DataDomain, it is transparently routed to an
+ * appropriate DataNode.
+ * <p>
+ * <i>For more information see <a href="../../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide. </a> </i>
+ * </p>
+ * 
  * @author Andrei Adamchik
  */
-public class DataDomain implements QueryEngine {
+public class DataDomain implements QueryEngine, QueryRouter {
+
     private static Logger logObj = Logger.getLogger(DataDomain.class);
 
-    public static final String SHARED_CACHE_ENABLED_PROPERTY =
-        "cayenne.DataDomain.sharedCache";
+    public static final String SHARED_CACHE_ENABLED_PROPERTY = "cayenne.DataDomain.sharedCache";
     public static final boolean SHARED_CACHE_ENABLED_DEFAULT = true;
 
-    public static final String VALIDATING_OBJECTS_ON_COMMIT_PROPERTY =
-        "cayenne.DataDomain.validatingObjectsOnCommit";
+    public static final String VALIDATING_OBJECTS_ON_COMMIT_PROPERTY = "cayenne.DataDomain.validatingObjectsOnCommit";
     public static final boolean VALIDATING_OBJECTS_ON_COMMIT_DEFAULT = true;
 
-    public static final String USING_EXTERNAL_TRANSACTIONS_PROPERTY =
-        "cayenne.DataDomain.usingExternalTransactions";
+    public static final String USING_EXTERNAL_TRANSACTIONS_PROPERTY = "cayenne.DataDomain.usingExternalTransactions";
     public static final boolean USING_EXTERNAL_TRANSACTIONS_DEFAULT = false;
 
     /** Stores mapping of data nodes to DataNode name keys. */
@@ -119,8 +119,8 @@ public class DataDomain implements QueryEngine {
     protected boolean validatingObjectsOnCommit;
     protected boolean usingExternalTransactions;
 
-    /** 
-     * Creates a DataDomain and assigns it a name. 
+    /**
+     * Creates a DataDomain and assigns it a name.
      */
     public DataDomain(String name) {
         setName(name);
@@ -131,7 +131,7 @@ public class DataDomain implements QueryEngine {
      * Creates new DataDomain.
      * 
      * @param name DataDomain name. Domain can be located using its name in the
-     * Configuration object.
+     *            Configuration object.
      * @param properties A Map containing domain configuration properties.
      */
     public DataDomain(String name, Map properties) {
@@ -167,40 +167,34 @@ public class DataDomain implements QueryEngine {
         this.properties = localMap;
 
         Object sharedCacheEnabled = localMap.get(SHARED_CACHE_ENABLED_PROPERTY);
-        Object validatingObjectsOnCommit =
-            localMap.get(VALIDATING_OBJECTS_ON_COMMIT_PROPERTY);
-        Object usingExternalTransactions =
-            localMap.get(USING_EXTERNAL_TRANSACTIONS_PROPERTY);
+        Object validatingObjectsOnCommit = localMap
+                .get(VALIDATING_OBJECTS_ON_COMMIT_PROPERTY);
+        Object usingExternalTransactions = localMap
+                .get(USING_EXTERNAL_TRANSACTIONS_PROPERTY);
 
         if (logObj.isDebugEnabled()) {
-            logObj.debug(
-                "DataDomain property "
+            logObj.debug("DataDomain property "
                     + SHARED_CACHE_ENABLED_PROPERTY
                     + " = "
                     + sharedCacheEnabled);
-            logObj.debug(
-                "DataDomain property "
+            logObj.debug("DataDomain property "
                     + VALIDATING_OBJECTS_ON_COMMIT_PROPERTY
                     + " = "
                     + validatingObjectsOnCommit);
-            logObj.debug(
-                "DataDomain property "
+            logObj.debug("DataDomain property "
                     + USING_EXTERNAL_TRANSACTIONS_PROPERTY
                     + " = "
                     + usingExternalTransactions);
         }
 
         // init ivars from properties
-        this.sharedCacheEnabled =
-            (sharedCacheEnabled != null)
+        this.sharedCacheEnabled = (sharedCacheEnabled != null)
                 ? "true".equalsIgnoreCase(sharedCacheEnabled.toString())
                 : SHARED_CACHE_ENABLED_DEFAULT;
-        this.validatingObjectsOnCommit =
-            (validatingObjectsOnCommit != null)
+        this.validatingObjectsOnCommit = (validatingObjectsOnCommit != null)
                 ? "true".equalsIgnoreCase(validatingObjectsOnCommit.toString())
                 : VALIDATING_OBJECTS_ON_COMMIT_DEFAULT;
-        this.usingExternalTransactions =
-            (usingExternalTransactions != null)
+        this.usingExternalTransactions = (usingExternalTransactions != null)
                 ? "true".equalsIgnoreCase(usingExternalTransactions.toString())
                 : USING_EXTERNAL_TRANSACTIONS_DEFAULT;
     }
@@ -219,9 +213,9 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
-     * Returns <code>true</code> if DataContexts produced by this DataDomain
-     * are using shared DataRowStore. Returns <code>false</code> if each
-     * DataContext would work with its own DataRowStore.
+     * Returns <code>true</code> if DataContexts produced by this DataDomain are using
+     * shared DataRowStore. Returns <code>false</code> if each DataContext would work
+     * with its own DataRowStore.
      */
     public boolean isSharedCacheEnabled() {
         return sharedCacheEnabled;
@@ -232,8 +226,8 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
-     * Returns whether child DataContexts default behavior is to perform 
-     * object validation before commit is executed.
+     * Returns whether child DataContexts default behavior is to perform object validation
+     * before commit is executed.
      * 
      * @since 1.1
      */
@@ -242,8 +236,8 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
-     * Sets the property defining whether child DataContexts should perform 
-     * object validation before commit is executed.
+     * Sets the property defining whether child DataContexts should perform object
+     * validation before commit is executed.
      * 
      * @since 1.1
      */
@@ -252,8 +246,8 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
-     * Returns whether this DataDomain should internally commit 
-     * all transactions, or let container do that.
+     * Returns whether this DataDomain should internally commit all transactions, or let
+     * container do that.
      * 
      * @since 1.1
      */
@@ -262,8 +256,8 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
-     * Sets a property defining whether this DataDomain should internally commit 
-     * all transactions, or let container do that.
+     * Sets a property defining whether this DataDomain should internally commit all
+     * transactions, or let container do that.
      * 
      * @since 1.1
      */
@@ -273,8 +267,8 @@ public class DataDomain implements QueryEngine {
 
     /**
      * @since 1.1
-     * @return a Map of properties for this DataDomain. There is no guarantees
-     * of specific synchronization behavior of this map.
+     * @return a Map of properties for this DataDomain. There is no guarantees of specific
+     *         synchronization behavior of this map.
      */
     public Map getProperties() {
         return properties;
@@ -282,15 +276,16 @@ public class DataDomain implements QueryEngine {
 
     /**
      * @since 1.1
-     * @return TransactionDelegate associated with this DataDomain, or null if no delegate exist.
+     * @return TransactionDelegate associated with this DataDomain, or null if no delegate
+     *         exist.
      */
     public TransactionDelegate getTransactionDelegate() {
         return transactionDelegate;
     }
 
     /**
-     * Initializes TransactionDelegate used by all DataContexts
-     * associated with this DataDomain.
+     * Initializes TransactionDelegate used by all DataContexts associated with this
+     * DataDomain.
      * 
      * @since 1.1
      */
@@ -299,8 +294,8 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
-     * Returns snapshots cache for this DataDomain, lazily initializing
-     * it on the first call.
+     * Returns snapshots cache for this DataDomain, lazily initializing it on the first
+     * call.
      */
     public synchronized DataRowStore getSharedSnapshotCache() {
         if (sharedSnapshotCache == null) {
@@ -387,8 +382,7 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
-     * Closes all data nodes, removes them from the list
-     * of available nodes.
+     * Closes all data nodes, removes them from the list of available nodes.
      */
     public void reset() {
         synchronized (nodes) {
@@ -403,15 +397,15 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
-     * Clears the list of internal DataMaps. In most cases it is wise to call
-     * "reset" before doing that.
+     * Clears the list of internal DataMaps. In most cases it is wise to call "reset"
+     * before doing that.
      */
     public void clearDataMaps() {
         getEntityResolver().setDataMaps(Collections.EMPTY_LIST);
     }
 
-    /** 
-     * Adds new DataNode. 
+    /**
+     * Adds new DataNode.
      */
     public synchronized void addNode(DataNode node) {
 
@@ -428,29 +422,27 @@ public class DataDomain implements QueryEngine {
         }
     }
 
-    /** 
-     * Creates and returns a new DataContext. If this DataDomain is configured 
-     * to use shared cache, returned DataContext will use shared cache as well.
-     * Otherwise a new instance of DataRowStore will be used as its local cache.
+    /**
+     * Creates and returns a new DataContext. If this DataDomain is configured to use
+     * shared cache, returned DataContext will use shared cache as well. Otherwise a new
+     * instance of DataRowStore will be used as its local cache.
      */
     public DataContext createDataContext() {
         return createDataContext(isSharedCacheEnabled());
     }
 
     /**
-     * Creates a new DataContext. 
+     * Creates a new DataContext.
      * 
-     * @param useSharedCache determines whether resulting DataContext should use
-     * shared vs. local cache. This setting overrides default behavior configured
-     * for this DataDomain via {@link #SHARED_CACHE_ENABLED_PROPERTY}. 
-     * 
+     * @param useSharedCache determines whether resulting DataContext should use shared
+     *            vs. local cache. This setting overrides default behavior configured for
+     *            this DataDomain via {@link #SHARED_CACHE_ENABLED_PROPERTY}.
      * @since 1.1
      */
     public DataContext createDataContext(boolean useSharedCache) {
         // for new dataRowStores use the same name for all stores
         // it makes it easier to track the event subject
-        DataRowStore snapshotCache =
-            (useSharedCache)
+        DataRowStore snapshotCache = (useSharedCache)
                 ? getSharedSnapshotCache()
                 : new DataRowStore(name, properties);
 
@@ -460,26 +452,24 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
-     * Creates and returns a new inactive transaction. If there is a 
-     * TransactionDelegate, adds the delegate to the newly created Transaction.
-     * Behavior of the returned Transaction depends on "usingInternalTransactions"
-     * property setting.
+     * Creates and returns a new inactive transaction. If there is a TransactionDelegate,
+     * adds the delegate to the newly created Transaction. Behavior of the returned
+     * Transaction depends on "usingInternalTransactions" property setting.
      * 
      * @since 1.1
      */
     public Transaction createTransaction() {
-        return (isUsingExternalTransactions())
-            ? Transaction.externalTransaction(getTransactionDelegate())
-            : Transaction.internalTransaction(getTransactionDelegate());
+        return (isUsingExternalTransactions()) ? Transaction
+                .externalTransaction(getTransactionDelegate()) : Transaction
+                .internalTransaction(getTransactionDelegate());
     }
 
-    /** 
-     * Returns registered DataNode whose name matches <code>name</code> parameter. 
+    /**
+     * Returns registered DataNode whose name matches <code>name</code> parameter.
      */
     public DataNode getNode(String nodeName) {
         return (DataNode) nodes.get(nodeName);
     }
-
 
     /**
      * Updates internal index of DataNodes stored by the entity name.
@@ -499,10 +489,8 @@ public class DataDomain implements QueryEngine {
         }
     }
 
-
     /**
-     * Returns a DataNode that should handle queries for all
-     * entities in a DataMap.
+     * Returns a DataNode that should handle queries for all entities in a DataMap.
      * 
      * @since 1.1
      */
@@ -519,109 +507,86 @@ public class DataDomain implements QueryEngine {
         }
     }
 
-    /** 
-     * Inspects the queries, sending them to appropriate DataNodes for execution.
-     * May modify transaction settings on the OperationObserver.
+    /**
+     * QueryRouter implementation that provides query with a DataNode to run. Looks up a
+     * DataNode mapped to a given DataMap. Throws CayenneRuntimeException if such node
+     * can't be found.
+     * 
+     * @since 1.2
+     */
+    public QueryEngine engineForDataMap(DataMap map) {
+        if (map == null) {
+            throw new NullPointerException("Null DataMap, can't determine DataNode.");
+        }
+
+        QueryEngine node = lookupDataNode(map);
+
+        if (node == null) {
+            throw new CayenneRuntimeException("No DataNode exists for DataMap " + map);
+        }
+
+        return node;
+    }
+
+    /**
+     * Inspects the queries, sending them to appropriate DataNodes for execution. May
+     * modify transaction settings on the OperationObserver.
      * 
      * @since 1.1
      */
     public void performQueries(
-        Collection queries,
-        OperationObserver resultConsumer,
-        Transaction transaction) {
+            Collection queries,
+            OperationObserver resultConsumer,
+            Transaction transaction) {
 
-        if (queries.size() == 0) {
+        if (queries.isEmpty()) {
             return;
         }
 
-        // optimize for single node 
-        // TODO: some refactoring wouldn't hurt
-        if (nodes.size() == 1 || queries.size() == 1) {
-            DataNode singleNode = null;
-
-            // run a quick sanity check
-            Iterator it = queries.iterator();
-
-            while (it.hasNext()) {
-                DataNode node = null;
-                Query nextQuery = (Query) it.next();
-
-                // try DbEntity root
-                DataMap dataMap = getEntityResolver().lookupDataMap(nextQuery);
-                if (dataMap == null) {
-                    throw new CayenneRuntimeException("No DataMap found for query "
-                            + nextQuery);
-                }
-
-                node = lookupDataNode(dataMap);
-                if (node == null) {
-                    throw new CayenneRuntimeException(
-                            "No suitable DataNode to handle query " + nextQuery);
-                }
-
-                if (singleNode == null) {
-                    singleNode = node;
-                }
-                else if (singleNode != node) {
-                    throw new CayenneRuntimeException(
-                            "No suitable DataNode to handle query " + nextQuery);
-                }
-            }
-
-            singleNode.performQueries(queries, resultConsumer, transaction);
+        // optimize for single query (can't optimize for single node as queries can do
+        // their own trickery with nodes and create substitute engines...)
+        if (queries.size() == 1) {
+            Query onlyQuery = (Query) queries.iterator().next();
+            QueryEngine singleEngine = onlyQuery.routeQuery(this, getEntityResolver());
+            singleEngine.performQueries(queries, resultConsumer, transaction);
+            return;
         }
-        else {
-            
-            // organize queries by node
-            Iterator it = queries.iterator();
-            Map queryMap = new HashMap();
-            while (it.hasNext()) {
-                Query nextQuery = (Query) it.next();
-                DataMap dataMap = getEntityResolver().lookupDataMap(nextQuery);
-                if (dataMap == null) {
-                    throw new CayenneRuntimeException("No DataMap found for query "
-                            + nextQuery);
-                }
 
-                DataNode node  = lookupDataNode(dataMap);
-                if (node == null) {
-                    throw new CayenneRuntimeException(
-                            "No suitable DataNode to handle query " + nextQuery);
-                }
+        // organize queries by node
+        Iterator it = queries.iterator();
+        Map queryMap = new HashMap();
+        while (it.hasNext()) {
+            Query nextQuery = (Query) it.next();
+            QueryEngine engine = nextQuery.routeQuery(this, getEntityResolver());
 
-                List nodeQueries = (List) queryMap.get(node);
-                if (nodeQueries == null) {
-                    nodeQueries = new ArrayList();
-                    queryMap.put(node, nodeQueries);
-                }
-                
-                nodeQueries.add(nextQuery);
+            List queriesByEngine = (List) queryMap.get(engine);
+            if (queriesByEngine == null) {
+                queriesByEngine = new ArrayList();
+                queryMap.put(engine, queriesByEngine);
             }
 
-            // perform queries on each node
-            Iterator nodeIt = queryMap.entrySet().iterator();
-            while (nodeIt.hasNext()) {
-                Map.Entry entry = (Map.Entry) nodeIt.next();
-                DataNode nextNode = (DataNode) entry.getKey();
-                List nodeQueries = (List) entry.getValue();
+            queriesByEngine.add(nextQuery);
+        }
 
-                // TODO: Maybe this should be run in parallel on different nodes ?
-                // (then resultCons will have to be prepared to handle results coming
-                // from multiple threads)
-                nextNode.performQueries(nodeQueries, resultConsumer, transaction);
-            }
+        // perform queries on each node
+        Iterator nodeIt = queryMap.entrySet().iterator();
+        while (nodeIt.hasNext()) {
+            Map.Entry entry = (Map.Entry) nodeIt.next();
+            QueryEngine nextNode = (QueryEngine) entry.getKey();
+            Collection nodeQueries = (Collection) entry.getValue();
+
+            // TODO: investigate parallel processing options...
+            nextNode.performQueries(nodeQueries, resultConsumer, transaction);
         }
     }
 
-    /** 
-     * Wraps queries in an internal transaction and sends them to appropriate DataNodes 
+    /**
+     * Wraps queries in an internal transaction and sends them to appropriate DataNodes
      * for execution.
      */
     public void performQueries(Collection queries, OperationObserver observer) {
-        Transaction transaction =
-            (observer.isIteratedResult())
-                ? Transaction.noTransaction()
-                : createTransaction();
+        Transaction transaction = (observer.isIteratedResult()) ? Transaction
+                .noTransaction() : createTransaction();
         transaction.performQueries(this, queries, observer);
     }
 
@@ -634,13 +599,13 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
-     * Sets EntityResolver. If not set explicitly, DataDomain creates 
-     * a default EntityResolver internally on demand.
+     * Sets EntityResolver. If not set explicitly, DataDomain creates a default
+     * EntityResolver internally on demand.
      * 
      * @since 1.1
      */
     public void setEntityResolver(
-        org.objectstyle.cayenne.map.EntityResolver entityResolver) {
+            org.objectstyle.cayenne.map.EntityResolver entityResolver) {
         this.entityResolver = entityResolver;
     }
 
@@ -690,9 +655,11 @@ public class DataDomain implements QueryEngine {
 
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append(ObjectUtils.identityToString(this)).append(":[").append(
-            getName()).append(
-            "]");
+        buffer
+                .append(ObjectUtils.identityToString(this))
+                .append(":[")
+                .append(getName())
+                .append("]");
 
         return buffer.toString();
     }
