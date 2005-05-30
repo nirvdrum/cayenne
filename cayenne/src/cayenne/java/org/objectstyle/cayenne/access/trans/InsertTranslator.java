@@ -64,91 +64,95 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.query.InsertQuery;
 
-/** Class implements default translation mechanism of org.objectstyle.cayenne.query.InsertQuery
-  * objects to SQL INSERT statements. Note that in order for this query to execute successfully,
-  * ObjectId contained within InsertQuery must be fully initialized.
-  *
-  * @author Andrei Adamchik  
+/**
+ * Class implements default translation mechanism of
+ * org.objectstyle.cayenne.query.InsertQuery objects to SQL INSERT statements. Note that
+ * in order for this query to execute successfully, ObjectId contained within InsertQuery
+ * must be fully initialized.
+ * 
+ * @author Andrei Adamchik
+ * @deprecated since 1.2 Object InsertQuery is not needed anymore. It shouldn't be used
+ *             directly anyway, but in cases where one might want to have access to it,
+ *             InsertBatchQuery is a reasonable substitute.
  */
 public class InsertTranslator extends QueryAssembler {
 
-	protected List columnList = new ArrayList();
+    protected List columnList = new ArrayList();
 
-	public String aliasForTable(DbEntity dbEnt) {
-		throw new RuntimeException("aliases not supported");
-	}
+    public String aliasForTable(DbEntity dbEnt) {
+        throw new RuntimeException("aliases not supported");
+    }
 
-	public void dbRelationshipAdded(DbRelationship dbRel) {
-		throw new RuntimeException("db relationships not supported");
-	}
+    public void dbRelationshipAdded(DbRelationship dbRel) {
+        throw new RuntimeException("db relationships not supported");
+    }
 
-	/** Method that converts an insert query into SQL string */
-	public String createSqlString() throws Exception {
-		prepareLists();
-		StringBuffer queryBuf = new StringBuffer("INSERT INTO ");
-		DbEntity dbE = getEntityResolver().lookupDbEntity(query);
-		queryBuf.append(dbE.getFullyQualifiedName()).append(" (");
+    /** Method that converts an insert query into SQL string */
+    public String createSqlString() throws Exception {
+        prepareLists();
+        StringBuffer queryBuf = new StringBuffer("INSERT INTO ");
+        DbEntity dbE = getEntityResolver().lookupDbEntity(query);
+        queryBuf.append(dbE.getFullyQualifiedName()).append(" (");
 
-		int len = columnList.size();
+        int len = columnList.size();
 
-		// 1. Append column names
+        // 1. Append column names
 
-		// unroll the loop to avoid condition checking in the loop
-		queryBuf.append(columnList.get(0)); // assume we have at least 1 column
-		for (int i = 1; i < len; i++) {
-			queryBuf.append(", ").append(columnList.get(i));
-		}
+        // unroll the loop to avoid condition checking in the loop
+        queryBuf.append(columnList.get(0)); // assume we have at least 1 column
+        for (int i = 1; i < len; i++) {
+            queryBuf.append(", ").append(columnList.get(i));
+        }
 
-		// 2. Append values ('?' in place of actual parameters)
-		queryBuf.append(") VALUES (");
-		if (len > 0) {
-			queryBuf.append('?');
-			for (int i = 1; i < len; i++) {
-				queryBuf.append(", ?");
-			}
-		}
+        // 2. Append values ('?' in place of actual parameters)
+        queryBuf.append(") VALUES (");
+        if (len > 0) {
+            queryBuf.append('?');
+            for (int i = 1; i < len; i++) {
+                queryBuf.append(", ?");
+            }
+        }
 
-		queryBuf.append(')');
-		return queryBuf.toString();
-	}
+        queryBuf.append(')');
+        return queryBuf.toString();
+    }
 
-	public InsertQuery insertQuery() {
-		return (InsertQuery) query;
-	}
+    public org.objectstyle.cayenne.query.InsertQuery insertQuery() {
+        return (org.objectstyle.cayenne.query.InsertQuery) query;
+    }
 
-	/** Creates 2 matching lists: columns names and values */
-	protected void prepareLists() throws Exception {
-		DbEntity dbE = getEntityResolver().lookupDbEntity(query);
-		ObjectId oid = insertQuery().getObjectId();
-		Map id = (oid != null) ? oid.getIdSnapshot() : null;
+    /** Creates 2 matching lists: columns names and values */
+    protected void prepareLists() throws Exception {
+        DbEntity dbE = getEntityResolver().lookupDbEntity(query);
+        ObjectId oid = insertQuery().getObjectId();
+        Map id = (oid != null) ? oid.getIdSnapshot() : null;
 
-		if (id != null) {
-			Iterator idIt = id.keySet().iterator();
-			while (idIt.hasNext()) {
-				String attrName = (String) idIt.next();
-				DbAttribute attr = (DbAttribute)dbE.getAttribute(attrName);
-				Object attrValue = id.get(attrName);
-				columnList.add(attrName);
-				
-			    addToParamList(attr, attrValue);
-			}
-		}
+        if (id != null) {
+            Iterator idIt = id.keySet().iterator();
+            while (idIt.hasNext()) {
+                String attrName = (String) idIt.next();
+                DbAttribute attr = (DbAttribute) dbE.getAttribute(attrName);
+                Object attrValue = id.get(attrName);
+                columnList.add(attrName);
 
-		Map snapshot = insertQuery().getObjectSnapshot();
-		Iterator columnsIt = snapshot.keySet().iterator();
-		while (columnsIt.hasNext()) {
-			String attrName = (String) columnsIt.next();
+                addToParamList(attr, attrValue);
+            }
+        }
 
-			// values taken from ObjectId take precedence.
-			if (id != null && id.get(attrName) != null)
-				continue;
+        Map snapshot = insertQuery().getObjectSnapshot();
+        Iterator columnsIt = snapshot.keySet().iterator();
+        while (columnsIt.hasNext()) {
+            String attrName = (String) columnsIt.next();
 
-			DbAttribute attr = (DbAttribute)dbE.getAttribute(attrName);
-			Object attrValue = snapshot.get(attrName);
-			columnList.add(attrName);
-			addToParamList(attr, attrValue);
-		}
-	}
+            // values taken from ObjectId take precedence.
+            if (id != null && id.get(attrName) != null)
+                continue;
+
+            DbAttribute attr = (DbAttribute) dbE.getAttribute(attrName);
+            Object attrValue = snapshot.get(attrName);
+            columnList.add(attrName);
+            addToParamList(attr, attrValue);
+        }
+    }
 }

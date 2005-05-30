@@ -63,6 +63,10 @@ import org.objectstyle.cayenne.map.ObjEntity;
 /**
  * Describes insert database operation. InsertQuery is initialized with object values
  * snapshot and ObjectId.
+ * 
+ * @deprecated since 1.2 Object InsertQuery is not needed anymore. It shouldn't be used
+ *             directly anyway, but in cases where one might want to have access to it,
+ *             InsertBatchQuery is a reasonable substitute.
  */
 public class InsertQuery extends AbstractQuery {
 

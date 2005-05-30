@@ -64,12 +64,10 @@ import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.trans.DeleteTranslator;
-import org.objectstyle.cayenne.access.trans.InsertTranslator;
 import org.objectstyle.cayenne.access.trans.UpdateTranslator;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.DeleteQuery;
-import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.UpdateQuery;
 
@@ -87,19 +85,19 @@ public class UpdateAction extends BaseSQLAction {
     }
 
     protected QueryTranslator createTranslator(Connection connection) {
-        QueryTranslator translator;
-        if (query instanceof UpdateQuery) {
-            translator = new UpdateTranslator();
-        }
-        else if (query instanceof InsertQuery) {
-            translator = new InsertTranslator();
-        }
-        else if (query instanceof DeleteQuery) {
-            translator = new DeleteTranslator();
-        }
-        else {
-            throw new CayenneRuntimeException("Can't make a translator for query "
-                    + query);
+        QueryTranslator translator = checkDeprecatedQueries(query);
+
+        if (translator == null) {
+            if (query instanceof UpdateQuery) {
+                translator = new UpdateTranslator();
+            }
+            else if (query instanceof DeleteQuery) {
+                translator = new DeleteTranslator();
+            }
+            else {
+                throw new CayenneRuntimeException("Can't make a translator for query "
+                        + query);
+            }
         }
 
         translator.setAdapter(getAdapter());
@@ -108,6 +106,17 @@ public class UpdateAction extends BaseSQLAction {
         translator.setConnection(connection);
 
         return translator;
+    }
+
+    /**
+     * @deprecated remove once deprcated queries processed here are removed.
+     */
+    final QueryTranslator checkDeprecatedQueries(Query query) {
+        if (query instanceof org.objectstyle.cayenne.query.InsertQuery) {
+            return new org.objectstyle.cayenne.access.trans.InsertTranslator();
+        }
+
+        return null;
     }
 
     public void performAction(Connection connection, OperationObserver observer)

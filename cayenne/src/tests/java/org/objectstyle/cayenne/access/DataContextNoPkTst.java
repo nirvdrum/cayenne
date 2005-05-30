@@ -84,6 +84,8 @@ public class DataContextNoPkTst extends CayenneTestCase {
 
         List queries = new ArrayList();
         queries.add(new DeleteQuery(NoPkTest.class));
+        
+        // TODO: factor out deprecated InsertQuery
         queries.add(new InsertQuery(NoPkTest.class, map1));
         queries.add(new InsertQuery(NoPkTest.class, map2));
         ctxt.performQueries(queries, new QueryResult());

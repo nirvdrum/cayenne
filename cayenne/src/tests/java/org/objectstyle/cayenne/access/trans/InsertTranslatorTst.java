@@ -60,34 +60,35 @@ import java.util.Map;
 
 import org.objectstyle.art.MeaningfulPKTest1;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
+ * @deprecated Since 1.2 InsertQuery is gone.
  * @author Andrei Adamchik
  */
 public class InsertTranslatorTst extends CayenneTestCase {
 
-	public void testMeaningfulPrimaryKey() throws Exception {
-		Map id = new HashMap();
-		Map object = new HashMap();
-		
-		id.put("ARTIST_ID", new Integer(3000));
-		
-		object.putAll(id);
-		object.put("ARTIST_NAME", "aaaaa");
-		object.put("DATE_OF_BIRTH", new java.util.Date());
-		
-		InsertQuery q = new InsertQuery(MeaningfulPKTest1.class);
-		q.setObjectSnapshot(object);
-		q.setObjectId(new ObjectId(MeaningfulPKTest1.class, id));
-		
-		InsertTranslator transl = new InsertTranslator();
-		transl.setEntityResolver(getNode().getEntityResolver());
-		transl.setQuery(q);
-		transl.prepareLists();
-		
-		assertNotNull(transl.columnList);
-		assertEquals(3, transl.columnList.size());
-	}
+    public void testMeaningfulPrimaryKey() throws Exception {
+        Map id = new HashMap();
+        Map object = new HashMap();
+
+        id.put("ARTIST_ID", new Integer(3000));
+
+        object.putAll(id);
+        object.put("ARTIST_NAME", "aaaaa");
+        object.put("DATE_OF_BIRTH", new java.util.Date());
+
+        org.objectstyle.cayenne.query.InsertQuery q = new org.objectstyle.cayenne.query.InsertQuery(
+                MeaningfulPKTest1.class);
+        q.setObjectSnapshot(object);
+        q.setObjectId(new ObjectId(MeaningfulPKTest1.class, id));
+
+        InsertTranslator transl = new InsertTranslator();
+        transl.setEntityResolver(getNode().getEntityResolver());
+        transl.setQuery(q);
+        transl.prepareLists();
+
+        assertNotNull(transl.columnList);
+        assertEquals(3, transl.columnList.size());
+    }
 }
