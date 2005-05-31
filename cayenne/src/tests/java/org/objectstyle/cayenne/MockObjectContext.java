@@ -107,6 +107,13 @@ public class MockObjectContext implements ObjectContext {
     public void commitChangesInContext(ObjectContext context) {
     }
 
+    public void deleteObject(Persistent object) {
+    }
+
+    public Persistent newObject(Class persistentClass) {
+        return null;
+    }
+
     public void objectWillRead(Persistent persistent, String property) {
     }
 

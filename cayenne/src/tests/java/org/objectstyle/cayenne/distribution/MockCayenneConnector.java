@@ -73,7 +73,12 @@ public class MockCayenneConnector implements CayenneConnector {
     protected Object fakeResponse;
 
     public MockCayenneConnector() {
+        this(null);
+    }
+
+    public MockCayenneConnector(Object defaultResponse) {
         this.commands = new ArrayList();
+        this.fakeResponse = defaultResponse;
     }
 
     public void reset() {

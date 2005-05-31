@@ -113,6 +113,8 @@ class ClientObjectStore implements Serializable {
      * deleted.
      */
     synchronized void trackObject(Persistent object) {
+
+        // I guess if an already tracked object is passed again, no harm is being done...
         switch (object.getPersistenceState()) {
             case PersistenceState.NEW:
             case PersistenceState.MODIFIED:
@@ -120,6 +122,10 @@ class ClientObjectStore implements Serializable {
                 dirtyObjects.put(object.getObjectId(), object);
                 break;
         }
+    }
+
+    synchronized void forgetObject(Persistent object) {
+        dirtyObjects.remove(object.getObjectId());
     }
 
     /**

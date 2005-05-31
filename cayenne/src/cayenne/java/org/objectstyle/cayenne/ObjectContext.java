@@ -68,9 +68,10 @@ import org.objectstyle.cayenne.query.Query;
  * dealing with when accessing Cayenne. ObjectContext methods can be broken down to the
  * three logical categories:
  * <ul>
- * <li>Query methods - perform*Query(..)</li>
- * <li>Methods for examining internal state - new/deleted/modifiedObjects()</li>
- * <li>Object lifecycle methods - commitChanges*(..), objectWill*(..).
+ * <li>Query methods: various "performQuery" methods.</li>
+ * <li>Methods for examining internal state: new/deleted/modifiedObjects()</li>
+ * <li>Object lifecycle methods: newObject(..), deleteObject(..), commitChanges(..),
+ * commitChangesInContext(..), objectWillRead(..), objectWillWrite(..).
  * </ul>
  * <p>
  * <i>Currently this interface is only used by client-side objects. The plan is to merge
@@ -127,7 +128,19 @@ public interface ObjectContext extends Serializable {
     // ==== Lifecycle methods
 
     /**
-     * Commits changes made to this ObjectContext persistent objects.
+     * Creates a new persistent object scheduled to be inserted on next commit.
+     */
+    Persistent newObject(Class persistentClass);
+
+    /**
+     * Schedules a persistent object for deletion on next commit.
+     */
+    void deleteObject(Persistent object);
+
+    /**
+     * Commits changes made to this ObjectContext persistent objects. If an ObjectContext
+     * is a part of an ObjectContext hierarchy, this method call triggers commit all the
+     * way to the external data store.
      */
     void commitChanges();
 
@@ -141,14 +154,14 @@ public interface ObjectContext extends Serializable {
      * A callback method that is invoked whenver a persistent object property is about to
      * be read. Allows ObjectContext to resolve faults on demand.
      */
-    void objectWillRead(Persistent persistent, String property);
+    void objectWillRead(Persistent object, String property);
 
     /**
      * A callback method that is invoked whenver a persistent object property is about to
      * be changed. Allows ObjectContext to track object changes.
      */
     void objectWillWrite(
-            Persistent persistent,
+            Persistent object,
             String property,
             Object oldValue,
             Object newValue);

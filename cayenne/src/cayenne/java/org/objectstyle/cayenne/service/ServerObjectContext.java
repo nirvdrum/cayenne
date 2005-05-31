@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
@@ -96,7 +97,18 @@ public class ServerObjectContext implements ObjectContext {
     }
 
     public void commitChangesInContext(ObjectContext context) {
+        // TODO: implement
+        throw new CayenneClientException("Not implemented by proxy.");
+    }
 
+    public void deleteObject(Persistent object) {
+        // TODO: implement
+        throw new CayenneClientException("Not implemented by proxy.");
+    }
+
+    public Persistent newObject(Class persistentClass) {
+        // TODO: implement
+        throw new CayenneClientException("Not implemented by proxy.");
     }
 
     public List performQuery(String queryName, Map parameters, boolean refresh) {
@@ -146,7 +158,7 @@ public class ServerObjectContext implements ObjectContext {
     }
 
     public void objectWillRead(Persistent dataObject, String property) {
-        // hmm... what would this be on the server...
+        // noop as this object is not accessible by users.
     }
 
     public void objectWillWrite(
@@ -154,7 +166,7 @@ public class ServerObjectContext implements ObjectContext {
             String property,
             Object oldValue,
             Object newValue) {
-        // hmm... what would this be on the server...
+        // noop as this object is not accessible by users.
     }
 
     public Collection deletedObjects() {

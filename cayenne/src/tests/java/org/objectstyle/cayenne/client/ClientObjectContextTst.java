@@ -56,12 +56,18 @@
 package org.objectstyle.cayenne.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.distribution.ChainedCommand;
+import org.objectstyle.cayenne.distribution.ClientCommand;
 import org.objectstyle.cayenne.distribution.MockCayenneConnector;
+import org.objectstyle.cayenne.distribution.SyncCommand;
 
 /**
  * @author Andrus Adamchik
@@ -78,18 +84,23 @@ public class ClientObjectContextTst extends TestCase {
         assertFalse(connector.isConnected());
     }
 
-    public void testCommitChanges() {
+    public void testCommitChangesUnchanged() {
 
         MockCayenneConnector connector = new MockCayenneConnector();
-        connector.setResponse(new ArrayList());
-
         ClientObjectContext context = new ClientObjectContext(connector);
 
         // no context changes so no connector access is expected
         context.commitChanges();
         assertTrue(connector.getCommands().isEmpty());
+    }
 
-        // introduce a fake dirty object
+    public void testCommitChangesCommandExecuted() {
+
+        MockCayenneConnector connector = new MockCayenneConnector(new ArrayList());
+        ClientObjectContext context = new ClientObjectContext(connector);
+
+        // test that a command is being sent via connector on commit...
+
         MockClientDataObject object = new MockClientDataObject();
         object.setObjectId(new ObjectId(Object.class, "key", "value"));
         object.setPersistenceState(PersistenceState.MODIFIED);
@@ -97,5 +108,108 @@ public class ClientObjectContextTst extends TestCase {
 
         context.commitChanges();
         assertEquals(1, connector.getCommands().size());
+
+        // expect a sync/commit chain
+        ClientCommand mainCommand = (ClientCommand) connector
+                .getCommands()
+                .iterator()
+                .next();
+        assertTrue(mainCommand instanceof ChainedCommand);
+        assertEquals(2, ((ChainedCommand) mainCommand).getCommands().length);
+
+    }
+
+    public void testCommitChangesNew() {
+
+        // test that ids that are passed back are actually propagated to the right
+        // objects...
+
+        MockCayenneConnector connector = new MockCayenneConnector() {
+
+            public Object sendCommand(ClientCommand command)
+                    throws CayenneClientException {
+                SyncCommand sync = (SyncCommand) ((ChainedCommand) command).getCommands()[0];
+
+                // fake creating a replacement ID on the server... return back the
+                // original id with attached replacement values
+                Persistent object = (Persistent) sync.getDirtyObjects().iterator().next();
+                object.getObjectId().getReplacementIdMap().put("key", "generated");
+                return Collections.singletonList(object.getObjectId());
+            }
+        };
+
+        ClientObjectContext context = new ClientObjectContext(connector);
+
+        // check that a generted object ID is assigned back to the object...
+        Persistent object = context.newObject(MockClientDataObject.class);
+        context.commitChanges();
+
+        assertFalse(object.getObjectId().isTemporary());
+        assertEquals(new ObjectId(MockClientDataObject.class, "key", "generated"), object
+                .getObjectId());
+    }
+
+    public void testNewObject() {
+        MockCayenneConnector connector = new MockCayenneConnector();
+        ClientObjectContext context = new ClientObjectContext(connector);
+
+        // an invalid class should blow
+        try {
+            context.newObject(Object.class);
+            fail("ClientObjectContext created an object that is not persistent.");
+        }
+        catch (CayenneRuntimeException e) {
+            // expected
+        }
+
+        // now try a good one... note that unlike 1.1 server side cayenne there is no
+        // entity checking performed; DataMap is not needed at this step
+        Persistent object = context.newObject(MockClientDataObject.class);
+        assertNotNull(object);
+        assertTrue(object instanceof MockClientDataObject);
+        assertEquals(PersistenceState.NEW, object.getPersistenceState());
+        assertTrue(context.objectStore
+                .objectsInState(PersistenceState.NEW)
+                .contains(object));
+        assertNotNull(object.getObjectId());
+        assertTrue(object.getObjectId().isTemporary());
+    }
+
+    public void testDeleteObject() {
+        MockCayenneConnector connector = new MockCayenneConnector();
+        ClientObjectContext context = new ClientObjectContext(connector);
+
+        // TRANSIENT ... should quietly ignore it
+        Persistent transientObject = new MockClientDataObject();
+        context.deleteObject(transientObject);
+        assertEquals(PersistenceState.TRANSIENT, transientObject.getPersistenceState());
+
+        // NEW ... should make it TRANSIENT
+        // create via context to make sure that object store would register it
+        Persistent newObject = context.newObject(MockClientDataObject.class);
+        context.deleteObject(newObject);
+        assertEquals(PersistenceState.TRANSIENT, newObject.getPersistenceState());
+        assertFalse(context.objectStore.dirtyObjects.containsValue(newObject));
+
+        // COMMITTED
+        Persistent committed = new MockClientDataObject();
+        committed.setPersistenceState(PersistenceState.COMMITTED);
+        committed.setObjectId(new ObjectId(MockClientDataObject.class, "key", "value1"));
+        context.deleteObject(committed);
+        assertEquals(PersistenceState.DELETED, committed.getPersistenceState());
+
+        // MODIFIED
+        Persistent modified = new MockClientDataObject();
+        modified.setPersistenceState(PersistenceState.MODIFIED);
+        modified.setObjectId(new ObjectId(MockClientDataObject.class, "key", "value2"));
+        context.deleteObject(modified);
+        assertEquals(PersistenceState.DELETED, modified.getPersistenceState());
+
+        // DELETED
+        Persistent deleted = new MockClientDataObject();
+        deleted.setPersistenceState(PersistenceState.DELETED);
+        deleted.setObjectId(new ObjectId(MockClientDataObject.class, "key", "value3"));
+        context.deleteObject(deleted);
+        assertEquals(PersistenceState.DELETED, committed.getPersistenceState());
     }
 }

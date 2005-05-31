@@ -59,9 +59,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.distribution.CayenneConnector;
 import org.objectstyle.cayenne.distribution.ChainedCommand;
 import org.objectstyle.cayenne.distribution.ClientCommand;
@@ -82,6 +84,10 @@ public class ClientObjectContext implements ObjectContext {
     protected CayenneConnector connector;
     protected ClientObjectStore objectStore;
 
+    /**
+     * Creates a new ClientObjectContext, initializaing it with a connector instance that
+     * should be used to connect to a remote Cayenne service.
+     */
     public ClientObjectContext(CayenneConnector connector) {
         this.connector = connector;
         this.objectStore = new ClientObjectStore();
@@ -94,6 +100,10 @@ public class ClientObjectContext implements ObjectContext {
         return connector;
     }
 
+    /**
+     * Sends commit and sync commands to remote Cayenne service via an internal instance
+     * of CayenneConnector.
+     */
     public void commitChanges() {
 
         if (objectStore.hasChanges()) {
@@ -110,7 +120,61 @@ public class ClientObjectContext implements ObjectContext {
     }
 
     public void commitChangesInContext(ObjectContext context) {
-        throw new CayenneClientException("Child ObjectContexts are not supported (yet).");
+        // TODO: implement
+        throw new CayenneRuntimeException(
+                "ObjectContext hierarchy is not supported (yet).");
+    }
+
+    /**
+     * Deletes an object locally, scheduling it for future deletion from the external data
+     * store.
+     */
+    public void deleteObject(Persistent object) {
+        if (object.getPersistenceState() == PersistenceState.TRANSIENT) {
+            return;
+        }
+
+        if (object.getPersistenceState() == PersistenceState.DELETED) {
+            return;
+        }
+
+        if (object.getPersistenceState() == PersistenceState.NEW) {
+            // kick it out of context
+            objectStore.forgetObject(object);
+            object.setPersistenceState(PersistenceState.TRANSIENT);
+            return;
+        }
+
+        // TODO: no delete rules (yet)
+
+        object.setPersistenceState(PersistenceState.DELETED);
+        objectStore.trackObject(object);
+    }
+
+    /**
+     * Creates and registers a new Persistent object instance.
+     */
+    public Persistent newObject(Class persistentClass) {
+        if (persistentClass == null) {
+            throw new NullPointerException("Persistent class can't be null.");
+        }
+
+        Persistent object = null;
+        try {
+            object = (Persistent) persistentClass.newInstance();
+        }
+        catch (Exception ex) {
+            throw new CayenneRuntimeException(
+                    "Error instantiating persistent object of class " + persistentClass,
+                    ex);
+        }
+
+        // make object "cayenne-persistent"
+        object.setObjectId(new TempObjectId(persistentClass));
+        object.setPersistenceState(PersistenceState.NEW);
+        objectStore.trackObject(object);
+
+        return object;
     }
 
     public List performQuery(String queryName, Map parameters, boolean refresh) {

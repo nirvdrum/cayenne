@@ -88,4 +88,8 @@ public class ChainedCommand implements ClientCommand {
 
         return result;
     }
+
+    public ClientCommand[] getCommands() {
+        return commands;
+    }
 }

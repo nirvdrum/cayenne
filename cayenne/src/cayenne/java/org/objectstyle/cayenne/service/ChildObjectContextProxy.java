@@ -85,14 +85,23 @@ class ChildObjectContextProxy implements ObjectContext {
         this.dirtyObjects = dirtyObjects;
     }
 
+    /**
+     * Filters deleted objects.
+     */
     public Collection deletedObjects() {
         return objectsInState(PersistenceState.DELETED);
     }
 
+    /**
+     * Filters modified objects.
+     */
     public Collection modifiedObjects() {
         return objectsInState(PersistenceState.MODIFIED);
     }
 
+    /**
+     * Filters new objects.
+     */
     public Collection newObjects() {
         return objectsInState(PersistenceState.NEW);
     }
@@ -102,6 +111,14 @@ class ChildObjectContextProxy implements ObjectContext {
     }
 
     public void commitChangesInContext(ObjectContext context) {
+        throw new CayenneClientException("Not implemented by proxy.");
+    }
+
+    public void deleteObject(Persistent object) {
+        throw new CayenneClientException("Not implemented by proxy.");
+    }
+
+    public Persistent newObject(Class persistentClass) {
         throw new CayenneClientException("Not implemented by proxy.");
     }
 
