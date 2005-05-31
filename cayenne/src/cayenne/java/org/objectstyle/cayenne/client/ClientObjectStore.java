@@ -166,7 +166,7 @@ class ClientObjectStore implements Serializable {
         Iterator dirtyIt = dirtyObjects.entrySet().iterator();
         while (dirtyIt.hasNext()) {
             Map.Entry entry = (Map.Entry) dirtyIt.next();
-            Persistent object = (Persistent) entry.getKey();
+            Persistent object = (Persistent) entry.getValue();
 
             switch (object.getPersistenceState()) {
                 case PersistenceState.DELETED:
@@ -176,7 +176,17 @@ class ClientObjectStore implements Serializable {
                     // sanity check
                     if (object.getObjectId().isTemporary()) {
                         throw new CayenneClientException(
-                                "Modified object temp id wasn't updated: " + object);
+                                "Modified object temporary id wasn't updated: " + object);
+                    }
+                    object.setPersistenceState(PersistenceState.COMMITTED);
+                    break;
+                // a new object wouldn't get here under normal circumstances, but as this
+                // is theoretically possible, do a check as well...
+                case PersistenceState.NEW:
+                    if (object.getObjectId().isTemporary()) {
+                        // somehow a new object didn't get an id...
+                        throw new CayenneClientException(
+                                "New object temporary id wasn't updated: " + object);
                     }
                     object.setPersistenceState(PersistenceState.COMMITTED);
                     break;

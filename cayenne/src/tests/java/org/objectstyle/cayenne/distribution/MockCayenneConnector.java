@@ -53,77 +53,53 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.client;
+package org.objectstyle.cayenne.distribution;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.Persistent;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.objectstyle.cayenne.client.CayenneClientException;
 
 /**
- * A base superclass for client-side Persistent objects.
+ * A noop CayenneConnector used for unit testing. Accumulates commands sent via this
+ * connector without doing anything with them.
  * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-public abstract class ClientDataObject implements Persistent {
+public class MockCayenneConnector implements CayenneConnector {
 
-    protected ObjectId objectId;
-    protected int persistenceState;
-    protected transient ObjectContext objectContext;
+    protected Collection commands;
+    protected boolean connected;
+    protected Object fakeResponse;
 
-    public ClientDataObject() {
-        this.persistenceState = PersistenceState.TRANSIENT;
+    public MockCayenneConnector() {
+        this.commands = new ArrayList();
     }
 
-    /**
-     * Notifies parent ObjectContext that this object is about to access a property.
-     */
-    protected void willRead(String property) {
-        if (objectContext != null) {
-            objectContext.objectWillRead(this, property);
-        }
+    public void reset() {
+        commands.clear();
+        connected = false;
+        fakeResponse = null;
     }
 
-    /**
-     * Notifies parent ObjectContext that this object is about to modify a property.
-     */
-    protected void willWrite(String property, Object oldValue, Object newValue) {
-        if (objectContext != null) {
-            objectContext.objectWillWrite(this, property, oldValue, newValue);
-        }
+    public void setResponse(Object fakeResponse) {
+        this.fakeResponse = fakeResponse;
     }
 
-    public int getPersistenceState() {
-        return persistenceState;
+    public Collection getCommands() {
+        return commands;
     }
 
-    public void setPersistenceState(int persistenceState) {
-        this.persistenceState = persistenceState;
-
-        if (persistenceState == PersistenceState.TRANSIENT) {
-            this.objectContext = null;
-        }
+    public boolean isConnected() {
+        return connected;
     }
 
-    public ObjectContext getObjectContext() {
-        return objectContext;
+    public void connect() throws CayenneClientException {
+        this.connected = true;
     }
 
-    public void setObjectContext(ObjectContext objectContext) {
-        this.objectContext = objectContext;
-    }
-
-    public ObjectId getObjectId() {
-        return objectId;
-    }
-
-    public void setObjectId(ObjectId objectId) {
-        this.objectId = objectId;
-    }
-
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+    public Object sendCommand(ClientCommand command) throws CayenneClientException {
+        commands.add(command);
+        return fakeResponse;
     }
 }

@@ -55,75 +55,47 @@
  */
 package org.objectstyle.cayenne.client;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.objectstyle.cayenne.ObjectContext;
+import java.util.ArrayList;
+
+import junit.framework.TestCase;
+
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.distribution.MockCayenneConnector;
 
 /**
- * A base superclass for client-side Persistent objects.
- * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-public abstract class ClientDataObject implements Persistent {
+public class ClientObjectContextTst extends TestCase {
 
-    protected ObjectId objectId;
-    protected int persistenceState;
-    protected transient ObjectContext objectContext;
+    public void testConnector() {
+        MockCayenneConnector connector = new MockCayenneConnector();
+        ClientObjectContext context = new ClientObjectContext(connector);
 
-    public ClientDataObject() {
-        this.persistenceState = PersistenceState.TRANSIENT;
+        assertSame(connector, context.getConnector());
+
+        // should connect lazily
+        assertFalse(connector.isConnected());
     }
 
-    /**
-     * Notifies parent ObjectContext that this object is about to access a property.
-     */
-    protected void willRead(String property) {
-        if (objectContext != null) {
-            objectContext.objectWillRead(this, property);
-        }
-    }
+    public void testCommitChanges() {
 
-    /**
-     * Notifies parent ObjectContext that this object is about to modify a property.
-     */
-    protected void willWrite(String property, Object oldValue, Object newValue) {
-        if (objectContext != null) {
-            objectContext.objectWillWrite(this, property, oldValue, newValue);
-        }
-    }
+        MockCayenneConnector connector = new MockCayenneConnector();
+        connector.setResponse(new ArrayList());
 
-    public int getPersistenceState() {
-        return persistenceState;
-    }
+        ClientObjectContext context = new ClientObjectContext(connector);
 
-    public void setPersistenceState(int persistenceState) {
-        this.persistenceState = persistenceState;
+        // no context changes so no connector access is expected
+        context.commitChanges();
+        assertTrue(connector.getCommands().isEmpty());
 
-        if (persistenceState == PersistenceState.TRANSIENT) {
-            this.objectContext = null;
-        }
-    }
+        // introduce a fake dirty object
+        MockClientDataObject object = new MockClientDataObject();
+        object.setObjectId(new ObjectId(Object.class, "key", "value"));
+        object.setPersistenceState(PersistenceState.MODIFIED);
+        context.objectStore.trackObject(object);
 
-    public ObjectContext getObjectContext() {
-        return objectContext;
-    }
-
-    public void setObjectContext(ObjectContext objectContext) {
-        this.objectContext = objectContext;
-    }
-
-    public ObjectId getObjectId() {
-        return objectId;
-    }
-
-    public void setObjectId(ObjectId objectId) {
-        this.objectId = objectId;
-    }
-
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        context.commitChanges();
+        assertEquals(1, connector.getCommands().size());
     }
 }

@@ -87,6 +87,13 @@ public class ClientObjectContext implements ObjectContext {
         this.objectStore = new ClientObjectStore();
     }
 
+    /**
+     * Returns connector used to access remote Cayenne service.
+     */
+    public CayenneConnector getConnector() {
+        return connector;
+    }
+
     public void commitChanges() {
 
         if (objectStore.hasChanges()) {

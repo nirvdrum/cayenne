@@ -76,7 +76,7 @@ public interface CayenneConnector {
     void connect() throws CayenneClientException;
 
     /**
-     * Sends a command to the server, returning result.
+     * Sends a command to the server, returning a result.
      */
-    Object sendCommand(ClientCommand callParameter) throws CayenneClientException;
+    Object sendCommand(ClientCommand command) throws CayenneClientException;
 }

@@ -53,77 +53,67 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.client;
+package org.objectstyle.cayenne;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.Persistent;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * A base superclass for client-side Persistent objects.
+ * A noop ObjectContext used for unit testing.
  * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-public abstract class ClientDataObject implements Persistent {
+public class MockObjectContext implements ObjectContext {
 
-    protected ObjectId objectId;
-    protected int persistenceState;
-    protected transient ObjectContext objectContext;
-
-    public ClientDataObject() {
-        this.persistenceState = PersistenceState.TRANSIENT;
+    public MockObjectContext() {
+        super();
     }
 
-    /**
-     * Notifies parent ObjectContext that this object is about to access a property.
-     */
-    protected void willRead(String property) {
-        if (objectContext != null) {
-            objectContext.objectWillRead(this, property);
-        }
+    public Collection newObjects() {
+        return null;
     }
 
-    /**
-     * Notifies parent ObjectContext that this object is about to modify a property.
-     */
-    protected void willWrite(String property, Object oldValue, Object newValue) {
-        if (objectContext != null) {
-            objectContext.objectWillWrite(this, property, oldValue, newValue);
-        }
+    public Collection deletedObjects() {
+        return null;
     }
 
-    public int getPersistenceState() {
-        return persistenceState;
+    public Collection modifiedObjects() {
+        return null;
     }
 
-    public void setPersistenceState(int persistenceState) {
-        this.persistenceState = persistenceState;
-
-        if (persistenceState == PersistenceState.TRANSIENT) {
-            this.objectContext = null;
-        }
+    public List performQuery(GenericSelectQuery query) {
+        return null;
     }
 
-    public ObjectContext getObjectContext() {
-        return objectContext;
+    public List performQuery(String queryName, Map parameters, boolean refresh) {
+        return null;
     }
 
-    public void setObjectContext(ObjectContext objectContext) {
-        this.objectContext = objectContext;
+    public int[] performNonSelectingQuery(Query query) {
+        return null;
     }
 
-    public ObjectId getObjectId() {
-        return objectId;
+    public int[] performNonSelectingQuery(String queryName, Map parameters) {
+        return null;
     }
 
-    public void setObjectId(ObjectId objectId) {
-        this.objectId = objectId;
+    public void commitChanges() {
     }
 
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+    public void commitChangesInContext(ObjectContext context) {
+    }
+
+    public void objectWillRead(Persistent persistent, String property) {
+    }
+
+    public void objectWillWrite(
+            Persistent persistent,
+            String property,
+            Object oldValue,
+            Object newValue) {
     }
 }
