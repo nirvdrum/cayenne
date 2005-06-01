@@ -65,11 +65,12 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.distribution.CayenneConnector;
-import org.objectstyle.cayenne.distribution.ChainedCommand;
-import org.objectstyle.cayenne.distribution.ClientCommand;
-import org.objectstyle.cayenne.distribution.CommitCommand;
-import org.objectstyle.cayenne.distribution.NamedQueryCommand;
-import org.objectstyle.cayenne.distribution.SyncCommand;
+import org.objectstyle.cayenne.distribution.ChainedMessage;
+import org.objectstyle.cayenne.distribution.ClientMessage;
+import org.objectstyle.cayenne.distribution.CommitMessage;
+import org.objectstyle.cayenne.distribution.NamedQueryMessage;
+import org.objectstyle.cayenne.distribution.QueryMessage;
+import org.objectstyle.cayenne.distribution.SyncMessage;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
@@ -108,11 +109,11 @@ public class ClientObjectContext implements ObjectContext {
 
         if (objectStore.hasChanges()) {
 
-            ClientCommand[] commands = new ClientCommand[2];
-            commands[0] = new SyncCommand(objectStore.getDirtyObjects());
-            commands[1] = new CommitCommand();
+            ClientMessage[] commands = new ClientMessage[2];
+            commands[0] = new SyncMessage(objectStore.getDirtyObjects());
+            commands[1] = new CommitMessage();
 
-            ClientCommand chain = new ChainedCommand(commands);
+            ClientMessage chain = new ChainedMessage(commands);
             Collection objectIds = (Collection) connector.sendCommand(chain);
 
             objectStore.objectsCommitted(objectIds);
@@ -178,25 +179,21 @@ public class ClientObjectContext implements ObjectContext {
     }
 
     public List performQuery(String queryName, Map parameters, boolean refresh) {
-        ClientCommand command = new NamedQueryCommand(
-                queryName,
-                parameters,
-                true,
-                refresh);
-        return (List) connector.sendCommand(command);
+        return new NamedQueryMessage(queryName, parameters, true, refresh)
+                .sendPerformQuery(connector);
     }
 
     public int[] performNonSelectingQuery(String queryName, Map parameters) {
-        ClientCommand command = new NamedQueryCommand(queryName, parameters, false, false);
-        return (int[]) connector.sendCommand(command);
+        return new NamedQueryMessage(queryName, parameters, false, false)
+                .sendPerformNonSelectingQuery(connector);
     }
 
     public int[] performNonSelectingQuery(Query query) {
-        return null;
+        return new QueryMessage(query, false).sendPerformNonSelectingQuery(connector);
     }
 
     public List performQuery(GenericSelectQuery query) {
-        return null;
+        return new QueryMessage(query, true).sendPerformQuery(connector);
     }
 
     public void objectWillRead(Persistent dataObject, String property) {

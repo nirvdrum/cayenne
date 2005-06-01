@@ -55,38 +55,122 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import org.objectstyle.cayenne.query.Query;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
- * A command that encapsulates a regular Cayenne query.
+ * A ClientCommand that describes a call to a server-side named query.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class QueryCommand implements ClientCommand {
+public class NamedQueryMessage extends AbstractMessage {
 
-    protected Query query;
+    protected String queryName;
+    protected String[] parameterKeys;
+    protected Object[] parameterValues;
     protected boolean selecting;
+    protected boolean refresh;
 
-    public QueryCommand(Query query, boolean selecting) {
-        // sanity check
-        if (query == null) {
-            throw new NullPointerException("Null query.");
-        }
+    public NamedQueryMessage(String name, Map parameters, boolean selecting,
+            boolean refresh) {
 
-        this.query = query;
+        this.queryName = name;
         this.selecting = selecting;
+        this.refresh = refresh;
+
+        parametersFromMap(parameters);
+    }
+
+    public NamedQueryMessage(String name, String[] parameterKeys,
+            String[] parameterValues, boolean selecting, boolean refresh) {
+
+        this.queryName = name;
+        this.parameterKeys = parameterKeys;
+        this.parameterValues = parameterValues;
+        this.selecting = selecting;
+        this.refresh = refresh;
     }
 
     /**
-     * Calls "executeQuery" on the handler.
+     * Converts a map of parameters to the internal representation as arrays of keys and
+     * values.
      */
-    public Object dispatchCommand(ClientCommandHandler handler) {
-        return handler.executeQuery(this);
+    protected void parametersFromMap(Map parameters) {
+        int size = (parameters != null) ? parameters.size() : 0;
+
+        if (size == 0) {
+            this.parameterKeys = null;
+            this.parameterValues = null;
+            return;
+        }
+
+        String[] keys = new String[size];
+        Object[] values = new Object[size];
+
+        Iterator it = parameters.entrySet().iterator();
+        for (int i = 0; i < size; i++) {
+            Map.Entry entry = (Map.Entry) it.next();
+
+            if (entry.getKey() != null) {
+                keys[i] = entry.getKey().toString();
+            }
+
+            values[i] = entry.getValue();
+        }
+
+        this.parameterKeys = keys;
+        this.parameterValues = values;
     }
 
-    public Query getQuery() {
-        return query;
+    public Map getParameters() {
+        if (parameterKeys == null) {
+            return Collections.EMPTY_MAP;
+        }
+
+        Map map = new HashMap();
+        for (int i = 0; i < parameterKeys.length; i++) {
+            map.put(parameterKeys[i], parameterValues[i]);
+        }
+
+        return map;
+    }
+
+    public Object onReceive(ClientMessageHandler handler) {
+        return handler.executeNamedQuery(this);
+    }
+
+    /**
+     * Invoked by the message sender to perform a remote selecting query.
+     */
+    public List sendPerformQuery(CayenneConnector connector) {
+        return (List) send(connector, List.class);
+    }
+
+    /**
+     * Invoked by the message sender to perform a remote non-selecting query.
+     */
+    public int[] sendPerformNonSelectingQuery(CayenneConnector connector) {
+        return (int[]) send(connector, int[].class);
+    }
+
+    public String getQueryName() {
+        return queryName;
+    }
+
+    public String[] getParameterKeys() {
+        return parameterKeys;
+    }
+
+    public Object[] getParameterValues() {
+        return parameterValues;
+    }
+
+    public boolean isRefresh() {
+        return refresh;
     }
 
     public boolean isSelecting() {

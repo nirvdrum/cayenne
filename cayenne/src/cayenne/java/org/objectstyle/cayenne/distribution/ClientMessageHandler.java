@@ -56,16 +56,25 @@
 package org.objectstyle.cayenne.distribution;
 
 /**
- * A commands that tells receiver to commit all uncommitted objects. Returns a collection
- * of client object ids modified or generated during commit. It is usually preceeded by
- * the {@link SyncCommand}.
+ * A visitor interface for client command self-dispatching. ClientCommandHandler defines
+ * methods for each supported command type. So command implementations can call an
+ * appropraite handler method, while concrete handler implementations can provide the
+ * actual execution logic.
+ * <p>
+ * <i>Note: One of the goals of using the Visitor pattern here is eliminating dependency
+ * of client-side command on server side classes. </i>
+ * </p>
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class CommitCommand implements ClientCommand {
+public interface ClientMessageHandler {
 
-    public Object dispatchCommand(ClientCommandHandler handler) {
-        return handler.executeCommit(this);
-    }
+    public Object executeQuery(QueryMessage command);
+
+    public Object executeNamedQuery(NamedQueryMessage command);
+
+    public Object executeCommit(CommitMessage command);
+
+    public Object executeSynchronize(SyncMessage command);
 }

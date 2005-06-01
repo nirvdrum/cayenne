@@ -94,5 +94,5 @@ public interface HessianService {
     /**
      * Invokes remote service method defined by the <em>callParameter</em>.
      */
-    Object processCommand(String sessionId, ClientCommand command);
+    Object processCommand(String sessionId, ClientMessage command);
 }

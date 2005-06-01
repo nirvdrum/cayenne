@@ -103,7 +103,7 @@ public class MockCayenneConnector implements CayenneConnector {
         this.connected = true;
     }
 
-    public Object sendCommand(ClientCommand command) throws CayenneClientException {
+    public Object sendCommand(ClientMessage command) throws CayenneClientException {
         commands.add(command);
         return fakeResponse;
     }

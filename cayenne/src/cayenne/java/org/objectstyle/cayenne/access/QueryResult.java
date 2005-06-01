@@ -68,14 +68,15 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * QueryResult encapsulates a result of execution of zero or more queries using QueryEngine.
- * QueryResult supporting queries with multiple ResultSets and updates, such as StoredProcedures.
+ * QueryResult encapsulates a result of execution of zero or more queries using
+ * QueryEngine. QueryResult supporting queries with multiple mixed selects and updates,
+ * such as ProcedureQueries.
  * 
  * @author Andrei Adamchik
  */
 public class QueryResult extends DefaultOperationObserver {
 
-    // SequencedHashMap guarantees that iterating over 
+    // LinkedMap guarantees that iterating over 
     // its keys is done in the original insertion order-
     // something that is needed to return executed queries in 
     // the right order. (Java 1.4 adds LinkedHashMap that has

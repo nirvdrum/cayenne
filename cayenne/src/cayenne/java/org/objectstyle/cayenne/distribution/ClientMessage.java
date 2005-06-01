@@ -55,26 +55,24 @@
  */
 package org.objectstyle.cayenne.distribution;
 
+import java.io.Serializable;
+
 /**
- * A visitor interface for client command self-dispatching. ClientCommandHandler defines
- * methods for each supported command type. So command implementations can call an
- * appropraite handler method, while concrete handler implementations can provide the
- * actual execution logic.
- * <p>
- * <i>Note: One of the benefits of using the Visitor pattern here is in eliminating
- * dependency of client-side command on server side classes. </i>
- * </p>
+ * Represents a two-way message sent by Cayenne client to Cayenne service. This interface
+ * provides a mechanism for a remote message receiver to process message without knowing
+ * much about its actual implementation. Concrete messages may also define methods for the
+ * sender, but as those have signitures specific to implementation, they are not described
+ * by this interface.
  * 
  * @since 1.2
  * @author Andrus Adamchik
+ * @see org.objectstyle.cayenne.distribution.ClientMessageHandler
  */
-public interface ClientCommandHandler {
+public interface ClientMessage extends Serializable {
 
-    public Object executeQuery(QueryCommand command);
-
-    public Object executeNamedQuery(NamedQueryCommand command);
-
-    public Object executeCommit(CommitCommand command);
-
-    public Object executeSynchronize(SyncCommand command);
+    /**
+     * Invokes an appropriate method on ClientMessageHandler. This is a server-side
+     * "visit" method called by a message receiver.
+     */
+    Object onReceive(ClientMessageHandler handler);
 }

@@ -56,12 +56,12 @@
 package org.objectstyle.cayenne.service;
 
 import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.distribution.ClientCommand;
-import org.objectstyle.cayenne.distribution.ClientCommandHandler;
-import org.objectstyle.cayenne.distribution.CommitCommand;
-import org.objectstyle.cayenne.distribution.NamedQueryCommand;
-import org.objectstyle.cayenne.distribution.QueryCommand;
-import org.objectstyle.cayenne.distribution.SyncCommand;
+import org.objectstyle.cayenne.distribution.ClientMessage;
+import org.objectstyle.cayenne.distribution.ClientMessageHandler;
+import org.objectstyle.cayenne.distribution.CommitMessage;
+import org.objectstyle.cayenne.distribution.NamedQueryMessage;
+import org.objectstyle.cayenne.distribution.QueryMessage;
+import org.objectstyle.cayenne.distribution.SyncMessage;
 
 /**
  * A default CayenneCommandHandler that translates calls forwarded from Cayenne service to
@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.distribution.SyncCommand;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class CommandHandler implements ClientCommandHandler {
+public class CommandHandler implements ClientMessageHandler {
 
     protected ObjectContext context;
 
@@ -92,25 +92,25 @@ public class CommandHandler implements ClientCommandHandler {
     /**
      * Main processing method that executes provided command.
      */
-    public Object processCommand(ClientCommand command) {
+    public Object processCommand(ClientMessage command) {
         // "visit" command...
-        return command.dispatchCommand(this);
+        return command.onReceive(this);
     }
 
-    public Object executeNamedQuery(NamedQueryCommand command) {
+    public Object executeNamedQuery(NamedQueryMessage command) {
         return (command.isSelecting())
                 ? executeSelectingNamedQuery(command)
                 : executeNonSelectingNamedQuery(command);
     }
 
-    public Object executeCommit(CommitCommand command) {
+    public Object executeCommit(CommitMessage command) {
         context.commitChanges();
 
         // TODO: where do we get ids?
         return null;
     }
 
-    public Object executeSynchronize(SyncCommand command) {
+    public Object executeSynchronize(SyncMessage command) {
         ObjectContext childProxy = new ChildObjectContextProxy(command.getDirtyObjects());
         context.commitChangesInContext(childProxy);
 
@@ -119,18 +119,18 @@ public class CommandHandler implements ClientCommandHandler {
         return null;
     }
 
-    protected Object executeSelectingNamedQuery(NamedQueryCommand command) {
+    protected Object executeSelectingNamedQuery(NamedQueryMessage command) {
         return context.performQuery(command.getQueryName(),
                 command.getParameters(),
                 command.isRefresh());
     }
 
-    protected Object executeNonSelectingNamedQuery(NamedQueryCommand command) {
+    protected Object executeNonSelectingNamedQuery(NamedQueryMessage command) {
         return context.performNonSelectingQuery(command.getQueryName(), command
                 .getParameters());
     }
 
-    public Object executeQuery(QueryCommand command) {
+    public Object executeQuery(QueryMessage command) {
         return null;
     }
 }

@@ -55,41 +55,54 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import java.util.Collection;
+import java.util.List;
+
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * A decorator for an array of commands. Dispatches them in the order they are passed to
- * the ChainedCommand constructor, returning the result of the last command.
+ * A message telling the receiver to perform a Cayenne query.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-// TODO: returning just the last result may prove to be limiting...
-// one way around it is subclassing...
-public class ChainedCommand implements ClientCommand {
+public class QueryMessage extends AbstractMessage {
 
-    protected ClientCommand[] commands;
+    protected Query query;
+    protected boolean selecting;
 
-    public ChainedCommand(ClientCommand[] commands) {
-        this.commands = commands;
-    }
-
-    public ChainedCommand(Collection commands) {
-        this.commands = new ClientCommand[commands.size()];
-        commands.toArray(this.commands);
-    }
-
-    public Object dispatchCommand(ClientCommandHandler handler) {
-        Object result = null;
-
-        for (int i = 0; i < commands.length; i++) {
-            result = commands[i].dispatchCommand(handler);
+    public QueryMessage(Query query, boolean selecting) {
+        // sanity check
+        if (query == null) {
+            throw new NullPointerException("Null query.");
         }
 
-        return result;
+        this.query = query;
+        this.selecting = selecting;
     }
 
-    public ClientCommand[] getCommands() {
-        return commands;
+    public Object onReceive(ClientMessageHandler handler) {
+        return handler.executeQuery(this);
+    }
+
+    /**
+     * Invoked by the message sender to perform a remote selecting query.
+     */
+    public List sendPerformQuery(CayenneConnector connector) {
+        return (List) send(connector, List.class);
+    }
+
+    /**
+     * Invoked by the message sender to perform a remote non-selecting query.
+     */
+    public int[] sendPerformNonSelectingQuery(CayenneConnector connector) {
+        return (int[]) send(connector, int[].class);
+    }
+
+    public Query getQuery() {
+        return query;
+    }
+
+    public boolean isSelecting() {
+        return selecting;
     }
 }

@@ -58,25 +58,38 @@ package org.objectstyle.cayenne.distribution;
 import java.util.Collection;
 
 /**
- * A command to update objects on the server with the state of the client.
+ * A decorator for an array of commands. Dispatches them in the order they are passed to
+ * the ChainedCommand constructor, returning the result of the last command.
  * 
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-// TODO: two-way sync needs to be implemented
-public class SyncCommand implements ClientCommand {
+// TODO: returning just the last result may prove to be limiting...
+// one way around it is subclassing...
+public class ChainedMessage implements ClientMessage {
 
-    protected Collection dirtyObjects;
+    protected ClientMessage[] messages;
 
-    public SyncCommand(Collection dirtyObject) {
-        this.dirtyObjects = dirtyObject;
+    public ChainedMessage(ClientMessage[] messages) {
+        this.messages = messages;
     }
 
-    public Object dispatchCommand(ClientCommandHandler handler) {
-        return handler.executeSynchronize(this);
+    public ChainedMessage(Collection messages) {
+        this.messages = new ClientMessage[messages.size()];
+        messages.toArray(this.messages);
     }
 
-    public Collection getDirtyObjects() {
-        return dirtyObjects;
+    public Object onReceive(ClientMessageHandler handler) {
+        Object result = null;
+
+        for (int i = 0; i < messages.length; i++) {
+            result = messages[i].onReceive(handler);
+        }
+
+        return result;
+    }
+
+    public ClientMessage[] getMessages() {
+        return messages;
     }
 }

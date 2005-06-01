@@ -55,23 +55,37 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import java.io.Serializable;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.objectstyle.cayenne.client.CayenneClientException;
 
 /**
- * Represents a "command" sent by Cayenne client to Cayenne server. Command dispatching is
- * done using visitor pattern. See
- * {@link org.objectstyle.cayenne.distribution.ClientCommandHandler}for details of the
- * command "language".
+ * A convenience common superclass of client messages.
  * 
  * @since 1.2
  * @author Andrus Adamchik
- * @see org.objectstyle.cayenne.distribution.ClientCommandHandler
  */
-public interface ClientCommand extends Serializable {
+public abstract class AbstractMessage implements ClientMessage {
+
+    public abstract Object onReceive(ClientMessageHandler handler);
 
     /**
-     * Invokes an appropriate method on ClientCommandHandler. This is a "visit" method
-     * described in the Visitor pattern.
+     * Convenience method to send this message over CayenneConnector and get a result of a
+     * specific class. Use by subclasses to implement safe casting of result.
+     * 
+     * @throws org.objectstyle.cayenne.client.CayenneClientException if an underlying
+     *             connector exception occured, or a result is not of expected type.
      */
-    Object dispatchCommand(ClientCommandHandler handler);
+    protected Object send(CayenneConnector connector, Class resultClass) {
+        Object result = connector.sendCommand(this);
+
+        if (result != null && !resultClass.isInstance(result)) {
+            String resultString = new ToStringBuilder(result).toString();
+            throw new CayenneClientException("Expected result type: "
+                    + resultClass.getName()
+                    + ", actual: "
+                    + resultString);
+        }
+
+        return result;
+    }
 }

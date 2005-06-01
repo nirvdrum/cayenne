@@ -64,10 +64,10 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.distribution.ChainedCommand;
-import org.objectstyle.cayenne.distribution.ClientCommand;
+import org.objectstyle.cayenne.distribution.ChainedMessage;
+import org.objectstyle.cayenne.distribution.ClientMessage;
 import org.objectstyle.cayenne.distribution.MockCayenneConnector;
-import org.objectstyle.cayenne.distribution.SyncCommand;
+import org.objectstyle.cayenne.distribution.SyncMessage;
 
 /**
  * @author Andrus Adamchik
@@ -110,12 +110,12 @@ public class ClientObjectContextTst extends TestCase {
         assertEquals(1, connector.getCommands().size());
 
         // expect a sync/commit chain
-        ClientCommand mainCommand = (ClientCommand) connector
+        ClientMessage mainCommand = (ClientMessage) connector
                 .getCommands()
                 .iterator()
                 .next();
-        assertTrue(mainCommand instanceof ChainedCommand);
-        assertEquals(2, ((ChainedCommand) mainCommand).getCommands().length);
+        assertTrue(mainCommand instanceof ChainedMessage);
+        assertEquals(2, ((ChainedMessage) mainCommand).getMessages().length);
 
     }
 
@@ -126,9 +126,9 @@ public class ClientObjectContextTst extends TestCase {
 
         MockCayenneConnector connector = new MockCayenneConnector() {
 
-            public Object sendCommand(ClientCommand command)
+            public Object sendCommand(ClientMessage command)
                     throws CayenneClientException {
-                SyncCommand sync = (SyncCommand) ((ChainedCommand) command).getCommands()[0];
+                SyncMessage sync = (SyncMessage) ((ChainedMessage) command).getMessages()[0];
 
                 // fake creating a replacement ID on the server... return back the
                 // original id with attached replacement values

@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
-import org.objectstyle.cayenne.distribution.ClientCommand;
+import org.objectstyle.cayenne.distribution.ClientMessage;
 import org.objectstyle.cayenne.distribution.HessianService;
 import org.objectstyle.cayenne.util.IDUtil;
 
@@ -139,7 +139,7 @@ public class HessianServiceHandler implements HessianService, Service {
         return id;
     }
 
-    public Object processCommand(String sessionId, ClientCommand command) {
+    public Object processCommand(String sessionId, ClientMessage command) {
         logObj.debug("invokeRemote, sessionId: " + sessionId);
 
         CommandHandler handler;

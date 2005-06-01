@@ -53,38 +53,31 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.jdbc;
+package org.objectstyle.cayenne.distribution;
 
-import java.io.IOException;
-import java.io.Writer;
-
-import org.apache.velocity.context.InternalContextAdapter;
+import java.util.Collection;
 
 /**
- * A custom Velocity directive to create a PreparedStatement parameter text for "<>?".
- * If null value is encountered, generated text will look like "IS NOT NULL". Usage in
- * Velocity template is "WHERE SOME_COLUMN #bindNotEqual($xyz)".
+ * A message notifying the receiver that the state of the client objects has changed and a
+ * synchronization is needed.
  * 
- * @since 1.1
+ * @since 1.2
  * @author Andrei Adamchik
  */
-public class BindNotEqualDirective extends BindDirective {
+// TODO: two-way sync needs to be implemented
+public class SyncMessage implements ClientMessage {
 
-    public String getName() {
-        return "bindNotEqual";
+    protected Collection dirtyObjects;
+
+    public SyncMessage(Collection dirtyObject) {
+        this.dirtyObjects = dirtyObject;
     }
 
-    protected void render(
-            InternalContextAdapter context,
-            Writer writer,
-            ParameterBinding binding) throws IOException {
+    public Object onReceive(ClientMessageHandler handler) {
+        return handler.executeSynchronize(this);
+    }
 
-        if (binding.getValue() != null) {
-            bind(context, binding);
-            writer.write("<> ?");
-        }
-        else {
-            writer.write("IS NOT NULL");
-        }
+    public Collection getDirtyObjects() {
+        return dirtyObjects;
     }
 }
