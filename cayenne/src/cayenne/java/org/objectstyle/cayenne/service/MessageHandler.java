@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.service;
 
 import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.distribution.ClientMessage;
 import org.objectstyle.cayenne.distribution.ClientMessageHandler;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.NamedQueryMessage;
@@ -70,7 +69,7 @@ import org.objectstyle.cayenne.distribution.SyncMessage;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class CommandHandler implements ClientMessageHandler {
+public class MessageHandler implements ClientMessageHandler {
 
     protected ObjectContext context;
 
@@ -78,7 +77,7 @@ public class CommandHandler implements ClientMessageHandler {
      * Creates new Commandhandler initializaing it with ObjectContext used for Cayenne
      * access.
      */
-    public CommandHandler(ObjectContext context) {
+    public MessageHandler(ObjectContext context) {
         this.context = context;
     }
 
@@ -87,14 +86,6 @@ public class CommandHandler implements ClientMessageHandler {
      */
     public ObjectContext getContext() {
         return context;
-    }
-
-    /**
-     * Main processing method that executes provided command.
-     */
-    public Object processCommand(ClientMessage command) {
-        // "visit" command...
-        return command.onReceive(this);
     }
 
     public Object executeNamedQuery(NamedQueryMessage command) {

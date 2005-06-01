@@ -60,24 +60,24 @@ package org.objectstyle.cayenne.distribution;
  * web.xml may look like this:
  * 
  * <pre>
- *  &lt;servlet&gt;
- *    &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *    &lt;servlet-class&gt;com.caucho.hessian.server.HessianServlet&lt;/servlet-class&gt;
- *    &lt;!-- Cayenne service API --&gt;
- *    &lt;init-param&gt;
- *      &lt;param-name&gt;api-class&lt;/param-name&gt;
- *      &lt;param-value&gt;org.objectstyle.cayenne.distribution.HessianService&lt;/param-value&gt;
- *    &lt;/init-param&gt;
- *    &lt;!-- Cayenne service implementation --&gt;
- *    &lt;init-param&gt;
- *      &lt;param-name&gt;service-class&lt;/param-name&gt;
- *      &lt;param-value&gt;org.objectstyle.cayenne.service.HessianServiceHandler&lt;/param-value&gt;
- *    &lt;/init-param&gt;
- *  &lt;/servlet&gt;
- *  &lt;servlet-mapping&gt;
- *    &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *    &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
- *  &lt;/servlet-mapping&gt;
+ *      &lt;servlet&gt;
+ *        &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
+ *        &lt;servlet-class&gt;com.caucho.hessian.server.HessianServlet&lt;/servlet-class&gt;
+ *        &lt;!-- Cayenne service API --&gt;
+ *        &lt;init-param&gt;
+ *          &lt;param-name&gt;api-class&lt;/param-name&gt;
+ *          &lt;param-value&gt;org.objectstyle.cayenne.distribution.HessianService&lt;/param-value&gt;
+ *        &lt;/init-param&gt;
+ *        &lt;!-- Cayenne service implementation --&gt;
+ *        &lt;init-param&gt;
+ *          &lt;param-name&gt;service-class&lt;/param-name&gt;
+ *          &lt;param-value&gt;org.objectstyle.cayenne.service.HessianServiceHandler&lt;/param-value&gt;
+ *        &lt;/init-param&gt;
+ *      &lt;/servlet&gt;
+ *      &lt;servlet-mapping&gt;
+ *        &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
+ *        &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
+ *      &lt;/servlet-mapping&gt;
  * </pre>
  * 
  * @since 1.2
@@ -92,7 +92,7 @@ public interface HessianService {
     String establishSession(String userName, String password);
 
     /**
-     * Invokes remote service method defined by the <em>callParameter</em>.
+     * Processes message on a remote server, returning the result of such processing.
      */
-    Object processCommand(String sessionId, ClientMessage command);
+    Object processMessage(String sessionId, ClientMessage message);
 }

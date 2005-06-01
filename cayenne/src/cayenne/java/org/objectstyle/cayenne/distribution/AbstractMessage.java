@@ -76,7 +76,7 @@ public abstract class AbstractMessage implements ClientMessage {
      *             connector exception occured, or a result is not of expected type.
      */
     protected Object send(CayenneConnector connector, Class resultClass) {
-        Object result = connector.sendCommand(this);
+        Object result = connector.sendMessage(this);
 
         if (result != null && !resultClass.isInstance(result)) {
             String resultString = new ToStringBuilder(result).toString();

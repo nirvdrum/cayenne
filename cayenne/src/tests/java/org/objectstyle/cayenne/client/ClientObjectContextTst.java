@@ -126,7 +126,7 @@ public class ClientObjectContextTst extends TestCase {
 
         MockCayenneConnector connector = new MockCayenneConnector() {
 
-            public Object sendCommand(ClientMessage command)
+            public Object sendMessage(ClientMessage command)
                     throws CayenneClientException {
                 SyncMessage sync = (SyncMessage) ((ChainedMessage) command).getMessages()[0];
 

@@ -139,12 +139,12 @@ public class HessianServiceHandler implements HessianService, Service {
         return id;
     }
 
-    public Object processCommand(String sessionId, ClientMessage command) {
+    public Object processMessage(String sessionId, ClientMessage command) {
         logObj.debug("invokeRemote, sessionId: " + sessionId);
 
-        CommandHandler handler;
+        MessageHandler handler;
         synchronized (commandHandlers) {
-            handler = (CommandHandler) commandHandlers.get(sessionId);
+            handler = (MessageHandler) commandHandlers.get(sessionId);
         }
 
         // TODO: expire sessions...
@@ -152,16 +152,16 @@ public class HessianServiceHandler implements HessianService, Service {
             throw new CayenneRuntimeException("Invalid sessionId: " + sessionId);
         }
 
-        return handler.processCommand(command);
+        return command.onReceive(handler);
     }
 
     /**
      * Assembles default handler.
      */
-    private CommandHandler makeHandler() {
+    private MessageHandler makeHandler() {
         DataContext dataContext = this.domain.createDataContext();
         ObjectContext objectContext = new ServerObjectContext(dataContext);
-        return new CommandHandler(objectContext);
+        return new MessageHandler(objectContext);
     }
 
     private String makeId() {

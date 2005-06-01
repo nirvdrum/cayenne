@@ -114,7 +114,7 @@ public class ClientObjectContext implements ObjectContext {
             commands[1] = new CommitMessage();
 
             ClientMessage chain = new ChainedMessage(commands);
-            Collection objectIds = (Collection) connector.sendCommand(chain);
+            Collection objectIds = (Collection) connector.sendMessage(chain);
 
             objectStore.objectsCommitted(objectIds);
         }

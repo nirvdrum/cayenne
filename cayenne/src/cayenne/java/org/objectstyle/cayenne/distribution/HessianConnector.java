@@ -112,19 +112,19 @@ public class HessianConnector implements CayenneConnector {
         }
     }
 
-    public Object sendCommand(ClientMessage command) throws CayenneClientException {
+    public Object sendMessage(ClientMessage message) throws CayenneClientException {
         // for now only support session-based communications...
         if (sessionId == null) {
             throw new CayenneClientException("Not connected, can't call 'invokeRemote'.");
         }
 
         try {
-            return service.processCommand(sessionId, command);
+            return service.processMessage(sessionId, message);
         }
         catch (Throwable th) {
             th = unwindThrowable(th);
-            String message = buildExceptionMessage("Remote error", th);
-            throw new CayenneClientException(message, th);
+            String errorMessage = buildExceptionMessage("Remote error", th);
+            throw new CayenneClientException(errorMessage, th);
         }
     }
 
