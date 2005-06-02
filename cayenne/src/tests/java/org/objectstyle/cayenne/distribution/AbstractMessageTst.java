@@ -55,29 +55,58 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import java.util.Collection;
+import org.objectstyle.cayenne.client.CayenneClientException;
+
+import junit.framework.TestCase;
 
 /**
- * A message notifying the receiver that the state of the client objects has changed and a
- * synchronization is needed.
- * 
- * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-// TODO: two-way sync needs to be implemented
-public class SyncMessage implements ClientMessage {
+public class AbstractMessageTst extends TestCase {
 
-    protected Collection dirtyObjects;
+    public void testSend() {
+        Object expectedResult = new Integer(5);
+        MockCayenneConnector connector = new MockCayenneConnector(expectedResult);
 
-    public SyncMessage(Collection dirtyObject) {
-        this.dirtyObjects = dirtyObject;
+        AbstractMessage message = new MockAbstractMessage();
+        Object result = message.send(connector, Integer.class);
+        assertSame(expectedResult, result);
     }
 
-    public Object onReceive(ClientMessageHandler handler) {
-        return handler.executeSynchronize(this);
+    public void testSendSuperclass() {
+        Object expectedResult = new Integer(6);
+        MockCayenneConnector connector = new MockCayenneConnector(expectedResult);
+
+        AbstractMessage message = new MockAbstractMessage();
+
+        // allow connector to return subclasses...
+        Object result = message.send(connector, Number.class);
+        assertSame(expectedResult, result);
     }
 
-    public Collection getDirtyObjects() {
-        return dirtyObjects;
+    public void testSendNull() {
+        MockCayenneConnector connector = new MockCayenneConnector(null);
+
+        AbstractMessage message = new MockAbstractMessage();
+
+        // null should be able to go through
+        Object result = message.send(connector, Number.class);
+        assertNull(result);
+    }
+
+    public void testSendClassMismatch() {
+        Integer expectedResult = new Integer(7);
+        MockCayenneConnector connector = new MockCayenneConnector(expectedResult);
+
+        // must blow on an unexpected result type
+        AbstractMessage message = new MockAbstractMessage();
+
+        try {
+            message.send(connector, String.class);
+            fail("result type check failed to detect mismatch");
+        }
+        catch (CayenneClientException e) {
+            // expected
+        }
     }
 }

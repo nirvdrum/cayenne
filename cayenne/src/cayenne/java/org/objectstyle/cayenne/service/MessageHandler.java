@@ -55,16 +55,16 @@
  */
 package org.objectstyle.cayenne.service;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.distribution.ClientMessageHandler;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.NamedQueryMessage;
 import org.objectstyle.cayenne.distribution.QueryMessage;
-import org.objectstyle.cayenne.distribution.SyncMessage;
 
 /**
- * A default CayenneCommandHandler that translates calls forwarded from Cayenne service to
- * the peer ObjectContext method calls.
+ * A default ClientMessageHandler that translates calls forwarded from Cayenne service to
+ * the calls on parent ObjectContext method calls.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -74,8 +74,8 @@ public class MessageHandler implements ClientMessageHandler {
     protected ObjectContext context;
 
     /**
-     * Creates new Commandhandler initializaing it with ObjectContext used for Cayenne
-     * access.
+     * Creates new MessageHandler initializing it with ObjectContext that will be
+     * channeled all the client updates.
      */
     public MessageHandler(ObjectContext context) {
         this.context = context;
@@ -94,19 +94,20 @@ public class MessageHandler implements ClientMessageHandler {
                 : executeNonSelectingNamedQuery(command);
     }
 
-    public Object executeCommit(CommitMessage command) {
-        context.commitChanges();
+    public Object executeCommit(CommitMessage message) {
+        ObjectContext remoteContext = message.getContext();
 
-        // TODO: where do we get ids?
-        return null;
-    }
+        // check message state
+        if (remoteContext == null) {
+            throw new CayenneRuntimeException("CommitMessage has null context");
+        }
 
-    public Object executeSynchronize(SyncMessage command) {
-        ObjectContext childProxy = new ChildObjectContextProxy(command.getDirtyObjects());
-        context.commitChangesInContext(childProxy);
+        // TODO: hmm.. this should be more like "remoteContext.commitChanges()", but this
+        // would require context.setParent(..) first. Should we use some deserialization
+        // ThreadLocal tricks to inject the parent?
+        context.commitChangesInContext(remoteContext);
 
-        // need to return something to follow general command method pattern...so send
-        // back null
+        // TODO: where do we get ids to send back...?
         return null;
     }
 

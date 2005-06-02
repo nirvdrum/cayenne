@@ -83,7 +83,7 @@ import org.objectstyle.cayenne.query.Query;
  */
 public interface ObjectContext extends Serializable {
 
-    // ==== methods for examining internal state.
+    // ==== methods used for examining internal state.
 
     /**
      * Returns a list of objects that are registered with this ObjectContext and have a

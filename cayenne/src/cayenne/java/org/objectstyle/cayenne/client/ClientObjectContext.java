@@ -55,34 +55,37 @@
  */
 package org.objectstyle.cayenne.client;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.distribution.CayenneConnector;
-import org.objectstyle.cayenne.distribution.ChainedMessage;
-import org.objectstyle.cayenne.distribution.ClientMessage;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.NamedQueryMessage;
 import org.objectstyle.cayenne.distribution.QueryMessage;
-import org.objectstyle.cayenne.distribution.SyncMessage;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * Client-side ObjectContext implementation.
+ * An ObjectContext that works 
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
 public class ClientObjectContext implements ObjectContext {
 
-    protected CayenneConnector connector;
+    // if we are to pass ClientObjectContext around, connector should be left alone and
+    // reinjected later if needed
+    protected transient CayenneConnector connector;
+
     protected ClientObjectStore objectStore;
 
     /**
@@ -102,24 +105,26 @@ public class ClientObjectContext implements ObjectContext {
     }
 
     /**
-     * Sends commit and sync commands to remote Cayenne service via an internal instance
-     * of CayenneConnector.
+     * Commits changes to uncommitted objects. First checks if there are changes in this
+     * context and if any changes are detected, sends a commit message to remote Cayenne
+     * service via an internal instance of CayenneConnector.
      */
     public void commitChanges() {
 
         if (objectStore.hasChanges()) {
 
-            ClientMessage[] commands = new ClientMessage[2];
-            commands[0] = new SyncMessage(objectStore.getDirtyObjects());
-            commands[1] = new CommitMessage();
-
-            ClientMessage chain = new ChainedMessage(commands);
-            Collection objectIds = (Collection) connector.sendMessage(chain);
-
-            objectStore.objectsCommitted(objectIds);
+            ObjectId[] ids = new CommitMessage(this).sendCommitChanges(connector);
+            Collection idCollection = ids != null
+                    ? Arrays.asList(ids)
+                    : Collections.EMPTY_LIST;
+            objectStore.objectsCommitted(idCollection);
         }
     }
 
+    /**
+     * Merges another ObjectContext changes to self. This method is performed locally and
+     * doesn't involve communication with the server.
+     */
     public void commitChangesInContext(ObjectContext context) {
         // TODO: implement
         throw new CayenneRuntimeException(

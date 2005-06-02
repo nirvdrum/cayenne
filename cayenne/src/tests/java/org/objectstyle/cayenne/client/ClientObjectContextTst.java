@@ -55,19 +55,15 @@
  */
 package org.objectstyle.cayenne.client;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.distribution.ChainedMessage;
 import org.objectstyle.cayenne.distribution.ClientMessage;
+import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.MockCayenneConnector;
-import org.objectstyle.cayenne.distribution.SyncMessage;
 
 /**
  * @author Andrus Adamchik
@@ -96,7 +92,7 @@ public class ClientObjectContextTst extends TestCase {
 
     public void testCommitChangesCommandExecuted() {
 
-        MockCayenneConnector connector = new MockCayenneConnector(new ArrayList());
+        MockCayenneConnector connector = new MockCayenneConnector(new ObjectId[0]);
         ClientObjectContext context = new ClientObjectContext(connector);
 
         // test that a command is being sent via connector on commit...
@@ -110,12 +106,11 @@ public class ClientObjectContextTst extends TestCase {
         assertEquals(1, connector.getCommands().size());
 
         // expect a sync/commit chain
-        ClientMessage mainCommand = (ClientMessage) connector
+        ClientMessage mainMessage = (ClientMessage) connector
                 .getCommands()
                 .iterator()
                 .next();
-        assertTrue(mainCommand instanceof ChainedMessage);
-        assertEquals(2, ((ChainedMessage) mainCommand).getMessages().length);
+        assertTrue(mainMessage instanceof CommitMessage);
 
     }
 
@@ -123,18 +118,25 @@ public class ClientObjectContextTst extends TestCase {
 
         // test that ids that are passed back are actually propagated to the right
         // objects...
-
         MockCayenneConnector connector = new MockCayenneConnector() {
 
-            public Object sendMessage(ClientMessage command)
+            public Object sendMessage(ClientMessage message)
                     throws CayenneClientException {
-                SyncMessage sync = (SyncMessage) ((ChainedMessage) command).getMessages()[0];
+                CommitMessage commit = (CommitMessage) message;
+
+                // assume a single NEW object...
+                Persistent object = (Persistent) commit
+                        .getContext()
+                        .newObjects()
+                        .iterator()
+                        .next();
 
                 // fake creating a replacement ID on the server... return back the
                 // original id with attached replacement values
-                Persistent object = (Persistent) sync.getDirtyObjects().iterator().next();
                 object.getObjectId().getReplacementIdMap().put("key", "generated");
-                return Collections.singletonList(object.getObjectId());
+                return new ObjectId[] {
+                    object.getObjectId()
+                };
             }
         };
 

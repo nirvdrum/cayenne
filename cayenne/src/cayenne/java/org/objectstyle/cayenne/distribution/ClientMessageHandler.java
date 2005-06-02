@@ -70,11 +70,9 @@ package org.objectstyle.cayenne.distribution;
  */
 public interface ClientMessageHandler {
 
-    public Object executeQuery(QueryMessage command);
+    public Object executeQuery(QueryMessage message);
 
-    public Object executeNamedQuery(NamedQueryMessage command);
+    public Object executeNamedQuery(NamedQueryMessage message);
 
-    public Object executeCommit(CommitMessage command);
-
-    public Object executeSynchronize(SyncMessage command);
+    public Object executeCommit(CommitMessage message);
 }

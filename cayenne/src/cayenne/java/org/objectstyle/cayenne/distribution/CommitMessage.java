@@ -55,17 +55,35 @@
  */
 package org.objectstyle.cayenne.distribution;
 
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.ObjectId;
+
 /**
- * A commands that tells receiver to commit all uncommitted objects. Returns a collection
- * of client object ids modified or generated during commit. It is usually preceeded by
- * the {@link SyncMessage}.
+ * A commands that instructs the receiver to commit all uncommitted objects. Returns a
+ * collection of client object ids modified or generated during commit. It passes client
+ * ObjectContext to the server, so it is a responsibility of the ObjectContext implementor
+ * to make its serialized size as small as possible.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class CommitMessage implements ClientMessage {
+public class CommitMessage extends AbstractMessage {
+
+    protected ObjectContext context;
+
+    public CommitMessage(ObjectContext context) {
+        this.context = context;
+    }
+
+    public ObjectContext getContext() {
+        return context;
+    }
 
     public Object onReceive(ClientMessageHandler handler) {
         return handler.executeCommit(this);
+    }
+
+    public ObjectId[] sendCommitChanges(CayenneConnector connector) {
+        return (ObjectId[]) send(connector, ObjectId[].class);
     }
 }

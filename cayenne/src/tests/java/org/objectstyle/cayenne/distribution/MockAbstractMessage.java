@@ -55,41 +55,12 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import java.util.Collection;
-
 /**
- * A decorator for an array of commands. Dispatches them in the order they are passed to
- * the ChainedCommand constructor, returning the result of the last command.
- * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-// TODO: returning just the last result may prove to be limiting...
-// one way around it is subclassing...
-public class ChainedMessage implements ClientMessage {
-
-    protected ClientMessage[] messages;
-
-    public ChainedMessage(ClientMessage[] messages) {
-        this.messages = messages;
-    }
-
-    public ChainedMessage(Collection messages) {
-        this.messages = new ClientMessage[messages.size()];
-        messages.toArray(this.messages);
-    }
+public class MockAbstractMessage extends AbstractMessage {
 
     public Object onReceive(ClientMessageHandler handler) {
-        Object result = null;
-
-        for (int i = 0; i < messages.length; i++) {
-            result = messages[i].onReceive(handler);
-        }
-
-        return result;
-    }
-
-    public ClientMessage[] getMessages() {
-        return messages;
+        return null;
     }
 }
