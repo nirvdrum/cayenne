@@ -432,8 +432,6 @@ public abstract class MapClassGenerator {
 
             StringUtils stringUtils = StringUtils.getInstance();
             
-            String baseClassName = stringUtils.stripPackageName(fqnBaseClass);
-            String basePackageName = stringUtils.stripClass(fqnBaseClass);
             String subClassName = stringUtils.stripPackageName(fqnSubClass);
             String subPackageName = stringUtils.stripClass(fqnSubClass);
      
