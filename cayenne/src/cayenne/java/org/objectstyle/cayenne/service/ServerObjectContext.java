@@ -181,4 +181,22 @@ public class ServerObjectContext implements ObjectContext {
         return dataContext.newObjects();
     }
 
+    public Collection uncommittedObjects() {
+        // TODO: implement
+        throw new CayenneClientException("Not implemented by proxy.");
+    }
+
+    public List performQueryInContext(ObjectContext context, GenericSelectQuery query) {
+        // TODO: implement
+        throw new CayenneClientException("Not implemented by proxy.");
+    }
+
+    public List performQueryInContext(
+            ObjectContext context,
+            String queryName,
+            Map parameters,
+            boolean refresh) {
+        // TODO: implement
+        throw new CayenneClientException("Not implemented by proxy.");
+    }
 }

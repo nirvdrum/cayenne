@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * An ObjectContext that works 
+ * An ObjectContext that works
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -127,6 +127,22 @@ public class ClientObjectContext implements ObjectContext {
      */
     public void commitChangesInContext(ObjectContext context) {
         // TODO: implement
+        throw new CayenneRuntimeException(
+                "ObjectContext hierarchy is not supported (yet).");
+    }
+
+    public List performQueryInContext(ObjectContext context, GenericSelectQuery query) {
+        //      TODO: implement
+        throw new CayenneRuntimeException(
+                "ObjectContext hierarchy is not supported (yet).");
+    }
+
+    public List performQueryInContext(
+            ObjectContext context,
+            String queryName,
+            Map parameters,
+            boolean refresh) {
+        //      TODO: implement
         throw new CayenneRuntimeException(
                 "ObjectContext hierarchy is not supported (yet).");
     }
@@ -225,6 +241,13 @@ public class ClientObjectContext implements ObjectContext {
         // diff for synchronization instead of sending full objects...
     }
 
+    /**
+     * Returns a collection of MODIFIED, DELETED or NEW objects.
+     */
+    public Collection uncommittedObjects() {
+        return objectStore.uncommittedObjects();
+    }
+
     public Collection deletedObjects() {
         return objectStore.objectsInState(PersistenceState.DELETED);
     }
@@ -236,4 +259,5 @@ public class ClientObjectContext implements ObjectContext {
     public Collection newObjects() {
         return objectStore.objectsInState(PersistenceState.NEW);
     }
+
 }

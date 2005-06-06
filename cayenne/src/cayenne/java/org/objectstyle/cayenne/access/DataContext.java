@@ -85,11 +85,9 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -488,6 +486,7 @@ public class DataContext implements QueryEngine, Serializable {
             DataObject obj = objectStore.getObject(oid);
             if (obj == null) {
                 try {
+                    // TODO: shouldn't we replace this with oid.getObjectClass().newInstance()
                     obj = DataContext.newDataObject(oid.getObjectClass().getName());
                 }
                 catch (Exception ex) {
@@ -656,90 +655,9 @@ public class DataContext implements QueryEngine, Serializable {
             List dataRows,
             boolean refresh,
             boolean resolveInheritanceHierarchy) {
-
-        if (dataRows == null || dataRows.size() == 0) {
-            return new ArrayList(1);
-        }
-
-        // do a sanity check on ObjEntity... if it's DbEntity has no PK defined,
-        // we can't build a valid ObjectId
-        DbEntity dbEntity = entity.getDbEntity();
-        if (dbEntity == null) {
-            throw new CayenneRuntimeException("ObjEntity '"
-                    + entity.getName()
-                    + "' has no DbEntity.");
-        }
-
-        if (dbEntity.getPrimaryKey().size() == 0) {
-            throw new CayenneRuntimeException("Can't create ObjectId for '"
-                    + entity.getName()
-                    + "'. Reason: DbEntity '"
-                    + dbEntity.getName()
-                    + "' has no Primary Key defined.");
-        }
-
-        // check inheritance
-        EntityInheritanceTree tree = null;
-        if (resolveInheritanceHierarchy) {
-            tree = getEntityResolver().lookupInheritanceTree(entity);
-        }
-
-        List results = new ArrayList(dataRows.size());
-        Iterator it = dataRows.iterator();
-
-        // must do double sync...
-        synchronized (getObjectStore()) {
-            synchronized (getObjectStore().getDataRowCache()) {
-                while (it.hasNext()) {
-                    DataRow dataRow = (DataRow) it.next();
-
-                    // determine entity to use
-                    ObjEntity objectEntity = entity;
-
-                    if (tree != null) {
-                        objectEntity = tree.entityMatchingRow(dataRow);
-
-                        // still null.... looks like inheritance qualifiers are messed up
-                        if (objectEntity == null) {
-                            objectEntity = entity;
-                        }
-                    }
-
-                    ObjectId anId = dataRow.createObjectId(objectEntity);
-
-                    // this will create a HOLLOW object if it is not registered yet
-                    DataObject object = registeredObject(anId);
-
-                    // deal with object state
-                    int state = object.getPersistenceState();
-                    switch (state) {
-                        case PersistenceState.COMMITTED:
-                        case PersistenceState.MODIFIED:
-                        case PersistenceState.DELETED:
-                            // process the above only if refresh is requested...
-                            if (!refresh) {
-                                break;
-                            }
-                        case PersistenceState.HOLLOW:
-                            DataRowUtils.mergeObjectWithSnapshot(objectEntity,
-                                    object,
-                                    dataRow);
-                        default:
-                            break;
-                    }
-                   
-
-                    object.setSnapshotVersion(dataRow.getVersion());
-                    object.fetchFinished();
-                    results.add(object);
-                }
-
-                // now deal with snapshots
-                getObjectStore().snapshotsUpdatedForObjects(results, dataRows, refresh);
-            }
-        }
-
-        return results;
+        
+        return new DataContextObjectFactory(this, refresh, resolveInheritanceHierarchy)
+                .objectsFromDataRows(entity, dataRows);
     }
 
     /**

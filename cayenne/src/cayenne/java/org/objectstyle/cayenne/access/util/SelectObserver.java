@@ -63,7 +63,9 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectFactory;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.DataContextObjectFactory;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -146,6 +148,25 @@ public class SelectObserver extends DefaultOperationObserver {
     }
 
     /**
+     * @since 1.1
+     * @deprecated since 1.2 use ObjectFactory variety instead.
+     */
+    public List getResultsAsObjects(DataContext dataContext, Query rootQuery) {
+
+        if (!(rootQuery instanceof GenericSelectQuery)) {
+            throw new CayenneRuntimeException("Expected GenericSelectQuery, got: "
+                    + rootQuery);
+        }
+
+        GenericSelectQuery selectQuery = (GenericSelectQuery) rootQuery;
+
+        ObjectFactory factory = new DataContextObjectFactory(dataContext, selectQuery
+                .isRefreshingObjects(), selectQuery.isResolvingInherited());
+        ObjEntity rootEntity = dataContext.getEntityResolver().lookupObjEntity(rootQuery);
+        return getResultsAsObjects(factory, rootEntity, selectQuery);
+    }
+
+    /**
      * Returns results for a given query object as DataObjects. <code>rootQuery</code>
      * argument is assumed to be the root query, and the rest are either independent
      * queries or queries prefetching relationships for the root query.
@@ -160,72 +181,54 @@ public class SelectObserver extends DefaultOperationObserver {
      * resolved as well.
      * </p>
      * 
-     * @since 1.1
+     * @since 1.2
      */
-    public List getResultsAsObjects(DataContext dataContext, Query rootQuery) {
-        ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(rootQuery);
+    public List getResultsAsObjects(
+            ObjectFactory factory,
+            ObjEntity rootEntity,
+            GenericSelectQuery rootQuery) {
 
         // sanity check
-        if (entity == null) {
+        if (rootEntity == null) {
             throw new CayenneRuntimeException(
                     "Can't instantiate DataObjects from resutls. ObjEntity is undefined for query: "
                             + rootQuery);
         }
-        
-        boolean genericSelect = rootQuery instanceof GenericSelectQuery;
-
-        boolean refresh = genericSelect
-                ? ((GenericSelectQuery) rootQuery).isRefreshingObjects()
-                : true;
-
-        boolean resolveHierarchy = genericSelect
-                ? ((GenericSelectQuery) rootQuery).isResolvingInherited()
-                : false;
 
         // prepare prefetch resolver ... it can be used in two different ways
         // depending on whether we also have joint prefetches.
         // TODO: this logic needs to be streamlined...
         PrefetchResolver tree = new PrefetchResolver();
-        tree.buildTree(entity, rootQuery, results);
+        tree.buildTree(rootEntity, rootQuery, results);
 
-        if (genericSelect) {
-            GenericSelectQuery rootSelect = (GenericSelectQuery) rootQuery;
-            Collection jointPrefetches = rootSelect.getJointPrefetches();
-            if (!jointPrefetches.isEmpty()) {
+        Collection jointPrefetches = rootQuery.getJointPrefetches();
+        if (!jointPrefetches.isEmpty()) {
 
-                // certain qualifiers conflict with joint prefetches, so we
-                // might need to disable some prefetched to-many arrays from being
-                // resolved. This is somewhat of a hack in search of a better solution.
-                Expression qualifier = null;
-                if (rootSelect instanceof QualifiedQuery) {
-                    qualifier = ((QualifiedQuery) rootSelect).getQualifier();
-                }
-
-                FlatPrefetchTreeNode flatPrefetchTree = new FlatPrefetchTreeNode(
-                        entity,
-                        jointPrefetches,
-                        qualifier);
-
-                FlatPrefetchResolver flatPrefetchResolver = new FlatPrefetchResolver(
-                        dataContext,
-                        refresh,
-                        resolveHierarchy);
-
-                List objects = flatPrefetchResolver.resolveObjectTree(flatPrefetchTree,
-                        getResults(rootQuery));
-
-                // attach normal prefetches to the list of main objects that is already
-                // resolved...
-                tree.resolveObjectTree(dataContext,
-                        refresh,
-                        resolveHierarchy,
-                        objects,
-                        true);
-                return objects;
+            // certain qualifiers conflict with joint prefetches, so we
+            // might need to disable some prefetched to-many arrays from being
+            // resolved. This is somewhat of a hack in search of a better solution.
+            Expression qualifier = null;
+            if (rootQuery instanceof QualifiedQuery) {
+                qualifier = ((QualifiedQuery) rootQuery).getQualifier();
             }
+
+            FlatPrefetchTreeNode flatPrefetchTree = new FlatPrefetchTreeNode(
+                    rootEntity,
+                    jointPrefetches,
+                    qualifier);
+
+            FlatPrefetchResolver flatPrefetchResolver = new FlatPrefetchResolver(factory);
+
+            List objects = flatPrefetchResolver.resolveObjectTree(flatPrefetchTree,
+                    getResults(rootQuery));
+
+            // attach normal prefetches to the list of main objects that is already
+            // resolved...
+            tree.resolveObjectTree(factory, objects, true);
+            return objects;
         }
 
-        return tree.resolveObjectTree(dataContext, refresh, resolveHierarchy);
+        return tree.resolveObjectTree(factory);
     }
 
     /**

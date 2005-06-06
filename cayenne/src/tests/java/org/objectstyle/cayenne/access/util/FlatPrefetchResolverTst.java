@@ -68,8 +68,10 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.ObjectFactory;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.DataContextObjectFactory;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -93,7 +95,9 @@ public class FlatPrefetchResolverTst extends CayenneTestCase {
         DataContext context = createDataContext();
         ObjEntity paint = context.getEntityResolver().lookupObjEntity(Painting.class);
         FlatPrefetchTreeNode tree = new FlatPrefetchTreeNode(paint, prefetches, null);
-        FlatPrefetchResolver resolver = new FlatPrefetchResolver(context, false, false);
+
+        ObjectFactory factory = new DataContextObjectFactory(context, false, false);
+        FlatPrefetchResolver resolver = new FlatPrefetchResolver(factory);
 
         List objects = resolver.resolveObjectTree(tree, rows);
         assertEquals(2, objects.size());
@@ -134,7 +138,9 @@ public class FlatPrefetchResolverTst extends CayenneTestCase {
         DataContext context = createDataContext();
         ObjEntity paint = context.getEntityResolver().lookupObjEntity(Painting.class);
         FlatPrefetchTreeNode tree = new FlatPrefetchTreeNode(paint, prefetches, null);
-        FlatPrefetchResolver resolver = new FlatPrefetchResolver(context, false, false);
+
+        ObjectFactory factory = new DataContextObjectFactory(context, false, false);
+        FlatPrefetchResolver resolver = new FlatPrefetchResolver(factory);
 
         List objects = resolver.resolveObjectTree(tree, rows);
         assertEquals(2, objects.size());
@@ -145,7 +151,7 @@ public class FlatPrefetchResolverTst extends CayenneTestCase {
             assertEquals(PersistenceState.COMMITTED, p.getPersistenceState());
             Artist a = p.getToArtist();
             assertEquals(PersistenceState.COMMITTED, a.getPersistenceState());
-            
+
             ToManyList list = (ToManyList) a.getGroupArray();
             assertNotNull(list);
             assertFalse("artist's groups not resolved: " + a, list.needsFetch());

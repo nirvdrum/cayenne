@@ -53,7 +53,6 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
@@ -61,120 +60,153 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectFactory;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.ParameterizedQuery;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * A DataContext helper that handles select query execution.
+ * Executes non-selecting queries on behalf of DataDomain.
  * 
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-class DataContextSelectAction {
+// Differences with DataContextSelectAction:
+// * no support for IncrementalFaultList yet (as it relies on DataContext)
+// * local cache is not checked ... caller must do it
+// * if caller uses its own "shared" cache, this action won't have access to it and will
+// use real shared cache instead...
+class DataDomainSelectQueryAction {
 
-    DataContext context;
+    DataDomain domain;
 
-    DataContextSelectAction(DataContext context) {
-        this.context = context;
+    DataDomainSelectQueryAction(DataDomain domain) {
+        this.domain = domain;
     }
 
-    List performQuery(GenericSelectQuery query) {
-        return performQuery(query, query.getName(), query.isRefreshingObjects());
+    List performQuery(
+            ObjectContext context,
+            String queryName,
+            Map parameters,
+            boolean refresh) {
+
+        // find query...
+        Query query = domain.getEntityResolver().getQuery(queryName);
+        if (query == null) {
+            throw new CayenneRuntimeException("There is no saved query for name '"
+                    + queryName
+                    + "'.");
+        }
+
+        // for SelectQuery we must always run parameter substitution as the query
+        // in question might have unbound values in the qualifier... that's a bit
+        // inefficient... any better ideas to determine whether we can skip parameter
+        // processing?
+
+        // another side effect from NOT substituting parameters is that caching key of the
+        // final query will be that of the original query... thus parameters vs. no
+        // paramete will result in inconsistent caching behavior.
+
+        if (query instanceof SelectQuery) {
+            SelectQuery select = (SelectQuery) query;
+            if (select.getQualifier() != null) {
+                query = select.createQuery(parameters != null
+                        ? parameters
+                        : Collections.EMPTY_MAP);
+            }
+        }
+        else if (parameters != null
+                && !parameters.isEmpty()
+                && query instanceof ParameterizedQuery) {
+            query = ((ParameterizedQuery) query).createQuery(parameters);
+        }
+
+        if (!(query instanceof GenericSelectQuery)) {
+            throw new CayenneRuntimeException("Query for name '"
+                    + queryName
+                    + "' is not a GenericSelectQuery: "
+                    + query);
+        }
+
+        return performQuery(context, (GenericSelectQuery) query, query.getName(), refresh);
     }
 
-    List performQuery(GenericSelectQuery query, String cacheKey, boolean refreshCache) {
+    List performQuery(ObjectContext context, GenericSelectQuery query) {
+        return performQuery(context, query, query.getName(), query.isRefreshingObjects());
+    }
+
+    List performQuery(
+            ObjectContext context,
+            GenericSelectQuery query,
+            String cacheKey,
+            boolean refreshCache) {
 
         // check if result pagination is requested
         // let a list handle fetch in this case
         if (query.getPageSize() > 0) {
-            return new IncrementalFaultList(context, query);
+            throw new CayenneRuntimeException("Paginated queries will be supported soon");
         }
 
-        boolean localCache = GenericSelectQuery.LOCAL_CACHE
-                .equals(query.getCachePolicy());
         boolean sharedCache = GenericSelectQuery.SHARED_CACHE.equals(query
                 .getCachePolicy());
-        boolean useCache = localCache || sharedCache;
 
         String name = query.getName();
 
         // sanity check
-        if (useCache && name == null) {
+        if (sharedCache && name == null) {
             throw new CayenneRuntimeException(
                     "Caching of unnamed queries is not supported.");
         }
 
         // get results from cache...
-        if (!refreshCache && useCache) {
-            List results = null;
+        if (!refreshCache && sharedCache) {
 
-            if (localCache) {
-                // results should have been stored as rows or objects when
-                // they were originally cached... do no conversions now
-                results = context.getObjectStore().getCachedQueryResult(cacheKey);
-            }
-            else if (sharedCache) {
+            List rows = domain.getSharedSnapshotCache().getCachedSnapshots(cacheKey);
+            if (rows != null) {
 
-                List rows = context
-                        .getObjectStore()
-                        .getDataRowCache()
-                        .getCachedSnapshots(cacheKey);
-                if (rows != null) {
+                // decorate shared cached lists with immutable list to avoid messing
+                // up the cache
 
-                    // decorate shared cached lists with immutable list to avoid messing
-                    // up the cache
-                    if (rows.size() == 0) {
-                        results = Collections.EMPTY_LIST;
-                    }
-                    else if (query.isFetchingDataRows()) {
-                        results = Collections.unmodifiableList(rows);
-                    }
-                    else {
-                        ObjEntity root = context
-                                .getEntityResolver()
-                                .lookupObjEntity(query);
-                        results = context.objectsFromDataRows(root, rows, query
-                                .isRefreshingObjects(), query.isResolvingInherited());
-                    }
+                if (rows.size() == 0) {
+                    return Collections.EMPTY_LIST;
+                }
+                else if (query.isFetchingDataRows()) {
+                    return Collections.unmodifiableList(rows);
+                }
+                else {
+                    ObjEntity root = domain.getEntityResolver().lookupObjEntity(query);
+                    return new EntityObjectFactory(context, query)
+                            .objectsFromDataRows(root, rows);
                 }
             }
 
-            if (results != null) {
-                return results;
-            }
         }
 
-        // must fetch...
+        // TODO: even with the move to ObjectFactory, SelectObserver still won't support
+        // ObjectContext prefetches as it relies on DataObject/DataContext internally...
+        // so need a different observer.
         SelectObserver observer = new SelectObserver(query.getLoggingLevel());
-        context.performQueries(queryWithPrefetches(query), observer);
+        ObjectFactory factory = new EntityObjectFactory(context, query);
+        ObjEntity rootEntity = domain.getEntityResolver().lookupObjEntity(query);
+        domain.performQueries(queryWithPrefetches(query), observer);
 
-        List results;
+        List results = (query.isFetchingDataRows())
+                ? observer.getResults(query)
+                : observer.getResultsAsObjects(factory, rootEntity, query);
 
-        if (query.isFetchingDataRows()) {
-            results = observer.getResults(query);
-        }
-        else {
-            ObjectFactory factory = new DataContextObjectFactory(context, query
-                    .isRefreshingObjects(), query.isResolvingInherited());
-            ObjEntity rootEntity = context.getEntityResolver().lookupObjEntity(query);
-            results = observer.getResultsAsObjects(factory, rootEntity, query);
-        }
-
-        // cache results if needed
-        if (useCache) {
-            if (localCache) {
-                context.getObjectStore().cacheQueryResult(cacheKey, results);
-            }
-            else if (sharedCache) {
-                context.getObjectStore().getDataRowCache().cacheSnapshots(cacheKey,
-                        observer.getResults(query));
-            }
+        // cache results if needed (note - if caller needs to set a local cache it is
+        // caller's responsibility...
+        if (sharedCache) {
+            domain.getSharedSnapshotCache().cacheSnapshots(cacheKey,
+                    observer.getResults(query));
         }
 
         return results;
@@ -203,7 +235,7 @@ class DataContextSelectAction {
 
         Iterator prefetchIt = prefetchKeys.iterator();
         while (prefetchIt.hasNext()) {
-            PrefetchSelectQuery prefetchQuery = new PrefetchSelectQuery(context
+            PrefetchSelectQuery prefetchQuery = new PrefetchSelectQuery(domain
                     .getEntityResolver(), selectQuery, (String) prefetchIt.next());
             queries.add(prefetchQuery);
         }

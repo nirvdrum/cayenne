@@ -53,67 +53,43 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.util;
+package org.objectstyle.cayenne.access;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectFactory;
-import org.objectstyle.cayenne.access.DataContextObjectFactory;
-import org.objectstyle.cayenne.access.DataContextTestBase;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 /**
- * @author Andrei Adamchik
+ * A default implementation of ObjectFactory interface that creates objects registered
+ * with ObjectContext.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public class SelectObserverTst extends DataContextTestBase {
+class EntityObjectFactory implements ObjectFactory {
 
-    public void testResults() {
-        SelectObserver observer = new SelectObserver();
-        Expression qualifier = ExpressionFactory.matchExp("artistName", "artist2");
-        SelectQuery query = new SelectQuery(Artist.class, qualifier);
-        context.performQueries(Collections.singletonList(query), observer);
+    ObjectContext context;
+    boolean refreshObjects;
+    boolean resolveInheritance;
 
-        List results = observer.getResults(query);
-        assertNotNull(results);
-        assertEquals(1, results.size());
-
-        assertTrue(results.get(0) instanceof Map);
+    EntityObjectFactory(ObjectContext context, GenericSelectQuery query) {
+        this(context, query.isRefreshingObjects(), query.isResolvingInherited());
     }
 
-    /**
-     * @deprecated Since 1.2 method being tested is deprecated.
-     */
-    public void testResultsAsObjectsOld() {
-        SelectObserver observer = new SelectObserver();
-        Expression qualifier = ExpressionFactory.matchExp("artistName", "artist2");
-        SelectQuery query = new SelectQuery(Artist.class, qualifier);
-        context.performQueries(Collections.singletonList(query), observer);
+    EntityObjectFactory(ObjectContext context, boolean refreshObjects,
+            boolean resolveInheritance) {
 
-        List results = observer.getResultsAsObjects(context, query);
-        assertNotNull(results);
-        assertEquals(1, results.size());
-        assertTrue(results.get(0) instanceof Artist);
+        this.context = context;
+        this.refreshObjects = refreshObjects;
+        this.resolveInheritance = resolveInheritance;
     }
 
-    public void testResultsAsObjects() {
-        SelectObserver observer = new SelectObserver();
-        Expression qualifier = ExpressionFactory.matchExp("artistName", "artist2");
-        SelectQuery query = new SelectQuery(Artist.class, qualifier);
-        context.performQueries(Collections.singletonList(query), observer);
-
-        ObjectFactory factory = new DataContextObjectFactory(context, query
-                .isRefreshingObjects(), query.isResolvingInherited());
-        ObjEntity rootEntity = context.getEntityResolver().lookupObjEntity(query);
-
-        List results = observer.getResultsAsObjects(factory, rootEntity, query);
-        assertNotNull(results);
-        assertEquals(1, results.size());
-        assertTrue(results.get(0) instanceof Artist);
+    public List objectsFromDataRows(ObjEntity entity, List rows) {
+        // TODO: implement
+        throw new CayenneRuntimeException("Not implemented yet");
     }
 }

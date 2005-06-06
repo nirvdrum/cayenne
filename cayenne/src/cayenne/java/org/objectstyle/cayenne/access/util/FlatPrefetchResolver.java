@@ -64,7 +64,7 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
-import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.ObjectFactory;
 
 /**
  * Encapsulates resolving of a cartesian product result set. Uses FlatPrefetchTreeNode
@@ -75,19 +75,13 @@ import org.objectstyle.cayenne.access.DataContext;
  */
 final class FlatPrefetchResolver {
 
-    DataContext dataContext;
-    boolean refresh;
-    boolean resolveHierarchy;
+    ObjectFactory factory;
 
     /**
      * Create and configure an operation.
      */
-    FlatPrefetchResolver(DataContext dataContext, boolean refresh,
-            boolean resolveHierarchy) {
-
-        this.dataContext = dataContext;
-        this.refresh = refresh;
-        this.resolveHierarchy = resolveHierarchy;
+    FlatPrefetchResolver(ObjectFactory factory) {
+        this.factory = factory;
     }
 
     /**
@@ -179,8 +173,8 @@ final class FlatPrefetchResolver {
         // some batching that we should do once instead of N * M times (e.g.
         // synchronization blocks, etc.)
         DataRow row = node.rowFromFlatRow(flatRow);
-        List objects = dataContext.objectsFromDataRows(node.getEntity(), Collections
-                .singletonList(row), refresh, resolveHierarchy);
+        List objects = factory.objectsFromDataRows(node.getEntity(), Collections
+                .singletonList(row));
         return (DataObject) objects.get(0);
     }
 }

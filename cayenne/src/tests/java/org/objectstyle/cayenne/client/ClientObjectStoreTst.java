@@ -110,10 +110,10 @@ public class ClientObjectStoreTst extends TestCase {
         assertTrue(store.objectsInState(PersistenceState.HOLLOW).isEmpty());
     }
 
-    public void testDirtyObjects() {
+    public void testUncommittedObjects() {
         ClientObjectStore store = new ClientObjectStore();
-        assertNotNull(store.getDirtyObjects());
-        assertTrue(store.getDirtyObjects().isEmpty());
+        assertNotNull(store.uncommittedObjects());
+        assertTrue(store.uncommittedObjects().isEmpty());
 
         // introduce a fake dirty object
         MockClientDataObject object = new MockClientDataObject();
@@ -121,12 +121,12 @@ public class ClientObjectStoreTst extends TestCase {
         object.setPersistenceState(PersistenceState.MODIFIED);
         store.trackObject(object);
 
-        assertTrue(store.getDirtyObjects().contains(object));
+        assertTrue(store.uncommittedObjects().contains(object));
 
         // must go away on commit...
         store.objectsCommitted(Collections.EMPTY_SET);
-        assertNotNull(store.getDirtyObjects());
-        assertTrue(store.getDirtyObjects().isEmpty());
+        assertNotNull(store.uncommittedObjects());
+        assertTrue(store.uncommittedObjects().isEmpty());
 
     }
 

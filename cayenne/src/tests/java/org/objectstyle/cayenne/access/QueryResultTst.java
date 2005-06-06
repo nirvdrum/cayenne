@@ -62,7 +62,6 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.query.DeleteQuery;
-import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
@@ -71,19 +70,17 @@ import org.objectstyle.cayenne.query.UpdateQuery;
  * @author Andrei Adamchik
  */
 public class QueryResultTst extends TestCase {
+
     protected QueryResult result;
     protected Query[] queries;
 
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         result = new QueryResult();
-        queries =
-            new Query[] {
-                new SelectQuery(),
-                new UpdateQuery(),
-                new DeleteQuery(),
-                new InsertQuery()};
+        queries = new Query[] {
+                new SelectQuery(), new UpdateQuery(), new DeleteQuery()
+        };
     }
 
     public void testQueries() throws Exception {
@@ -125,6 +122,5 @@ public class QueryResultTst extends TestCase {
         List all = result.getResults(q);
         assertNotNull(all);
         assertEquals(5, all.size());
-
     }
 }

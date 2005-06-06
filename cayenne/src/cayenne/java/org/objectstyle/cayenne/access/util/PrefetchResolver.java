@@ -66,6 +66,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections.map.LinkedMap;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectFactory;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.DataContext;
@@ -188,17 +189,10 @@ class PrefetchResolver {
     /**
      * Recursively resolves a hierarchy of prefetched data rows.
      */
-    List resolveObjectTree(
-            DataContext dataContext,
-            boolean refresh,
-            boolean resolveHierarchy) {
+    List resolveObjectTree(ObjectFactory factory) {
 
         // resolve the tree recursively...
-        List objects = resolveObjectTree(dataContext,
-                refresh,
-                resolveHierarchy,
-                null,
-                false);
+        List objects = resolveObjectTree(factory, null, false);
         return (objects != null) ? objects : new ArrayList(1);
     }
 
@@ -207,12 +201,7 @@ class PrefetchResolver {
      * node. Allows to skip the resolution of this node and only do children. This is
      * useful in chaining various prefetch resolving strategies.
      */
-    List resolveObjectTree(
-            DataContext dataContext,
-            boolean refresh,
-            boolean resolveHierarchy,
-            List parentObjects,
-            boolean skipSelf) {
+    List resolveObjectTree(ObjectFactory factory, List parentObjects, boolean skipSelf) {
 
         List objects = null;
 
@@ -222,10 +211,7 @@ class PrefetchResolver {
                     .getTargetEntity() : this.entity;
 
             // resolve objects;
-            objects = dataContext.objectsFromDataRows(entity,
-                    dataRows,
-                    refresh,
-                    resolveHierarchy);
+            objects = factory.objectsFromDataRows(entity, dataRows);
 
             // connect to parent - to-many only, as to-one are connected by Cayenne
             // automatically.
@@ -251,11 +237,7 @@ class PrefetchResolver {
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
                 PrefetchResolver node = (PrefetchResolver) entry.getValue();
-                node.resolveObjectTree(dataContext,
-                        refresh,
-                        resolveHierarchy,
-                        objects,
-                        false);
+                node.resolveObjectTree(factory, objects, false);
             }
         }
 

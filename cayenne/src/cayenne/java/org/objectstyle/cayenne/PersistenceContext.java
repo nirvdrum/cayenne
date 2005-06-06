@@ -53,67 +53,55 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.util;
+package org.objectstyle.cayenne;
 
-import java.util.Collections;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.ObjectFactory;
-import org.objectstyle.cayenne.access.DataContextObjectFactory;
-import org.objectstyle.cayenne.access.DataContextTestBase;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * @author Andrei Adamchik
+ * An interface defining methods to access a persistent store in Cayenne. Users would
+ * normally work directly with a subinterface -
+ * {@link org.objectstyle.cayenne.ObjectContext}. PersistenceContext API is designed to
+ * serve child ObjectContexts. It makes possible building hierarchies of ObjectContexts.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public class SelectObserverTst extends DataContextTestBase {
-
-    public void testResults() {
-        SelectObserver observer = new SelectObserver();
-        Expression qualifier = ExpressionFactory.matchExp("artistName", "artist2");
-        SelectQuery query = new SelectQuery(Artist.class, qualifier);
-        context.performQueries(Collections.singletonList(query), observer);
-
-        List results = observer.getResults(query);
-        assertNotNull(results);
-        assertEquals(1, results.size());
-
-        assertTrue(results.get(0) instanceof Map);
-    }
+public interface PersistenceContext extends Serializable {
 
     /**
-     * @deprecated Since 1.2 method being tested is deprecated.
+     * Merges changes from the ObjectContext parameter. This method is used by child
+     * ObjectContexts to commit their objects to parent.
      */
-    public void testResultsAsObjectsOld() {
-        SelectObserver observer = new SelectObserver();
-        Expression qualifier = ExpressionFactory.matchExp("artistName", "artist2");
-        SelectQuery query = new SelectQuery(Artist.class, qualifier);
-        context.performQueries(Collections.singletonList(query), observer);
+    void commitChangesInContext(ObjectContext context);
 
-        List results = observer.getResultsAsObjects(context, query);
-        assertNotNull(results);
-        assertEquals(1, results.size());
-        assertTrue(results.get(0) instanceof Artist);
-    }
+    /**
+     * Executes a selecting query on behalf of an ObjectContext. Any returned objects will
+     * be registered with that ObjectContext.
+     */
+    List performQueryInContext(ObjectContext context, GenericSelectQuery query);
 
-    public void testResultsAsObjects() {
-        SelectObserver observer = new SelectObserver();
-        Expression qualifier = ExpressionFactory.matchExp("artistName", "artist2");
-        SelectQuery query = new SelectQuery(Artist.class, qualifier);
-        context.performQueries(Collections.singletonList(query), observer);
+    /**
+     * Executes a named selecting query on behalf of an ObjectContext. Any returned
+     * objects will be registered with that ObjectContext.
+     */
+    List performQueryInContext(
+            ObjectContext context,
+            String queryName,
+            Map parameters,
+            boolean refresh);
 
-        ObjectFactory factory = new DataContextObjectFactory(context, query
-                .isRefreshingObjects(), query.isResolvingInherited());
-        ObjEntity rootEntity = context.getEntityResolver().lookupObjEntity(query);
+    /**
+     * Executes a non-se;ecting query returning result counts.
+     */
+    public int[] performNonSelectingQuery(Query query);
 
-        List results = observer.getResultsAsObjects(factory, rootEntity, query);
-        assertNotNull(results);
-        assertEquals(1, results.size());
-        assertTrue(results.get(0) instanceof Artist);
-    }
+    /**
+     * Executes a named non-selecting query.
+     */
+    int[] performNonSelectingQuery(String queryName, Map parameters);
 }

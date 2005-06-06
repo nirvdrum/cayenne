@@ -64,9 +64,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.Persistent;
 
 /**
  * A helper class for ClientObjectContext that tracks object changes.
@@ -84,6 +84,10 @@ class ClientObjectStore implements Serializable {
 
     boolean hasChanges() {
         return !dirtyObjects.isEmpty();
+    }
+
+    synchronized Collection uncommittedObjects() {
+        return dirtyObjects.values();
     }
 
     /**
@@ -126,13 +130,6 @@ class ClientObjectStore implements Serializable {
 
     synchronized void forgetObject(Persistent object) {
         dirtyObjects.remove(object.getObjectId());
-    }
-
-    /**
-     * Returns all registered "dirty" objects.
-     */
-    synchronized Collection getDirtyObjects() {
-        return dirtyObjects.values();
     }
 
     /**

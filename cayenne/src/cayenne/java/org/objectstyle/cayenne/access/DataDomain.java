@@ -64,11 +64,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryRouter;
 
@@ -84,7 +87,7 @@ import org.objectstyle.cayenne.query.QueryRouter;
  * 
  * @author Andrei Adamchik
  */
-public class DataDomain implements QueryEngine, QueryRouter {
+public class DataDomain implements QueryEngine, QueryRouter, PersistenceContext {
 
     private static Logger logObj = Logger.getLogger(DataDomain.class);
 
@@ -654,13 +657,54 @@ public class DataDomain implements QueryEngine, QueryRouter {
     }
 
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
-        buffer
-                .append(ObjectUtils.identityToString(this))
-                .append(":[")
-                .append(getName())
-                .append("]");
+        return new ToStringBuilder(this).append("name", name).toString();
+    }
 
-        return buffer.toString();
+    // **** new 1.2 PersistenceContext methods:
+
+    /**
+     * Commits changes in an ObjectContext. PersistenceContext method implementation.
+     * 
+     * @since 1.2
+     */
+    public void commitChangesInContext(ObjectContext context) {
+        new DataDomainCommitAction(this).commit(context);
+    }
+
+    /**
+     * @since 1.2
+     */
+    public int[] performNonSelectingQuery(Query query) {
+        return new DataDomainQueryAction(this).performNonSelectingQuery(query);
+    }
+
+    /**
+     * @since 1.2
+     */
+    public int[] performNonSelectingQuery(String queryName, Map parameters) {
+        return new DataDomainQueryAction(this).performNonSelectingQuery(queryName,
+                parameters);
+    }
+
+    /**
+     * @since 1.2
+     */
+    public List performQueryInContext(ObjectContext context, GenericSelectQuery query) {
+        return new DataDomainSelectQueryAction(this).performQuery(context, query);
+    }
+
+    /**
+     * @since 1.2
+     */
+    public List performQueryInContext(
+            ObjectContext context,
+            String queryName,
+            Map parameters,
+            boolean refresh) {
+
+        return new DataDomainSelectQueryAction(this).performQuery(context,
+                queryName,
+                parameters,
+                refresh);
     }
 }

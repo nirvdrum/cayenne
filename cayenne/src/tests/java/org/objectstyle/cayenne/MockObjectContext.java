@@ -123,4 +123,20 @@ public class MockObjectContext implements ObjectContext {
             Object oldValue,
             Object newValue) {
     }
+
+    public Collection uncommittedObjects() {
+        return null;
+    }
+
+    public List performQueryInContext(ObjectContext context, GenericSelectQuery query) {
+        return null;
+    }
+
+    public List performQueryInContext(
+            ObjectContext context,
+            String queryName,
+            Map parameters,
+            boolean refresh) {
+        return null;
+    }
 }

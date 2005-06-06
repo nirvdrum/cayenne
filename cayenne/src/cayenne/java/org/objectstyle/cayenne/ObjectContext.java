@@ -55,24 +55,15 @@
  */
 package org.objectstyle.cayenne;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.Query;
 
 /**
- * Defines a persistent context abstraction. Instances of ObjectContext is what users are
- * dealing with when accessing Cayenne. ObjectContext methods can be broken down to the
- * three logical categories:
- * <ul>
- * <li>Query methods: various "performQuery" methods.</li>
- * <li>Methods for examining internal state: new/deleted/modifiedObjects()</li>
- * <li>Object lifecycle methods: newObject(..), deleteObject(..), commitChanges(..),
- * commitChangesInContext(..), objectWillRead(..), objectWillWrite(..).
- * </ul>
+ * A variety of PersistenceContext used directly by the application code. ObjectContext
+ * tracks uncommitted changes to objects and can commit them in a single method call.
  * <p>
  * <i>Currently this interface is only used by client-side objects. The plan is to merge
  * it with DataContext. </i>
@@ -81,51 +72,30 @@ import org.objectstyle.cayenne.query.Query;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface ObjectContext extends Serializable {
-
-    // ==== methods used for examining internal state.
+public interface ObjectContext extends PersistenceContext {
 
     /**
-     * Returns a list of objects that are registered with this ObjectContext and have a
-     * state PersistenceState.NEW
+     * Returns a collection of objects that are registered with this ObjectContext and
+     * have a state PersistenceState.NEW
      */
     Collection newObjects();
 
     /**
-     * Returns a list of objects that are registered with this ObjectContext and have a
-     * state PersistenceState.DELETED
+     * Returns a collection of objects that are registered with this ObjectContext and
+     * have a state PersistenceState.DELETED
      */
     Collection deletedObjects();
 
     /**
-     * Returns a list of objects that are registered with this ObjectContext and have a
-     * state PersistenceState.MODIFIED
+     * Returns a collection of objects that are registered with this ObjectContext and
+     * have a state PersistenceState.MODIFIED
      */
     Collection modifiedObjects();
 
-    // ==== query methods
-
     /**
-     * Executes a selecting query, returning the result.
+     * Returns a collection of MODIFIED, DELETED or NEW objects.
      */
-    List performQuery(GenericSelectQuery query);
-
-    /**
-     * Executes a named selecting query.
-     */
-    List performQuery(String queryName, Map parameters, boolean refresh);
-
-    /**
-     * Executes a non-se;ecting query returning result counts.
-     */
-    public int[] performNonSelectingQuery(Query query);
-
-    /**
-     * Executes a named non-selecting query.
-     */
-    int[] performNonSelectingQuery(String queryName, Map parameters);
-
-    // ==== Lifecycle methods
+    Collection uncommittedObjects();
 
     /**
      * Creates a new persistent object scheduled to be inserted on next commit.
@@ -136,19 +106,6 @@ public interface ObjectContext extends Serializable {
      * Schedules a persistent object for deletion on next commit.
      */
     void deleteObject(Persistent object);
-
-    /**
-     * Commits changes made to this ObjectContext persistent objects. If an ObjectContext
-     * is a part of an ObjectContext hierarchy, this method call triggers commit all the
-     * way to the external data store.
-     */
-    void commitChanges();
-
-    /**
-     * Merges changes from the ObjectContext parameter. This method is used by child
-     * ObjectContexts to commit their objects to parent.
-     */
-    void commitChangesInContext(ObjectContext context);
 
     /**
      * A callback method that is invoked whenver a persistent object property is about to
@@ -165,4 +122,21 @@ public interface ObjectContext extends Serializable {
             String property,
             Object oldValue,
             Object newValue);
+
+    /**
+     * Commits changes made to this ObjectContext persistent objects. If an ObjectContext
+     * is a part of an ObjectContext hierarchy, this method call triggers commit all the
+     * way to the external data store.
+     */
+    void commitChanges();
+
+    /**
+     * Executes a selecting query, returning the result.
+     */
+    List performQuery(GenericSelectQuery query);
+
+    /**
+     * Executes a named selecting query.
+     */
+    List performQuery(String queryName, Map parameters, boolean refresh);
 }

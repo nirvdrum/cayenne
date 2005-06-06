@@ -53,67 +53,66 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.util;
+package org.objectstyle.cayenne.access;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.ObjectFactory;
-import org.objectstyle.cayenne.access.DataContextObjectFactory;
-import org.objectstyle.cayenne.access.DataContextTestBase;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.query.ParameterizedQuery;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * @author Andrei Adamchik
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public class SelectObserverTst extends DataContextTestBase {
+class DataDomainQueryAction {
 
-    public void testResults() {
-        SelectObserver observer = new SelectObserver();
-        Expression qualifier = ExpressionFactory.matchExp("artistName", "artist2");
-        SelectQuery query = new SelectQuery(Artist.class, qualifier);
-        context.performQueries(Collections.singletonList(query), observer);
+    DataDomain domain;
 
-        List results = observer.getResults(query);
-        assertNotNull(results);
-        assertEquals(1, results.size());
-
-        assertTrue(results.get(0) instanceof Map);
+    public DataDomainQueryAction(DataDomain domain) {
+        this.domain = domain;
     }
 
     /**
-     * @deprecated Since 1.2 method being tested is deprecated.
+     * Performs a named mapped non-selecting query using a map of parameters. Returns an
+     * array of update counts.
      */
-    public void testResultsAsObjectsOld() {
-        SelectObserver observer = new SelectObserver();
-        Expression qualifier = ExpressionFactory.matchExp("artistName", "artist2");
-        SelectQuery query = new SelectQuery(Artist.class, qualifier);
-        context.performQueries(Collections.singletonList(query), observer);
+    int[] performNonSelectingQuery(String queryName, Map parameters) {
+        // find query...
+        Query query = domain.getEntityResolver().getQuery(queryName);
+        if (query == null) {
+            throw new CayenneRuntimeException("There is no saved query for name '"
+                    + queryName
+                    + "'.");
+        }
 
-        List results = observer.getResultsAsObjects(context, query);
-        assertNotNull(results);
-        assertEquals(1, results.size());
-        assertTrue(results.get(0) instanceof Artist);
+        if (parameters != null
+                && !parameters.isEmpty()
+                && query instanceof ParameterizedQuery) {
+            query = ((ParameterizedQuery) query).createQuery(parameters);
+        }
+
+        return performNonSelectingQuery(query);
     }
 
-    public void testResultsAsObjects() {
-        SelectObserver observer = new SelectObserver();
-        Expression qualifier = ExpressionFactory.matchExp("artistName", "artist2");
-        SelectQuery query = new SelectQuery(Artist.class, qualifier);
-        context.performQueries(Collections.singletonList(query), observer);
+    int[] performNonSelectingQuery(Query query) {
+        QueryResult result = new QueryResult();
+        domain.performQueries(Collections.singletonList(query), result);
+        List updateCounts = result.getUpdates(query);
 
-        ObjectFactory factory = new DataContextObjectFactory(context, query
-                .isRefreshingObjects(), query.isResolvingInherited());
-        ObjEntity rootEntity = context.getEntityResolver().lookupObjEntity(query);
+        if (updateCounts == null || updateCounts.isEmpty()) {
+            return new int[0];
+        }
 
-        List results = observer.getResultsAsObjects(factory, rootEntity, query);
-        assertNotNull(results);
-        assertEquals(1, results.size());
-        assertTrue(results.get(0) instanceof Artist);
+        int len = updateCounts.size();
+        int[] counts = new int[len];
+
+        for (int i = 0; i < len; i++) {
+            counts[i] = ((Number) updateCounts.get(i)).intValue();
+        }
+
+        return counts;
     }
 }
