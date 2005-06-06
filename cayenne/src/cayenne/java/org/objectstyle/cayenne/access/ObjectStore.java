@@ -130,6 +130,25 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         this();
         setDataRowCache(dataRowCache);
     }
+    
+    /**
+     * Returns a number of objects currently registered with this ObjectStore.
+     * 
+     * @since 1.2
+     */
+    public int registeredObjectsCount() {
+        return objectMap.size();
+    }
+    
+    /**
+     * Returns a number of query results cached by this object store. Note that each
+     * result is a list and can possibly contain a large number of entries.
+     * 
+     * @since 1.2
+     */
+    public int cachedQueriesCount() {
+        return queryResultMap.size();
+    }
 
     /**
      * Saves a committed snapshot for an object in a non-expiring cache. This ensures that

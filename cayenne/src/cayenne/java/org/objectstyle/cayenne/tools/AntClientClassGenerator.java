@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.tools;
 
 import org.apache.tools.ant.Task;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.client.ClientDataObject;
+import org.objectstyle.cayenne.PersistentObject;
 import org.objectstyle.cayenne.gen.AntClassGenerator;
 import org.objectstyle.cayenne.gen.ClassGenerator;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -131,7 +131,7 @@ class AntClientClassGenerator extends AntClassGenerator {
             generator.setSuperClassName(entity.getClientSuperClassName());
         }
         else {
-            generator.setSuperClassName(ClientDataObject.class.getName());
+            generator.setSuperClassName(PersistentObject.class.getName());
         }
 
         generator.setSuperPackageName(spkg);

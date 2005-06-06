@@ -59,10 +59,6 @@ import java.io.Serializable;
 
 /**
  * An interface that defines Cayenne persistent object.
- * <p>
- * <i>Currently this interface is only used by client-side objects. The plan is to merge
- * it with DataObject </i>
- * </p>
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -76,6 +72,4 @@ public interface Persistent extends Serializable {
     int getPersistenceState();
 
     void setPersistenceState(int state);
-
-    ObjectContext getObjectContext();
 }

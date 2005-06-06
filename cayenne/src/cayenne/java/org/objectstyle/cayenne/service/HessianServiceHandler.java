@@ -64,12 +64,11 @@ import javax.servlet.ServletException;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.distribution.ClientMessage;
+import org.objectstyle.cayenne.distribution.ClientMessageHandler;
 import org.objectstyle.cayenne.distribution.HessianService;
 import org.objectstyle.cayenne.util.IDUtil;
 
@@ -132,7 +131,7 @@ public class HessianServiceHandler implements HessianService, Service {
         String id = makeId();
 
         synchronized (commandHandlers) {
-            commandHandlers.put(id, makeHandler());
+            commandHandlers.put(id, new ServerObjectContext(domain));
         }
 
         logObj.debug("CayenneHessianService - established client session: " + id);
@@ -142,9 +141,9 @@ public class HessianServiceHandler implements HessianService, Service {
     public Object processMessage(String sessionId, ClientMessage command) {
         logObj.debug("invokeRemote, sessionId: " + sessionId);
 
-        MessageHandler handler;
+        ClientMessageHandler handler;
         synchronized (commandHandlers) {
-            handler = (MessageHandler) commandHandlers.get(sessionId);
+            handler = (ClientMessageHandler) commandHandlers.get(sessionId);
         }
 
         // TODO: expire sessions...
@@ -153,15 +152,6 @@ public class HessianServiceHandler implements HessianService, Service {
         }
 
         return command.onReceive(handler);
-    }
-
-    /**
-     * Assembles default handler.
-     */
-    private MessageHandler makeHandler() {
-        DataContext dataContext = this.domain.createDataContext();
-        ObjectContext objectContext = new ServerObjectContext(dataContext);
-        return new MessageHandler(objectContext);
     }
 
     private String makeId() {

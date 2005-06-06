@@ -53,27 +53,27 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.client;
+package org.objectstyle.cayenne;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.MockObjectContext;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.PersistentObject;
 
 /**
  * @author Andrus Adamchik
  */
-public class ClientDataObjectTst extends TestCase {
+public class PersistentObjectTst extends TestCase {
 
     public void testObjectContext() {
         MockObjectContext context = new MockObjectContext();
-        ClientDataObject object = new MockClientDataObject();
+        PersistentObject object = new MockPersistentObject();
 
         assertNull(object.getObjectContext());
         object.setObjectContext(context);
@@ -81,7 +81,7 @@ public class ClientDataObjectTst extends TestCase {
     }
 
     public void testPersistenceState() {
-        ClientDataObject object = new MockClientDataObject();
+        PersistentObject object = new MockPersistentObject();
         assertEquals(PersistenceState.TRANSIENT, object.getPersistenceState());
         object.setPersistenceState(PersistenceState.DELETED);
         assertEquals(PersistenceState.DELETED, object.getPersistenceState());
@@ -90,7 +90,7 @@ public class ClientDataObjectTst extends TestCase {
     public void testObjectId() {
         ObjectId id = new ObjectId(Object.class, "a", "b");
 
-        ClientDataObject object = new MockClientDataObject();
+        PersistentObject object = new MockPersistentObject();
 
         assertNull(object.getObjectId());
         object.setObjectId(id);
@@ -98,14 +98,14 @@ public class ClientDataObjectTst extends TestCase {
     }
 
     public void testWillReadTransient() {
-        ClientDataObject object = new MockClientDataObject();
+        PersistentObject object = new MockPersistentObject();
 
         // check that no exception is thrown...
         object.willRead("someProperty");
     }
 
     public void testWillWriteTransient() {
-        ClientDataObject object = new MockClientDataObject();
+        PersistentObject object = new MockPersistentObject();
 
         // check that no exception is thrown...
         object.willWrite("someProperty", new Object(), new Object());
@@ -121,7 +121,7 @@ public class ClientDataObjectTst extends TestCase {
             }
         };
 
-        ClientDataObject object = new MockClientDataObject();
+        PersistentObject object = new MockPersistentObject();
         object.setObjectContext(context);
         object.willRead("someProperty");
         assertEquals("someProperty", readProperties.get(object));
@@ -149,7 +149,7 @@ public class ClientDataObjectTst extends TestCase {
         Object oldValue = new Object();
         Object newValue = new Object();
 
-        ClientDataObject object = new MockClientDataObject();
+        PersistentObject object = new MockPersistentObject();
         object.setObjectContext(context);
         object.willWrite("writtenProperty", oldValue, newValue);
         assertEquals("writtenProperty", writtenProperties.get(object));

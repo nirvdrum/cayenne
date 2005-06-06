@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.util.MockDataObject;
 
 /**
  * @author Andrei Adamchik
@@ -85,6 +86,42 @@ public class ObjectStoreTst extends CayenneTestCase {
         DataRowStore cache = new DataRowStore("test");
         this.objectStore = new ObjectStore(cache);
 
+    }
+
+    public void testRegisteredObjectsCount() throws Exception {
+        assertEquals(0, objectStore.registeredObjectsCount());
+
+        DataObject o1 = new MockDataObject();
+        o1.setObjectId(new ObjectId(Object.class, "key1", "v1"));
+        objectStore.addObject(o1);
+        assertEquals(1, objectStore.registeredObjectsCount());
+
+        // test object with same id
+        DataObject o2 = new MockDataObject();
+        o2.setObjectId(new ObjectId(Object.class, "key1", "v1"));
+        objectStore.addObject(o2);
+        assertEquals(1, objectStore.registeredObjectsCount());
+
+        // test new object
+        DataObject o3 = new MockDataObject();
+        o3.setObjectId(new ObjectId(Object.class, "key3", "v3"));
+        objectStore.addObject(o3);
+        assertEquals(2, objectStore.registeredObjectsCount());
+    }
+
+    public void testCachedQueriesCount() throws Exception {
+        assertEquals(0, objectStore.cachedQueriesCount());
+
+        objectStore.cacheQueryResult("result", new ArrayList());
+        assertEquals(1, objectStore.cachedQueriesCount());
+
+        // test refreshing the cache
+        objectStore.cacheQueryResult("result", new ArrayList());
+        assertEquals(1, objectStore.cachedQueriesCount());
+
+        // test new entry
+        objectStore.cacheQueryResult("result2", new ArrayList());
+        assertEquals(2, objectStore.cachedQueriesCount());
     }
 
     public void testCachedQueryResult() throws Exception {
@@ -110,8 +147,7 @@ public class ObjectStoreTst extends CayenneTestCase {
 
         // insert object into the ObjectStore
         objectStore.addObject(object);
-        objectStore.getDataRowCache().processSnapshotChanges(
-                this,
+        objectStore.getDataRowCache().processSnapshotChanges(this,
                 Collections.singletonMap(object.getObjectId(), row),
                 Collections.EMPTY_LIST,
                 Collections.EMPTY_LIST,
@@ -137,8 +173,7 @@ public class ObjectStoreTst extends CayenneTestCase {
 
         // insert object into the ObjectStore
         objectStore.addObject(object);
-        objectStore.getDataRowCache().processSnapshotChanges(
-                this,
+        objectStore.getDataRowCache().processSnapshotChanges(this,
                 Collections.singletonMap(object.getObjectId(), row),
                 Collections.EMPTY_LIST,
                 Collections.EMPTY_LIST,

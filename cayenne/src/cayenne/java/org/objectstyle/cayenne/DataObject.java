@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  * 
  * @author Andrei Adamchik
  */
-public interface DataObject extends java.io.Serializable {
+public interface DataObject extends Persistent {
     public static final long DEFAULT_VERSION = Long.MIN_VALUE;
 
     /** 
@@ -76,29 +76,6 @@ public interface DataObject extends java.io.Serializable {
      * Sets object DataContext. 
      */
     public void setDataContext(DataContext ctxt);
-
-    /** 
-     * Returns ObjectId for this data object - piece that
-     * uniquely identifies this data object for persistence purposes.
-     */
-    public ObjectId getObjectId();
-
-    /** Sets ObjectId for this data object - piece that uniquely 
-     *  identifies this data object for persistence purposes.
-     */
-    public void setObjectId(ObjectId objectId);
-
-    /** 
-     * Returns current persistence state. Acceptable values are defined in
-     * {@link PersistenceState} class.
-     */
-    public int getPersistenceState();
-
-    /** 
-     * Modifies persistence state of the object. Acceptable values are defined in
-     * {@link PersistenceState} class.
-     */
-    public void setPersistenceState(int newState);
 
     /** 
      * Modifies a value of a named property without altering the object state in any way,

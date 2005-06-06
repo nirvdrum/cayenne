@@ -53,76 +53,56 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne.distribution;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.distribution.ClientMessageHandler;
-import org.objectstyle.cayenne.distribution.CommitMessage;
-import org.objectstyle.cayenne.distribution.NamedQueryMessage;
-import org.objectstyle.cayenne.distribution.QueryMessage;
+import junit.framework.TestCase;
 
 /**
- * A default ClientMessageHandler that translates calls forwarded from Cayenne service to
- * the calls on parent ObjectContext method calls.
- * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-public class MessageHandler implements ClientMessageHandler {
+public class LocalConnectorTst extends TestCase {
 
-    protected ObjectContext context;
+    public void testConstructors() {
+        ClientMessageHandler handler1 = new MockClientMessageHandler();
+        LocalConnector connector1 = new LocalConnector(handler1);
+        assertFalse(connector1.isSerializingMessages());
+        assertSame(handler1, connector1.getHandler());
 
-    /**
-     * Creates new MessageHandler initializing it with ObjectContext that will be
-     * channeled all the client updates.
-     */
-    public MessageHandler(ObjectContext context) {
-        this.context = context;
+        ClientMessageHandler handler2 = new MockClientMessageHandler();
+        LocalConnector connector2 = new LocalConnector(handler2, true);
+        assertTrue(connector2.isSerializingMessages());
+        assertSame(handler2, connector2.getHandler());
     }
 
-    /**
-     * Returns a server-side ObjectContext used by the handler to access Cayenne.
-     */
-    public ObjectContext getContext() {
-        return context;
+    public void testSendMessage() {
+        ClientMessageHandler handler = new MockClientMessageHandler();
+
+        // create connector without serialization support...
+        LocalConnector connector = new LocalConnector(handler);
+
+        // test that messages are being dispatched...
+
+        MockAbstractMessage message1 = new MockAbstractMessage();
+        connector.sendMessage(message1);
+        assertSame(handler, message1.getLastHandler());
+
+        MockAbstractMessage message2 = new MockAbstractMessage();
+        connector.sendMessage(message2);
+        assertSame(handler, message2.getLastHandler());
     }
 
-    public Object executeNamedQuery(NamedQueryMessage command) {
-        return (command.isSelecting())
-                ? executeSelectingNamedQuery(command)
-                : executeNonSelectingNamedQuery(command);
-    }
+    public void testSendMessageSerialized() {
+        ClientMessageHandler handler = new MockClientMessageHandler();
 
-    public Object executeCommit(CommitMessage message) {
-        ObjectContext remoteContext = message.getContext();
+        // create connector without serialization support...
+        LocalConnector connector = new LocalConnector(handler, true);
 
-        // check message state
-        if (remoteContext == null) {
-            throw new CayenneRuntimeException("CommitMessage has null context");
-        }
+        // indirectly test that a dispatch was done on a different message
+        // a better test would involve some serialization tricks with
+        // MockAbstractMessage....
 
-        // TODO: hmm.. this should be more like "remoteContext.commitChanges()", but this
-        // would require context.setParent(..) first. Should we use some deserialization
-        // ThreadLocal tricks to inject the parent?
-        context.commitChangesInContext(remoteContext);
-
-        // TODO: where do we get ids to send back...?
-        return null;
-    }
-
-    protected Object executeSelectingNamedQuery(NamedQueryMessage command) {
-        return context.performQuery(command.getQueryName(),
-                command.getParameters(),
-                command.isRefresh());
-    }
-
-    protected Object executeNonSelectingNamedQuery(NamedQueryMessage command) {
-        return context.performNonSelectingQuery(command.getQueryName(), command
-                .getParameters());
-    }
-
-    public Object executeQuery(QueryMessage command) {
-        return null;
+        MockAbstractMessage message1 = new MockAbstractMessage();
+        connector.sendMessage(message1);
+        assertNull(message1.getLastHandler());
     }
 }

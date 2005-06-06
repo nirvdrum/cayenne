@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  * @author Andrei Adamchik
  */
 public class MockDataObject implements DataObject {
+    protected ObjectId objectId;
 
     public DataContext getDataContext() {
         return null;
@@ -75,10 +76,11 @@ public class MockDataObject implements DataObject {
     }
 
     public ObjectId getObjectId() {
-        return null;
+        return objectId;
     }
 
     public void setObjectId(ObjectId objectId) {
+        this.objectId = objectId;
     }
 
     public int getPersistenceState() {

@@ -55,148 +55,64 @@
  */
 package org.objectstyle.cayenne.service;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.client.CayenneClientException;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.PersistenceContext;
+import org.objectstyle.cayenne.distribution.ClientMessageHandler;
+import org.objectstyle.cayenne.distribution.CommitMessage;
+import org.objectstyle.cayenne.distribution.NamedQueryMessage;
+import org.objectstyle.cayenne.distribution.QueryMessage;
 
 /**
- * A wrapper around regular DataContext that works as a client ObjectContext peer on the
- * server side.
+ * A server-side peer of a ClientDataContext. Client messages are processed via callback
+ * methods defined in ClientMessageHandler interface.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-// TODO: DataContext should be made compatible with ObjectContext interface at some point.
-// Get rid of this class whwn this happens.
-public class ServerObjectContext implements ObjectContext {
+public class ServerObjectContext extends ObjectDataContext implements
+        ClientMessageHandler {
 
-    protected DataContext dataContext;
-
-    public ServerObjectContext(DataContext dataContext) {
-        this.dataContext = dataContext;
+    ServerObjectContext(PersistenceContext parent) {
+        super(parent);
     }
 
     /**
-     * Commits all changes to the underlying DataContext.
+     * 
      */
-    public void commitChanges() {
-        dataContext.commitChanges();
-    }
+    public Object executeCommit(CommitMessage message) {
+        ObjectContext remoteContext = message.getContext();
 
-    public void commitChangesInContext(ObjectContext context) {
-        // TODO: implement
-        throw new CayenneClientException("Not implemented by proxy.");
-    }
-
-    public void deleteObject(Persistent object) {
-        // TODO: implement
-        throw new CayenneClientException("Not implemented by proxy.");
-    }
-
-    public Persistent newObject(Class persistentClass) {
-        // TODO: implement
-        throw new CayenneClientException("Not implemented by proxy.");
-    }
-
-    public List performQuery(String queryName, Map parameters, boolean refresh) {
-
-        List results = dataContext.performQuery(queryName, parameters, refresh);
-
-        if (results.isEmpty()) {
-            return Collections.EMPTY_LIST;
+        // check message state
+        if (remoteContext == null) {
+            throw new CayenneRuntimeException("CommitMessage has null context");
         }
 
-        // if DataRows, return as is
-        Object first = results.get(0);
-        if (!(first instanceof DataObject)) {
-            // TODO: filter out server-side properties
-            return results;
-        }
+        // TODO: hmm.. this should be more like "remoteContext.commitChanges()", but this
+        // would require context.setParent(..) first. Should we use some deserialization
+        // ThreadLocal tricks to inject the parent?
+        commitChangesInContext(remoteContext);
 
-        // translate to client objects
-
-        EntityResolver resolver = dataContext.getEntityResolver();
-        ObjEntity entity = resolver.lookupObjEntity((DataObject) first);
-
-        try {
-            List clientObjects = ClientServerUtils.toClientObjects(entity, results);
-            System.out.println("Client objects: " + clientObjects);
-            return clientObjects;
-        }
-        catch (Exception ex) {
-            Throwable th = Util.unwindException(ex);
-            throw new CayenneRuntimeException("Error instantiating client objects - "
-                    + th.getClass().getName()
-                    + ": "
-                    + ex.getMessage(), ex);
-        }
+        // TODO: where do we get ids to send back...?
+        return null;
     }
 
-    public int[] performNonSelectingQuery(String queryName, Map parameters) {
-        return dataContext.performNonSelectingQuery(queryName, parameters);
+    protected Object executeSelectingNamedQuery(NamedQueryMessage command) {
+        return performQuery(command.getQueryName(), command.getParameters(), command
+                .isRefresh());
     }
 
-    public int[] performNonSelectingQuery(Query query) {
-        return dataContext.performNonSelectingQuery(query);
+    protected Object executeNonSelectingNamedQuery(NamedQueryMessage command) {
+        return performNonSelectingQuery(command.getQueryName(), command.getParameters());
     }
 
-    public List performQuery(GenericSelectQuery query) {
-        return dataContext.performQuery(query);
+    public Object executeNamedQuery(NamedQueryMessage command) {
+        return (command.isSelecting())
+                ? executeSelectingNamedQuery(command)
+                : executeNonSelectingNamedQuery(command);
     }
 
-    public void objectWillRead(Persistent dataObject, String property) {
-        // noop as this object is not accessible by users.
-    }
-
-    public void objectWillWrite(
-            Persistent dataObject,
-            String property,
-            Object oldValue,
-            Object newValue) {
-        // noop as this object is not accessible by users.
-    }
-
-    public Collection deletedObjects() {
-        return dataContext.deletedObjects();
-    }
-
-    public Collection modifiedObjects() {
-        return dataContext.modifiedObjects();
-    }
-
-    public Collection newObjects() {
-        return dataContext.newObjects();
-    }
-
-    public Collection uncommittedObjects() {
-        // TODO: implement
-        throw new CayenneClientException("Not implemented by proxy.");
-    }
-
-    public List performQueryInContext(ObjectContext context, GenericSelectQuery query) {
-        // TODO: implement
-        throw new CayenneClientException("Not implemented by proxy.");
-    }
-
-    public List performQueryInContext(
-            ObjectContext context,
-            String queryName,
-            Map parameters,
-            boolean refresh) {
-        // TODO: implement
-        throw new CayenneClientException("Not implemented by proxy.");
+    public Object executeQuery(QueryMessage command) {
+        return null;
     }
 }

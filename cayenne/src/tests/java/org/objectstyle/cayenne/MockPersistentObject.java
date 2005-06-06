@@ -53,21 +53,15 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne;
+
+import org.objectstyle.cayenne.PersistentObject;
 
 /**
+ * Concrete ClientDataObject used for unit testing.
+ * 
  * @author Andrus Adamchik
  */
-public class MockAbstractMessage extends AbstractMessage {
+public class MockPersistentObject extends PersistentObject {
 
-    ClientMessageHandler handler;
-
-    public ClientMessageHandler getLastHandler() {
-        return handler;
-    }
-
-    public Object onReceive(ClientMessageHandler handler) {
-        this.handler = handler;
-        return null;
-    }
 }

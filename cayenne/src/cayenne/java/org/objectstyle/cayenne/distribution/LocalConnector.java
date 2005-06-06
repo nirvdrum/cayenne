@@ -53,13 +53,62 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.client;
+package org.objectstyle.cayenne.distribution;
+
+import org.objectstyle.cayenne.client.CayenneClientException;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * Concrete ClientDataObject used for unit testing.
+ * A "local" connector used mainly to enable testing of all parts of a distributed
+ * application in a single virtual machine. To better reproduce test conditions, it can
+ * optionally serialize all messages passed through it, and then pass a deserialized
+ * version to the handler.
  * 
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class MockClientDataObject extends ClientDataObject {
+public class LocalConnector implements CayenneConnector {
+
+    protected ClientMessageHandler handler;
+    protected boolean serializingMessages;
+
+    public LocalConnector(ClientMessageHandler handler) {
+        this(handler, false);
+    }
+
+    public LocalConnector(ClientMessageHandler handler, boolean serializingMessages) {
+        this.handler = handler;
+        this.serializingMessages = serializingMessages;
+    }
+
+    public boolean isSerializingMessages() {
+        return serializingMessages;
+    }
+
+    public ClientMessageHandler getHandler() {
+        return handler;
+    }
+
+    /**
+     * Does nothing. This connector is local, so there is nothing to connect to.
+     */
+    public void connect() throws CayenneClientException {
+    }
+
+    /**
+     * Dispatches a message to an internal handler.
+     */
+    public Object sendMessage(ClientMessage message) throws CayenneClientException {
+        if (isSerializingMessages()) {
+
+            try {
+                message = (ClientMessage) Util.cloneViaSerialization(message);
+            }
+            catch (Exception ex) {
+                throw new CayenneClientException("Error serializing message", ex);
+            }
+        }
+        return message.onReceive(handler);
+    }
 
 }

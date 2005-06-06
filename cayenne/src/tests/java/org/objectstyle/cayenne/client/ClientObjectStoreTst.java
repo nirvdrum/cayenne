@@ -59,6 +59,7 @@ import java.util.Collections;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.MockPersistentObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 
@@ -85,7 +86,7 @@ public class ClientObjectStoreTst extends TestCase {
         assertTrue(store.objectsInState(PersistenceState.TRANSIENT).isEmpty());
         assertTrue(store.objectsInState(PersistenceState.HOLLOW).isEmpty());
 
-        MockClientDataObject modified = new MockClientDataObject();
+        MockPersistentObject modified = new MockPersistentObject();
         modified.setObjectId(new ObjectId(Object.class, "key", "value1"));
         modified.setPersistenceState(PersistenceState.MODIFIED);
         store.trackObject(modified);
@@ -97,7 +98,7 @@ public class ClientObjectStoreTst extends TestCase {
         assertTrue(store.objectsInState(PersistenceState.TRANSIENT).isEmpty());
         assertTrue(store.objectsInState(PersistenceState.HOLLOW).isEmpty());
 
-        MockClientDataObject deleted = new MockClientDataObject();
+        MockPersistentObject deleted = new MockPersistentObject();
         deleted.setObjectId(new ObjectId(Object.class, "key", "value2"));
         deleted.setPersistenceState(PersistenceState.DELETED);
         store.trackObject(deleted);
@@ -116,7 +117,7 @@ public class ClientObjectStoreTst extends TestCase {
         assertTrue(store.uncommittedObjects().isEmpty());
 
         // introduce a fake dirty object
-        MockClientDataObject object = new MockClientDataObject();
+        MockPersistentObject object = new MockPersistentObject();
         object.setObjectId(new ObjectId(Object.class, "key", "value"));
         object.setPersistenceState(PersistenceState.MODIFIED);
         store.trackObject(object);
@@ -135,7 +136,7 @@ public class ClientObjectStoreTst extends TestCase {
         assertFalse(store.hasChanges());
 
         // introduce a fake dirty object
-        MockClientDataObject object = new MockClientDataObject();
+        MockPersistentObject object = new MockPersistentObject();
         object.setObjectId(new ObjectId(Object.class, "key", "value"));
         object.setPersistenceState(PersistenceState.MODIFIED);
         store.trackObject(object);
@@ -151,7 +152,7 @@ public class ClientObjectStoreTst extends TestCase {
         ClientObjectStore store = new ClientObjectStore();
 
         // MODIFIED -> COMMITTED
-        MockClientDataObject modified = new MockClientDataObject();
+        MockPersistentObject modified = new MockPersistentObject();
         modified.setObjectId(new ObjectId(Object.class, "key", "value1"));
         modified.setPersistenceState(PersistenceState.MODIFIED);
 
@@ -161,7 +162,7 @@ public class ClientObjectStoreTst extends TestCase {
         assertEquals(PersistenceState.COMMITTED, modified.getPersistenceState());
 
         // DELETED -> TRANSIENT
-        MockClientDataObject deleted = new MockClientDataObject();
+        MockPersistentObject deleted = new MockPersistentObject();
         deleted.setObjectId(new ObjectId(Object.class, "key", "value2"));
         deleted.setPersistenceState(PersistenceState.DELETED);
 
@@ -171,7 +172,7 @@ public class ClientObjectStoreTst extends TestCase {
         assertEquals(PersistenceState.TRANSIENT, deleted.getPersistenceState());
 
         // NEW -> COMMITTED
-        MockClientDataObject newObject = new MockClientDataObject();
+        MockPersistentObject newObject = new MockPersistentObject();
         newObject.setObjectId(new ObjectId(Object.class, "key", "value3"));
         newObject.setPersistenceState(PersistenceState.NEW);
 

@@ -53,77 +53,36 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.client;
+package org.objectstyle.cayenne.distribution;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.Persistent;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * A base superclass for client-side Persistent objects.
+ * Stores all messages passed via this handler.
  * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-public abstract class ClientDataObject implements Persistent {
+public class MockClientMessageHandler implements ClientMessageHandler {
 
-    protected ObjectId objectId;
-    protected int persistenceState;
-    protected transient ObjectContext objectContext;
+    protected List messages = new ArrayList();
 
-    public ClientDataObject() {
-        this.persistenceState = PersistenceState.TRANSIENT;
+    public List getMessages() {
+        return messages;
     }
 
-    /**
-     * Notifies parent ObjectContext that this object is about to access a property.
-     */
-    protected void willRead(String property) {
-        if (objectContext != null) {
-            objectContext.objectWillRead(this, property);
-        }
+    public Object executeQuery(QueryMessage message) {
+        this.messages.add(message);
+        return null;
     }
 
-    /**
-     * Notifies parent ObjectContext that this object is about to modify a property.
-     */
-    protected void willWrite(String property, Object oldValue, Object newValue) {
-        if (objectContext != null) {
-            objectContext.objectWillWrite(this, property, oldValue, newValue);
-        }
+    public Object executeNamedQuery(NamedQueryMessage message) {
+        this.messages.add(message);
+        return null;
     }
 
-    public int getPersistenceState() {
-        return persistenceState;
-    }
-
-    public void setPersistenceState(int persistenceState) {
-        this.persistenceState = persistenceState;
-
-        if (persistenceState == PersistenceState.TRANSIENT) {
-            this.objectContext = null;
-        }
-    }
-
-    public ObjectContext getObjectContext() {
-        return objectContext;
-    }
-
-    public void setObjectContext(ObjectContext objectContext) {
-        this.objectContext = objectContext;
-    }
-
-    public ObjectId getObjectId() {
-        return objectId;
-    }
-
-    public void setObjectId(ObjectId objectId) {
-        this.objectId = objectId;
-    }
-
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+    public Object executeCommit(CommitMessage message) {
+        this.messages.add(message);
+        return null;
     }
 }

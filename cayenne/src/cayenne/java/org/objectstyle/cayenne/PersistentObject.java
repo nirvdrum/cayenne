@@ -53,21 +53,73 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
+ * A base superclass for client-side Persistent objects.
+ * 
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class MockAbstractMessage extends AbstractMessage {
+public abstract class PersistentObject implements Persistent {
 
-    ClientMessageHandler handler;
+    protected ObjectId objectId;
+    protected int persistenceState;
+    protected transient ObjectContext objectContext;
 
-    public ClientMessageHandler getLastHandler() {
-        return handler;
+    public PersistentObject() {
+        this.persistenceState = PersistenceState.TRANSIENT;
     }
 
-    public Object onReceive(ClientMessageHandler handler) {
-        this.handler = handler;
-        return null;
+    /**
+     * Notifies parent ObjectContext that this object is about to access a property.
+     */
+    protected void willRead(String property) {
+        if (objectContext != null) {
+            objectContext.objectWillRead(this, property);
+        }
+    }
+
+    /**
+     * Notifies parent ObjectContext that this object is about to modify a property.
+     */
+    protected void willWrite(String property, Object oldValue, Object newValue) {
+        if (objectContext != null) {
+            objectContext.objectWillWrite(this, property, oldValue, newValue);
+        }
+    }
+
+    public int getPersistenceState() {
+        return persistenceState;
+    }
+
+    public void setPersistenceState(int persistenceState) {
+        this.persistenceState = persistenceState;
+
+        if (persistenceState == PersistenceState.TRANSIENT) {
+            this.objectContext = null;
+        }
+    }
+
+    public ObjectContext getObjectContext() {
+        return objectContext;
+    }
+
+    public void setObjectContext(ObjectContext objectContext) {
+        this.objectContext = objectContext;
+    }
+
+    public ObjectId getObjectId() {
+        return objectId;
+    }
+
+    public void setObjectId(ObjectId objectId) {
+        this.objectId = objectId;
+    }
+
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }
