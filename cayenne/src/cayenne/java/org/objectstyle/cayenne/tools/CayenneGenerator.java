@@ -254,6 +254,16 @@ public class CayenneGenerator extends CayenneTask {
     public void setSuperpkg(String superpkg) {
         generator.setSuperPkg(superpkg);
     }
+    
+
+    /**
+     * Sets <code>client</code> property.
+     * 
+     * @since 1.2
+     */
+    public void setClient(boolean client) {
+        generator.setClient(client);
+    }
 
     /**
      * Sets <code>version</code> property.

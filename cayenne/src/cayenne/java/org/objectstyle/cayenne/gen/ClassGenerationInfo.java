@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.util.NameConverter;
  * the key "classGen".
  * 
  * @author Andrei Adamchik
+ * @since 1.2
  */
 public class ClassGenerationInfo {
 
