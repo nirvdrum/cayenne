@@ -387,11 +387,8 @@ public class ResourceLocator {
         }
 
         if (!willSkipClasspath()) {
-            URL url = findURLInClassLoader(name, classLoader);
-            if (url != null) {
-                return url;
-            }
 
+            // start with custom classpaths and then move to the default one
             if (!this.additionalClassPaths.isEmpty()) {
                 logObj.debug("searching additional classpaths: "
                         + this.additionalClassPaths);
@@ -399,11 +396,16 @@ public class ResourceLocator {
                 while (cpi.hasNext()) {
                     String fullName = cpi.next() + "/" + name;
                     logObj.debug("searching for: " + fullName);
-                    url = findURLInClassLoader(fullName, classLoader);
+                    URL url = findURLInClassLoader(fullName, classLoader);
                     if (url != null) {
                         return url;
                     }
                 }
+            }
+
+            URL url = findURLInClassLoader(name, classLoader);
+            if (url != null) {
+                return url;
             }
         }
 
