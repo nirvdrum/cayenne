@@ -62,21 +62,25 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.util.Util;
 
-/** Looks up DataSource objects via JNDI.
-  *
-  * @author Andrei Adamchik
-  */
+/**
+ * Looks up DataSource objects via JNDI.
+ * 
+ * @author Andrei Adamchik
+ */
 public class JNDIDataSourceFactory implements DataSourceFactory {
+
+    private static final Logger logObj = Logger.getLogger(JNDIDataSourceFactory.class);
 
     protected Configuration parentConfig;
 
-    public JNDIDataSourceFactory() throws Exception {
-    }
-
-    /** Returns DataSource object corresponding to <code>location</code>.
-      * Location is expected to be a path mapped in JNDI InitialContext. */
+    /**
+     * Returns DataSource object corresponding to <code>location</code>. Location is
+     * expected to be a path mapped in JNDI InitialContext.
+     */
     public DataSource getDataSource(String location) throws Exception {
         return getDataSource(location, Level.DEBUG);
     }
@@ -85,31 +89,67 @@ public class JNDIDataSourceFactory implements DataSourceFactory {
         this.parentConfig = conf;
     }
 
+    /**
+     * Attempts to load DataSource using JNDI. In case of failure tries to get the
+     * DataSource with the same name from CayenneModeler preferences.
+     */
     public DataSource getDataSource(String location, Level logLevel) throws Exception {
         if (logLevel == null) {
             logLevel = Level.DEBUG;
         }
 
         try {
-            QueryLogger.logConnect(logLevel, location);
-
-            Context initCtx = new InitialContext();
-            DataSource ds;
-            try {
-                Context envCtx = (Context) initCtx.lookup("java:comp/env");
-                ds = (DataSource) envCtx.lookup(location);
-            }
-            catch (NamingException namingEx) {
-                // try looking up the location directly...
-                ds = (DataSource) initCtx.lookup(location);
-            }
-
-            QueryLogger.logConnectSuccess(logLevel);
-            return ds;
+            return loadViaJNDI(location, logLevel);
         }
         catch (Exception ex) {
-            QueryLogger.logConnectFailure(logLevel, ex);
-            throw ex;
+
+            logObj
+                    .debug("failed JNDI lookup, attempt to load from local preferences. Location key:"
+                            + location);
+
+            // failover to preferences loader to allow local development
+            try {
+                return loadFromPreferences(location, logLevel);
+            }
+            catch (Exception preferencesException) {
+
+                logObj.debug("failed loading from local preferences", Util
+                        .unwindException(preferencesException));
+
+                // giving up ... rethrow original exception...
+                QueryLogger.logConnectFailure(logLevel, ex);
+                throw ex;
+            }
         }
+    }
+
+    DataSource loadViaJNDI(String location, Level logLevel) throws NamingException {
+        QueryLogger.logConnect(logLevel, location);
+
+        Context initCtx = new InitialContext();
+        DataSource ds;
+        try {
+            Context envCtx = (Context) initCtx.lookup("java:comp/env");
+            ds = (DataSource) envCtx.lookup(location);
+        }
+        catch (NamingException namingEx) {
+            // try looking up the location directly...
+            ds = (DataSource) initCtx.lookup(location);
+        }
+
+        QueryLogger.logConnectSuccess(logLevel);
+        return ds;
+    }
+
+    DataSource loadFromPreferences(String location, Level logLevel) throws Exception {
+        // as we don't want to have dependencies on the Modeler, instantiate factory via
+        // reflection .. eventually "pref" package should be moved to Cayenne...
+
+        DataSourceFactory prefsFactory = (DataSourceFactory) Class
+                .forName("org.objectstyle.cayenne.pref.PreferencesDataSourceFactory")
+                .newInstance();
+
+        prefsFactory.initializeWithParentConfiguration(parentConfig);
+        return prefsFactory.getDataSource(location, logLevel);
     }
 }

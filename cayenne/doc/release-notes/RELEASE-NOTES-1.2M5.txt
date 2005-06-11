@@ -14,7 +14,8 @@ Changes/New Features:
 * SQLTemplateExecutionPlan and SQLTemplateSelectExecutionPlan classes are removed from 
   Cayenne. Keeping it in deprecated state is no longer possible due to SQLAction method 
   signature changes.
-
+* A change in the order of loading resources via ResourceLocator (this includes cayenne.xml loading). 
+  Now custom classpath locations take precedence over the default one. 
 
 Bugs Fixed:
 

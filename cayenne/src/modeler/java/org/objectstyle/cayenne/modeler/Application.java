@@ -134,8 +134,11 @@ import org.scopemvc.view.swing.SwingView;
 public class Application {
 
     public static final String PREFERENCES_VERSION = "1.1";
+    public static final String PREFERENCES_DB_SUBDIRECTORY = "prefs";
+    public static final String PREFERENCES_MAP_PACKAGE = "pref";
     public static final String APPLICATION_NAME_PROPERTY = "cayenne.modeler.application.name";
     public static final String PREFERENCES_VERSION_PROPERTY = "cayenne.modeler.pref.version";
+    
 
     public static final String DEFAULT_APPLICATION_NAME = "CayenneModeler";
 
@@ -179,10 +182,11 @@ public class Application {
             subdir = PREFERENCES_VERSION;
         }
 
-        File dbDir = new File(CayenneUserDir.getInstance().resolveFile("prefs"), subdir);
+        File dbDir = new File(CayenneUserDir
+                .getInstance()
+                .resolveFile(PREFERENCES_DB_SUBDIRECTORY), subdir);
         dbDir.mkdirs();
         this.preferencesDB = new File(dbDir, "db").getAbsolutePath();
-
     }
 
     public String getName() {
@@ -295,7 +299,7 @@ public class Application {
     protected void initPreferences() {
         HSQLEmbeddedPreferenceService service = new HSQLEmbeddedPreferenceService(
                 preferencesDB,
-                "pref",
+                PREFERENCES_MAP_PACKAGE,
                 getName());
         service.stopOnShutdown();
         this.preferenceService = service;
