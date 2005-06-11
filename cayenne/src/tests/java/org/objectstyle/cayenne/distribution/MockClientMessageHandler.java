@@ -71,17 +71,17 @@ public class MockClientMessageHandler implements ClientMessageHandler {
         return messages;
     }
 
-    public Object executeQuery(QueryMessage message) {
+    public Object onQuery(QueryMessage message) {
         this.messages.add(message);
         return null;
     }
 
-    public Object executeNamedQuery(NamedQueryMessage message) {
+    public Object onNamedQuery(NamedQueryMessage message) {
         this.messages.add(message);
         return null;
     }
 
-    public Object executeCommit(CommitMessage message) {
+    public Object onCommit(CommitMessage message) {
         this.messages.add(message);
         return null;
     }

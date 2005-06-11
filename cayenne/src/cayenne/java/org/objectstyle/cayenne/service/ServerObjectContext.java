@@ -55,13 +55,12 @@
  */
 package org.objectstyle.cayenne.service;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.distribution.ClientMessageHandler;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.NamedQueryMessage;
 import org.objectstyle.cayenne.distribution.QueryMessage;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 /**
  * A server-side peer of a ClientDataContext. Client messages are processed via callback
@@ -77,42 +76,30 @@ public class ServerObjectContext extends ObjectDataContext implements
         super(parent);
     }
 
-    /**
-     * 
-     */
-    public Object executeCommit(CommitMessage message) {
-        ObjectContext remoteContext = message.getContext();
+    public Object onCommit(CommitMessage message) {
+        // TODO: sync from commit message...
 
-        // check message state
-        if (remoteContext == null) {
-            throw new CayenneRuntimeException("CommitMessage has null context");
+        commitChanges();
+        return null;
+    }
+
+    public Object onNamedQuery(NamedQueryMessage message) {
+        if (message.isSelecting()) {
+            return performQuery(message.getQueryName(), message.getParameters(), message
+                    .isRefresh());
         }
-
-        // TODO: hmm.. this should be more like "remoteContext.commitChanges()", but this
-        // would require context.setParent(..) first. Should we use some deserialization
-        // ThreadLocal tricks to inject the parent?
-        commitChangesInContext(remoteContext);
-
-        // TODO: where do we get ids to send back...?
-        return null;
+        else {
+            return performNonSelectingQuery(message.getQueryName(), message
+                    .getParameters());
+        }
     }
 
-    protected Object executeSelectingNamedQuery(NamedQueryMessage command) {
-        return performQuery(command.getQueryName(), command.getParameters(), command
-                .isRefresh());
-    }
-
-    protected Object executeNonSelectingNamedQuery(NamedQueryMessage command) {
-        return performNonSelectingQuery(command.getQueryName(), command.getParameters());
-    }
-
-    public Object executeNamedQuery(NamedQueryMessage command) {
-        return (command.isSelecting())
-                ? executeSelectingNamedQuery(command)
-                : executeNonSelectingNamedQuery(command);
-    }
-
-    public Object executeQuery(QueryMessage command) {
-        return null;
+    public Object onQuery(QueryMessage message) {
+        if (message.isSelecting()) {
+            return performQuery((GenericSelectQuery) message.getQuery());
+        }
+        else {
+            return performNonSelectingQuery(message.getQuery());
+        }
     }
 }

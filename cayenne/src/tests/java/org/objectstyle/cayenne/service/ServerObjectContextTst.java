@@ -53,56 +53,75 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.service;
 
-import java.util.List;
+import java.util.Collections;
 
-import org.objectstyle.cayenne.query.Query;
+import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.MockPersistenceContext;
+import org.objectstyle.cayenne.PersistenceContext;
+import org.objectstyle.cayenne.distribution.CommitMessage;
+import org.objectstyle.cayenne.distribution.NamedQueryMessage;
+import org.objectstyle.cayenne.distribution.QueryMessage;
+import org.objectstyle.cayenne.unit.util.MockQuery;
 
 /**
- * A message telling the receiver to perform a Cayenne query.
- * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-public class QueryMessage extends AbstractMessage {
+public class ServerObjectContextTst extends TestCase {
 
-    protected Query query;
-    protected boolean selecting;
-
-    public QueryMessage(Query query, boolean selecting) {
-        // sanity check
-        if (query == null) {
-            throw new NullPointerException("Null query.");
-        }
-
-        this.query = query;
-        this.selecting = selecting;
+    public void testParent() {
+        PersistenceContext parent = new MockPersistenceContext();
+        ServerObjectContext context = new ServerObjectContext(parent);
+        assertSame(parent, context.getParentContext());
     }
 
-    public Object onReceive(ClientMessageHandler handler) {
-        return handler.onQuery(this);
+    public void testExecuteCommit() {
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ServerObjectContext context = new ServerObjectContext(parent);
+
+        context.onCommit(new CommitMessage());
+        assertTrue(parent.isCommitChangesInContext());
     }
 
-    /**
-     * Invoked by the message sender to perform a remote selecting query.
-     */
-    public List sendPerformQuery(CayenneConnector connector) {
-        return (List) send(connector, List.class);
+    public void testExecuteNonSelectingQuery() {
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ServerObjectContext context = new ServerObjectContext(parent);
+
+        context.onQuery(new QueryMessage(new MockQuery(), false));
+        assertTrue(parent.isPerformNonSelectingQuery());
     }
 
-    /**
-     * Invoked by the message sender to perform a remote non-selecting query.
-     */
-    public int[] sendPerformNonSelectingQuery(CayenneConnector connector) {
-        return (int[]) send(connector, int[].class);
+    public void testExecuteSelectingQuery() {
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ServerObjectContext context = new ServerObjectContext(parent);
+
+        context.onQuery(new QueryMessage(new MockQuery(), true));
+        assertTrue(parent.isPerformNonSelectingQuery());
     }
 
-    public Query getQuery() {
-        return query;
+    public void testExecuteNonSelectingNamedQuery() {
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ServerObjectContext context = new ServerObjectContext(parent);
+
+        context.onNamedQuery(new NamedQueryMessage(
+                "test",
+                Collections.EMPTY_MAP,
+                false,
+                false));
+        assertTrue(parent.isPerformNamedNonSelectingQuery());
     }
 
-    public boolean isSelecting() {
-        return selecting;
+    public void testExecuteNamedSelectingQuery() {
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ServerObjectContext context = new ServerObjectContext(parent);
+
+        context.onNamedQuery(new NamedQueryMessage(
+                "test",
+                Collections.EMPTY_MAP,
+                true,
+                false));
+        assertTrue(parent.isPerformNamedQueryInContext());
     }
 }

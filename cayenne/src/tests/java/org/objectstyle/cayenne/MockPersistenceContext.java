@@ -53,56 +53,70 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne;
 
 import java.util.List;
+import java.util.Map;
 
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * A message telling the receiver to perform a Cayenne query.
- * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-public class QueryMessage extends AbstractMessage {
+public class MockPersistenceContext implements PersistenceContext {
 
-    protected Query query;
-    protected boolean selecting;
+    protected boolean commitChangesInContext;
+    protected boolean performQueryInContext;
+    protected boolean performNamedQueryInContext;
+    protected boolean performNonSelectingQuery;
+    protected boolean performNamedNonSelectingQuery;
 
-    public QueryMessage(Query query, boolean selecting) {
-        // sanity check
-        if (query == null) {
-            throw new NullPointerException("Null query.");
-        }
-
-        this.query = query;
-        this.selecting = selecting;
+    public void commitChangesInContext(ObjectContext context) {
+        this.commitChangesInContext = true;
     }
 
-    public Object onReceive(ClientMessageHandler handler) {
-        return handler.onQuery(this);
+    public List performQueryInContext(ObjectContext context, GenericSelectQuery query) {
+        this.performQueryInContext = true;
+        return null;
     }
 
-    /**
-     * Invoked by the message sender to perform a remote selecting query.
-     */
-    public List sendPerformQuery(CayenneConnector connector) {
-        return (List) send(connector, List.class);
+    public List performQueryInContext(
+            ObjectContext context,
+            String queryName,
+            Map parameters,
+            boolean refresh) {
+        this.performNamedQueryInContext = true;
+        return null;
     }
 
-    /**
-     * Invoked by the message sender to perform a remote non-selecting query.
-     */
-    public int[] sendPerformNonSelectingQuery(CayenneConnector connector) {
-        return (int[]) send(connector, int[].class);
+    public int[] performNonSelectingQuery(Query query) {
+        this.performNonSelectingQuery = true;
+        return null;
     }
 
-    public Query getQuery() {
-        return query;
+    public int[] performNonSelectingQuery(String queryName, Map parameters) {
+        this.performNamedNonSelectingQuery = true;
+        return null;
     }
 
-    public boolean isSelecting() {
-        return selecting;
+    public boolean isCommitChangesInContext() {
+        return commitChangesInContext;
+    }
+
+    public boolean isPerformNamedNonSelectingQuery() {
+        return performNamedNonSelectingQuery;
+    }
+
+    public boolean isPerformNamedQueryInContext() {
+        return performNamedQueryInContext;
+    }
+
+    public boolean isPerformNonSelectingQuery() {
+        return performNonSelectingQuery;
+    }
+
+    public boolean isPerformQueryInContext() {
+        return performQueryInContext;
     }
 }

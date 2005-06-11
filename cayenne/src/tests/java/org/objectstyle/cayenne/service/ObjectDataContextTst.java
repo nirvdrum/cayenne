@@ -53,56 +53,13 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.service;
 
-import java.util.List;
-
-import org.objectstyle.cayenne.query.Query;
+import junit.framework.TestCase;
 
 /**
- * A message telling the receiver to perform a Cayenne query.
- * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-public class QueryMessage extends AbstractMessage {
+public class ObjectDataContextTst extends TestCase {
 
-    protected Query query;
-    protected boolean selecting;
-
-    public QueryMessage(Query query, boolean selecting) {
-        // sanity check
-        if (query == null) {
-            throw new NullPointerException("Null query.");
-        }
-
-        this.query = query;
-        this.selecting = selecting;
-    }
-
-    public Object onReceive(ClientMessageHandler handler) {
-        return handler.onQuery(this);
-    }
-
-    /**
-     * Invoked by the message sender to perform a remote selecting query.
-     */
-    public List sendPerformQuery(CayenneConnector connector) {
-        return (List) send(connector, List.class);
-    }
-
-    /**
-     * Invoked by the message sender to perform a remote non-selecting query.
-     */
-    public int[] sendPerformNonSelectingQuery(CayenneConnector connector) {
-        return (int[]) send(connector, int[].class);
-    }
-
-    public Query getQuery() {
-        return query;
-    }
-
-    public boolean isSelecting() {
-        return selecting;
-    }
 }

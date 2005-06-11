@@ -140,7 +140,7 @@ public class NamedQueryMessage extends AbstractMessage {
     }
 
     public Object onReceive(ClientMessageHandler handler) {
-        return handler.executeNamedQuery(this);
+        return handler.onNamedQuery(this);
     }
 
     /**

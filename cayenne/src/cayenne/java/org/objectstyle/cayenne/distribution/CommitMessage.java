@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 
 /**
@@ -69,18 +68,8 @@ import org.objectstyle.cayenne.ObjectId;
  */
 public class CommitMessage extends AbstractMessage {
 
-    protected ObjectContext context;
-
-    public CommitMessage(ObjectContext context) {
-        this.context = context;
-    }
-
-    public ObjectContext getContext() {
-        return context;
-    }
-
     public Object onReceive(ClientMessageHandler handler) {
-        return handler.executeCommit(this);
+        return handler.onCommit(this);
     }
 
     public ObjectId[] sendCommitChanges(CayenneConnector connector) {

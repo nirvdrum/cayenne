@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.PersistenceState;
@@ -28,6 +29,20 @@ class ObjectDataContext extends DataContext implements ObjectContext {
 
     ObjectDataContext(PersistenceContext parent) {
         this.parent = parent;
+    }
+
+    public void commitChanges() throws CayenneRuntimeException {
+        
+        if (this.getParentContext() == null) {
+            throw new CayenneRuntimeException(
+                    "ObjectContext has no parent PersistenceContext.");
+        }
+
+        getParentContext().commitChangesInContext(this);
+    }
+
+    public PersistenceContext getParentContext() {
+        return parent;
     }
 
     public void deleteObject(Persistent object) {
@@ -78,11 +93,13 @@ class ObjectDataContext extends DataContext implements ObjectContext {
     }
 
     public void commitChangesInContext(ObjectContext context) {
-
+        // TODO: implement me
+        throw new CayenneRuntimeException("Nested contexts are not supported yet");
     }
 
     public List performQueryInContext(ObjectContext context, GenericSelectQuery query) {
-        return null;
+        // TODO: implement me
+        throw new CayenneRuntimeException("Nested contexts are not supported yet");
     }
 
     public List performQueryInContext(
@@ -90,6 +107,8 @@ class ObjectDataContext extends DataContext implements ObjectContext {
             String queryName,
             Map parameters,
             boolean refresh) {
-        return null;
+        // TODO: implement me
+        throw new CayenneRuntimeException("Nested contexts are not supported yet");
     }
+
 }

@@ -113,7 +113,7 @@ public class ClientObjectContext implements ObjectContext {
 
         if (objectStore.hasChanges()) {
 
-            ObjectId[] ids = new CommitMessage(this).sendCommitChanges(connector);
+            ObjectId[] ids = new CommitMessage().sendCommitChanges(connector);
             Collection idCollection = ids != null
                     ? Arrays.asList(ids)
                     : Collections.EMPTY_LIST;
