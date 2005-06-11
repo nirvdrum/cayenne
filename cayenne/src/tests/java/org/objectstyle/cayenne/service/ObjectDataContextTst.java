@@ -55,11 +55,63 @@
  */
 package org.objectstyle.cayenne.service;
 
+import java.util.Collections;
+
 import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.MockPersistenceContext;
+import org.objectstyle.cayenne.PersistenceContext;
+import org.objectstyle.cayenne.query.MockGenericSelectQuery;
+import org.objectstyle.cayenne.query.MockQuery;
 
 /**
  * @author Andrus Adamchik
  */
 public class ObjectDataContextTst extends TestCase {
 
+    public void testParentContext() {
+        PersistenceContext parent = new MockPersistenceContext();
+        ObjectDataContext context = new ObjectDataContext(parent);
+        assertSame(parent, context.getParentContext());
+    }
+
+    public void testCommitChanges() {
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ObjectDataContext context = new ObjectDataContext(parent);
+
+        context.commitChanges();
+        assertTrue(parent.isCommitChangesInContext());
+    }
+
+    public void testPerformNonSelectingQuery() {
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ObjectDataContext context = new ObjectDataContext(parent);
+
+        context.performNonSelectingQuery(new MockQuery());
+        assertTrue(parent.isPerformNonSelectingQuery());
+    }
+
+    public void testPerformQuery() {
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ObjectDataContext context = new ObjectDataContext(parent);
+
+        context.performQuery(new MockGenericSelectQuery());
+        assertTrue(parent.isPerformQueryInContext());
+    }
+
+    public void testPerformNonSelectingNamedQuery() {
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ObjectDataContext context = new ObjectDataContext(parent);
+
+        context.performNonSelectingQuery("test", Collections.EMPTY_MAP);
+        assertTrue(parent.isPerformNamedNonSelectingQuery());
+    }
+
+    public void testPerformNamedSelectingQuery() {
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ObjectDataContext context = new ObjectDataContext(parent);
+
+        context.performQuery("test", Collections.EMPTY_MAP, true);
+        assertTrue(parent.isPerformNamedQueryInContext());
+    }
 }

@@ -64,20 +64,21 @@ import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.NamedQueryMessage;
 import org.objectstyle.cayenne.distribution.QueryMessage;
-import org.objectstyle.cayenne.unit.util.MockQuery;
+import org.objectstyle.cayenne.query.MockGenericSelectQuery;
+import org.objectstyle.cayenne.query.MockQuery;
 
 /**
  * @author Andrus Adamchik
  */
 public class ServerObjectContextTst extends TestCase {
 
-    public void testParent() {
+    public void testParentContext() {
         PersistenceContext parent = new MockPersistenceContext();
         ServerObjectContext context = new ServerObjectContext(parent);
         assertSame(parent, context.getParentContext());
     }
 
-    public void testExecuteCommit() {
+    public void testOnCommit() {
         MockPersistenceContext parent = new MockPersistenceContext();
         ServerObjectContext context = new ServerObjectContext(parent);
 
@@ -85,7 +86,7 @@ public class ServerObjectContextTst extends TestCase {
         assertTrue(parent.isCommitChangesInContext());
     }
 
-    public void testExecuteNonSelectingQuery() {
+    public void testOnNonSelectingQuery() {
         MockPersistenceContext parent = new MockPersistenceContext();
         ServerObjectContext context = new ServerObjectContext(parent);
 
@@ -93,15 +94,15 @@ public class ServerObjectContextTst extends TestCase {
         assertTrue(parent.isPerformNonSelectingQuery());
     }
 
-    public void testExecuteSelectingQuery() {
+    public void testOnSelectingQuery() {
         MockPersistenceContext parent = new MockPersistenceContext();
         ServerObjectContext context = new ServerObjectContext(parent);
 
-        context.onQuery(new QueryMessage(new MockQuery(), true));
-        assertTrue(parent.isPerformNonSelectingQuery());
+        context.onQuery(new QueryMessage(new MockGenericSelectQuery(), true));
+        assertTrue(parent.isPerformQueryInContext());
     }
 
-    public void testExecuteNonSelectingNamedQuery() {
+    public void testOnNonSelectingNamedQuery() {
         MockPersistenceContext parent = new MockPersistenceContext();
         ServerObjectContext context = new ServerObjectContext(parent);
 
@@ -113,7 +114,7 @@ public class ServerObjectContextTst extends TestCase {
         assertTrue(parent.isPerformNamedNonSelectingQuery());
     }
 
-    public void testExecuteNamedSelectingQuery() {
+    public void testOnNamedSelectingQuery() {
         MockPersistenceContext parent = new MockPersistenceContext();
         ServerObjectContext context = new ServerObjectContext(parent);
 

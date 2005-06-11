@@ -110,10 +110,41 @@ public class XMLDecoderTst extends TestCase {
         Object object = decoder.decode(xml, XML_DATA_DIR + "simple-mapping.xml");
 
         assertTrue(object instanceof TestObject);
-        TestObject test = (TestObject) object;
-        assertEquals("George", test.getName());
-        assertEquals(57, test.getAge());
-        assertEquals(false, test.isOpen());
+        TestObject decoded = (TestObject) object;
+
+        TestObject george = new TestObject("George", 57, false);
+        assertEquals(decoded, george);
+    }
+
+    public void testDecodeMappingCollection() throws Exception {
+        Reader xml = new FileReader(XML_DATA_DIR + "collection-mapped.xml");
+        Object object = decoder.decode(xml, XML_DATA_DIR + "collection-mapping.xml");
+
+        assertTrue(object instanceof TestObject);
+        TestObject decoded = (TestObject) object;
+
+        TestObject george = new TestObject();
+        george.setName("George");
+        assertEquals(decoded, george);
+
+        List children = decoded.getChildren();
+        assertEquals(children.size(), 2);
+
+        TestObject bill = new TestObject();
+        bill.setName("Bill");
+        assertEquals(children.get(0), bill);
+
+        TestObject sue = new TestObject();
+        sue.setName("Sue");
+        assertEquals(children.get(1), sue);
+
+        List grandchildren = ((TestObject) children.get(1)).getChildren();
+        assertEquals(grandchildren.size(), 1);
+
+        TestObject mike = new TestObject();
+        mike.setName("Mike");
+        mike.setAge(3);
+        assertEquals(grandchildren.get(0), mike);
     }
 
     public void testDecodeCollection() throws Exception {
@@ -121,36 +152,47 @@ public class XMLDecoderTst extends TestCase {
         Object object = decoder.decode(xml);
 
         assertTrue(object instanceof TestObject);
-        TestObject test = (TestObject) object;
-        assertEquals(2, test.getChildren().size());
+        TestObject decoded = (TestObject) object;
+
+        List children = decoded.getChildren();
+        assertEquals(children.size(), 2);
+
+        TestObject bill = new TestObject("Bill", 98, true);
+        assertEquals(children.get(0), bill);
+
+        TestObject sue = new TestObject("Sue", 45, false);
+        assertEquals(children.get(1), sue);
     }
 
     public void testDecodeComplexCollection() throws Exception {
         Reader xml = new FileReader(XML_DATA_DIR + "encoded-complex-collection.xml");
-        List testObjects = (List) decoder.decode(xml);
+        Object object = decoder.decode(xml);
 
-        assertEquals(4, testObjects.size());
+        assertTrue(object instanceof TestObject);
+        TestObject decoded = (TestObject) object;
 
-        List embeddedList = (List) testObjects.get(3);
+        TestObject george = new TestObject();
+        george.setName("George");
 
-        TestObject obj1 = new TestObject();
-        obj1.setName("George");
-        obj1.addChild("Bill");
-        obj1.addChild("Sue");
+        assertEquals(decoded, george);
 
-        TestObject obj2 = new TestObject();
-        obj2.setAge(31);
-        obj2.setOpen(false);
-        obj2.addChild("Harry");
+        List children = decoded.getChildren();
+        assertEquals(children.size(), 3);
 
-        assertEquals(obj1, testObjects.get(0));
-        assertEquals("Random String", testObjects.get(1));
-        assertEquals(obj2, testObjects.get(2));
+        TestObject bill = new TestObject("Bill", 62, true);
+        assertEquals(children.get(0), bill);
 
-        assertEquals(4, embeddedList.size());
-        assertEquals("Testing", embeddedList.get(0));
-        assertEquals("embedded", embeddedList.get(1));
-        assertEquals("list", embeddedList.get(2));
+        TestObject sue = new TestObject("Sue", 8, true);
+        assertEquals(children.get(1), sue);
+
+        TestObject joe = new TestObject("Joe", 31, false);
+        assertEquals(children.get(2), joe);
+
+        List grandchildren = ((TestObject) children.get(2)).getChildren();
+        assertEquals(grandchildren.size(), 1);
+
+        TestObject harry = new TestObject("Harry", 23, false);
+        assertEquals(grandchildren.get(0), harry);
     }
 
     // TODO Test decode with mapping file & data context.

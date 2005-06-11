@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.util;
+package org.objectstyle.cayenne.query;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.access.QueryEngine;
@@ -91,10 +91,6 @@ public class MockQuery implements Query {
 
     public void setLoggingLevel(Level level) {
 
-    }
-
-    public int getQueryType() {
-        return 0;
     }
 
     public Object getRoot() {

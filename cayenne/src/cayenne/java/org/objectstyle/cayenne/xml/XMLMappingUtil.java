@@ -56,6 +56,8 @@
 
 package org.objectstyle.cayenne.xml;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -68,6 +70,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
+import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
@@ -122,7 +125,7 @@ public class XMLMappingUtil {
      * @param root The root node of the mapping document.
      */
     protected void setRoot(Element root) {
-        
+
         if (!"model".equals(root.getName())) {
             throw new CayenneRuntimeException(
                     "Root of the mapping model must be \"model\"");
@@ -186,6 +189,9 @@ public class XMLMappingUtil {
         for (Iterator it = entity.getChildren().iterator(); it.hasNext();) {
             Element property = (Element) it.next();
             String xmlTag = property.getAttributeValue("xmlTag");
+            String propertyName = property.getAttributeValue("name");
+
+            Object propertyValue = getProperty(object, propertyName);
 
             // If the child refers to an entity, skip over it, since when that entity
             // is processed, it will
@@ -193,25 +199,50 @@ public class XMLMappingUtil {
             if (getEntityNames().contains(xmlTag) == false) {
                 // Otherwise, create a new child for the returned xml item, encoding
                 // the passed in object's property.
-                
+
                 XMLEncoder encoder = new XMLEncoder();
-                Element e;
-                String propertyName = property.getAttributeValue("name");
-                try {
-                    encoder.encodeProperty(xmlTag, PropertyUtils
-                            .getNestedProperty(object, propertyName));
-                    e = encoder.getRoot();
-                    e.removeAttribute("type");
-                }
-                catch (Exception ex) {
-                    throw new CayenneRuntimeException("Error reading property '"
-                            + propertyName
-                            + "'.", ex);
-                }
+
+                // TODO This will not work on a collection. We need to first pull out
+                // the object and then encode its property.
+                encoder.encodeProperty(xmlTag, propertyValue);
+                Element e = encoder.getRoot();
+                e.removeAttribute("type");
 
                 // Once the property is encoded, add it to the item to be returned.
                 ret.addContent(e);
             }
+            else {
+
+                if (propertyValue instanceof Collection) {
+
+                    List encodedObjects = encodeCollection(
+                            (Collection) propertyValue,
+                            getEntity(xmlTag));
+
+                    for (Iterator it2 = encodedObjects.iterator(); it2.hasNext();) {
+                        Element element = (Element) it2.next();
+                        ret.addContent(element);
+                    }
+                }
+                else {
+                    ret.addContent(encodeEntity(propertyValue, getEntity(xmlTag)));
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    public List encodeCollection(Collection collection, Element entity)
+            throws CayenneRuntimeException {
+
+        List ret = new ArrayList();
+
+        // For each element in the collection.
+        for (Iterator it = collection.iterator(); it.hasNext();) {
+            Object element = it.next();
+
+            ret.add(encodeEntity(element, entity));
         }
 
         return ret;
@@ -225,40 +256,7 @@ public class XMLMappingUtil {
      * @return The XML document containing the encoded object.
      */
     public Element encode(Object object) throws CayenneRuntimeException {
-
-        Element ret = null;
-
-        // An object encoding is simply an encoding of each of the entities specified
-        // in the mapping file.
-        for (Iterator it = getEntities().iterator(); it.hasNext();) {
-            Element e = (Element) it.next();
-
-            // Handle the root entity differently. We want its encoding to be at the
-            // base level (i.e, the
-            // root of the returned object's encoding).
-            if (getRootEntity() == e) {
-                ret = encodeEntity(object, e);
-            }
-
-            // If this entity is not the root entity, then append its encoding to the
-            // root entity's encoding.
-            else {
-                String prop = getEntityRef(e.getAttributeValue("xmlTag"));
-                Object o;
-
-                try {
-                    o = PropertyUtils.getProperty(object, prop);
-                }
-                catch (Exception ex) {
-                    throw new CayenneRuntimeException("Error reading property '"
-                            + prop
-                            + "'.", ex);
-                }
-                ret.addContent(encodeEntity(o, e));
-            }
-        }
-
-        return ret;
+        return encodeEntity(object, getRootEntity());
     }
 
     /**
@@ -278,10 +276,11 @@ public class XMLMappingUtil {
      * @param ref The name of the entity.
      * @return The name of the property that is associated with the named entity.
      */
-    // Decide whether to change the @param tag description since "the name of the entity"
+    // TODO Decide whether to change the @param tag description since "the name of the
+    // entity"
     // can be deceiving.
-    public String getEntityRef(String ref) {
-        for (Iterator it = getRootEntity().getChildren().iterator(); it.hasNext();) {
+    public String getEntityRef(Element rootEntity, String ref) {
+        for (Iterator it = rootEntity.getChildren().iterator(); it.hasNext();) {
             Element child = (Element) it.next();
 
             if (child.getAttributeValue("xmlTag").equals(ref)) {
@@ -340,7 +339,15 @@ public class XMLMappingUtil {
 
             // Set the property in the main object that corresponds to the newly
             // created object.
-            setProperty(object, getEntityRef(xmlTag), o);
+            Object property = getProperty(object, getEntityRef(entity, xmlTag));
+
+            if (property instanceof Collection) {
+                Collection c = (Collection) property;
+                c.add(o);
+            }
+            else {
+                setProperty(object, getEntityRef(entity, xmlTag), o);
+            }
         }
     }
 
@@ -373,7 +380,7 @@ public class XMLMappingUtil {
     /**
      * Sets object property, wrapping any exceptions in CayenneRuntimeException.
      */
-    void setProperty(Object object, String property, Object value)
+    protected void setProperty(Object object, String property, Object value)
             throws CayenneRuntimeException {
         try {
             BeanUtils.setProperty(object, property, value);
@@ -383,11 +390,23 @@ public class XMLMappingUtil {
         }
     }
 
+    protected Object getProperty(Object object, String property)
+            throws CayenneRuntimeException {
+        try {
+            return PropertyUtils.getNestedProperty(object, property);
+        }
+        catch (Exception ex) {
+            throw new CayenneRuntimeException("Error reading property '"
+                    + property
+                    + "'.", ex);
+        }
+    }
+
     /**
      * Instantiates a new object for class name, wrapping any exceptions in
      * CayenneRuntimeException.
      */
-    Object newInstance(String className) throws CayenneRuntimeException {
+    protected Object newInstance(String className) throws CayenneRuntimeException {
         try {
             return Class.forName(className).newInstance();
         }

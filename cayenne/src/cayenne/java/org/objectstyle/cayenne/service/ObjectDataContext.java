@@ -14,6 +14,7 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * A temporary subclass of DataContext that implements ObjectContext interface. Used to
@@ -32,7 +33,7 @@ class ObjectDataContext extends DataContext implements ObjectContext {
     }
 
     public void commitChanges() throws CayenneRuntimeException {
-        
+
         if (this.getParentContext() == null) {
             throw new CayenneRuntimeException(
                     "ObjectContext has no parent PersistenceContext.");
@@ -111,4 +112,38 @@ class ObjectDataContext extends DataContext implements ObjectContext {
         throw new CayenneRuntimeException("Nested contexts are not supported yet");
     }
 
+    /**
+     * Overrides super implementation to use parent PersistenceContext for query
+     * execution.
+     */
+    public int[] performNonSelectingQuery(Query query) {
+        return getParentContext().performNonSelectingQuery(query);
+    }
+
+    /**
+     * Overrides super implementation to use parent PersistenceContext for query
+     * execution.
+     */
+    public int[] performNonSelectingQuery(String queryName, Map parameters) {
+        return getParentContext().performNonSelectingQuery(queryName, parameters);
+    }
+
+    /**
+     * Overrides super implementation to use parent PersistenceContext for query
+     * execution.
+     */
+    public List performQuery(GenericSelectQuery query) {
+        return getParentContext().performQueryInContext(this, query);
+    }
+
+    /**
+     * Overrides super implementation to use parent PersistenceContext for query
+     * execution.
+     */
+    public List performQuery(String queryName, Map parameters, boolean refresh) {
+        return getParentContext().performQueryInContext(this,
+                queryName,
+                parameters,
+                refresh);
+    }
 }

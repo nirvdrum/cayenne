@@ -53,61 +53,48 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne.query;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.PersistenceContext;
-import org.objectstyle.cayenne.distribution.ClientMessageHandler;
-import org.objectstyle.cayenne.distribution.CommitMessage;
-import org.objectstyle.cayenne.distribution.NamedQueryMessage;
-import org.objectstyle.cayenne.distribution.QueryMessage;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import java.util.Collection;
 
 /**
- * A server-side peer of a ClientDataContext. Client messages are processed via callback
- * methods defined in ClientMessageHandler interface.
- * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-public class ServerObjectContext extends ObjectDataContext implements
-        ClientMessageHandler {
+public class MockGenericSelectQuery extends MockQuery implements GenericSelectQuery {
 
-    ServerObjectContext(PersistenceContext parent) {
-        super(parent);
+    public MockGenericSelectQuery() {
+        super();
     }
 
-    public Object onCommit(CommitMessage message) {
-        // TODO: sync from commit message...
+    public MockGenericSelectQuery(String name) {
+        super(name);
+    }
 
-        commitChanges();
+    public String getCachePolicy() {
         return null;
     }
 
-    public Object onNamedQuery(NamedQueryMessage message) {
-        if (message.isSelecting()) {
-            return performQuery(message.getQueryName(), message.getParameters(), message
-                    .isRefresh());
-        }
-        else {
-            return performNonSelectingQuery(message.getQueryName(), message
-                    .getParameters());
-        }
+    public boolean isFetchingDataRows() {
+        return false;
     }
 
-    public Object onQuery(QueryMessage message) {
-        if (message.isSelecting()) {
-            if (message.getQuery() instanceof GenericSelectQuery) {
-                return performQuery((GenericSelectQuery) message.getQuery());
-            }
-            else {
-                throw new CayenneRuntimeException(
-                        "Expected a GenericSelectQuery for selecting query, got: "
-                                + message.getQuery());
-            }
-        }
-        else {
-            return performNonSelectingQuery(message.getQuery());
-        }
+    public boolean isRefreshingObjects() {
+        return false;
+    }
+
+    public boolean isResolvingInherited() {
+        return false;
+    }
+
+    public int getPageSize() {
+        return 0;
+    }
+
+    public int getFetchLimit() {
+        return 0;
+    }
+
+    public Collection getJointPrefetches() {
+        return null;
     }
 }

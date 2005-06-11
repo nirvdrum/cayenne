@@ -62,9 +62,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockQuery;
 
 public class EntityResolverTst extends CayenneTestCase {
     protected EntityResolver resolver;

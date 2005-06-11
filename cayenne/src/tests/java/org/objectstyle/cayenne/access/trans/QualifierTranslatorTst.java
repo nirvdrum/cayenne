@@ -44,10 +44,10 @@ import org.objectstyle.cayenne.exp.TstExpressionSuite;
 import org.objectstyle.cayenne.exp.TstTernaryExpSuite;
 import org.objectstyle.cayenne.exp.TstUnaryExpSuite;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.QualifiedQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockQuery;
 
 public class QualifierTranslatorTst extends CayenneTestCase {
 

@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.xml;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.jdom.Document;
 import org.jdom.Element;
@@ -95,7 +96,7 @@ public class XMLEncoder {
 
         String ret = serializer.outputString(doc);
         doc.detachRootElement();
-        
+
         return ret;
     }
 
@@ -103,31 +104,50 @@ public class XMLEncoder {
         root = new Element(xmlTag);
         root.setAttribute("type", type);
     }
-    
+
     public Element getRoot() {
         return root;
     }
 
     public void encodeProperty(String xmlTag, Object property) {
-        Element temp = new Element(xmlTag);
-        
+        Element temp = null;
+
         if (property instanceof XMLSerializable) {
             XMLSerializable element = (XMLSerializable) property;
+
+            // Make a back-up copy of the root and then nullify it. This is done so we can
+            // recycle the encoder object.
             Element rootCopy = root;
             root = null;
+
+            // Use the current encoder object to encode the property.
             element.encodeAsXML(this);
+
+            // Store a copy of the encoded property, which is currently stored in the
+            // root, since the encoder object was recycled.
+            // Also, change the element name to that which was provided as a parameter to
+            // the method.
             temp = root;
+            temp.setName(xmlTag);
+
+            // Restore the old root.
             root = rootCopy;
         }
+        // TODO This block operates differently from the others. Here, root can never be
+        // null and we need to add a list of items. Having two points of exit is not good.
         else if (property instanceof Collection) {
             Collection c = (Collection) property;
-            temp = encodeCollection(xmlTag, c);
+            root.addContent(encodeCollection(xmlTag, c));
+
+            return;
         }
         else {
+            temp = new Element(xmlTag);
+
             temp.setAttribute("type", property.getClass().getName());
             temp.setText(property.toString());
         }
-        
+
         if (null != root) {
             root.addContent(temp);
         }
@@ -136,16 +156,23 @@ public class XMLEncoder {
         }
     }
 
-    // TODO Should this be made protected now that encodeProperty does the right thing w/ regards to collections?
-    public Element encodeCollection(String xmlTag, Collection c) {
+    protected List encodeCollection(String xmlTag, Collection c) {
         XMLEncoder encoder = new XMLEncoder();
         encoder.setRoot(xmlTag, c.getClass().getName());
 
         for (Iterator it = c.iterator(); it.hasNext();) {
-            encoder.encodeProperty("element", it.next());
+            encoder.encodeProperty(xmlTag, it.next());
         }
 
-        //root.addContent(encoder.getRoot());
-        return encoder.getRoot();
+        List ret = encoder.getRoot().removeContent();
+
+        if (1 == ret.size()) {
+            Element e = (Element) ret.get(0);
+
+            e.setAttribute("forceList", "YES");
+        }
+
+        // root.addContent(encoder.getRoot());
+        return ret;
     }
 }

@@ -57,12 +57,15 @@
 package org.objectstyle.cayenne.xml;
 
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.beanutils.ConstructorUtils;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -77,8 +80,9 @@ import org.objectstyle.cayenne.access.DataContext;
  * @since 1.2
  */
 public class XMLDecoder {
+
     static final Map classMapping = new HashMap();
-    
+
     static {
         classMapping.put("boolean", Boolean.class);
         classMapping.put("int", Integer.class);
@@ -92,30 +96,33 @@ public class XMLDecoder {
 
     /** The root of the XML document being decoded. */
     protected Element root = null;
-    
+
     /** The data context to register decoded DataObjects with. */
     protected DataContext dc = null;
-    
+
+    // TODO: H to the A to the C to the K
+    protected List decodedCollections = new ArrayList();
+
     /**
-     * Default constructor.  This will create an XMLDecoder instance that will decode objects from
-     * XML, but will not register them with any DataContext.
-     *
-     *@see XMLDecoder#XMLDecoder(DataContext)
+     * Default constructor. This will create an XMLDecoder instance that will decode
+     * objects from XML, but will not register them with any DataContext.
+     * 
+     * @see XMLDecoder#XMLDecoder(DataContext)
      */
     public XMLDecoder() {
         this.dc = null;
     }
-    
+
     /**
-     * Creates an XMLDecoder that will register decoded DataObjects with the specified DataContext.
+     * Creates an XMLDecoder that will register decoded DataObjects with the specified
+     * DataContext.
      * 
      * @param dc The DataContext to register decoded DataObjects with.
      */
     public XMLDecoder(DataContext dc) {
         this.dc = dc;
     }
-    
-    
+
     /**
      * Decodes an XML element to a Boolean.
      * 
@@ -124,11 +131,11 @@ public class XMLDecoder {
      */
     public Boolean decodeBoolean(String xmlTag) {
         String val = decodeString(xmlTag);
-        
+
         if (null == val) {
             return null;
         }
-        
+
         return Boolean.valueOf(val);
     }
 
@@ -140,11 +147,11 @@ public class XMLDecoder {
      */
     public Double decodeDouble(String xmlTag) {
         String val = decodeString(xmlTag);
-        
+
         if (null == val) {
             return null;
         }
-        
+
         return Double.valueOf(val);
     }
 
@@ -156,11 +163,11 @@ public class XMLDecoder {
      */
     public Float decodeFloat(String xmlTag) {
         String val = decodeString(xmlTag);
-        
+
         if (null == val) {
             return null;
         }
-                
+
         return Float.valueOf(val);
     }
 
@@ -172,21 +179,21 @@ public class XMLDecoder {
      */
     public Integer decodeInteger(String xmlTag) {
         String val = decodeString(xmlTag);
-        
+
         if (null == val) {
             return null;
         }
-        
+
         return Integer.valueOf(val);
     }
 
     public Object decodeObject(String xmlTag) {
         // Find the XML element corresponding to the supplied tag.
         Element child = root.getChild(xmlTag);
-        
+
         return decodeObject(child);
     }
-    
+
     /**
      * Decodes an XML element to an Object.
      * 
@@ -194,62 +201,71 @@ public class XMLDecoder {
      * @return The tag's value.
      */
     protected Object decodeObject(Element child) {
-        
+
         if (null == child) {
             return null;
         }
-        
+
         String type = child.getAttributeValue("type");
-        if (type == null) {
+        if (null == type) {
             // TODO should we use String by default? Or guess from the property type?
             throw new CayenneRuntimeException("No type specified for tag '"
                     + child.getName()
                     + "'.");
         }
-        
+
         // temp hack to support primitives...
         Class objectClass = (Class) classMapping.get(type);
-        if (objectClass == null) {
+        if (null == objectClass) {
             try {
                 objectClass = Class.forName(type);
             }
             catch (Exception e) {
-                throw new CayenneRuntimeException(
-                        "Unrecognized class '" + objectClass + "'",
-                        e);
+                throw new CayenneRuntimeException("Unrecognized class '"
+                        + objectClass
+                        + "'", e);
             }
         }
 
-        try { 
-            if (Collection.class.isAssignableFrom(objectClass)) {
+        try {
+            if ((((null != child.getParentElement()) && (child
+                    .getParentElement()
+                    .getChildren(child.getName())
+                    .size() > 1)) || ((null != child.getAttributeValue("forceList")) && (child
+                    .getAttributeValue("forceList")
+                    .toUpperCase().equals("YES"))))
+                    && (false == decodedCollections.contains(child))) {
                 return decodeCollection(child, objectClass);
             }
-            
+
             else if (XMLSerializable.class.isAssignableFrom(objectClass)) {
                 XMLSerializable ret = (XMLSerializable) objectClass.newInstance();
                 ret.decodeFromXML(this);
-                
+
                 return ret;
             }
-            
-            else if (ConstructorUtils.getAccessibleConstructor(objectClass, String.class) != null) { 
-            // Create a new object of the type supplied as the "type" attribute
-            // in the XML element that
-            // represents the XML element's text value.
-            // E.g., for <count type="java.lang.Integer">13</count>, this is
-            // equivalent to new Integer("13");
-            return ConstructorUtils.invokeConstructor(objectClass, child
-                    .getText());
-            }
-            
-            else {
-                throw new CayenneRuntimeException("Error decoding tag '" + child.getName() + "': " +
-                		"specified class does not have a constructor taking either a String or an XMLDecoder");
+
+            else if (ConstructorUtils.getAccessibleConstructor(objectClass, String.class) != null) {
+                // Create a new object of the type supplied as the "type" attribute
+                // in the XML element that
+                // represents the XML element's text value.
+                // E.g., for <count type="java.lang.Integer">13</count>, this is
+                // equivalent to new Integer("13");
+                return ConstructorUtils.invokeConstructor(objectClass, child.getText());
             }
 
+            else {
+                throw new CayenneRuntimeException(
+                        "Error decoding tag '"
+                                + child.getName()
+                                + "': "
+                                + "specified class does not have a constructor taking either a String or an XMLDecoder");
+            }
         }
         catch (Exception e) {
-            throw new CayenneRuntimeException("Error decoding tag '" + child.getName() + "'", e);
+            throw new CayenneRuntimeException("Error decoding tag '"
+                    + child.getName()
+                    + "'", e);
         }
     }
 
@@ -272,7 +288,7 @@ public class XMLDecoder {
      * @return A new instance of the object represented by the XML.
      */
     public Object decode(Reader in) throws CayenneRuntimeException {
-        
+
         // Parse the XML into a JDOM representation.
         Document data = parse(in);
 
@@ -306,12 +322,13 @@ public class XMLDecoder {
             throw new CayenneRuntimeException("Error instantiating object", th);
         }
 
-        if (dc != null && object instanceof DataObject) {
+        if ((null != dc) && (object instanceof DataObject)) {
             dc.registerNewObject((DataObject) object);
         }
 
         root = oldRoot;
-        
+        decodedCollections.clear();
+
         return object;
     }
 
@@ -325,8 +342,7 @@ public class XMLDecoder {
      * @return A new instance of the object represented by the XML.
      * @see XMLMappingUtil#decode(Document)
      */
-    public Object decode(Reader in, String mappingFile)
-            throws CayenneRuntimeException {
+    public Object decode(Reader in, String mappingFile) throws CayenneRuntimeException {
         // Parse the XML document into a JDOM representation.
         Document data = parse(in);
 
@@ -334,7 +350,7 @@ public class XMLDecoder {
         XMLMappingUtil mu = new XMLMappingUtil(mappingFile);
         Object ret = mu.decode(data);
 
-        if (dc != null) {
+        if (null != dc) {
             dc.registerNewObject((DataObject) ret);
         }
 
@@ -355,24 +371,31 @@ public class XMLDecoder {
 
         Collection ret;
         try {
-            ret = (Collection) objectClass.newInstance();
+            String parentClass = xml.getParentElement().getAttributeValue("type");
+            Object property = Class.forName(parentClass).newInstance();
+            Collection c = (Collection) PropertyUtils.getNestedProperty(property, xml
+                    .getName());
+
+            ret = (Collection) c.getClass().newInstance();
         }
         catch (Exception ex) {
-            throw new CayenneRuntimeException("Could not create collection with no-arg constructor.", ex);
+            throw new CayenneRuntimeException(
+                    "Could not create collection with no-arg constructor.",
+                    ex);
         }
 
         // Each child of the root corresponds to an XML representation of
         // the object. The idea is decode each of those into an object and add them to the
         // list to be returned.
-        for (Iterator it = xml.getChildren().iterator(); it.hasNext();) {
+        for (Iterator it = xml.getParentElement().getChildren(xml.getName()).iterator(); it
+                .hasNext();) {
             // Decode the object.
             Element e = (Element) it.next();
+
+            decodedCollections.add(e);
+
             Object o = decode(e);
 
-            if (dc != null && o instanceof DataObject) {
-                dc.registerNewObject((DataObject) o);
-            }
-            
             // Add it to the output list.
             ret.add(o);
         }

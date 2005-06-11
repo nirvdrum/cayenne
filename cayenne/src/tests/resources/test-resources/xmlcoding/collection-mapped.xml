@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Test>
+<Family>
   <Name>George</Name>
-  <Children>
-    <element type="java.lang.String">Bill</element>
-    <element type="java.lang.String">Sue</element>
-  </Children>
-</Test>
+  <Child>
+    <Name>Bill</Name>
+  </Child>
+  <Child>
+    <Name>Sue</Name>
+    <Grandchild>
+      <Name>Mike</Name>
+      <Age>3</Age>
+    </Grandchild>
+  </Child>
+</Family>
 
