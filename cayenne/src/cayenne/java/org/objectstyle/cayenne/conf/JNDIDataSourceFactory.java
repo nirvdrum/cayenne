@@ -142,11 +142,12 @@ public class JNDIDataSourceFactory implements DataSourceFactory {
     }
 
     DataSource loadFromPreferences(String location, Level logLevel) throws Exception {
-        // as we don't want to have dependencies on the Modeler, instantiate factory via
-        // reflection .. eventually "pref" package should be moved to Cayenne...
+        // as we don't want compile dependencies on the Modeler, instantiate factory via
+        // reflection ...
 
         DataSourceFactory prefsFactory = (DataSourceFactory) Class
-                .forName("org.objectstyle.cayenne.pref.PreferencesDataSourceFactory")
+                .forName(
+                        "org.objectstyle.cayenne.modeler.pref.PreferencesDataSourceFactory")
                 .newInstance();
 
         prefsFactory.initializeWithParentConfiguration(parentConfig);
