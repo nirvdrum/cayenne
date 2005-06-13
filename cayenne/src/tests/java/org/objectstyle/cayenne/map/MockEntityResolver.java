@@ -53,82 +53,35 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.map;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * A noop ObjectContext used for unit testing.
- * 
  * @author Andrus Adamchik
  */
-public class MockObjectContext extends MockPersistenceContext implements ObjectContext {
+public class MockEntityResolver extends EntityResolver {
 
-    public MockObjectContext() {
-        super();
+    protected ObjEntity mockObjEntity;
+
+    public MockEntityResolver(ObjEntity mockObjEntity) {
+        this.mockObjEntity = mockObjEntity;
     }
 
-    public Collection newObjects() {
-        return null;
+    public synchronized ObjEntity lookupObjEntity(Class aClass) {
+        return mockObjEntity;
     }
 
-    public Collection deletedObjects() {
-        return null;
+    public synchronized ObjEntity lookupObjEntity(DataObject dataObject) {
+        return mockObjEntity;
     }
 
-    public Collection modifiedObjects() {
-        return null;
+    public synchronized ObjEntity lookupObjEntity(Query q) {
+        return mockObjEntity;
     }
 
-    public List performQuery(GenericSelectQuery query) {
-        return null;
-    }
-
-    public List performQuery(String queryName, Map parameters, boolean refresh) {
-        return null;
-    }
-
-    public int[] performNonSelectingQuery(Query query) {
-        return null;
-    }
-
-    public int[] performNonSelectingQuery(String queryName, Map parameters) {
-        return null;
-    }
-
-    public void commitChanges() {
-    }
-
-    public void commitChangesInContext(ObjectContext context) {
-    }
-
-    public void deleteObject(Persistent object) {
-    }
-
-    public Persistent newObject(Class persistentClass) {
-        return null;
-    }
-
-    public void objectWillRead(Persistent persistent, String property) {
-    }
-
-    public void objectWillWrite(
-            Persistent persistent,
-            String property,
-            Object oldValue,
-            Object newValue) {
-    }
-
-    public Collection uncommittedObjects() {
-        return null;
-    }
-
-    public List performQuery(Query query) {
-        return null;
+    public synchronized ObjEntity lookupObjEntity(String entityName) {
+        return mockObjEntity;
     }
 }

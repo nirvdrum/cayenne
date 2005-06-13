@@ -53,82 +53,43 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.service;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.PersistenceContext;
+import org.objectstyle.cayenne.access.QueryResult;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * A noop ObjectContext used for unit testing.
- * 
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class MockObjectContext extends MockPersistenceContext implements ObjectContext {
+class PersistenceContextQueryAction {
 
-    public MockObjectContext() {
-        super();
+    PersistenceContext context;
+
+    public PersistenceContextQueryAction(PersistenceContext context) {
+        this.context = context;
     }
 
-    public Collection newObjects() {
-        return null;
-    }
+    int[] performNonSelectingQuery(Query query) {
+        QueryResult resultCallback = new QueryResult();
 
-    public Collection deletedObjects() {
-        return null;
-    }
+        context.performQuery(query, resultCallback);
 
-    public Collection modifiedObjects() {
-        return null;
-    }
+        List updateCounts = resultCallback.getUpdates(query);
+        if (updateCounts == null || updateCounts.isEmpty()) {
+            return new int[0];
+        }
 
-    public List performQuery(GenericSelectQuery query) {
-        return null;
-    }
+        int len = updateCounts.size();
+        int[] counts = new int[len];
 
-    public List performQuery(String queryName, Map parameters, boolean refresh) {
-        return null;
-    }
+        for (int i = 0; i < len; i++) {
+            counts[i] = ((Number) updateCounts.get(i)).intValue();
+        }
 
-    public int[] performNonSelectingQuery(Query query) {
-        return null;
-    }
-
-    public int[] performNonSelectingQuery(String queryName, Map parameters) {
-        return null;
-    }
-
-    public void commitChanges() {
-    }
-
-    public void commitChangesInContext(ObjectContext context) {
-    }
-
-    public void deleteObject(Persistent object) {
-    }
-
-    public Persistent newObject(Class persistentClass) {
-        return null;
-    }
-
-    public void objectWillRead(Persistent persistent, String property) {
-    }
-
-    public void objectWillWrite(
-            Persistent persistent,
-            String property,
-            Object oldValue,
-            Object newValue) {
-    }
-
-    public Collection uncommittedObjects() {
-        return null;
-    }
-
-    public List performQuery(Query query) {
-        return null;
+        return counts;
     }
 }

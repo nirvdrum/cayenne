@@ -59,7 +59,6 @@ package org.objectstyle.cayenne.query;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -167,14 +166,14 @@ public abstract class AbstractQuery implements Query {
      * 
      * @since 1.2
      */
-    public QueryEngine routeQuery(QueryRouter router, EntityResolver resolver) {
+    public void routeQuery(QueryRouter router, EntityResolver resolver) {
         DataMap map = resolver.lookupDataMap(this);
 
         if (map == null) {
             throw new CayenneRuntimeException("No DataMap found, can't route query "
                     + this);
         }
-        
-        return router.engineForDataMap(map);
+
+        router.useEngineForQuery(router.engineForDataMap(map), this);
     }
 }

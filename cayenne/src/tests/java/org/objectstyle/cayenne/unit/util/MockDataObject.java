@@ -66,13 +66,27 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  * @author Andrei Adamchik
  */
 public class MockDataObject implements DataObject {
-    protected ObjectId objectId;
 
-    public DataContext getDataContext() {
-        return null;
+    protected ObjectId objectId;
+    protected int persistenceState;
+    protected DataContext context;
+
+    public MockDataObject() {
+
     }
 
-    public void setDataContext(DataContext ctxt) {
+    public MockDataObject(DataContext context, ObjectId id, int persistenceState) {
+        this.context = context;
+        this.objectId = id;
+        this.persistenceState = persistenceState;
+    }
+
+    public DataContext getDataContext() {
+        return context;
+    }
+
+    public void setDataContext(DataContext context) {
+        this.context = context;
     }
 
     public ObjectId getObjectId() {
@@ -84,10 +98,11 @@ public class MockDataObject implements DataObject {
     }
 
     public int getPersistenceState() {
-        return 0;
+        return persistenceState;
     }
 
     public void setPersistenceState(int newState) {
+        this.persistenceState = newState;
     }
 
     public void writePropertyDirectly(String propertyName, Object val) {

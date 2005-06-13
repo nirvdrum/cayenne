@@ -56,10 +56,9 @@
 package org.objectstyle.cayenne;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
 
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -80,28 +79,19 @@ public interface PersistenceContext extends Serializable {
     void commitChangesInContext(ObjectContext context);
 
     /**
-     * Executes a selecting query on behalf of an ObjectContext. Any returned objects will
-     * be registered with that ObjectContext.
+     * Executes a query using its own preferred transactional behavior.
+     * 
+     * @see org.objectstyle.cayenne.query.QueryChain
      */
-    List performQueryInContext(ObjectContext context, GenericSelectQuery query);
+    void performQuery(Query query, OperationObserver observer);
 
     /**
-     * Executes a named selecting query on behalf of an ObjectContext. Any returned
-     * objects will be registered with that ObjectContext.
+     * Executes a query within a given transaction. Note that if there is a need to run
+     * multiple queries, a decorator can be created that implements Query, but internally
+     * resolves to more than one actual query.
+     * 
+     * @see org.objectstyle.cayenne.query.QueryChain
      */
-    List performQueryInContext(
-            ObjectContext context,
-            String queryName,
-            Map parameters,
-            boolean refresh);
+    void performQuery(Query query, OperationObserver observer, Transaction transaction);
 
-    /**
-     * Executes a non-se;ecting query returning result counts.
-     */
-    public int[] performNonSelectingQuery(Query query);
-
-    /**
-     * Executes a named non-selecting query.
-     */
-    int[] performNonSelectingQuery(String queryName, Map parameters);
 }

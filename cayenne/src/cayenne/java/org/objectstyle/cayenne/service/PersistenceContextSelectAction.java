@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,82 +53,39 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.service;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * A noop ObjectContext used for unit testing.
+ * Executes non-selecting queries on behalf of DataDomain.
  * 
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class MockObjectContext extends MockPersistenceContext implements ObjectContext {
+// Differences with DataContextSelectAction:
+// * no support for prefetch queries - this should be solved by moving this logic from
+// DataContext to the query itself using current routing extensions.
+// * no support for paginated queries
+// * no support for IncrementalFaultList yet (as it relies on DataContext)
+// * local cache is not checked ... caller must do it
+// * if caller uses its own "shared" cache, this action won't have access to it and will
+// use real shared cache instead...
+class PersistenceContextSelectAction {
 
-    public MockObjectContext() {
-        super();
+    PersistenceContext context;
+
+    PersistenceContextSelectAction(PersistenceContext context) {
+        this.context = context;
     }
 
-    public Collection newObjects() {
-        return null;
-    }
-
-    public Collection deletedObjects() {
-        return null;
-    }
-
-    public Collection modifiedObjects() {
-        return null;
-    }
-
-    public List performQuery(GenericSelectQuery query) {
-        return null;
-    }
-
-    public List performQuery(String queryName, Map parameters, boolean refresh) {
-        return null;
-    }
-
-    public int[] performNonSelectingQuery(Query query) {
-        return null;
-    }
-
-    public int[] performNonSelectingQuery(String queryName, Map parameters) {
-        return null;
-    }
-
-    public void commitChanges() {
-    }
-
-    public void commitChangesInContext(ObjectContext context) {
-    }
-
-    public void deleteObject(Persistent object) {
-    }
-
-    public Persistent newObject(Class persistentClass) {
-        return null;
-    }
-
-    public void objectWillRead(Persistent persistent, String property) {
-    }
-
-    public void objectWillWrite(
-            Persistent persistent,
-            String property,
-            Object oldValue,
-            Object newValue) {
-    }
-
-    public Collection uncommittedObjects() {
-        return null;
-    }
-
-    public List performQuery(Query query) {
-        return null;
+    List performQuery(ObjectContext objectContext, Query query, boolean refreshCache) {
+        // TODO: implement
+        throw new CayenneRuntimeException("TODO");
     }
 }

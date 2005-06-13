@@ -123,13 +123,16 @@ public interface Query extends Serializable {
     SQLAction toSQLAction(SQLActionVisitor visitor);
 
     /**
-     * A "visit" method that lets query to decide which query engine to use out of a set
-     * of QueryEngines provided by QueryRouter.
+     * A "visit" method that lets query to decide which query engine to use. Mapping of
+     * query engines is provided by QueryRouter. Query should use a
+     * {@link QueryRouter#useEngineForQuery(QueryEngine, Query)}callback method to route
+     * itself. Such API allows for maximum flexibility and customization options. E.g. a
+     * query can create one or more substitute queries or even provide its own QueryEngine
+     * to execute itself.
      * 
      * @throws org.objectstyle.cayenne.CayenneRuntimeException if a QueryEngine can't be
      *             found.
      * @since 1.2
      */
-    // TODO: simplify QueryEngine and stick it in the query package
-    QueryEngine routeQuery(QueryRouter router, EntityResolver resolver);
+    void routeQuery(QueryRouter router, EntityResolver resolver);
 }

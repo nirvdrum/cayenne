@@ -66,6 +66,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.PersistenceContext;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * Class responsible for transaction management within Cayenne.
@@ -183,6 +185,54 @@ public abstract class Transaction {
             // since caller will no longer be processing stuff on exception
             if (!observer.isIteratedResult()
                 && (getStatus() == Transaction.STATUS_ACTIVE)) {
+                commit();
+            }
+        }
+        catch (Exception ex) {
+            setRollbackOnly();
+
+            // must rethrow
+            if (ex instanceof CayenneRuntimeException) {
+                throw (CayenneRuntimeException) ex;
+            }
+            else {
+                throw new CayenneRuntimeException(ex);
+            }
+        }
+        finally {
+            if (getStatus() == Transaction.STATUS_MARKED_ROLLEDBACK) {
+                try {
+                    rollback();
+                }
+                catch (Exception rollbackEx) {
+                }
+            }
+        }
+    }
+    
+
+    /**
+     * Helper method that runs a query, wrapping it in this transaction, and then commits
+     * or rolls back depending on the outcome. Query can internally be a chain of multiple
+     * queries.
+     * 
+     * @since 1.2
+     */
+    public void performQuery(
+            PersistenceContext context,
+            Query query,
+            OperationObserver observer)
+            throws CayenneRuntimeException {
+
+        try {
+            // implicit begin..
+            context.performQuery(query, observer, this);
+
+            // don't commit iterated queries - leave it up to the caller
+            // at the same time rollbacks of iterated queries must be processed here,
+            // since caller will no longer be processing stuff on exception
+            if (!observer.isIteratedResult()
+                    && (getStatus() == Transaction.STATUS_ACTIVE)) {
                 commit();
             }
         }

@@ -56,12 +56,7 @@
 package org.objectstyle.cayenne.query;
 
 import org.apache.log4j.Level;
-import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.QueryRouter;
-import org.objectstyle.cayenne.query.SQLAction;
-import org.objectstyle.cayenne.query.SQLActionVisitor;
 
 /**
  * @author Andrei Adamchik
@@ -105,7 +100,7 @@ public class MockQuery implements Query {
         return null;
     }
 
-    public QueryEngine routeQuery(QueryRouter router, EntityResolver resolver) {
-        return null;
+    public void routeQuery(QueryRouter router, EntityResolver resolver) {
+
     }
 }

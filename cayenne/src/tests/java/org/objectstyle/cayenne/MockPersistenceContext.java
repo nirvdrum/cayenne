@@ -55,10 +55,8 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.List;
-import java.util.Map;
-
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -67,56 +65,33 @@ import org.objectstyle.cayenne.query.Query;
 public class MockPersistenceContext implements PersistenceContext {
 
     protected boolean commitChangesInContext;
-    protected boolean performQueryInContext;
-    protected boolean performNamedQueryInContext;
-    protected boolean performNonSelectingQuery;
-    protected boolean performNamedNonSelectingQuery;
+    protected boolean performQuery;
+    protected boolean performQueryInTransaction;
 
     public void commitChangesInContext(ObjectContext context) {
         this.commitChangesInContext = true;
-    }
-
-    public List performQueryInContext(ObjectContext context, GenericSelectQuery query) {
-        this.performQueryInContext = true;
-        return null;
-    }
-
-    public List performQueryInContext(
-            ObjectContext context,
-            String queryName,
-            Map parameters,
-            boolean refresh) {
-        this.performNamedQueryInContext = true;
-        return null;
-    }
-
-    public int[] performNonSelectingQuery(Query query) {
-        this.performNonSelectingQuery = true;
-        return null;
-    }
-
-    public int[] performNonSelectingQuery(String queryName, Map parameters) {
-        this.performNamedNonSelectingQuery = true;
-        return null;
     }
 
     public boolean isCommitChangesInContext() {
         return commitChangesInContext;
     }
 
-    public boolean isPerformNamedNonSelectingQuery() {
-        return performNamedNonSelectingQuery;
+    public boolean isPerformQuery() {
+        return performQuery;
     }
 
-    public boolean isPerformNamedQueryInContext() {
-        return performNamedQueryInContext;
+    public boolean isPerformQueryInTransaction() {
+        return performQueryInTransaction;
     }
 
-    public boolean isPerformNonSelectingQuery() {
-        return performNonSelectingQuery;
+    public void performQuery(
+            Query query,
+            OperationObserver observer,
+            Transaction transaction) {
+        performQueryInTransaction = true;
     }
 
-    public boolean isPerformQueryInContext() {
-        return performQueryInContext;
+    public void performQuery(Query query, OperationObserver observer) {
+        performQuery = true;
     }
 }

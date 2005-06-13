@@ -67,11 +67,12 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.TempObjectId;
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.distribution.CayenneConnector;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.NamedQueryMessage;
 import org.objectstyle.cayenne.distribution.QueryMessage;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -127,22 +128,6 @@ public class ClientObjectContext implements ObjectContext {
      */
     public void commitChangesInContext(ObjectContext context) {
         // TODO: implement
-        throw new CayenneRuntimeException(
-                "ObjectContext hierarchy is not supported (yet).");
-    }
-
-    public List performQueryInContext(ObjectContext context, GenericSelectQuery query) {
-        //      TODO: implement
-        throw new CayenneRuntimeException(
-                "ObjectContext hierarchy is not supported (yet).");
-    }
-
-    public List performQueryInContext(
-            ObjectContext context,
-            String queryName,
-            Map parameters,
-            boolean refresh) {
-        //      TODO: implement
         throw new CayenneRuntimeException(
                 "ObjectContext hierarchy is not supported (yet).");
     }
@@ -213,7 +198,7 @@ public class ClientObjectContext implements ObjectContext {
         return new QueryMessage(query, false).sendPerformNonSelectingQuery(connector);
     }
 
-    public List performQuery(GenericSelectQuery query) {
+    public List performQuery(Query query) {
         return new QueryMessage(query, true).sendPerformQuery(connector);
     }
 
@@ -260,4 +245,16 @@ public class ClientObjectContext implements ObjectContext {
         return objectStore.objectsInState(PersistenceState.NEW);
     }
 
+    // *** Unsupported stuff...
+
+    public void performQuery(Query query, OperationObserver observer) {
+        throw new CayenneClientException("Not supported on the client.");
+    }
+
+    public void performQuery(
+            Query query,
+            OperationObserver observer,
+            Transaction transaction) {
+        throw new CayenneClientException("Not supported on the client.");
+    }
 }

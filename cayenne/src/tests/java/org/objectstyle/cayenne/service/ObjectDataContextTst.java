@@ -59,10 +59,17 @@ import java.util.Collections;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.MockPersistenceContext;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceContext;
-import org.objectstyle.cayenne.query.MockGenericSelectQuery;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.access.MockDataRowStore;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.MockEntityResolver;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.MockQuery;
+import org.objectstyle.cayenne.unit.util.MockDataObject;
 
 /**
  * @author Andrus Adamchik
@@ -71,13 +78,48 @@ public class ObjectDataContextTst extends TestCase {
 
     public void testParentContext() {
         PersistenceContext parent = new MockPersistenceContext();
-        ObjectDataContext context = new ObjectDataContext(parent);
+        ObjectDataContext context = new ObjectDataContext(
+                parent,
+                new EntityResolver(),
+                new MockDataRowStore());
         assertSame(parent, context.getParentContext());
     }
 
-    public void testCommitChanges() {
+    public void testHasChanges() {
+        // mocking 1.1 Cayenne stack is painful...
+        MockDataRowStore cache = new MockDataRowStore();
         MockPersistenceContext parent = new MockPersistenceContext();
-        ObjectDataContext context = new ObjectDataContext(parent);
+        ObjectDataContext context = new ObjectDataContext(parent, new MockEntityResolver(
+                new ObjEntity("test")), cache);
+
+        assertFalse(context.hasChanges());
+
+        ObjectId oid = new ObjectId(Object.class, "key", "value");
+        DataObject object = new MockDataObject(context, oid, PersistenceState.MODIFIED);
+        context.getObjectStore().addObject(object);
+        cache.putSnapshot(oid, Collections.singletonMap("p1", "v1"));
+
+        assertTrue(context.hasChanges());
+    }
+
+    public void testCommitChanges() {
+
+        // mocking 1.1 Cayenne stack is painful...
+        MockDataRowStore cache = new MockDataRowStore();
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ObjectDataContext context = new ObjectDataContext(parent, new MockEntityResolver(
+                new ObjEntity("test")), cache);
+
+        context.commitChanges();
+
+        // no changes in context, so no commit should be executed
+        assertFalse(parent.isCommitChangesInContext());
+
+        // introduce changes
+        ObjectId oid = new ObjectId(Object.class, "key", "value");
+        DataObject object = new MockDataObject(context, oid, PersistenceState.MODIFIED);
+        context.getObjectStore().addObject(object);
+        cache.putSnapshot(oid, Collections.singletonMap("p1", "v1"));
 
         context.commitChanges();
         assertTrue(parent.isCommitChangesInContext());
@@ -85,33 +127,39 @@ public class ObjectDataContextTst extends TestCase {
 
     public void testPerformNonSelectingQuery() {
         MockPersistenceContext parent = new MockPersistenceContext();
-        ObjectDataContext context = new ObjectDataContext(parent);
+        ObjectDataContext context = new ObjectDataContext(
+                parent,
+                new EntityResolver(),
+                new MockDataRowStore());
 
         context.performNonSelectingQuery(new MockQuery());
-        assertTrue(parent.isPerformNonSelectingQuery());
+        assertTrue(parent.isPerformQuery());
     }
 
-    public void testPerformQuery() {
-        MockPersistenceContext parent = new MockPersistenceContext();
-        ObjectDataContext context = new ObjectDataContext(parent);
-
-        context.performQuery(new MockGenericSelectQuery());
-        assertTrue(parent.isPerformQueryInContext());
-    }
+    //    public void testPerformQuery() {
+    //        MockPersistenceContext parent = new MockPersistenceContext();
+    //        ObjectDataContext context = new ObjectDataContext(
+    //                parent,
+    //                new EntityResolver(),
+    //                new MockDataRowStore());
+    //
+    //        // perform both generic select and regular query to test both legacy and new API
+    //        context.performQuery(new MockQuery());
+    //        assertTrue(parent.isPerformQuery());
+    //
+    //        context.performQuery(new MockGenericSelectQuery());
+    //        assertTrue(parent.isPerformQuery());
+    //    }
 
     public void testPerformNonSelectingNamedQuery() {
         MockPersistenceContext parent = new MockPersistenceContext();
-        ObjectDataContext context = new ObjectDataContext(parent);
+        ObjectDataContext context = new ObjectDataContext(
+                parent,
+                new EntityResolver(),
+                new MockDataRowStore());
 
         context.performNonSelectingQuery("test", Collections.EMPTY_MAP);
-        assertTrue(parent.isPerformNamedNonSelectingQuery());
+        assertTrue(parent.isPerformQuery());
     }
 
-    public void testPerformNamedSelectingQuery() {
-        MockPersistenceContext parent = new MockPersistenceContext();
-        ObjectDataContext context = new ObjectDataContext(parent);
-
-        context.performQuery("test", Collections.EMPTY_MAP, true);
-        assertTrue(parent.isPerformNamedQueryInContext());
-    }
 }

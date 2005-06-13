@@ -68,7 +68,14 @@ import org.objectstyle.cayenne.map.DataMap;
 public interface QueryRouter {
 
     /**
-     * Returns a QueryEngine that should handle a given DataMap.
+     * A callback method that allows a query to set its preferred engine during the
+     * routing phase. It allows query to further customize its routing, e.g. it is
+     * possible to implement query chains that pass multiple queries for execution.
+     */
+    void useEngineForQuery(QueryEngine engine, Query query);
+
+    /**
+     * Returns a QueryEngine that is configured to handle a given DataMap.
      * 
      * @throws CayenneRuntimeException if an engine can't be found.
      * @throws NullPointerException if a map parameter is null.

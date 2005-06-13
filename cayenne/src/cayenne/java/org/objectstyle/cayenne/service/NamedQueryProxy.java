@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,66 +53,108 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.service;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.ParameterizedQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryRouter;
+import org.objectstyle.cayenne.query.SQLAction;
+import org.objectstyle.cayenne.query.SQLActionVisitor;
 
 /**
+ * A reference to a named parameterized query stored in Cayenne mapping. The actual query
+ * is resolved during the routing phase and is used to build a SQLAction.
+ * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class DataDomainQueryAction {
+class NamedQueryProxy implements Query {
 
-    DataDomain domain;
+    protected String name;
+    protected Map parameters;
 
-    public DataDomainQueryAction(DataDomain domain) {
-        this.domain = domain;
+    protected Level loggingLevel;
+
+    public NamedQueryProxy(String name, Map parameters) {
+        this.name = name;
+        this.parameters = parameters;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Level getLoggingLevel() {
+        return loggingLevel;
+    }
+
+    public void setLoggingLevel(Level loggingLevel) {
+        this.loggingLevel = loggingLevel;
+    }
+
+    public Object getRoot() {
+        throw new CayenneRuntimeException("'getRoot' is not supported by this query: "
+                + this);
+    }
+
+    public void setRoot(Object root) {
+        throw new CayenneRuntimeException("'setRoot' is not supported by this query: "
+                + this);
     }
 
     /**
-     * Performs a named mapped non-selecting query using a map of parameters. Returns an
-     * array of update counts.
+     * Throws an exception as query execution is expected to be delegated to a resolved
+     * named query during routing phase.
      */
-    int[] performNonSelectingQuery(String queryName, Map parameters) {
-        // find query...
-        Query query = domain.getEntityResolver().getQuery(queryName);
-        if (query == null) {
-            throw new CayenneRuntimeException("There is no saved query for name '"
-                    + queryName
-                    + "'.");
+    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+        throw new CayenneRuntimeException(this
+                + " doesn't support its own execution. "
+                + "It should've been delegated to another "
+                + "query during routing phase.");
+    }
+
+    /**
+     * Resolves a real query for the name and delegates further execution to this query.
+     */
+    public void routeQuery(QueryRouter router, EntityResolver resolver) {
+        Query substituteQuery = substituteQuery(resolver);
+
+        if (substituteQuery == null) {
+            throw new CayenneRuntimeException("Can't find named query for name '"
+                    + getName()
+                    + "'");
         }
+
+        substituteQuery.routeQuery(router, resolver);
+    }
+
+    /**
+     * Locates and initializes a substitution query.
+     */
+    protected Query substituteQuery(EntityResolver resolver) {
+        Query query = resolver.lookupQuery(getName());
 
         if (parameters != null
                 && !parameters.isEmpty()
                 && query instanceof ParameterizedQuery) {
+
             query = ((ParameterizedQuery) query).createQuery(parameters);
         }
 
-        return performNonSelectingQuery(query);
+        return query;
     }
 
-    int[] performNonSelectingQuery(Query query) {
-        QueryResult result = new QueryResult();
-        domain.performQueries(Collections.singletonList(query), result);
-        List updateCounts = result.getUpdates(query);
-
-        if (updateCounts == null || updateCounts.isEmpty()) {
-            return new int[0];
-        }
-
-        int len = updateCounts.size();
-        int[] counts = new int[len];
-
-        for (int i = 0; i < len; i++) {
-            counts[i] = ((Number) updateCounts.get(i)).intValue();
-        }
-
-        return counts;
+    public String toString() {
+        return new ToStringBuilder(this).append("name", name).toString();
     }
 }

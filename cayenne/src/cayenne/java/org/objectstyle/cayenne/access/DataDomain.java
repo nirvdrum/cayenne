@@ -71,8 +71,9 @@ import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryChain;
 import org.objectstyle.cayenne.query.QueryRouter;
 
 /**
@@ -87,7 +88,7 @@ import org.objectstyle.cayenne.query.QueryRouter;
  * 
  * @author Andrei Adamchik
  */
-public class DataDomain implements QueryEngine, QueryRouter, PersistenceContext {
+public class DataDomain implements QueryEngine, PersistenceContext {
 
     private static Logger logObj = Logger.getLogger(DataDomain.class);
 
@@ -511,27 +512,6 @@ public class DataDomain implements QueryEngine, QueryRouter, PersistenceContext 
     }
 
     /**
-     * QueryRouter implementation that provides query with a DataNode to run. Looks up a
-     * DataNode mapped to a given DataMap. Throws CayenneRuntimeException if such node
-     * can't be found.
-     * 
-     * @since 1.2
-     */
-    public QueryEngine engineForDataMap(DataMap map) {
-        if (map == null) {
-            throw new NullPointerException("Null DataMap, can't determine DataNode.");
-        }
-
-        QueryEngine node = lookupDataNode(map);
-
-        if (node == null) {
-            throw new CayenneRuntimeException("No DataNode exists for DataMap " + map);
-        }
-
-        return node;
-    }
-
-    /**
      * Inspects the queries, sending them to appropriate DataNodes for execution. May
      * modify transaction settings on the OperationObserver.
      * 
@@ -546,41 +526,8 @@ public class DataDomain implements QueryEngine, QueryRouter, PersistenceContext 
             return;
         }
 
-        // optimize for single query (can't optimize for single node as queries can do
-        // their own trickery with nodes and create substitute engines...)
-        if (queries.size() == 1) {
-            Query onlyQuery = (Query) queries.iterator().next();
-            QueryEngine singleEngine = onlyQuery.routeQuery(this, getEntityResolver());
-            singleEngine.performQueries(queries, resultConsumer, transaction);
-            return;
-        }
-
-        // organize queries by node
-        Iterator it = queries.iterator();
-        Map queryMap = new HashMap();
-        while (it.hasNext()) {
-            Query nextQuery = (Query) it.next();
-            QueryEngine engine = nextQuery.routeQuery(this, getEntityResolver());
-
-            List queriesByEngine = (List) queryMap.get(engine);
-            if (queriesByEngine == null) {
-                queriesByEngine = new ArrayList();
-                queryMap.put(engine, queriesByEngine);
-            }
-
-            queriesByEngine.add(nextQuery);
-        }
-
-        // perform queries on each node
-        Iterator nodeIt = queryMap.entrySet().iterator();
-        while (nodeIt.hasNext()) {
-            Map.Entry entry = (Map.Entry) nodeIt.next();
-            QueryEngine nextNode = (QueryEngine) entry.getKey();
-            Collection nodeQueries = (Collection) entry.getValue();
-
-            // TODO: investigate parallel processing options...
-            nextNode.performQueries(nodeQueries, resultConsumer, transaction);
-        }
+        // transaction is passed to us, so assume we are already wrapped in it...
+        performQuery(new QueryChain(queries), resultConsumer, transaction);
     }
 
     /**
@@ -588,12 +535,14 @@ public class DataDomain implements QueryEngine, QueryRouter, PersistenceContext 
      * for execution.
      */
     public void performQueries(Collection queries, OperationObserver observer) {
-        Transaction transaction = (observer.isIteratedResult()) ? Transaction
-                .noTransaction() : createTransaction();
-        transaction.performQueries(this, queries, observer);
+        if (queries.isEmpty()) {
+            return;
+        }
+
+        performQuery(new QueryChain(queries), observer);
     }
 
-    public org.objectstyle.cayenne.map.EntityResolver getEntityResolver() {
+    public EntityResolver getEntityResolver() {
         if (entityResolver == null) {
             createEntityResolver();
         }
@@ -607,8 +556,7 @@ public class DataDomain implements QueryEngine, QueryRouter, PersistenceContext 
      * 
      * @since 1.1
      */
-    public void setEntityResolver(
-            org.objectstyle.cayenne.map.EntityResolver entityResolver) {
+    public void setEntityResolver(EntityResolver entityResolver) {
         this.entityResolver = entityResolver;
     }
 
@@ -661,6 +609,7 @@ public class DataDomain implements QueryEngine, QueryRouter, PersistenceContext 
     }
 
     // **** new 1.2 PersistenceContext methods:
+    // =======================================
 
     /**
      * Commits changes in an ObjectContext. PersistenceContext method implementation.
@@ -672,39 +621,78 @@ public class DataDomain implements QueryEngine, QueryRouter, PersistenceContext 
     }
 
     /**
+     * Runs a query, wrapping it in an internally created transaction.
+     * 
      * @since 1.2
      */
-    public int[] performNonSelectingQuery(Query query) {
-        return new DataDomainQueryAction(this).performNonSelectingQuery(query);
+    public void performQuery(Query query, OperationObserver resultConsumer) {
+
+        Transaction transaction = (resultConsumer.isIteratedResult()) ? Transaction
+                .noTransaction() : createTransaction();
+
+        // we created a transaction, so it is this method's responsibility to
+        // wrap the execution in it
+        transaction.performQuery(this, query, resultConsumer);
     }
 
     /**
+     * Performs a given query, wrapping it in a provided transaction.
+     * 
      * @since 1.2
      */
-    public int[] performNonSelectingQuery(String queryName, Map parameters) {
-        return new DataDomainQueryAction(this).performNonSelectingQuery(queryName,
-                parameters);
-    }
+    public void performQuery(
+            Query query,
+            OperationObserver resultConsumer,
+            Transaction transaction) {
 
-    /**
-     * @since 1.2
-     */
-    public List performQueryInContext(ObjectContext context, GenericSelectQuery query) {
-        return new DataDomainSelectQueryAction(this).performQuery(context, query);
-    }
+        final Map queryMap = new HashMap();
 
-    /**
-     * @since 1.2
-     */
-    public List performQueryInContext(
-            ObjectContext context,
-            String queryName,
-            Map parameters,
-            boolean refresh) {
+        // TODO: optimize for single engine - the most common case...
 
-        return new DataDomainSelectQueryAction(this).performQuery(context,
-                queryName,
-                parameters,
-                refresh);
+        // QueryRouter to organize queries by engine
+        QueryRouter router = new QueryRouter() {
+
+            public QueryEngine engineForDataMap(DataMap map) {
+                if (map == null) {
+                    throw new NullPointerException(
+                            "Null DataMap, can't determine DataNode.");
+                }
+
+                QueryEngine node = lookupDataNode(map);
+
+                if (node == null) {
+                    throw new CayenneRuntimeException("No DataNode exists for DataMap "
+                            + map);
+                }
+
+                return node;
+            }
+
+            public void useEngineForQuery(QueryEngine engine, Query query) {
+
+                List queriesByEngine = (List) queryMap.get(engine);
+                if (queriesByEngine == null) {
+                    queriesByEngine = new ArrayList();
+                    queryMap.put(engine, queriesByEngine);
+                }
+
+                queriesByEngine.add(query);
+            }
+        };
+
+        query.routeQuery(router, getEntityResolver());
+
+        // perform queries on each node
+        Iterator nodeIt = queryMap.entrySet().iterator();
+        while (nodeIt.hasNext()) {
+            Map.Entry entry = (Map.Entry) nodeIt.next();
+            QueryEngine nextNode = (QueryEngine) entry.getKey();
+            Collection nodeQueries = (Collection) entry.getValue();
+
+            // transaction is passed to us, so assume we are already wrapped in it...
+
+            // TODO: investigate parallel processing options...
+            nextNode.performQueries(nodeQueries, resultConsumer, transaction);
+        }
     }
 }

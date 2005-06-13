@@ -57,10 +57,13 @@ package org.objectstyle.cayenne.service;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.PersistenceContext;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataRowStore;
 import org.objectstyle.cayenne.distribution.ClientMessageHandler;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.NamedQueryMessage;
 import org.objectstyle.cayenne.distribution.QueryMessage;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 /**
@@ -73,8 +76,14 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
 public class ServerObjectContext extends ObjectDataContext implements
         ClientMessageHandler {
 
-    ServerObjectContext(PersistenceContext parent) {
-        super(parent);
+    public ServerObjectContext(DataDomain parentDomain) {
+        super(parentDomain);
+    }
+
+    public ServerObjectContext(PersistenceContext parent, EntityResolver entityResolver,
+            DataRowStore cache) {
+
+        super(parent, entityResolver, cache);
     }
 
     public Object onCommit(CommitMessage message) {
