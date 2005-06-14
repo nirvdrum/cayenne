@@ -18,6 +18,7 @@
 	
     <path id="agnostic-classpath">
     	<fileset dir="${otherlib.dir}">
+			<include name="${vpp.jar}"/>
 			<include name="${ant-junit.jar}"/>
 			<include name="${emma.jar}"/>
 			<include name="${emma.ant.jar}"/>
