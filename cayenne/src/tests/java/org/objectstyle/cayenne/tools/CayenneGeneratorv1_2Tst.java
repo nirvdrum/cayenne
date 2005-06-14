@@ -82,13 +82,60 @@ public class CayenneGeneratorv1_2Tst extends TestCase {
         task.setLocation(Location.UNKNOWN_LOCATION);
     }
 
+    /** Test pairs generation with a cross-DataMap relationship (v1.1). */
+    public void testCrossDataMapRelationships_v1_1() throws Exception {
+        // prepare destination directory
+        File map = new File("src/tests/resources/test-resources/testmap-dependent.map.xml");
+        File destDir = new File("testrun/cgen11");
+        // prepare destination directory
+        if (!destDir.exists()) {
+            assertTrue(destDir.mkdirs());
+        }
+
+        File additionalMaps[] = new File[1];
+        additionalMaps[0] = new File("src/tests/resources/test-resources/testmap.map.xml");
+        
+        FileList additionalMapsFilelist = new FileList();
+        additionalMapsFilelist.setDir(additionalMaps[0].getParentFile());
+        additionalMapsFilelist.setFiles(additionalMaps[0].getName());
+
+        Path additionalMapsPath = new Path(task.getProject());
+        additionalMapsPath.addFilelist(additionalMapsFilelist);
+            
+        // setup task
+        task.setMap(map);
+        task.setAdditionalMaps(additionalMapsPath);
+        task.setVersion("1.1");
+        task.setMakepairs(true);
+        task.setOverwrite(false);
+        task.setMode("entity");
+        task.setIncludeEntities("MyArtGroup");
+        task.setDestDir(destDir);
+        task.setSuperpkg("org.objectstyle.art2.auto");
+        task.setUsepkgpath(true);
+ 
+        // run task
+        task.execute();
+
+        // check results
+        File a = new File(destDir, convertPath("org/objectstyle/art2/MyArtGroup.java"));
+        assertTrue(a.isFile());
+        assertContents(a, "MyArtGroup", "org.objectstyle.art2", "_MyArtGroup");
+
+        File _a = new File(destDir, convertPath("org/objectstyle/art2/auto/_MyArtGroup.java"));
+        assertTrue(_a.exists());
+        assertContents(_a, "_MyArtGroup", "org.objectstyle.art2.auto", "CayenneDataObject");
+    }
+
     /** Test pairs generation with a cross-DataMap relationship. */
     public void testCrossDataMapRelationships() throws Exception {
         // prepare destination directory
         File map = new File("src/tests/resources/test-resources/testmap-dependent.map.xml");
-        File destDir = new File("testrun/cgen");
+        File destDir = new File("testrun/cgen12");
         // prepare destination directory
-        assertTrue(destDir.mkdirs());
+        if (!destDir.exists()) {
+            assertTrue(destDir.mkdirs());
+        }
 
         File additionalMaps[] = new File[1];
         additionalMaps[0] = new File("src/tests/resources/test-resources/testmap.map.xml");
@@ -109,20 +156,20 @@ public class CayenneGeneratorv1_2Tst extends TestCase {
         task.setMode("entity");
         task.setIncludeEntities("MyArtGroup");
         task.setDestDir(destDir);
-        task.setSuperpkg("org.objectstyle.art.auto");
+        task.setSuperpkg("org.objectstyle.art2.auto");
         task.setUsepkgpath(true);
  
         // run task
         task.execute();
 
         // check results
-        File a = new File(destDir, convertPath("org/objectstyle/art/MyArtGroup.java"));
+        File a = new File(destDir, convertPath("org/objectstyle/art2/MyArtGroup.java"));
         assertTrue(a.isFile());
-        assertContents(a, "MyArtGroup", "org.objectstyle.art", "_MyArtGroup");
+        assertContents(a, "MyArtGroup", "org.objectstyle.art2", "_MyArtGroup");
 
-        File _a = new File(destDir, convertPath("org/objectstyle/art/auto/_MyArtGroup.java"));
+        File _a = new File(destDir, convertPath("org/objectstyle/art2/auto/_MyArtGroup.java"));
         assertTrue(_a.exists());
-        assertContents(_a, "_MyArtGroup", "org.objectstyle.art.auto", "CayenneDataObject");
+        assertContents(_a, "_MyArtGroup", "org.objectstyle.art2.auto", "CayenneDataObject");
     }
 
     private String convertPath(String unixPath) {
