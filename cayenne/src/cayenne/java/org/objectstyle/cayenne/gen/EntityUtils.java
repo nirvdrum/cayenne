@@ -79,6 +79,7 @@ public class EntityUtils {
     protected String superPackageName;
     protected String basePackageName;
 
+    protected DataMap primaryDataMap;
     protected ObjEntity objEntity;
     
     protected EntityResolver entityResolver;
@@ -97,8 +98,14 @@ public class EntityUtils {
         this.subPackageName = stringUtils.stripClass(fqnSubClass);
 
         this.entityResolver = new EntityResolver(Collections.singleton(dataMap));
+
+        this.primaryDataMap = dataMap;
+        
+        this.primaryDataMap.setNamespace(this.entityResolver);
+        
         for (int i = 0; i < additionalDataMaps.length; i++) {
             this.entityResolver.addDataMap(additionalDataMaps[i]);
+            additionalDataMaps[i].setNamespace(this.entityResolver);
         }
         
         this.objEntity = objEntity;
@@ -152,7 +159,16 @@ public class EntityUtils {
     }
 
     /**
-     * Returns true if current ObjEntity contains at least one toMany relationship.
+     * @return Returns the primary DataMap.
+     * 
+     * @since 1.2
+     */
+    public DataMap getPrimaryDataMap() {
+        return primaryDataMap;
+    }
+
+    /**
+     * Returns the EntityResolver for this set of DataMaps.
      * 
      * @since 1.2
      */
