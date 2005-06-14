@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.PersistentObject;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 import foundrylogic.vpp.VPPConfig;
@@ -254,6 +255,18 @@ public abstract class MapClassGenerator {
         String superTemplate,
         String superPrefix)
         throws Exception {
+
+        if ( (null != dataMap) && (0 != additionalDataMaps.length) )
+        {
+            EntityResolver entityResolver = new EntityResolver(Collections.singleton(dataMap));
+
+            dataMap.setNamespace(entityResolver);
+            
+            for (int i = 0; i < additionalDataMaps.length; i++) {
+                entityResolver.addDataMap(additionalDataMaps[i]);
+                additionalDataMaps[i].setNamespace(entityResolver);
+            }
+        }
 
         ClassGenerator mainGenSetup = new ClassGenerator(classTemplate, versionString);
         ClassGenerator superGenSetup = new ClassGenerator(superTemplate, versionString);
@@ -487,6 +500,18 @@ public abstract class MapClassGenerator {
      */
     private void generateSingleClasses_1_1(String classTemplate) throws Exception {
         ClassGenerator gen = new ClassGenerator(classTemplate, versionString);
+
+        if ( (null != dataMap) && (0 != additionalDataMaps.length) )
+        {
+            EntityResolver entityResolver = new EntityResolver(Collections.singleton(dataMap));
+
+            dataMap.setNamespace(entityResolver);
+            
+            for (int i = 0; i < additionalDataMaps.length; i++) {
+                entityResolver.addDataMap(additionalDataMaps[i]);
+                additionalDataMaps[i].setNamespace(entityResolver);
+            }
+        }
 
         // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
