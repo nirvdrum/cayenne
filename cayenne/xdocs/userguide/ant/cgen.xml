@@ -29,6 +29,11 @@
 					<td valign="top" align="center">Yes</td>
 				</tr>
 				<tr>
+					<td valign="top">additionalMaps</td>
+					<td valign="top">Path to additional DataMap XML files to use for class generation.</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
 					<td valign="top">destDir</td>
 					<td valign="top">Destination directory for Java classes
 					<i>(ignoring their package names)</i>.</td>

@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.types.Path;
 import org.objectstyle.cayenne.gen.AntClassGenerator;
 import org.objectstyle.cayenne.gen.ClassGenerator;
 import org.objectstyle.cayenne.gen.DefaultClassGenerator;
@@ -200,10 +201,15 @@ public class CayenneGenerator extends CayenneTask {
     /**
      * Sets the additional DataMaps.
      * 
-     * @param map The map to set
+     * @param additionalMaps The additional DataMaps to set
      */
-    public void setAdditionalMaps(File additionalMaps[]) {
-        this.additionalMaps = additionalMaps;
+    public void setAdditionalMaps(Path additionalMapsPath) {
+        String additionalMapFilenames[] = additionalMapsPath.list();
+        this.additionalMaps = new File[additionalMapFilenames.length];
+
+        for (int i = 0; i < additionalMapFilenames.length; i++) {
+            additionalMaps[i] = new File(additionalMapFilenames[i]);
+        }
     }
 
     /**
