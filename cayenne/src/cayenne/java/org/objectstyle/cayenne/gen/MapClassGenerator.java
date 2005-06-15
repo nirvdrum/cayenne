@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.PersistentObject;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 import foundrylogic.vpp.VPPConfig;
@@ -119,7 +118,6 @@ public abstract class MapClassGenerator {
     protected List objEntities;
     protected String superPkg;
     protected DataMap dataMap;
-    protected DataMap additionalDataMaps[] = new DataMap[0];
     protected VPPConfig vppConfig;
     protected String mode = MODE_ENTITY;
     protected boolean client;
@@ -256,18 +254,6 @@ public abstract class MapClassGenerator {
         String superPrefix)
         throws Exception {
 
-        if ( (null != dataMap) && (0 != additionalDataMaps.length) )
-        {
-            EntityResolver entityResolver = new EntityResolver(Collections.singleton(dataMap));
-
-            dataMap.setNamespace(entityResolver);
-            
-            for (int i = 0; i < additionalDataMaps.length; i++) {
-                entityResolver.addDataMap(additionalDataMaps[i]);
-                additionalDataMaps[i].setNamespace(entityResolver);
-            }
-        }
-
         ClassGenerator mainGenSetup = new ClassGenerator(classTemplate, versionString);
         ClassGenerator superGenSetup = new ClassGenerator(superTemplate, versionString);
 
@@ -383,7 +369,6 @@ public abstract class MapClassGenerator {
             if (superOut != null) {
                 superGenSetup.generateClass(superOut,
                         dataMap,
-                        additionalDataMaps,
                         ent,
                         fqnBaseClass,
                         fqnSuperClass,
@@ -395,7 +380,6 @@ public abstract class MapClassGenerator {
             if (mainOut != null) {
                 mainGenSetup.generateClass(mainOut,
                         dataMap,
-                        additionalDataMaps,
                         ent,
                         fqnBaseClass,
                         fqnSuperClass,
@@ -464,7 +448,6 @@ public abstract class MapClassGenerator {
             if (superOut != null) {
                 superGenSetup.generateClass(superOut,
                         dataMap,
-                        additionalDataMaps,
                         ent,
                         fqnBaseClass,
                         fqnSuperClass,
@@ -476,7 +459,6 @@ public abstract class MapClassGenerator {
             if (mainOut != null) {
                 mainGenSetup.generateClass(mainOut,
                         dataMap,
-                        additionalDataMaps,
                         ent,
                         fqnBaseClass,
                         fqnSuperClass,
@@ -500,18 +482,6 @@ public abstract class MapClassGenerator {
      */
     private void generateSingleClasses_1_1(String classTemplate) throws Exception {
         ClassGenerator gen = new ClassGenerator(classTemplate, versionString);
-
-        if ( (null != dataMap) && (0 != additionalDataMaps.length) )
-        {
-            EntityResolver entityResolver = new EntityResolver(Collections.singleton(dataMap));
-
-            dataMap.setNamespace(entityResolver);
-            
-            for (int i = 0; i < additionalDataMaps.length; i++) {
-                entityResolver.addDataMap(additionalDataMaps[i]);
-                additionalDataMaps[i].setNamespace(entityResolver);
-            }
-        }
 
         // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
@@ -587,7 +557,7 @@ public abstract class MapClassGenerator {
                 continue;
             }
 
-            gen.generateClass(out, dataMap, additionalDataMaps, ent, fqnBaseClass, fqnSubClass, fqnSubClass);
+            gen.generateClass(out, dataMap, ent, fqnBaseClass, fqnSubClass, fqnSubClass);
             closeWriter(out);
         }
     }
@@ -748,17 +718,5 @@ public abstract class MapClassGenerator {
             throw new IllegalStateException("'mode' must be '" + MODE_ENTITY + "' or '" + MODE_DATAMAP + "', but was '" + mode + "'");
         }
         this.mode = mode;
-    }
-    /**
-     * @return Returns the additionalDataMaps.
-     */
-    public DataMap[] getAdditionalDataMaps() {
-        return additionalDataMaps;
-    }
-    /**
-     * @param additionalDataMaps The additionalDataMaps to set.
-     */
-    public void setAdditionalDataMaps(DataMap[] additionalDataMaps) {
-        this.additionalDataMaps = additionalDataMaps;
     }
 }

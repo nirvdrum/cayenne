@@ -125,6 +125,8 @@ public class CayenneGeneratorv1_2Tst extends TestCase {
         File _a = new File(destDir, convertPath("org/objectstyle/art2/auto/_MyArtGroup.java"));
         assertTrue(_a.exists());
         assertContents(_a, "_MyArtGroup", "org.objectstyle.art2.auto", "CayenneDataObject");
+        assertContents(_a, "org.objectstyle.art.ArtGroup getToParentGroup()");
+        assertContents(_a, "setToParentGroup(org.objectstyle.art.ArtGroup toParentGroup)");
     }
 
     /** Test pairs generation with a cross-DataMap relationship. */
@@ -170,10 +172,34 @@ public class CayenneGeneratorv1_2Tst extends TestCase {
         File _a = new File(destDir, convertPath("org/objectstyle/art2/auto/_MyArtGroup.java"));
         assertTrue(_a.exists());
         assertContents(_a, "_MyArtGroup", "org.objectstyle.art2.auto", "CayenneDataObject");
+        assertContents(_a, "import org.objectstyle.art.ArtGroup;");
+        assertContents(_a, " ArtGroup getToParentGroup()");
+        assertContents(_a, "setToParentGroup(ArtGroup toParentGroup)");
     }
 
     private String convertPath(String unixPath) {
         return unixPath.replace('/', File.separatorChar);
+    }
+
+    private void assertContents(
+            File f,
+            String content) throws Exception {
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(
+                f)));
+
+        try {
+            String s = null;
+            while ((s = in.readLine()) != null) {
+                if (s.indexOf(content) >= 0)  return;
+            }
+
+            fail("<" + content + "> not found in " + f.getAbsolutePath() + ".");
+        }
+        finally {
+            in.close();
+        }
+
     }
 
     private void assertContents(
@@ -200,7 +226,7 @@ public class CayenneGeneratorv1_2Tst extends TestCase {
         String s = null;
         while ((s = in.readLine()) != null) {
             if (regexUtil.match("/^package\\s+([^\\s;]+);/", s + '\n')) {
-                assertTrue(s.indexOf(packageName) > 0);
+                assertTrue(s.indexOf(packageName) >= 0);
                 return;
             }
         }
@@ -214,8 +240,8 @@ public class CayenneGeneratorv1_2Tst extends TestCase {
         String s = null;
         while ((s = in.readLine()) != null) {
             if (regexUtil.match("/class\\s+([^\\s]+)\\s+extends\\s+([^\\s]+)/", s + '\n')) {
-                assertTrue(s.indexOf(className) > 0);
-                assertTrue(s.indexOf(extendsName) > 0);
+                assertTrue(s.indexOf(className) >= 0);
+                assertTrue(s.indexOf(extendsName) >= 0);
                 assertTrue(s.indexOf(className) < s.indexOf(extendsName));
                 return;
             }

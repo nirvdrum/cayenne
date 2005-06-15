@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.tools;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.tools.ant.BuildException;
@@ -65,6 +66,7 @@ import org.objectstyle.cayenne.gen.AntClassGenerator;
 import org.objectstyle.cayenne.gen.ClassGenerator;
 import org.objectstyle.cayenne.gen.DefaultClassGenerator;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.InputSource;
@@ -135,6 +137,14 @@ public class CayenneGenerator extends CayenneTask {
         DataMap dataMap = loadDataMap();
         DataMap additionalDataMaps[] = loadAdditionalDataMaps();
 
+        // Create MappingNamespace for maps.
+        EntityResolver entityResolver = new EntityResolver(Collections.singleton(dataMap));
+        dataMap.setNamespace(entityResolver);
+        for (int i = 0; i < additionalDataMaps.length; i++) {
+            entityResolver.addDataMap(additionalDataMaps[i]);
+            additionalDataMaps[i].setNamespace(entityResolver);
+        }
+
         List entityList = new ArrayList(dataMap.getObjEntities());
 
         NamePatternMatcher namePatternMatcher = new NamePatternMatcher(this, includeEntitiesPattern, excludeEntitiesPattern);
@@ -148,7 +158,6 @@ public class CayenneGenerator extends CayenneTask {
 
         generator.setTimestamp(map.lastModified());
         generator.setDataMap(dataMap);
-        generator.setAdditionalDataMaps(additionalDataMaps);
         generator.setObjEntities(entityList);
         generator.validateAttributes();
         generator.execute();

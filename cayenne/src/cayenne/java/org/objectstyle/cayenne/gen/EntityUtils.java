@@ -56,11 +56,10 @@
 
 package org.objectstyle.cayenne.gen;
 
-import java.util.Collections;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.MappingNamespace;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Relationship;
 
@@ -82,9 +81,7 @@ public class EntityUtils {
     protected DataMap primaryDataMap;
     protected ObjEntity objEntity;
     
-    protected EntityResolver entityResolver;
-
-    public EntityUtils(DataMap dataMap, DataMap additionalDataMaps[], ObjEntity objEntity, String fqnBaseClass, String fqnSuperClass, String fqnSubClass)
+    public EntityUtils(DataMap dataMap, ObjEntity objEntity, String fqnBaseClass, String fqnSuperClass, String fqnSubClass)
     {
         super();
         
@@ -97,16 +94,7 @@ public class EntityUtils {
         this.subClassName = stringUtils.stripPackageName(fqnSubClass);
         this.subPackageName = stringUtils.stripClass(fqnSubClass);
 
-        this.entityResolver = new EntityResolver(Collections.singleton(dataMap));
-
         this.primaryDataMap = dataMap;
-        
-        this.primaryDataMap.setNamespace(this.entityResolver);
-        
-        for (int i = 0; i < additionalDataMaps.length; i++) {
-            this.entityResolver.addDataMap(additionalDataMaps[i]);
-            additionalDataMaps[i].setNamespace(this.entityResolver);
-        }
         
         this.objEntity = objEntity;
     }
@@ -172,8 +160,8 @@ public class EntityUtils {
      * 
      * @since 1.2
      */
-    public EntityResolver getEntityResolver() {
-        return entityResolver;
+    public MappingNamespace getEntityResolver() {
+        return primaryDataMap.getNamespace();
     }
 
     /**
