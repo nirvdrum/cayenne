@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.dataview;
 
 import java.util.*;
-import org.apache.commons.lang.enum.ValuedEnum;
+import org.apache.commons.lang.enums.ValuedEnum;
 
 public class DataTypeEnum extends ValuedEnum {
   public static final int UNKNOWN_TYPE_VALUE = -1;

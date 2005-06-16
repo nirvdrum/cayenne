@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.dataview;
 
 import java.util.*;
-import org.apache.commons.lang.enum.ValuedEnum;
+import org.apache.commons.lang.enums.ValuedEnum;
 
 public class CalcTypeEnum extends ValuedEnum {
   public static final int NO_CALC_TYPE_VALUE = 1;

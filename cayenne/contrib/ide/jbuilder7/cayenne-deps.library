@@ -3,12 +3,12 @@
   <!--JBuilder Library Definition File-->
   <fullname>cayenne-deps</fullname>
   <class>
-    <path>[otherlib/ant-1.6.3.jar]</path>
+    <path>[otherlib/ant-1.6.5.jar]</path>
     <path>[otherlib/ashwood-28012003.jar]</path>
     <path>[otherlib/bcel-5.1.jar]</path>
     <path>[otherlib/commons-beanutils-1.6.1.jar]</path>
     <path>[otherlib/commons-collections-3.1.jar]</path>
-    <path>[otherlib/commons-lang-2.0.jar]</path>
+    <path>[otherlib/commons-lang-2.1.jar]</path>
     <path>[otherlib/commons-logging-1.0.4.jar]</path>
     <path>[otherlib/foundrylogic-vpp-2.2.1.jar]</path>
     <path>[otherlib/junit-3.8.1.jar]</path>

@@ -501,7 +501,7 @@ public class MultiColumnBrowser extends JPanel {
                 }
             }
         }
-    };
+    }
 
     // ====================================================
     // Default renderer that shows non-leaf nodes with a 

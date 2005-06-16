@@ -237,7 +237,7 @@ public class DataView {
         ObjEntityViewField field = new ObjEntityViewField();
         field.setName(name);
         String prefIndex = element.getAttributeValue("pref-index");
-        field.setPreferredIndex(NumberUtils.stringToInt(prefIndex, -1));
+        field.setPreferredIndex(NumberUtils.toInt(prefIndex, -1));
         entityView.insertField(field);
 
         String calcType = element.getAttributeValue("calc-type");

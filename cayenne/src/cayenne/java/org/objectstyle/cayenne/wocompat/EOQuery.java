@@ -284,7 +284,6 @@ public class EOQuery extends SelectQuery {
          * @return HashMap of Expression types, keyed by the corresponding selector name
          */
         public static HashMap selectorToExpressionBridge() {
-            ;
             if (null == selectorToExpressionBridge) {
                 // initialize selectorToExpressionBridge
                 selectorToExpressionBridge = new HashMap(8);

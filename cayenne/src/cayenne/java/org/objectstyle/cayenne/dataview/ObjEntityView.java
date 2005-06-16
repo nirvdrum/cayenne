@@ -193,8 +193,9 @@ public class ObjEntityView {
         int curPrefIndex = -1;
         while (index < fieldCount
                 && ((curPrefIndex = getField(index++).getPreferredIndex()) <= prefIndex)
-                && curPrefIndex >= 0)
-            ;
+                && curPrefIndex >= 0) {
+        	// skip forward
+        }
 
         fields.add(index, field);
         field.setIndex(index);

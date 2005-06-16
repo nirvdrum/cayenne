@@ -13,13 +13,13 @@
 	<classpathentry kind="src" path="src/tutorials/cayenne-tapestry-app/WEB-INF/classes"/>
 	<classpathentry kind="src" path="src/pdf/java"/>
 	<classpathentry excluding="com/*" kind="src" path="src/dvmodeler/java"/>
-	<classpathentry exported="true" kind="lib" path="otherlib/ant-1.6.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="otherlib/ant-1.6.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/ashwood-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/bcel-5.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/commons-beanutils-1.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/commons-collections-3.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/commons-dbcp-1.2.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="otherlib/commons-lang-2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="otherlib/commons-lang-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/commons-logging-1.0.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/commons-pool-1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/ejb-2.0.jar"/>
