@@ -84,6 +84,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.oro.text.perl.Perl5Util;
 import org.objectstyle.cayenne.CayenneException;
@@ -304,12 +305,27 @@ public class Util {
      * if any of the two objects is null.
      */
     public static boolean nullSafeEquals(Object obj1, Object obj2) {
-        if (obj1 == null && obj2 == null)
+        if (obj1 == null && obj2 == null) {
             return true;
+        }
         else if (obj1 != null)
+        {
+          // Arrays must be handled differently since equals() only does
+          // an "==" for an array and ignores equivalence.  If an array, use
+          // the Jakarta Commons Language component EqualsBuilder to determine
+          // the types contained in the array and do individual comparisons.
+          if (obj1.getClass().isArray()) {
+            EqualsBuilder builder = new EqualsBuilder();
+            builder.append(obj1, obj2);
+            return builder.isEquals();
+          }
+          else { // It is NOT an array, so use regular equals()
             return obj1.equals(obj2);
-        else
+          }
+        }
+        else {
             return false;
+        }
     }
 
     /**
