@@ -3,8 +3,6 @@ dist
 derby.log
 velocity.log
 tmp
-.classpath
-.project
 testrun
 build.properties
 perfresults
