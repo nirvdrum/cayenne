@@ -80,22 +80,10 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
 public class OpenBasePkGenerator extends JdbcPkGenerator {
 
     /**
-     * Returns SQL string that can generate new (unique and non-repeating)
-     * primary key for specified DbEntity. No actual database operations
-     * are performed.
+     * @deprecated Since 1.2 corresponding interface method is unused and deprecated.
      */
     public String generatePkForDbEntityString(DbEntity ent) {
-        if ((null == ent.getPrimaryKey()) || (1 != ent.getPrimaryKey().size())) {
-            throw new CayenneRuntimeException(
-                "Error generating pk for DbEntity "
-                    + ent.getName()
-                    + ": pk must be single attribute");
-        }
-        DbAttribute primaryKeyAttribute = (DbAttribute) ent.getPrimaryKey().get(0);
-
-        StringBuffer buf = new StringBuffer("NEWID FOR ");
-        buf.append(ent.getName()).append(' ').append(primaryKeyAttribute.getName());
-        return buf.toString();
+        return newIDString(ent);
     }
 
     /**
@@ -122,7 +110,7 @@ public class OpenBasePkGenerator extends JdbcPkGenerator {
      * COLUMN must be marked as UNIQUE in order for this to work properly.
      */
     protected int pkFromDatabase(DataNode node, DbEntity entity) throws Exception {
-        String sql = generatePkForDbEntityString(entity);
+        String sql = newIDString(entity);
         QueryLogger.logQuery(QueryLogger.DEFAULT_LOG_LEVEL, sql, Collections.EMPTY_LIST);
 
         Connection con = node.getDataSource().getConnection();
@@ -153,8 +141,26 @@ public class OpenBasePkGenerator extends JdbcPkGenerator {
     }
 
     /**
+     * Returns SQL string that can generate new (unique and non-repeating)
+     * primary key for specified DbEntity. No actual database operations
+     * are performed.
      * 
+     * @since 1.2
      */
+    protected String newIDString(DbEntity ent) {
+        if ((null == ent.getPrimaryKey()) || (1 != ent.getPrimaryKey().size())) {
+            throw new CayenneRuntimeException(
+                "Error generating pk for DbEntity "
+                    + ent.getName()
+                    + ": pk must be single attribute");
+        }
+        DbAttribute primaryKeyAttribute = (DbAttribute) ent.getPrimaryKey().get(0);
+
+        StringBuffer buf = new StringBuffer("NEWID FOR ");
+        buf.append(ent.getName()).append(' ').append(primaryKeyAttribute.getName());
+        return buf.toString();
+    }
+    
     public void createAutoPk(DataNode node, List dbEntities) throws Exception {
         // looks like generating a PK on top of an existing one does not
         // result in errors...

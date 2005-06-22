@@ -271,6 +271,9 @@ public class JdbcPkGenerator implements PkGenerator {
         }
     }
 
+    /**
+     * @deprecated Since 1.2 corresponding interface method is deprecated.
+     */
     public String generatePkForDbEntityString(DbEntity ent) {
         StringBuffer buf = new StringBuffer();
         buf.append(pkSelectString(ent.getName())).append('\n').append(

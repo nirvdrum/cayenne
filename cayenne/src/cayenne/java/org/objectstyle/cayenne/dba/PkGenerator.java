@@ -63,67 +63,61 @@ import org.objectstyle.cayenne.map.DbEntity;
 
 /**
  * Defines methods to support automatic primary key generation.
- *
+ * 
  * @author Andrei Adamchik
  */
 public interface PkGenerator {
 
     /**
-     * Generates necessary database objects to provide automatic primary
-     * key support.
-     *
+     * Generates necessary database objects to provide automatic primary key support.
+     * 
      * @param node node that provides access to a DataSource.
-     * @param dbEntities a list of entities that require primary key autogeneration support
+     * @param dbEntities a list of entities that require primary key autogeneration
+     *            support
      */
-    public void createAutoPk(DataNode node, List dbEntities) throws Exception;
+    void createAutoPk(DataNode node, List dbEntities) throws Exception;
 
     /**
-     * Returns a list of SQL strings needed to generates
-     * database objects to provide automatic primary support
-     * for the list of entities. No actual database operations
+     * Returns a list of SQL strings needed to generates database objects to provide
+     * automatic primary support for the list of entities. No actual database operations
      * are performed.
      */
-    public List createAutoPkStatements(List dbEntities);
-
+    List createAutoPkStatements(List dbEntities);
 
     /**
-     * Drops any common database objects associated with automatic primary
-     * key generation process. This may be lookup tables, special stored
-     * procedures or sequences.
-     *
+     * Drops any common database objects associated with automatic primary key generation
+     * process. This may be lookup tables, special stored procedures or sequences.
+     * 
      * @param node node that provides access to a DataSource.
      * @param dbEntities a list of entities whose primary key autogeneration support
-     * should be dropped.
+     *            should be dropped.
      */
-    public void dropAutoPk(DataNode node, List dbEntities) throws Exception;
-
+    void dropAutoPk(DataNode node, List dbEntities) throws Exception;
 
     /**
-     * Returns SQL string needed to drop database objects associated
-     * with automatic primary key generation. No actual database
-     * operations are performed.
+     * Returns SQL string needed to drop database objects associated with automatic
+     * primary key generation. No actual database operations are performed.
      */
-    public List dropAutoPkStatements(List dbEntities);
-
-
+    List dropAutoPkStatements(List dbEntities);
 
     /**
-     * Generates new (unique and non-repeating) primary key for specified
-     * DbEntity.
-     *
-     *  @param ent DbEntity for which automatic PK is generated.
+     * Generates new (unique and non-repeating) primary key for specified DbEntity.
+     * 
+     * @param ent DbEntity for which automatic PK is generated.
      */
-    public Object generatePkForDbEntity(DataNode dataNode, DbEntity ent)
-        throws Exception;
-
+    Object generatePkForDbEntity(DataNode dataNode, DbEntity ent) throws Exception;
 
     /**
-     * Returns SQL string that can generate new (unique and non-repeating)
-     * primary key for specified DbEntity. No actual database operations
-     * are performed.
+     * Returns SQL string that can generate new (unique and non-repeating) primary key for
+     * specified DbEntity. No actual database operations are performed.
+     * 
+     * @deprecated Since 1.2. This method is not used.
      */
-    public String generatePkForDbEntityString(DbEntity ent);
+    String generatePkForDbEntityString(DbEntity ent);
 
-    public void reset();
-
+    /**
+     * Resets any cached primary keys forcing generator to go to the database next time id
+     * generation is requested. May not be applicable for all generator implementations.
+     */
+    void reset();
 }
