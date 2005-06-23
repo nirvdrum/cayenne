@@ -63,11 +63,16 @@ package org.objectstyle.cayenne.xml;
  */
 public interface XMLSerializable {
     /**
-     * Prints itself as XML to the provided XMLEncoder.
+     * Encodes itself as XML using the provided XMLEncoder.
      * 
-     * @since 1.1
+     * @param encoder The encoder object.
      */
     public void encodeAsXML(XMLEncoder encoder);
     
+    /**
+     * Decodes itself from XML using the provided XMLDecoder.
+     * 
+     * @param decoder The decoder object.
+     */
     public void decodeFromXML(XMLDecoder decoder);
 }

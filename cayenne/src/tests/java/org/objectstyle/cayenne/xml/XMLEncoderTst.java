@@ -57,6 +57,8 @@ package org.objectstyle.cayenne.xml;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -84,7 +86,7 @@ public class XMLEncoderTst extends TestCase {
                 + "encoded-simple-collection.xml"));
         StringBuffer comp = new StringBuffer();
         while (in.ready()) {
-            comp.append(in.readLine()).append("\r\n");
+            comp.append(in.readLine()).append("\n");
         }
 
         assertEquals(comp.toString(), encoder.getXml());
@@ -107,7 +109,7 @@ public class XMLEncoderTst extends TestCase {
                 + "encoded-complex-collection.xml"));
         StringBuffer comp = new StringBuffer();
         while (in.ready()) {
-            comp.append(in.readLine()).append("\r\n");
+            comp.append(in.readLine()).append("\n");
         }
 
         assertEquals(comp.toString(), encoder.getXml());
@@ -125,7 +127,7 @@ public class XMLEncoderTst extends TestCase {
                 + "simple-mapped.xml"));
         StringBuffer comp = new StringBuffer();
         while (in.ready()) {
-            comp.append(in.readLine()).append("\r\n");
+            comp.append(in.readLine()).append("\n");
         }
 
         assertEquals(comp.toString(), encoder.getXml());
@@ -146,9 +148,51 @@ public class XMLEncoderTst extends TestCase {
                 + "collection-mapped.xml"));
         StringBuffer comp = new StringBuffer();
         while (in.ready()) {
-            comp.append(in.readLine()).append("\r\n");
+            comp.append(in.readLine()).append("\n");
         }
 
+        System.out.print(comp.toString());
+        System.out.print(encoder.getXml());
+
         assertEquals(comp.toString(), encoder.getXml());
+    }
+
+    public void testEncodeDataObjectsList() throws Exception {
+        final List dataObjects = new ArrayList();
+
+        dataObjects.add(new TestObject("George", 5, true));
+        dataObjects.add(new TestObject("Mary", 28, false));
+        dataObjects.add(new TestObject("Joe", 31, true));
+
+        final String xml = encoder.encodeList("Test", dataObjects);
+
+        BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
+                + "data-objects-encoded.xml"));
+        StringBuffer comp = new StringBuffer();
+        while (in.ready()) {
+            comp.append(in.readLine()).append("\n");
+        }
+
+        assertEquals(comp.toString(), xml);
+    }
+
+    public void testDataObjectsListMapping() throws Exception {
+        final List dataObjects = new ArrayList();
+
+        dataObjects.add(new TestObject("George", 5, true));
+        dataObjects.add(new TestObject("Mary", 28, false));
+        dataObjects.add(new TestObject("Joe", 31, true));
+
+        final String xml = encoder.encodeList("Test", dataObjects, XML_DATA_DIR
+                + "simple-mapping.xml");
+
+        BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
+                + "data-objects-mapped.xml"));
+        StringBuffer comp = new StringBuffer();
+        while (in.ready()) {
+            comp.append(in.readLine()).append("\n");
+        }
+
+        assertEquals(comp.toString(), xml);
     }
 }

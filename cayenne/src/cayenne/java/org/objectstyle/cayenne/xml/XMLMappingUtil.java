@@ -70,7 +70,6 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
-import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
@@ -80,7 +79,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  * @author Kevin J. Menard, Jr.
  * @since 1.2
  */
-public class XMLMappingUtil {
+final class XMLMappingUtil {
 
     /** The root of the mapping file (the "model" tag). */
     protected Element root;
@@ -92,7 +91,7 @@ public class XMLMappingUtil {
      * Creates a MappingUtils instance using a URL that points to the mapping file.
      * 
      * @param mappingUrl A URL to the mapping file that specifies the mapping model.
-     * @throws CayenneException
+     * @throws CayenneRuntimeException
      */
     public XMLMappingUtil(String mappingUrl) throws CayenneRuntimeException {
 
@@ -111,20 +110,11 @@ public class XMLMappingUtil {
     }
 
     /**
-     * Creates a MappingUtils instance with the mapping file provided as a JDOM document.
-     * 
-     * @param mapping The mapping file as a JDOM document.
-     */
-    public XMLMappingUtil(Document mapping) {
-        setRoot(mapping.getRootElement());
-    }
-
-    /**
      * Sets the root of the mapping document.
      * 
      * @param root The root node of the mapping document.
      */
-    protected void setRoot(Element root) {
+    private void setRoot(Element root) {
 
         if (!"model".equals(root.getName())) {
             throw new CayenneRuntimeException(
@@ -146,7 +136,7 @@ public class XMLMappingUtil {
      * 
      * @return The list of entities.
      */
-    public List getEntities() {
+    private List getEntities() {
         return Collections.unmodifiableList(root.getChildren());
     }
 
@@ -155,7 +145,7 @@ public class XMLMappingUtil {
      * 
      * @return The set of entity names.
      */
-    public Set getEntityNames() {
+    private Set getEntityNames() {
         return Collections.unmodifiableSet(entities.keySet());
     }
 
@@ -166,7 +156,7 @@ public class XMLMappingUtil {
      * @return The "root" entity.
      */
     // TODO Decide whether this should be called "primary" entity.
-    public Element getRootEntity() {
+    private Element getRootEntity() {
         return (Element) getEntities().get(0);
     }
 
@@ -176,9 +166,9 @@ public class XMLMappingUtil {
      * @param object The object to be encoded by this entity block.
      * @param entity The entity block in XML (from the mapping file).
      * @return The encoded entity.
-     * @throws CayenneException
+     * @throws CayenneRuntimeException
      */
-    public Element encodeEntity(Object object, Element entity)
+    private Element encodeEntity(Object object, Element entity)
             throws CayenneRuntimeException {
 
         // Create the xml item to return.
@@ -233,7 +223,15 @@ public class XMLMappingUtil {
         return ret;
     }
 
-    public List encodeCollection(Collection collection, Element entity)
+    /**
+     * Utility method for encoding a collection of objects.
+     * 
+     * @param collection The collection to encode.
+     * @param entity The entity block corresponding to the collection's elements.
+     * @return A flat list of the encoded objects (i.e., there is no root node).
+     * @throws CayenneRuntimeException
+     */
+    private List encodeCollection(Collection collection, Element entity)
             throws CayenneRuntimeException {
 
         List ret = new ArrayList();
@@ -254,6 +252,7 @@ public class XMLMappingUtil {
      * 
      * @param object The object to be encoded.
      * @return The XML document containing the encoded object.
+     * @throws CayenneRuntimeException
      */
     public Element encode(Object object) throws CayenneRuntimeException {
         return encodeEntity(object, getRootEntity());
@@ -265,7 +264,7 @@ public class XMLMappingUtil {
      * @param name The name of the entity to retrieve.
      * @return The entity with "xmlTag" equal to the passed in name.
      */
-    public Element getEntity(String name) {
+    private Element getEntity(String name) {
         return (Element) entities.get(name);
     }
 
@@ -273,13 +272,13 @@ public class XMLMappingUtil {
      * Returns the property name that is associated with the passed in entity name. This
      * is used to determine what property an entity block represents.
      * 
+     * @param rootEntity The root to which the reference to find is relative to.
      * @param ref The name of the entity.
      * @return The name of the property that is associated with the named entity.
      */
     // TODO Decide whether to change the @param tag description since "the name of the
-    // entity"
-    // can be deceiving.
-    public String getEntityRef(Element rootEntity, String ref) {
+    // entity" can be deceiving.
+    private String getEntityRef(Element rootEntity, String ref) {
         for (Iterator it = rootEntity.getChildren().iterator(); it.hasNext();) {
             Element child = (Element) it.next();
 
@@ -297,8 +296,9 @@ public class XMLMappingUtil {
      * @param object The object to be updated with the decoded property's value.
      * @param entity The entity block that contains the property mapping for the value.
      * @param encProperty The encoded property.
+     * @throws CayenneRuntimeException
      */
-    public void decodeProperty(Object object, Element entity, Element encProperty)
+    private void decodeProperty(Object object, Element entity, Element encProperty)
             throws CayenneRuntimeException {
 
         List children = encProperty.getChildren();
@@ -354,14 +354,15 @@ public class XMLMappingUtil {
     /**
      * Decode the supplied XML JDOM document into an object.
      * 
-     * @param data The JDOM document containing the encoded object.
+     * @param xml The JDOM document containing the encoded object.
      * @return The decoded object.
+     * @throws CayenneRuntimeException
      */
-    public Object decode(Document data) throws CayenneRuntimeException {
+    public Object decode(Element xml) throws CayenneRuntimeException {
 
         // TODO: Add an error check to make sure the mapping file actually is for this
         // data file.
-        List values = data.getRootElement().getChildren();
+        List values = xml.getChildren();
 
         // Create the object to be returned.
         Object ret = newInstance(getRootEntity().getAttributeValue("name"));
@@ -379,8 +380,13 @@ public class XMLMappingUtil {
 
     /**
      * Sets object property, wrapping any exceptions in CayenneRuntimeException.
+     * 
+     * @param object The object to set the property value on.
+     * @param property The name of the property to set.
+     * @param value The value of the property.
+     * @throws CayenneRuntimeException
      */
-    protected void setProperty(Object object, String property, Object value)
+    private void setProperty(Object object, String property, Object value)
             throws CayenneRuntimeException {
         try {
             BeanUtils.setProperty(object, property, value);
@@ -390,7 +396,15 @@ public class XMLMappingUtil {
         }
     }
 
-    protected Object getProperty(Object object, String property)
+    /**
+     * Returns the value for an object's property.
+     * 
+     * @param object The object whose property value to retrieve.
+     * @param property The property whose value to retrieve.
+     * @return The retrieved property value.
+     * @throws CayenneRuntimeException
+     */
+    private Object getProperty(Object object, String property)
             throws CayenneRuntimeException {
         try {
             return PropertyUtils.getNestedProperty(object, property);
@@ -405,8 +419,12 @@ public class XMLMappingUtil {
     /**
      * Instantiates a new object for class name, wrapping any exceptions in
      * CayenneRuntimeException.
+     * 
+     * @param className The type to create a new instance of.
+     * @return The newly created object.
+     * @throws CayenneRuntimeException
      */
-    protected Object newInstance(String className) throws CayenneRuntimeException {
+    private Object newInstance(String className) throws CayenneRuntimeException {
         try {
             return Class.forName(className).newInstance();
         }

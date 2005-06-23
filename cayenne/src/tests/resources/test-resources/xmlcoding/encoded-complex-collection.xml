@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <TestObjects type="org.objectstyle.cayenne.xml.TestObject">
   <name type="java.lang.String">George</name>
   <age type="java.lang.Integer">0</age>
@@ -24,4 +23,3 @@
     </children>
   </children>
 </TestObjects>
-

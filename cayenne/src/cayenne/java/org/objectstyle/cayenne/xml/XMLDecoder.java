@@ -95,13 +95,13 @@ public class XMLDecoder {
     }
 
     /** The root of the XML document being decoded. */
-    protected Element root = null;
+    private Element root;
 
     /** The data context to register decoded DataObjects with. */
-    protected DataContext dc = null;
+    private DataContext dc;
 
     // TODO: H to the A to the C to the K
-    protected List decodedCollections = new ArrayList();
+    private List decodedCollections = new ArrayList();
 
     /**
      * Default constructor. This will create an XMLDecoder instance that will decode
@@ -110,7 +110,7 @@ public class XMLDecoder {
      * @see XMLDecoder#XMLDecoder(DataContext)
      */
     public XMLDecoder() {
-        this.dc = null;
+        this(null);
     }
 
     /**
@@ -187,6 +187,12 @@ public class XMLDecoder {
         return Integer.valueOf(val);
     }
 
+    /**
+     * Decodes an object from XML.
+     * 
+     * @param xmlTag The XML tag corresponding to the root of the encoded object.
+     * @return The decoded object.
+     */
     public Object decodeObject(String xmlTag) {
         // Find the XML element corresponding to the supplied tag.
         Element child = root.getChild(xmlTag);
@@ -197,10 +203,10 @@ public class XMLDecoder {
     /**
      * Decodes an XML element to an Object.
      * 
-     * @param xmlTag The tag identifying the element.
+     * @param child The XML element.
      * @return The tag's value.
      */
-    protected Object decodeObject(Element child) {
+    private Object decodeObject(Element child) {
 
         if (null == child) {
             return null;
@@ -228,6 +234,15 @@ public class XMLDecoder {
         }
 
         try {
+            // This crazy conditional checks if we're decoding a collection.  There are two ways
+            // to enter into this body:
+            // 1) If there are two elements at the same level with the same name, then they should
+            // part of a collection.
+            // 2) If a single occurring element has the "forceList" attribute set to "YES", then it
+            // too should be treated as a collection.
+            // 
+            // The final part checks that we have not previously attempted to decode this collection,
+            // which is necessary to prevent infinite loops .
             if ((((null != child.getParentElement()) && (child
                     .getParentElement()
                     .getChildren(child.getName())
@@ -235,9 +250,11 @@ public class XMLDecoder {
                     .getAttributeValue("forceList")
                     .toUpperCase().equals("YES"))))
                     && (false == decodedCollections.contains(child))) {
-                return decodeCollection(child, objectClass);
+                return decodeCollection(child);
             }
 
+            // If the object implements XMLSerializable, delegate decoding to the class's
+            // implementation of decodeFromXML().
             else if (XMLSerializable.class.isAssignableFrom(objectClass)) {
                 XMLSerializable ret = (XMLSerializable) objectClass.newInstance();
                 ret.decodeFromXML(this);
@@ -245,6 +262,8 @@ public class XMLDecoder {
                 return ret;
             }
 
+            // If we hit here, then we should be encoding "simple" properties, which are basically
+            // objects that take a single arg String constructor.
             else if (ConstructorUtils.getAccessibleConstructor(objectClass, String.class) != null) {
                 // Create a new object of the type supplied as the "type" attribute
                 // in the XML element that
@@ -254,6 +273,8 @@ public class XMLDecoder {
                 return ConstructorUtils.invokeConstructor(objectClass, child.getText());
             }
 
+            // If we hit here, then we're trying to decode something we're not equipped to handle.
+            // E.g., a complex object that does not implement XMLSerializable.
             else {
                 throw new CayenneRuntimeException(
                         "Error decoding tag '"
@@ -284,39 +305,66 @@ public class XMLDecoder {
     /**
      * Decodes XML wrapped by a Reader into an object.
      * 
-     * @param in Wrapped XML.
+     * @param xml Wrapped XML.
      * @return A new instance of the object represented by the XML.
+     * @throws CayenneRuntimeException
      */
-    public Object decode(Reader in) throws CayenneRuntimeException {
+    public Object decode(Reader xml) throws CayenneRuntimeException {
 
         // Parse the XML into a JDOM representation.
-        Document data = parse(in);
+        Document data = parse(xml);
 
         // Delegate to the decode() method that works on JDOM elements.
-        return decode(data.getRootElement());
+        return decodeElement(data.getRootElement());
+    }
+
+    /**
+     * Decodes XML wrapped by a Reader into an object, using the supplied mapping file to
+     * guide the decoding process.
+     * 
+     * @param xml Wrapped XML.
+     * @param mappingUrl Mapping file describing how the XML elements and object
+     *            properties correlate.
+     * @return A new instance of the object represented by the XML.
+     * @throws CayenneRuntimeException
+     * @see XMLMappingUtil#decode(Element)
+     */
+    public Object decode(Reader xml, String mappingUrl) throws CayenneRuntimeException {
+        // Parse the XML document into a JDOM representation.
+        Document data = parse(xml);
+
+        // MappingUtils will really do all the work.
+        XMLMappingUtil mu = new XMLMappingUtil(mappingUrl);
+        Object ret = mu.decode(data.getRootElement());
+
+        if (null != dc) {
+            dc.registerNewObject((DataObject) ret);
+        }
+
+        return ret;
     }
 
     /**
      * Decodes the XML element to an object. If the supplied DataContext is not null, the
      * object will be registered with it and committed to the database.
      * 
-     * @param xml The XML element.
-     * @param dc DataContext to register the decoded object with.
+     * @param element The XML element.
      * @return The decoded object.
+     * @throws CayenneRuntimeException
      */
-    public Object decode(Element xml) throws CayenneRuntimeException {
+    private Object decodeElement(Element element) throws CayenneRuntimeException {
 
         // Update root to be the supplied xml element. This is necessary as
         // root is used for decoding properties.
         Element oldRoot = root;
-        root = xml;
+        root = element;
 
         // Create the object we're ultimately returning. It is represented
         // by the root element of the XML.
         Object object;
 
         try {
-            object = decodeObject(xml);
+            object = decodeObject(element);
         }
         catch (Throwable th) {
             throw new CayenneRuntimeException("Error instantiating object", th);
@@ -333,41 +381,14 @@ public class XMLDecoder {
     }
 
     /**
-     * Decodes XML wrapped by a Reader into an object, using the supplied mapping file to
-     * guide the decoding process.
-     * 
-     * @param in Wrapped XML.
-     * @param mappingFile Mapping file describing how the XML elements and object
-     *            properties correlate.
-     * @return A new instance of the object represented by the XML.
-     * @see XMLMappingUtil#decode(Document)
-     */
-    public Object decode(Reader in, String mappingFile) throws CayenneRuntimeException {
-        // Parse the XML document into a JDOM representation.
-        Document data = parse(in);
-
-        // MappingUtils will really do all the work.
-        XMLMappingUtil mu = new XMLMappingUtil(mappingFile);
-        Object ret = mu.decode(data);
-
-        if (null != dc) {
-            dc.registerNewObject((DataObject) ret);
-        }
-
-        return ret;
-    }
-
-    /**
      * Decodes a Collection represented by XML wrapped by a Reader into a List of objects.
      * Each object will be registered with the supplied DataContext.
      * 
-     * @param in Wrapped XML.
-     * @param dc DataContext to register the decoded objects with.
+     * @param xml The XML element representing the elements in the collection to decode.
      * @return A List of all the decoded objects.
+     * @throws CayenneRuntimeException
      */
-    // TODO Should we be passing in the object class or something more concrete?
-    protected Collection decodeCollection(Element xml, Class objectClass)
-            throws CayenneRuntimeException {
+    private Collection decodeCollection(Element xml) throws CayenneRuntimeException {
 
         Collection ret;
         try {
@@ -391,10 +412,77 @@ public class XMLDecoder {
                 .hasNext();) {
             // Decode the object.
             Element e = (Element) it.next();
-
             decodedCollections.add(e);
+            Object o = decodeElement(e);
 
-            Object o = decode(e);
+            // Add it to the output list.
+            ret.add(o);
+        }
+
+        return ret;
+    }
+
+    /**
+     * Decodes a list of objects. This intended to be used to decode a list of encdoded
+     * DataObjects.
+     * 
+     * @param xml The wrapped XML encoding of the list of objects.
+     * @return The list of decoded objects.
+     */
+    public List decodeList(Reader xml) {
+        return decodeList(xml, null);
+    }
+
+    /**
+     * Decodes a list of objects using the specified mapping. This intended to be used to
+     * decode a list of encdoded DataObjects.
+     * 
+     * @param xml The wrapped XML encoding of the list of objects.
+     * @param mappingUrl The mapping file that defines how the list elements should be
+     *            decoded.
+     * @return The list of decoded objects.
+     * @throws CayenneRuntimeException
+     */
+    public List decodeList(Reader xml, String mappingUrl) throws CayenneRuntimeException {
+        Element listRoot = parse(xml).getRootElement();
+
+        List ret;
+        try {
+            String parentClass = listRoot.getAttributeValue("type");
+            ret = (List) Class.forName(parentClass).newInstance();
+        }
+        catch (Exception ex) {
+            throw new CayenneRuntimeException(
+                    "Could not create collection with no-arg constructor.",
+                    ex);
+        }
+
+        XMLMappingUtil mu = null;
+        if (null != mappingUrl) {
+            mu = new XMLMappingUtil(mappingUrl);
+        }
+
+        // Each child of the root corresponds to an XML representation of
+        // the object. The idea is decode each of those into an object and add them to the
+        // list to be returned.
+        for (Iterator it = listRoot.getChildren().iterator(); it.hasNext();) {
+            // Decode the object.
+            Element e = (Element) it.next();
+            decodedCollections.add(e);
+            Object o;
+
+            // Decode the item using the appropriate decoding method.
+            if (null == mu) {
+                o = decodeElement(e);
+            }
+            else {
+                o = mu.decode(e);
+            }
+
+            // Register the decoded object with the data context if necessary.
+            if ((null != dc) && (o instanceof DataObject)) {
+                dc.registerNewObject((DataObject) o);
+            }
 
             // Add it to the output list.
             ret.add(o);
@@ -408,8 +496,9 @@ public class XMLDecoder {
      * 
      * @param in Wrapped XML.
      * @return JDOM Document wrapping the XML for use throughout the rest of the decoder.
+     * @throws CayenneRuntimeException
      */
-    protected Document parse(Reader in) throws CayenneRuntimeException {
+    private Document parse(Reader in) throws CayenneRuntimeException {
 
         // Read in the XML file holding the data to be constructed into an
         // object.

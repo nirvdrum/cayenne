@@ -1,9 +1,0 @@
-<!DOCTYPE root>
-<root>
-	<some-element a1="5" a2="6">
-		 <some-other-element/>
-	</some-element>
-	<some-element a1="7" a2="8">
-		 <some-other-element/>
-	</some-element>
-</root>

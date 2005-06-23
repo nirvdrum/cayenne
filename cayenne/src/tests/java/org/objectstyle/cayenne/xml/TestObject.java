@@ -3,10 +3,12 @@ package org.objectstyle.cayenne.xml;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectstyle.cayenne.CayenneDataObject;
+
 /**
  * @author Andrei Adamchik
  */
-public class TestObject implements XMLSerializable {
+public class TestObject extends CayenneDataObject {
 
     protected String name = "";
     protected int age;
@@ -81,7 +83,7 @@ public class TestObject implements XMLSerializable {
         encoder.encodeProperty("open", new Boolean(open));
         encoder.encodeProperty("children", children);
     }
-
+    
     public void decodeFromXML(XMLDecoder decoder) {
 
         if (null != decoder.decodeInteger("age")) {

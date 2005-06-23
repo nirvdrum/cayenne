@@ -57,12 +57,10 @@ package org.objectstyle.cayenne.xml;
 
 import java.io.FileReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
-
-import org.jdom.Document;
-import org.jdom.Element;
 
 /**
  * @author Andrei Adamchik
@@ -74,19 +72,6 @@ public class XMLDecoderTst extends TestCase {
 
     public void setUp() {
         decoder = new XMLDecoder();
-    }
-
-    public void testParse() throws Exception {
-        Reader xml = new FileReader(XML_DATA_DIR + "parser-test.xml");
-        Document document = decoder.parse(xml);
-
-        assertNotNull(document);
-
-        Element root = document.getRootElement();
-        assertEquals("root", root.getName());
-
-        List children = root.getChildren("some-element");
-        assertEquals(2, children.size());
     }
 
     public void testDecode() throws Exception {
@@ -195,10 +180,6 @@ public class XMLDecoderTst extends TestCase {
         assertEquals(grandchildren.get(0), harry);
     }
 
-    // TODO Test decode with mapping file & data context.
-
-    // TODO Test decode with data context.
-
     public void testDecodePrimitives() throws Exception {
         Reader xml = new FileReader(XML_DATA_DIR + "encoded-object-primitives.xml");
         Object object = decoder.decode(xml);
@@ -208,5 +189,31 @@ public class XMLDecoderTst extends TestCase {
         assertEquals("n1", test.getName());
         assertEquals(5, test.getAge());
         assertEquals(true, test.isOpen());
+    }
+
+    public void testDecodeDataObjectsList() throws Exception {
+        final List dataObjects = new ArrayList();
+
+        dataObjects.add(new TestObject("George", 5, true));
+        dataObjects.add(new TestObject("Mary", 28, false));
+        dataObjects.add(new TestObject("Joe", 31, true));
+
+        Reader xml = new FileReader(XML_DATA_DIR + "data-objects-encoded.xml");
+        final List decoded = decoder.decodeList(xml);
+
+        assertEquals(dataObjects, decoded);
+    }
+
+    public void testDataObjectsListMapping() throws Exception {
+        final List dataObjects = new ArrayList();
+
+        dataObjects.add(new TestObject("George", 5, true));
+        dataObjects.add(new TestObject("Mary", 28, false));
+        dataObjects.add(new TestObject("Joe", 31, true));
+
+        Reader xml = new FileReader(XML_DATA_DIR + "data-objects-mapped.xml");
+        final List decoded = decoder.decodeList(xml, XML_DATA_DIR + "simple-mapping.xml");
+
+        assertEquals(dataObjects, decoded);
     }
 }
