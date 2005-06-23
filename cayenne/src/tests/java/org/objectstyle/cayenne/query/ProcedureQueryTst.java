@@ -61,19 +61,21 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.access.jdbc.ColumnDescriptor;
+
 /**
  * @author Andrei Adamchik
  */
 public class ProcedureQueryTst extends TestCase {
 
-    public void testCreateQuery() throws Exception {
+    public void testCreateQuery() {
         ProcedureQuery template = new ProcedureQuery();
         Query clone = template.createQuery(Collections.EMPTY_MAP);
         assertTrue(clone instanceof ProcedureQuery);
         assertNotSame(template, clone);
     }
 
-    public void testCreateQueryWithParameters() throws Exception {
+    public void testCreateQueryWithParameters() {
         Map params = new HashMap();
         params.put("a", "1");
         params.put("b", "2");
@@ -84,11 +86,27 @@ public class ProcedureQueryTst extends TestCase {
         assertEquals(params, clone.getParameters());
     }
 
-    public void testResultType() throws Exception {
+    public void testResultType() {
         ProcedureQuery query = new ProcedureQuery();
         assertNull(query.getResultClassName());
 
         query.setResultClassName("abc.AAAA");
         assertSame("abc.AAAA", query.getResultClassName());
+    }
+
+    public void testResultDescriptors() {
+        ProcedureQuery query = new ProcedureQuery();
+
+        assertNotNull(query.getResultDescriptors());
+        assertTrue(query.getResultDescriptors().isEmpty());
+
+        ColumnDescriptor[] descriptor = new ColumnDescriptor[5];
+        query.addResultDescriptor(descriptor);
+        assertEquals(1, query.getResultDescriptors().size());
+        assertTrue(query.getResultDescriptors().contains(descriptor));
+
+        query.removeResultDescriptor(descriptor);
+        assertNotNull(query.getResultDescriptors());
+        assertTrue(query.getResultDescriptors().isEmpty());
     }
 }

@@ -111,8 +111,7 @@ class OracleProcedureAction extends ProcedureAction {
                 ResultSet rs = (ResultSet) statement.getObject(i + 1);
 
                 try {
-                    RowDescriptor rsDescriptor = new RowDescriptor(rs, getAdapter()
-                            .getExtendedTypes());
+                    RowDescriptor rsDescriptor = describeResultSet(rs, processedResultSets++);
                     readResultSet(rs, rsDescriptor, query, delegate);
                 }
                 finally {

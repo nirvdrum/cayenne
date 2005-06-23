@@ -57,7 +57,9 @@
 package org.objectstyle.cayenne.access;
 
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +68,7 @@ import org.apache.log4j.Level;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.access.jdbc.ColumnDescriptor;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.ProcedureQuery;
@@ -110,7 +113,8 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
 
         // since stored procedure commits its stuff, we must use an explicit
         // non-committing transaction
-        Transaction.externalTransaction(null).performQueries(ctxt,
+        Transaction.externalTransaction(null).performQueries(
+                ctxt,
                 Collections.singletonList(q),
                 observer);
 
@@ -144,7 +148,8 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         assertNotNull("Null result from StoredProcedure.", artists);
         assertEquals(1, artists.size());
         DataRow artistRow = (DataRow) artists.get(0);
-        Artist a = (Artist) ctxt.objectFromDataRow(Artist.class,
+        Artist a = (Artist) ctxt.objectFromDataRow(
+                Artist.class,
                 uppercaseConverter(artistRow),
                 false);
         Painting p = (Painting) a.getPaintingArray().get(0);
@@ -173,7 +178,8 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         assertNotNull("Null result from StoredProcedure.", artists);
         assertEquals(1, artists.size());
         DataRow artistRow = (DataRow) artists.get(0);
-        Artist a = (Artist) ctxt.objectFromDataRow(Artist.class,
+        Artist a = (Artist) ctxt.objectFromDataRow(
+                Artist.class,
                 uppercaseConverter(artistRow),
                 false);
         Painting p = (Painting) a.getPaintingArray().get(0);
@@ -204,7 +210,8 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         assertNotNull("Null result from StoredProcedure.", artists);
         assertEquals(1, artists.size());
         DataRow artistRow = (DataRow) artists.get(0);
-        Artist a = (Artist) ctxt.objectFromDataRow(Artist.class,
+        Artist a = (Artist) ctxt.objectFromDataRow(
+                Artist.class,
                 uppercaseConverter(artistRow),
                 false);
         Painting p = (Painting) a.getPaintingArray().get(0);
@@ -228,7 +235,8 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         assertEquals(1, rows.size());
         Object row = rows.get(0);
         assertNotNull(row);
-        assertTrue("Unexpected row class: " + row.getClass().getName(),
+        assertTrue(
+                "Unexpected row class: " + row.getClass().getName(),
                 row instanceof Map);
         Map outParams = (Map) row;
         Number price = (Number) outParams.get("out_param");
@@ -241,8 +249,8 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         if (!getAccessStackAdapter().supportsStoredProcedures()) {
             return;
         }
-        
-        if(!getAccessStackAdapter().canMakeObjectsOutOfProcedures()) {
+
+        if (!getAccessStackAdapter().canMakeObjectsOutOfProcedures()) {
             return;
         }
 
@@ -264,6 +272,51 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         ctxt.invalidateObjects(Collections.singletonList(p));
         assertEquals(1101.01, p.getEstimatedPrice().doubleValue(), 0.02);
 
+    }
+
+    public void testSelectWithRowDescriptor() throws Exception {
+        // Don't run this on MySQL
+        if (!getAccessStackAdapter().supportsStoredProcedures()) {
+            return;
+        }
+
+        // create an artist with painting in the database
+        createArtist(1000.0);
+
+        // test ProcedureQuery with Procedure as root
+        Procedure proc = ctxt.getEntityResolver().getProcedure(SELECT_STORED_PROCEDURE);
+        ProcedureQuery q = new ProcedureQuery(proc);
+        q.setFetchingDataRows(true);
+        q.addParameter("aName", "An Artist");
+        q.addParameter("paintingPrice", new Integer(3000));
+
+        // TESTING THIS ***
+        // A.ARTIST_ID, A.DATE_OF_BIRTH, A.ARTIST_NAME
+        ColumnDescriptor[] columns = new ColumnDescriptor[3];
+
+        // read ID as Long, and everything else as default types
+        columns[0] = new ColumnDescriptor("ARTIST_ID", Types.INTEGER, Long.class
+                .getName());
+        columns[1] = new ColumnDescriptor("ARTIST_NAME", Types.CHAR, String.class
+                .getName());
+        columns[2] = new ColumnDescriptor("DATE_OF_BIRTH", Types.DATE, Date.class
+                .getName());
+        q.addResultDescriptor(columns);
+
+        List rows = runProcedureSelect(q);
+
+        // check the results
+        assertNotNull("Null result from StoredProcedure.", rows);
+        assertEquals(1, rows.size());
+        DataRow artistRow = (DataRow) rows.get(0);
+
+        assertEquals(3, artistRow.size());
+
+        artistRow = uppercaseConverter(artistRow);
+
+        Object id = artistRow.get("ARTIST_ID");
+        assertNotNull(id);
+        assertTrue("Expected Long, got: " + id.getClass().getName(), id instanceof Long);
     }
 
     protected List runProcedureSelect(ProcedureQuery q) throws Exception {

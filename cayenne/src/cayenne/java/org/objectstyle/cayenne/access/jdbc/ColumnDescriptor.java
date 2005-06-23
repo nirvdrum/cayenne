@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access.jdbc;
 
+import java.io.Serializable;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
@@ -73,7 +74,7 @@ import org.objectstyle.cayenne.map.ProcedureParameter;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class ColumnDescriptor {
+public class ColumnDescriptor implements Serializable {
 
     protected String tableName;
     protected String procedureName;
@@ -98,6 +99,20 @@ public class ColumnDescriptor {
      */
     public ColumnDescriptor() {
     }
+    
+    /**
+     * Creates a column descriptor with user-specified parameters.
+     * 
+     * @since 1.2
+     */
+    public ColumnDescriptor(String columnName, int jdbcType, String javaClass) {
+        this.name = columnName;
+        this.qualifiedColumnName = columnName;
+        this.label = columnName;
+        this.jdbcType = jdbcType;
+        this.javaClass = javaClass;
+    }
+
 
     /**
      * Creates a ColumnDescriptor from Cayenne ObjAttribute and DbAttribute.

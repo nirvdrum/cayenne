@@ -64,6 +64,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
@@ -75,12 +76,21 @@ import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 
 /**
+ * A SQLAction that runs a stored procedure. Note that ProcedureAction has internal state
+ * and is not thread-safe.
+ * 
  * @since 1.2
  * @author Andrei Adamchik
  */
 public class ProcedureAction extends BaseSQLAction {
 
     protected ProcedureQuery query;
+
+    /**
+     * Holds a number of ResultSets processed by the action. This value is reset to zero
+     * on every "performAction" call.
+     */
+    protected int processedResultSets;
 
     public ProcedureAction(ProcedureQuery query, DbAdapter adapter,
             EntityResolver entityResolver) {
@@ -90,6 +100,8 @@ public class ProcedureAction extends BaseSQLAction {
 
     public void performAction(Connection connection, OperationObserver observer)
             throws SQLException, Exception {
+
+        processedResultSets = 0;
 
         ProcedureTranslator transl = new ProcedureTranslator();
         transl.setAdapter(getAdapter());
@@ -115,8 +127,9 @@ public class ProcedureAction extends BaseSQLAction {
                     ResultSet rs = statement.getResultSet();
 
                     try {
-                        RowDescriptor descriptor = new RowDescriptor(rs, getAdapter()
-                                .getExtendedTypes());
+                        RowDescriptor descriptor = describeResultSet(
+                                rs,
+                                processedResultSets++);
                         readResultSet(rs, descriptor, query, observer);
                     }
                     finally {
@@ -148,9 +161,39 @@ public class ProcedureAction extends BaseSQLAction {
     }
 
     /**
+     * Creates a RowDescriptor for result set.
+     * 
+     * @param resultSet JDBC ResultSet
+     * @param setIndex a zero-based index of the ResultSet in the query results.
+     */
+    protected RowDescriptor describeResultSet(ResultSet resultSet, int setIndex) {
+        if (setIndex < 0) {
+            throw new IllegalArgumentException(
+                    "Expected a non-negative result set index. Got: " + setIndex);
+        }
+
+        List descriptors = query.getResultDescriptors();
+
+        if (descriptors.isEmpty()) {
+            // failover to default JDBC result descriptor
+            return new RowDescriptor(resultSet, getAdapter().getExtendedTypes());
+        }
+
+        // if one result is described, all of them must be present...
+        if (setIndex >= descriptors.size() || descriptors.get(setIndex) == null) {
+            throw new CayenneRuntimeException("No descriptor for result set at index '"
+                    + setIndex
+                    + "' configured.");
+        }
+
+        ColumnDescriptor[] columns = (ColumnDescriptor[]) descriptors.get(setIndex);
+        return new RowDescriptor(columns, getAdapter().getExtendedTypes());
+    }
+
+    /**
      * Returns stored procedure for an internal query.
      */
-    public Procedure getProcedure() {
+    protected Procedure getProcedure() {
         return getEntityResolver().lookupProcedure(query);
     }
 
@@ -178,9 +221,8 @@ public class ProcedureAction extends BaseSQLAction {
             }
 
             ColumnDescriptor descriptor = new ColumnDescriptor(parameter);
-            ExtendedType type = getAdapter()
-                    .getExtendedTypes()
-                    .getRegisteredType(descriptor.getJavaClass());
+            ExtendedType type = getAdapter().getExtendedTypes().getRegisteredType(
+                    descriptor.getJavaClass());
             Object val = type.materializeObject(statement, i + 1, descriptor
                     .getJdbcType());
 

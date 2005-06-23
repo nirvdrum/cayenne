@@ -56,12 +56,16 @@
 
 package org.objectstyle.cayenne.query;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.jdbc.ColumnDescriptor;
+import org.objectstyle.cayenne.access.jdbc.RowDescriptor;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.QueryBuilder;
 import org.objectstyle.cayenne.util.XMLEncoder;
@@ -107,6 +111,13 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     protected SelectExecutionProperties selectProperties = new SelectExecutionProperties();
     protected boolean selecting;
 
+    // TODO: serialization issue - RowDescriptor is not XMLSerializable so we can't store
+    // it in a DataMap
+    /**
+     * @since 1.2
+     */
+    protected List resultDescriptors;
+
     /**
      * Creates an empty procedure query.
      */
@@ -125,13 +136,56 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     }
 
     /**
-     * Creates a ProcedureQuery based on a stored procedure. 
+     * Returns a List of #{@link RowDescriptor}
+     * objects describing query ResultSets in the order they are returned by the stored
+     * procedure.
+     * <p>
+     * <i>Note that if a procedure returns ResultSet in an OUT parameter, it is returned
+     * prior to any other result sets (though in practice database engines usually support
+     * only one mechanism for returning result sets. </i>
+     * </p>
      * 
-     * <p>Performance Note: with current EntityResolver implementation it is preferrable
-     * to use Procedure object instead of String as a query root. String root can cause
-     * unneeded EntityResolver reindexing on every call. See this mailing list thread:
-     * <a href="http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0109.html">
-     * http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0109.html</a></p>
+     * @since 1.2
+     */
+    public List getResultDescriptors() {
+        return resultDescriptors != null ? resultDescriptors : Collections.EMPTY_LIST;
+    }
+
+    /**
+     * Adds a descriptor for a single ResultSet. More than one descriptor can be added by
+     * calling this method multiple times in the order of described ResultSet appearance
+     * in the procedure results.
+     * 
+     * @since 1.2
+     */
+    public synchronized void addResultDescriptor(ColumnDescriptor[] descriptor) {
+        if (resultDescriptors == null) {
+            resultDescriptors = new ArrayList(2);
+        }
+
+        resultDescriptors.add(descriptor);
+    }
+    
+    /**
+     * Removes result descriptor from the list of descriptors.
+     * 
+     * @since 1.2
+     */
+    public void removeResultDescriptor(ColumnDescriptor[] descriptor) {
+        if(resultDescriptors != null) {
+            resultDescriptors.remove(descriptor);
+        }
+    }
+
+    /**
+     * Creates a ProcedureQuery based on a stored procedure.
+     * <p>
+     * Performance Note: with current EntityResolver implementation it is preferrable to
+     * use Procedure object instead of String as a query root. String root can cause
+     * unneeded EntityResolver reindexing on every call. See this mailing list thread: <a
+     * href="http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0109.html">
+     * http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0109.html</a>
+     * </p>
      * 
      * @param procedureName A name of the stored procedure. For this query to work, a
      *            procedure with this name must be mapped in Cayenne.
@@ -152,11 +206,13 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     }
 
     /**
-     * <p>Performance Note: with current EntityResolver implementation it is preferrable
-     * to use Procedure object instead of String as a query root. String root can cause
-     * unneeded EntityResolver reindexing on every call. See this mailing list thread:
-     * <a href="http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0109.html">
-     * http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0109.html</a></p>
+     * <p>
+     * Performance Note: with current EntityResolver implementation it is preferrable to
+     * use Procedure object instead of String as a query root. String root can cause
+     * unneeded EntityResolver reindexing on every call. See this mailing list thread: <a
+     * href="http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0109.html">
+     * http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0109.html</a>
+     * </p>
      * 
      * @since 1.1
      */
@@ -164,7 +220,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
         setRoot(procedureName);
         setResultClassName(resultType != null ? resultType.getName() : null);
     }
-    
+
     /**
      * Calls "makeProcedure" on the visitor.
      * 
@@ -421,7 +477,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     public void setSelecting(boolean b) {
         selecting = b;
     }
-    
+
     /**
      * Returns a collection of joint prefetches.
      * 
@@ -430,7 +486,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     public Collection getJointPrefetches() {
         return selectProperties.getJointPrefetches();
     }
-    
+
     /**
      * Adds a joint prefetch.
      * 
@@ -439,7 +495,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     public void addJointPrefetch(String relationshipPath) {
         selectProperties.addJointPrefetch(relationshipPath);
     }
-    
+
     /**
      * Adds all joint prefetches from a provided collection.
      * 
@@ -448,7 +504,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     public void addJointPrefetches(Collection relationshipPaths) {
         selectProperties.addJointPrefetches(relationshipPaths);
     }
-    
+
     /**
      * Clears all joint prefetches.
      * 
@@ -457,7 +513,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     public void clearJointPrefetches() {
         selectProperties.clearJointPrefetches();
     }
-    
+
     /**
      * Removes joint prefetch.
      * 

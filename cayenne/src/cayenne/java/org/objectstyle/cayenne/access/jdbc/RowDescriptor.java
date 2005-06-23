@@ -77,6 +77,13 @@ public class RowDescriptor {
     protected ExtendedType[] converters;
 
     /**
+     * Creates an empty RowDescriptor. Intended mainly for testing and use by subclasses.
+     */
+    protected RowDescriptor() {
+
+    }
+
+    /**
      * Creates a RowDescriptor for an array of columns.
      */
     public RowDescriptor(ColumnDescriptor[] columns, ExtendedTypeMap types) {
@@ -105,13 +112,6 @@ public class RowDescriptor {
         }
 
         indexTypes(types);
-    }
-
-    /**
-     * Creates an empty RowDescriptor. Intended mainly for use by subclasses.
-     */
-    protected RowDescriptor() {
-
     }
 
     /**

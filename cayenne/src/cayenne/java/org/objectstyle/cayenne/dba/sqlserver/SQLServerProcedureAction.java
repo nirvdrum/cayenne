@@ -119,12 +119,14 @@ public class SQLServerProcedureAction extends ProcedureAction {
             Observer localObserver = new Observer(observer);
 
             // read query, using local observer
+
             while (true) {
                 if (hasResultSet) {
                     ResultSet rs = statement.getResultSet();
                     try {
-                        RowDescriptor descriptor = new RowDescriptor(rs, getAdapter()
-                                .getExtendedTypes());
+                        RowDescriptor descriptor = describeResultSet(
+                                rs,
+                                processedResultSets++);
                         readResultSet(rs, descriptor, query, localObserver);
                     }
                     finally {
