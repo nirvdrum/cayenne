@@ -63,6 +63,7 @@ import javax.swing.KeyStroke;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerController;
+import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 
@@ -107,5 +108,8 @@ public class NewProjectAction extends ProjectAction {
         project.getConfiguration().addDomain(domain);
 
         controller.projectOpenedAction(project);
+        
+        // select default domain
+        getProjectController().fireDomainDisplayEvent(new DomainDisplayEvent(this, domain));
     }
 }
