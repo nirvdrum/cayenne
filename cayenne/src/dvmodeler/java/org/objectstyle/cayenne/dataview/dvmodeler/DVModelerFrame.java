@@ -83,8 +83,8 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeSelectionModel;
 
 import com.jgoodies.forms.factories.Borders;
-import com.jgoodies.plaf.HeaderStyle;
-import com.jgoodies.plaf.Options;
+import com.jgoodies.looks.HeaderStyle;
+import com.jgoodies.looks.Options;
 
 /**
  *

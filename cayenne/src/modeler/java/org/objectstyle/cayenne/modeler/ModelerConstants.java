@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.modeler;
 
-import com.jgoodies.plaf.plastic.PlasticXPLookAndFeel;
+import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
 
 /**
  * Defines constants used in the modeler.

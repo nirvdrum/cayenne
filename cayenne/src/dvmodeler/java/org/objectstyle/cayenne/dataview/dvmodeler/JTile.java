@@ -56,10 +56,21 @@
 
 package org.objectstyle.cayenne.dataview.dvmodeler;
 
-import java.awt.*;
-import javax.swing.*;
-import com.jgoodies.forms.factories.*;
-import com.jgoodies.plaf.plastic.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+
+import javax.swing.Icon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.UIManager;
+
+import com.jgoodies.forms.factories.Borders;
+import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
 
 /**
  *

@@ -72,7 +72,7 @@ import javax.swing.SpinnerNumberModel;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.plaf.Options;
+import com.jgoodies.looks.Options;
 
 /**
  *

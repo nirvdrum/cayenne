@@ -58,8 +58,10 @@
  * copyright (c) 2002, Drew Davidson and Luke Blanshard
  */
 package org.objectstyle.cayenne.exp.parser;
-
+import java.io.*;
+import java.util.*;
 import java.math.*;
+import org.objectstyle.cayenne.exp.*;
 
 public class ExpressionParserTokenManager implements ExpressionParserConstants
 {

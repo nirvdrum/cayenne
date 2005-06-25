@@ -72,8 +72,8 @@ import org.apache.log4j.PatternLayout;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.project.CayenneUserDir;
 
-import com.jgoodies.plaf.plastic.PlasticLookAndFeel;
-import com.jgoodies.plaf.plastic.PlasticTheme;
+import com.jgoodies.looks.plastic.PlasticLookAndFeel;
+import com.jgoodies.looks.plastic.PlasticTheme;
 
 /**
  * Main class responsible for starting CayenneModeler.
