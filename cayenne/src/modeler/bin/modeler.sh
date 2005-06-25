@@ -62,8 +62,15 @@ fi
     
 OPTIONS="-classpath $CAYENNE_CLASSPATH"
 
-# Mac OS X Specific property - application name
-PROPERTIES="-Dcom.apple.mrj.application.apple.menu.about.name=CayenneModeler"
+# Mac OS X Specific properties
+if [ -d /System/Library/Frameworks/JavaVM.framework ]; then
+  PROP1="-Dcom.apple.mrj.application.apple.menu.about.name=CayenneModeler"
+  PROP2="-Dapple.laf.useScreenMenuBar=true"
+  PROP3="-Xdock:name=CayenneModeler"
+  PROP4="-Xdock:icon=${CAYENNE_HOME}/bin/icon.ico"
+
+  PROPERTIES="$PROP1 $PROP2 $PROP3 $PROP4"
+fi
 
 # Start the Modeler
 $JAVACMD $OPTIONS $PROPERTIES $MAIN_CLASS $@ &
