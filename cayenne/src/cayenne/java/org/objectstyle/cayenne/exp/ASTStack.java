@@ -109,7 +109,7 @@ final class ASTStack extends LinkedList {
     /** 
      * Returns a value from the stack without removing it.
      */
-    public Object peek() {
+    public Object peekObject() {
         return get(size() - 1);
     }
 
@@ -117,7 +117,7 @@ final class ASTStack extends LinkedList {
      * Returns a value from the stack without removing it, converting it to boolean.
      */
     boolean peekBoolean() {
-        Object obj = peek();
+        Object obj = peekObject();
         return booleanFromObject(obj);
     }
 
@@ -125,7 +125,7 @@ final class ASTStack extends LinkedList {
      * Returns a value from the stack without removing it, converting it to int.
      */
     int peekInt() {
-        return ((Integer) peek()).intValue();
+        return ((Integer) peekObject()).intValue();
     }
 
     /**
