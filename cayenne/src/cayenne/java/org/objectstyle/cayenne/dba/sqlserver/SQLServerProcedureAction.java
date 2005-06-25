@@ -112,9 +112,7 @@ public class SQLServerProcedureAction extends ProcedureAction {
             boolean hasResultSet = statement.execute();
 
             // local observer to cache results and provide them to the external observer
-            // in
-            // the order consistent
-            // with other adapters.
+            // in the order consistent with other adapters.
 
             Observer localObserver = new Observer(observer);
 
@@ -150,6 +148,8 @@ public class SQLServerProcedureAction extends ProcedureAction {
             }
 
             // read out parameters to the main observer ... AFTER the main result set
+            // TODO: I hope SQLServer does not support ResultSets as OUT parameters, otherwise 
+            // the order of custom result descriptors will be messed up
             readProcedureOutParameters(statement, observer);
 
             // add results back to main observer

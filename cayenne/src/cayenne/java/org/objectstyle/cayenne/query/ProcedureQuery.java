@@ -111,7 +111,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     protected SelectExecutionProperties selectProperties = new SelectExecutionProperties();
     protected boolean selecting;
 
-    // TODO: serialization issue - RowDescriptor is not XMLSerializable so we can't store
+    // TODO: ColumnDescriptor is not XMLSerializable so we can't store
     // it in a DataMap
     /**
      * @since 1.2
@@ -133,48 +133,6 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
         // for backwards compatibility we go against usual default...
         selectProperties.setFetchingDataRows(true);
         setRoot(procedure);
-    }
-
-    /**
-     * Returns a List of #{@link RowDescriptor}
-     * objects describing query ResultSets in the order they are returned by the stored
-     * procedure.
-     * <p>
-     * <i>Note that if a procedure returns ResultSet in an OUT parameter, it is returned
-     * prior to any other result sets (though in practice database engines usually support
-     * only one mechanism for returning result sets. </i>
-     * </p>
-     * 
-     * @since 1.2
-     */
-    public List getResultDescriptors() {
-        return resultDescriptors != null ? resultDescriptors : Collections.EMPTY_LIST;
-    }
-
-    /**
-     * Adds a descriptor for a single ResultSet. More than one descriptor can be added by
-     * calling this method multiple times in the order of described ResultSet appearance
-     * in the procedure results.
-     * 
-     * @since 1.2
-     */
-    public synchronized void addResultDescriptor(ColumnDescriptor[] descriptor) {
-        if (resultDescriptors == null) {
-            resultDescriptors = new ArrayList(2);
-        }
-
-        resultDescriptors.add(descriptor);
-    }
-    
-    /**
-     * Removes result descriptor from the list of descriptors.
-     * 
-     * @since 1.2
-     */
-    public void removeResultDescriptor(ColumnDescriptor[] descriptor) {
-        if(resultDescriptors != null) {
-            resultDescriptors.remove(descriptor);
-        }
     }
 
     /**
@@ -219,6 +177,47 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     public ProcedureQuery(String procedureName, Class resultType) {
         setRoot(procedureName);
         setResultClassName(resultType != null ? resultType.getName() : null);
+    }
+
+    /**
+     * Returns a List of #{@link RowDescriptor} objects describing query ResultSets in
+     * the order they are returned by the stored procedure.
+     * <p>
+     * <i>Note that if a procedure returns ResultSet in an OUT parameter, it is returned
+     * prior to any other result sets (though in practice database engines usually support
+     * only one mechanism for returning result sets. </i>
+     * </p>
+     * 
+     * @since 1.2
+     */
+    public List getResultDescriptors() {
+        return resultDescriptors != null ? resultDescriptors : Collections.EMPTY_LIST;
+    }
+
+    /**
+     * Adds a descriptor for a single ResultSet. More than one descriptor can be added by
+     * calling this method multiple times in the order of described ResultSet appearance
+     * in the procedure results.
+     * 
+     * @since 1.2
+     */
+    public synchronized void addResultDescriptor(ColumnDescriptor[] descriptor) {
+        if (resultDescriptors == null) {
+            resultDescriptors = new ArrayList(2);
+        }
+
+        resultDescriptors.add(descriptor);
+    }
+
+    /**
+     * Removes result descriptor from the list of descriptors.
+     * 
+     * @since 1.2
+     */
+    public void removeResultDescriptor(ColumnDescriptor[] descriptor) {
+        if (resultDescriptors != null) {
+            resultDescriptors.remove(descriptor);
+        }
     }
 
     /**
