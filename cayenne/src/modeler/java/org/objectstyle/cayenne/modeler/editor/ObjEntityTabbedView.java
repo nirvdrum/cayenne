@@ -142,16 +142,7 @@ public class ObjEntityTabbedView extends JTabbedPane implements ObjEntityDisplay
 
     public void currentObjEntityChanged(EntityDisplayEvent e) {
         resetRemoveButtons();
-        
-        if (e.getEntity() == null) {
-            setVisible(false);
-        }
-        else {
-            if (e.isTabReset()) {
-                setSelectedIndex(0);
-            }
-            setVisible(true);
-        }
+        setVisible(e.getEntity() != null);
     }
 
     public void currentObjRelationshipChanged(RelationshipDisplayEvent e) {
@@ -162,7 +153,7 @@ public class ObjEntityTabbedView extends JTabbedPane implements ObjEntityDisplay
         // update relationship selection
         Relationship rel = e.getRelationship();
         if (rel instanceof ObjRelationship) {
-            if (e.isTabReset() && getSelectedComponent() != relationshipsPanel){
+            if (getSelectedComponent() != relationshipsPanel) {
                 setSelectedComponent(relationshipsPanel);
                 relationshipsPanel.setVisible(true);
             }
@@ -177,7 +168,7 @@ public class ObjEntityTabbedView extends JTabbedPane implements ObjEntityDisplay
         // update relationship selection
         Attribute attr = e.getAttribute();
         if (attr instanceof ObjAttribute) {
-            if (e.isTabReset() && getSelectedComponent() != attributesPanel){
+            if (getSelectedComponent() != attributesPanel) {
                 setSelectedComponent(attributesPanel);
                 attributesPanel.setVisible(true);
             }

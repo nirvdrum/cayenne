@@ -233,7 +233,7 @@ public class CayenneModelerController extends CayenneController {
             projectController.setDirty(true);
 
             // show warning dialog
-            ValidatorDialog.showDialog(frame, projectController, new Validator(
+            ValidatorDialog.showDialog(frame, new Validator(
                     project,
                     project.getLoadStatus()));
         }

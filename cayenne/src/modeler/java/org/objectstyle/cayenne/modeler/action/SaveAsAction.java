@@ -60,7 +60,6 @@ import java.io.File;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.objectstyle.cayenne.modeler.util.CayenneAction;
@@ -133,7 +132,6 @@ public class SaveAsAction extends CayenneAction {
     }
 
     public synchronized void performAction(int warningLevel) {
-        ProjectController mediator = getProjectController();
         Validator val = getCurrentProject().getValidator();
         int validationCode = val.validate();
 
@@ -153,7 +151,7 @@ public class SaveAsAction extends CayenneAction {
 
         // If there were errors or warnings at validation, display them
         if (validationCode >= warningLevel) {
-            ValidatorDialog.showDialog(Application.getFrame(), mediator, val);
+            ValidatorDialog.showDialog(Application.getFrame(), val);
         }
     }
 

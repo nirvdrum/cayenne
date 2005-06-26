@@ -59,7 +59,6 @@
 import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.objectstyle.cayenne.modeler.util.CayenneAction;
@@ -86,16 +85,15 @@ public class ValidateAction extends CayenneAction {
 	 * Validates project for possible conflicts and incomplete mappings.
 	 */
 	public void performAction(ActionEvent e) {
-		ProjectController mediator = getProjectController();
 		Validator val = getCurrentProject().getValidator();
 		int validationCode = val.validate();
 
 		// If there were errors or warnings at validation, display them
 		if (validationCode >= ValidationDisplayHandler.WARNING) {
-			ValidatorDialog.showDialog(Application.getFrame(), mediator, val);
+			ValidatorDialog.showDialog(Application.getFrame(), val);
 		}
 		else {
-			ValidatorDialog.showValidationSuccess(Application.getFrame(), mediator, val);
+			ValidatorDialog.showValidationSuccess(Application.getFrame(), val);
 		}
 	}
 	

@@ -69,9 +69,6 @@ import org.objectstyle.cayenne.map.Entity;
 public class EntityDisplayEvent extends DataMapDisplayEvent {
 	protected Entity entity;
 
-	/** Reset the tab display to tab 0 */
-	protected boolean tabReset;
-
 	/** True if different from current entity */
 	protected boolean entityChanged = true;
 	protected boolean unselectAttributes;
@@ -108,10 +105,6 @@ public class EntityDisplayEvent extends DataMapDisplayEvent {
 		return entity;
 	}
 
-	public boolean isTabReset() {
-		return tabReset;
-	}
-
 	/** True if entity different from current entity. */
 	public boolean isEntityChanged() {
 		return entityChanged;
@@ -142,13 +135,5 @@ public class EntityDisplayEvent extends DataMapDisplayEvent {
 	 */
 	public void setEntity(Entity entity) {
 		this.entity = entity;
-	}
-
-	/**
-	 * Sets the tabReset.
-	 * @param tabReset The tabReset to set
-	 */
-	public void setTabReset(boolean tabReset) {
-		this.tabReset = tabReset;
 	}
 }

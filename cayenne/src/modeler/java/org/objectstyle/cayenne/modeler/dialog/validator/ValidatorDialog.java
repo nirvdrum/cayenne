@@ -58,326 +58,239 @@ package org.objectstyle.cayenne.modeler.dialog.validator;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Collections;
 import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
 
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
-import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.modeler.util.CayenneDialog;
-import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.util.PanelFactory;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
 import org.objectstyle.cayenne.project.validator.Validator;
 
-/** 
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+
+/**
  * Dialog for displaying validation errors.
  * 
  * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-public class ValidatorDialog extends CayenneDialog implements ActionListener {
+public class ValidatorDialog extends CayenneDialog {
 
     protected static ValidatorDialog instance;
 
     public static final Color WARNING_COLOR = new Color(245, 194, 194);
     public static final Color ERROR_COLOR = new Color(237, 121, 121);
 
-    protected ProjectController mediator;
-    protected Validator validator;
-    protected JTable messages;
-    protected JButton closeBtn;
+    protected JTable problemsTable;
+    protected JButton closeButton;
+    protected JButton refreshButton;
+    protected List validationObjects;
 
     public static synchronized void showDialog(
-        CayenneModelerFrame editor,
-        ProjectController mediator,
-        Validator val) {
+            CayenneModelerFrame editor,
+            Validator validator) {
 
-        closeValidationDialog();
-        instance = new ValidatorDialog(editor, mediator, val);
-    }
+        if (instance == null) {
+            instance = new ValidatorDialog(editor);
+            instance.centerWindow();
+        }
 
-    public static synchronized void showDialog(
-        CayenneModelerFrame editor,
-        ProjectController mediator,
-        Validator val,
-        String message) {
-
-        closeValidationDialog();
-        instance = new ValidatorDialog(editor, mediator, val, message);
+        instance.refreshFromModel(validator);
+        instance.setVisible(true);
     }
 
     public static synchronized void showValidationSuccess(
-        CayenneModelerFrame editor,
-        ProjectController mediator,
-        Validator val) {
-        closeValidationDialog();
-        JOptionPane.showMessageDialog(
-            Application.getFrame(),
-            "Project passed validation successfully.");
-    }
+            CayenneModelerFrame editor,
+            Validator val) {
 
-    protected static synchronized void closeValidationDialog() {
         if (instance != null) {
             instance.dispose();
+            instance = null;
         }
-        instance = null;
+
+        JOptionPane
+                .showMessageDialog(Application.getFrame(), "Cayenne project is valid.");
     }
 
-    protected ValidatorDialog(
-        CayenneModelerFrame editor,
-        ProjectController mediator,
-        Validator validator) {
-        this(editor, mediator, validator, "Validation Problems");
+    protected ValidatorDialog(CayenneModelerFrame editor) {
+        super(editor, "Validation Problems", false);
+
+        this.validationObjects = Collections.EMPTY_LIST;
+
+        initView();
+        initController();
     }
 
-    protected ValidatorDialog(
-        CayenneModelerFrame editor,
-        ProjectController mediator,
-        Validator validator,
-        String warning) {
-        super(editor, warning, false);
-        this.mediator = mediator;
-        this.validator = validator;
+    private void initView() {
 
-        init();
+        refreshButton = new JButton("Refresh");
+        closeButton = new JButton("Close");
 
-        this
-            .messages
-            .getSelectionModel()
-            .addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-                showFailedObject();
-            }
+        problemsTable = new JTable();
+        problemsTable.setRowHeight(25);
+        problemsTable.setRowMargin(3);
+        problemsTable.setCellSelectionEnabled(false);
+        problemsTable.setRowSelectionAllowed(true);
+        problemsTable.setDefaultRenderer(ValidationInfo.class, new ValidationRenderer());
+
+        // assemble
+        CellConstraints cc = new CellConstraints();
+        PanelBuilder builder = new PanelBuilder(new FormLayout(
+                "fill:200dlu",
+                "pref, 3dlu, top:40dlu:grow"));
+
+        builder.setDefaultDialogBorder();
+
+        builder
+                .addLabel(
+                        "Click on any row below to go to the object that has a validation problem:",
+                        cc.xy(1, 1));
+        builder.add(new JScrollPane(problemsTable), cc.xy(1, 3));
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttons.add(refreshButton);
+        buttons.add(closeButton);
+
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(builder.getPanel(), BorderLayout.CENTER);
+        getContentPane().add(buttons, BorderLayout.SOUTH);
+
+        // TODO: use preferences
+        setSize(450, 350);
+    }
+
+    private void initController() {
+
+        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        problemsTable.getSelectionModel().addListSelectionListener(
+                new ListSelectionListener() {
+
+                    public void valueChanged(ListSelectionEvent e) {
+                        showFailedObject();
+                    }
+                });
+
+        closeButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                setVisible(false);
+                dispose();
+            };
         });
 
-        this.closeBtn.addActionListener(this);
+        refreshButton.addActionListener(new ActionListener() {
 
-        // this even handler is needed to show failed object
-        // when the user clicks on an already selected row
-        this.messages.addMouseListener(new MouseAdapter() {
+            public void actionPerformed(ActionEvent e) {
+                Application
+                        .getFrame()
+                        .getAction(ValidateAction.getActionName())
+                        .actionPerformed(e);
+            };
+        });
+
+        this.problemsTable.addMouseListener(new MouseAdapter() {
+
             public void mouseClicked(MouseEvent e) {
-                int row = messages.rowAtPoint(e.getPoint());
+                int row = problemsTable.rowAtPoint(e.getPoint());
 
                 // if this happens to be a selected row, re-run object selection
-                if (row >= 0 && messages.getSelectedRow() == row) {
+                if (row >= 0 && problemsTable.getSelectedRow() == row) {
                     showFailedObject();
                 }
             }
         });
-
-        this.pack();
-        this.centerWindow();
-        this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        this.setVisible(true);
     }
 
-    protected void init() {
-        getContentPane().setLayout(new BorderLayout());
-
-        JLabel description =
-            CayenneWidgetFactory.createLabel(
-                "Click on any row below to go to the object that has a validation problem.");
-        description.setFont(description.getFont().deriveFont(10));
-        description.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-
-        getContentPane().add(description, BorderLayout.NORTH);
-
-        ValidatorTableModel model =
-            new ValidatorTableModel(validator.validationResults());
-        messages = new ValidatorTable(model);
-        messages.setRowHeight(25);
-        messages.setRowMargin(3);
-        messages.setCellSelectionEnabled(false);
-        messages.setRowSelectionAllowed(true);
-        messages.getColumnModel().getColumn(0).setPreferredWidth(100);
-        messages.getColumnModel().getColumn(1).setPreferredWidth(400);
-
-        JButton revalidateBtn =
-            new JButton(
-                Application.getFrame().getAction(ValidateAction.getActionName()));
-        revalidateBtn.setText("Refresh");
-        closeBtn = new JButton("Close");
-        JPanel panel =
-            PanelFactory.createTablePanel(
-                messages,
-                new JButton[] { revalidateBtn, closeBtn });
-        getContentPane().add(panel, BorderLayout.CENTER);
+    protected void refreshFromModel(Validator validator) {
+        validationObjects = validator.validationResults();
+        problemsTable.setModel(new ValidatorTableModel());
     }
 
-    protected void showFailedObject() {
-        if (messages.getSelectedRow() >= 0) {
-            ValidatorTableModel model = (ValidatorTableModel) messages.getModel();
-            ValidationInfo obj = model.getValue(messages.getSelectedRow());
+    private void showFailedObject() {
+        if (problemsTable.getSelectedRow() >= 0) {
+            ValidationInfo obj = (ValidationInfo) problemsTable.getModel().getValueAt(
+                    problemsTable.getSelectedRow(),
+                    0);
             ValidationDisplayHandler.getErrorMsg(obj).displayField(
-                mediator,
-                super.getParentEditor());
+                    getMediator(),
+                    super.getParentEditor());
         }
-    }
-
-    public void actionPerformed(ActionEvent e) {
-        this.setVisible(false);
-        this.dispose();
-    }
-
-    class ValidatorTable extends JTable {
-        protected final Dimension preferredSize = new Dimension(500, 300);
-
-        protected CellRenderer errorRenderer;
-        protected CellRenderer errorMsgRenderer;
-
-        protected CellRenderer warnRenderer;
-        protected CellRenderer warnMsgRenderer;
-
-        public ValidatorTable(TableModel model) {
-            super(model);
-
-            errorRenderer = new CellRenderer(ERROR_COLOR, true);
-            errorMsgRenderer = new CellRenderer(ERROR_COLOR, false);
-            warnRenderer = new CellRenderer(WARNING_COLOR, true);
-            warnMsgRenderer = new CellRenderer(WARNING_COLOR, false);
-        }
-
-        /**
-         * @see javax.swing.JTable#getCellRenderer(int, int)
-         */
-        public TableCellRenderer getCellRenderer(int row, int column) {
-            if (row < 0 || row >= validator.validationResults().size()) {
-                return super.getCellRenderer(row, column);
-            }
-
-            ValidationInfo rowObj =
-                (ValidationInfo) validator.validationResults().get(row);
-            return (rowObj.getSeverity() == ValidationInfo.ERROR)
-                ? ((column == 0) ? errorRenderer : errorMsgRenderer)
-                : ((column == 0) ? warnRenderer : warnMsgRenderer);
-        }
-
-        public Dimension getPreferredScrollableViewportSize() {
-            return preferredSize;
-        }
-
     }
 
     class ValidatorTableModel extends AbstractTableModel {
-        List validationObjects;
-
-        public ValidatorTableModel(List validationObjects) {
-            this.validationObjects = validationObjects;
-        }
-
-        public String getColumnName(int col) {
-            if (col == 0)
-                return "Severity";
-            else if (col == 1)
-                return "Error Message";
-            else
-                return "";
-        }
 
         public int getRowCount() {
             return validationObjects.size();
         }
 
         public int getColumnCount() {
-            return 2;
+            return 1;
         }
 
         public Object getValueAt(int row, int col) {
-            ValidationInfo msg = (ValidationInfo) validationObjects.get(row);
-            if (col == 0) {
-                if (msg.getSeverity() == ValidationDisplayHandler.ERROR)
-                    return "ERROR";
-                else
-                    return "WARNING";
-            } else if (col == 1) {
-                return msg.getMessage();
-            } else
-                return "";
+            return validationObjects.get(row);
         }
 
         public boolean isCellEditable(int row, int col) {
             return false;
         }
 
-        public ValidationInfo getValue(int row) {
-            return (ValidationInfo) validationObjects.get(row);
+        public String getColumnName(int column) {
+            return " ";
+        }
+
+        public Class getColumnClass(int columnIndex) {
+            return ValidationInfo.class;
         }
     }
 
-    public class CellRenderer extends DefaultTableCellRenderer {
-        protected Font rendererFont;
+    // a renderer for the error message
+    class ValidationRenderer extends DefaultTableCellRenderer {
 
-        public CellRenderer(Color bg, boolean bold) {
-            if (bg != null) {
-                setBackground(bg);
-            }
-
-            if (bold && getFont() != null) {
-                rendererFont = getFont().deriveFont(Font.BOLD);
-            }
-        }
-
-        /**
-         * @see javax.swing.table.TableCellRenderer#getTableCellRendererComponent(JTable, Object, boolean, boolean, int, int)
-         */
         public Component getTableCellRendererComponent(
-            JTable table,
-            Object value,
-            boolean isSelected,
-            boolean hasFocus,
-            int row,
-            int column) {
-            Component comp =
-                super.getTableCellRendererComponent(
+                JTable table,
+                Object value,
+                boolean isSelected,
+                boolean hasFocus,
+                int row,
+                int column) {
+
+            boolean error = false;
+            if (value != null) {
+                ValidationInfo info = (ValidationInfo) value;
+                error = info.getSeverity() == ValidationInfo.ERROR;
+                value = (error) ? "Error: " + info.getMessage() : "Warning: "
+                        + info.getMessage();
+            }
+
+            setBackground(error ? ERROR_COLOR : WARNING_COLOR);
+            return super.getTableCellRendererComponent(
                     table,
                     value,
                     isSelected,
                     hasFocus,
                     row,
                     column);
-
-            if (rendererFont != null) {
-                comp.setFont(rendererFont);
-            }
-
-            return comp;
-        }
-
-        /**
-         * Returns the rendererFont.
-         * @return Font
-         */
-        public Font getRendererFont() {
-            return rendererFont;
-        }
-
-        /**
-         * Sets the rendererFont.
-         * @param rendererFont The rendererFont to set
-         */
-        public void setRendererFont(Font rendererFont) {
-            this.rendererFont = rendererFont;
         }
     }
 }

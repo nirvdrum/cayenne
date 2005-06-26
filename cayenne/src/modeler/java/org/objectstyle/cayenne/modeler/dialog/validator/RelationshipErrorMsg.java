@@ -75,12 +75,14 @@ import org.objectstyle.cayenne.project.validator.ValidationInfo;
  * @author Andrei Adamchik
  */
 public class RelationshipErrorMsg extends ValidationDisplayHandler {
+
     protected DataMap map;
     protected Entity entity;
     protected Relationship rel;
 
     /**
      * Constructor for RelationshipErrorMsg.
+     * 
      * @param result
      */
     public RelationshipErrorMsg(ValidationInfo result) {
@@ -106,12 +108,21 @@ public class RelationshipErrorMsg extends ValidationDisplayHandler {
     }
 
     public void displayField(ProjectController mediator, JFrame frame) {
-        RelationshipDisplayEvent event =
-            new RelationshipDisplayEvent(frame, rel, entity, map, domain);
+        RelationshipDisplayEvent event = new RelationshipDisplayEvent(
+                frame,
+                rel,
+                entity,
+                map,
+                domain);
+
+        // must first display entity, and then switch to relationship display .. so fire
+        // twice
         if (entity instanceof ObjEntity) {
+            mediator.fireObjEntityDisplayEvent(event);
             mediator.fireObjRelationshipDisplayEvent(event);
         }
         else if (entity instanceof DbEntity) {
+            mediator.fireDbEntityDisplayEvent(event);
             mediator.fireDbRelationshipDisplayEvent(event);
         }
     }

@@ -124,9 +124,6 @@ public class CreateRelationshipAction extends CayenneAction {
                 objEnt,
                 mediator.getCurrentDataMap(),
                 mediator.getCurrentDataDomain());
-
-        // tell the Tabbed View controller to switch to the relationship tab
-        rde.setTabReset(true);
         
         mediator.fireObjRelationshipDisplayEvent(rde);
     }
@@ -149,9 +146,6 @@ public class CreateRelationshipAction extends CayenneAction {
                 dbEnt,
                 mediator.getCurrentDataMap(),
                 mediator.getCurrentDataDomain());
-
-        // tell the Tabbed View controller to switch to the relationship tab
-        rde.setTabReset(true);
         
         mediator.fireDbRelationshipDisplayEvent(rde);
     }

@@ -61,7 +61,9 @@ import javax.swing.JFrame;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
@@ -73,12 +75,14 @@ import org.objectstyle.cayenne.project.validator.ValidationInfo;
  * @author Andrei Adamchik
  */
 public class AttributeErrorMsg extends ValidationDisplayHandler {
+
     protected DataMap map;
     protected Entity entity;
     protected Attribute attribute;
 
     /**
      * Constructor for AttributeErrorMsg.
+     * 
      * @param result
      */
     public AttributeErrorMsg(ValidationInfo result) {
@@ -106,11 +110,22 @@ public class AttributeErrorMsg extends ValidationDisplayHandler {
     }
 
     public void displayField(ProjectController mediator, JFrame frame) {
-        AttributeDisplayEvent event;
-        event = new AttributeDisplayEvent(frame, attribute, entity, map, domain);
-        if (entity instanceof org.objectstyle.cayenne.map.ObjEntity)
+        AttributeDisplayEvent event = new AttributeDisplayEvent(
+                frame,
+                attribute,
+                entity,
+                map,
+                domain);
+
+        // must first display entity, and then switch to relationship display .. so fire
+        // twice
+        if (entity instanceof ObjEntity) {
+            mediator.fireObjEntityDisplayEvent(event);
             mediator.fireObjAttributeDisplayEvent(event);
-        else if (entity instanceof org.objectstyle.cayenne.map.DbEntity)
+        }
+        else if (entity instanceof DbEntity) {
+            mediator.fireDbEntityDisplayEvent(event);
             mediator.fireDbAttributeDisplayEvent(event);
+        }
     }
 }
