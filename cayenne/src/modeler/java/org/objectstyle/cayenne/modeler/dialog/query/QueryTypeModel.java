@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.modeler.dialog.query;
 
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
@@ -75,13 +76,23 @@ public class QueryTypeModel {
             .fromString("procedureQuery");
 
     // query prototypes...
-    protected Query objectSelectQuery = new SelectQuery();
-    protected Query rawSQLQuery = new SQLTemplate(true);
-    protected Query procedureQuery = new ProcedureQuery();
+    protected Query objectSelectQuery;
+    protected Query rawSQLQuery;
+    protected Query procedureQuery;
 
     protected Query selectedQuery;
 
-    public QueryTypeModel() {
+    public QueryTypeModel(DataMap root) {
+        // create query prototypes:
+        objectSelectQuery = new SelectQuery();
+        procedureQuery = new ProcedureQuery();
+
+        SQLTemplate rawSQLQuery = new SQLTemplate(true);
+        rawSQLQuery.setRoot(root);
+        rawSQLQuery.setFetchingDataRows(true);
+        this.rawSQLQuery = rawSQLQuery;
+
+        // by default use object query...
         selectedQuery = objectSelectQuery;
     }
 

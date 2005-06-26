@@ -113,7 +113,7 @@ public class QueryTypeController extends BasicController {
      * Creates and runs QueryTypeDialog.
      */
     public void startup() {
-        setModel(new QueryTypeModel());
+        setModel(new QueryTypeModel(mediator.getCurrentDataMap()));
         setView(new QueryTypeDialog());
         showView();
     }
