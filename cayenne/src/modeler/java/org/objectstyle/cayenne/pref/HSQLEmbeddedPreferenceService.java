@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.pref;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 
 import javax.sql.DataSource;
@@ -208,34 +209,19 @@ public class HSQLEmbeddedPreferenceService extends CayennePreferenceService {
      */
     void moveDB(String masterBaseName, String targetBaseName) throws IOException {
 
-        // move log
-        File logSrc = new File(dbDirectory, masterBaseName + ".log");
-        File logTarget = new File(dbDirectory, targetBaseName + ".log");
-        if (logSrc.exists()) {
-            logSrc.renameTo(logTarget);
-        }
-        else {
-            logTarget.delete();
-        }
+        File[] filesToMove = dbDirectory.listFiles(new HSQLDBFileFilter(masterBaseName));
+        if (filesToMove != null) {
+            for (int i = 0; i < filesToMove.length; i++) {
+                String ext = Util.extractFileExtension(filesToMove[i].getName());
 
-        // move script
-        File scriptSrc = new File(dbDirectory, masterBaseName + ".script");
-        File scriptTarget = new File(dbDirectory, targetBaseName + ".script");
-        if (scriptSrc.exists()) {
-            scriptSrc.renameTo(scriptTarget);
-        }
-        else {
-            scriptTarget.delete();
-        }
-
-        // move properties
-        File propertiesSrc = new File(dbDirectory, masterBaseName + ".properties");
-        File propertiesTarget = new File(dbDirectory, targetBaseName + ".properties");
-        if (propertiesSrc.exists()) {
-            propertiesSrc.renameTo(propertiesTarget);
-        }
-        else {
-            propertiesTarget.delete();
+                File target = new File(dbDirectory, targetBaseName + "." + ext);
+                if (filesToMove[i].exists()) {
+                    filesToMove[i].renameTo(target);
+                }
+                else {
+                    target.delete();
+                }
+            }
         }
     }
 
@@ -245,36 +231,46 @@ public class HSQLEmbeddedPreferenceService extends CayennePreferenceService {
      */
     void copyDB(String masterBaseName, String targetBaseName) throws IOException {
 
-        // copy log
-        File logSrc = new File(dbDirectory, masterBaseName + ".log");
-        File logTarget = new File(dbDirectory, targetBaseName + ".log");
-        if (logSrc.exists()) {
-            Util.copy(logSrc, logTarget);
-        }
-        else {
-            logTarget.delete();
-        }
+        File[] filesToCopy = dbDirectory.listFiles(new HSQLDBFileFilter(masterBaseName));
+        if (filesToCopy != null) {
+            for (int i = 0; i < filesToCopy.length; i++) {
+                String ext = Util.extractFileExtension(filesToCopy[i].getName());
 
-        // copy script
-        File scriptSrc = new File(dbDirectory, masterBaseName + ".script");
-        File scriptTarget = new File(dbDirectory, targetBaseName + ".script");
-        if (logSrc.exists()) {
-            Util.copy(scriptSrc, scriptTarget);
-        }
-        else {
-            scriptTarget.delete();
-        }
-
-        // copy properties
-        File propertiesSrc = new File(dbDirectory, masterBaseName + ".properties");
-        File propertiesTarget = new File(dbDirectory, targetBaseName + ".properties");
-        if (logSrc.exists()) {
-            Util.copy(propertiesSrc, propertiesTarget);
-        }
-        else {
-            propertiesTarget.delete();
+                File target = new File(dbDirectory, targetBaseName + "." + ext);
+                if (filesToCopy[i].exists()) {
+                    Util.copy(filesToCopy[i], target);
+                }
+                else {
+                    target.delete();
+                }
+            }
         }
     }
+    
+    // filers HSQLDB files
+    final class HSQLDBFileFilter implements FileFilter {
+        String baseName;
+        
+        HSQLDBFileFilter(String baseName) {
+            this.baseName = baseName;
+        }
+
+        public boolean accept(File pathname) {
+            if (!pathname.isFile()) {
+                return false;
+            }
+
+            String fullName = pathname.getName();
+            if (fullName.endsWith(".lck")) {
+                return false;
+            }
+
+            int dot = fullName.indexOf('.');
+            String name = (dot > 0) ? fullName.substring(0, dot) : fullName;
+
+            return baseName.equals(name);
+        };
+    };
 
     // addresses various issues with embedded database...
     final class HSQLDataSourceFactory implements DataSourceFactory {

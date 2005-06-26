@@ -411,7 +411,7 @@ public class Util {
     }
 
     /**
-     * Extracts extension from the file name.
+     * Extracts extension from the file name. Dot is not included in the returned string.
      */
     public static String extractFileExtension(String fileName) {
         int dotInd = fileName.lastIndexOf('.');
