@@ -62,6 +62,7 @@ import org.objectstyle.art.GeneratedColumnCompKey;
 import org.objectstyle.art.GeneratedColumnCompMaster;
 import org.objectstyle.art.GeneratedColumnDep;
 import org.objectstyle.art.GeneratedColumnTest;
+import org.objectstyle.art.GeneratedColumnTest2;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataObjectUtils;
 import org.objectstyle.cayenne.ObjectId;
@@ -99,6 +100,24 @@ public class IdentityColumnsTst extends CayenneTestCase {
                 id);
         assertNotNull(object);
         assertEquals(name, object.getName());
+    }
+
+    /**
+     * Tests that insert in two tables with identity pk does not generate a conflict. See
+     * CAY-341 for the original bug.
+     */
+    public void testMultipleNewObjectsSeparateTables() throws Exception {
+        DataContext context = createDataContext();
+        
+        GeneratedColumnTest idObject1 = (GeneratedColumnTest) context
+                .createAndRegisterNewObject(GeneratedColumnTest.class);
+        idObject1.setName("o1");
+
+        GeneratedColumnTest2 idObject2 = (GeneratedColumnTest2) context
+                .createAndRegisterNewObject(GeneratedColumnTest2.class);
+        idObject2.setName("o2");
+
+        context.commitChanges();
     }
 
     public void testMultipleNewObjects() throws Exception {

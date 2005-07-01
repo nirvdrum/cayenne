@@ -84,34 +84,51 @@ public class SQLServerBatchAction extends BatchAction {
     public void performAction(Connection connection, OperationObserver observer)
             throws SQLException, Exception {
 
-        //      this condition checks if identity coilumns are present in the query and adapter
+        // this condition checks if identity columns are present in the query and adapter
         // is not ready to process them... e.g. if we are using a MS driver...
-        if (expectsToOverrideIdentityColumns()) {
-
-            String configSQL = "SET IDENTITY_INSERT "
-                    + query.getDbEntity().getFullyQualifiedName()
-                    + " ON";
-
-            QueryLogger.logQuery(query.getLoggingLevel(),
-                    configSQL,
-                    Collections.EMPTY_LIST);
-
-            Statement statement = connection.createStatement();
-            try {
-                statement.execute(configSQL);
-            }
-            finally {
-                try {
-                    statement.close();
-                }
-                catch (Exception e) {
-                }
-            }
+        boolean identityOverride = expectsToOverrideIdentityColumns();
+        if (identityOverride) {
+            setIdentityInsert(connection, true);
         }
 
-        super.performAction(connection, observer);
-    }
+        try {
+            super.performAction(connection, observer);
+        }
+        finally {
 
+            // important: turn off IDENTITY_INSERT as SQL Server won't be able to process
+            // other identity columns in the same transaction
+            
+            // TODO: if an error happens here this would mask the parent error
+            if (identityOverride) {
+                setIdentityInsert(connection, false);
+            }
+        }
+    }
+    
+    protected void setIdentityInsert(Connection connection, boolean on)
+            throws SQLException {
+
+        String flag = on ? " ON" : " OFF";
+        String configSQL = "SET IDENTITY_INSERT "
+                + query.getDbEntity().getFullyQualifiedName()
+                + flag;
+
+        QueryLogger.logQuery(query.getLoggingLevel(), configSQL, Collections.EMPTY_LIST);
+
+        Statement statement = connection.createStatement();
+        try {
+            statement.execute(configSQL);
+        }
+        finally {
+            try {
+                statement.close();
+            }
+            catch (Exception e) {
+            }
+        }
+    }
+ 
     /**
      * Returns whether a table has identity columns.
      */

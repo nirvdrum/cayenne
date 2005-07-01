@@ -113,6 +113,10 @@
 		<db-attribute name="GENERATED_COLUMN" type="INTEGER" isPrimaryKey="true" isMandatory="true" isGenerated="true"/>
 		<db-attribute name="NAME" type="VARCHAR" length="250"/>
 	</db-entity>
+	<db-entity name="GENERATED_COLUMN_TEST2">
+		<db-attribute name="GENERATED_COLUMN" type="INTEGER" isPrimaryKey="true" isMandatory="true" isGenerated="true"/>
+		<db-attribute name="NAME" type="VARCHAR" length="100"/>
+	</db-entity>
 	<db-entity name="MEANINGFUL_PK_DEP">
 		<db-attribute name="DESCR" type="VARCHAR" length="50"/>
 		<db-attribute name="MASTER_PK" type="INTEGER"/>
@@ -249,6 +253,9 @@
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
 	</obj-entity>
 	<obj-entity name="GeneratedColumnTest" className="org.objectstyle.art.GeneratedColumnTest" dbEntityName="GENERATED_COLUMN_TEST">
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
+	</obj-entity>
+	<obj-entity name="GeneratedColumnTest2" className="org.objectstyle.art.GeneratedColumnTest2" dbEntityName="GENERATED_COLUMN_TEST2">
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
 	</obj-entity>
 	<obj-entity name="MeaningfulPKDep" className="org.objectstyle.art.MeaningfulPKDep" dbEntityName="MEANINGFUL_PK_DEP">
