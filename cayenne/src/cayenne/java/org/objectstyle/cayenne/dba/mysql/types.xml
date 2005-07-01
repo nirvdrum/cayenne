@@ -69,6 +69,7 @@ MySQL types mapping
        <db-type name="TIME"/>
    </jdbc-type>
    <jdbc-type name="TIMESTAMP">
+	   <db-type name="DATETIME"/>
        <db-type name="TIMESTAMP"/>
    </jdbc-type>
    <jdbc-type name="TINYINT">

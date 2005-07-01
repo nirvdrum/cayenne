@@ -15,7 +15,9 @@ Changes/New Features:
   Cayenne. Keeping it in deprecated state is no longer possible due to SQLAction method 
   signature changes.
 * A change in the order of loading resources via ResourceLocator (this includes cayenne.xml loading). 
-  Now custom classpath locations take precedence over the default one. 
+  Now custom classpath locations take precedence over the default one.
+* Changing default MySQL mapping of JDBC TIMESTAMP to be "DATETIME". This is a more sensible default as TIMESTAMP
+  is autoinitialized by MySQL on insert.
 
 Bugs Fixed:
 
