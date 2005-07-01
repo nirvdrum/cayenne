@@ -222,9 +222,6 @@ public class AboutDialog extends CayenneDialog {
 
         // assemble info section
         JTabbedPane tabPanel = new JTabbedPane() {
-            public Dimension getMaximiumSize() {
-                return infoAreaSize;
-            }
 
             public Dimension getPreferredSize() {
                 return infoAreaSize;
