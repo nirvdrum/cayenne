@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.dba.hsqldb.HSQLDBSniffer;
 import org.objectstyle.cayenne.dba.oracle.OracleSniffer;
 import org.objectstyle.cayenne.dba.postgres.PostgresSniffer;
 import org.objectstyle.cayenne.dba.sqlserver.SQLServerSniffer;
+import org.objectstyle.cayenne.dba.sybase.SybaseSniffer;
 
 /**
  * Guesses correct DbAdapter for an unknown database. This implementation obtains
@@ -96,6 +97,7 @@ public class DbAdapterDetector {
         addFactory(new OracleSniffer());
         addFactory(new DB2Sniffer());
         addFactory(new SQLServerSniffer());
+        addFactory(new SybaseSniffer());
     }
 
     /**

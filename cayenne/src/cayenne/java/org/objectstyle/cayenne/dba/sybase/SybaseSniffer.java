@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.sqlserver;
+package org.objectstyle.cayenne.dba.sybase;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -62,17 +62,17 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.DbAdapterFactory;
 
 /**
- * Detects SQLServer database from JDBC metadata.
+ * Detects Sybase database from JDBC metadata.
  * 
  * @since 1.2
  * @author Andrei Adamchik
  */
-public class SQLServerSniffer implements DbAdapterFactory {
+public class SybaseSniffer implements DbAdapterFactory {
 
     public DbAdapter canHandleDatabase(DatabaseMetaData md) throws SQLException {
         String dbName = md.getDatabaseProductName();
-        return dbName != null && dbName.toUpperCase().indexOf("MICROSOFT SQL SERVER") >= 0
-                ? new SQLServerAdapter()
+        return dbName != null && dbName.toUpperCase().indexOf("ADAPTIVE SERVER") >= 0
+                ? new SybaseAdapter()
                 : null;
     }
 }

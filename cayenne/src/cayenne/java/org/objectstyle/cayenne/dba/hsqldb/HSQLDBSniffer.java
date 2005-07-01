@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.DbAdapterFactory;
 
 /**
- * Detects HSQLDB database from the metadata.
+ * Detects HSQLDB database from JDBC metadata.
  * 
  * @since 1.2
  * @author Andrei Adamchik
