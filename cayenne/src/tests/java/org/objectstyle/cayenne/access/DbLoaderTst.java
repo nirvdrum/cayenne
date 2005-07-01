@@ -310,7 +310,8 @@ public class DbLoaderTst extends CayenneTestCase {
         // check float
         assertTrue(msgForTypeMismatch(Types.FLOAT, floatAttr), Types.FLOAT == floatAttr
                 .getType()
-                || Types.DOUBLE == floatAttr.getType());
+                || Types.DOUBLE == floatAttr.getType()
+                || Types.REAL == floatAttr.getType());
 
         // check smallint
         assertTrue(
