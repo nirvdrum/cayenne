@@ -56,10 +56,7 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -67,8 +64,6 @@ import org.objectstyle.cayenne.ObjectFactory;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.PrefetchSelectQuery;
-import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * A DataContext helper that handles select query execution.
@@ -136,9 +131,8 @@ class DataContextSelectAction {
                         results = Collections.unmodifiableList(rows);
                     }
                     else {
-                        ObjEntity root = context
-                                .getEntityResolver()
-                                .lookupObjEntity(query);
+                        ObjEntity root = context.getEntityResolver().lookupObjEntity(
+                                query);
                         results = context.objectsFromDataRows(root, rows, query
                                 .isRefreshingObjects(), query.isResolvingInherited());
                     }
@@ -152,7 +146,7 @@ class DataContextSelectAction {
 
         // must fetch...
         SelectObserver observer = new SelectObserver(query.getLoggingLevel());
-        context.performQueries(queryWithPrefetches(query), observer);
+        context.performQueries(Collections.singleton(query), observer);
 
         List results;
 
@@ -172,43 +166,12 @@ class DataContextSelectAction {
                 context.getObjectStore().cacheQueryResult(cacheKey, results);
             }
             else if (sharedCache) {
-                context.getObjectStore().getDataRowCache().cacheSnapshots(cacheKey,
+                context.getObjectStore().getDataRowCache().cacheSnapshots(
+                        cacheKey,
                         observer.getResults(query));
             }
         }
 
         return results;
     }
-
-    /**
-     * Expands a SelectQuery into a collection of queries, including prefetch queries if
-     * needed.
-     */
-    Collection queryWithPrefetches(GenericSelectQuery query) {
-
-        // check conditions for prefetch...
-        if (query.isFetchingDataRows() || !(query instanceof SelectQuery)) {
-            return Collections.singletonList(query);
-        }
-
-        SelectQuery selectQuery = (SelectQuery) query;
-
-        Collection prefetchKeys = selectQuery.getPrefetches();
-        if (prefetchKeys.isEmpty()) {
-            return Collections.singletonList(query);
-        }
-
-        List queries = new ArrayList(prefetchKeys.size() + 1);
-        queries.add(query);
-
-        Iterator prefetchIt = prefetchKeys.iterator();
-        while (prefetchIt.hasNext()) {
-            PrefetchSelectQuery prefetchQuery = new PrefetchSelectQuery(context
-                    .getEntityResolver(), selectQuery, (String) prefetchIt.next());
-            queries.add(prefetchQuery);
-        }
-
-        return queries;
-    }
-
 }

@@ -18,6 +18,8 @@ Changes/New Features:
   Now custom classpath locations take precedence over the default one.
 * Changing default MySQL mapping of JDBC TIMESTAMP to be "DATETIME". This is a more sensible default as TIMESTAMP
   is autoinitialized by MySQL on insert.
+* SelectQuery resolves its prefetches during the routing phase. Users who did prefetch query filtering via
+  DataContextDelegate must be aware of this change.
 
 Bugs Fixed:
 

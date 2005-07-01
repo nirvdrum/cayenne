@@ -143,8 +143,8 @@ public class IncrementalFaultList implements List {
     public IncrementalFaultList(DataContext dataContext, GenericSelectQuery query) {
         if (query.getPageSize() <= 0) {
             throw new CayenneRuntimeException(
-                "IncrementalFaultList does not support unpaged queries. Query page size is "
-                    + query.getPageSize());
+                    "IncrementalFaultList does not support unpaged queries. Query page size is "
+                            + query.getPageSize());
         }
 
         this.elements = Collections.synchronizedList(new ArrayList());
@@ -152,8 +152,8 @@ public class IncrementalFaultList implements List {
         this.pageSize = query.getPageSize();
         this.rootEntity = dataContext.getEntityResolver().lookupObjEntity(query);
 
-        // create an internal query, it is a partial replica of 
-        // the original query and will serve as a value holder for 
+        // create an internal query, it is a partial replica of
+        // the original query and will serve as a value holder for
         // various parameters
         this.internalQuery = new SelectQuery();
         this.internalQuery.setRoot(query.getRoot());
@@ -161,15 +161,32 @@ public class IncrementalFaultList implements List {
         this.internalQuery.setFetchingDataRows(query.isFetchingDataRows());
         this.internalQuery.setResolvingInherited(query.isResolvingInherited());
 
-        if (!query.isFetchingDataRows() && (query instanceof SelectQuery)) {
-            this.internalQuery.addPrefetches(((SelectQuery) query).getPrefetches());
-        }
-
         if (query.isFetchingDataRows()) {
             helper = new DataRowListHelper();
         }
         else {
             helper = new DataObjectListHelper();
+        }
+
+        if (!query.isFetchingDataRows() && (query instanceof SelectQuery)) {
+            SelectQuery select = (SelectQuery) query;
+
+            this.internalQuery.addPrefetches(select.getPrefetches());
+
+            // prefetching will blow iterated result, so strip prefetches... this is
+            // a bit of a hack
+            if (!select.getPrefetches().isEmpty()) {
+                SelectQuery clone = select.queryWithParameters(
+                        Collections.EMPTY_MAP,
+                        true);
+
+                Iterator it = select.getPrefetches().iterator();
+                while (it.hasNext()) {
+                    clone.removePrefetch((String) it.next());
+                }
+
+                query = clone;
+            }
         }
 
         fillIn(query);

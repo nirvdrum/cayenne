@@ -67,8 +67,8 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
- * A query that selects objects related to a given object. It can be used for resolving to
- * many relationships
+ * A query that selects objects related to a given object. It can be used for resolving
+ * to-many relationships. It is in fact used for this purpose internally in Cayenne.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -85,10 +85,8 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
      * constructor will only work if a DataObject has a non-null DataContext.
      */
     public RelationshipQuery(DataObject object, String relationshipName) {
-        Entity entity = object
-                .getDataContext()
-                .getEntityResolver()
-                .lookupObjEntity(object);
+        Entity entity = object.getDataContext().getEntityResolver().lookupObjEntity(
+                object);
 
         ObjRelationship relationship = (ObjRelationship) entity
                 .getRelationship(relationshipName);

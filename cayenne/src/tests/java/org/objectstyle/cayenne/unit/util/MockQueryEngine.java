@@ -82,7 +82,10 @@ public class MockQueryEngine implements QueryEngine {
     protected Map results = new HashMap();
     protected EntityResolver entityResolver;
     protected int runCount;
-    
+
+    public MockQueryEngine() {
+    }
+
     public MockQueryEngine(QueryEngine engine) {
         this(engine.getEntityResolver());
     }

@@ -53,37 +53,29 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne.query;
 
-import java.util.List;
+import org.objectstyle.cayenne.access.QueryEngine;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.unit.util.MockQueryEngine;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.PersistenceContext;
-import org.objectstyle.cayenne.query.Query;
+public class MockQueryRouter implements QueryRouter {
 
-/**
- * Executes non-selecting queries on behalf of DataDomain.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-// Differences with DataContextSelectAction:
-// * no support for paginated queries
-// * no support for IncrementalFaultList yet (as it relies on DataContext)
-// * local cache is not checked ... caller must do it
-// * if caller uses its own "shared" cache, this action won't have access to it and will
-// use real shared cache instead...
-class PersistenceContextSelectAction {
+    protected int queryCount;
 
-    PersistenceContext context;
-
-    PersistenceContextSelectAction(PersistenceContext context) {
-        this.context = context;
+    public void reset() {
+        this.queryCount = 0;
     }
 
-    List performQuery(ObjectContext objectContext, Query query, boolean refreshCache) {
-        // TODO: implement
-        throw new CayenneRuntimeException("TODO");
+    public int getQueryCount() {
+        return queryCount;
+    }
+
+    public void useEngineForQuery(QueryEngine engine, Query query) {
+        queryCount++;
+    }
+
+    public QueryEngine engineForDataMap(DataMap map) {
+        return new MockQueryEngine();
     }
 }

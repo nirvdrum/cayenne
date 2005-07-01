@@ -67,6 +67,7 @@ import java.util.Set;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.QueryBuilder;
@@ -97,9 +98,8 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     protected String parentObjEntityName;
     protected SelectExecutionProperties selectProperties = new SelectExecutionProperties();
 
-    /** Creates empty SelectQuery. */
+    /** Creates an empty SelectQuery. */
     public SelectQuery() {
-        super();
     }
 
     /**
@@ -181,6 +181,37 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     private void init(Object root, Expression qualifier) {
         this.setRoot(root);
         this.setQualifier(qualifier);
+    }
+    
+    /**
+     * Routes itself and if there are any prefetches configured, creates prefetch queries
+     * and routes them as well.
+     * 
+     * @since 1.2
+     */
+    public void routeQuery(QueryRouter router, EntityResolver resolver) {
+
+        // route self
+        super.routeQuery(router, resolver);
+
+        // create and route prefetch queries if any
+        if (!isFetchingDataRows()) {
+
+            Iterator prefetchIt = getPrefetches().iterator();
+            while (prefetchIt.hasNext()) {
+                String prefetchKey = (String) prefetchIt.next();
+
+                // TODO: with routing API, PrefetchSelectQuery no longer needs
+                // EntityResolver to be passed in constructor, as it is passed during
+                // routing.
+                // should refactor PrefetchSelectQuery
+                PrefetchSelectQuery prefetchQuery = new PrefetchSelectQuery(
+                        resolver,
+                        this,
+                        prefetchKey);
+                prefetchQuery.routeQuery(router, resolver);
+            }
+        }
     }
 
     /**

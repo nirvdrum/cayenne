@@ -78,7 +78,7 @@ public class IncrementalFaultListPrefetchTst extends DataContextTestBase {
       * Test that all queries specified in prefetch are executed
       * with a single prefetch path.
       */
-    public void testPrefetch1() throws Exception {
+    public void testPrefetch1() {
 
         Expression e = ExpressionFactory.likeExp("artistName", "artist1%");
         SelectQuery q = new SelectQuery("Artist", e);
@@ -100,15 +100,15 @@ public class IncrementalFaultListPrefetchTst extends DataContextTestBase {
         for (int i = 4; i < 8; i++) {
             result.get(i);
 
-            // within the same page only two queries should've been executed
-            assertEquals(2, delegate.count);
+            // within the same page only one query should've been executed
+            assertEquals(1, delegate.count);
         }
     }
 
     /**
      * Test that a to-many relationship is initialized.
      */
-    public void testPrefetch3() throws Exception {
+    public void testPrefetch3() {
 
         Expression e = ExpressionFactory.likeExp("artistName", "artist1%");
         SelectQuery q = new SelectQuery("Artist", e);
@@ -135,7 +135,7 @@ public class IncrementalFaultListPrefetchTst extends DataContextTestBase {
     /**
      * Test that a to-one relationship is initialized.
      */
-    public void testPrefetch4() throws Exception {
+    public void testPrefetch4()  {
 
         SelectQuery q = new SelectQuery("Painting");
         q.setPageSize(4);

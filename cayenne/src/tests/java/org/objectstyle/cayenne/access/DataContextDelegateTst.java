@@ -65,8 +65,8 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
- * Tests various DataContextDelegate methods invocation and consequences on
- * DataContext behavior.
+ * Tests various DataContextDelegate methods invocation and consequences on DataContext
+ * behavior.
  * 
  * @author Andrei Adamchik
  */
@@ -96,11 +96,12 @@ public class DataContextDelegateTst extends CayenneTestCase {
 
         final List queriesPerformed = new ArrayList(1);
         DataContextDelegate delegate = new DefaultDataContextDelegate() {
+
             public GenericSelectQuery willPerformSelect(
-                DataContext context,
-                GenericSelectQuery query) {
-                    // save query, and allow its execution
-    queriesPerformed.add(query);
+                    DataContext context,
+                    GenericSelectQuery query) {
+                // save query, and allow its execution
+                queriesPerformed.add(query);
                 return query;
             }
         };
@@ -110,9 +111,8 @@ public class DataContextDelegateTst extends CayenneTestCase {
         SelectQuery query = new SelectQuery(Gallery.class);
         List results = context.performQuery(query);
 
-        assertTrue(
-            "Delegate is not notified of a query being run.",
-            queriesPerformed.contains(query));
+        assertTrue("Delegate is not notified of a query being run.", queriesPerformed
+                .contains(query));
         assertEquals(1, queriesPerformed.size());
         assertNotNull(results);
     }
@@ -122,11 +122,12 @@ public class DataContextDelegateTst extends CayenneTestCase {
 
         final List queriesPerformed = new ArrayList(1);
         DataContextDelegate delegate = new DefaultDataContextDelegate() {
+
             public GenericSelectQuery willPerformSelect(
-                DataContext context,
-                GenericSelectQuery query) {
-                    // save query, and block its execution
-    queriesPerformed.add(query);
+                    DataContext context,
+                    GenericSelectQuery query) {
+                // save query, and block its execution
+                queriesPerformed.add(query);
                 return null;
             }
         };
@@ -135,41 +136,13 @@ public class DataContextDelegateTst extends CayenneTestCase {
         SelectQuery query = new SelectQuery(Gallery.class);
         List results = context.performQuery(query);
 
-        assertTrue(
-            "Delegate is not notified of a query being run.",
-            queriesPerformed.contains(query));
+        assertTrue("Delegate is not notified of a query being run.", queriesPerformed
+                .contains(query));
         assertEquals(1, queriesPerformed.size());
 
         assertNotNull(results);
 
         // blocked
         assertEquals("Delegate couldn't block the query.", 0, results.size());
-    }
-
-    public void testWillPerformSelectWithPrefetch() throws Exception {
-        DataContext context = gallery.getDataContext();
-
-        final List queriesPerformed = new ArrayList();
-        DataContextDelegate delegate = new DefaultDataContextDelegate() {
-            public GenericSelectQuery willPerformSelect(
-                DataContext context,
-                GenericSelectQuery query) {
-                    // save query, and allow its execution
-    queriesPerformed.add(query);
-                return query;
-            }
-        };
-        context.setDelegate(delegate);
-
-        // test that delegate is consulted before select
-        SelectQuery query = new SelectQuery(Gallery.class);
-        query.addPrefetch("exhibitArray");
-        List results = context.performQuery(query);
-
-        assertTrue(
-            "Delegate is not notified of a query being run.",
-            queriesPerformed.contains(query));
-        assertEquals(2, queriesPerformed.size());
-        assertNotNull(results);
     }
 }
