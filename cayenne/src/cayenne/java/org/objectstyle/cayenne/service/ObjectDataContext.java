@@ -236,35 +236,41 @@ class ObjectDataContext extends DataContext implements ObjectContext {
      * Overrides super implementation to channel query execution using new algorithm.
      */
     public List performQuery(GenericSelectQuery query) {
-        // channel through our own implementation... TODO: this method should be deprected
-        // in super at some point...
+        // channel through our own implementation... TODO: this method should be
+        // deprecated in super at some point as now selecting queries do not have to
+        // implement GenericSelectQuery
         return performQuery((Query) query);
-    }
-
-    public List performQuery(Query query) {
-        if (this.getParentContext() == null) {
-            throw new CayenneRuntimeException(
-                    "Can't run query - parent PersistenceContext is not set.");
-        }
-
-        return new PersistenceContextSelectAction(getParentContext()).performQuery(this,
-                query,
-                false);
     }
 
     /**
      * Overrides super implementation to use parent PersistenceContext for query
      * execution.
      */
-    public List performQuery(String queryName, Map parameters, boolean refresh) {
+    public List performQuery(String queryName, Map parameters, boolean forceRefresh) {
+        return performQuery(new NamedQueryProxy(queryName, parameters), forceRefresh);
+    }
+
+    /**
+     * Performs a selecting query, returning the result.
+     */
+    public List performQuery(Query query) {
+        return performQuery(query, false);
+    }
+
+    /**
+     * The actual worker method that executes the query. All other selecting
+     * 'performQuery' methods call this one.
+     */
+    protected List performQuery(Query query, boolean forceRefresh) {
         if (this.getParentContext() == null) {
             throw new CayenneRuntimeException(
                     "Can't run query - parent PersistenceContext is not set.");
         }
 
-        return new PersistenceContextSelectAction(getParentContext()).performQuery(this,
-                new NamedQueryProxy(queryName, parameters),
-                refresh);
+        return new PersistenceContextSelectAction(getParentContext()).performQuery(
+                this,
+                query,
+                forceRefresh);
     }
 
     /**

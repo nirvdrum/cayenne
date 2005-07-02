@@ -62,6 +62,8 @@ import org.objectstyle.cayenne.access.QueryResult;
 import org.objectstyle.cayenne.query.Query;
 
 /**
+ * An action that performs an updating query with a given persistence context.
+ * 
  * @since 1.2
  * @author Andrus Adamchik
  */
