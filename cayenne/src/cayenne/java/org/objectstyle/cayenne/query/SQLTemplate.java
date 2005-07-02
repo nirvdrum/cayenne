@@ -171,7 +171,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
      * 
      * @since 1.2
      */
-    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
         return visitor.sqlAction(this);
     }
 

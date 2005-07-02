@@ -225,7 +225,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * 
      * @since 1.2
      */
-    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
         return visitor.procedureAction(this);
     }
 

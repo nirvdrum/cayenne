@@ -78,7 +78,7 @@ public abstract class BatchQuery extends AbstractQuery {
      * 
      * @since 1.2
      */
-    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
         return visitor.batchAction(this);
     }
 

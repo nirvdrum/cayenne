@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,56 +55,43 @@
  */
 package org.objectstyle.cayenne.query;
 
-import org.apache.log4j.Level;
+import java.io.Serializable;
+
+import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
- * @author Andrei Adamchik
+ * Defines callback methods for query execution in Cayenne.
+ * 
+ * @author Andrus Adamchik
+ * @since 1.2
  */
-public class MockQuery implements Query {
+public interface QueryExecutionPlan extends Serializable {
 
-    protected String name;
+    /**
+     * A callback method invoked by Cayenne during the first phase of query execution,
+     * allowing to resolve the actual query to be executed. For example a
+     * QueryExecutionPlan can be implemented to store a query stored by name in the
+     * DataMap. In this method such query would find the actual mapped query and return it
+     * to the caller for execution.
+     */
+    Query resolve(EntityResolver resolver);
 
-    public MockQuery() {
-    }
+    /**
+     * A callback method invoked by Cayenne during the routing phase of the query run.
+     * Mapping of query engines is provided by QueryRouter. Query should use a
+     * {@link QueryRouter#useEngineForQuery(QueryEngine, Query)}callback method to route
+     * itself. At this point a query can create one or more substitute queries or even
+     * provide its own QueryEngine to execute itself.
+     */
+    void route(QueryRouter router, EntityResolver resolver);
 
-    public MockQuery(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Level getLoggingLevel() {
-        return null;
-    }
-
-    public void setLoggingLevel(Level level) {
-
-    }
-
-    public Object getRoot() {
-        return null;
-    }
-
-    public void setRoot(Object value) {
-
-    }
-
-    public Query resolve(EntityResolver resolver) {
-        return this;
-    }
-
-    public SQLAction createSQLAction(SQLActionVisitor visitor) {
-        return null;
-    }
-
-    public void route(QueryRouter router, EntityResolver resolver) {
-
-    }
+    /**
+     * A callback method invoked by Cayenne during the final execution phase of the query
+     * run. A concrete query implementation is given a chance to decide how it should be
+     * handled. Implementors can pick an appropriate method of the SQLActionVisitor to
+     * handle itself, create a custom SQLAction of its own, or substitute itself with
+     * another query that should be used for SQLAction construction.
+     */
+    SQLAction createSQLAction(SQLActionVisitor visitor);
 }

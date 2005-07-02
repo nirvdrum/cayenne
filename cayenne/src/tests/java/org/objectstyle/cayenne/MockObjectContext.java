@@ -57,10 +57,8 @@ package org.objectstyle.cayenne;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * A noop ObjectContext used for unit testing.
@@ -85,19 +83,11 @@ public class MockObjectContext extends MockPersistenceContext implements ObjectC
         return null;
     }
 
-    public List performQuery(GenericSelectQuery query) {
+    public List performQuery(QueryExecutionPlan query) {
         return null;
     }
 
-    public List performQuery(String queryName, Map parameters, boolean refresh) {
-        return null;
-    }
-
-    public int[] performNonSelectingQuery(Query query) {
-        return null;
-    }
-
-    public int[] performNonSelectingQuery(String queryName, Map parameters) {
+    public int[] performNonSelectingQuery(QueryExecutionPlan query) {
         return null;
     }
 
@@ -125,10 +115,6 @@ public class MockObjectContext extends MockPersistenceContext implements ObjectC
     }
 
     public Collection uncommittedObjects() {
-        return null;
-    }
-
-    public List performQuery(Query query) {
         return null;
     }
 }

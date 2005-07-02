@@ -57,7 +57,7 @@ package org.objectstyle.cayenne;
 
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.Transaction;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * @author Andrus Adamchik
@@ -85,13 +85,13 @@ public class MockPersistenceContext implements PersistenceContext {
     }
 
     public void performQuery(
-            Query query,
+            QueryExecutionPlan query,
             OperationObserver observer,
             Transaction transaction) {
         performQueryInTransaction = true;
     }
 
-    public void performQuery(Query query, OperationObserver observer) {
+    public void performQuery(QueryExecutionPlan query, OperationObserver observer) {
         performQuery = true;
     }
 }

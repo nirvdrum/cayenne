@@ -182,17 +182,17 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         this.setRoot(root);
         this.setQualifier(qualifier);
     }
-    
+
     /**
      * Routes itself and if there are any prefetches configured, creates prefetch queries
      * and routes them as well.
      * 
      * @since 1.2
      */
-    public void routeQuery(QueryRouter router, EntityResolver resolver) {
+    public void route(QueryRouter router, EntityResolver resolver) {
 
         // route self
-        super.routeQuery(router, resolver);
+        super.route(router, resolver);
 
         // create and route prefetch queries if any
         if (!isFetchingDataRows()) {
@@ -209,7 +209,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
                         resolver,
                         this,
                         prefetchKey);
-                prefetchQuery.routeQuery(router, resolver);
+                prefetchQuery.route(router, resolver);
             }
         }
     }
@@ -219,7 +219,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * 
      * @since 1.2
      */
-    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
         return visitor.objectSelectAction(this);
     }
 

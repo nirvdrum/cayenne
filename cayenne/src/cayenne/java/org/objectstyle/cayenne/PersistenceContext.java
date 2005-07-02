@@ -59,7 +59,7 @@ import java.io.Serializable;
 
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.Transaction;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * An interface defining methods to access a persistent store in Cayenne. Users would
@@ -83,7 +83,7 @@ public interface PersistenceContext extends Serializable {
      * 
      * @see org.objectstyle.cayenne.query.QueryChain
      */
-    void performQuery(Query query, OperationObserver observer);
+    void performQuery(QueryExecutionPlan query, OperationObserver observer);
 
     /**
      * Executes a query within a given transaction. Note that if there is a need to run
@@ -92,6 +92,8 @@ public interface PersistenceContext extends Serializable {
      * 
      * @see org.objectstyle.cayenne.query.QueryChain
      */
-    void performQuery(Query query, OperationObserver observer, Transaction transaction);
-
+    void performQuery(
+            QueryExecutionPlan query,
+            OperationObserver observer,
+            Transaction transaction);
 }

@@ -132,7 +132,7 @@ public class SQLServerAdapter extends SybaseAdapter {
      * @since 1.2
      */
     public SQLAction getAction(Query query, DataNode node) {
-        return query.toSQLAction(new SQLServerActionBuilder(this, node.getEntityResolver()));
+        return query.createSQLAction(new SQLServerActionBuilder(this, node.getEntityResolver()));
     }
 
     

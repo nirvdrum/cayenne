@@ -155,8 +155,23 @@ public abstract class AbstractQuery implements Query {
     }
 
     public String toString() {
-        return new ToStringBuilder(this).append("root", getRoot()).append("name",
+        return new ToStringBuilder(this).append("root", getRoot()).append(
+                "name",
                 getName()).toString();
+    }
+
+    /**
+     * @since 1.2
+     */
+    public abstract SQLAction createSQLAction(SQLActionVisitor visitor);
+
+    /**
+     * Implements default resolution mechanism - simply returns this query.
+     * 
+     * @since 1.2
+     */
+    public Query resolve(EntityResolver resolver) {
+        return this;
     }
 
     /**
@@ -166,7 +181,7 @@ public abstract class AbstractQuery implements Query {
      * 
      * @since 1.2
      */
-    public void routeQuery(QueryRouter router, EntityResolver resolver) {
+    public void route(QueryRouter router, EntityResolver resolver) {
         DataMap map = resolver.lookupDataMap(this);
 
         if (map == null) {

@@ -55,14 +55,11 @@
  */
 package org.objectstyle.cayenne.service;
 
-import java.util.Collections;
-
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.MockPersistenceContext;
 import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.access.MockDataRowStore;
-import org.objectstyle.cayenne.distribution.NamedQueryMessage;
 import org.objectstyle.cayenne.distribution.QueryMessage;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.MockQuery;
@@ -81,21 +78,21 @@ public class ServerObjectContextTst extends TestCase {
         assertSame(parent, context.getParentContext());
     }
 
-    //    public void testOnCommit() {
-    //        MockPersistenceContext parent = new MockPersistenceContext();
-    //        ServerObjectContext context = new ServerObjectContext(
-    //                parent,
-    //                new EntityResolver(),
-    //                new MockDataRowStore());
+    // public void testOnCommit() {
+    // MockPersistenceContext parent = new MockPersistenceContext();
+    // ServerObjectContext context = new ServerObjectContext(
+    // parent,
+    // new EntityResolver(),
+    // new MockDataRowStore());
     //
-    //        context.onCommit(new CommitMessage());
+    // context.onCommit(new CommitMessage());
     //
-    //        // no changes in context, so no commit should be executed
-    //        assertFalse(parent.isCommitChangesInContext());
+    // // no changes in context, so no commit should be executed
+    // assertFalse(parent.isCommitChangesInContext());
     //
-    //        // introduce changes
-    //        fail("TODO: implement CommitMessage to be able to carry client changes");
-    //    }
+    // // introduce changes
+    // fail("TODO: implement CommitMessage to be able to carry client changes");
+    // }
 
     public void testOnNonSelectingQuery() {
         MockPersistenceContext parent = new MockPersistenceContext();
@@ -108,44 +105,29 @@ public class ServerObjectContextTst extends TestCase {
         assertTrue(parent.isPerformQuery());
     }
 
-    //    public void testOnSelectingQuery() {
-    //        MockPersistenceContext parent = new MockPersistenceContext();
-    //        ServerObjectContext context = new ServerObjectContext(
-    //                parent,
-    //                new EntityResolver(),
-    //                new MockDataRowStore());
+    // public void testOnSelectingQuery() {
+    // MockPersistenceContext parent = new MockPersistenceContext();
+    // ServerObjectContext context = new ServerObjectContext(
+    // parent,
+    // new EntityResolver(),
+    // new MockDataRowStore());
     //
-    //        context.onQuery(new QueryMessage(new MockGenericSelectQuery(), true));
-    //        assertTrue(parent.isPerformQuery());
-    //    }
+    // context.onQuery(new QueryMessage(new MockGenericSelectQuery(), true));
+    // assertTrue(parent.isPerformQuery());
+    // }
 
-    public void testOnNonSelectingNamedQuery() {
-        MockPersistenceContext parent = new MockPersistenceContext();
-        ServerObjectContext context = new ServerObjectContext(
-                parent,
-                new EntityResolver(),
-                new MockDataRowStore());
-
-        context.onNamedQuery(new NamedQueryMessage(
-                "test",
-                Collections.EMPTY_MAP,
-                false,
-                false));
-        assertTrue(parent.isPerformQuery());
-    }
-
-    //    public void testOnNamedSelectingQuery() {
-    //        MockPersistenceContext parent = new MockPersistenceContext();
-    //        ServerObjectContext context = new ServerObjectContext(
-    //                parent,
-    //                new EntityResolver(),
-    //                new MockDataRowStore());
+    // public void testOnNamedSelectingQuery() {
+    // MockPersistenceContext parent = new MockPersistenceContext();
+    // ServerObjectContext context = new ServerObjectContext(
+    // parent,
+    // new EntityResolver(),
+    // new MockDataRowStore());
     //
-    //        context.onNamedQuery(new NamedQueryMessage(
-    //                "test",
-    //                Collections.EMPTY_MAP,
-    //                true,
-    //                false));
-    //        assertTrue(parent.isPerformQuery());
-    //    }
+    // context.onNamedQuery(new NamedQueryMessage(
+    // "test",
+    // Collections.EMPTY_MAP,
+    // true,
+    // false));
+    // assertTrue(parent.isPerformQuery());
+    // }
 }

@@ -59,7 +59,9 @@ import java.util.List;
 
 import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.access.QueryResult;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * An action that performs an updating query with a given persistence context.
@@ -69,18 +71,20 @@ import org.objectstyle.cayenne.query.Query;
  */
 class PersistenceContextQueryAction {
 
-    PersistenceContext context;
+    EntityResolver resolver;
 
-    public PersistenceContextQueryAction(PersistenceContext context) {
-        this.context = context;
+    public PersistenceContextQueryAction(EntityResolver resolver) {
+        this.resolver = resolver;
     }
 
-    int[] performNonSelectingQuery(Query query) {
+    int[] performNonSelectingQuery(PersistenceContext context, QueryExecutionPlan query) {
+
+        Query resolvedQuery = query.resolve(resolver);
+
         QueryResult resultCallback = new QueryResult();
+        context.performQuery(resolvedQuery, resultCallback);
 
-        context.performQuery(query, resultCallback);
-
-        List updateCounts = resultCallback.getUpdates(query);
+        List updateCounts = resultCallback.getUpdates(resolvedQuery);
         if (updateCounts == null || updateCounts.isEmpty()) {
             return new int[0];
         }

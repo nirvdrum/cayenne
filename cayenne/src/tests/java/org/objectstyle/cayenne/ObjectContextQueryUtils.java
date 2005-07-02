@@ -269,7 +269,11 @@ public class ObjectContextQueryUtils {
             this.dataRows = dataRows;
         }
 
-        public void routeQuery(QueryRouter router, EntityResolver resolver) {
+        public Query resolve(EntityResolver resolver) {
+            return this;
+        }
+
+        public void route(QueryRouter router, EntityResolver resolver) {
 
             // build a substitute query and route it to appropriate node
             DataMap rootMap = resolver.getDataMap(dataMapName);
@@ -277,10 +281,10 @@ public class ObjectContextQueryUtils {
             substituteQuery.setParameters(parameters);
             substituteQuery.setFetchingDataRows(dataRows);
 
-            substituteQuery.routeQuery(router, resolver);
+            substituteQuery.route(router, resolver);
         }
 
-        public SQLAction toSQLAction(SQLActionVisitor visitor) {
+        public SQLAction createSQLAction(SQLActionVisitor visitor) {
             throw new CayenneRuntimeException(
                     "Not intended for execution. Should've been replaced by a SQLTemaplte during routing.");
         }

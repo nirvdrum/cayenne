@@ -59,8 +59,8 @@ import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.PersistenceContext;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * Executes non-selecting queries on behalf of DataDomain.
@@ -76,13 +76,13 @@ import org.objectstyle.cayenne.query.Query;
 // use real shared cache instead...
 class PersistenceContextSelectAction {
 
-    PersistenceContext context;
+    EntityResolver resolver;
 
-    PersistenceContextSelectAction(PersistenceContext context) {
-        this.context = context;
+    public PersistenceContextSelectAction(EntityResolver resolver) {
+        this.resolver = resolver;
     }
 
-    List performQuery(ObjectContext objectContext, Query query, boolean refreshCache) {
+    List performQuery(ObjectContext objectContext, QueryExecutionPlan query) {
         // TODO: implement
         throw new CayenneRuntimeException("TODO");
     }

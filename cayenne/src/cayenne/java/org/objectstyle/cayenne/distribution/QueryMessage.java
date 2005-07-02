@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.distribution;
 
 import java.util.List;
 
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * A message telling the receiver to perform a Cayenne query.
@@ -67,10 +67,10 @@ import org.objectstyle.cayenne.query.Query;
  */
 public class QueryMessage extends AbstractMessage {
 
-    protected Query query;
+    protected QueryExecutionPlan query;
     protected boolean selecting;
 
-    public QueryMessage(Query query, boolean selecting) {
+    public QueryMessage(QueryExecutionPlan query, boolean selecting) {
         // sanity check
         if (query == null) {
             throw new NullPointerException("Null query.");
@@ -98,7 +98,7 @@ public class QueryMessage extends AbstractMessage {
         return (int[]) send(connector, int[].class);
     }
 
-    public Query getQuery() {
+    public QueryExecutionPlan getQuery() {
         return query;
     }
 

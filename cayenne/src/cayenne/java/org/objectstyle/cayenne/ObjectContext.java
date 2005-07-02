@@ -57,9 +57,8 @@ package org.objectstyle.cayenne;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * A variety of PersistenceContext used directly by the application code. ObjectContext
@@ -133,20 +132,10 @@ public interface ObjectContext extends PersistenceContext {
     /**
      * Executes a selecting query, returning the result.
      */
-    List performQuery(Query query);
+    List performQuery(QueryExecutionPlan query);
 
-    /**
-     * Executes a named selecting query.
-     */
-    List performQuery(String queryName, Map parameters, boolean refresh);
-    
     /**
      * Executes a non-selecting query returning result counts.
      */
-    public int[] performNonSelectingQuery(Query query);
-
-    /**
-     * Executes a named non-selecting query.
-     */
-    int[] performNonSelectingQuery(String queryName, Map parameters);
+    public int[] performNonSelectingQuery(QueryExecutionPlan query);
 }

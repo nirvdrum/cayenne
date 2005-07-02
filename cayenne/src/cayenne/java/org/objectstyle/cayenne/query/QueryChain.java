@@ -113,20 +113,6 @@ public class QueryChain implements Query {
         return chain == null || chain.isEmpty();
     }
 
-    /**
-     * Delegates routing to each individual query in the chain. If there is no queries,
-     * this method does nothing.
-     */
-    public void routeQuery(QueryRouter router, EntityResolver resolver) {
-        if (chain != null && !chain.isEmpty()) {
-            Iterator it = chain.iterator();
-            while (it.hasNext()) {
-                Query q = (Query) it.next();
-                q.routeQuery(router, resolver);
-            }
-        }
-    }
-
     public String getName() {
         return name;
     }
@@ -152,7 +138,8 @@ public class QueryChain implements Query {
      * routed individually.
      */
     public Object getRoot() {
-        throw new CayenneRuntimeException("Chain doesn't support its own root.");
+        throw new CayenneRuntimeException(
+                "Chain doesn't support its own root. Root should be deprecated soon anyway");
     }
 
     /**
@@ -161,14 +148,51 @@ public class QueryChain implements Query {
      */
     public void setRoot(Object root) {
         throw new CayenneRuntimeException(
-                "Chain doesn't support its own root. An attempt to set it to " + root);
+                "Chain doesn't support its own root. Root should be deprecated soon anyway. An attempt to set it to "
+                        + root);
+    }
+
+    /**
+     * Resolves queries in the chain, creating another QueryChain that contains resolved
+     * queries.
+     */
+    public Query resolve(EntityResolver resolver) {
+        if (isEmpty()) {
+            return this;
+        }
+
+        Collection resolvedChain = new ArrayList(chain.size());
+
+        Iterator it = chain.iterator();
+        while (it.hasNext()) {
+            Query resolved = ((Query) it.next()).resolve(resolver);
+            if (resolved != null) {
+                resolvedChain.add(resolved);
+            }
+        }
+
+        return new QueryChain(resolvedChain);
+    }
+
+    /**
+     * Delegates routing to each individual query in the chain. If there is no queries,
+     * this method does nothing.
+     */
+    public void route(QueryRouter router, EntityResolver resolver) {
+        if (chain != null && !chain.isEmpty()) {
+            Iterator it = chain.iterator();
+            while (it.hasNext()) {
+                Query q = (Query) it.next();
+                q.route(router, resolver);
+            }
+        }
     }
 
     /**
      * Throws an exception as execution should've been delegated to the queries contained
      * in the chain.
      */
-    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
         throw new CayenneRuntimeException("Chain doesn't support its own execution "
                 + "and should've been split into separate queries during routing phase.");
     }

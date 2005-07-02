@@ -74,6 +74,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryChain;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.query.QueryRouter;
 
 /**
@@ -621,11 +622,12 @@ public class DataDomain implements QueryEngine, PersistenceContext {
     }
 
     /**
-     * Runs a query, wrapping it in an internally created transaction.
+     * Routes and executes a given query, wrapping it in a transaction. Note that query
+     * resolution phase is not done at this level and is a responsibility of the caller.
      * 
      * @since 1.2
      */
-    public void performQuery(Query query, OperationObserver resultConsumer) {
+    public void performQuery(QueryExecutionPlan query, OperationObserver resultConsumer) {
 
         Transaction transaction = (resultConsumer.isIteratedResult()) ? Transaction
                 .noTransaction() : createTransaction();
@@ -636,12 +638,13 @@ public class DataDomain implements QueryEngine, PersistenceContext {
     }
 
     /**
-     * Performs a given query, wrapping it in a provided transaction.
+     * Routes and executes a given query. Note that query resolution phase is not done at
+     * this level and is a responsibility of the caller.
      * 
      * @since 1.2
      */
     public void performQuery(
-            Query query,
+            QueryExecutionPlan query,
             OperationObserver resultConsumer,
             Transaction transaction) {
 
@@ -680,7 +683,7 @@ public class DataDomain implements QueryEngine, PersistenceContext {
             }
         };
 
-        query.routeQuery(router, getEntityResolver());
+        query.route(router, getEntityResolver());
 
         // perform queries on each node
         Iterator nodeIt = queryMap.entrySet().iterator();
@@ -688,10 +691,7 @@ public class DataDomain implements QueryEngine, PersistenceContext {
             Map.Entry entry = (Map.Entry) nodeIt.next();
             QueryEngine nextNode = (QueryEngine) entry.getKey();
             Collection nodeQueries = (Collection) entry.getValue();
-
-            // transaction is passed to us, so assume we are already wrapped in it...
-
-            // TODO: investigate parallel processing options...
+            
             nextNode.performQueries(nodeQueries, resultConsumer, transaction);
         }
     }

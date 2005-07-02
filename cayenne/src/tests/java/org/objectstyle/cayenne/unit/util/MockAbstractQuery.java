@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.query.SQLActionVisitor;
  */
 public class MockAbstractQuery extends AbstractQuery {
 
-    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
         return null;
     }
 

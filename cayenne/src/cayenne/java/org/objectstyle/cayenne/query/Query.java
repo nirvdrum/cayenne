@@ -55,25 +55,14 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.io.Serializable;
-
 import org.apache.log4j.Level;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
- * A generic query that can be executed via Cayenne QueryEngine, such as DataContext. The
- * main parameter of a Cayenne query is its root that can be a String, an ObjEntity, a
- * DbEntity or a Class. Root serves as hint to Cayenne runtime on how to handle the query.
- * E.g. root is used to determine which one of multiple databases should be chosen for
- * query execution; also it is used as a key to find Cayenne mapping objects describing
- * databse tables participating in the query and Java objects that should be returned from
- * such query.
+ * An interface of a generic query that can be executed via Cayenne.
  * 
- * @see org.objectstyle.cayenne.access.QueryEngine
  * @author Andrei Adamchik
  */
-public interface Query extends Serializable {
+public interface Query extends QueryExecutionPlan {
 
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
 
@@ -108,31 +97,6 @@ public interface Query extends Serializable {
     /**
      * Sets the root of the query.
      */
-    //  TODO: deprecate this... with new routing mechanism, not all queries need a root.
+    // TODO: deprecate this... with new routing mechanism, not all queries need a root.
     void setRoot(Object root);
-
-    /**
-     * A "visit" method that allows a concrete query implementation to decide how it
-     * should be handled at the JDBC level. Implementors can pick an appropriate method of
-     * the SQLActionVisitor to handle itself, create a custom SQLAction on its own, or
-     * even substitute itself with another query that should be used for SQLAction
-     * construction.
-     * 
-     * @since 1.2
-     */
-    SQLAction toSQLAction(SQLActionVisitor visitor);
-
-    /**
-     * A "visit" method that lets query to decide which query engine to use. Mapping of
-     * query engines is provided by QueryRouter. Query should use a
-     * {@link QueryRouter#useEngineForQuery(QueryEngine, Query)}callback method to route
-     * itself. Such API allows for maximum flexibility and customization options. E.g. a
-     * query can create one or more substitute queries or even provide its own QueryEngine
-     * to execute itself.
-     * 
-     * @throws org.objectstyle.cayenne.CayenneRuntimeException if a QueryEngine can't be
-     *             found.
-     * @since 1.2
-     */
-    void routeQuery(QueryRouter router, EntityResolver resolver);
 }

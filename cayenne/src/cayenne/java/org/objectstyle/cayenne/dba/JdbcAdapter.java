@@ -548,7 +548,7 @@ public class JdbcAdapter implements DbAdapter {
      * @since 1.2
      */
     public SQLAction getAction(Query query, DataNode node) {
-        return query.toSQLAction(new JdbcActionBuilder(this, node.getEntityResolver()));
+        return query.createSQLAction(new JdbcActionBuilder(this, node.getEntityResolver()));
     }
 
     public void bindParameter(

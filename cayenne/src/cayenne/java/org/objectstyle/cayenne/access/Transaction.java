@@ -67,7 +67,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.PersistenceContext;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * Class responsible for transaction management within Cayenne.
@@ -220,7 +220,7 @@ public abstract class Transaction {
      */
     public void performQuery(
             PersistenceContext context,
-            Query query,
+            QueryExecutionPlan query,
             OperationObserver observer)
             throws CayenneRuntimeException {
 

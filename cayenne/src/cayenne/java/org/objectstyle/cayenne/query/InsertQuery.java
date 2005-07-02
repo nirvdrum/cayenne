@@ -103,7 +103,7 @@ public class InsertQuery extends AbstractQuery {
      * 
      * @since 1.2
      */
-    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
         return visitor.updateAction(this);
     }
 

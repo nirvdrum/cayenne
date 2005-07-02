@@ -78,6 +78,8 @@ import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryChain;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * A temporary subclass of DataContext that implements ObjectContext interface. Used to
@@ -91,6 +93,63 @@ class ObjectDataContext extends DataContext implements ObjectContext {
 
     PersistenceContext parentContext;
     EntityResolver entityResolver;
+
+    // ==== START: DataContext compatibility code... need to merge to DataContext
+    // --------------------------------------------------------------------------
+
+    public EntityResolver getEntityResolver() {
+        // TODO: ready to be moved to DataContext
+        return entityResolver;
+    }
+
+    public int[] performNonSelectingQuery(Query query) {
+        // channel to the right implementation
+        return performNonSelectingQuery((QueryExecutionPlan) query);
+    }
+
+    public List performQuery(GenericSelectQuery query) {
+        // channel through a new implementation...
+        return performQuery((QueryExecutionPlan) query);
+    }
+
+    /**
+     * @deprecated since 1.2 as QueryChains are now possible.
+     */
+    public void performQueries(Collection queries, OperationObserver observer) {
+        QueryChain query = new QueryChain(queries);
+        getParentContext().performQuery(query.resolve(getEntityResolver()), observer);
+    }
+
+    /**
+     * @deprecated since 1.2 as QueryChains are now possible.
+     */
+    public void performQueries(
+            Collection queries,
+            OperationObserver observer,
+            Transaction transaction) {
+
+        QueryChain query = new QueryChain(queries);
+        getParentContext().performQuery(
+                query.resolve(getEntityResolver()),
+                observer,
+                transaction);
+    }
+
+    public int[] performNonSelectingQuery(String queryName, Map parameters) {
+        return performNonSelectingQuery(new NamedQueryProxy(queryName, parameters));
+    }
+
+    public int[] performNonSelectingQuery(String queryName) {
+        return performNonSelectingQuery(new NamedQueryProxy(queryName));
+    }
+
+    public List performQuery(String queryName, boolean refresh) {
+        // TODO: refresh is not handled...
+        return performQuery(new NamedQueryProxy(queryName));
+    }
+
+    // ==== END: DataContext compatibility code... need to merge to DataContext
+    // --------------------------------------------------------------------------
 
     /**
      * Initializes ObjectDataContext obtaining settings from parent DataDomain.
@@ -214,77 +273,34 @@ class ObjectDataContext extends DataContext implements ObjectContext {
      * Overrides super implementation to use parent PersistenceContext for query
      * execution.
      */
-    public int[] performNonSelectingQuery(Query query) {
+    public int[] performNonSelectingQuery(QueryExecutionPlan query) {
         if (this.getParentContext() == null) {
             throw new CayenneRuntimeException(
                     "Can't run query - parent PersistenceContext is not set.");
         }
 
-        return new PersistenceContextQueryAction(getParentContext())
-                .performNonSelectingQuery(query);
-    }
-
-    /**
-     * Overrides super implementation to use parent PersistenceContext for query
-     * execution.
-     */
-    public int[] performNonSelectingQuery(String queryName, Map parameters) {
-        return performNonSelectingQuery(new NamedQueryProxy(queryName, parameters));
-    }
-
-    /**
-     * Overrides super implementation to channel query execution using new algorithm.
-     */
-    public List performQuery(GenericSelectQuery query) {
-        // channel through our own implementation... TODO: this method should be
-        // deprecated in super at some point as now selecting queries do not have to
-        // implement GenericSelectQuery
-        return performQuery((Query) query);
-    }
-
-    /**
-     * Overrides super implementation to use parent PersistenceContext for query
-     * execution.
-     */
-    public List performQuery(String queryName, Map parameters, boolean forceRefresh) {
-        return performQuery(new NamedQueryProxy(queryName, parameters), forceRefresh);
+        return new PersistenceContextQueryAction(getEntityResolver())
+                .performNonSelectingQuery(getParentContext(), query);
     }
 
     /**
      * Performs a selecting query, returning the result.
      */
-    public List performQuery(Query query) {
-        return performQuery(query, false);
-    }
-
-    /**
-     * The actual worker method that executes the query. All other selecting
-     * 'performQuery' methods call this one.
-     */
-    protected List performQuery(Query query, boolean forceRefresh) {
+    public List performQuery(QueryExecutionPlan query) {
         if (this.getParentContext() == null) {
             throw new CayenneRuntimeException(
                     "Can't run query - parent PersistenceContext is not set.");
         }
 
-        return new PersistenceContextSelectAction(getParentContext()).performQuery(
+        return new PersistenceContextSelectAction(getEntityResolver()).performQuery(
                 this,
-                query,
-                forceRefresh);
-    }
-
-    /**
-     * Overrides DataContext implementation to return EntityResolver stored in ivar.
-     */
-    public EntityResolver getEntityResolver() {
-        // TODO: ready to be moved to DataContext
-        return entityResolver;
+                query);
     }
 
     /**
      * Delegates execution to parent.
      */
-    public void performQuery(Query query, OperationObserver resultConsumer) {
+    public void performQuery(QueryExecutionPlan query, OperationObserver resultConsumer) {
 
         if (this.getParentContext() == null) {
             throw new CayenneRuntimeException(
@@ -298,7 +314,7 @@ class ObjectDataContext extends DataContext implements ObjectContext {
     }
 
     public void performQuery(
-            Query query,
+            QueryExecutionPlan query,
             OperationObserver resultConsumer,
             Transaction transaction) {
 

@@ -58,11 +58,11 @@ package org.objectstyle.cayenne.service;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.ParameterizedQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.query.QueryRouter;
 import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.query.SQLActionVisitor;
@@ -74,12 +74,14 @@ import org.objectstyle.cayenne.query.SQLActionVisitor;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class NamedQueryProxy implements Query {
+class NamedQueryProxy implements QueryExecutionPlan {
 
     protected String name;
     protected Map parameters;
 
-    protected Level loggingLevel;
+    public NamedQueryProxy(String name) {
+        this(name, null);
+    }
 
     public NamedQueryProxy(String name, Map parameters) {
         this.name = name;
@@ -94,39 +96,13 @@ class NamedQueryProxy implements Query {
         this.name = name;
     }
 
-    public Level getLoggingLevel() {
-        return loggingLevel;
-    }
-
-    public void setLoggingLevel(Level loggingLevel) {
-        this.loggingLevel = loggingLevel;
-    }
-
-    public Object getRoot() {
-        throw new CayenneRuntimeException("'getRoot' is not supported by this query: "
-                + this);
-    }
-
-    public void setRoot(Object root) {
-        throw new CayenneRuntimeException("'setRoot' is not supported by this query: "
-                + this);
-    }
-
     /**
-     * Throws an exception as query execution is expected to be delegated to a resolved
-     * named query during routing phase.
+     * A callback method invoked by Cayenne during the first phase of execution. Allows
+     * query to resolve itself. For example a query can be a "proxy" for another query
+     * stored by name in the DataMap. In this method such query would find the actual
+     * mapped query and return it to the caller for execution.
      */
-    public SQLAction toSQLAction(SQLActionVisitor visitor) {
-        throw new CayenneRuntimeException(this
-                + " doesn't support its own execution. "
-                + "It should've been delegated to another "
-                + "query during routing phase.");
-    }
-
-    /**
-     * Resolves a real query for the name and delegates further execution to this query.
-     */
-    public void routeQuery(QueryRouter router, EntityResolver resolver) {
+    public Query resolve(EntityResolver resolver) {
         Query substituteQuery = substituteQuery(resolver);
 
         if (substituteQuery == null) {
@@ -135,7 +111,28 @@ class NamedQueryProxy implements Query {
                     + "'");
         }
 
-        substituteQuery.routeQuery(router, resolver);
+        return substituteQuery;
+    }
+
+    /**
+     * Resolves a real query for the name and delegates further execution to this query.
+     */
+    public void route(QueryRouter router, EntityResolver resolver) {
+        throw new CayenneRuntimeException(this
+                + " doesn't support its own routing. "
+                + "It should've been delegated to another "
+                + "query during resolution phase.");
+    }
+
+    /**
+     * Throws an exception as query execution is expected to be delegated to a resolved
+     * named query during routing phase.
+     */
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
+        throw new CayenneRuntimeException(this
+                + " doesn't support its own sql actions. "
+                + "It should've been delegated to another "
+                + "query during resolution phase.");
     }
 
     /**

@@ -136,30 +136,18 @@ public class ObjectDataContextTst extends TestCase {
         assertTrue(parent.isPerformQuery());
     }
 
-    //    public void testPerformQuery() {
-    //        MockPersistenceContext parent = new MockPersistenceContext();
-    //        ObjectDataContext context = new ObjectDataContext(
-    //                parent,
-    //                new EntityResolver(),
-    //                new MockDataRowStore());
+    // public void testPerformQuery() {
+    // MockPersistenceContext parent = new MockPersistenceContext();
+    // ObjectDataContext context = new ObjectDataContext(
+    // parent,
+    // new EntityResolver(),
+    // new MockDataRowStore());
     //
-    //        // perform both generic select and regular query to test both legacy and new API
-    //        context.performQuery(new MockQuery());
-    //        assertTrue(parent.isPerformQuery());
+    // // perform both generic select and regular query to test both legacy and new API
+    // context.performQuery(new MockQuery());
+    // assertTrue(parent.isPerformQuery());
     //
-    //        context.performQuery(new MockGenericSelectQuery());
-    //        assertTrue(parent.isPerformQuery());
-    //    }
-
-    public void testPerformNonSelectingNamedQuery() {
-        MockPersistenceContext parent = new MockPersistenceContext();
-        ObjectDataContext context = new ObjectDataContext(
-                parent,
-                new EntityResolver(),
-                new MockDataRowStore());
-
-        context.performNonSelectingQuery("test", Collections.EMPTY_MAP);
-        assertTrue(parent.isPerformQuery());
-    }
-
+    // context.performQuery(new MockGenericSelectQuery());
+    // assertTrue(parent.isPerformQuery());
+    // }
 }

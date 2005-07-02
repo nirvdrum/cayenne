@@ -136,7 +136,7 @@ public class UpdateQuery extends QualifiedQuery {
      * 
      * @since 1.2
      */
-    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
         return visitor.updateAction(this);
     }
 

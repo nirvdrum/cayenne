@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.query.SQLActionVisitor;
  */
 public class MockQualifiedQuery extends QualifiedQuery {
 
-    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
         return null;
     }
 

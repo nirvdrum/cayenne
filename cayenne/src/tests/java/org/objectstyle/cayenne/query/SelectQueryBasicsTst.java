@@ -304,7 +304,7 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
      * Tests that all queries specified in prefetch are executed in a more complex
      * prefetch scenario.
      */
-    public void testRouteQueryWithPrefetches() {
+    public void testRouteWithPrefetches() {
         EntityResolver resolver = getDomain().getEntityResolver();
         MockQueryRouter router = new MockQueryRouter();
 
@@ -312,27 +312,27 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
                 "artistName",
                 "a"));
 
-        q.routeQuery(router, resolver);
+        q.route(router, resolver);
         assertEquals(1, router.getQueryCount());
 
         q.addPrefetch("paintingArray");
         router.reset();
-        q.routeQuery(router, resolver);
+        q.route(router, resolver);
         assertEquals(2, router.getQueryCount());
 
         q.addPrefetch("paintingArray.toGallery");
         router.reset();
-        q.routeQuery(router, resolver);
+        q.route(router, resolver);
         assertEquals(3, router.getQueryCount());
 
         q.addPrefetch("artistExhibitArray.toExhibit");
         router.reset();
-        q.routeQuery(router, resolver);
+        q.route(router, resolver);
         assertEquals(4, router.getQueryCount());
 
         q.removePrefetch("paintingArray");
         router.reset();
-        q.routeQuery(router, resolver);
+        q.route(router, resolver);
         assertEquals(3, router.getQueryCount());
     }
 
@@ -371,7 +371,7 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
 
         try {
             MockQueryRouter router = new MockQueryRouter();
-            q.routeQuery(router, resolver);
+            q.route(router, resolver);
             assertEquals(4, router.getQueryCount());
         }
         finally {
@@ -398,7 +398,7 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
         // a while
         EntityResolver resolver = getDomain().getEntityResolver();
         MockQueryRouter router = new MockQueryRouter();
-        q.routeQuery(router, resolver);
+        q.route(router, resolver);
         assertEquals(2, router.getQueryCount());
     }
 }

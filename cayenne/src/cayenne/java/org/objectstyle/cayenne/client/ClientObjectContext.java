@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.distribution.CayenneConnector;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.NamedQueryMessage;
 import org.objectstyle.cayenne.distribution.QueryMessage;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * An ObjectContext that works
@@ -189,16 +189,11 @@ public class ClientObjectContext implements ObjectContext {
                 .sendPerformQuery(connector);
     }
 
-    public int[] performNonSelectingQuery(String queryName, Map parameters) {
-        return new NamedQueryMessage(queryName, parameters, false, false)
-                .sendPerformNonSelectingQuery(connector);
-    }
-
-    public int[] performNonSelectingQuery(Query query) {
+    public int[] performNonSelectingQuery(QueryExecutionPlan query) {
         return new QueryMessage(query, false).sendPerformNonSelectingQuery(connector);
     }
 
-    public List performQuery(Query query) {
+    public List performQuery(QueryExecutionPlan query) {
         return new QueryMessage(query, true).sendPerformQuery(connector);
     }
 
@@ -247,12 +242,12 @@ public class ClientObjectContext implements ObjectContext {
 
     // *** Unsupported stuff...
 
-    public void performQuery(Query query, OperationObserver observer) {
+    public void performQuery(QueryExecutionPlan query, OperationObserver observer) {
         throw new CayenneClientException("Not supported on the client.");
     }
 
     public void performQuery(
-            Query query,
+            QueryExecutionPlan query,
             OperationObserver observer,
             Transaction transaction) {
         throw new CayenneClientException("Not supported on the client.");

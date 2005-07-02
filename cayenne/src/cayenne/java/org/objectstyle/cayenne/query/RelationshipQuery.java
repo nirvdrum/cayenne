@@ -152,7 +152,7 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
      * Creates a SelectQuery for relationship, delegating SQLAction creation to this newly
      * created query.
      */
-    public SQLAction toSQLAction(SQLActionVisitor visitor) {
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
 
         // build a SelectQuery that Cayenne knows how to process.
 
@@ -170,6 +170,6 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
         select.setFetchingDataRows(isFetchingDataRows());
 
         // delegate to select query
-        return select.toSQLAction(visitor);
+        return select.createSQLAction(visitor);
     }
 }

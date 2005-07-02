@@ -307,7 +307,7 @@ public class OracleAdapter extends JdbcAdapter {
      * @since 1.2
      */
     public SQLAction getAction(Query query, DataNode node) {
-        return query.toSQLAction(new OracleActionBuilder(this, node.getEntityResolver()));
+        return query.createSQLAction(new OracleActionBuilder(this, node.getEntityResolver()));
     }
 
     /**
