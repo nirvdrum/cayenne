@@ -68,7 +68,9 @@ import org.objectstyle.cayenne.access.MockDataRowStore;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.MockEntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
+import org.objectstyle.cayenne.query.MockQueryExecutionPlan;
 import org.objectstyle.cayenne.unit.util.MockDataObject;
 
 /**
@@ -136,18 +138,18 @@ public class ObjectDataContextTst extends TestCase {
         assertTrue(parent.isPerformQuery());
     }
 
-    // public void testPerformQuery() {
-    // MockPersistenceContext parent = new MockPersistenceContext();
-    // ObjectDataContext context = new ObjectDataContext(
-    // parent,
-    // new EntityResolver(),
-    // new MockDataRowStore());
-    //
-    // // perform both generic select and regular query to test both legacy and new API
-    // context.performQuery(new MockQuery());
-    // assertTrue(parent.isPerformQuery());
-    //
-    // context.performQuery(new MockGenericSelectQuery());
-    // assertTrue(parent.isPerformQuery());
-    // }
+    public void testPerformQuery() {
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ObjectDataContext context = new ObjectDataContext(
+                parent,
+                new EntityResolver(),
+                new MockDataRowStore());
+
+        // perform both generic select and a "plan" query to test both legacy and new API
+        context.performQuery(new MockGenericSelectQuery(true));
+        assertTrue(parent.isPerformQuery());
+
+        context.performQuery(new MockQueryExecutionPlan(true));
+        assertTrue(parent.isPerformQuery());
+    }
 }

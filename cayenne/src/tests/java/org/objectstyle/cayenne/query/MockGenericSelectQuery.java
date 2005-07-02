@@ -62,8 +62,16 @@ import java.util.Collection;
  */
 public class MockGenericSelectQuery extends MockQuery implements GenericSelectQuery {
 
+    protected boolean fetchingDataRows;
+
     public MockGenericSelectQuery() {
         super();
+    }
+
+    public MockGenericSelectQuery(boolean fetchingDataRows) {
+        super();
+
+        this.fetchingDataRows = fetchingDataRows;
     }
 
     public MockGenericSelectQuery(String name) {
@@ -75,7 +83,7 @@ public class MockGenericSelectQuery extends MockQuery implements GenericSelectQu
     }
 
     public boolean isFetchingDataRows() {
-        return false;
+        return fetchingDataRows;
     }
 
     public boolean isRefreshingObjects() {
@@ -96,5 +104,9 @@ public class MockGenericSelectQuery extends MockQuery implements GenericSelectQu
 
     public Collection getJointPrefetches() {
         return null;
+    }
+
+    public void setFetchingDataRows(boolean fetchingDataRows) {
+        this.fetchingDataRows = fetchingDataRows;
     }
 }

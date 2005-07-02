@@ -292,9 +292,7 @@ class ObjectDataContext extends DataContext implements ObjectContext {
                     "Can't run query - parent PersistenceContext is not set.");
         }
 
-        return new PersistenceContextSelectAction(getEntityResolver()).performQuery(
-                this,
-                query);
+        return new ObjectDataContextContextSelectAction(this).performQuery(query);
     }
 
     /**
