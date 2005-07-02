@@ -76,11 +76,6 @@ public class MockClientMessageHandler implements ClientMessageHandler {
         return null;
     }
 
-    public Object onNamedQuery(NamedQueryMessage message) {
-        this.messages.add(message);
-        return null;
-    }
-
     public Object onCommit(CommitMessage message) {
         this.messages.add(message);
         return null;

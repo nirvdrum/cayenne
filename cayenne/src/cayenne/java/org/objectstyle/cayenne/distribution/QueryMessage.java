@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
  */
 public class QueryMessage extends AbstractMessage {
 
-    protected QueryExecutionPlan query;
+    protected QueryExecutionPlan queryPlan;
     protected boolean selecting;
 
     public QueryMessage(QueryExecutionPlan query, boolean selecting) {
@@ -76,7 +76,7 @@ public class QueryMessage extends AbstractMessage {
             throw new NullPointerException("Null query.");
         }
 
-        this.query = query;
+        this.queryPlan = query;
         this.selecting = selecting;
     }
 
@@ -98,8 +98,8 @@ public class QueryMessage extends AbstractMessage {
         return (int[]) send(connector, int[].class);
     }
 
-    public QueryExecutionPlan getQuery() {
-        return query;
+    public QueryExecutionPlan getQueryPlan() {
+        return queryPlan;
     }
 
     public boolean isSelecting() {

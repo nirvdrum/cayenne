@@ -72,7 +72,5 @@ public interface ClientMessageHandler {
 
     public Object onQuery(QueryMessage message);
 
-    public Object onNamedQuery(NamedQueryMessage message);
-
     public Object onCommit(CommitMessage message);
 }

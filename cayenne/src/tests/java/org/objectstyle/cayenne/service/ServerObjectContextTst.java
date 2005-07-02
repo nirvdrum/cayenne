@@ -62,6 +62,7 @@ import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.access.MockDataRowStore;
 import org.objectstyle.cayenne.distribution.QueryMessage;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
 
 /**
@@ -105,29 +106,14 @@ public class ServerObjectContextTst extends TestCase {
         assertTrue(parent.isPerformQuery());
     }
 
-    // public void testOnSelectingQuery() {
-    // MockPersistenceContext parent = new MockPersistenceContext();
-    // ServerObjectContext context = new ServerObjectContext(
-    // parent,
-    // new EntityResolver(),
-    // new MockDataRowStore());
-    //
-    // context.onQuery(new QueryMessage(new MockGenericSelectQuery(), true));
-    // assertTrue(parent.isPerformQuery());
-    // }
+    public void testOnSelectingQuery() {
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ServerObjectContext context = new ServerObjectContext(
+                parent,
+                new EntityResolver(),
+                new MockDataRowStore());
 
-    // public void testOnNamedSelectingQuery() {
-    // MockPersistenceContext parent = new MockPersistenceContext();
-    // ServerObjectContext context = new ServerObjectContext(
-    // parent,
-    // new EntityResolver(),
-    // new MockDataRowStore());
-    //
-    // context.onNamedQuery(new NamedQueryMessage(
-    // "test",
-    // Collections.EMPTY_MAP,
-    // true,
-    // false));
-    // assertTrue(parent.isPerformQuery());
-    // }
+        context.onQuery(new QueryMessage(new MockGenericSelectQuery(true), true));
+        assertTrue(parent.isPerformQuery());
+    }
 }

@@ -53,24 +53,24 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.util;
+package org.objectstyle.cayenne.map;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.query.SQLAction;
+public class MockRelationship extends Relationship {
 
-/**
- * @author Andrei Adamchik
- */
-public class MockSQLAction implements SQLAction {
+    public MockRelationship() {
 
-    public MockSQLAction() {
-        super();
     }
 
-    public void performAction(Connection connection, OperationObserver observer)
-            throws SQLException, Exception {
+    public MockRelationship(String name) {
+        super(name);
+    }
+
+    public Entity getTargetEntity() {
+        return null;
+    }
+
+    public void encodeAsXML(XMLEncoder encoder) {
     }
 }

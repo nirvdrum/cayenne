@@ -53,74 +53,31 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.util;
+package org.objectstyle.cayenne.map;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
 
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.MappingNamespace;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.Procedure;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionException;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
  * @author Andrei Adamchik
  */
-public class MockMappingNamespace implements MappingNamespace {
-    private Map dbEntities = new HashMap();
-    private Map objEntities = new HashMap();
-    private Map queries = new HashMap();
-    private Map procedures = new HashMap();
+public class MockEntity extends Entity {
 
-    public void addDbEntity(DbEntity entity) {
-        dbEntities.put(entity.getName(), entity);
-        entity.setParent(this);
+    public Expression translateToRelatedEntity(
+            Expression expression,
+            String relationshipPath) {
+        return null;
     }
 
-    public void addObjEntity(ObjEntity entity) {
-        objEntities.put(entity.getName(), entity);
-        entity.setParent(this);
+    public Iterator resolvePathComponents(Expression pathExp) throws ExpressionException {
+        return null;
     }
 
-    public void addQuery(Query query) {
-        queries.put(query.getName(), query);
+    public void encodeAsXML(XMLEncoder encoder) {
     }
 
-    public void addProcedure(Procedure procedure) {
-        procedures.put(procedure.getName(), procedure);
-    }
-
-    public DbEntity getDbEntity(String name) {
-        return (DbEntity) dbEntities.get(name);
-    }
-
-    public ObjEntity getObjEntity(String name) {
-        return (ObjEntity) objEntities.get(name);
-    }
-
-    public Procedure getProcedure(String name) {
-        return (Procedure) procedures.get(name);
-    }
-
-    public Query getQuery(String name) {
-        return (Query) queries.get(name);
-    }
-
-    public Collection getDbEntities() {
-        return dbEntities.values();
-    }
-
-    public Collection getObjEntities() {
-        return objEntities.values();
-    }
-
-    public Collection getProcedures() {
-        return procedures.values();
-    }
-
-    public Collection getQueries() {
-        return queries.values();
-    }
 }

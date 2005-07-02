@@ -60,10 +60,10 @@ import junit.framework.TestCase;
 import org.objectstyle.cayenne.access.jdbc.SQLTemplateAction;
 import org.objectstyle.cayenne.access.jdbc.SQLTemplateSelectAction;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.MockSQLAction;
 import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.unit.util.MockDbAdapter;
-import org.objectstyle.cayenne.unit.util.MockSQLAction;
 
 /**
  * @author Andrei Adamchik

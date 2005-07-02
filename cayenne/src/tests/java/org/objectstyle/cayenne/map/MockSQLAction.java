@@ -53,25 +53,24 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.util;
+package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.map.Attribute;
-import org.objectstyle.cayenne.util.XMLEncoder;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.query.SQLAction;
 
 /**
  * @author Andrei Adamchik
  */
-public class MockAttribute extends Attribute {
+public class MockSQLAction implements SQLAction {
 
-    public MockAttribute() {
+    public MockSQLAction() {
         super();
     }
 
-    public MockAttribute(String name) {
-        super(name);
+    public void performAction(Connection connection, OperationObserver observer)
+            throws SQLException, Exception {
     }
-
-    public void encodeAsXML(XMLEncoder encoder) {
-    }
-
 }

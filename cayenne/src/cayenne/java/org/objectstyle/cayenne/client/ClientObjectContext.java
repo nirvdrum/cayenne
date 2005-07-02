@@ -59,7 +59,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
@@ -71,7 +70,6 @@ import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.distribution.CayenneConnector;
 import org.objectstyle.cayenne.distribution.CommitMessage;
-import org.objectstyle.cayenne.distribution.NamedQueryMessage;
 import org.objectstyle.cayenne.distribution.QueryMessage;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
@@ -182,11 +180,6 @@ public class ClientObjectContext implements ObjectContext {
         objectStore.trackObject(object);
 
         return object;
-    }
-
-    public List performQuery(String queryName, Map parameters, boolean refresh) {
-        return new NamedQueryMessage(queryName, parameters, true, refresh)
-                .sendPerformQuery(connector);
     }
 
     public int[] performNonSelectingQuery(QueryExecutionPlan query) {

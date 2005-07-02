@@ -61,7 +61,6 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataRowStore;
 import org.objectstyle.cayenne.distribution.ClientMessageHandler;
 import org.objectstyle.cayenne.distribution.CommitMessage;
-import org.objectstyle.cayenne.distribution.NamedQueryMessage;
 import org.objectstyle.cayenne.distribution.QueryMessage;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
@@ -93,30 +92,19 @@ public class ServerObjectContext extends ObjectDataContext implements
         return null;
     }
 
-    public Object onNamedQuery(NamedQueryMessage message) {
-        if (message.isSelecting()) {
-            return performQuery(message.getQueryName(), message.getParameters(), message
-                    .isRefresh());
-        }
-        else {
-            return performNonSelectingQuery(message.getQueryName(), message
-                    .getParameters());
-        }
-    }
-
     public Object onQuery(QueryMessage message) {
         if (message.isSelecting()) {
-            if (message.getQuery() instanceof GenericSelectQuery) {
-                return performQuery((GenericSelectQuery) message.getQuery());
+            if (message.getQueryPlan() instanceof GenericSelectQuery) {
+                return performQuery((GenericSelectQuery) message.getQueryPlan());
             }
             else {
                 throw new CayenneRuntimeException(
                         "Expected a GenericSelectQuery for selecting query, got: "
-                                + message.getQuery());
+                                + message.getQueryPlan());
             }
         }
         else {
-            return performNonSelectingQuery(message.getQuery());
+            return performNonSelectingQuery(message.getQueryPlan());
         }
     }
 }

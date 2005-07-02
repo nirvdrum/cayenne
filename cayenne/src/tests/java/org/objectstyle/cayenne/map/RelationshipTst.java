@@ -56,44 +56,34 @@
 package org.objectstyle.cayenne.map;
 
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.util.XMLEncoder;
 
 public class RelationshipTst extends CayenneTestCase {
-    protected Relationship rel;
-
-    public void setUp() throws Exception {
-        // create an anonymous inner Relationship subclass, since Relationship is abstract
-        rel = new Relationship() {
-            public Entity getTargetEntity() {
-                return null;
-            }
-
-            public void encodeAsXML(XMLEncoder encoder) {
-
-            }
-        };
-    }
 
     public void testName() throws Exception {
+        Relationship rel = new MockRelationship();
+
         String tstName = "tst_name";
         rel.setName(tstName);
         assertEquals(tstName, rel.getName());
     }
 
-    public void testSourceEntity() throws Exception {
-        Entity tstEntity = new GenericTestEntity();
+    public void testSourceEntity() {
+        Relationship rel = new MockRelationship();
+        Entity tstEntity = new MockEntity();
         rel.setSourceEntity(tstEntity);
         assertSame(tstEntity, rel.getSourceEntity());
     }
 
-    public void testTargetEntity() throws Exception {
-        Entity tstEntity = new GenericTestEntity();
+    public void testTargetEntity() {
+        Relationship rel = new MockRelationship();
+        Entity tstEntity = new MockEntity();
         tstEntity.setName("abc");
         rel.setTargetEntity(tstEntity);
         assertSame("abc", rel.getTargetEntityName());
     }
 
-    public void testTargetEntityName() throws Exception {
+    public void testTargetEntityName() {
+        Relationship rel = new MockRelationship();
         rel.setTargetEntityName("abc");
         assertSame("abc", rel.getTargetEntityName());
     }

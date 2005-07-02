@@ -55,32 +55,33 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.Iterator;
-
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.util.XMLEncoder;
+import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
- * A helper class that implements all abstract Entity methods as noops.
- * Used as a mockup Entity test object in test cases.
- * 
  * @author Andrei Adamchik
  */
-public class GenericTestEntity extends Entity {
+public class MockObjRelationship extends ObjRelationship {
 
-    public void encodeAsXML(XMLEncoder encoder) {
+    protected ObjRelationship reverseRelationship;
 
+    public MockObjRelationship() {
+        super();
     }
 
-    public Iterator resolvePathComponents(Expression pathExp)
-        throws ExpressionException {
-        return null;
+    public MockObjRelationship(String name) {
+        super(name);
     }
 
-    public Expression translateToRelatedEntity(
-        Expression expression,
-        String relationshipPath) {
-        return null;
+    public ObjRelationship getReverseRelationship() {
+        return reverseRelationship;
+    }
+
+    public void setReverseRelationship(MockObjRelationship reverseRelationship) {
+        if (this.reverseRelationship != reverseRelationship) {
+            this.reverseRelationship = reverseRelationship;
+            if (reverseRelationship != null) {
+                reverseRelationship.setReverseRelationship(this);
+            }
+        }
     }
 }

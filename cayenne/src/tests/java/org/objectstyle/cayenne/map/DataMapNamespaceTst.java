@@ -59,7 +59,6 @@ import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.unit.util.MockMappingNamespace;
 
 /**
  * Test case for recursive lookup of DataMap resources via a parent

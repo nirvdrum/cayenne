@@ -61,67 +61,47 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.util.XMLEncoder;
 
 public class EntityTst extends CayenneTestCase {
-    protected Entity ent;
 
-    public void setUp() throws Exception {
-        ent = new GenericTestEntity();
-    }
-
-    public void testName() throws Exception {
+    public void testName() {
+        Entity entity = new MockEntity();
         String tstName = "tst_name";
-        ent.setName(tstName);
-        assertEquals(tstName, ent.getName());
+        entity.setName(tstName);
+        assertEquals(tstName, entity.getName());
     }
 
-    public void testAttribute() throws Exception {
-        Attribute attr = new Attribute() {
-            public String getNameToDisplay() {
-                return null;
-            }
-            public String getTypenameToDisplay() {
-                return null;
-            }
-            public void encodeAsXML(XMLEncoder encoder) {
+    public void testAttribute() {
+        Entity entity = new MockEntity();
+        Attribute attribute = new MockAttribute("tst_name");
 
-            }
-        };
-        attr.setName("tst_name");
-        ent.addAttribute(attr);
-        assertSame(attr, ent.getAttribute(attr.getName()));
+        entity.addAttribute(attribute);
+        assertSame(attribute, entity.getAttribute(attribute.getName()));
 
         // attribute must have its entity switched to our entity.
-        assertSame(ent, attr.getEntity());
+        assertSame(entity, attribute.getEntity());
 
         // remove attribute
-        ent.removeAttribute(attr.getName());
-        assertNull(ent.getAttribute(attr.getName()));
+        entity.removeAttribute(attribute.getName());
+        assertNull(entity.getAttribute(attribute.getName()));
     }
 
-    public void testRelationship() throws Exception {
-        Relationship rel = new Relationship() {
-            public Entity getTargetEntity() {
-                return null;
-            }
-            public void encodeAsXML(XMLEncoder encoder) {
+    public void testRelationship() {
+        Entity entity = new MockEntity();
+        Relationship rel = new MockRelationship("tst_name");
 
-            }
-        };
-        rel.setName("tst_name");
-        ent.addRelationship(rel);
-        assertSame(rel, ent.getRelationship(rel.getName()));
+        entity.addRelationship(rel);
+        assertSame(rel, entity.getRelationship(rel.getName()));
 
         // attribute must have its entity switched to our entity.
-        assertSame(ent, rel.getSourceEntity());
+        assertSame(entity, rel.getSourceEntity());
 
         // remove attribute
-        ent.removeRelationship(rel.getName());
-        assertNull(ent.getRelationship(rel.getName()));
+        entity.removeRelationship(rel.getName());
+        assertNull(entity.getRelationship(rel.getName()));
     }
 
-    public void testResolveBadObjPath1() throws Exception {
+    public void testResolveBadObjPath1() {
         // test invalid expression path
         Expression pathExpr = ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
         pathExpr.setOperand(0, "invalid.invalid");
@@ -141,7 +121,7 @@ public class EntityTst extends CayenneTestCase {
         }
     }
 
-    public void testResolveBadObjPath2() throws Exception {
+    public void testResolveBadObjPath2() {
         // test invalid expression type
         Expression badPathExpr = ExpressionFactory.expressionOfType(Expression.IN);
         badPathExpr.setOperand(0, "a.b.c");
@@ -156,7 +136,7 @@ public class EntityTst extends CayenneTestCase {
         }
     }
 
-    public void testResolveObjPath1() throws Exception {
+    public void testResolveObjPath1() {
         Expression pathExpr = ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
         pathExpr.setOperand(0, "galleryName");
 
@@ -173,7 +153,7 @@ public class EntityTst extends CayenneTestCase {
     }
 
     public void testRemoveAttribute() {
-        Entity entity = new GenericTestEntity();
+        Entity entity = new MockEntity();
 
         entity.setName("test");
         ObjAttribute attribute1 = new ObjAttribute("a1");

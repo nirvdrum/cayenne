@@ -53,35 +53,25 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.util;
+package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
  * @author Andrei Adamchik
  */
-public class MockObjRelationship extends ObjRelationship {
+public class MockAttribute extends Attribute {
 
-    protected ObjRelationship reverseRelationship;
-
-    public MockObjRelationship() {
+    public MockAttribute() {
         super();
     }
 
-    public MockObjRelationship(String name) {
+    public MockAttribute(String name) {
         super(name);
     }
 
-    public ObjRelationship getReverseRelationship() {
-        return reverseRelationship;
+    public void encodeAsXML(XMLEncoder encoder) {
     }
 
-    public void setReverseRelationship(MockObjRelationship reverseRelationship) {
-        if (this.reverseRelationship != reverseRelationship) {
-            this.reverseRelationship = reverseRelationship;
-            if (reverseRelationship != null) {
-                reverseRelationship.setReverseRelationship(this);
-            }
-        }
-    }
 }

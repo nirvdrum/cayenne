@@ -59,7 +59,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockMappingNamespace;
 
 public class DbRelationshipTst extends CayenneTestCase {
     protected DbEntity artistEnt;

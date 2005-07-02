@@ -56,35 +56,22 @@
 package org.objectstyle.cayenne.map;
 
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.util.XMLEncoder;
 
 public class AttributeTst extends CayenneTestCase {
-    protected Attribute attr;
-
-    public void setUp() throws Exception {
-        // create an anonymous inner Attribute subclass, since Attribute is abstract
-        attr = new Attribute() {
-            public String getNameToDisplay() {
-                return null;
-            }
-            public String getTypenameToDisplay() {
-                return null;
-            }
-            public void encodeAsXML(XMLEncoder encoder) {
-
-            }
-        };
-    }
 
     public void testName() throws Exception {
+        Attribute a = new MockAttribute();
+
         String tstName = "tst_name";
-        attr.setName(tstName);
-        assertEquals(tstName, attr.getName());
+        a.setName(tstName);
+        assertEquals(tstName, a.getName());
     }
 
     public void testEntity() throws Exception {
-        Entity tstEntity = new GenericTestEntity();
-        attr.setEntity(tstEntity);
-        assertSame(tstEntity, attr.getEntity());
+        Attribute a = new MockAttribute();
+
+        Entity tstEntity = new MockEntity();
+        a.setEntity(tstEntity);
+        assertSame(tstEntity, a.getEntity());
     }
 }
