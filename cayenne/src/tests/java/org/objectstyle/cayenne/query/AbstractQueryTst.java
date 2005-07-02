@@ -39,7 +39,6 @@ import junit.framework.TestCase;
 import org.apache.log4j.Level;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unit.util.MockAbstractQuery;
 
 public class AbstractQueryTst extends TestCase {
 

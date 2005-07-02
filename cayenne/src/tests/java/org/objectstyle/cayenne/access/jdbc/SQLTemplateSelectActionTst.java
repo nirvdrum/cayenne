@@ -63,12 +63,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataContextTestBase;
+import org.objectstyle.cayenne.access.MockOperationObserver;
 import org.objectstyle.cayenne.access.QueryResult;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockOperationObserver;
 
 /**
  * @author Andrei Adamchik

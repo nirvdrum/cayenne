@@ -58,10 +58,10 @@ package org.objectstyle.cayenne.query;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.MockDataObject;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.unit.util.MockDataObject;
 
 /**
  * @author Andrus Adamchik

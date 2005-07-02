@@ -60,6 +60,7 @@ import java.util.Collections;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.MockDataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.MockDataRowStore;
@@ -71,7 +72,6 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.MockQueryExecutionPlan;
-import org.objectstyle.cayenne.unit.util.MockDataObject;
 
 /**
  * @author Andrus Adamchik

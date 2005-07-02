@@ -53,119 +53,136 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.util;
+package org.objectstyle.cayenne.dba;
 
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Collection;
 
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.validation.ValidationResult;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.QueryTranslator;
+import org.objectstyle.cayenne.access.trans.QualifierTranslator;
+import org.objectstyle.cayenne.access.trans.QueryAssembler;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.query.BatchQuery;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 
 /**
  * @author Andrei Adamchik
  */
-public class MockDataObject implements DataObject {
+public class MockDbAdapter implements DbAdapter {
 
-    protected ObjectId objectId;
-    protected int persistenceState;
-    protected DataContext context;
-
-    public MockDataObject() {
-
+    public MockDbAdapter() {
+        super();
     }
 
-    public MockDataObject(DataContext context, ObjectId id, int persistenceState) {
-        this.context = context;
-        this.objectId = id;
-        this.persistenceState = persistenceState;
-    }
-
-    public DataContext getDataContext() {
-        return context;
-    }
-
-    public void setDataContext(DataContext context) {
-        this.context = context;
-    }
-
-    public ObjectId getObjectId() {
-        return objectId;
-    }
-
-    public void setObjectId(ObjectId objectId) {
-        this.objectId = objectId;
-    }
-
-    public int getPersistenceState() {
-        return persistenceState;
-    }
-
-    public void setPersistenceState(int newState) {
-        this.persistenceState = newState;
-    }
-
-    public void writePropertyDirectly(String propertyName, Object val) {
-    }
-
-    public Object readPropertyDirectly(String propertyName) {
+    public String getBatchTerminator() {
         return null;
     }
 
-    public Object readNestedProperty(String path) {
+    /**
+     * @deprecated Since 1.2
+     */
+    public DataNode createDataNode(String name) {
         return null;
     }
 
-    public Object readProperty(String propName) {
+    public QueryTranslator getQueryTranslator(Query query) throws Exception {
         return null;
     }
 
-    public void writeProperty(String propName, Object val) {
-    }
-
-    public DataObject readToOneDependentTarget(String relName) {
+    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
         return null;
     }
 
-    public void addToManyTarget(String relName, DataObject val, boolean setReverse) {
-    }
-
-    public void removeToManyTarget(String relName, DataObject val, boolean setReverse) {
-    }
-
-    public void setToOneTarget(String relName, DataObject val, boolean setReverse) {
-    }
-
-    public void setToOneDependentTarget(String relName, DataObject val) {
-    }
-
-    public Map getCommittedSnapshot() {
+    public SQLAction getAction(Query query, DataNode node) {
         return null;
     }
 
-    public Map getCurrentSnapshot() {
+    public boolean supportsFkConstraints() {
+        return false;
+    }
+
+    public boolean supportsUniqueConstraints() {
+        return false;
+    }
+
+    public boolean supportsGeneratedKeys() {
+        return false;
+    }
+
+    public boolean supportsBatchUpdates() {
+        return false;
+    }
+
+    public String dropTable(DbEntity ent) {
         return null;
     }
 
-    public void fetchFinished() {
+    public String createTable(DbEntity ent) {
+        return null;
     }
 
-    public long getSnapshotVersion() {
-        return 0;
+    public String createUniqueConstraint(DbEntity source, Collection columns) {
+        return null;
     }
 
-    public void setSnapshotVersion(long snapshotVersion) {
+    public String createFkConstraint(DbRelationship rel) {
+        return null;
     }
 
-    public void resolveFault() {
+    public String[] externalTypesForJdbcType(int type) {
+        return null;
     }
 
-    public void validateForInsert(ValidationResult validationResult) {
+    public ExtendedTypeMap getExtendedTypes() {
+        return null;
     }
 
-    public void validateForUpdate(ValidationResult validationResult) {
+    public PkGenerator getPkGenerator() {
+        return null;
     }
 
-    public void validateForDelete(ValidationResult validationResult) {
+    public DbAttribute buildAttribute(
+            String name,
+            String typeName,
+            int type,
+            int size,
+            int precision,
+            boolean allowNulls) {
+        return null;
     }
+
+    public void bindParameter(
+            PreparedStatement statement,
+            Object object,
+            int pos,
+            int sqlType,
+            int precision) throws SQLException, Exception {
+    }
+
+    public String tableTypeForTable() {
+        return null;
+    }
+
+    public String tableTypeForView() {
+        return null;
+    }
+
+    public boolean shouldRunBatchQuery(
+            DataNode node,
+            Connection con,
+            BatchQuery query,
+            OperationObserver delegate) throws SQLException, Exception {
+        return false;
+    }
+
 }

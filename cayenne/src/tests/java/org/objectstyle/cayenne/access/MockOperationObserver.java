@@ -53,43 +53,70 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.util;
+package org.objectstyle.cayenne.access;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.query.BatchQuery;
+import org.apache.log4j.Level;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * @author Andrei Adamchik
+ * Helper class to process test queries results.
  */
-public class MockBatchQuery extends BatchQuery {
+public class MockOperationObserver implements OperationObserver {
 
-    public MockBatchQuery() {
-        super(new DbEntity("dummy"));
+    protected Map resultRows = new HashMap();
+    protected Map resultCounts = new HashMap();
+    protected Map resultBatch = new HashMap();
+
+    public List rowsForQuery(Query q) {
+        return (List) resultRows.get(q);
     }
 
-    public MockBatchQuery(DbEntity dbEntity) {
-        super(dbEntity);
+    public int countForQuery(Query q) {
+        Integer count = (Integer) resultCounts.get(q);
+        return (count != null) ? count.intValue() : -1;
     }
 
-    public List getDbAttributes() {
-        return null;
+    public int[] countsForQuery(Query q) {
+        return (int[]) resultBatch.get(q);
     }
 
-    public void reset() {
+    public void nextCount(Query query, int resultCount) {
+        resultCounts.put(query, new Integer(resultCount));
     }
 
-    public boolean next() {
+    public void nextDataRows(Query query, List dataRows) {
+        resultRows.put(query, dataRows);
+    }
+
+    public void nextBatchCount(Query query, int[] resultCount) {
+        resultBatch.put(query, resultCount);
+    }
+
+    public void nextGlobalException(Exception ex) {
+        throw new CayenneRuntimeException(ex);
+    }
+
+    public void nextQueryException(Query query, Exception ex) {
+        throw new CayenneRuntimeException(ex);
+    }
+
+    public void nextDataRows(Query q, ResultIterator it) {
+    }
+
+    public void nextGeneratedDataRows(Query query, ResultIterator keysIterator) {
+    }
+
+    public Level getLoggingLevel() {
+        return DefaultOperationObserver.DEFAULT_LOG_LEVEL;
+    }
+
+    public boolean isIteratedResult() {
         return false;
     }
-
-    public Object getValue(int valueIndex) {
-        return null;
-    }
-
-    public int size() {
-        return 0;
-    }
-
 }

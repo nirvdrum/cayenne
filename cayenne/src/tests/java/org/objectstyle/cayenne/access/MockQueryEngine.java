@@ -53,136 +53,96 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.util;
+package org.objectstyle.cayenne.access;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.QueryTranslator;
-import org.objectstyle.cayenne.access.trans.QualifierTranslator;
-import org.objectstyle.cayenne.access.trans.QueryAssembler;
-import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.PkGenerator;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.query.BatchQuery;
+import org.objectstyle.cayenne.access.QueryEngine;
+import org.objectstyle.cayenne.access.Transaction;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SQLAction;
 
 /**
+ * A query engine used for unit testing. Returns canned results instead of doing the
+ * actual query.
+ * 
  * @author Andrei Adamchik
  */
-public class MockDbAdapter implements DbAdapter {
+public class MockQueryEngine implements QueryEngine {
 
-    public MockDbAdapter() {
-        super();
+    // mockup the actual results
+    protected Map results = new HashMap();
+    protected EntityResolver entityResolver;
+    protected int runCount;
+
+    public MockQueryEngine() {
     }
 
-    public String getBatchTerminator() {
+    public MockQueryEngine(QueryEngine engine) {
+        this(engine.getEntityResolver());
+    }
+
+    public MockQueryEngine(EntityResolver resolver) {
+        this.entityResolver = resolver;
+    }
+
+    public void reset() {
+        runCount = 0;
+        results.clear();
+    }
+
+    public int getRunCount() {
+        return runCount;
+    }
+
+    public void addExpectedResult(Query query, List result) {
+        results.put(query, result);
+    }
+
+    public void performQueries(
+            Collection queries,
+            OperationObserver resultConsumer,
+            Transaction transaction) {
+        initWithPresetResults(queries, resultConsumer);
+    }
+
+    public void performQueries(Collection queries, OperationObserver resultConsumer) {
+        initWithPresetResults(queries, resultConsumer);
+    }
+
+    private void initWithPresetResults(
+            Collection queries,
+            OperationObserver resultConsumer) {
+
+        runCount++;
+
+        // stick preset results to the consumer
+        Iterator it = queries.iterator();
+        while (it.hasNext()) {
+            Query query = (Query) it.next();
+            resultConsumer.nextDataRows(query, (List) results.get(query));
+        }
+    }
+
+    public DataNode lookupDataNode(DataMap dataMap) {
         return null;
     }
 
-    /**
-     * @deprecated Since 1.2
-     */
-    public DataNode createDataNode(String name) {
-        return null;
+    public EntityResolver getEntityResolver() {
+        return entityResolver;
     }
 
-    public QueryTranslator getQueryTranslator(Query query) throws Exception {
-        return null;
+    public Collection getDataMaps() {
+        return (entityResolver != null)
+                ? entityResolver.getDataMaps()
+                : Collections.EMPTY_LIST;
     }
-
-    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
-        return null;
-    }
-
-    public SQLAction getAction(Query query, DataNode node) {
-        return null;
-    }
-
-    public boolean supportsFkConstraints() {
-        return false;
-    }
-
-    public boolean supportsUniqueConstraints() {
-        return false;
-    }
-
-    public boolean supportsGeneratedKeys() {
-        return false;
-    }
-
-    public boolean supportsBatchUpdates() {
-        return false;
-    }
-
-    public String dropTable(DbEntity ent) {
-        return null;
-    }
-
-    public String createTable(DbEntity ent) {
-        return null;
-    }
-
-    public String createUniqueConstraint(DbEntity source, Collection columns) {
-        return null;
-    }
-
-    public String createFkConstraint(DbRelationship rel) {
-        return null;
-    }
-
-    public String[] externalTypesForJdbcType(int type) {
-        return null;
-    }
-
-    public ExtendedTypeMap getExtendedTypes() {
-        return null;
-    }
-
-    public PkGenerator getPkGenerator() {
-        return null;
-    }
-
-    public DbAttribute buildAttribute(
-            String name,
-            String typeName,
-            int type,
-            int size,
-            int precision,
-            boolean allowNulls) {
-        return null;
-    }
-
-    public void bindParameter(
-            PreparedStatement statement,
-            Object object,
-            int pos,
-            int sqlType,
-            int precision) throws SQLException, Exception {
-    }
-
-    public String tableTypeForTable() {
-        return null;
-    }
-
-    public String tableTypeForView() {
-        return null;
-    }
-
-    public boolean shouldRunBatchQuery(
-            DataNode node,
-            Connection con,
-            BatchQuery query,
-            OperationObserver delegate) throws SQLException, Exception {
-        return false;
-    }
-
 }

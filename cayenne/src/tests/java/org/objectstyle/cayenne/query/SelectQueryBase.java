@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.query;
 
 import java.util.Collections;
 
+import org.objectstyle.cayenne.access.MockOperationObserver;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockOperationObserver;
 
 public abstract class SelectQueryBase extends CayenneTestCase {
 

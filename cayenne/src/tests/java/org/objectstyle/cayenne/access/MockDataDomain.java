@@ -53,19 +53,45 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.util;
 
-import org.objectstyle.cayenne.query.QualifiedQuery;
-import org.objectstyle.cayenne.query.SQLAction;
-import org.objectstyle.cayenne.query.SQLActionVisitor;
+package org.objectstyle.cayenne.access;
+
+import java.util.Collection;
+
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.QueryEngine;
+import org.objectstyle.cayenne.access.Transaction;
 
 /**
+ * A mockup DataDomain that delegates all queries to the underlying QueryEngine. Ideally
+ * there should be no need to use MockupDataDomain for testing, since MockupQueryEngine
+ * should safice. Unfortunately DataContext currently assumes that its parent QueryEngine
+ * is a DataDomain...
+ * 
  * @author Andrei Adamchik
  */
-public class MockQualifiedQuery extends QualifiedQuery {
+public class MockDataDomain extends DataDomain {
 
-    public SQLAction createSQLAction(SQLActionVisitor visitor) {
-        return null;
+    protected QueryEngine engine;
+
+    public MockDataDomain(QueryEngine engine) {
+        this("test", engine);
     }
 
+    public MockDataDomain(String name, QueryEngine engine) {
+        super(name);
+        this.engine = engine;
+        this.entityResolver = engine.getEntityResolver();
+    }
+
+    /**
+     * Delegates query to the internal engine.
+     */
+    public void performQueries(
+            Collection queries,
+            OperationObserver resultConsumer,
+            Transaction transaction) {
+        engine.performQueries(queries, resultConsumer, transaction);
+    }
 }

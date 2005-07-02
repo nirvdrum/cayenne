@@ -5,8 +5,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockDataDomain;
-import org.objectstyle.cayenne.unit.util.MockQueryEngine;
 
 /**
  * @author Andrei Adamchik

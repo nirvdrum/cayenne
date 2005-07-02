@@ -61,8 +61,6 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockDataDomain;
-import org.objectstyle.cayenne.unit.util.MockQueryEngine;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**

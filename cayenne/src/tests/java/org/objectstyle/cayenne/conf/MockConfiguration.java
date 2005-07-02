@@ -53,34 +53,47 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.util;
+package org.objectstyle.cayenne.conf;
 
-import java.sql.CallableStatement;
-import java.sql.ResultSet;
+import java.io.InputStream;
 
-import org.objectstyle.cayenne.access.types.AbstractType;
+import org.apache.commons.lang.NotImplementedException;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
  * @author Andrei Adamchik
  */
-public class MockAbstractType extends AbstractType {
+public class MockConfiguration extends Configuration {
 
-    protected String className;
-
-    public MockAbstractType(String className) {
-        this.className = className;
+    public MockConfiguration() {
+        super();
     }
 
-    public String getClassName() {
-        return className;
+    public boolean canInitialize() {
+        return true;
     }
 
-    public Object materializeObject(CallableStatement rs, int index, int type)
-            throws Exception {
+    public void didInitialize() {
+    }
+
+    protected InputStream getDomainConfiguration() {
+        throw new NotImplementedException(
+                "this is an in-memory mockup...'getDomainConfiguration' is not implemented.");
+    }
+
+    protected InputStream getMapConfiguration(String name) {
         return null;
     }
 
-    public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
+    protected ResourceLocator getResourceLocator() {
         return null;
+    }
+
+    protected InputStream getViewConfiguration(String location) {
+        return null;
+    }
+
+    public void initialize() throws Exception {
     }
 }

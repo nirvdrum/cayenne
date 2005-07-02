@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne.query;
 
+import org.objectstyle.cayenne.access.MockQueryEngine;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.unit.util.MockQueryEngine;
 
 public class MockQueryRouter implements QueryRouter {
 

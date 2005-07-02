@@ -53,20 +53,34 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.util;
+package org.objectstyle.cayenne.access.types;
 
-import org.objectstyle.cayenne.query.AbstractQuery;
-import org.objectstyle.cayenne.query.SQLAction;
-import org.objectstyle.cayenne.query.SQLActionVisitor;
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
 
+import org.objectstyle.cayenne.access.types.AbstractType;
 
 /**
  * @author Andrei Adamchik
  */
-public class MockAbstractQuery extends AbstractQuery {
+public class MockAbstractType extends AbstractType {
 
-    public SQLAction createSQLAction(SQLActionVisitor visitor) {
+    protected String className;
+
+    public MockAbstractType(String className) {
+        this.className = className;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public Object materializeObject(CallableStatement rs, int index, int type)
+            throws Exception {
         return null;
     }
 
+    public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
+        return null;
+    }
 }

@@ -64,8 +64,6 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockDataDomain;
-import org.objectstyle.cayenne.unit.util.MockQueryEngine;
 
 /**
  * @author Andrei Adamchik

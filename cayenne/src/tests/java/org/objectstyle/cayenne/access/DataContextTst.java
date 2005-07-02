@@ -85,7 +85,6 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unit.util.MockOperationObserver;
 
 public class DataContextTst extends DataContextTestBase {
 

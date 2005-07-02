@@ -53,96 +53,19 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.util;
+package org.objectstyle.cayenne.query;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.access.Transaction;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QualifiedQuery;
+import org.objectstyle.cayenne.query.SQLAction;
+import org.objectstyle.cayenne.query.SQLActionVisitor;
 
 /**
- * A query engine used for unit testing. Returns canned results instead of doing the
- * actual query.
- * 
  * @author Andrei Adamchik
  */
-public class MockQueryEngine implements QueryEngine {
+public class MockQualifiedQuery extends QualifiedQuery {
 
-    // mockup the actual results
-    protected Map results = new HashMap();
-    protected EntityResolver entityResolver;
-    protected int runCount;
-
-    public MockQueryEngine() {
-    }
-
-    public MockQueryEngine(QueryEngine engine) {
-        this(engine.getEntityResolver());
-    }
-
-    public MockQueryEngine(EntityResolver resolver) {
-        this.entityResolver = resolver;
-    }
-
-    public void reset() {
-        runCount = 0;
-        results.clear();
-    }
-
-    public int getRunCount() {
-        return runCount;
-    }
-
-    public void addExpectedResult(Query query, List result) {
-        results.put(query, result);
-    }
-
-    public void performQueries(
-            Collection queries,
-            OperationObserver resultConsumer,
-            Transaction transaction) {
-        initWithPresetResults(queries, resultConsumer);
-    }
-
-    public void performQueries(Collection queries, OperationObserver resultConsumer) {
-        initWithPresetResults(queries, resultConsumer);
-    }
-
-    private void initWithPresetResults(
-            Collection queries,
-            OperationObserver resultConsumer) {
-
-        runCount++;
-
-        // stick preset results to the consumer
-        Iterator it = queries.iterator();
-        while (it.hasNext()) {
-            Query query = (Query) it.next();
-            resultConsumer.nextDataRows(query, (List) results.get(query));
-        }
-    }
-
-    public DataNode lookupDataNode(DataMap dataMap) {
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
         return null;
     }
 
-    public EntityResolver getEntityResolver() {
-        return entityResolver;
-    }
-
-    public Collection getDataMaps() {
-        return (entityResolver != null)
-                ? entityResolver.getDataMaps()
-                : Collections.EMPTY_LIST;
-    }
 }

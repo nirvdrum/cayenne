@@ -53,45 +53,43 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.query;
 
-package org.objectstyle.cayenne.unit.util;
+import java.util.List;
 
-import java.util.Collection;
-
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.access.Transaction;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
- * A mockup DataDomain that delegates all queries to the underlying QueryEngine. Ideally
- * there should be no need to use MockupDataDomain for testing, since MockupQueryEngine
- * should safice. Unfortunately DataContext currently assumes that its parent QueryEngine
- * is a DataDomain...
- * 
  * @author Andrei Adamchik
  */
-public class MockDataDomain extends DataDomain {
+public class MockBatchQuery extends BatchQuery {
 
-    protected QueryEngine engine;
-
-    public MockDataDomain(QueryEngine engine) {
-        this("test", engine);
+    public MockBatchQuery() {
+        super(new DbEntity("dummy"));
     }
 
-    public MockDataDomain(String name, QueryEngine engine) {
-        super(name);
-        this.engine = engine;
-        this.entityResolver = engine.getEntityResolver();
+    public MockBatchQuery(DbEntity dbEntity) {
+        super(dbEntity);
     }
 
-    /**
-     * Delegates query to the internal engine.
-     */
-    public void performQueries(
-            Collection queries,
-            OperationObserver resultConsumer,
-            Transaction transaction) {
-        engine.performQueries(queries, resultConsumer, transaction);
+    public List getDbAttributes() {
+        return null;
     }
+
+    public void reset() {
+    }
+
+    public boolean next() {
+        return false;
+    }
+
+    public Object getValue(int valueIndex) {
+        return null;
+    }
+
+    public int size() {
+        return 0;
+    }
+
 }

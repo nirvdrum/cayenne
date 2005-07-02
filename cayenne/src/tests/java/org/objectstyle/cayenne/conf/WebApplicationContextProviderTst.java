@@ -64,7 +64,6 @@ import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.unit.util.MockConfiguration;
 import org.objectstyle.cayenne.unit.util.ThreadedTestHelper;
 
 import com.mockrunner.mock.web.MockHttpServletRequest;

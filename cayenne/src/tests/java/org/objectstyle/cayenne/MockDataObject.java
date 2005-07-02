@@ -53,55 +53,119 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.util;
+package org.objectstyle.cayenne;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
-/** 
- * Helper class to process test queries results. 
+/**
+ * @author Andrei Adamchik
  */
-public class MockOperationObserver extends DefaultOperationObserver {
+public class MockDataObject implements DataObject {
 
-    protected Map resultRows = new HashMap();
-    protected Map resultCounts = new HashMap();
-    protected Map resultBatch = new HashMap();
+    protected ObjectId objectId;
+    protected int persistenceState;
+    protected DataContext context;
 
-    public List rowsForQuery(Query q) {
-        return (List) resultRows.get(q);
+    public MockDataObject() {
+
     }
 
-    public int countForQuery(Query q) {
-        Integer count = (Integer) resultCounts.get(q);
-        return (count != null) ? count.intValue() : -1;
+    public MockDataObject(DataContext context, ObjectId id, int persistenceState) {
+        this.context = context;
+        this.objectId = id;
+        this.persistenceState = persistenceState;
     }
 
-    public int[] countsForQuery(Query q) {
-        return (int[]) resultBatch.get(q);
+    public DataContext getDataContext() {
+        return context;
     }
 
-    public void nextCount(Query query, int resultCount) {
-        resultCounts.put(query, new Integer(resultCount));
+    public void setDataContext(DataContext context) {
+        this.context = context;
     }
 
-    public void nextDataRows(Query query, List dataRows) {
-        resultRows.put(query, dataRows);
+    public ObjectId getObjectId() {
+        return objectId;
     }
 
-    public void nextBatchCount(Query query, int[] resultCount) {
-        resultBatch.put(query, resultCount);
+    public void setObjectId(ObjectId objectId) {
+        this.objectId = objectId;
     }
 
-    public void nextGlobalException(Exception ex) {
-        throw new CayenneRuntimeException(ex);
+    public int getPersistenceState() {
+        return persistenceState;
     }
 
-    public void nextQueryException(Query query, Exception ex) {
-        throw new CayenneRuntimeException(ex);
+    public void setPersistenceState(int newState) {
+        this.persistenceState = newState;
+    }
+
+    public void writePropertyDirectly(String propertyName, Object val) {
+    }
+
+    public Object readPropertyDirectly(String propertyName) {
+        return null;
+    }
+
+    public Object readNestedProperty(String path) {
+        return null;
+    }
+
+    public Object readProperty(String propName) {
+        return null;
+    }
+
+    public void writeProperty(String propName, Object val) {
+    }
+
+    public DataObject readToOneDependentTarget(String relName) {
+        return null;
+    }
+
+    public void addToManyTarget(String relName, DataObject val, boolean setReverse) {
+    }
+
+    public void removeToManyTarget(String relName, DataObject val, boolean setReverse) {
+    }
+
+    public void setToOneTarget(String relName, DataObject val, boolean setReverse) {
+    }
+
+    public void setToOneDependentTarget(String relName, DataObject val) {
+    }
+
+    public Map getCommittedSnapshot() {
+        return null;
+    }
+
+    public Map getCurrentSnapshot() {
+        return null;
+    }
+
+    public void fetchFinished() {
+    }
+
+    public long getSnapshotVersion() {
+        return 0;
+    }
+
+    public void setSnapshotVersion(long snapshotVersion) {
+    }
+
+    public void resolveFault() {
+    }
+
+    public void validateForInsert(ValidationResult validationResult) {
+    }
+
+    public void validateForUpdate(ValidationResult validationResult) {
+    }
+
+    public void validateForDelete(ValidationResult validationResult) {
     }
 }

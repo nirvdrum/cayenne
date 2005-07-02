@@ -37,7 +37,6 @@ package org.objectstyle.cayenne.query;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockQualifiedQuery;
 
 public class QualifiedQueryTst extends CayenneTestCase {
 

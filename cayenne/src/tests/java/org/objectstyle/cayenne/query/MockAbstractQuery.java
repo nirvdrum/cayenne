@@ -53,47 +53,20 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.util;
+package org.objectstyle.cayenne.query;
 
-import java.io.InputStream;
+import org.objectstyle.cayenne.query.AbstractQuery;
+import org.objectstyle.cayenne.query.SQLAction;
+import org.objectstyle.cayenne.query.SQLActionVisitor;
 
-import org.apache.commons.lang.NotImplementedException;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
  * @author Andrei Adamchik
  */
-public class MockConfiguration extends Configuration {
+public class MockAbstractQuery extends AbstractQuery {
 
-    public MockConfiguration() {
-        super();
-    }
-
-    public boolean canInitialize() {
-        return true;
-    }
-
-    public void didInitialize() {
-    }
-
-    protected InputStream getDomainConfiguration() {
-        throw new NotImplementedException(
-                "this is an in-memory mockup...'getDomainConfiguration' is not implemented.");
-    }
-
-    protected InputStream getMapConfiguration(String name) {
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
         return null;
     }
 
-    protected ResourceLocator getResourceLocator() {
-        return null;
-    }
-
-    protected InputStream getViewConfiguration(String location) {
-        return null;
-    }
-
-    public void initialize() throws Exception {
-    }
 }

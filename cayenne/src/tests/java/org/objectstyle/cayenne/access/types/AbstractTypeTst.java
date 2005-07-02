@@ -60,7 +60,6 @@ import java.sql.Types;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.unit.util.MockAbstractType;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 import com.mockrunner.mock.jdbc.MockConnection;

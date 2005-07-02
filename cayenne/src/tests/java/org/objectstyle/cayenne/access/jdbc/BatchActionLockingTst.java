@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.objectstyle.cayenne.access.MockOperationObserver;
 import org.objectstyle.cayenne.access.OptimisticLockException;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.dba.DbAdapter;
@@ -71,7 +72,6 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.DeleteBatchQuery;
 import org.objectstyle.cayenne.testdo.locking.SimpleLockingTest;
 import org.objectstyle.cayenne.unit.LockingTestCase;
-import org.objectstyle.cayenne.unit.util.MockOperationObserver;
 
 import com.mockrunner.jdbc.PreparedStatementResultSetHandler;
 import com.mockrunner.mock.jdbc.MockConnection;
