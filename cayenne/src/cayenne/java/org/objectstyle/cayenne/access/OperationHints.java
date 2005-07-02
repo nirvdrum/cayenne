@@ -52,31 +52,29 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 
 package org.objectstyle.cayenne.access;
 
 import org.apache.log4j.Level;
 
 /**
- * Defines an API that allows QueryEngine to obtain information about 
- * query execution. Defines query running strategies, logging, etc. 
+ * Defines API that allows QueryEngine to obtain information about query execution
+ * strategy.
  * 
  * @author Andrei Adamchik
  */
 public interface OperationHints {
-    
-    /** 
-     * Returns a log level level that should be used when 
-     * logging query execution. 
-     */ 
+
+    /**
+     * Returns a log level that should be used when logging query execution.
+     */
     public Level getLoggingLevel();
-    
-    /** 
+
+    /**
      * Returns <code>true</code> to indicate that any results of a select operation
      * should be returned as a ResultIterator. <code>false</code> is returned when the
      * results are expected as a list.
      */
     public boolean isIteratedResult();
 }
-

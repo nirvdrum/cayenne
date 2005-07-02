@@ -61,63 +61,56 @@ import java.util.List;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * Defines a set of callback methods for a QueryEngine to notify interested object about
- * different stages of queries execution. Superinterface, OperationHints, defines
- * information methods that are needed to define query execution strategy. This Interface
- * adds callback methods.
- * <p>
- * Implementing objects are passed to a QueryEngine that will execute one or more queries.
- * QueryEngine will pass results of the execution of any kind of queries - selects,
- * updates, store proc. calls, etc.. to the interested objects. This includes result
- * counts, created objects, thrown exceptions, etc.
- * </p>
- * <p>
- * <i>For more information see <a href="../../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide. </a> </i>
- * </p>
+ * Defines a set of callback methods that allow QueryEngine to pass back query results and
+ * notify caller about exceptions.
  * 
  * @see org.objectstyle.cayenne.access.QueryEngine
  * @author Andrei Adamchik
  */
-// TODO: need a name that better reflects the functionality, 
-// e.g. OperationContext.
+// TODO: need a name that better reflects the functionality,
+// e.g. OperationContext or QueryContext
 public interface OperationObserver extends OperationHints {
 
     /**
-     * Invoked after the update (can be insert, delete or update query) is executed.
+     * Callback method invoked after an updating query is executed.
      */
     public void nextCount(Query query, int resultCount);
 
     /**
-     * Invoked after the batch update is executed
+     * Callback method invoked after a batch update is executed.
      */
     public void nextBatchCount(Query query, int[] resultCount);
 
     /**
-     * Invoked after each ResultSet is read.
+     * Callback method invoked for each processed ResultSet.
      */
     public void nextDataRows(Query query, List dataRows);
 
     /**
-     * Invoked after each ResultSet is obtained. This method is called instead of
-     * "nextDataRows(Query,List)", if a query required results to be returned as a
-     * ResultIterator. OperationObserver is responsible for closing the ResultIterator.
+     * Callback method invoked for each opened ResultIterator. If this observer requested
+     * results to be returned as a ResultIterator, this method is invoked instead of
+     * "nextDataRows(Query,List)". OperationObserver is responsible for closing the
+     * ResultIterators passed via this method.
      */
     public void nextDataRows(Query q, ResultIterator it);
 
     /**
-     * Invoked after each batch of values generated on update is read.
+     * Callback method invoked after each batch of generated values is read durring an
+     * update.
      * 
      * @since 1.2
      */
     public void nextGeneratedDataRows(Query query, ResultIterator keysIterator);
 
-    /** Invoked when an exception occurs during query execution. */
+    /**
+     * Callback method invoked on exceptions that happen during an execution of a specific
+     * query.
+     */
     public void nextQueryException(Query query, Exception ex);
 
     /**
-     * Invoked when a "global" exception occurred, such as JDBC connection exception, etc.
+     * Callback method invoked on exceptions that are not tied to a specific query
+     * execution, such as JDBC connection exceptions, etc.
      */
     public void nextGlobalException(Exception ex);
 }
-
