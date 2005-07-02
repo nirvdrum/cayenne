@@ -56,9 +56,9 @@
 package org.objectstyle.cayenne.service;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataRowStore;
+import org.objectstyle.cayenne.access.PersistenceContext;
 import org.objectstyle.cayenne.distribution.ClientMessageHandler;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.QueryMessage;

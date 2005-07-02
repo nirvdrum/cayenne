@@ -68,7 +68,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;

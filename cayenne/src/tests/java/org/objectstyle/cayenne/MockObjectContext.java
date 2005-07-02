@@ -58,6 +58,7 @@ package org.objectstyle.cayenne;
 import java.util.Collection;
 import java.util.List;
 
+import org.objectstyle.cayenne.access.MockPersistenceContext;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
@@ -92,9 +93,6 @@ public class MockObjectContext extends MockPersistenceContext implements ObjectC
     }
 
     public void commitChanges() {
-    }
-
-    public void commitChangesInContext(ObjectContext context) {
     }
 
     public void deleteObject(Persistent object) {

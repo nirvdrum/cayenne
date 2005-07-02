@@ -53,45 +53,14 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.Transaction;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.MockObjectContext;
 
-/**
- * @author Andrus Adamchik
- */
-public class MockPersistenceContext implements PersistenceContext {
+public class MockHierachicalObjectContext extends MockObjectContext implements
+        HierarchicalObjectContext {
 
-    protected boolean commitChangesInContext;
-    protected boolean performQuery;
-    protected boolean performQueryInTransaction;
-
-    public void commitChangesInContext(ObjectContext context) {
-        this.commitChangesInContext = true;
-    }
-
-    public boolean isCommitChangesInContext() {
-        return commitChangesInContext;
-    }
-
-    public boolean isPerformQuery() {
-        return performQuery;
-    }
-
-    public boolean isPerformQueryInTransaction() {
-        return performQueryInTransaction;
-    }
-
-    public void performQuery(
-            QueryExecutionPlan query,
-            OperationObserver observer,
-            Transaction transaction) {
-        performQueryInTransaction = true;
-    }
-
-    public void performQuery(QueryExecutionPlan query, OperationObserver observer) {
-        performQuery = true;
+    public PersistenceContext getParentContext() {
+        return null;
     }
 }

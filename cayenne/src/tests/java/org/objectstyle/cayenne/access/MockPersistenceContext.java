@@ -53,47 +53,44 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.access;
 
-import java.io.Serializable;
-
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.Transaction;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
- * An interface defining methods to access a persistent store in Cayenne. Users would
- * normally work directly with a subinterface -
- * {@link org.objectstyle.cayenne.ObjectContext}. PersistenceContext API is designed to
- * serve child ObjectContexts. It makes possible building hierarchies of ObjectContexts.
- * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-public interface PersistenceContext extends Serializable {
+public class MockPersistenceContext implements PersistenceContext {
 
-    /**
-     * Merges changes from the ObjectContext parameter. This method is used by child
-     * ObjectContexts to commit their objects to parent.
-     */
-    void commitChangesInContext(ObjectContext context);
+    protected boolean commitChangesInContext;
+    protected boolean performQuery;
+    protected boolean performQueryInTransaction;
 
-    /**
-     * Executes a query using its own preferred transactional behavior.
-     * 
-     * @see org.objectstyle.cayenne.query.QueryChain
-     */
-    void performQuery(QueryExecutionPlan query, OperationObserver observer);
+    public void commitChangesInContext(ObjectContext context) {
+        this.commitChangesInContext = true;
+    }
 
-    /**
-     * Executes a query within a given transaction. Note that if there is a need to run
-     * multiple queries, a decorator can be created that implements Query, but internally
-     * resolves to more than one actual query.
-     * 
-     * @see org.objectstyle.cayenne.query.QueryChain
-     */
-    void performQuery(
+    public boolean isCommitChangesInContext() {
+        return commitChangesInContext;
+    }
+
+    public boolean isPerformQuery() {
+        return performQuery;
+    }
+
+    public boolean isPerformQueryInTransaction() {
+        return performQueryInTransaction;
+    }
+
+    public void performQuery(
             QueryExecutionPlan query,
             OperationObserver observer,
-            Transaction transaction);
+            Transaction transaction) {
+        performQueryInTransaction = true;
+    }
+
+    public void performQuery(QueryExecutionPlan query, OperationObserver observer) {
+        performQuery = true;
+    }
 }

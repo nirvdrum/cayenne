@@ -66,15 +66,15 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.TempObjectId;
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.distribution.CayenneConnector;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.QueryMessage;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
- * An ObjectContext that works
+ * An client tier ObjectContext implementation in a 3+ tier Cayenne application. Instead
+ * of using regular Cayenne stack for database updates ClientObjectContext uses a
+ * connector object to communicate with server-side peer.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -118,16 +118,6 @@ public class ClientObjectContext implements ObjectContext {
                     : Collections.EMPTY_LIST;
             objectStore.objectsCommitted(idCollection);
         }
-    }
-
-    /**
-     * Merges another ObjectContext changes to self. This method is performed locally and
-     * doesn't involve communication with the server.
-     */
-    public void commitChangesInContext(ObjectContext context) {
-        // TODO: implement
-        throw new CayenneRuntimeException(
-                "ObjectContext hierarchy is not supported (yet).");
     }
 
     /**
@@ -231,18 +221,5 @@ public class ClientObjectContext implements ObjectContext {
 
     public Collection newObjects() {
         return objectStore.objectsInState(PersistenceState.NEW);
-    }
-
-    // *** Unsupported stuff...
-
-    public void performQuery(QueryExecutionPlan query, OperationObserver observer) {
-        throw new CayenneClientException("Not supported on the client.");
-    }
-
-    public void performQuery(
-            QueryExecutionPlan query,
-            OperationObserver observer,
-            Transaction transaction) {
-        throw new CayenneClientException("Not supported on the client.");
     }
 }

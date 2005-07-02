@@ -65,15 +65,15 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataRowStore;
+import org.objectstyle.cayenne.access.HierarchicalObjectContext;
 import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.PersistenceContext;
 import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
@@ -89,7 +89,7 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
  * @author Andrus Adamchik
  */
 // TODO: merge into DataContext
-class ObjectDataContext extends DataContext implements ObjectContext {
+class ObjectDataContext extends DataContext implements HierarchicalObjectContext {
 
     PersistenceContext parentContext;
     EntityResolver entityResolver;
@@ -295,44 +295,7 @@ class ObjectDataContext extends DataContext implements ObjectContext {
         return new ObjectDataContextContextSelectAction(this).performQuery(query);
     }
 
-    /**
-     * Delegates execution to parent.
-     */
-    public void performQuery(QueryExecutionPlan query, OperationObserver resultConsumer) {
-
-        if (this.getParentContext() == null) {
-            throw new CayenneRuntimeException(
-                    "Can't run queries - parent PersistenceContext is not set.");
-        }
-
-        // TODO: this method doesn't check the DataContextDelegate ... do we need
-        // a new delegate interface for ObjectContext?
-
-        this.getParentContext().performQuery(query, resultConsumer);
-    }
-
-    public void performQuery(
-            QueryExecutionPlan query,
-            OperationObserver resultConsumer,
-            Transaction transaction) {
-
-        if (this.getParentContext() == null) {
-            throw new CayenneRuntimeException(
-                    "Can't run queries - parent PersistenceContext is not set.");
-        }
-
-        // TODO: this method doesn't check the DataContextDelegate ... do we need
-        // a new delegate interface for ObjectContext?
-
-        this.getParentContext().performQuery(query, resultConsumer, transaction);
-    }
-
     // *** Unfinished stuff
-
-    public void commitChangesInContext(ObjectContext context) {
-        // TODO: implement me
-        throw new CayenneRuntimeException("Nested contexts are not supported yet");
-    }
 
     public void objectWillRead(Persistent object, String property) {
         // TODO: implement me

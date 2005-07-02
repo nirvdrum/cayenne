@@ -115,7 +115,7 @@ class ObjectDataContextContextSelectAction {
 
         // must fetch...
         SelectObserver observer = new SelectObserver(selectQuery.getLoggingLevel());
-        context.performQuery(selectQuery, observer);
+        context.getParentContext().performQuery(selectQuery, observer);
 
         List results;
 

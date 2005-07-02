@@ -53,91 +53,21 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.access;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.ObjectContext;
 
 /**
- * A variety of used directly by the application code. ObjectContext tracks uncommitted
- * changes to objects and can commit them in a single method call.
- * <p>
- * <i>Currently this interface is only used by client-side objects. The plan is to merge
- * it with DataContext. </i>
- * </p>
+ * An ObjectContext that is a part of Cayenne access stack, meaning it "knows" its parent
+ * PersistenceContext.
  * 
- * @since 1.2
  * @author Andrus Adamchik
+ * @since 1.2
  */
-public interface ObjectContext extends Serializable {
+public interface HierarchicalObjectContext extends ObjectContext {
 
     /**
-     * Returns a collection of objects that are registered with this ObjectContext and
-     * have a state PersistenceState.NEW
+     * Returns parent PersistenceContext.
      */
-    Collection newObjects();
-
-    /**
-     * Returns a collection of objects that are registered with this ObjectContext and
-     * have a state PersistenceState.DELETED
-     */
-    Collection deletedObjects();
-
-    /**
-     * Returns a collection of objects that are registered with this ObjectContext and
-     * have a state PersistenceState.MODIFIED
-     */
-    Collection modifiedObjects();
-
-    /**
-     * Returns a collection of MODIFIED, DELETED or NEW objects.
-     */
-    Collection uncommittedObjects();
-
-    /**
-     * Creates a new persistent object scheduled to be inserted on next commit.
-     */
-    Persistent newObject(Class persistentClass);
-
-    /**
-     * Schedules a persistent object for deletion on next commit.
-     */
-    void deleteObject(Persistent object);
-
-    /**
-     * A callback method that is invoked whenver a persistent object property is about to
-     * be read. Allows ObjectContext to resolve faults on demand.
-     */
-    void objectWillRead(Persistent object, String property);
-
-    /**
-     * A callback method that is invoked whenver a persistent object property is about to
-     * be changed. Allows ObjectContext to track object changes.
-     */
-    void objectWillWrite(
-            Persistent object,
-            String property,
-            Object oldValue,
-            Object newValue);
-
-    /**
-     * Commits changes made to this ObjectContext persistent objects. If an ObjectContext
-     * is a part of an ObjectContext hierarchy, this method call triggers commit all the
-     * way to the external data store.
-     */
-    void commitChanges();
-
-    /**
-     * Executes a selecting query, returning the result.
-     */
-    List performQuery(QueryExecutionPlan query);
-
-    /**
-     * Executes a non-selecting query returning result counts.
-     */
-    public int[] performNonSelectingQuery(QueryExecutionPlan query);
-
+    PersistenceContext getParentContext();
 }

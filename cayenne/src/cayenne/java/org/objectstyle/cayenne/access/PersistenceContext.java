@@ -53,91 +53,45 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.access;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
 
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
- * A variety of used directly by the application code. ObjectContext tracks uncommitted
- * changes to objects and can commit them in a single method call.
- * <p>
- * <i>Currently this interface is only used by client-side objects. The plan is to merge
- * it with DataContext. </i>
- * </p>
+ * An interface exposed by Cayenne access stack objects to define their interaction with
+ * child ObjectContexts. If a child ObjectContext is a PersistenceContext itself, then it
+ * would allow nesting of multiple levels of contexts.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface ObjectContext extends Serializable {
+public interface PersistenceContext extends Serializable {
 
     /**
-     * Returns a collection of objects that are registered with this ObjectContext and
-     * have a state PersistenceState.NEW
+     * Merges changes from the ObjectContext parameter. This method is used by child
+     * ObjectContexts to commit their objects to parent.
      */
-    Collection newObjects();
+    void commitChangesInContext(ObjectContext context);
 
     /**
-     * Returns a collection of objects that are registered with this ObjectContext and
-     * have a state PersistenceState.DELETED
+     * Executes a query using its own preferred transactional behavior.
+     * 
+     * @see org.objectstyle.cayenne.query.QueryChain
      */
-    Collection deletedObjects();
+    void performQuery(QueryExecutionPlan query, OperationObserver observer);
 
     /**
-     * Returns a collection of objects that are registered with this ObjectContext and
-     * have a state PersistenceState.MODIFIED
+     * Executes a query within a given transaction. Note that if there is a need to run
+     * multiple queries, a decorator can be created that implements Query, but internally
+     * resolves to more than one actual query.
+     * 
+     * @see org.objectstyle.cayenne.query.QueryChain
      */
-    Collection modifiedObjects();
-
-    /**
-     * Returns a collection of MODIFIED, DELETED or NEW objects.
-     */
-    Collection uncommittedObjects();
-
-    /**
-     * Creates a new persistent object scheduled to be inserted on next commit.
-     */
-    Persistent newObject(Class persistentClass);
-
-    /**
-     * Schedules a persistent object for deletion on next commit.
-     */
-    void deleteObject(Persistent object);
-
-    /**
-     * A callback method that is invoked whenver a persistent object property is about to
-     * be read. Allows ObjectContext to resolve faults on demand.
-     */
-    void objectWillRead(Persistent object, String property);
-
-    /**
-     * A callback method that is invoked whenver a persistent object property is about to
-     * be changed. Allows ObjectContext to track object changes.
-     */
-    void objectWillWrite(
-            Persistent object,
-            String property,
-            Object oldValue,
-            Object newValue);
-
-    /**
-     * Commits changes made to this ObjectContext persistent objects. If an ObjectContext
-     * is a part of an ObjectContext hierarchy, this method call triggers commit all the
-     * way to the external data store.
-     */
-    void commitChanges();
-
-    /**
-     * Executes a selecting query, returning the result.
-     */
-    List performQuery(QueryExecutionPlan query);
-
-    /**
-     * Executes a non-selecting query returning result counts.
-     */
-    public int[] performNonSelectingQuery(QueryExecutionPlan query);
-
+    void performQuery(
+            QueryExecutionPlan query,
+            OperationObserver observer,
+            Transaction transaction);
 }

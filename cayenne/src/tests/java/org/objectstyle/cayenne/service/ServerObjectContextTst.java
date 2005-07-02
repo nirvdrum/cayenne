@@ -57,9 +57,9 @@ package org.objectstyle.cayenne.service;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.MockPersistenceContext;
-import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.access.MockDataRowStore;
+import org.objectstyle.cayenne.access.MockPersistenceContext;
+import org.objectstyle.cayenne.access.PersistenceContext;
 import org.objectstyle.cayenne.distribution.QueryMessage;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;

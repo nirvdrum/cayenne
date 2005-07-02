@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.service;
 
 import java.util.List;
 
-import org.objectstyle.cayenne.PersistenceContext;
+import org.objectstyle.cayenne.access.PersistenceContext;
 import org.objectstyle.cayenne.access.QueryResult;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.Query;

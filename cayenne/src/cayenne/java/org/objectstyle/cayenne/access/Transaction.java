@@ -66,7 +66,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**

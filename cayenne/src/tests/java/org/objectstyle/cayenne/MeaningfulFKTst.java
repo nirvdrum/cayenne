@@ -64,16 +64,6 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  * @author Andrei Adamchik
  */
 public class MeaningfulFKTst extends RelationshipTestCase {
-    
-    public static void main(String[] args) {
-        
-        try {
-            new MeaningfulFKTst().testValidateForSave2();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     public void testValidateForSave1() throws Exception {
         MeaningfulFK testObject = (MeaningfulFK) createDataContext()

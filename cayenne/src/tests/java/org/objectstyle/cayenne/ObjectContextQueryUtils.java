@@ -62,6 +62,7 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.HierarchicalObjectContext;
 import org.objectstyle.cayenne.access.QueryResult;
 import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.exp.Expression;
@@ -136,9 +137,9 @@ public class ObjectContextQueryUtils {
      * shortcut for mixed queries that combine updates with selects (e.g. stored
      * procedures).
      */
-    public static QueryResult runMixedQuery(ObjectContext context, Query query) {
+    public static QueryResult runMixedQuery(HierarchicalObjectContext context, Query query) {
         QueryResult result = new QueryResult();
-        context.performQuery(query, result);
+        context.getParentContext().performQuery(query, result);
         return result;
     }
 
@@ -170,7 +171,7 @@ public class ObjectContextQueryUtils {
      * by SQLTemplate.
      */
     public static List dataRowsWithSQL(
-            ObjectContext context,
+            HierarchicalObjectContext context,
             String dataMapName,
             String sql) {
         return dataRowsWithSQL(context, dataMapName, sql, null, null);
@@ -181,7 +182,7 @@ public class ObjectContextQueryUtils {
      * template parameters.
      */
     public static List dataRowsWithSQL(
-            ObjectContext context,
+            HierarchicalObjectContext context,
             String dataMapName,
             String sql,
             String[] parameterNames,
@@ -193,7 +194,10 @@ public class ObjectContextQueryUtils {
 
         Query query = new SQLTemplateSelectWrapper(dataMapName, sql, parameters, true);
         QueryResult result = new QueryResult();
-        context.performQuery(query, result, Transaction.internalTransaction(null));
+        context.getParentContext().performQuery(
+                query,
+                result,
+                Transaction.internalTransaction(null));
         return result.getFirstRows(query);
     }
 

@@ -60,11 +60,11 @@ import java.util.Collections;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.MockPersistenceContext;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.PersistenceContext;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.MockDataRowStore;
+import org.objectstyle.cayenne.access.MockPersistenceContext;
+import org.objectstyle.cayenne.access.PersistenceContext;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.MockEntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
