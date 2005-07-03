@@ -57,12 +57,14 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.collections.map.LinkedMap;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
@@ -74,7 +76,7 @@ import org.objectstyle.cayenne.util.Util;
  * 
  * @author Andrei Adamchik
  */
-public class QueryResult extends DefaultOperationObserver {
+public class QueryResult extends DefaultOperationObserver implements QueryResponse {
 
     // LinkedMap guarantees that iterating over 
     // its keys is done in the original insertion order-
@@ -94,10 +96,31 @@ public class QueryResult extends DefaultOperationObserver {
     public Iterator getQueries() {
         return queries.asList().iterator();
     }
+    
+    /**
+     * Returns all results regardless of the query.
+     * 
+     * @since 1.2
+     */
+    public Collection getResults() {
+        if (queries.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
+
+        Collection results = new ArrayList(5);
+
+        Iterator it = queries.values().iterator();
+        while (it.hasNext()) {
+            Collection queryResult = (Collection) it.next();
+            results.addAll(queryResult);
+        }
+
+        return results;
+    }
 
     /**
-     * Returns a list of all results of a given query. This is potentially a mix
-     * of java.lang.Integer values for update operations and java.util.List for select
+     * Returns a list of all results of a given query. This is potentially a mix of
+     * java.lang.Integer values for update operations and java.util.List for select
      * operations. Results are returned in the order they were obtained.
      */
     public List getResults(Query query) {

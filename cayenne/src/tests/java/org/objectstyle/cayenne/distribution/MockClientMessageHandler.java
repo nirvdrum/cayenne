@@ -58,6 +58,9 @@ package org.objectstyle.cayenne.distribution;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.QueryResponse;
+
 /**
  * Stores all messages passed via this handler.
  * 
@@ -71,13 +74,23 @@ public class MockClientMessageHandler implements ClientMessageHandler {
         return messages;
     }
 
-    public Object onQuery(QueryMessage message) {
-        this.messages.add(message);
+    public ObjectId[] onCommit(CommitMessage message) {
+        messages.add(message);
         return null;
     }
 
-    public Object onCommit(CommitMessage message) {
-        this.messages.add(message);
+    public QueryResponse onGenericQuery(GenericQueryMessage message) {
+        messages.add(message);
+        return null;
+    }
+
+    public List onSelectQuery(SelectMessage message) {
+        messages.add(message);
+        return null;
+    }
+
+    public int[] onUpdateQuery(UpdateMessage message) {
+        messages.add(message);
         return null;
     }
 }

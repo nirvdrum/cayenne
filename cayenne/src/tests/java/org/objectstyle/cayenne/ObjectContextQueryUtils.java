@@ -149,7 +149,7 @@ public class ObjectContextQueryUtils {
      * consists of more than one object, CayenneRuntimeException is thrown.
      */
     public Object singleObjectOrDataRow(ObjectContext context, GenericSelectQuery query) {
-        List results = context.performQuery(query);
+        List results = context.performSelectQuery(query);
         if (results.isEmpty()) {
             return null;
         }
@@ -229,7 +229,7 @@ public class ObjectContextQueryUtils {
             query.setParameters(toMap(parameterNames, parameterValues));
         }
         query.setFetchingDataRows(false);
-        return context.performQuery(query);
+        return context.performSelectQuery(query);
     }
 
     private static Map toMap(String[] keys, Object[] values) {

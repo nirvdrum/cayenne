@@ -55,6 +55,11 @@
  */
 package org.objectstyle.cayenne.distribution;
 
+import java.util.List;
+
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.QueryResponse;
+
 /**
  * A visitor interface for client command self-dispatching. ClientCommandHandler defines
  * methods for each supported command type. So command implementations can call an
@@ -70,7 +75,11 @@ package org.objectstyle.cayenne.distribution;
  */
 public interface ClientMessageHandler {
 
-    public Object onQuery(QueryMessage message);
+    List onSelectQuery(SelectMessage message);
 
-    public Object onCommit(CommitMessage message);
+    int[] onUpdateQuery(UpdateMessage message);
+
+    QueryResponse onGenericQuery(GenericQueryMessage message);
+
+    ObjectId[] onCommit(CommitMessage message);
 }

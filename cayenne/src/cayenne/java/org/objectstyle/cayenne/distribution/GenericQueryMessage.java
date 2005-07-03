@@ -55,54 +55,36 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import java.util.List;
-
+import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
- * A message telling the receiver to perform a Cayenne query.
- * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class QueryMessage extends AbstractMessage {
+public class GenericQueryMessage extends AbstractMessage {
 
     protected QueryExecutionPlan queryPlan;
-    protected boolean selecting;
 
-    public QueryMessage(QueryExecutionPlan query, boolean selecting) {
-        // sanity check
-        if (query == null) {
-            throw new NullPointerException("Null query.");
-        }
-
-        this.queryPlan = query;
-        this.selecting = selecting;
-    }
-
-    public Object onReceive(ClientMessageHandler handler) {
-        return handler.onQuery(this);
-    }
-
-    /**
-     * Invoked by the message sender to perform a remote selecting query.
-     */
-    public List sendPerformQuery(CayenneConnector connector) {
-        return (List) send(connector, List.class);
-    }
-
-    /**
-     * Invoked by the message sender to perform a remote non-selecting query.
-     */
-    public int[] sendPerformNonSelectingQuery(CayenneConnector connector) {
-        return (int[]) send(connector, int[].class);
+    public GenericQueryMessage(QueryExecutionPlan queryPlan) {
+        this.queryPlan = queryPlan;
     }
 
     public QueryExecutionPlan getQueryPlan() {
         return queryPlan;
     }
 
-    public boolean isSelecting() {
-        return selecting;
+    /**
+     * Invoked by message receiver to dispatch message.
+     */
+    public Object onReceive(ClientMessageHandler handler) {
+        return handler.onGenericQuery(this);
+    }
+
+    /**
+     * Invoked by the message sender to perform a remote selecting query.
+     */
+    public QueryResponse send(CayenneConnector connector) {
+        return (QueryResponse) send(connector, QueryResponse.class);
     }
 }

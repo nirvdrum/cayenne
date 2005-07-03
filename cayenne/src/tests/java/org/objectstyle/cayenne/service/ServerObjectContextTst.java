@@ -60,7 +60,9 @@ import junit.framework.TestCase;
 import org.objectstyle.cayenne.access.MockDataRowStore;
 import org.objectstyle.cayenne.access.MockPersistenceContext;
 import org.objectstyle.cayenne.access.PersistenceContext;
-import org.objectstyle.cayenne.distribution.QueryMessage;
+import org.objectstyle.cayenne.distribution.GenericQueryMessage;
+import org.objectstyle.cayenne.distribution.SelectMessage;
+import org.objectstyle.cayenne.distribution.UpdateMessage;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
@@ -95,25 +97,39 @@ public class ServerObjectContextTst extends TestCase {
     // fail("TODO: implement CommitMessage to be able to carry client changes");
     // }
 
-    public void testOnNonSelectingQuery() {
+    public void testOnUpdateQuery() {
         MockPersistenceContext parent = new MockPersistenceContext();
         ServerObjectContext context = new ServerObjectContext(
                 parent,
                 new EntityResolver(),
                 new MockDataRowStore());
 
-        context.onQuery(new QueryMessage(new MockQuery(), false));
+        UpdateMessage message = new UpdateMessage(new MockQuery());
+        context.onUpdateQuery(message);
         assertTrue(parent.isPerformQuery());
     }
 
-    public void testOnSelectingQuery() {
+    public void testOnSelectQuery() {
         MockPersistenceContext parent = new MockPersistenceContext();
         ServerObjectContext context = new ServerObjectContext(
                 parent,
                 new EntityResolver(),
                 new MockDataRowStore());
 
-        context.onQuery(new QueryMessage(new MockGenericSelectQuery(true), true));
+        SelectMessage message = new SelectMessage(new MockGenericSelectQuery(true));
+        context.onSelectQuery(message);
+        assertTrue(parent.isPerformQuery());
+    }
+
+    public void testOnGenericQuery() {
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ServerObjectContext context = new ServerObjectContext(
+                parent,
+                new EntityResolver(),
+                new MockDataRowStore());
+
+        GenericQueryMessage message = new GenericQueryMessage(new MockQuery());
+        context.onGenericQuery(message);
         assertTrue(parent.isPerformQuery());
     }
 }

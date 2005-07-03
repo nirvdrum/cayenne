@@ -64,10 +64,6 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
 /**
  * A variety of used directly by the application code. ObjectContext tracks uncommitted
  * changes to objects and can commit them in a single method call.
- * <p>
- * <i>Currently this interface is only used by client-side objects. The plan is to merge
- * it with DataContext. </i>
- * </p>
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -131,13 +127,17 @@ public interface ObjectContext extends Serializable {
     void commitChanges();
 
     /**
-     * Executes a selecting query, returning the result.
+     * Executes a selecting query, returning a list of persistent objects or data rows.
      */
-    List performQuery(QueryExecutionPlan query);
+    List performSelectQuery(QueryExecutionPlan queryPlan);
 
     /**
-     * Executes a non-selecting query returning result counts.
+     * Executes a non-selecting query returning an array of update counts.
      */
-    public int[] performNonSelectingQuery(QueryExecutionPlan query);
+    int[] performUpdateQuery(QueryExecutionPlan queryPlan);
 
+    /**
+     * Executes any kind of query providing the result in a form of QueryResponse.
+     */
+    QueryResponse performGenericQuery(QueryExecutionPlan queryPlan);
 }

@@ -55,15 +55,19 @@
  */
 package org.objectstyle.cayenne.service;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import java.util.List;
+
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataRowStore;
 import org.objectstyle.cayenne.access.PersistenceContext;
 import org.objectstyle.cayenne.distribution.ClientMessageHandler;
 import org.objectstyle.cayenne.distribution.CommitMessage;
-import org.objectstyle.cayenne.distribution.QueryMessage;
+import org.objectstyle.cayenne.distribution.GenericQueryMessage;
+import org.objectstyle.cayenne.distribution.SelectMessage;
+import org.objectstyle.cayenne.distribution.UpdateMessage;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 /**
  * A server-side peer of a ClientDataContext. Client messages are processed via callback
@@ -85,26 +89,22 @@ public class ServerObjectContext extends ObjectDataContext implements
         super(parent, entityResolver, cache);
     }
 
-    public Object onCommit(CommitMessage message) {
-        // TODO: sync from commit message...
+    public ObjectId[] onCommit(CommitMessage message) {
+        // TODO: synchronize client changes first
 
         commitChanges();
-        return null;
+        return new ObjectId[0];
     }
 
-    public Object onQuery(QueryMessage message) {
-        if (message.isSelecting()) {
-            if (message.getQueryPlan() instanceof GenericSelectQuery) {
-                return performQuery((GenericSelectQuery) message.getQueryPlan());
-            }
-            else {
-                throw new CayenneRuntimeException(
-                        "Expected a GenericSelectQuery for selecting query, got: "
-                                + message.getQueryPlan());
-            }
-        }
-        else {
-            return performNonSelectingQuery(message.getQueryPlan());
-        }
+    public QueryResponse onGenericQuery(GenericQueryMessage message) {
+        return performGenericQuery(message.getQueryPlan());
+    }
+
+    public List onSelectQuery(SelectMessage message) {
+        return performSelectQuery(message.getQueryPlan());
+    }
+
+    public int[] onUpdateQuery(UpdateMessage message) {
+        return performUpdateQuery(message.getQueryPlan());
     }
 }

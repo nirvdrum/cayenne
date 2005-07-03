@@ -53,57 +53,26 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne;
 
-import java.util.List;
-
-import org.objectstyle.cayenne.access.PersistenceContext;
-import org.objectstyle.cayenne.access.QueryResult;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import java.io.Serializable;
+import java.util.Collection;
 
 /**
- * An action that performs an updating query with a given persistence context.
+ * An interface that encapsulates results of query execution. QueryResponse provides a way
+ * to the caller to process execution results in their own special way. This may be
+ * helpful in cases like stored procedures or query batches, when there is more than one
+ * result. QueryResponse can contain a mix of collections of objects and update counts.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class PersistenceContextQueryAction {
+public interface QueryResponse extends Serializable {
 
-    EntityResolver resolver;
-
-    public PersistenceContextQueryAction(EntityResolver resolver) {
-        this.resolver = resolver;
-    }
-
-    QueryResult performMixed(PersistenceContext context, QueryExecutionPlan query) {
-        Query resolvedQuery = query.resolve(resolver);
-
-        QueryResult resultCallback = new QueryResult();
-        context.performQuery(resolvedQuery, resultCallback);
-        return resultCallback;
-    }
-
-    int[] performNonSelectingQuery(PersistenceContext context, QueryExecutionPlan query) {
-
-        Query resolvedQuery = query.resolve(resolver);
-
-        QueryResult resultCallback = new QueryResult();
-        context.performQuery(resolvedQuery, resultCallback);
-
-        List updateCounts = resultCallback.getUpdates(resolvedQuery);
-        if (updateCounts == null || updateCounts.isEmpty()) {
-            return new int[0];
-        }
-
-        int len = updateCounts.size();
-        int[] counts = new int[len];
-
-        for (int i = 0; i < len; i++) {
-            counts[i] = ((Number) updateCounts.get(i)).intValue();
-        }
-
-        return counts;
-    }
+    /**
+     * Returns a collection of query results in the order they were provided by Cayenne
+     * stack. Collection can contain List objects (for selecting queries) and
+     * java.lang.Number values for the update counts.
+     */
+    Collection getResults();
 }

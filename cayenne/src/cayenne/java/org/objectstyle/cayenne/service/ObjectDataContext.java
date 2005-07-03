@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataRowStore;
@@ -93,63 +94,6 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
 
     PersistenceContext parentContext;
     EntityResolver entityResolver;
-
-    // ==== START: DataContext compatibility code... need to merge to DataContext
-    // --------------------------------------------------------------------------
-
-    public EntityResolver getEntityResolver() {
-        // TODO: ready to be moved to DataContext
-        return entityResolver;
-    }
-
-    public int[] performNonSelectingQuery(Query query) {
-        // channel to the right implementation
-        return performNonSelectingQuery((QueryExecutionPlan) query);
-    }
-
-    public List performQuery(GenericSelectQuery query) {
-        // channel through a new implementation...
-        return performQuery((QueryExecutionPlan) query);
-    }
-
-    /**
-     * @deprecated since 1.2 as QueryChains are now possible.
-     */
-    public void performQueries(Collection queries, OperationObserver observer) {
-        QueryChain query = new QueryChain(queries);
-        getParentContext().performQuery(query.resolve(getEntityResolver()), observer);
-    }
-
-    /**
-     * @deprecated since 1.2 as QueryChains are now possible.
-     */
-    public void performQueries(
-            Collection queries,
-            OperationObserver observer,
-            Transaction transaction) {
-
-        QueryChain query = new QueryChain(queries);
-        getParentContext().performQuery(
-                query.resolve(getEntityResolver()),
-                observer,
-                transaction);
-    }
-
-    public int[] performNonSelectingQuery(String queryName, Map parameters) {
-        return performNonSelectingQuery(new NamedQueryProxy(queryName, parameters));
-    }
-
-    public int[] performNonSelectingQuery(String queryName) {
-        return performNonSelectingQuery(new NamedQueryProxy(queryName));
-    }
-
-    public List performQuery(String queryName, boolean refresh) {
-        // TODO: refresh is not handled...
-        return performQuery(new NamedQueryProxy(queryName));
-    }
-
-    // ==== END: DataContext compatibility code... need to merge to DataContext
-    // --------------------------------------------------------------------------
 
     /**
      * Initializes ObjectDataContext obtaining settings from parent DataDomain.
@@ -180,6 +124,63 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
 
         super.objectStore = new ObjectStore(cache);
     }
+
+    // ==== START: DataContext compatibility code... need to merge to DataContext
+    // --------------------------------------------------------------------------
+
+    public EntityResolver getEntityResolver() {
+        // TODO: ready to be moved to DataContext
+        return entityResolver;
+    }
+
+    public int[] performNonSelectingQuery(Query query) {
+        // channel to the right implementation
+        return performUpdateQuery((QueryExecutionPlan) query);
+    }
+
+    public List performQuery(GenericSelectQuery query) {
+        // channel through a new implementation...
+        return performSelectQuery((QueryExecutionPlan) query);
+    }
+
+    /**
+     * @deprecated since 1.2 as QueryChains are now possible.
+     */
+    public void performQueries(Collection queries, OperationObserver observer) {
+        QueryChain query = new QueryChain(queries);
+        getParentContext().performQuery(query.resolve(getEntityResolver()), observer);
+    }
+
+    /**
+     * @deprecated since 1.2 as QueryChains are now possible.
+     */
+    public void performQueries(
+            Collection queries,
+            OperationObserver observer,
+            Transaction transaction) {
+
+        QueryChain query = new QueryChain(queries);
+        getParentContext().performQuery(
+                query.resolve(getEntityResolver()),
+                observer,
+                transaction);
+    }
+
+    public int[] performNonSelectingQuery(String queryName, Map parameters) {
+        return performUpdateQuery(new NamedQueryProxy(queryName, parameters));
+    }
+
+    public int[] performNonSelectingQuery(String queryName) {
+        return performUpdateQuery(new NamedQueryProxy(queryName));
+    }
+
+    public List performQuery(String queryName, boolean refresh) {
+        // TODO: refresh is not handled...
+        return performSelectQuery(new NamedQueryProxy(queryName));
+    }
+
+    // ==== END: DataContext compatibility code... need to merge to DataContext
+    // --------------------------------------------------------------------------
 
     public void commitChanges() throws CayenneRuntimeException {
 
@@ -269,11 +270,18 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
         return objects;
     }
 
-    /**
-     * Overrides super implementation to use parent PersistenceContext for query
-     * execution.
-     */
-    public int[] performNonSelectingQuery(QueryExecutionPlan query) {
+    public QueryResponse performGenericQuery(QueryExecutionPlan query) {
+        if (this.getParentContext() == null) {
+            throw new CayenneRuntimeException(
+                    "Can't run query - parent PersistenceContext is not set.");
+        }
+
+        return new PersistenceContextQueryAction(getEntityResolver()).performMixed(
+                getParentContext(),
+                query);
+    }
+
+    public int[] performUpdateQuery(QueryExecutionPlan query) {
         if (this.getParentContext() == null) {
             throw new CayenneRuntimeException(
                     "Can't run query - parent PersistenceContext is not set.");
@@ -283,10 +291,7 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
                 .performNonSelectingQuery(getParentContext(), query);
     }
 
-    /**
-     * Performs a selecting query, returning the result.
-     */
-    public List performQuery(QueryExecutionPlan query) {
+    public List performSelectQuery(QueryExecutionPlan query) {
         if (this.getParentContext() == null) {
             throw new CayenneRuntimeException(
                     "Can't run query - parent PersistenceContext is not set.");

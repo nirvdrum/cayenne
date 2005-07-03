@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.distribution;
 import org.objectstyle.cayenne.ObjectId;
 
 /**
- * A commands that instructs the receiver to commit all uncommitted objects. Returns a
- * collection of client object ids modified or generated during commit. It passes client
+ * A commands that instructs the receiver to commit all uncommitted objects. Returns an
+ * array of client object ids modified or generated during commit. It passes client
  * ObjectContext to the server, so it is a responsibility of the ObjectContext implementor
  * to make its serialized size as small as possible.
  * 
@@ -72,7 +72,7 @@ public class CommitMessage extends AbstractMessage {
         return handler.onCommit(this);
     }
 
-    public ObjectId[] sendCommitChanges(CayenneConnector connector) {
+    public ObjectId[] sendCommit(CayenneConnector connector) {
         return (ObjectId[]) send(connector, ObjectId[].class);
     }
 }

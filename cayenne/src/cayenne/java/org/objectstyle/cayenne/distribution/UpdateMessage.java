@@ -53,57 +53,37 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne.distribution;
 
-import java.util.List;
-
-import org.objectstyle.cayenne.access.PersistenceContext;
-import org.objectstyle.cayenne.access.QueryResult;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
- * An action that performs an updating query with a given persistence context.
- * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class PersistenceContextQueryAction {
+public class UpdateMessage extends AbstractMessage {
 
-    EntityResolver resolver;
+    protected QueryExecutionPlan queryPlan;
 
-    public PersistenceContextQueryAction(EntityResolver resolver) {
-        this.resolver = resolver;
+    public UpdateMessage(QueryExecutionPlan queryPlan) {
+        this.queryPlan = queryPlan;
     }
 
-    QueryResult performMixed(PersistenceContext context, QueryExecutionPlan query) {
-        Query resolvedQuery = query.resolve(resolver);
-
-        QueryResult resultCallback = new QueryResult();
-        context.performQuery(resolvedQuery, resultCallback);
-        return resultCallback;
+    public QueryExecutionPlan getQueryPlan() {
+        return queryPlan;
     }
 
-    int[] performNonSelectingQuery(PersistenceContext context, QueryExecutionPlan query) {
+    /**
+     * Invoked by message receiver to dispatch message.
+     */
+    public Object onReceive(ClientMessageHandler handler) {
+        return handler.onUpdateQuery(this);
+    }
 
-        Query resolvedQuery = query.resolve(resolver);
-
-        QueryResult resultCallback = new QueryResult();
-        context.performQuery(resolvedQuery, resultCallback);
-
-        List updateCounts = resultCallback.getUpdates(resolvedQuery);
-        if (updateCounts == null || updateCounts.isEmpty()) {
-            return new int[0];
-        }
-
-        int len = updateCounts.size();
-        int[] counts = new int[len];
-
-        for (int i = 0; i < len; i++) {
-            counts[i] = ((Number) updateCounts.get(i)).intValue();
-        }
-
-        return counts;
+    /**
+     * Invoked by the message sender to perform a remote selecting query.
+     */
+    public int[] send(CayenneConnector connector) {
+        return (int[]) send(connector, int[].class);
     }
 }

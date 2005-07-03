@@ -149,7 +149,7 @@ public class ObjectDataContextTst extends TestCase {
         context.performQuery(new MockGenericSelectQuery(true));
         assertTrue(parent.isPerformQuery());
 
-        context.performQuery(new MockQueryExecutionPlan(true));
+        context.performSelectQuery(new MockQueryExecutionPlan(true));
         assertTrue(parent.isPerformQuery());
     }
 }

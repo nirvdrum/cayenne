@@ -84,11 +84,11 @@ public class MockObjectContext extends MockPersistenceContext implements ObjectC
         return null;
     }
 
-    public List performQuery(QueryExecutionPlan query) {
+    public List performSelectQuery(QueryExecutionPlan query) {
         return null;
     }
 
-    public int[] performNonSelectingQuery(QueryExecutionPlan query) {
+    public int[] performUpdateQuery(QueryExecutionPlan query) {
         return null;
     }
 
@@ -113,6 +113,10 @@ public class MockObjectContext extends MockPersistenceContext implements ObjectC
     }
 
     public Collection uncommittedObjects() {
+        return null;
+    }
+
+    public QueryResponse performGenericQuery(QueryExecutionPlan queryPlan) {
         return null;
     }
 }

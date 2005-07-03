@@ -65,10 +65,13 @@ import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.distribution.CayenneConnector;
 import org.objectstyle.cayenne.distribution.CommitMessage;
-import org.objectstyle.cayenne.distribution.QueryMessage;
+import org.objectstyle.cayenne.distribution.GenericQueryMessage;
+import org.objectstyle.cayenne.distribution.SelectMessage;
+import org.objectstyle.cayenne.distribution.UpdateMessage;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
@@ -112,7 +115,7 @@ public class ClientObjectContext implements ObjectContext {
 
         if (objectStore.hasChanges()) {
 
-            ObjectId[] ids = new CommitMessage().sendCommitChanges(connector);
+            ObjectId[] ids = new CommitMessage().sendCommit(connector);
             Collection idCollection = ids != null
                     ? Arrays.asList(ids)
                     : Collections.EMPTY_LIST;
@@ -172,12 +175,16 @@ public class ClientObjectContext implements ObjectContext {
         return object;
     }
 
-    public int[] performNonSelectingQuery(QueryExecutionPlan query) {
-        return new QueryMessage(query, false).sendPerformNonSelectingQuery(connector);
+    public int[] performUpdateQuery(QueryExecutionPlan query) {
+        return new UpdateMessage(query).send(connector);
     }
 
-    public List performQuery(QueryExecutionPlan query) {
-        return new QueryMessage(query, true).sendPerformQuery(connector);
+    public List performSelectQuery(QueryExecutionPlan query) {
+        return new SelectMessage(query).send(connector);
+    }
+
+    public QueryResponse performGenericQuery(QueryExecutionPlan query) {
+        return new GenericQueryMessage(query).send(connector);
     }
 
     public void objectWillRead(Persistent dataObject, String property) {
