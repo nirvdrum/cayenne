@@ -64,7 +64,6 @@ import javax.swing.JOptionPane;
 
 import org.objectstyle.cayenne.gen.DefaultClassGenerator;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.pref.GeneralPreferences;
@@ -100,7 +99,6 @@ public class ClassGeneratorController extends BasicController {
         Project project = parent.getProject();
         DataMap map = parent.getCurrentDataMap();
         DataMapDefaults preferences = parent.getDataMapPreferences();
-        ObjEntity selectedEntity = parent.getCurrentObjEntity();
 
         // validate entities
         Validator validator = project.getValidator();
@@ -109,7 +107,7 @@ public class ClassGeneratorController extends BasicController {
         ClassGeneratorModel model = new ClassGeneratorModel(
                 map,
                 preferences,
-                selectedEntity,
+                parent.getCurrentObjEntity(),
                 validator.validationResults());
 
         return model;

@@ -296,8 +296,8 @@ public class ProjectController extends CayenneController {
     }
 
     /**
-     * Returns preferences object for the current DataMap, throwing an exception if no
-     * DataMap is selected.
+     * Returns preferences object for the current DataMap. If no preferences exist for the current DataMap,
+     * a new Preferences object is created. If no DataMap is currently selected, an exception is thrown.
      */
     public DataMapDefaults getDataMapPreferences() {
         DataMap map = getCurrentDataMap();

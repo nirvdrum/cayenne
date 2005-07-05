@@ -3,6 +3,8 @@ package org.objectstyle.cayenne.modeler.pref;
 import org.objectstyle.cayenne.PersistenceState;
 
 public class DataMapDefaults extends _DataMapDefaults {
+    
+    public static final String DEFAULT_SUPERCLASS_PACKAGE = "auto";
 
     public void setPersistenceState(int persistenceState) {
 
@@ -10,7 +12,7 @@ public class DataMapDefaults extends _DataMapDefaults {
         if (this.persistenceState == PersistenceState.TRANSIENT
                 && persistenceState == PersistenceState.NEW) {
             setGeneratePairs(Boolean.TRUE);
-            setSuperclassPackageSuffix("auto");
+            setSuperclassPackageSuffix(DEFAULT_SUPERCLASS_PACKAGE);
         }
         super.setPersistenceState(persistenceState);
     }

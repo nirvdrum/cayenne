@@ -325,6 +325,13 @@ public class DataMapView extends JPanel {
         }
 
         dataMap.setDefaultPackage(newDefaultPackage);
+        
+        // update class generation preferences
+        eventController.getDataMapPreferences().setSuperclassPackage(
+                newDefaultPackage,
+                DataMapDefaults.DEFAULT_SUPERCLASS_PACKAGE);
+        
+        
         eventController.fireDataMapEvent(new DataMapEvent(this, dataMap));
     }
 
