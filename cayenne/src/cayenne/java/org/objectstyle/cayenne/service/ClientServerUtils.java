@@ -62,14 +62,16 @@ import java.util.List;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
  * @since 1.2
  * @author Andrei Adamchik
  */
+// TODO: create a generic GraphSerializer, maybe using the same approach as XML
+// serialization mechanism only based on Java serialization.
 class ClientServerUtils {
 
     static ObjectId toClientObjectId(ObjectId id, Class clientClass) {
@@ -112,9 +114,7 @@ class ClientServerUtils {
     /**
      * Converts a list of server-side objects to their client counterparts.
      */
-    // TODO - this is not very efficient .. should investigate some serialization tricks
-    // to serialize normal DataObjects to client versions without field copying...
-    static List toClientObjects(ObjEntity entity, List dataObjects) throws Exception {
+    static List toClientObjects(List dataObjects) throws Exception {
         List clientObjects = new ArrayList(dataObjects.size());
 
         Iterator it = dataObjects.iterator();

@@ -79,6 +79,7 @@ import org.objectstyle.cayenne.unit.util.SQLTemplateCustomizer;
  */
 public abstract class CayenneTestCase extends BasicTestCase {
     public static final String TEST_ACCESS_STACK = "TestStack";
+    public static final String MULTI_TIER_ACCESS_STACK = "MultiTierStack";
 
     static {
         // create dummy shared config

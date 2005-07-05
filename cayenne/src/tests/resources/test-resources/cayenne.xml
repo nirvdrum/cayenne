@@ -3,6 +3,7 @@
 <domain name="default">
 	<map name="one-way-map" location="one-way-map.map.xml"/>
 	<map name="map-db2" location="map-db2.map.xml"/>
+	<map name="multi-tier" location="multi-tier.map.xml"/>
 	<map name="locking" location="locking.map.xml"/>
 	<map name="map-db1" location="map-db1.map.xml"/>
 	<map name="testmap" location="testmap.map.xml"/>

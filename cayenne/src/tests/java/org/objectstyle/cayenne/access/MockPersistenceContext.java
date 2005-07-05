@@ -55,7 +55,10 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.List;
+
 import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
@@ -63,9 +66,21 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
  */
 public class MockPersistenceContext implements PersistenceContext {
 
+    protected List mockResults;
+    protected EntityResolver resolver;
+
     protected boolean commitChangesInContext;
     protected boolean performQuery;
     protected boolean performQueryInTransaction;
+
+    public MockPersistenceContext() {
+
+    }
+
+    public MockPersistenceContext(EntityResolver resolver, List mockResults) {
+        this.resolver = resolver;
+        this.mockResults = mockResults;
+    }
 
     public void commitChangesInContext(ObjectContext context) {
         this.commitChangesInContext = true;
@@ -88,9 +103,17 @@ public class MockPersistenceContext implements PersistenceContext {
             OperationObserver observer,
             Transaction transaction) {
         performQueryInTransaction = true;
+
+        if (mockResults != null) {
+            observer.nextDataRows(query.resolve(resolver), mockResults);
+        }
     }
 
     public void performQuery(QueryExecutionPlan query, OperationObserver observer) {
         performQuery = true;
+
+        if (mockResults != null) {
+            observer.nextDataRows(query.resolve(resolver), mockResults);
+        }
     }
 }

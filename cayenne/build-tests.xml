@@ -16,23 +16,35 @@
 	<property name="test.filter" value="**/*Tst.class"/>
 	<property environment="test.env"/>
 	
-    <path id="agnostic-classpath">
-    	<fileset dir="${otherlib.dir}">
+	<path id="cgen-classpath">
+		<fileset dir="${ant.home}/lib">
+			<include name="*.jar"/>
+		</fileset>
+		<fileset dir="${dist}/lib">
+			<include name="cayenne.jar"/>
+		</fileset>
+		<fileset dir="${otherlib.dir}">
+			<include name="${vpp.jar}"/>
+		</fileset>
+	</path>
+	
+	<path id="agnostic-classpath">
+		<fileset dir="${otherlib.dir}">
 			<include name="${vpp.jar}"/>
 			<include name="${ant-junit.jar}"/>
 			<include name="${emma.jar}"/>
 			<include name="${emma.ant.jar}"/>
 			<include name="${junit.jar}"/>
 			<include name="${servlet.jar}"/>
-    		<include name="${mockrunner.jar}"/>
+			<include name="${mockrunner.jar}"/>
 			<include name="${spring.jar}"/>
 			<include name="${jgroups.jar}"/>
 			<include name="${jdom.jar}"/>
 			<include name="${commons.dbcp.jar}"/>
 			<include name="${commons.pool.jar}"/>
 		</fileset>
-    	<fileset dir="${ant.home}/lib">
-			<include name="*.jar"/>		
+		<fileset dir="${ant.home}/lib">
+			<include name="*.jar"/>
 		</fileset>
 		<fileset dir="${dist}/lib">
 			<include name="cayenne.jar"/>
@@ -40,13 +52,28 @@
 		<pathelement path="build/tests/classes"/>
 		<pathelement path="build/tests/deps"/>
 		<pathelement path="${test.env.CLASSPATH}"/>
-    </path>
+	</path>
 
 	<!-- emma code coverage -->
 	<property name="coverage.dir" value="${test.build}/coverage"/>
 	<taskdef resource="emma_ant.properties" classpathref="agnostic-classpath" />
 
 	<target name="compile">
+		<!-- generate test classes out of the DataMap -->		
+		<taskdef name="cgen-tests"
+			classname="org.objectstyle.cayenne.tools.CayenneGenerator">
+			<classpath refid="cgen-classpath"/>
+		</taskdef>
+		
+		<!-- for now only include MT DataMap -->
+		
+		<cgen-tests map="${test.resources}/test-resources/multi-tier.map.xml"
+			destDir="${test.src}"
+			superpkg="org.objectstyle.cayenne.testdo.mt.auto"/>
+		<cgen-tests map="${test.resources}/test-resources/multi-tier.map.xml"
+			destDir="${test.src}"
+			superpkg="org.objectstyle.cayenne.testdo.mt.auto" client="true"/>
+		
 		<ant antfile="build-subproj.xml" target="compile">
 			<property name="subproj" value="tests"/>
 		</ant>

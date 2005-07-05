@@ -55,8 +55,10 @@
  */
 package org.objectstyle.cayenne.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.DataDomain;
@@ -101,7 +103,21 @@ public class ServerObjectContext extends ObjectDataContext implements
     }
 
     public List onSelectQuery(SelectMessage message) {
-        return performSelectQuery(message.getQueryPlan());
+        List objects = performSelectQuery(message.getQueryPlan());
+
+        // create client objects for a list of server object
+
+        if (objects.isEmpty()) {
+            return new ArrayList(0);
+        }
+
+        try {
+            return ClientServerUtils.toClientObjects(objects);
+        }
+        catch (Exception e) {
+            throw new CayenneRuntimeException("Error converting to client objects: "
+                    + e.getLocalizedMessage(), e);
+        }
     }
 
     public int[] onUpdateQuery(UpdateMessage message) {

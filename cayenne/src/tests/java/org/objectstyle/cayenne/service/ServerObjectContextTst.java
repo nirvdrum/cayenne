@@ -55,22 +55,37 @@
  */
 package org.objectstyle.cayenne.service;
 
-import junit.framework.TestCase;
+import java.util.Collections;
+import java.util.List;
 
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.MockDataRowStore;
 import org.objectstyle.cayenne.access.MockPersistenceContext;
 import org.objectstyle.cayenne.access.PersistenceContext;
+import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GenericQueryMessage;
 import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
+import org.objectstyle.cayenne.testdo.mt.MtTable1;
+import org.objectstyle.cayenne.unit.AccessStack;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestResources;
 
 /**
  * @author Andrus Adamchik
  */
-public class ServerObjectContextTst extends TestCase {
+public class ServerObjectContextTst extends CayenneTestCase {
+
+    protected AccessStack buildAccessStack() {
+        return CayenneTestResources
+                .getResources()
+                .getAccessStack(MULTI_TIER_ACCESS_STACK);
+    }
 
     public void testParentContext() {
         PersistenceContext parent = new MockPersistenceContext();
@@ -81,21 +96,21 @@ public class ServerObjectContextTst extends TestCase {
         assertSame(parent, context.getParentContext());
     }
 
-    // public void testOnCommit() {
-    // MockPersistenceContext parent = new MockPersistenceContext();
-    // ServerObjectContext context = new ServerObjectContext(
-    // parent,
-    // new EntityResolver(),
-    // new MockDataRowStore());
-    //
-    // context.onCommit(new CommitMessage());
-    //
-    // // no changes in context, so no commit should be executed
-    // assertFalse(parent.isCommitChangesInContext());
-    //
-    // // introduce changes
-    // fail("TODO: implement CommitMessage to be able to carry client changes");
-    // }
+    public void testOnCommit() {
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ServerObjectContext context = new ServerObjectContext(
+                parent,
+                new EntityResolver(),
+                new MockDataRowStore());
+
+        context.onCommit(new CommitMessage());
+
+        // no changes in context, so no commit should be executed
+        assertFalse(parent.isCommitChangesInContext());
+
+        // introduce changes
+        // TODO: unfinished
+    }
 
     public void testOnUpdateQuery() {
         MockPersistenceContext parent = new MockPersistenceContext();
@@ -110,15 +125,41 @@ public class ServerObjectContextTst extends TestCase {
     }
 
     public void testOnSelectQuery() {
-        MockPersistenceContext parent = new MockPersistenceContext();
+        final ObjEntity entity = getDomain().getEntityResolver().lookupObjEntity(
+                MtTable1.class);
+        final ObjectId oid = new ObjectId(MtTable1.class, "key", 1);
+        MtTable1 serverObject = new MtTable1() {
+
+            public ObjEntity getObjEntity() {
+                return entity;
+            }
+
+            public ObjectId getObjectId() {
+                return oid;
+            }
+        };
+
+        MockPersistenceContext parent = new MockPersistenceContext(getDomain()
+                .getEntityResolver(), Collections.singletonList(serverObject));
+
         ServerObjectContext context = new ServerObjectContext(
                 parent,
                 new EntityResolver(),
                 new MockDataRowStore());
 
         SelectMessage message = new SelectMessage(new MockGenericSelectQuery(true));
-        context.onSelectQuery(message);
+        List results = context.onSelectQuery(message);
         assertTrue(parent.isPerformQuery());
+
+        assertNotNull(results);
+        assertEquals(1, results.size());
+
+        Object result = results.get(0);
+        assertTrue(result instanceof ClientMtTable1);
+        ClientMtTable1 clientObject = (ClientMtTable1) result;
+        assertNotNull(clientObject.getObjectId());
+        assertEquals(new ObjectId(ClientMtTable1.class, "key", 1), clientObject
+                .getObjectId());
     }
 
     public void testOnGenericQuery() {
