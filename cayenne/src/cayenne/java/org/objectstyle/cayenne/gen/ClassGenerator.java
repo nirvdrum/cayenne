@@ -190,18 +190,28 @@ public class ClassGenerator {
     /**
      * Creates a new ClassGenerationInfo that uses a specified Velocity template.
      */
-    public ClassGenerator(String template, String versionString, VPPConfig vppConfig) throws Exception {
+    public ClassGenerator(String template, String versionString, VPPConfig vppConfig)
+            throws Exception {
+        
         if (!initDone) {
             bootstrapVelocity(this.getClass());
         }
-        
+
         this.versionString = versionString;
-        
+
         if (false == VERSION_1_2.equals(versionString)) {
-            throw new IllegalStateException("Illegal Version in generateClass(Writer,ObjEntity): " + versionString);
+            throw new IllegalStateException(
+                    "Illegal Version in generateClass(Writer,ObjEntity): "
+                            + versionString);
         }
 
-        velCtxt = vppConfig.getVelocityContext();
+        if (vppConfig != null) {
+            velCtxt = vppConfig.getVelocityContext();
+        }
+        else {
+            velCtxt = new VelocityContext();
+        }
+
         classTemplate = Velocity.getTemplate(template);
     }
 
