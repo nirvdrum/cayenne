@@ -23,5 +23,6 @@ Changes/New Features:
 
 Bugs Fixed:
 
-
+* Doing extra checks to prevent double regsitration of new objects - 
+  http://objectstyle.org/cayenne/lists/cayenne-devel/2005/07/0006.html
 

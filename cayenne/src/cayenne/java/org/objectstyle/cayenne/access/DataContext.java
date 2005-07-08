@@ -769,6 +769,18 @@ public class DataContext implements QueryEngine, Serializable {
             throw new NullPointerException("Can't register null object.");
         }
 
+        // sanity check - maybe already registered
+        if (dataObject.getObjectId() != null) {
+            if (dataObject.getDataContext() == this) {
+                // already registered, just ignore
+                return;
+            }
+            else if (dataObject.getDataContext() != null) {
+                throw new IllegalStateException(
+                        "DataObject is already registered with another DataContext. Try using 'localObjects()' instead.");
+            }
+        }
+
         ObjEntity entity = getEntityResolver().lookupObjEntity(dataObject);
         if (entity == null) {
             throw new IllegalArgumentException(
@@ -781,7 +793,12 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     private void registerNewObjectWithEntity(DataObject dataObject, ObjEntity objEntity) {
-        dataObject.setObjectId(new TempObjectId(dataObject.getClass()));
+        // method is private ... assuming all sanity checks on the DataObject have been
+        // performed by the caller depending on the inocation context
+
+        if (dataObject.getObjectId() == null) {
+            dataObject.setObjectId(new TempObjectId(dataObject.getClass()));
+        }
 
         // initialize to-many relationships with a fault
         Iterator it = objEntity.getRelationships().iterator();
