@@ -473,7 +473,7 @@ public abstract class MapClassGenerator {
      * each ObjEntity in the map. Uses default Cayenne templates for classes. 
      */
     public void generateSingleClasses() throws Exception {
-        generateSingleClasses(defaultSingleClassTemplate());
+        generateSingleClasses(defaultSingleClassTemplate(), SUPERCLASS_PREFIX);
     }
 
     /** 
@@ -519,7 +519,7 @@ public abstract class MapClassGenerator {
      * Runs class generation. Produces a single Java class for
      * each ObjEntity in the map. 
      */
-    private void generateSingleClasses_1_2(String classTemplate) throws Exception {
+    private void generateSingleClasses_1_2(String classTemplate, String superPrefix) throws Exception {
         ClassGenerator gen = new ClassGenerator(classTemplate, versionString, vppConfig);
 
         // Iterate only once if this is datamap mode
@@ -551,13 +551,18 @@ public abstract class MapClassGenerator {
             
             String subClassName = stringUtils.stripPackageName(fqnSubClass);
             String subPackageName = stringUtils.stripClass(fqnSubClass);
-     
+
+            String superClassName = superPrefix + stringUtils.stripPackageName(fqnSubClass);
+
+            String superPackageName = this.superPkg;
+            String fqnSuperClass = superPackageName + "." + superClassName;
+
             Writer out = openWriter(ent, subPackageName, subClassName);
             if (out == null) {
                 continue;
             }
 
-            gen.generateClass(out, dataMap, ent, fqnBaseClass, fqnSubClass, fqnSubClass);
+            gen.generateClass(out, dataMap, ent, fqnBaseClass, fqnSuperClass, fqnSubClass);
             closeWriter(out);
         }
     }
@@ -565,17 +570,26 @@ public abstract class MapClassGenerator {
     /** 
      * Runs class generation. Produces a single Java class for
      * each ObjEntity in the map. 
+     * @deprecated Use generateSingleClasses(String classTemplate, String superPrefix) instead.
      */
     public void generateSingleClasses(String classTemplate) throws Exception {
+        generateSingleClasses(classTemplate, SUPERCLASS_PREFIX);
+    }
+
+    /** 
+     * Runs class generation. Produces a single Java class for
+     * each ObjEntity in the map. 
+     */
+    public void generateSingleClasses(String classTemplate, String superPrefix) throws Exception {
         // note - client templates ignore version and automatically switch to 1.2
         if(client) {
-            generateSingleClasses_1_2(classTemplate);
+            generateSingleClasses_1_2(classTemplate, superPrefix);
         }
         else if (VERSION_1_1.equals(versionString)) {
             generateSingleClasses_1_1(classTemplate);
         }
         else if (VERSION_1_2.equals(versionString)) {
-            generateSingleClasses_1_2(classTemplate);
+            generateSingleClasses_1_2(classTemplate, superPrefix);
         }
         else {
             throw new IllegalStateException("Illegal Version in generateClassPairs: " + versionString);

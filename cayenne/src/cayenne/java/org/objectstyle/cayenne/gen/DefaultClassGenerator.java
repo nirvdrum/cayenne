@@ -132,7 +132,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
             generateClassPairs(t, st, MapClassGenerator.SUPERCLASS_PREFIX);
         }
         else {
-            generateSingleClasses(getTemplateForSingles());
+            generateSingleClasses(getTemplateForSingles(), MapClassGenerator.SUPERCLASS_PREFIX);
         }
     }
 
