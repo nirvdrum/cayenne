@@ -235,8 +235,10 @@ public class CircularArray extends Object {
                     else if (head > pos){
                         // copy from head to end of array
                         len = capacity - head;
-                        System.arraycopy(array, head, a, destPos, len);
-                        destPos += len;
+                        if (len > 0){
+                            System.arraycopy(array, head, a, destPos, len);
+                            destPos += len;                            
+                        }
                         
                         // copy from zero to pos -1
                         len = pos;
@@ -244,6 +246,7 @@ public class CircularArray extends Object {
                             System.arraycopy(array, 0, a, destPos, len);
                             destPos += len;                            
                         }
+                        
                         // copy from pos + 1 to tail
                         len = tail - pos - 1;
                         if (len > 0){
@@ -254,44 +257,58 @@ public class CircularArray extends Object {
                 else if (head < tail){
                     // copy from head to position -1
                     len = pos - head;
-                    System.arraycopy(array, head, a, destPos, len);
-                    destPos += len;                        
+                    if (len > 0){
+                        System.arraycopy(array, head, a, destPos, len);
+                        destPos += len;                        
+                    }
 
                     // copy from position + 1 to tail
                     len = tail - pos;
-                    System.arraycopy(array, pos+1, a, destPos, len);
-                    destPos += len;                        
+                    if (len > 0){
+                        System.arraycopy(array, pos+1, a, destPos, len);
+                        destPos += len;                        
+                    }
                 }
                 else if (head > tail) {
                     if (head < pos){
                         // copy from head to position
                         len = pos - head;
                         System.arraycopy(array, head, a, destPos, len);
-                        destPos += len;
+                        destPos += len;                            
 
                         // copy from pos +1 to end
                         len = capacity -1 - pos;
-                        System.arraycopy(array, pos+1 , a, destPos, len);
-                        destPos += len;
+                        if (len > 0){
+                            System.arraycopy(array, pos+1 , a, destPos, len);
+                            destPos += len;                            
+                        }
                         
                         // copy from beginning to tail
                         len = tail;
-                        System.arraycopy(array, 0 , a, destPos, len);
+                        if (len > 0){
+                            System.arraycopy(array, 0 , a, destPos, len);
+                        }
                     }
                     else if (head > pos){
                         // copy from head to end of array
                         len = capacity - head;
-                        System.arraycopy(array, head, a, destPos, len);
-                        destPos += len;
+                        if (len > 0){
+                            System.arraycopy(array, head, a, destPos, len);
+                            destPos += len;                            
+                        }
                         
                         // copy from zero to pos -1
                         len = pos -1;
-                        System.arraycopy(array, 0, a, destPos, len);
-                        destPos += len;
+                        if (len > 0){
+                            System.arraycopy(array, 0, a, destPos, len);
+                            destPos += len;                            
+                        }
                         
                         // copy from pos+1 to tail
                         len = tail - pos;
-                        System.arraycopy(array, pos+1, a, destPos, len);
+                        if (len > 0){
+                            System.arraycopy(array, pos+1, a, destPos, len);   
+                        }
                     }
                 }
                 count--;
