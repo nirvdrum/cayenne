@@ -682,6 +682,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     public synchronized void unregisterNewObjects() {
         // TODO: something like shared DataContext or nested DataContext
         // would hopefully obsolete this feature...
+        
+        if(newObjectMap == null) {
+            return;
+        }
 
         Iterator it = newObjectMap.values().iterator();
 
