@@ -82,17 +82,17 @@ public class ClientObjectContextTst extends TestCase {
         assertFalse(connector.isConnected());
     }
 
-    public void testCommitChangesUnchanged() {
+    public void testCommitUnchanged() {
 
         MockCayenneConnector connector = new MockCayenneConnector();
         ClientObjectContext context = new ClientObjectContext(connector);
 
         // no context changes so no connector access is expected
-        context.commitChanges();
+        context.commit();
         assertTrue(connector.getCommands().isEmpty());
     }
 
-    public void testCommitChangesCommandExecuted() {
+    public void testCommitCommandExecuted() {
 
         MockCayenneConnector connector = new MockCayenneConnector(new MockGraphDiff());
         ClientObjectContext context = new ClientObjectContext(connector);
@@ -100,7 +100,7 @@ public class ClientObjectContextTst extends TestCase {
         // test that a command is being sent via connector on commit...
 
         context.changeRecorder.nodePropertyChanged(new Object(), "x", "y", "z");
-        context.commitChanges();
+        context.commit();
         assertEquals(1, connector.getCommands().size());
 
         // expect a sync/commit chain
@@ -189,7 +189,8 @@ public class ClientObjectContextTst extends TestCase {
         Persistent newObject = context.newObject(MockPersistentObject.class);
         context.deleteObject(newObject);
         assertEquals(PersistenceState.TRANSIENT, newObject.getPersistenceState());
-        assertFalse(context.stateRecorder.dirtyNodes(context.graphManager).contains(newObject));
+        assertFalse(context.stateRecorder.dirtyNodes(context.graphManager).contains(
+                newObject));
 
         // COMMITTED
         Persistent committed = new MockPersistentObject();

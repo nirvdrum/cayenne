@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.distribution;
 
 import java.util.List;
 
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.graph.GraphDiff;
 
 /**
  * A visitor interface for client command self-dispatching. ClientCommandHandler defines
@@ -81,5 +81,5 @@ public interface ClientMessageHandler {
 
     QueryResponse onGenericQuery(GenericQueryMessage message);
 
-    ObjectId[] onCommit(CommitMessage message);
+    GraphDiff onCommit(CommitMessage message);
 }

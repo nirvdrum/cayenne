@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataRowStore;
@@ -69,6 +68,7 @@ import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GenericQueryMessage;
 import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;
+import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
@@ -91,11 +91,12 @@ public class ServerObjectContext extends ObjectDataContext implements
         super(parent, entityResolver, cache);
     }
 
-    public ObjectId[] onCommit(CommitMessage message) {
-        // TODO: synchronize client changes first
+    public GraphDiff onCommit(CommitMessage message) {
+        // sync client changes
+        message.getSenderChanges().apply(new ObjectDataContextChangeMerger(this));
 
-        commitChanges();
-        return new ObjectId[0];
+        // TODO: recast server diff to client diff
+        return commit();
     }
 
     public QueryResponse onGenericQuery(GenericQueryMessage message) {

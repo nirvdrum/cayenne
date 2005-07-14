@@ -65,6 +65,7 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.QueryResponse;
@@ -76,7 +77,10 @@ import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.PersistenceContext;
 import org.objectstyle.cayenne.access.Transaction;
+import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryChain;
@@ -179,27 +183,60 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
         return performSelectQuery(new NamedQueryProxy(queryName));
     }
 
+    public void commitChanges() throws CayenneRuntimeException {
+        commit();
+    }
+
     // ==== END: DataContext compatibility code... need to merge to DataContext
     // --------------------------------------------------------------------------
 
-    public void commitChanges() throws CayenneRuntimeException {
+    DataObject createAndRegisterNewObject(ObjectId id) {
+        if (id.getObjectClass() == null) {
+            throw new NullPointerException("DataObject class can't be null.");
+        }
+
+        ObjEntity entity = getEntityResolver().lookupObjEntity(id.getObjectClass());
+        if (entity == null) {
+            throw new IllegalArgumentException("Class is not mapped with Cayenne: "
+                    + id.getObjectClass().getName());
+        }
+
+        DataObject dataObject = null;
+        try {
+            dataObject = (DataObject) id.getObjectClass().newInstance();
+        }
+        catch (Exception ex) {
+            throw new CayenneRuntimeException("Error instantiating object.", ex);
+        }
+
+        dataObject.setObjectId(id);
+        registerNewObject(dataObject);
+        return dataObject;
+    }
+
+    public GraphDiff commit() throws CayenneRuntimeException {
 
         if (this.getParentContext() == null) {
             throw new CayenneRuntimeException(
                     "ObjectContext has no parent PersistenceContext.");
         }
 
+        CompoundDiff diff = new CompoundDiff();
+
         synchronized (getObjectStore()) {
-            if (!hasChanges()) {
-                return;
-            }
 
-            if (isValidatingObjectsOnCommit()) {
-                getObjectStore().validateUncommittedObjects();
-            }
+            if (hasChanges()) {
+                if (isValidatingObjectsOnCommit()) {
+                    getObjectStore().validateUncommittedObjects();
+                }
 
-            getParentContext().commitChangesInContext(this);
+                getParentContext().commitChangesInContext(this, diff);
+
+                // TODO: merge diff to ObjectStore
+            }
         }
+
+        return diff;
     }
 
     public PersistenceContext getParentContext() {

@@ -69,6 +69,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.Query;
@@ -612,12 +613,12 @@ public class DataDomain implements QueryEngine, PersistenceContext {
     // =======================================
 
     /**
-     * Commits changes in an ObjectContext. PersistenceContext method implementation.
+     * Commits changes in an ObjectContext.
      * 
      * @since 1.2
      */
-    public void commitChangesInContext(ObjectContext context) {
-        new DataDomainCommitAction(this).commit(context);
+    public void commitChangesInContext(ObjectContext context, CompoundDiff changeBuffer) {
+        new DataDomainCommitAction(this).commit(context, changeBuffer);
     }
 
     /**
@@ -690,7 +691,7 @@ public class DataDomain implements QueryEngine, PersistenceContext {
             Map.Entry entry = (Map.Entry) nodeIt.next();
             QueryEngine nextNode = (QueryEngine) entry.getKey();
             Collection nodeQueries = (Collection) entry.getValue();
-            
+
             nextNode.performQueries(nodeQueries, resultConsumer, transaction);
         }
     }

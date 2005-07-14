@@ -59,11 +59,12 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
+import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
- * A variety of used directly by the application code. ObjectContext tracks uncommitted
- * changes to objects and can commit them in a single method call.
+ * A Cayenne object facade to a persistence store. Instances of ObjectContext are used in
+ * application code to access Cayenne persistence features.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -123,8 +124,11 @@ public interface ObjectContext extends Serializable {
      * Commits changes made to this ObjectContext persistent objects. If an ObjectContext
      * is a part of an ObjectContext hierarchy, this method call triggers commit all the
      * way to the external data store.
+     * 
+     * @return GraphDiff that contains changes made to objects during commit. This
+     *         includes things like generated ObjectIds, etc.
      */
-    void commitChanges();
+    GraphDiff commit();
 
     /**
      * Executes a selecting query, returning a list of persistent objects or data rows.

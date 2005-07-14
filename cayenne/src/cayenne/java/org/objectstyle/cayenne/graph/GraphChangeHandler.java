@@ -62,8 +62,8 @@ package org.objectstyle.cayenne.graph;
  * unique id within the graph and each directional arc has a unique identifier within its
  * source node.
  * <p>
- * GraphStateTracker can be either "injected" directly into the graph nodes or wrapped in
- * some event notification mechanism to collect graph changes.
+ * GraphChangeHandlers can be either "injected" directly into the graph nodes or wrapped in
+ * some event mechanism to collect graph changes.
  * </p>
  * 
  * @since 1.2

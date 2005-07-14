@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.distribution;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.graph.GraphDiff;
 
 /**
  * Stores all messages passed via this handler.
@@ -74,7 +74,7 @@ public class MockClientMessageHandler implements ClientMessageHandler {
         return messages;
     }
 
-    public ObjectId[] onCommit(CommitMessage message) {
+    public GraphDiff onCommit(CommitMessage message) {
         messages.add(message);
         return null;
     }

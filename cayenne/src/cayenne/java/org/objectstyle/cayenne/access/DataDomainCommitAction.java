@@ -74,6 +74,7 @@ import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.util.BatchQueryUtils;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
@@ -125,7 +126,7 @@ class DataDomainCommitAction {
     /**
      * Commits changes in the enclosed DataContext.
      */
-    void commit(ObjectContext context) {
+    void commit(ObjectContext context, CompoundDiff changeBuffer) {
         synchronized (domain.getSharedSnapshotCache()) {
             categorizeObjects(context);
             createPrimaryKeys();
@@ -158,7 +159,8 @@ class DataDomainCommitAction {
 
                     if (queries.size() > 0) {
                         // note: observer throws on error
-                        nodeHelper.getNode().performQueries(queries,
+                        nodeHelper.getNode().performQueries(
+                                queries,
                                 observer,
                                 transaction);
                     }
@@ -211,7 +213,8 @@ class DataDomainCommitAction {
                 boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
                 DbRelationship masterDependentDbRel = (isMasterDbEntity
                         ? null
-                        : findMasterToDependentDbRelationship(entity.getDbEntity(),
+                        : findMasterToDependentDbRelationship(
+                                entity.getDbEntity(),
                                 dbEntity));
 
                 List objects = (List) newObjectsByObjEntity.get(entity.getClassName());
@@ -227,7 +230,8 @@ class DataDomainCommitAction {
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
-                    Map snapshot = BatchQueryUtils.buildSnapshotForInsert(entity,
+                    Map snapshot = BatchQueryUtils.buildSnapshotForInsert(
+                            entity,
                             o,
                             masterDependentDbRel,
                             supportsGeneratedKeys);
@@ -269,7 +273,8 @@ class DataDomainCommitAction {
                 boolean isRootDbEntity = (entity.getDbEntity() == dbEntity);
                 DbRelationship masterDependentDbRel = (isRootDbEntity
                         ? null
-                        : findMasterToDependentDbRelationship(entity.getDbEntity(),
+                        : findMasterToDependentDbRelationship(
+                                entity.getDbEntity(),
                                 dbEntity));
 
                 List objects = (List) objectsToDeleteByObjEntity.get(entity
@@ -304,7 +309,8 @@ class DataDomainCommitAction {
                     if (optimisticLocking) {
                         // clone snapshot and add extra keys...
                         qualifierSnapshot = new HashMap(qualifierSnapshot);
-                        appendOptimisticLockingAttributes(qualifierSnapshot,
+                        appendOptimisticLockingAttributes(
+                                qualifierSnapshot,
                                 o,
                                 qualifierAttributes);
                     }
@@ -371,7 +377,8 @@ class DataDomainCommitAction {
 
                 DbRelationship masterDependentDbRel = (isRootDbEntity)
                         ? null
-                        : findMasterToDependentDbRelationship(entity.getDbEntity(),
+                        : findMasterToDependentDbRelationship(
+                                entity.getDbEntity(),
                                 dbEntity);
                 List objects = (List) objectsToUpdateByObjEntity.get(entity
                         .getClassName());
@@ -379,7 +386,8 @@ class DataDomainCommitAction {
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
 
-                    Map snapshot = BatchQueryUtils.buildSnapshotForUpdate(entity,
+                    Map snapshot = BatchQueryUtils.buildSnapshotForUpdate(
+                            entity,
                             o,
                             masterDependentDbRel);
 
@@ -408,7 +416,8 @@ class DataDomainCommitAction {
                     if (optimisticLocking) {
                         // clone snapshot and add extra keys...
                         qualifierSnapshot = new HashMap(qualifierSnapshot);
-                        appendOptimisticLockingAttributes(qualifierSnapshot,
+                        appendOptimisticLockingAttributes(
+                                qualifierSnapshot,
                                 o,
                                 qualifierAttributes);
                     }
@@ -444,7 +453,8 @@ class DataDomainCommitAction {
                     batch.add(qualifierSnapshot, snapshot);
 
                     if (isRootDbEntity) {
-                        updateId(idSnapshot,
+                        updateId(
+                                idSnapshot,
                                 o.getObjectId().getReplacementIdMap(),
                                 snapshot);
                     }
@@ -614,21 +624,24 @@ class DataDomainCommitAction {
     }
 
     private void objectToInsert(DataObject o) {
-        classifyByEntityAndNode(o,
+        classifyByEntityAndNode(
+                o,
                 newObjectsByObjEntity,
                 objEntitiesToInsert,
                 DataNodeCommitAction.INSERT);
     }
 
     private void objectToDelete(DataObject o) {
-        classifyByEntityAndNode(o,
+        classifyByEntityAndNode(
+                o,
                 objectsToDeleteByObjEntity,
                 objEntitiesToDelete,
                 DataNodeCommitAction.DELETE);
     }
 
     private void objectToUpdate(DataObject o) {
-        classifyByEntityAndNode(o,
+        classifyByEntityAndNode(
+                o,
                 objectsToUpdateByObjEntity,
                 objEntitiesToUpdate,
                 DataNodeCommitAction.UPDATE);

@@ -59,6 +59,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.MockPersistenceContext;
+import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
@@ -92,7 +93,8 @@ public class MockObjectContext extends MockPersistenceContext implements ObjectC
         return null;
     }
 
-    public void commitChanges() {
+    public GraphDiff commit() {
+        return null;
     }
 
     public void deleteObject(Persistent object) {

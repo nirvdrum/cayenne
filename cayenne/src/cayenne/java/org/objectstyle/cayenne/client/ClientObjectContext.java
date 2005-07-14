@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GenericQueryMessage;
 import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.graph.OperationRecorder;
@@ -121,12 +122,16 @@ public class ClientObjectContext implements ObjectContext {
      * context and if any changes are detected, sends a commit message to remote Cayenne
      * service via an internal instance of CayenneConnector.
      */
-    public void commitChanges() {
+    public GraphDiff commit() {
 
         if (!changeRecorder.isEmpty()) {
             GraphDiff commitDiff = new CommitMessage(changeRecorder.getDiffs())
                     .sendCommit(connector);
             graphManager.mergeRemoteChange(commitDiff);
+            return commitDiff;
+        }
+        else {
+            return new CompoundDiff();
         }
     }
 
@@ -227,14 +232,17 @@ public class ClientObjectContext implements ObjectContext {
     }
 
     public Collection deletedObjects() {
+        // TODO: sync on graphManager?
         return stateRecorder.dirtyNodes(graphManager, PersistenceState.DELETED);
     }
 
     public Collection modifiedObjects() {
+        // TODO: sync on graphManager?
         return stateRecorder.dirtyNodes(graphManager, PersistenceState.MODIFIED);
     }
 
     public Collection newObjects() {
+        // TODO: sync on graphManager?
         return stateRecorder.dirtyNodes(graphManager, PersistenceState.NEW);
     }
 }

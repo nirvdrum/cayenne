@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access;
 import java.io.Serializable;
 
 import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
@@ -72,9 +73,10 @@ public interface PersistenceContext extends Serializable {
 
     /**
      * Merges changes from the ObjectContext parameter. This method is used by child
-     * ObjectContexts to commit their objects to parent.
+     * ObjectContexts to commit their objects to parent. Any changes made to objects as a
+     * result of commit are appended to the changeBuffer.
      */
-    void commitChangesInContext(ObjectContext context);
+    void commitChangesInContext(ObjectContext context, CompoundDiff changeBuffer);
 
     /**
      * Executes a query using its own preferred transactional behavior.
