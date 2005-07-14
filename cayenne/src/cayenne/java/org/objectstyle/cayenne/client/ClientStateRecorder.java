@@ -53,21 +53,105 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.graph;
 
-class NodeIdChangeOperation extends NodeDiff {
+package org.objectstyle.cayenne.client;
 
-    Object newNodeId;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
-    public NodeIdChangeOperation(Object nodeId, Object newNodeId) {
-        super(nodeId);
+import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.graph.GraphChangeHandler;
+import org.objectstyle.cayenne.graph.GraphMap;
 
-        this.newNodeId = newNodeId;
+/**
+ * Tracks dirty Persistent objects.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+class ClientStateRecorder implements GraphChangeHandler {
+
+    Set dirtyIds;
+
+    ClientStateRecorder() {
+        this.dirtyIds = new HashSet();
     }
 
-    public void apply(GraphChangeHandler tracker) {
+    void clear() {
+        dirtyIds = new HashSet();
     }
 
-    public void undo(GraphChangeHandler tracker) {
+    boolean hasChanges() {
+        return !dirtyIds.isEmpty();
+    }
+
+    Collection dirtyNodes(GraphMap graphMap) {
+        if (dirtyIds.isEmpty()) {
+            return Collections.EMPTY_SET;
+        }
+
+        List objects = new ArrayList(dirtyIds.size());
+        Iterator it = dirtyIds.iterator();
+        while (it.hasNext()) {
+            objects.add(graphMap.getNode(it.next()));
+        }
+
+        return objects;
+    }
+
+    Collection dirtyNodes(GraphMap graphMap, int state) {
+        if (dirtyIds.isEmpty()) {
+            return Collections.EMPTY_SET;
+        }
+
+        int size = dirtyIds.size();
+        List objects = new ArrayList(size > 50 ? size / 2 : size);
+        Iterator it = dirtyIds.iterator();
+        while (it.hasNext()) {
+            Persistent o = (Persistent) graphMap.getNode(it.next());
+
+            if (o.getPersistenceState() == state) {
+                objects.add(o);
+            }
+        }
+
+        return objects;
+    }
+
+    // *** GraphChangeHandler methods
+
+    public void nodeIdChanged(Object nodeId, Object newId) {
+        if (dirtyIds.remove(nodeId)) {
+            dirtyIds.add(newId);
+        }
+    }
+
+    public void nodeCreated(Object nodeId) {
+        dirtyIds.add(nodeId);
+    }
+
+    public void nodeDeleted(Object nodeId) {
+        dirtyIds.add(nodeId);
+    }
+
+    public void nodePropertyChanged(
+            Object nodeId,
+            String property,
+            Object oldValue,
+            Object newValue) {
+        dirtyIds.add(nodeId);
+    }
+
+    public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
+        dirtyIds.add(nodeId);
+    }
+
+    public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
+        dirtyIds.add(nodeId);
     }
 }

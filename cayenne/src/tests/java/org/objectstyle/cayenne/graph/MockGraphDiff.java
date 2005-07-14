@@ -55,14 +55,10 @@
  */
 package org.objectstyle.cayenne.graph;
 
-class NodeIdChangeOperation extends NodeDiff {
+public class MockGraphDiff implements GraphDiff {
 
-    Object newNodeId;
-
-    public NodeIdChangeOperation(Object nodeId, Object newNodeId) {
-        super(nodeId);
-
-        this.newNodeId = newNodeId;
+    public MockGraphDiff() {
+        super();
     }
 
     public void apply(GraphChangeHandler tracker) {
@@ -70,4 +66,5 @@ class NodeIdChangeOperation extends NodeDiff {
 
     public void undo(GraphChangeHandler tracker) {
     }
+
 }

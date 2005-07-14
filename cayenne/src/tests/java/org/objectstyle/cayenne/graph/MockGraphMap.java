@@ -55,19 +55,27 @@
  */
 package org.objectstyle.cayenne.graph;
 
-class NodeIdChangeOperation extends NodeDiff {
+import java.util.HashMap;
+import java.util.Map;
 
-    Object newNodeId;
+public class MockGraphMap implements GraphMap {
 
-    public NodeIdChangeOperation(Object nodeId, Object newNodeId) {
-        super(nodeId);
+    protected Map map;
 
-        this.newNodeId = newNodeId;
+    public MockGraphMap() {
+        this.map = new HashMap();
     }
 
-    public void apply(GraphChangeHandler tracker) {
+    public Object getNode(Object nodeId) {
+        return map.get(nodeId);
     }
 
-    public void undo(GraphChangeHandler tracker) {
+    public void registerNode(Object nodeId, Object nodeObject) {
+        map.put(nodeId, nodeObject);
     }
+
+    public Object unregisterNode(Object nodeId) {
+        return map.remove(nodeId);
+    }
+
 }

@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.graph.GraphDiff;
 
 /**
  * A commands that instructs the receiver to commit all uncommitted objects. Returns an
@@ -68,11 +68,21 @@ import org.objectstyle.cayenne.ObjectId;
  */
 public class CommitMessage extends AbstractMessage {
 
+    protected GraphDiff senderChanges;
+
+    public CommitMessage(GraphDiff senderChanges) {
+        this.senderChanges = senderChanges;
+    }
+
+    public GraphDiff getSenderChanges() {
+        return senderChanges;
+    }
+
     public Object onReceive(ClientMessageHandler handler) {
         return handler.onCommit(this);
     }
 
-    public ObjectId[] sendCommit(CayenneConnector connector) {
-        return (ObjectId[]) send(connector, ObjectId[].class);
+    public GraphDiff sendCommit(CayenneConnector connector) {
+        return (GraphDiff) send(connector, GraphDiff.class);
     }
 }

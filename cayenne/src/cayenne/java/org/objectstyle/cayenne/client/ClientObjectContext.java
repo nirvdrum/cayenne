@@ -55,14 +55,11 @@
  */
 package org.objectstyle.cayenne.client;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.QueryResponse;
@@ -72,6 +69,9 @@ import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GenericQueryMessage;
 import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;
+import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.GraphManager;
+import org.objectstyle.cayenne.graph.OperationRecorder;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
@@ -88,7 +88,9 @@ public class ClientObjectContext implements ObjectContext {
     // reinjected later if needed
     protected transient CayenneConnector connector;
 
-    protected ClientObjectStore objectStore;
+    protected GraphManager graphManager;
+    protected OperationRecorder changeRecorder;
+    protected ClientStateRecorder stateRecorder;
 
     /**
      * Creates a new ClientObjectContext, initializaing it with a connector instance that
@@ -96,7 +98,15 @@ public class ClientObjectContext implements ObjectContext {
      */
     public ClientObjectContext(CayenneConnector connector) {
         this.connector = connector;
-        this.objectStore = new ClientObjectStore();
+
+        // assemble objects that track graph changes
+        this.graphManager = new GraphManager();
+
+        this.changeRecorder = new OperationRecorder();
+        this.stateRecorder = new ClientStateRecorder();
+
+        graphManager.addLocalChangeHandler(changeRecorder);
+        graphManager.addLocalChangeHandler(stateRecorder);
     }
 
     /**
@@ -113,13 +123,10 @@ public class ClientObjectContext implements ObjectContext {
      */
     public void commitChanges() {
 
-        if (objectStore.hasChanges()) {
-
-            ObjectId[] ids = new CommitMessage().sendCommit(connector);
-            Collection idCollection = ids != null
-                    ? Arrays.asList(ids)
-                    : Collections.EMPTY_LIST;
-            objectStore.objectsCommitted(idCollection);
+        if (!changeRecorder.isEmpty()) {
+            GraphDiff commitDiff = new CommitMessage(changeRecorder.getDiffs())
+                    .sendCommit(connector);
+            graphManager.mergeRemoteChange(commitDiff);
         }
     }
 
@@ -138,15 +145,15 @@ public class ClientObjectContext implements ObjectContext {
 
         if (object.getPersistenceState() == PersistenceState.NEW) {
             // kick it out of context
-            objectStore.forgetObject(object);
             object.setPersistenceState(PersistenceState.TRANSIENT);
+            graphManager.unregisterNode(object.getObjectId());
             return;
         }
 
         // TODO: no delete rules (yet)
 
         object.setPersistenceState(PersistenceState.DELETED);
-        objectStore.trackObject(object);
+        graphManager.nodeDeleted(object.getObjectId());
     }
 
     /**
@@ -170,7 +177,9 @@ public class ClientObjectContext implements ObjectContext {
         // make object "cayenne-persistent"
         object.setObjectId(new TempObjectId(persistentClass));
         object.setPersistenceState(PersistenceState.NEW);
-        objectStore.trackObject(object);
+
+        graphManager.registerNode(object.getObjectId(), object);
+        graphManager.nodeCreated(object.getObjectId());
 
         return object;
     }
@@ -203,30 +212,29 @@ public class ClientObjectContext implements ObjectContext {
         // change state...
         if (object.getPersistenceState() == PersistenceState.COMMITTED) {
             object.setPersistenceState(PersistenceState.MODIFIED);
-
-            objectStore.trackObject(object);
         }
 
-        // TODO: take a better advantage of the property change info, e.g build a
-        // diff for synchronization instead of sending full objects...
+        graphManager.nodePropertyChanged(
+                object.getObjectId(),
+                property,
+                oldValue,
+                newValue);
     }
 
-    /**
-     * Returns a collection of MODIFIED, DELETED or NEW objects.
-     */
     public Collection uncommittedObjects() {
-        return objectStore.uncommittedObjects();
+        // TODO: sync on graphManager?
+        return stateRecorder.dirtyNodes(graphManager);
     }
 
     public Collection deletedObjects() {
-        return objectStore.objectsInState(PersistenceState.DELETED);
+        return stateRecorder.dirtyNodes(graphManager, PersistenceState.DELETED);
     }
 
     public Collection modifiedObjects() {
-        return objectStore.objectsInState(PersistenceState.MODIFIED);
+        return stateRecorder.dirtyNodes(graphManager, PersistenceState.MODIFIED);
     }
 
     public Collection newObjects() {
-        return objectStore.objectsInState(PersistenceState.NEW);
+        return stateRecorder.dirtyNodes(graphManager, PersistenceState.NEW);
     }
 }

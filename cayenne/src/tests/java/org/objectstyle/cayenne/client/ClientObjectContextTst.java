@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.distribution.ClientMessage;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.MockCayenneConnector;
+import org.objectstyle.cayenne.graph.MockGraphDiff;
 
 /**
  * @author Andrus Adamchik
@@ -93,16 +94,12 @@ public class ClientObjectContextTst extends TestCase {
 
     public void testCommitChangesCommandExecuted() {
 
-        MockCayenneConnector connector = new MockCayenneConnector(new ObjectId[0]);
+        MockCayenneConnector connector = new MockCayenneConnector(new MockGraphDiff());
         ClientObjectContext context = new ClientObjectContext(connector);
 
         // test that a command is being sent via connector on commit...
 
-        MockPersistentObject object = new MockPersistentObject();
-        object.setObjectId(new ObjectId(Object.class, "key", "value"));
-        object.setPersistenceState(PersistenceState.MODIFIED);
-        context.objectStore.trackObject(object);
-
+        context.changeRecorder.nodePropertyChanged(new Object(), "x", "y", "z");
         context.commitChanges();
         assertEquals(1, connector.getCommands().size());
 
@@ -112,44 +109,44 @@ public class ClientObjectContextTst extends TestCase {
                 .iterator()
                 .next();
         assertTrue(mainMessage instanceof CommitMessage);
-
     }
 
     public void testCommitChangesNew() {
 
         // test that ids that are passed back are actually propagated to the right
         // objects...
-//        MockCayenneConnector connector = new MockCayenneConnector() {
-//
-//            public Object sendMessage(ClientMessage message)
-//                    throws CayenneClientException {
-//                CommitMessage commit = (CommitMessage) message;
-//
-//                // assume a single NEW object...
-//                Persistent object = (Persistent) commit
-//                        .getContext()
-//                        .newObjects()
-//                        .iterator()
-//                        .next();
-//
-//                // fake creating a replacement ID on the server... return back the
-//                // original id with attached replacement values
-//                object.getObjectId().getReplacementIdMap().put("key", "generated");
-//                return new ObjectId[] {
-//                    object.getObjectId()
-//                };
-//            }
-//        };
-//
-//        ClientObjectContext context = new ClientObjectContext(connector);
-//
-//        // check that a generted object ID is assigned back to the object...
-//        Persistent object = context.newObject(MockPersistentObject.class);
-//        context.commitChanges();
-//
-//        assertFalse(object.getObjectId().isTemporary());
-//        assertEquals(new ObjectId(MockPersistentObject.class, "key", "generated"), object
-//                .getObjectId());
+        // MockCayenneConnector connector = new MockCayenneConnector() {
+        //
+        // public Object sendMessage(ClientMessage message)
+        // throws CayenneClientException {
+        // CommitMessage commit = (CommitMessage) message;
+        //
+        // // assume a single NEW object...
+        // Persistent object = (Persistent) commit
+        // .getContext()
+        // .newObjects()
+        // .iterator()
+        // .next();
+        //
+        // // fake creating a replacement ID on the server... return back the
+        // // original id with attached replacement values
+        // object.getObjectId().getReplacementIdMap().put("key", "generated");
+        // return new ObjectId[] {
+        // object.getObjectId()
+        // };
+        // }
+        // };
+        //
+        // ClientObjectContext context = new ClientObjectContext(connector);
+        //
+        // // check that a generted object ID is assigned back to the object...
+        // Persistent object = context.newObject(MockPersistentObject.class);
+        // context.commitChanges();
+        //
+        // assertFalse(object.getObjectId().isTemporary());
+        // assertEquals(new ObjectId(MockPersistentObject.class, "key", "generated"),
+        // object
+        // .getObjectId());
     }
 
     public void testNewObject() {
@@ -171,9 +168,9 @@ public class ClientObjectContextTst extends TestCase {
         assertNotNull(object);
         assertTrue(object instanceof MockPersistentObject);
         assertEquals(PersistenceState.NEW, object.getPersistenceState());
-        assertTrue(context.objectStore
-                .objectsInState(PersistenceState.NEW)
-                .contains(object));
+        assertTrue(context.stateRecorder.dirtyNodes(
+                context.graphManager,
+                PersistenceState.NEW).contains(object));
         assertNotNull(object.getObjectId());
         assertTrue(object.getObjectId().isTemporary());
     }
@@ -192,7 +189,7 @@ public class ClientObjectContextTst extends TestCase {
         Persistent newObject = context.newObject(MockPersistentObject.class);
         context.deleteObject(newObject);
         assertEquals(PersistenceState.TRANSIENT, newObject.getPersistenceState());
-        assertFalse(context.objectStore.dirtyObjects.containsValue(newObject));
+        assertFalse(context.stateRecorder.dirtyNodes(context.graphManager).contains(newObject));
 
         // COMMITTED
         Persistent committed = new MockPersistentObject();

@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GenericQueryMessage;
 import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;
+import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;
@@ -103,7 +104,7 @@ public class ServerObjectContextTst extends CayenneTestCase {
                 new EntityResolver(),
                 new MockDataRowStore());
 
-        context.onCommit(new CommitMessage());
+        context.onCommit(new CommitMessage(new MockGraphDiff()));
 
         // no changes in context, so no commit should be executed
         assertFalse(parent.isCommitChangesInContext());

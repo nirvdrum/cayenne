@@ -55,19 +55,53 @@
  */
 package org.objectstyle.cayenne.graph;
 
-class NodeIdChangeOperation extends NodeDiff {
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
-    Object newNodeId;
+/**
+ * A GraphDiff that is a list of other GraphDiffs.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+public class CompoundDiff implements GraphDiff {
 
-    public NodeIdChangeOperation(Object nodeId, Object newNodeId) {
-        super(nodeId);
+    protected List diffs;
 
-        this.newNodeId = newNodeId;
+    public CompoundDiff() {
+        this.diffs = new ArrayList();
     }
 
+    public CompoundDiff(List diffs) {
+        this.diffs = diffs;
+    }
+
+    public void add(GraphDiff diff) {
+        this.diffs.add(diff);
+    }
+
+    /**
+     * Iterates over diffs list, calling "apply" on each individual diff.
+     */
     public void apply(GraphChangeHandler tracker) {
+        // implements a naive linear commit - simply replay stored operations
+        Iterator it = diffs.iterator();
+        while (it.hasNext()) {
+            GraphDiff change = (GraphDiff) it.next();
+            change.apply(tracker);
+        }
     }
 
+    /**
+     * Iterates over diffs list in reverse order, calling "apply" on each individual diff.
+     */
     public void undo(GraphChangeHandler tracker) {
+        ListIterator it = diffs.listIterator(diffs.size());
+        while (it.hasPrevious()) {
+            GraphDiff change = (GraphDiff) it.previous();
+            change.undo(tracker);
+        }
     }
 }
