@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.distribution.ClientMessage;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.MockCayenneConnector;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
+import org.objectstyle.cayenne.graph.OperationRecorder;
 
 /**
  * @author Andrus Adamchik
@@ -112,41 +113,33 @@ public class ClientObjectContextTst extends TestCase {
     }
 
     public void testCommitChangesNew() {
+        final OperationRecorder recorder = new OperationRecorder();
 
         // test that ids that are passed back are actually propagated to the right
         // objects...
-        // MockCayenneConnector connector = new MockCayenneConnector() {
-        //
-        // public Object sendMessage(ClientMessage message)
-        // throws CayenneClientException {
-        // CommitMessage commit = (CommitMessage) message;
-        //
-        // // assume a single NEW object...
-        // Persistent object = (Persistent) commit
-        // .getContext()
-        // .newObjects()
-        // .iterator()
-        // .next();
-        //
-        // // fake creating a replacement ID on the server... return back the
-        // // original id with attached replacement values
-        // object.getObjectId().getReplacementIdMap().put("key", "generated");
-        // return new ObjectId[] {
-        // object.getObjectId()
-        // };
-        // }
-        // };
-        //
-        // ClientObjectContext context = new ClientObjectContext(connector);
-        //
-        // // check that a generted object ID is assigned back to the object...
-        // Persistent object = context.newObject(MockPersistentObject.class);
-        // context.commitChanges();
-        //
-        // assertFalse(object.getObjectId().isTemporary());
-        // assertEquals(new ObjectId(MockPersistentObject.class, "key", "generated"),
-        // object
-        // .getObjectId());
+        MockCayenneConnector connector = new MockCayenneConnector() {
+
+            public Object sendMessage(ClientMessage message)
+                    throws CayenneClientException {
+                return recorder.getDiffs();
+            }
+        };
+
+        ClientObjectContext context = new ClientObjectContext(connector);
+        final Persistent object = context.newObject(MockPersistentObject.class);
+
+        // record change here to make it available to the anonymous connector method..
+        recorder.nodeIdChanged(object.getObjectId(), new ObjectId(
+                MockPersistentObject.class,
+                "key",
+                "generated"));
+
+        // check that a generated object ID is assigned back to the object...
+        context.commit();
+
+        assertFalse(object.getObjectId().isTemporary());
+        assertEquals(new ObjectId(MockPersistentObject.class, "key", "generated"), object
+                .getObjectId());
     }
 
     public void testNewObject() {

@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.MockDataRowStore;
 import org.objectstyle.cayenne.access.MockPersistenceContext;
 import org.objectstyle.cayenne.access.PersistenceContext;
@@ -67,6 +68,7 @@ import org.objectstyle.cayenne.distribution.GenericQueryMessage;
 import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
+import org.objectstyle.cayenne.graph.OperationRecorder;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;
@@ -88,6 +90,15 @@ public class ServerObjectContextTst extends CayenneTestCase {
                 .getAccessStack(MULTI_TIER_ACCESS_STACK);
     }
 
+    public void testEntityResolver() {
+        EntityResolver resolver = new EntityResolver();
+        ServerObjectContext context = new ServerObjectContext(
+                new MockPersistenceContext(),
+                resolver,
+                new MockDataRowStore());
+        assertSame(resolver, context.getEntityResolver());
+    }
+
     public void testParentContext() {
         PersistenceContext parent = new MockPersistenceContext();
         ServerObjectContext context = new ServerObjectContext(
@@ -99,10 +110,8 @@ public class ServerObjectContextTst extends CayenneTestCase {
 
     public void testOnCommit() {
         MockPersistenceContext parent = new MockPersistenceContext();
-        ServerObjectContext context = new ServerObjectContext(
-                parent,
-                new EntityResolver(),
-                new MockDataRowStore());
+        ServerObjectContext context = new ServerObjectContext(parent, getDomain()
+                .getEntityResolver(), new MockDataRowStore());
 
         context.onCommit(new CommitMessage(new MockGraphDiff()));
 
@@ -110,7 +119,11 @@ public class ServerObjectContextTst extends CayenneTestCase {
         assertFalse(parent.isCommitChangesInContext());
 
         // introduce changes
-        // TODO: unfinished
+        OperationRecorder recorder = new OperationRecorder();
+        recorder.nodeCreated(new TempObjectId(MtTable1.class));
+
+        context.onCommit(new CommitMessage(recorder.getDiffs()));
+        assertTrue(parent.isCommitChangesInContext());
     }
 
     public void testOnUpdateQuery() {

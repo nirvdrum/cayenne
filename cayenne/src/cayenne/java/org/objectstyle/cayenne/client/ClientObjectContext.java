@@ -108,6 +108,7 @@ public class ClientObjectContext implements ObjectContext {
 
         graphManager.addLocalChangeHandler(changeRecorder);
         graphManager.addLocalChangeHandler(stateRecorder);
+        graphManager.setRemoteChangeHandler(new ObjectContextChangeMerger(this, graphManager));
     }
 
     /**

@@ -133,11 +133,11 @@ public class GraphManager implements GraphMap, GraphChangeHandler {
         }
     }
 
-    protected GraphChangeHandler getRemoteChangeHandler() {
+    public GraphChangeHandler getRemoteChangeHandler() {
         return remoteChangeHandler;
     }
 
-    protected void setRemoteChangeHandler(GraphChangeHandler handler) {
+    public void setRemoteChangeHandler(GraphChangeHandler handler) {
         this.remoteChangeHandler = handler;
     }
 

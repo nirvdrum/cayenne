@@ -66,8 +66,10 @@ class NodeIdChangeOperation extends NodeDiff {
     }
 
     public void apply(GraphChangeHandler tracker) {
+        tracker.nodeIdChanged(nodeId, newNodeId);
     }
 
     public void undo(GraphChangeHandler tracker) {
+        tracker.nodeIdChanged(newNodeId, nodeId);
     }
 }
