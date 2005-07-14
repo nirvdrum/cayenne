@@ -790,4 +790,27 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
             writeProperty(name, decoder.decodeObject(name));
         }
     }
+
+    /**
+     * Returns this object's ObjectId.
+     * 
+     * @since 1.2
+     */
+    public Object getOid() {
+        return getObjectId();
+    }
+
+    /**
+     * Sets this object's ObjectId.
+     * 
+     * @since 1.2
+     */
+    public void setOid(Object oid) {
+        if (oid == null || oid instanceof ObjectId) {
+            setObjectId((ObjectId) oid);
+        }
+
+        throw new IllegalArgumentException(
+                "CayenneDataObject only supports ObjectId ids, got: " + oid);
+    }
 }

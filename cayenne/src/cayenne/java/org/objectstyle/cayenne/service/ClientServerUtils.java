@@ -96,7 +96,7 @@ class ClientServerUtils {
         // copy ID
         if (clientObject instanceof Persistent) {
             ObjectId clientOID = toClientObjectId(object.getObjectId(), clientClass);
-            ((Persistent) clientObject).setObjectId(clientOID);
+            ((Persistent) clientObject).setOid(clientOID);
         }
 
         // TODO: implement attribute filtering for client..

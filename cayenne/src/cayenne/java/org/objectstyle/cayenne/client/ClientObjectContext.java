@@ -108,7 +108,9 @@ public class ClientObjectContext implements ObjectContext {
 
         graphManager.addLocalChangeHandler(changeRecorder);
         graphManager.addLocalChangeHandler(stateRecorder);
-        graphManager.setRemoteChangeHandler(new ObjectContextChangeMerger(this, graphManager));
+        graphManager.setRemoteChangeHandler(new ObjectContextChangeMerger(
+                this,
+                graphManager));
     }
 
     /**
@@ -152,14 +154,14 @@ public class ClientObjectContext implements ObjectContext {
         if (object.getPersistenceState() == PersistenceState.NEW) {
             // kick it out of context
             object.setPersistenceState(PersistenceState.TRANSIENT);
-            graphManager.unregisterNode(object.getObjectId());
+            graphManager.unregisterNode(object.getOid());
             return;
         }
 
         // TODO: no delete rules (yet)
 
         object.setPersistenceState(PersistenceState.DELETED);
-        graphManager.nodeDeleted(object.getObjectId());
+        graphManager.nodeDeleted(object.getOid());
     }
 
     /**
@@ -181,11 +183,11 @@ public class ClientObjectContext implements ObjectContext {
         }
 
         // make object "cayenne-persistent"
-        object.setObjectId(new TempObjectId(persistentClass));
+        object.setOid(new TempObjectId(persistentClass));
         object.setPersistenceState(PersistenceState.NEW);
 
-        graphManager.registerNode(object.getObjectId(), object);
-        graphManager.nodeCreated(object.getObjectId());
+        graphManager.registerNode(object.getOid(), object);
+        graphManager.nodeCreated(object.getOid());
 
         return object;
     }
@@ -220,11 +222,7 @@ public class ClientObjectContext implements ObjectContext {
             object.setPersistenceState(PersistenceState.MODIFIED);
         }
 
-        graphManager.nodePropertyChanged(
-                object.getObjectId(),
-                property,
-                oldValue,
-                newValue);
+        graphManager.nodePropertyChanged(object.getOid(), property, oldValue, newValue);
     }
 
     public Collection uncommittedObjects() {

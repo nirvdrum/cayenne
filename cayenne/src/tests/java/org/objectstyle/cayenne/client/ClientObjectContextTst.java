@@ -114,6 +114,10 @@ public class ClientObjectContextTst extends TestCase {
 
     public void testCommitChangesNew() {
         final OperationRecorder recorder = new OperationRecorder();
+        final Object newObjectId = new ObjectId(
+                MockPersistentObject.class,
+                "key",
+                "generated");
 
         // test that ids that are passed back are actually propagated to the right
         // objects...
@@ -129,17 +133,13 @@ public class ClientObjectContextTst extends TestCase {
         final Persistent object = context.newObject(MockPersistentObject.class);
 
         // record change here to make it available to the anonymous connector method..
-        recorder.nodeIdChanged(object.getObjectId(), new ObjectId(
-                MockPersistentObject.class,
-                "key",
-                "generated"));
+        recorder.nodeIdChanged(object.getOid(), newObjectId);
 
         // check that a generated object ID is assigned back to the object...
+        assertNotSame(newObjectId, object.getOid());
         context.commit();
-
-        assertFalse(object.getObjectId().isTemporary());
-        assertEquals(new ObjectId(MockPersistentObject.class, "key", "generated"), object
-                .getObjectId());
+        assertSame(newObjectId, object.getOid());
+        assertSame(object, context.graphManager.getNode(newObjectId));
     }
 
     public void testNewObject() {
@@ -164,8 +164,7 @@ public class ClientObjectContextTst extends TestCase {
         assertTrue(context.stateRecorder.dirtyNodes(
                 context.graphManager,
                 PersistenceState.NEW).contains(object));
-        assertNotNull(object.getObjectId());
-        assertTrue(object.getObjectId().isTemporary());
+        assertNotNull(object.getOid());
     }
 
     public void testDeleteObject() {
@@ -188,21 +187,21 @@ public class ClientObjectContextTst extends TestCase {
         // COMMITTED
         Persistent committed = new MockPersistentObject();
         committed.setPersistenceState(PersistenceState.COMMITTED);
-        committed.setObjectId(new ObjectId(MockPersistentObject.class, "key", "value1"));
+        committed.setOid(new ObjectId(MockPersistentObject.class, "key", "value1"));
         context.deleteObject(committed);
         assertEquals(PersistenceState.DELETED, committed.getPersistenceState());
 
         // MODIFIED
         Persistent modified = new MockPersistentObject();
         modified.setPersistenceState(PersistenceState.MODIFIED);
-        modified.setObjectId(new ObjectId(MockPersistentObject.class, "key", "value2"));
+        modified.setOid(new ObjectId(MockPersistentObject.class, "key", "value2"));
         context.deleteObject(modified);
         assertEquals(PersistenceState.DELETED, modified.getPersistenceState());
 
         // DELETED
         Persistent deleted = new MockPersistentObject();
         deleted.setPersistenceState(PersistenceState.DELETED);
-        deleted.setObjectId(new ObjectId(MockPersistentObject.class, "key", "value3"));
+        deleted.setOid(new ObjectId(MockPersistentObject.class, "key", "value3"));
         context.deleteObject(deleted);
         assertEquals(PersistenceState.DELETED, committed.getPersistenceState());
     }

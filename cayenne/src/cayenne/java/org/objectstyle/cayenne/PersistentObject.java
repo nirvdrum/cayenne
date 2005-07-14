@@ -65,7 +65,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  */
 public abstract class PersistentObject implements Persistent {
 
-    protected ObjectId objectId;
+    protected Object oid;
     protected int persistenceState;
     protected transient ObjectContext objectContext;
 
@@ -111,12 +111,12 @@ public abstract class PersistentObject implements Persistent {
         this.objectContext = objectContext;
     }
 
-    public ObjectId getObjectId() {
-        return objectId;
+    public Object getOid() {
+        return oid;
     }
 
-    public void setObjectId(ObjectId objectId) {
-        this.objectId = objectId;
+    public void setOid(Object oid) {
+        this.oid = oid;
     }
 
     public String toString() {

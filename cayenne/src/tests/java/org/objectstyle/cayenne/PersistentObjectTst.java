@@ -87,14 +87,14 @@ public class PersistentObjectTst extends TestCase {
         assertEquals(PersistenceState.DELETED, object.getPersistenceState());
     }
 
-    public void testObjectId() {
+    public void testOid() {
         ObjectId id = new ObjectId(Object.class, "a", "b");
 
         PersistentObject object = new MockPersistentObject();
 
-        assertNull(object.getObjectId());
-        object.setObjectId(id);
-        assertSame(id, object.getObjectId());
+        assertNull(object.getOid());
+        object.setOid(id);
+        assertSame(id, object.getOid());
     }
 
     public void testWillReadTransient() {

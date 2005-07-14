@@ -89,10 +89,10 @@ public class ClientStateRecorderTst extends TestCase {
         assertTrue(recorder.dirtyNodes(map, PersistenceState.HOLLOW).isEmpty());
 
         MockPersistentObject modified = new MockPersistentObject();
-        modified.setObjectId(new ObjectId(Object.class, "key", "value1"));
+        modified.setOid(new ObjectId(Object.class, "key", "value1"));
         modified.setPersistenceState(PersistenceState.MODIFIED);
-        map.registerNode(modified.getObjectId(), modified);
-        recorder.nodePropertyChanged(modified.getObjectId(), "a", "b", "c");
+        map.registerNode(modified.getOid(), modified);
+        recorder.nodePropertyChanged(modified.getOid(), "a", "b", "c");
 
         assertTrue(recorder.dirtyNodes(map, PersistenceState.MODIFIED).contains(modified));
         assertTrue(recorder.dirtyNodes(map, PersistenceState.COMMITTED).isEmpty());
@@ -102,10 +102,10 @@ public class ClientStateRecorderTst extends TestCase {
         assertTrue(recorder.dirtyNodes(map, PersistenceState.HOLLOW).isEmpty());
 
         MockPersistentObject deleted = new MockPersistentObject();
-        deleted.setObjectId(new ObjectId(Object.class, "key", "value2"));
+        deleted.setOid(new ObjectId(Object.class, "key", "value2"));
         deleted.setPersistenceState(PersistenceState.DELETED);
-        map.registerNode(deleted.getObjectId(), deleted);
-        recorder.nodeDeleted(deleted.getObjectId());
+        map.registerNode(deleted.getOid(), deleted);
+        recorder.nodeDeleted(deleted.getOid());
 
         assertTrue(recorder.dirtyNodes(map, PersistenceState.MODIFIED).contains(modified));
         assertTrue(recorder.dirtyNodes(map, PersistenceState.COMMITTED).isEmpty());
@@ -124,10 +124,10 @@ public class ClientStateRecorderTst extends TestCase {
 
         // introduce a fake dirty object
         MockPersistentObject object = new MockPersistentObject();
-        object.setObjectId(new ObjectId(Object.class, "key", "value"));
+        object.setOid(new ObjectId(Object.class, "key", "value"));
         object.setPersistenceState(PersistenceState.MODIFIED);
-        map.registerNode(object.getObjectId(), object);
-        recorder.nodePropertyChanged(object.getObjectId(), "a", "b", "c");
+        map.registerNode(object.getOid(), object);
+        recorder.nodePropertyChanged(object.getOid(), "a", "b", "c");
 
         assertTrue(recorder.dirtyNodes(map).contains(object));
 
@@ -144,9 +144,9 @@ public class ClientStateRecorderTst extends TestCase {
 
         // introduce a fake dirty object
         MockPersistentObject object = new MockPersistentObject();
-        object.setObjectId(new ObjectId(Object.class, "key", "value"));
+        object.setOid(new ObjectId(Object.class, "key", "value"));
         object.setPersistenceState(PersistenceState.MODIFIED);
-        recorder.nodePropertyChanged(object.getObjectId(), "xyz", "a", "b");
+        recorder.nodePropertyChanged(object.getOid(), "xyz", "a", "b");
 
         assertTrue(recorder.hasChanges());
 

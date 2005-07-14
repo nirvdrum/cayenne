@@ -1,7 +1,6 @@
 package org.objectstyle.cayenne.client;
 
 import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.graph.BeanChangeMerger;
 import org.objectstyle.cayenne.graph.GraphMap;
@@ -27,7 +26,7 @@ class ObjectContextChangeMerger extends BeanChangeMerger {
             graphMap.registerNode(newId, node);
 
             if (node instanceof Persistent) {
-                ((Persistent) node).setObjectId((ObjectId) newId);
+                ((Persistent) node).setOid(newId);
             }
         }
     }

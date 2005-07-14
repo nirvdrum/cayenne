@@ -65,9 +65,15 @@ import java.io.Serializable;
  */
 public interface Persistent extends Serializable {
 
-    ObjectId getObjectId();
+    /**
+     * Returns an object id of this object.
+     */
+    Object getOid();
 
-    void setObjectId(ObjectId id);
+    /**
+     * Sets an object id of this object.
+     */
+    void setOid(Object oid);
 
     int getPersistenceState();
 
