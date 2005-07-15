@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.map.Relationship;
 /**
  * Attributes and Methods for working with ObjEntities.
  * 
+ * @since 1.2
  * @author Mike Kienenberger
  */
 public class EntityUtils {

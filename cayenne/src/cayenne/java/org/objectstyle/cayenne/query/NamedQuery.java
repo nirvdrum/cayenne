@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.query;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -144,10 +145,9 @@ public class NamedQuery implements QueryExecutionPlan {
     protected Query substituteQuery(EntityResolver resolver) {
         Query query = resolver.lookupQuery(getName());
 
-        if (parameters != null
-                && !parameters.isEmpty()
-                && query instanceof ParameterizedQuery) {
-
+        if(query instanceof ParameterizedQuery) {
+            // must process the query even if we have no parameters set
+            Map parameters = (this.parameters != null) ? this.parameters : Collections.EMPTY_MAP;
             query = ((ParameterizedQuery) query).createQuery(parameters);
         }
 
