@@ -55,73 +55,82 @@
  */
 package org.objectstyle.cayenne.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataRowStore;
-import org.objectstyle.cayenne.access.PersistenceContext;
-import org.objectstyle.cayenne.distribution.ClientMessageHandler;
-import org.objectstyle.cayenne.distribution.CommitMessage;
-import org.objectstyle.cayenne.distribution.GenericQueryMessage;
-import org.objectstyle.cayenne.distribution.SelectMessage;
-import org.objectstyle.cayenne.distribution.UpdateMessage;
-import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.distribution.GlobalID;
+import org.objectstyle.cayenne.graph.GraphChangeHandler;
 
 /**
- * A server-side peer of a ClientDataContext. Client messages are processed via callback
- * methods defined in ClientMessageHandler interface.
+ * A GraphChangeHandler that propagates object graph changes to an underlying
+ * ObjectContext. Assumes that node ids are Cayenne ObjectIds.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ServerObjectContext extends ObjectDataContext implements
-        ClientMessageHandler {
+class ClientObjectMergeHandler implements GraphChangeHandler {
 
-    public ServerObjectContext(DataDomain parentDomain) {
-        super(parentDomain);
+    ObjectDataContext context;
+
+    ClientObjectMergeHandler(ObjectDataContext context) {
+        this.context = context;
     }
 
-    public ServerObjectContext(PersistenceContext parent, EntityResolver entityResolver,
-            DataRowStore cache) {
-
-        super(parent, entityResolver, cache);
+    public void nodeIdChanged(Object nodeId, Object newId) {
+        throw new CayenneRuntimeException("Unimplemented");
     }
 
-    public GraphDiff onCommit(CommitMessage message) {
-        // sync client changes
-        message.getSenderChanges().apply(new ClientObjectMergeHandler(this));
-
-        // TODO: recast server diff to client diff
-        return commit();
+    public void nodeCreated(Object nodeId) {
+        ObjectId id = toObjectId(nodeId);
+        context.createAndRegisterNewObject(id);
     }
 
-    public QueryResponse onGenericQuery(GenericQueryMessage message) {
-        return performGenericQuery(message.getQueryPlan());
+    public void nodeRemoved(Object nodeId) {
+        Persistent object = findObject(nodeId);
+        context.deleteObject(object);
     }
 
-    public List onSelectQuery(SelectMessage message) {
-        List objects = performSelectQuery(message.getQueryPlan());
+    public void nodePropertyChanged(
+            Object nodeId,
+            String property,
+            Object oldValue,
+            Object newValue) {
 
-        // create client objects for a list of server object
-
-        if (objects.isEmpty()) {
-            return new ArrayList(0);
-        }
-
+        Persistent object = findObject(nodeId);
         try {
-            return ClientServerUtils.toClientObjects(getEntityResolver(), objects);
+            PropertyUtils.setSimpleProperty(object, property, newValue);
         }
         catch (Exception e) {
-            throw new CayenneRuntimeException("Error converting to client objects: "
-                    + e.getLocalizedMessage(), e);
+            throw new CayenneRuntimeException("Error setting property: " + property, e);
         }
     }
 
-    public int[] onUpdateQuery(UpdateMessage message) {
-        return performUpdateQuery(message.getQueryPlan());
+    public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
+        throw new CayenneRuntimeException(
+                "TODO: implement relationship change updates...");
+    }
+
+    public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
+        throw new CayenneRuntimeException(
+                "TODO: implement relationship change updates...");
+    }
+
+    Persistent findObject(Object nodeId) {
+        ObjectId id = toObjectId(nodeId);
+        return context.getObjectStore().getObject(id);
+    }
+
+    ObjectId toObjectId(Object nodeId) {
+        if (nodeId instanceof GlobalID) {
+            return ((GlobalID) nodeId).toServerOID(context.getEntityResolver());
+        }
+        else if (nodeId == null) {
+            throw new NullPointerException("Null GlobalID");
+        }
+        else {
+            throw new CayenneRuntimeException(
+                    "Client node id is expected to be GlobalID, got: " + nodeId);
+        }
     }
 }

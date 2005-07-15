@@ -53,83 +53,82 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne;
 
-import org.apache.commons.beanutils.PropertyUtils;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.graph.GraphChangeHandler;
+import junit.framework.TestCase;
 
-/**
- * A GraphChangeHandler that propagates object graph changes to an underlying
- * ObjectContext. Assumes that node ids are Cayenne ObjectIds.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-class ClientCommitMergeHandler implements GraphChangeHandler {
+public class TempObjectIdTst extends TestCase {
 
-    ObjectDataContext context;
-
-    ClientCommitMergeHandler(ObjectDataContext context) {
-        this.context = context;
+    public void testEqualsSame() {
+        Class class1 = Number.class;
+        TempObjectId oid1 = new TempObjectId(class1);
+        assertEquals(oid1, oid1);
+        assertEquals(oid1.hashCode(), oid1.hashCode());
     }
 
-    public void nodeIdChanged(Object nodeId, Object newId) {
-        throw new CayenneRuntimeException("Unimplemented");
+    public void testEquals() {
+        byte[] b1 = new byte[] {
+            1
+        };
+        byte[] b2 = new byte[] {
+            1
+        };
+
+        TempObjectId oid1 = new TempObjectId(Object.class, b1);
+        TempObjectId oid2 = new TempObjectId(Object.class, b2);
+        assertEquals(oid1, oid1);
+        assertEquals(oid1, oid2);
+        assertEquals(oid1.hashCode(), oid2.hashCode());
     }
 
-    public void nodeCreated(Object nodeId) {
-        ObjectId id = toObjectId(nodeId);
-        context.createAndRegisterNewObject(id);
+    public void testNotEquals1() {
+        Class class1 = Number.class;
+        TempObjectId oid1 = new TempObjectId(class1);
+        TempObjectId oid2 = new TempObjectId(class1);
+        assertFalse(oid1.equals(oid2));
+
+        // don't make any assertions about hashCode .. it may be the same
     }
 
-    public void nodeRemoved(Object nodeId) {
-        Persistent object = findObject(nodeId);
-        context.deleteObject(object);
+    public void testNotEquals2() {
+        byte[] b1 = new byte[] {
+            1
+        };
+        byte[] b2 = new byte[] {
+                1, 2
+        };
+
+        TempObjectId oid1 = new TempObjectId(Object.class, b1);
+        TempObjectId oid2 = new TempObjectId(Object.class, b2);
+        assertFalse(oid1.equals(oid2));
     }
 
-    public void nodePropertyChanged(
-            Object nodeId,
-            String property,
-            Object oldValue,
-            Object newValue) {
+    public void testNotEquals3() {
+        byte[] b1 = new byte[] {
+            1
+        };
 
-        Persistent object = findObject(nodeId);
-        try {
-            PropertyUtils.setSimpleProperty(object, property, newValue);
-        }
-        catch (Exception e) {
-            throw new CayenneRuntimeException("Error setting property: " + property, e);
-        }
+        TempObjectId oid1 = new TempObjectId(Object.class, b1);
+        TempObjectId oid2 = new TempObjectId(Object.class);
+        assertFalse(oid1.equals(oid2));
+        assertFalse(oid2.equals(oid1));
     }
 
-    public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
-        throw new CayenneRuntimeException(
-                "TODO: implement relationship change updates...");
+    public void testNotEquals4() {
+        byte[] b1 = new byte[] {
+            1
+        };
+        byte[] b2 = new byte[] {
+            3
+        };
+
+        TempObjectId oid1 = new TempObjectId(Object.class, b1);
+        TempObjectId oid2 = new TempObjectId(Object.class, b2);
+        assertFalse(oid1.equals(oid2));
     }
 
-    public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
-        throw new CayenneRuntimeException(
-                "TODO: implement relationship change updates...");
-    }
-
-    Persistent findObject(Object nodeId) {
-        ObjectId id = toObjectId(nodeId);
-        return context.getObjectStore().getObject(id);
-    }
-
-    ObjectId toObjectId(Object nodeId) {
-        if (nodeId instanceof ObjectId) {
-            return (ObjectId) nodeId;
-        }
-        else if (nodeId == null) {
-            throw new NullPointerException("Null ObjectId");
-        }
-        else {
-            throw new CayenneRuntimeException("Node id is expected to be ObjectId, got: "
-                    + nodeId);
-        }
+    public void testNotEqualsNull() {
+        TempObjectId o = new TempObjectId(Object.class);
+        assertFalse(o.equals(null));
     }
 }

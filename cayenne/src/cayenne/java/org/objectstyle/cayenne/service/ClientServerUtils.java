@@ -62,8 +62,9 @@ import java.util.List;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.distribution.GlobalID;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
@@ -74,11 +75,8 @@ import org.objectstyle.cayenne.map.ObjEntity;
 // serialization mechanism only based on Java serialization.
 class ClientServerUtils {
 
-    static Object toClientObjectId(ObjectId id, Class clientClass) {
-        return new ObjectId(clientClass, id.getIdSnapshot());
-    }
-
-    static Object toClientObject(CayenneDataObject object) throws Exception {
+    static Object toClientObject(EntityResolver resolver, CayenneDataObject object)
+            throws Exception {
         ObjEntity entity = object.getObjEntity();
 
         // TODO: move class creation to ObjEntity
@@ -95,7 +93,7 @@ class ClientServerUtils {
 
         // copy ID
         if (clientObject instanceof Persistent) {
-            Object clientOID = toClientObjectId(object.getObjectId(), clientClass);
+            Object clientOID = new GlobalID(resolver, object.getObjectId());
             ((Persistent) clientObject).setOid(clientOID);
         }
 
@@ -114,7 +112,8 @@ class ClientServerUtils {
     /**
      * Converts a list of server-side objects to their client counterparts.
      */
-    static List toClientObjects(List dataObjects) throws Exception {
+    static List toClientObjects(EntityResolver resolver, List dataObjects)
+            throws Exception {
         List clientObjects = new ArrayList(dataObjects.size());
 
         Iterator it = dataObjects.iterator();
@@ -124,7 +123,7 @@ class ClientServerUtils {
             // TODO: toClientObject performs some entity specific lookups that can be
             // cached as local variables when processing the list
 
-            clientObjects.add(toClientObject(serverObject));
+            clientObjects.add(toClientObject(resolver, serverObject));
         }
 
         return clientObjects;

@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.distribution.ClientMessage;
 import org.objectstyle.cayenne.distribution.ClientMessageHandler;
 import org.objectstyle.cayenne.distribution.HessianService;
 import org.objectstyle.cayenne.util.IDUtil;
+import org.objectstyle.cayenne.util.Util;
 
 import com.caucho.services.server.Service;
 
@@ -138,8 +139,10 @@ public class HessianServiceHandler implements HessianService, Service {
         return id;
     }
 
-    public Object processMessage(String sessionId, ClientMessage command) {
-        logObj.debug("invokeRemote, sessionId: " + sessionId);
+    public Object processMessage(String sessionId, ClientMessage command)
+            throws Throwable {
+
+        logObj.debug("processMessage, sessionId: " + sessionId);
 
         ClientMessageHandler handler;
         synchronized (commandHandlers) {
@@ -151,7 +154,14 @@ public class HessianServiceHandler implements HessianService, Service {
             throw new CayenneRuntimeException("Invalid sessionId: " + sessionId);
         }
 
-        return command.onReceive(handler);
+        // intercept and log exceptions
+        try {
+            return command.onReceive(handler);
+        }
+        catch (Throwable th) {
+            logObj.debug("error processing message", Util.unwindException(th));
+            throw th;
+        }
     }
 
     private String makeId() {

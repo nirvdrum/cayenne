@@ -94,5 +94,5 @@ public interface HessianService {
     /**
      * Processes message on a remote server, returning the result of such processing.
      */
-    Object processMessage(String sessionId, ClientMessage message);
+    Object processMessage(String sessionId, ClientMessage message) throws Throwable;
 }

@@ -88,8 +88,11 @@ public class ObjectId implements Serializable {
      */
     protected Map replacementIdMap;
 
-    // cache hasCode, since ObjectId is immutable
-    private int hashCode = Integer.MIN_VALUE;
+    // TODO: caching hash code may cause issues on deserilaization in a different VM...
+    // need custom readObject/writeObject
+    
+    // cache hashCode, since ObjectId is immutable
+    int hashCode = Integer.MIN_VALUE;
 
     /**
      * Convenience constructor for entities that have a single Integer as their id.

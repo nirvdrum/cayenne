@@ -58,26 +58,27 @@ package org.objectstyle.cayenne;
 import java.util.HashMap;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.collections.map.LinkedMap;
 import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-public class ObjectIdTst extends CayenneTestCase {
+public class ObjectIdTst extends TestCase {
 
-    public void testObjEntityName() throws Exception {
+    public void testObjEntityName() {
         Class class1 = Number.class;
         ObjectId oid = new ObjectId(class1, null);
         assertEquals(class1, oid.getObjectClass());
     }
 
-    public void testEquals0() throws Exception {
+    public void testEquals0() {
         Class class1 = Number.class;
         ObjectId oid1 = new ObjectId(class1, null);
         assertEquals(oid1, oid1);
         assertEquals(oid1.hashCode(), oid1.hashCode());
     }
 
-    public void testEquals1() throws Exception {
+    public void testEquals1() {
         Class class1 = Number.class;
         ObjectId oid1 = new ObjectId(class1, null);
         ObjectId oid2 = new ObjectId(class1, null);
@@ -85,7 +86,7 @@ public class ObjectIdTst extends CayenneTestCase {
         assertEquals(oid1.hashCode(), oid2.hashCode());
     }
 
-    public void testEquals2() throws Exception {
+    public void testEquals2() {
         Class class1 = Number.class;
         Map hm = new HashMap();
         ObjectId oid1 = new ObjectId(class1, hm);
@@ -94,7 +95,7 @@ public class ObjectIdTst extends CayenneTestCase {
         assertEquals(oid1.hashCode(), oid2.hashCode());
     }
 
-    public void testEquals3() throws Exception {
+    public void testEquals3() {
         Class class1 = Number.class;
         String pknm = "xyzabc";
 
@@ -110,7 +111,7 @@ public class ObjectIdTst extends CayenneTestCase {
         assertEquals(oid1.hashCode(), oid2.hashCode());
     }
 
-    public void testEquals4() throws Exception {
+    public void testEquals4() {
         Class class1 = Number.class;
         String pknm = "xyzabc";
 
@@ -126,7 +127,7 @@ public class ObjectIdTst extends CayenneTestCase {
     /**
      * This is a test case reproducing conditions for the bug "8458963".
      */
-    public void testEquals5() throws Exception {
+    public void testEquals5() {
         Class class1 = Number.class;
 
         Map hm1 = new HashMap();
@@ -143,9 +144,9 @@ public class ObjectIdTst extends CayenneTestCase {
     }
 
     /**
-        * Multiple key objectId
-        */
-    public void testEquals6() throws Exception {
+     * Multiple key objectId
+     */
+    public void testEquals6() {
         Class class1 = Number.class;
 
         Map hm1 = new HashMap();
@@ -163,12 +164,12 @@ public class ObjectIdTst extends CayenneTestCase {
     }
 
     /**
-     * Checks that hashCode works even if keys
-     * are inserted in the map in a different order...
+     * Checks that hashCode works even if keys are inserted in the map in a different
+     * order...
      */
-    public void testEquals7() throws Exception {
+    public void testEquals7() {
         Class class1 = Number.class;
-        
+
         // create maps with guaranteed iteration order
 
         Map hm1 = new LinkedMap();
@@ -176,7 +177,7 @@ public class ObjectIdTst extends CayenneTestCase {
         hm1.put("KEY2", new Integer(2));
 
         Map hm2 = new LinkedMap();
-        // put same keys but in different order 
+        // put same keys but in different order
         hm2.put("KEY2", new Integer(2));
         hm2.put("KEY1", new Integer(1));
 
@@ -186,14 +187,18 @@ public class ObjectIdTst extends CayenneTestCase {
         assertEquals(ref.hashCode(), oid.hashCode());
     }
 
-    public void testEqualsBinaryKey() throws Exception {
+    public void testEqualsBinaryKey() {
         Class class1 = Artist.class;
 
         Map hm1 = new HashMap();
-        hm1.put("key1", new byte[] { 3, 4, 10, -1 });
+        hm1.put("key1", new byte[] {
+                3, 4, 10, -1
+        });
 
         Map hm2 = new HashMap();
-        hm2.put("key1", new byte[] { 3, 4, 10, -1 });
+        hm2.put("key1", new byte[] {
+                3, 4, 10, -1
+        });
 
         ObjectId ref = new ObjectId(class1, hm1);
         ObjectId oid = new ObjectId(class1, hm2);
@@ -206,7 +211,7 @@ public class ObjectIdTst extends CayenneTestCase {
         assertFalse(o.equals(null));
     }
 
-    public void testIdAsMapKey() throws Exception {
+    public void testIdAsMapKey() {
         Map map = new HashMap();
         Object o1 = new Object();
 
@@ -226,7 +231,7 @@ public class ObjectIdTst extends CayenneTestCase {
         assertSame(o1, map.get(oid2));
     }
 
-    public void testNotEqual1() throws Exception {
+    public void testNotEqual1() {
         Class class1 = Number.class;
         Class class2 = Boolean.class;
 
@@ -235,7 +240,7 @@ public class ObjectIdTst extends CayenneTestCase {
         assertFalse(oid1.equals(oid2));
     }
 
-    public void testNotEqual2() throws Exception {
+    public void testNotEqual2() {
         Class class1 = Number.class;
 
         Map hm1 = new HashMap();

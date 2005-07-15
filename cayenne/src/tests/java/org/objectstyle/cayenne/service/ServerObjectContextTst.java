@@ -59,12 +59,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.MockDataRowStore;
 import org.objectstyle.cayenne.access.MockPersistenceContext;
 import org.objectstyle.cayenne.access.PersistenceContext;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GenericQueryMessage;
+import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
@@ -120,7 +120,7 @@ public class ServerObjectContextTst extends CayenneTestCase {
 
         // introduce changes
         OperationRecorder recorder = new OperationRecorder();
-        recorder.nodeCreated(new TempObjectId(MtTable1.class));
+        recorder.nodeCreated(new GlobalID("MtTable1"));
 
         context.onCommit(new CommitMessage(recorder.getDiffs()));
         assertTrue(parent.isCommitChangesInContext());
@@ -139,6 +139,7 @@ public class ServerObjectContextTst extends CayenneTestCase {
     }
 
     public void testOnSelectQuery() {
+
         final ObjEntity entity = getDomain().getEntityResolver().lookupObjEntity(
                 MtTable1.class);
         final ObjectId oid = new ObjectId(MtTable1.class, "key", 1);
@@ -156,10 +157,8 @@ public class ServerObjectContextTst extends CayenneTestCase {
         MockPersistenceContext parent = new MockPersistenceContext(getDomain()
                 .getEntityResolver(), Collections.singletonList(serverObject));
 
-        ServerObjectContext context = new ServerObjectContext(
-                parent,
-                new EntityResolver(),
-                new MockDataRowStore());
+        ServerObjectContext context = new ServerObjectContext(parent, getDomain()
+                .getEntityResolver(), new MockDataRowStore());
 
         SelectMessage message = new SelectMessage(new MockGenericSelectQuery(true));
         List results = context.onSelectQuery(message);
@@ -172,7 +171,12 @@ public class ServerObjectContextTst extends CayenneTestCase {
         assertTrue(result instanceof ClientMtTable1);
         ClientMtTable1 clientObject = (ClientMtTable1) result;
         assertNotNull(clientObject.getOid());
-        assertEquals(new ObjectId(ClientMtTable1.class, "key", 1), clientObject.getOid());
+
+        GlobalID refId = new GlobalID(getDomain().getEntityResolver(), new ObjectId(
+                MtTable1.class,
+                "key",
+                1));
+        assertEquals(refId, clientObject.getOid());
     }
 
     public void testOnGenericQuery() {

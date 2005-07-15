@@ -58,6 +58,9 @@ package org.objectstyle.cayenne;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 /**
  * An ObjectId for new objects that hasn't been committed to the external data store. On
  * commit, a TempObjectId is replaced with a permanent ObjectId tied to a primary key of
@@ -67,8 +70,25 @@ import java.util.Map;
  */
 public class TempObjectId extends ObjectId {
 
-    public TempObjectId(Class objClass) {
-        super(objClass, null);
+    protected byte[] key;
+
+    /**
+     * Creates a non-portable temporary ObjectId that should be replaced by a permanent id
+     * once a corresponding object is committed.
+     */
+    public TempObjectId(Class objectClass) {
+        super(objectClass, null);
+    }
+
+    /**
+     * Create a TempObjectId with a binary unique key. This id is "portable" in that it
+     * can be used across virtual machines to identify the same object.
+     * 
+     * @since 1.2
+     */
+    public TempObjectId(Class objectClass, byte[] key) {
+        super(objectClass, null);
+        this.key = key;
     }
 
     /**
@@ -77,9 +97,43 @@ public class TempObjectId extends ObjectId {
      * used for "new" objects.
      */
     public boolean equals(Object object) {
-        // TODO: shouldn't we also override hashCode()
-        // to use the one from Object, not ObjectId?
-        return object == this;
+        // non-portable id
+        if (key == null) {
+            return object == this;
+        }
+
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof TempObjectId)) {
+            return false;
+        }
+
+        TempObjectId id = (TempObjectId) object;
+        return new EqualsBuilder()
+                .append(objectClass.getName(), id.objectClass.getName())
+                .append(key, id.key)
+                .isEquals();
+    }
+    
+    public int hashCode() {
+        if (this.hashCode == Integer.MIN_VALUE) {
+            // build and cache hashCode
+            HashCodeBuilder builder = new HashCodeBuilder(15, 37);
+
+            // use the class name because two ObjectId's should be equal
+            // even if their objClass'es were loaded by different class loaders.
+            builder.append(objectClass.getName().hashCode());
+
+            if (key != null) {
+                builder.append(key);
+            }
+
+            this.hashCode = builder.toHashCode();
+        }
+
+        return this.hashCode;
     }
 
     /**
