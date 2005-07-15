@@ -77,8 +77,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -408,6 +410,33 @@ public class Util {
         else {
             return "";
         }
+    }
+    
+    /**
+     * Creates a mutable map out of two arrays with keys and values.
+     * 
+     * @since 1.2
+     */
+    public static Map toMap(Object[] keys, Object[] values) {
+        int keysSize = (keys != null) ? keys.length : 0;
+        int valuesSize = (values != null) ? values.length : 0;
+
+        if (keysSize == 0 && valuesSize == 0) {
+            // return mutable map
+            return new HashMap();
+        }
+
+        if (keysSize != valuesSize) {
+            throw new IllegalArgumentException(
+                    "The number of keys doesn't match the number of values.");
+        }
+
+        Map map = new HashMap();
+        for (int i = 0; i < keysSize; i++) {
+            map.put(keys[i], values[i]);
+        }
+
+        return map;
     }
 
     /**

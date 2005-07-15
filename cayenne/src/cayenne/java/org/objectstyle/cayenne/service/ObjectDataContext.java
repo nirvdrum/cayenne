@@ -82,6 +82,7 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryChain;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
@@ -171,16 +172,16 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
     }
 
     public int[] performNonSelectingQuery(String queryName, Map parameters) {
-        return performUpdateQuery(new NamedQueryProxy(queryName, parameters));
+        return performUpdateQuery(new NamedQuery(queryName, parameters));
     }
 
     public int[] performNonSelectingQuery(String queryName) {
-        return performUpdateQuery(new NamedQueryProxy(queryName));
+        return performUpdateQuery(new NamedQuery(queryName));
     }
 
     public List performQuery(String queryName, boolean refresh) {
         // TODO: refresh is not handled...
-        return performSelectQuery(new NamedQueryProxy(queryName));
+        return performSelectQuery(new NamedQuery(queryName));
     }
 
     public void commitChanges() throws CayenneRuntimeException {

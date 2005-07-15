@@ -53,39 +53,42 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne.query;
 
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.ParameterizedQuery;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
-import org.objectstyle.cayenne.query.QueryRouter;
-import org.objectstyle.cayenne.query.SQLAction;
-import org.objectstyle.cayenne.query.SQLActionVisitor;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * A reference to a named parameterized query stored in Cayenne mapping. The actual query
- * is resolved during the routing phase and is used to build a SQLAction.
+ * A query that is a reference to a named parameterized query stored in the mapping. The
+ * actual query is resolved during execution.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class NamedQueryProxy implements QueryExecutionPlan {
+public class NamedQuery implements QueryExecutionPlan {
 
     protected String name;
     protected Map parameters;
 
-    public NamedQueryProxy(String name) {
+    public NamedQuery(String name) {
         this(name, null);
     }
 
-    public NamedQueryProxy(String name, Map parameters) {
+    public NamedQuery(String name, Map parameters) {
         this.name = name;
         this.parameters = parameters;
+    }
+
+    /**
+     * Creates NamedQuery with parameters passed as two matching arrays of keys and values.
+     */
+    public NamedQuery(String name, String[] keys, Object[] values) {
+        this.name = name;
+        this.parameters = Util.toMap(keys, values);
     }
 
     public String getName() {

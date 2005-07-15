@@ -38,6 +38,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -68,8 +69,42 @@ public class UtilTst extends TestCase {
             throw new Exception("Error deleting temporary file: " + fTmpFileCopy);
 
     }
+    
+    public void testToMap() {
+        Object[] keys = new Object[] {
+                "a", "b"
+        };
+        Object[] values = new Object[] {
+                "1", "2"
+        };
 
-    public void testStripLineBreaks() throws Exception {
+        Map map = Util.toMap(keys, values);
+        assertEquals(2, map.size());
+        assertEquals("1", map.get("a"));
+        assertEquals("2", map.get("b"));
+
+        // check that map is mutable
+        map.put("c", "3");
+
+        // check that two null maps work
+        Map emptyMap = Util.toMap(null, new Object[0]);
+        assertTrue(emptyMap.isEmpty());
+        emptyMap.put("key1", "value1");
+
+        // check arrays with different sizes
+        Object[] values2 = new Object[] {
+            "1"
+        };
+        try {
+            Util.toMap(keys, values2);
+            fail("must have thrown");
+        }
+        catch (IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    public void testStripLineBreaks() {
         // Windows
         assertEquals("aAbAc", Util.stripLineBreaks("a\r\nb\r\nc", "A"));
 
