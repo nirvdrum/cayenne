@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.distribution;
 import java.util.List;
 
 import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.graph.GraphDiff;
 
 /**
@@ -82,4 +83,7 @@ public interface ClientMessageHandler {
     QueryResponse onGenericQuery(GenericQueryMessage message);
 
     GraphDiff onCommit(CommitMessage message);
+    
+    ClientEntityResolver onBootstrap(BootstrapMessage message);
+    
 }

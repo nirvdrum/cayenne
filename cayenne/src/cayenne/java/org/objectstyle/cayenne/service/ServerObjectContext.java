@@ -63,6 +63,8 @@ import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataRowStore;
 import org.objectstyle.cayenne.access.PersistenceContext;
+import org.objectstyle.cayenne.client.ClientEntityResolver;
+import org.objectstyle.cayenne.distribution.BootstrapMessage;
 import org.objectstyle.cayenne.distribution.ClientMessageHandler;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GenericQueryMessage;
@@ -123,5 +125,9 @@ public class ServerObjectContext extends ObjectDataContext implements
 
     public int[] onUpdateQuery(UpdateMessage message) {
         return performUpdateQuery(message.getQueryPlan());
+    }
+
+    public ClientEntityResolver onBootstrap(BootstrapMessage message) {
+        return entityResolver.getClientEntityResolver();
     }
 }

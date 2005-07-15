@@ -53,50 +53,50 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.client.ClientEntityResolver;
-import org.objectstyle.cayenne.graph.GraphDiff;
+import java.io.Serializable;
+import java.util.Map;
 
 /**
- * Stores all messages passed via this handler.
+ * An object that provides limited mapping information to the client applications.
  * 
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class MockClientMessageHandler implements ClientMessageHandler {
+public class ClientEntityResolver implements Serializable {
 
-    protected List messages = new ArrayList();
+    protected Map entityNameByClientClass;
 
-    public List getMessages() {
-        return messages;
+    public ClientEntityResolver(Map entityNameByClientClass) {
+        this.entityNameByClientClass = entityNameByClientClass;
     }
 
-    public GraphDiff onCommit(CommitMessage message) {
-        messages.add(message);
-        return null;
+    /**
+     * Returns the name of Cayenne entity for a given object class. If a class is not
+     * mapped, its superclass is checked, all the way to the base class.
+     * 
+     * @throws CayenneClientException if a class is not mapped.
+     */
+    public String lookupEntity(Class objectClass) {
+        if (objectClass == null) {
+            throw new CayenneClientException("Null object class.");
+        }
+
+        String entity = doLookupEntity(objectClass);
+
+        if (entity == null) {
+            throw new CayenneClientException("Unmapped class hierarchy: " + objectClass);
+        }
+        return entity;
     }
 
-    public QueryResponse onGenericQuery(GenericQueryMessage message) {
-        messages.add(message);
-        return null;
-    }
+    protected String doLookupEntity(Class objectClass) {
+        if (objectClass == null) {
+            return null;
+        }
 
-    public List onSelectQuery(SelectMessage message) {
-        messages.add(message);
-        return null;
-    }
-
-    public int[] onUpdateQuery(UpdateMessage message) {
-        messages.add(message);
-        return null;
-    }
-
-    public ClientEntityResolver onBootstrap(BootstrapMessage message) {
-        messages.add(message);
-        return null;
+        String entity = (String) entityNameByClientClass.get(objectClass.getName());
+        return (entity != null) ? entity : doLookupEntity(objectClass.getSuperclass());
     }
 }

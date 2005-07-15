@@ -64,10 +64,11 @@ import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.TempObjectId;
+import org.objectstyle.cayenne.distribution.BootstrapMessage;
 import org.objectstyle.cayenne.distribution.CayenneConnector;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GenericQueryMessage;
+import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;
 import org.objectstyle.cayenne.graph.CompoundDiff;
@@ -90,6 +91,7 @@ public class ClientObjectContext implements ObjectContext {
     // reinjected later if needed
     protected transient CayenneConnector connector;
 
+    protected ClientEntityResolver entityResolver;
     protected GraphManager graphManager;
     protected OperationRecorder changeRecorder;
     protected ClientStateRecorder stateRecorder;
@@ -114,6 +116,23 @@ public class ClientObjectContext implements ObjectContext {
                 graphManager));
     }
 
+    public ClientEntityResolver getEntityResolver() {
+        // load entity resolver on demand
+        if (entityResolver == null) {
+            synchronized (this) {
+                if (entityResolver == null) {
+                    entityResolver = new BootstrapMessage().sendBootstrap(connector);
+                }
+            }
+        }
+
+        return entityResolver;
+    }
+
+    public void setEntityResolver(ClientEntityResolver entityResolver) {
+        this.entityResolver = entityResolver;
+    }
+
     /**
      * Returns connector used to access remote Cayenne service.
      */
@@ -132,6 +151,9 @@ public class ClientObjectContext implements ObjectContext {
             GraphDiff commitDiff = new CommitMessage(changeRecorder.getDiffs())
                     .sendCommit(connector);
             graphManager.mergeRemoteChange(commitDiff);
+
+            changeRecorder.clear();
+            stateRecorder.clear();
             return commitDiff;
         }
         else {
@@ -183,8 +205,7 @@ public class ClientObjectContext implements ObjectContext {
                     ex);
         }
 
-        // make object "cayenne-persistent"
-        object.setOid(new TempObjectId(persistentClass));
+        object.setOid(new GlobalID(getEntityResolver().lookupEntity(persistentClass)));
         object.setPersistenceState(PersistenceState.NEW);
 
         graphManager.registerNode(object.getOid(), object);

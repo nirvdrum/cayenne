@@ -232,6 +232,8 @@ public class GlobalID implements Serializable {
 
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
+        
+        builder.append("entityName", entityName);
 
         if (objectIdKeys != null) {
             Iterator it = objectIdKeys.entrySet().iterator();

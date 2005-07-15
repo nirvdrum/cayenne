@@ -67,6 +67,7 @@ import org.apache.commons.collections.collection.CompositeCollection;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -117,6 +118,29 @@ public class EntityResolver implements MappingNamespace {
         this();
         this.maps.addAll(dataMaps); //Take a copy
         this.constructCache();
+    }
+    
+    /**
+     * Returns ClientEntityResolver that maps client classes to entity names.
+     * 
+     * @since 1.2
+     */
+    public ClientEntityResolver getClientEntityResolver() {
+        // TODO: cache client resolver
+        Map entityNameByClientClass = new HashMap();
+
+        Iterator it = getObjEntities().iterator();
+        while (it.hasNext()) {
+            ObjEntity entity = (ObjEntity) it.next();
+            String clientClassName = entity.getClientClassName();
+            if (clientClassName == null) {
+                clientClassName = entity.getClassName();
+            }
+
+            entityNameByClientClass.put(clientClassName, entity.getName());
+        }
+
+        return new ClientEntityResolver(entityNameByClientClass);
     }
 
     /**

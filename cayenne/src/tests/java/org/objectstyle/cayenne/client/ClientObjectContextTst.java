@@ -56,7 +56,9 @@
 package org.objectstyle.cayenne.client;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -67,6 +69,7 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.distribution.ClientMessage;
 import org.objectstyle.cayenne.distribution.CommitMessage;
+import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.distribution.MockCayenneConnector;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.OperationRecorder;
@@ -134,6 +137,11 @@ public class ClientObjectContextTst extends TestCase {
         };
 
         ClientObjectContext context = new ClientObjectContext(connector);
+
+        Map resolverMap = Collections.singletonMap(
+                MockPersistentObject.class.getName(),
+                "test_entity");
+        context.setEntityResolver(new ClientEntityResolver(resolverMap));
         Persistent object = context.newObject(MockPersistentObject.class);
 
         // record change here to make it available to the anonymous connector method..
@@ -173,8 +181,12 @@ public class ClientObjectContextTst extends TestCase {
     }
 
     public void testNewObject() {
+        Map resolverMap = Collections.singletonMap(
+                MockPersistentObject.class.getName(),
+                "test_entity");
         MockCayenneConnector connector = new MockCayenneConnector();
         ClientObjectContext context = new ClientObjectContext(connector);
+        context.setEntityResolver(new ClientEntityResolver(resolverMap));
 
         // an invalid class should blow
         try {
@@ -195,11 +207,17 @@ public class ClientObjectContextTst extends TestCase {
                 context.graphManager,
                 PersistenceState.NEW).contains(object));
         assertNotNull(object.getOid());
+        assertTrue(object.getOid() instanceof GlobalID);
+        assertTrue(((GlobalID) object.getOid()).isTemporary());
     }
 
     public void testDeleteObject() {
+        Map resolverMap = Collections.singletonMap(
+                MockPersistentObject.class.getName(),
+                "test_entity");
         MockCayenneConnector connector = new MockCayenneConnector();
         ClientObjectContext context = new ClientObjectContext(connector);
+        context.setEntityResolver(new ClientEntityResolver(resolverMap));
 
         // TRANSIENT ... should quietly ignore it
         Persistent transientObject = new MockPersistentObject();

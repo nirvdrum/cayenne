@@ -55,48 +55,21 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.client.ClientEntityResolver;
-import org.objectstyle.cayenne.graph.GraphDiff;
 
 /**
- * Stores all messages passed via this handler.
+ * A message sent by the client to "bootstrap" to Cayenne server.
  * 
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class MockClientMessageHandler implements ClientMessageHandler {
+public class BootstrapMessage extends AbstractMessage {
 
-    protected List messages = new ArrayList();
-
-    public List getMessages() {
-        return messages;
+    public Object onReceive(ClientMessageHandler handler) {
+        return handler.onBootstrap(this);
     }
 
-    public GraphDiff onCommit(CommitMessage message) {
-        messages.add(message);
-        return null;
-    }
-
-    public QueryResponse onGenericQuery(GenericQueryMessage message) {
-        messages.add(message);
-        return null;
-    }
-
-    public List onSelectQuery(SelectMessage message) {
-        messages.add(message);
-        return null;
-    }
-
-    public int[] onUpdateQuery(UpdateMessage message) {
-        messages.add(message);
-        return null;
-    }
-
-    public ClientEntityResolver onBootstrap(BootstrapMessage message) {
-        messages.add(message);
-        return null;
+    public ClientEntityResolver sendBootstrap(CayenneConnector connector) {
+        return (ClientEntityResolver) send(connector, ClientEntityResolver.class);
     }
 }
