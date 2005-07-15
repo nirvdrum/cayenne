@@ -70,6 +70,6 @@ class NodeCreateOperation extends NodeDiff {
     }
 
     public void undo(GraphChangeHandler tracker) {
-        tracker.nodeDeleted(nodeId);
+        tracker.nodeRemoved(nodeId);
     }
 }

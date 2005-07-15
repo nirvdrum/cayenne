@@ -135,7 +135,7 @@ class ClientStateRecorder implements GraphChangeHandler {
         dirtyIds.add(nodeId);
     }
 
-    public void nodeDeleted(Object nodeId) {
+    public void nodeRemoved(Object nodeId) {
         dirtyIds.add(nodeId);
     }
 

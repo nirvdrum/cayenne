@@ -61,18 +61,26 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
- * GraphChangeTracker that applies received changes to the objects in the graph, treating
- * nodes and arcs as properties and using introspection.
+ * GraphChangeHandler that works on top of a GraphMap, with callback methods implemented
+ * to modify objects in the graph, treating nodes and arcs as properties and using
+ * introspection.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class BeanChangeMerger implements GraphChangeHandler {
+public class BeanMergeHandler implements GraphChangeHandler {
 
     protected GraphMap graphMap;
 
-    public BeanChangeMerger(GraphMap graphMap) {
+    public BeanMergeHandler(GraphMap graphMap) {
         this.graphMap = graphMap;
+    }
+
+    /**
+     * Returns GraphMap used by this object to lookup graph nodes that need to be updated.
+     */
+    public GraphMap getGraphMap() {
+        return graphMap;
     }
 
     public void nodeIdChanged(Object nodeId, Object newId) {
@@ -83,17 +91,18 @@ public class BeanChangeMerger implements GraphChangeHandler {
         }
     }
 
+    /**
+     * Does nothing.
+     */
     public void nodeCreated(Object nodeId) {
         // noop
-
-        // TODO: in an interactive application we may actually need to instantiate this
-        // node and display it... Or maybe just have a delegate that decides whether it
-        // cares about the node (e.g. if a node is outside the viewport we don't have
-        // to show it)
     }
 
-    public void nodeDeleted(Object nodeId) {
-        graphMap.unregisterNode(nodeId);
+    /**
+     * Does nothing.
+     */
+    public void nodeRemoved(Object nodeId) {
+        // noop
     }
 
     public void nodePropertyChanged(
@@ -168,4 +177,5 @@ public class BeanChangeMerger implements GraphChangeHandler {
             }
         }
     }
+
 }

@@ -108,7 +108,7 @@ public class ClientObjectContext implements ObjectContext {
 
         graphManager.addLocalChangeHandler(changeRecorder);
         graphManager.addLocalChangeHandler(stateRecorder);
-        graphManager.setRemoteChangeHandler(new ObjectContextChangeMerger(
+        graphManager.setRemoteChangeHandler(new ObjectContextMergeHandler(
                 this,
                 graphManager));
     }
@@ -161,7 +161,7 @@ public class ClientObjectContext implements ObjectContext {
         // TODO: no delete rules (yet)
 
         object.setPersistenceState(PersistenceState.DELETED);
-        graphManager.nodeDeleted(object.getOid());
+        graphManager.nodeRemoved(object.getOid());
     }
 
     /**

@@ -188,11 +188,11 @@ public class GraphManager implements GraphMap, GraphChangeHandler {
         }
     }
 
-    public synchronized void nodeDeleted(Object nodeId) {
+    public synchronized void nodeRemoved(Object nodeId) {
         if (recordingLocalChanges && localChangeHandlers != null) {
             Iterator it = localChangeHandlers.iterator();
             while (it.hasNext()) {
-                ((GraphChangeHandler) it.next()).nodeDeleted(nodeId);
+                ((GraphChangeHandler) it.next()).nodeRemoved(nodeId);
             }
         }
     }

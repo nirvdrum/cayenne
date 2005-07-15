@@ -105,7 +105,7 @@ public class ClientStateRecorderTst extends TestCase {
         deleted.setOid(new ObjectId(Object.class, "key", "value2"));
         deleted.setPersistenceState(PersistenceState.DELETED);
         map.registerNode(deleted.getOid(), deleted);
-        recorder.nodeDeleted(deleted.getOid());
+        recorder.nodeRemoved(deleted.getOid());
 
         assertTrue(recorder.dirtyNodes(map, PersistenceState.MODIFIED).contains(modified));
         assertTrue(recorder.dirtyNodes(map, PersistenceState.COMMITTED).isEmpty());

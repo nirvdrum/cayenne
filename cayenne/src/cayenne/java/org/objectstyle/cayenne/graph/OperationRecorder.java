@@ -98,7 +98,7 @@ public class OperationRecorder implements GraphChangeHandler {
         diffs.add(new NodeIdChangeOperation(nodeId, newId));
     }
 
-    public void nodeDeleted(Object nodeId) {
+    public void nodeRemoved(Object nodeId) {
         diffs.add(new NodeDeleteOperation(nodeId));
     }
 

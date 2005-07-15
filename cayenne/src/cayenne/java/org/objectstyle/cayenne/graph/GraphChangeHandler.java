@@ -84,7 +84,7 @@ public interface GraphChangeHandler {
     /**
      * Notifies implementing object that a node was removed from the graph.
      */
-    void nodeDeleted(Object nodeId);
+    void nodeRemoved(Object nodeId);
 
     /**
      * Notifies implementing object that a node's property was modified.

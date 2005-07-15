@@ -93,7 +93,7 @@ public class ServerObjectContext extends ObjectDataContext implements
 
     public GraphDiff onCommit(CommitMessage message) {
         // sync client changes
-        message.getSenderChanges().apply(new ObjectDataContextChangeMerger(this));
+        message.getSenderChanges().apply(new ObjectDataContextMergeHandler(this));
 
         // TODO: recast server diff to client diff
         return commit();

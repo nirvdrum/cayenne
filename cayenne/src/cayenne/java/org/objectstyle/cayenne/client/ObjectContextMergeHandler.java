@@ -53,84 +53,36 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne.client;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.commons.beanutils.PropertyUtils;
-import org.objectstyle.cayenne.CayenneDataObject;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.graph.BeanMergeHandler;
+import org.objectstyle.cayenne.graph.GraphMap;
 
 /**
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-// TODO: create a generic GraphSerializer, maybe using the same approach as XML
-// serialization mechanism only based on Java serialization.
-class ClientServerUtils {
+class ObjectContextMergeHandler extends BeanMergeHandler {
 
-    static Object toClientObjectId(ObjectId id, Class clientClass) {
-        return new ObjectId(clientClass, id.getIdSnapshot());
+    ObjectContext context;
+
+    ObjectContextMergeHandler(ObjectContext context, GraphMap graphMap) {
+        super(graphMap);
+
+        this.context = context;
     }
 
-    static Object toClientObject(CayenneDataObject object) throws Exception {
-        ObjEntity entity = object.getObjEntity();
+    public void nodeIdChanged(Object nodeId, Object newId) {
+        Object node = graphMap.unregisterNode(nodeId);
 
-        // TODO: move class creation to ObjEntity
-        if (entity.getClientClassName() == null) {
-            throw new CayenneRuntimeException(
-                    "No client-side class defined for ObjEntity: " + entity.getName());
+        if (node != null) {
+            graphMap.registerNode(newId, node);
+
+            if (node instanceof Persistent) {
+                ((Persistent) node).setOid(newId);
+            }
         }
-
-        Class clientClass = Class.forName(entity.getClientClassName(), true, Thread
-                .currentThread()
-                .getContextClassLoader());
-
-        Object clientObject = clientClass.newInstance();
-
-        // copy ID
-        if (clientObject instanceof Persistent) {
-            Object clientOID = toClientObjectId(object.getObjectId(), clientClass);
-            ((Persistent) clientObject).setOid(clientOID);
-        }
-
-        // TODO: implement attribute filtering for client..
-        // copy client properties
-
-        Iterator it = entity.getAttributeMap().keySet().iterator();
-        while (it.hasNext()) {
-            String key = (String) it.next();
-            PropertyUtils.setProperty(clientObject, key, object.readProperty(key));
-        }
-
-        return clientObject;
-    }
-
-    /**
-     * Converts a list of server-side objects to their client counterparts.
-     */
-    static List toClientObjects(List dataObjects) throws Exception {
-        List clientObjects = new ArrayList(dataObjects.size());
-
-        Iterator it = dataObjects.iterator();
-        while (it.hasNext()) {
-            CayenneDataObject serverObject = (CayenneDataObject) it.next();
-
-            // TODO: toClientObject performs some entity specific lookups that can be
-            // cached as local variables when processing the list
-
-            clientObjects.add(toClientObject(serverObject));
-        }
-
-        return clientObjects;
-    }
-
-    private ClientServerUtils() {
-
     }
 }

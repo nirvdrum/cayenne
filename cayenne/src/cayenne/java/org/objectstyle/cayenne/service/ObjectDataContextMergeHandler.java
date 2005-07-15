@@ -55,82 +55,81 @@
  */
 package org.objectstyle.cayenne.service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.commons.beanutils.PropertyUtils;
-import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.graph.GraphChangeHandler;
 
 /**
+ * A GraphChangeHandler that propagates object graph changes to an underlying
+ * ObjectContext. Assumes that node ids are Cayenne ObjectIds.
+ * 
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-// TODO: create a generic GraphSerializer, maybe using the same approach as XML
-// serialization mechanism only based on Java serialization.
-class ClientServerUtils {
+class ObjectDataContextMergeHandler implements GraphChangeHandler {
 
-    static Object toClientObjectId(ObjectId id, Class clientClass) {
-        return new ObjectId(clientClass, id.getIdSnapshot());
+    ObjectDataContext context;
+
+    ObjectDataContextMergeHandler(ObjectDataContext context) {
+        this.context = context;
     }
 
-    static Object toClientObject(CayenneDataObject object) throws Exception {
-        ObjEntity entity = object.getObjEntity();
-
-        // TODO: move class creation to ObjEntity
-        if (entity.getClientClassName() == null) {
-            throw new CayenneRuntimeException(
-                    "No client-side class defined for ObjEntity: " + entity.getName());
-        }
-
-        Class clientClass = Class.forName(entity.getClientClassName(), true, Thread
-                .currentThread()
-                .getContextClassLoader());
-
-        Object clientObject = clientClass.newInstance();
-
-        // copy ID
-        if (clientObject instanceof Persistent) {
-            Object clientOID = toClientObjectId(object.getObjectId(), clientClass);
-            ((Persistent) clientObject).setOid(clientOID);
-        }
-
-        // TODO: implement attribute filtering for client..
-        // copy client properties
-
-        Iterator it = entity.getAttributeMap().keySet().iterator();
-        while (it.hasNext()) {
-            String key = (String) it.next();
-            PropertyUtils.setProperty(clientObject, key, object.readProperty(key));
-        }
-
-        return clientObject;
+    public void nodeIdChanged(Object nodeId, Object newId) {
+        throw new CayenneRuntimeException("Unimplemented");
     }
 
-    /**
-     * Converts a list of server-side objects to their client counterparts.
-     */
-    static List toClientObjects(List dataObjects) throws Exception {
-        List clientObjects = new ArrayList(dataObjects.size());
-
-        Iterator it = dataObjects.iterator();
-        while (it.hasNext()) {
-            CayenneDataObject serverObject = (CayenneDataObject) it.next();
-
-            // TODO: toClientObject performs some entity specific lookups that can be
-            // cached as local variables when processing the list
-
-            clientObjects.add(toClientObject(serverObject));
-        }
-
-        return clientObjects;
+    public void nodeCreated(Object nodeId) {
+        ObjectId id = toObjectId(nodeId);
+        context.createAndRegisterNewObject(id);
     }
 
-    private ClientServerUtils() {
+    public void nodeRemoved(Object nodeId) {
+        Persistent object = findObject(nodeId);
+        context.deleteObject(object);
+    }
 
+    public void nodePropertyChanged(
+            Object nodeId,
+            String property,
+            Object oldValue,
+            Object newValue) {
+
+        Persistent object = findObject(nodeId);
+        try {
+            PropertyUtils.setSimpleProperty(object, property, newValue);
+        }
+        catch (Exception e) {
+            throw new CayenneRuntimeException("Error setting property: " + property, e);
+        }
+    }
+
+    public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
+        throw new CayenneRuntimeException(
+                "TODO: implement relationship change updates...");
+    }
+
+    public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
+        throw new CayenneRuntimeException(
+                "TODO: implement relationship change updates...");
+    }
+
+    Persistent findObject(Object nodeId) {
+        ObjectId id = toObjectId(nodeId);
+        return context.getObjectStore().getObject(id);
+    }
+
+    ObjectId toObjectId(Object nodeId) {
+        if (nodeId instanceof ObjectId) {
+            return (ObjectId) nodeId;
+        }
+        else if (nodeId == null) {
+            throw new NullPointerException("Null ObjectId");
+        }
+        else {
+            throw new CayenneRuntimeException("Node id is expected to be ObjectId, got: "
+                    + nodeId);
+        }
     }
 }

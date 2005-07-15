@@ -66,7 +66,7 @@ class NodeDeleteOperation extends NodeDiff {
     }
 
     public void apply(GraphChangeHandler tracker) {
-        tracker.nodeDeleted(nodeId);
+        tracker.nodeRemoved(nodeId);
     }
 
     public void undo(GraphChangeHandler tracker) {
