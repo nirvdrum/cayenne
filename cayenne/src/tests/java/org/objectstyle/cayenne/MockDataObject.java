@@ -69,6 +69,7 @@ public class MockDataObject implements DataObject {
     protected ObjectId objectId;
     protected int persistenceState;
     protected DataContext context;
+    protected ObjectContext objectContext;
 
     public MockDataObject() {
 
@@ -174,5 +175,13 @@ public class MockDataObject implements DataObject {
 
     public void setOid(Object oid) {
         this.oid = oid;
+    }
+
+    public ObjectContext getObjectContext() {
+        return objectContext;
+    }
+
+    public void setObjectContext(ObjectContext objectContext) {
+        this.objectContext = objectContext;
     }
 }

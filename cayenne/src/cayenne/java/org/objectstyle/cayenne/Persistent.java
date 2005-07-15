@@ -78,4 +78,8 @@ public interface Persistent extends Serializable {
     int getPersistenceState();
 
     void setPersistenceState(int state);
+
+    ObjectContext getObjectContext();
+
+    void setObjectContext(ObjectContext objectContext);
 }

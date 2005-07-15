@@ -813,4 +813,28 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
         throw new IllegalArgumentException(
                 "CayenneDataObject only supports ObjectId ids, got: " + oid);
     }
+    
+    /**
+     * Returns this object's DataContext.
+     * 
+     * @since 1.2
+     */
+    public ObjectContext getObjectContext() {
+        return (dataContext == null || dataContext instanceof ObjectContext)
+                ? (ObjectContext) dataContext
+                : null;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setObjectContext(ObjectContext objectContext) {
+        if (objectContext == null || objectContext instanceof DataContext) {
+            setDataContext((DataContext) objectContext);
+        }
+
+        throw new IllegalArgumentException(
+                "CayenneDataObject only supports DataContext for ObjectContext, got: "
+                        + objectContext);
+    }
 }

@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne.client;
 
+import java.util.Arrays;
+import java.util.List;
+
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -67,6 +70,7 @@ import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.MockCayenneConnector;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.OperationRecorder;
+import org.objectstyle.cayenne.query.NamedQuery;
 
 /**
  * @author Andrus Adamchik
@@ -130,7 +134,7 @@ public class ClientObjectContextTst extends TestCase {
         };
 
         ClientObjectContext context = new ClientObjectContext(connector);
-        final Persistent object = context.newObject(MockPersistentObject.class);
+        Persistent object = context.newObject(MockPersistentObject.class);
 
         // record change here to make it available to the anonymous connector method..
         recorder.nodeIdChanged(object.getOid(), newObjectId);
@@ -140,6 +144,32 @@ public class ClientObjectContextTst extends TestCase {
         context.commit();
         assertSame(newObjectId, object.getOid());
         assertSame(object, context.graphManager.getNode(newObjectId));
+    }
+
+    public void testPerformSelectQuery() {
+        final MockPersistentObject o1 = new MockPersistentObject();
+        Object oid1 = new Object();
+        o1.setOid(oid1);
+
+        MockCayenneConnector connector = new MockCayenneConnector() {
+
+            public Object sendMessage(ClientMessage message)
+                    throws CayenneClientException {
+                return Arrays.asList(new Object[] {
+                    o1
+                });
+            }
+        };
+
+        ClientObjectContext context = new ClientObjectContext(connector);
+        List list = context.performSelectQuery(new NamedQuery("dummy"));
+        assertNotNull(list);
+        assertEquals(1, list.size());
+        assertTrue(list.contains(o1));
+
+        // ObjectContext must be injected
+        assertEquals(context, o1.getObjectContext());
+        assertSame(o1, context.graphManager.getNode(oid1));
     }
 
     public void testNewObject() {

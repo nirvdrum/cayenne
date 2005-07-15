@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.client;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -197,7 +198,24 @@ public class ClientObjectContext implements ObjectContext {
     }
 
     public List performSelectQuery(QueryExecutionPlan query) {
-        return new SelectMessage(query).send(connector);
+        List objects = new SelectMessage(query).send(connector);
+
+        // register objects with graphManager
+        Iterator it = objects.iterator();
+        while (it.hasNext()) {
+            Persistent o = (Persistent) it.next();
+
+            // sanity check
+            if (o.getOid() == null) {
+                throw new CayenneClientException(
+                        "Server returned an object without an id: " + o);
+            }
+
+            graphManager.registerNode(o.getOid(), o);
+            o.setObjectContext(this);
+        }
+
+        return objects;
     }
 
     public QueryResponse performGenericQuery(QueryExecutionPlan query) {

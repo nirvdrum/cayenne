@@ -68,11 +68,11 @@ import org.objectstyle.cayenne.graph.GraphChangeHandler;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ObjectDataContextMergeHandler implements GraphChangeHandler {
+class ClientCommitMergeHandler implements GraphChangeHandler {
 
     ObjectDataContext context;
 
-    ObjectDataContextMergeHandler(ObjectDataContext context) {
+    ClientCommitMergeHandler(ObjectDataContext context) {
         this.context = context;
     }
 
