@@ -63,8 +63,8 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
- * A Cayenne object facade to a persistence store. Instances of ObjectContext are used in
- * application code to access Cayenne persistence features.
+ * A Cayenne object facade to a persistent store. Instances of ObjectContext are used in
+ * the application code to access Cayenne persistence features.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -126,7 +126,7 @@ public interface ObjectContext extends Serializable {
      * way to the external data store.
      * 
      * @return GraphDiff that contains changes made to objects during commit. This
-     *         includes things like generated ObjectIds, etc.
+     *         includes things like generated ids, etc.
      */
     GraphDiff commit();
 

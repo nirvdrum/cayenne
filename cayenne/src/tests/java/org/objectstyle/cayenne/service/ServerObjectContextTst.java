@@ -56,8 +56,11 @@
 package org.objectstyle.cayenne.service;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.MockDataRowStore;
 import org.objectstyle.cayenne.access.MockPersistenceContext;
@@ -67,6 +70,7 @@ import org.objectstyle.cayenne.distribution.GenericQueryMessage;
 import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;
+import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.OperationRecorder;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -109,7 +113,22 @@ public class ServerObjectContextTst extends CayenneTestCase {
     }
 
     public void testOnCommit() {
-        MockPersistenceContext parent = new MockPersistenceContext();
+        MockPersistenceContext parent = new MockPersistenceContext() {
+
+            public void commitChangesInContext(
+                    ObjectContext context,
+                    GraphChangeHandler callback) {
+                super.commitChangesInContext(context, callback);
+
+                // replace temp ids to satisfy ObjectStore
+                Iterator it = context.newObjects().iterator();
+                int i = 0;
+                while (it.hasNext()) {
+                    DataObject o = (DataObject) it.next();
+                    o.getObjectId().getReplacementIdMap().put("x", "y" + i++);
+                }
+            }
+        };
         ServerObjectContext context = new ServerObjectContext(parent, getDomain()
                 .getEntityResolver(), new MockDataRowStore());
 
@@ -117,6 +136,8 @@ public class ServerObjectContextTst extends CayenneTestCase {
 
         // no changes in context, so no commit should be executed
         assertFalse(parent.isCommitChangesInContext());
+
+        parent.reset();
 
         // introduce changes
         OperationRecorder recorder = new OperationRecorder();

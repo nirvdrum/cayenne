@@ -86,6 +86,24 @@ public class CompoundDiff implements GraphDiff {
         this.diffs = diffs;
     }
 
+    /**
+     * Returns true if this diff has no other diffs or if all of its diffs are noops.
+     */
+    public boolean isNoop() {
+        if (diffs == null) {
+            return true;
+        }
+
+        Iterator it = diffs.iterator();
+        while (it.hasNext()) {
+            if (!((GraphDiff) it.next()).isNoop()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public List getDiffs() {
         return (diffs != null)
                 ? Collections.unmodifiableList(diffs)

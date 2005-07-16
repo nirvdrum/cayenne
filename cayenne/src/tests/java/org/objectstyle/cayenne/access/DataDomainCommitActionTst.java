@@ -53,41 +53,42 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.graph;
+package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.util.Util;
+import java.util.Collection;
+import java.util.Collections;
 
-/**
- * @since 1.2
- * @author Andrus Adamchik
- */
-class NodePropertyChangeOperation extends NodeDiff {
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.MockObjectContext;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.TempObjectId;
+import org.objectstyle.cayenne.graph.OperationRecorder;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-    String property;
-    Object oldValue;
-    Object newValue;
+public class DataDomainCommitActionTst extends CayenneTestCase {
 
-    NodePropertyChangeOperation(Object nodeId, String property, Object oldValue,
-            Object newValue) {
-
-        super(nodeId);
-        this.property = property;
-        this.oldValue = oldValue;
-        this.newValue = newValue;
+    public void testConstructor() {
+        DataDomainCommitAction action = new DataDomainCommitAction(getDomain());
+        assertSame(getDomain(), action.domain);
     }
 
-    /**
-     * Returns true if both old and new value are equal.
-     */
-    public boolean isNoop() {
-        return Util.nullSafeEquals(oldValue, newValue);
-    }
+    public void testCommitResult() {
+        final Artist artist = new Artist();
+        artist.setArtistName("test");
+        artist.setObjectId(new TempObjectId(Artist.class));
+        artist.setPersistenceState(PersistenceState.NEW);
 
-    public void apply(GraphChangeHandler tracker) {
-        tracker.nodePropertyChanged(nodeId, property, oldValue, newValue);
-    }
+        MockObjectContext context = new MockObjectContext() {
 
-    public void undo(GraphChangeHandler tracker) {
-        tracker.nodePropertyChanged(nodeId, property, newValue, oldValue);
+            public Collection uncommittedObjects() {
+                return Collections.singleton(artist);
+            }
+        };
+
+        DataDomainCommitAction action = new DataDomainCommitAction(getDomain());
+
+        OperationRecorder recorder = new OperationRecorder();
+        action.commit(context, recorder);
+        assertEquals(1, recorder.size());
     }
 }

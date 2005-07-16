@@ -71,10 +71,11 @@ import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.util.BatchQueryUtils;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
-import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
@@ -126,9 +127,10 @@ class DataDomainCommitAction {
     /**
      * Commits changes in the enclosed DataContext.
      */
-    void commit(ObjectContext context, CompoundDiff changeBuffer) {
+    void commit(ObjectContext context, GraphChangeHandler commitChangeCallback) {
         synchronized (domain.getSharedSnapshotCache()) {
-            categorizeObjects(context);
+            Collection uncommitted = context.uncommittedObjects();
+            categorizeObjects(uncommitted);
             createPrimaryKeys();
 
             for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
@@ -179,6 +181,18 @@ class DataDomainCommitAction {
                 }
 
                 throw new CayenneRuntimeException("Transaction was rolledback.", th);
+            }
+
+            // notify callback of generated keys ...
+            if (commitChangeCallback != null) {
+                Iterator it = uncommitted.iterator();
+                while (it.hasNext()) {
+                    DataObject object = (DataObject) it.next();
+                    ObjectId id = object.getObjectId();
+                    if (id.isReplacementIdAttached()) {
+                        commitChangeCallback.nodeIdChanged(id, id.createReplacementId());
+                    }
+                }
             }
         }
     }
@@ -595,7 +609,7 @@ class DataDomainCommitAction {
     /**
      * Organizes committed objects by node, performs sorting operations.
      */
-    private void categorizeObjects(ObjectContext context) {
+    private void categorizeObjects(Collection uncommittedObjects) {
         this.nodeHelpers = new ArrayList();
 
         newObjectsByObjEntity = new HashMap();
@@ -605,7 +619,7 @@ class DataDomainCommitAction {
         objEntitiesToDelete = new ArrayList();
         objEntitiesToUpdate = new ArrayList();
 
-        Iterator it = context.uncommittedObjects().iterator();
+        Iterator it = uncommittedObjects.iterator();
         while (it.hasNext()) {
             DataObject nextObject = (DataObject) it.next();
             int objectState = nextObject.getPersistenceState();

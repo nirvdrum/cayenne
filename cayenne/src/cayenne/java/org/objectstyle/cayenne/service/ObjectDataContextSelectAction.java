@@ -75,11 +75,11 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
  */
 // Differences with DataContextSelectAction:
 // * shared cache handling is delegated to the underlying PersistenceContext.
-class ObjectDataContextContextSelectAction {
+class ObjectDataContextSelectAction {
 
     ObjectDataContext context;
 
-    ObjectDataContextContextSelectAction(ObjectDataContext context) {
+    ObjectDataContextSelectAction(ObjectDataContext context) {
         this.context = context;
     }
 

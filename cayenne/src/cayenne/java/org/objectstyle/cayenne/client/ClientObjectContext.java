@@ -111,8 +111,8 @@ public class ClientObjectContext implements ObjectContext {
 
         graphManager.addLocalChangeHandler(changeRecorder);
         graphManager.addLocalChangeHandler(stateRecorder);
-        graphManager.setRemoteChangeHandler(new ObjectContextMergeHandler(
-                this,
+        graphManager.setRemoteChangeHandler(new ClientObjectContextMergeHandler(
+                stateRecorder,
                 graphManager));
     }
 
@@ -150,10 +150,11 @@ public class ClientObjectContext implements ObjectContext {
         if (!changeRecorder.isEmpty()) {
             GraphDiff commitDiff = new CommitMessage(changeRecorder.getDiffs())
                     .sendCommit(connector);
-            graphManager.mergeRemoteChange(commitDiff);
 
+            graphManager.mergeRemoteChange(commitDiff);
+            stateRecorder.processCommit(graphManager);
             changeRecorder.clear();
-            stateRecorder.clear();
+
             return commitDiff;
         }
         else {
@@ -233,8 +234,9 @@ public class ClientObjectContext implements ObjectContext {
                         "Server returned an object without an id: " + o);
             }
 
-            graphManager.registerNode(o.getOid(), o);
+            o.setPersistenceState(PersistenceState.COMMITTED);
             o.setObjectContext(this);
+            graphManager.registerNode(o.getOid(), o);
         }
 
         return objects;

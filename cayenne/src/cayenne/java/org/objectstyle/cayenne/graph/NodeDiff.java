@@ -61,19 +61,23 @@ package org.objectstyle.cayenne.graph;
  * @since 1.2
  * @author Andrus Adamchik
  */
-abstract class NodeDiff implements GraphDiff {
+public abstract class NodeDiff implements GraphDiff {
 
-    Object nodeId;
+    protected Object nodeId;
 
     public NodeDiff(Object nodeId) {
         this.nodeId = nodeId;
+    }
+    
+    public boolean isNoop() {
+        return false;
     }
 
     public abstract void apply(GraphChangeHandler tracker);
 
     public abstract void undo(GraphChangeHandler tracker);
 
-    Object getNodeId() {
+    public Object getNodeId() {
         return nodeId;
     }
 }

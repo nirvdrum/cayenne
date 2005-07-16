@@ -55,23 +55,24 @@
  */
 package org.objectstyle.cayenne.client;
 
-import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.graph.BeanMergeHandler;
 import org.objectstyle.cayenne.graph.GraphMap;
 
 /**
+ * A GraphChangeHandler that injects external graph changes to an ObjectContext.
+ * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ObjectContextMergeHandler extends BeanMergeHandler {
+class ClientObjectContextMergeHandler extends BeanMergeHandler {
 
-    ObjectContext context;
+    ClientStateRecorder stateRecorder;
 
-    ObjectContextMergeHandler(ObjectContext context, GraphMap graphMap) {
+    ClientObjectContextMergeHandler(ClientStateRecorder stateRecorder, GraphMap graphMap) {
         super(graphMap);
 
-        this.context = context;
+        this.stateRecorder = stateRecorder;
     }
 
     public void nodeIdChanged(Object nodeId, Object newId) {
@@ -81,8 +82,12 @@ class ObjectContextMergeHandler extends BeanMergeHandler {
             graphMap.registerNode(newId, node);
 
             if (node instanceof Persistent) {
+                // inject new id
                 ((Persistent) node).setOid(newId);
             }
+
+            // notify state recorder
+            stateRecorder.nodeIdChanged(nodeId, newId);
         }
     }
 }

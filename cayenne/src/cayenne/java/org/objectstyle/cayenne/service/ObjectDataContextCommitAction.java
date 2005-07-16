@@ -53,41 +53,47 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.graph;
+package org.objectstyle.cayenne.service;
 
-import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.OperationRecorder;
 
 /**
+ * An action that commits ObjectDataContext.
+ * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class NodePropertyChangeOperation extends NodeDiff {
+class ObjectDataContextCommitAction {
 
-    String property;
-    Object oldValue;
-    Object newValue;
+    GraphDiff commit(ObjectDataContext context) throws CayenneRuntimeException {
 
-    NodePropertyChangeOperation(Object nodeId, String property, Object oldValue,
-            Object newValue) {
+        if (context.getParentContext() == null) {
+            throw new CayenneRuntimeException(
+                    "ObjectContext has no parent PersistenceContext.");
+        }
 
-        super(nodeId);
-        this.property = property;
-        this.oldValue = oldValue;
-        this.newValue = newValue;
-    }
+        synchronized (context.getObjectStore()) {
 
-    /**
-     * Returns true if both old and new value are equal.
-     */
-    public boolean isNoop() {
-        return Util.nullSafeEquals(oldValue, newValue);
-    }
+            if (!context.hasChanges()) {
+                return new CompoundDiff();
+            }
 
-    public void apply(GraphChangeHandler tracker) {
-        tracker.nodePropertyChanged(nodeId, property, oldValue, newValue);
-    }
+            if (context.isValidatingObjectsOnCommit()) {
+                context.getObjectStore().validateUncommittedObjects();
+            }
 
-    public void undo(GraphChangeHandler tracker) {
-        tracker.nodePropertyChanged(nodeId, property, newValue, oldValue);
+            // record changes to objects made as a result of commit ...
+            OperationRecorder recorder = new OperationRecorder();
+            context.getParentContext().commitChangesInContext(context, recorder);
+
+            // TODO: ObjectStore should accept GraphDiff instead of relying on replacement
+            // ids ... do this when we make ObjectStore a GraphMap
+            context.getObjectStore().objectsCommitted();
+
+            return recorder.getDiffs();
+        }
     }
 }

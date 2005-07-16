@@ -67,6 +67,12 @@ import java.io.Serializable;
 public interface GraphDiff extends Serializable {
 
     /**
+     * Returns true if this diff is simply a placeholder and does not perform any actual
+     * operation.
+     */
+    boolean isNoop();
+
+    /**
      * Calls appropriate methods on the tracker to "replay" this change.
      */
     void apply(GraphChangeHandler tracker);

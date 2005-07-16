@@ -85,6 +85,10 @@ public class OperationRecorder implements GraphChangeHandler {
     public void clear() {
         this.diffs = new ArrayList();
     }
+    
+    public int size() {
+        return diffs.size();
+    }
 
     public boolean isEmpty() {
         return diffs.isEmpty();

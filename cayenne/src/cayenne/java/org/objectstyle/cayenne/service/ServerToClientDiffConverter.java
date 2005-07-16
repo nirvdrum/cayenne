@@ -55,40 +55,50 @@
  */
 package org.objectstyle.cayenne.service;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.distribution.GlobalID;
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
+import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
+import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
- * A GraphChangeHandler that propagates object graph changes to an underlying
- * ObjectContext. Assumes that node ids are Cayenne ObjectIds.
+ * Converts server-side commit GraphDiff to the client version, accumulating the result in
+ * an internal CompoundDiff.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ClientObjectMergeHandler implements GraphChangeHandler {
+// TODO: currently only supports id change operations. When we can handle all operations,
+// this class can be used for pushing any type of synchronization diffs to the client...
+class ServerToClientDiffConverter implements GraphChangeHandler {
 
-    ObjectDataContext context;
+    EntityResolver resolver;
+    CompoundDiff clientDiff;
 
-    ClientObjectMergeHandler(ObjectDataContext context) {
-        this.context = context;
+    ServerToClientDiffConverter(EntityResolver resolver) {
+        this.resolver = resolver;
+        this.clientDiff = new CompoundDiff();
+    }
+
+    GraphDiff getClientDiff() {
+        return clientDiff;
     }
 
     public void nodeIdChanged(Object nodeId, Object newId) {
-        throw new CayenneRuntimeException("Unimplemented");
+        GlobalID nodeGlobalID = toGlobalID(nodeId);
+        GlobalID newGlobalID = toGlobalID(newId);
+        clientDiff.add(new NodeIdChangeOperation(nodeGlobalID, newGlobalID));
     }
 
     public void nodeCreated(Object nodeId) {
-        ObjectId id = toObjectId(nodeId);
-        context.createAndRegisterNewObject(id);
+        throw new CayenneRuntimeException("Unimplemented...");
     }
 
     public void nodeRemoved(Object nodeId) {
-        Persistent object = findObject(nodeId);
-        context.deleteObject(object);
+        throw new CayenneRuntimeException("Unimplemented...");
     }
 
     public void nodePropertyChanged(
@@ -96,41 +106,30 @@ class ClientObjectMergeHandler implements GraphChangeHandler {
             String property,
             Object oldValue,
             Object newValue) {
-
-        Persistent object = findObject(nodeId);
-        try {
-            PropertyUtils.setSimpleProperty(object, property, newValue);
-        }
-        catch (Exception e) {
-            throw new CayenneRuntimeException("Error setting property: " + property, e);
-        }
+        throw new CayenneRuntimeException("Unimplemented...");
     }
 
     public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
-        throw new CayenneRuntimeException(
-                "TODO: implement relationship change updates...");
+        throw new CayenneRuntimeException("Unimplemented...");
     }
 
     public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
-        throw new CayenneRuntimeException(
-                "TODO: implement relationship change updates...");
+        throw new CayenneRuntimeException("Unimplemented...");
     }
 
-    Persistent findObject(Object nodeId) {
-        ObjectId id = toObjectId(nodeId);
-        return context.getObjectStore().getObject(id);
-    }
-
-    ObjectId toObjectId(Object nodeId) {
-        if (nodeId instanceof GlobalID) {
-            return ((GlobalID) nodeId).toServerOID(context.getEntityResolver());
+    GlobalID toGlobalID(Object nodeId) {
+        if (nodeId instanceof ObjectId) {
+            return new GlobalID(resolver, (ObjectId) nodeId);
+        }
+        else if (nodeId instanceof GlobalID) {
+            return (GlobalID) nodeId;
         }
         else if (nodeId == null) {
-            throw new NullPointerException("Null GlobalID");
+            throw new NullPointerException("Null ObjectId");
         }
         else {
             throw new CayenneRuntimeException(
-                    "Client node id is expected to be GlobalID, got: " + nodeId);
+                    "Server object identifier is expected to be ObjectId, got: " + nodeId);
         }
     }
 }

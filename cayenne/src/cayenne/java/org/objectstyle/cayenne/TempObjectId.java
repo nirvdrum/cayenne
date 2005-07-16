@@ -90,6 +90,15 @@ public class TempObjectId extends ObjectId {
         super(objectClass, null);
         this.key = key;
     }
+    
+    /**
+     * Returns a binary unique key for this id.
+     * 
+     * @since 1.2
+     */
+    public byte[] getKey() {
+        return key;
+    }
 
     /**
      * TempObjectId equality condition is based on object reference comparison. This is

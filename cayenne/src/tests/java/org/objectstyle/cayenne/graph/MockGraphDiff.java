@@ -57,14 +57,13 @@ package org.objectstyle.cayenne.graph;
 
 public class MockGraphDiff implements GraphDiff {
 
-    public MockGraphDiff() {
-        super();
-    }
-
     public void apply(GraphChangeHandler tracker) {
     }
 
     public void undo(GraphChangeHandler tracker) {
     }
 
+    public boolean isNoop() {
+        return false;
+    }
 }

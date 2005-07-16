@@ -53,115 +53,43 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.service;
 
-package org.objectstyle.cayenne.client;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import org.objectstyle.cayenne.PersistenceState;
+import org.apache.commons.beanutils.PropertyUtils;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
-import org.objectstyle.cayenne.graph.GraphMap;
 
 /**
- * Tracks dirty Persistent objects.
+ * A GraphChangeHandler that propagates submitted object graph changes to an underlying
+ * ObjectContext. Graph node ids are expected to be GlobalIDs.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ClientStateRecorder implements GraphChangeHandler {
+class ClientToServerDiffConverter implements GraphChangeHandler {
 
-    Set dirtyIds;
+    ObjectDataContext context;
 
-    ClientStateRecorder() {
-        this.dirtyIds = new HashSet();
+    ClientToServerDiffConverter(ObjectDataContext context) {
+        this.context = context;
     }
-
-    void clear() {
-        dirtyIds = new HashSet();
-    }
-
-    /**
-     * Updates dirty objects state and clears dirty ids map.
-     */
-    void processCommit(GraphMap graphMap) {
-        Iterator it = dirtyIds.iterator();
-        while (it.hasNext()) {
-            Object node = graphMap.getNode(it.next());
-            if (node instanceof Persistent) {
-                Persistent persistentNode = (Persistent) node;
-                switch (persistentNode.getPersistenceState()) {
-                    case PersistenceState.MODIFIED:
-                    case PersistenceState.NEW:
-                        persistentNode.setPersistenceState(PersistenceState.COMMITTED);
-                        break;
-                    case PersistenceState.DELETED:
-                        persistentNode.setPersistenceState(PersistenceState.TRANSIENT);
-                        break;
-                }
-            }
-        }
-
-        clear();
-    }
-
-    boolean hasChanges() {
-        return !dirtyIds.isEmpty();
-    }
-
-    Collection dirtyNodes(GraphMap graphMap) {
-        if (dirtyIds.isEmpty()) {
-            return Collections.EMPTY_SET;
-        }
-
-        List objects = new ArrayList(dirtyIds.size());
-        Iterator it = dirtyIds.iterator();
-        while (it.hasNext()) {
-            objects.add(graphMap.getNode(it.next()));
-        }
-
-        return objects;
-    }
-
-    Collection dirtyNodes(GraphMap graphMap, int state) {
-        if (dirtyIds.isEmpty()) {
-            return Collections.EMPTY_SET;
-        }
-
-        int size = dirtyIds.size();
-        List objects = new ArrayList(size > 50 ? size / 2 : size);
-        Iterator it = dirtyIds.iterator();
-        while (it.hasNext()) {
-            Persistent o = (Persistent) graphMap.getNode(it.next());
-
-            if (o.getPersistenceState() == state) {
-                objects.add(o);
-            }
-        }
-
-        return objects;
-    }
-
-    // *** GraphChangeHandler methods
 
     public void nodeIdChanged(Object nodeId, Object newId) {
-        if (dirtyIds.remove(nodeId)) {
-            dirtyIds.add(newId);
-        }
+        throw new CayenneRuntimeException(
+                "Not supported - client is not allowed to change Global ID of server objects.");
     }
 
     public void nodeCreated(Object nodeId) {
-        dirtyIds.add(nodeId);
+        ObjectId id = toObjectId(nodeId);
+        context.createAndRegisterNewObject(id);
     }
 
     public void nodeRemoved(Object nodeId) {
-        dirtyIds.add(nodeId);
+        Persistent object = findObject(nodeId);
+        context.deleteObject(object);
     }
 
     public void nodePropertyChanged(
@@ -169,14 +97,44 @@ class ClientStateRecorder implements GraphChangeHandler {
             String property,
             Object oldValue,
             Object newValue) {
-        dirtyIds.add(nodeId);
+
+        Persistent object = findObject(nodeId);
+        try {
+            PropertyUtils.setSimpleProperty(object, property, newValue);
+        }
+        catch (Exception e) {
+            throw new CayenneRuntimeException("Error setting property: " + property, e);
+        }
     }
 
     public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
-        dirtyIds.add(nodeId);
+        throw new CayenneRuntimeException(
+                "TODO: implement relationship change updates...");
     }
 
     public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
-        dirtyIds.add(nodeId);
+        throw new CayenneRuntimeException(
+                "TODO: implement relationship change updates...");
+    }
+
+    Persistent findObject(Object nodeId) {
+        ObjectId id = toObjectId(nodeId);
+        return context.getObjectStore().getObject(id);
+    }
+
+    ObjectId toObjectId(Object nodeId) {
+        if (nodeId instanceof GlobalID) {
+            return ((GlobalID) nodeId).toServerOID(context.getEntityResolver());
+        }
+        else if (nodeId instanceof ObjectId) {
+            return (ObjectId) nodeId;
+        }
+        else if (nodeId == null) {
+            throw new NullPointerException("Null GlobalID");
+        }
+        else {
+            throw new CayenneRuntimeException(
+                    "Client node id is expected to be GlobalID, got: " + nodeId);
+        }
     }
 }

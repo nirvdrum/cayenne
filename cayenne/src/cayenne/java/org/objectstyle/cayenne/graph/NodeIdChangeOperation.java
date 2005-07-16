@@ -55,9 +55,15 @@
  */
 package org.objectstyle.cayenne.graph;
 
-class NodeIdChangeOperation extends NodeDiff {
+/**
+ * A GraphDiff representing a change in node ID.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+public class NodeIdChangeOperation extends NodeDiff {
 
-    Object newNodeId;
+    protected Object newNodeId;
 
     public NodeIdChangeOperation(Object nodeId, Object newNodeId) {
         super(nodeId);

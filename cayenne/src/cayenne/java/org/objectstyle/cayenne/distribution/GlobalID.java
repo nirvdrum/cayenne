@@ -107,7 +107,13 @@ public class GlobalID implements Serializable {
         }
 
         this.entityName = entity.getName();
-        this.objectIdKeys = serverOID.getIdSnapshot();
+
+        if (serverOID instanceof TempObjectId) {
+            key = ((TempObjectId) serverOID).getKey();
+        }
+        else {
+            this.objectIdKeys = serverOID.getIdSnapshot();
+        }
     }
 
     /**
@@ -146,7 +152,7 @@ public class GlobalID implements Serializable {
         }
 
         GlobalID id = (GlobalID) object;
-        
+
         if (isTemporary()) {
             return new EqualsBuilder()
                     .append(entityName, entityName)
@@ -235,10 +241,14 @@ public class GlobalID implements Serializable {
 
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
-        
-        builder.append("entityName", entityName);
 
-        if (objectIdKeys != null) {
+        builder.append("entityName", entityName);
+        builder.append("temporary", isTemporary());
+
+        if (isTemporary()) {
+            builder.append("key", key);
+        }
+        else if (objectIdKeys != null) {
             Iterator it = objectIdKeys.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();

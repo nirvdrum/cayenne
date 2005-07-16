@@ -77,7 +77,6 @@ import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.PersistenceContext;
 import org.objectstyle.cayenne.access.Transaction;
-import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -216,29 +215,7 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
     }
 
     public GraphDiff commit() throws CayenneRuntimeException {
-
-        if (this.getParentContext() == null) {
-            throw new CayenneRuntimeException(
-                    "ObjectContext has no parent PersistenceContext.");
-        }
-
-        CompoundDiff diff = new CompoundDiff();
-
-        synchronized (getObjectStore()) {
-
-            if (hasChanges()) {
-                if (isValidatingObjectsOnCommit()) {
-                    getObjectStore().validateUncommittedObjects();
-                }
-
-                getParentContext().commitChangesInContext(this, diff);
-
-                // TODO: merge diff to ObjectStore
-               getObjectStore().objectsCommitted();
-            }
-        }
-
-        return diff;
+        return new ObjectDataContextCommitAction().commit(this);
     }
 
     public PersistenceContext getParentContext() {
@@ -283,7 +260,7 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
      * Returns a collection of all uncommitted registered objects.
      */
     public Collection uncommittedObjects() {
-   
+
         int len = getObjectStore().registeredObjectsCount();
         if (len == 0) {
             return Collections.EMPTY_LIST;
@@ -334,7 +311,7 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
                     "Can't run query - parent PersistenceContext is not set.");
         }
 
-        return new ObjectDataContextContextSelectAction(this).performQuery(query);
+        return new ObjectDataContextSelectAction(this).performQuery(query);
     }
 
     // *** Unfinished stuff

@@ -69,7 +69,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
-import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.Query;
@@ -617,8 +617,8 @@ public class DataDomain implements QueryEngine, PersistenceContext {
      * 
      * @since 1.2
      */
-    public void commitChangesInContext(ObjectContext context, CompoundDiff changeBuffer) {
-        new DataDomainCommitAction(this).commit(context, changeBuffer);
+    public void commitChangesInContext(ObjectContext context, GraphChangeHandler commitChangeCallback) {
+        new DataDomainCommitAction(this).commit(context, commitChangeCallback);
     }
 
     /**

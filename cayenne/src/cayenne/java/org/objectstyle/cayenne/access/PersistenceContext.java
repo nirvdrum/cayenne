@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.access;
 import java.io.Serializable;
 
 import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
@@ -76,7 +76,7 @@ public interface PersistenceContext extends Serializable {
      * ObjectContexts to commit their objects to parent. Any changes made to objects as a
      * result of commit are appended to the changeBuffer.
      */
-    void commitChangesInContext(ObjectContext context, CompoundDiff changeBuffer);
+    void commitChangesInContext(ObjectContext context, GraphChangeHandler commitChangeCallback);
 
     /**
      * Executes a query using its own preferred transactional behavior.

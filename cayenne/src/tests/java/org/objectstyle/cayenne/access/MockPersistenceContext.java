@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.access;
 import java.util.List;
 
 import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
@@ -82,8 +82,14 @@ public class MockPersistenceContext implements PersistenceContext {
         this.resolver = resolver;
         this.mockResults = mockResults;
     }
+    
+    public void reset() {
+        commitChangesInContext = false;
+        performQuery = false;
+        performQueryInTransaction = false;
+    }
 
-    public void commitChangesInContext(ObjectContext context, CompoundDiff changeDiff) {
+    public void commitChangesInContext(ObjectContext context, GraphChangeHandler callback) {
         this.commitChangesInContext = true;
     }
 
