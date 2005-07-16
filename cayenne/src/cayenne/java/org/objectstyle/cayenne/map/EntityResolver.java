@@ -67,8 +67,11 @@ import org.apache.commons.collections.collection.CompositeCollection;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 
@@ -118,6 +121,46 @@ public class EntityResolver implements MappingNamespace {
         this();
         this.maps.addAll(dataMaps); //Take a copy
         this.constructCache();
+    }
+    
+    /**
+     * Converts ObjectId to GlobalID.
+     * 
+     * @since 1.2
+     */
+    public GlobalID convertToGlobalID(ObjectId id) {
+        ObjEntity entity = lookupObjEntity(id.getObjectClass());
+        if (entity == null) {
+            throw new CayenneRuntimeException("Unmapped object class:"
+                    + id.getObjectClass().getName());
+        }
+
+        if (id instanceof TempObjectId) {
+            return new GlobalID(entity.getName(), ((TempObjectId) id).getKey());
+        }
+        else {
+            return new GlobalID(entity.getName(), id.getIdSnapshot());
+        }
+    }
+    
+    /**
+     * Converts GlobalID to ObjectId.
+     * 
+     * @since 1.2
+     */
+    public ObjectId convertToObjectID(GlobalID id) {
+        ObjEntity entity = lookupObjEntity(id.getEntityName());
+
+        if (entity == null) {
+            throw new CayenneRuntimeException("Unknown entity:" + id.getEntityName());
+        }
+
+        Class objectClass = entity.getJavaClass(Thread
+                .currentThread()
+                .getContextClassLoader());
+        return (id.isTemporary())
+                ? new TempObjectId(objectClass, id.getKey())
+                : new ObjectId(objectClass, id.getObjectIdKeys());
     }
     
     /**

@@ -57,22 +57,18 @@ package org.objectstyle.cayenne.distribution;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.TempObjectId;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.util.IDUtil;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * A global id for client objects.
+ * A portable global identifier for persistent objects.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -95,43 +91,17 @@ public class GlobalID implements Serializable {
         this.key = IDUtil.pseudoUniqueByteSequence16();
     }
 
-    /**
-     * Creates a portable GlobalID from Cayenne ObjectId.
-     */
-    // TODO: make it work with Temp IDs
-    public GlobalID(EntityResolver resolver, ObjectId serverOID) {
-        ObjEntity entity = resolver.lookupObjEntity(serverOID.getObjectClass());
-        if (entity == null) {
-            throw new CayenneRuntimeException("Unmapped object class:"
-                    + serverOID.getObjectClass().getName());
-        }
-
-        this.entityName = entity.getName();
-
-        if (serverOID instanceof TempObjectId) {
-            key = ((TempObjectId) serverOID).getKey();
-        }
-        else {
-            this.objectIdKeys = serverOID.getIdSnapshot();
-        }
+    public GlobalID(String entityName, byte[] key) {
+        this.entityName = entityName;
+        this.key = key;
     }
 
     /**
-     * Converts client ID to server ID.
+     * Creates a portable permanent GlobalID.
      */
-    public ObjectId toServerOID(EntityResolver resolver) {
-        ObjEntity entity = resolver.lookupObjEntity(this.entityName);
-
-        if (entity == null) {
-            throw new CayenneRuntimeException("Unknown entity:" + this.entityName);
-        }
-
-        Class serverClass = entity.getJavaClass(Thread
-                .currentThread()
-                .getContextClassLoader());
-        return isTemporary() ? new TempObjectId(serverClass, key) : new ObjectId(
-                serverClass,
-                objectIdKeys);
+    public GlobalID(String entityName, Map idKeys) {
+        this.entityName = entityName;
+        this.objectIdKeys = Collections.unmodifiableMap(idKeys);
     }
 
     public boolean isTemporary() {
@@ -140,6 +110,14 @@ public class GlobalID implements Serializable {
 
     public String getEntityName() {
         return entityName;
+    }
+
+    public byte[] getKey() {
+        return key;
+    }
+
+    public Map getObjectIdKeys() {
+        return objectIdKeys;
     }
 
     public boolean equals(Object object) {

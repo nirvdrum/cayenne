@@ -124,7 +124,7 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
 
     ObjectId toObjectId(Object nodeId) {
         if (nodeId instanceof GlobalID) {
-            return ((GlobalID) nodeId).toServerOID(context.getEntityResolver());
+            return context.getEntityResolver().convertToObjectID((GlobalID) nodeId);
         }
         else if (nodeId instanceof ObjectId) {
             return (ObjectId) nodeId;

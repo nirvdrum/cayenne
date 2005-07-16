@@ -119,7 +119,7 @@ class ServerToClientDiffConverter implements GraphChangeHandler {
 
     GlobalID toGlobalID(Object nodeId) {
         if (nodeId instanceof ObjectId) {
-            return new GlobalID(resolver, (ObjectId) nodeId);
+            return resolver.convertToGlobalID((ObjectId) nodeId);
         }
         else if (nodeId instanceof GlobalID) {
             return (GlobalID) nodeId;

@@ -63,7 +63,6 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 
@@ -93,8 +92,7 @@ class ClientServerUtils {
 
         // copy ID
         if (clientObject instanceof Persistent) {
-            Object clientOID = new GlobalID(resolver, object.getObjectId());
-            ((Persistent) clientObject).setOid(clientOID);
+            ((Persistent) clientObject).setOid(resolver.convertToGlobalID(object.getObjectId()));
         }
 
         // TODO: implement attribute filtering for client..
