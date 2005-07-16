@@ -207,6 +207,7 @@ public class ClientObjectContext implements ObjectContext {
 
         object.setOid(new GlobalID(getEntityResolver().lookupEntity(persistentClass)));
         object.setPersistenceState(PersistenceState.NEW);
+        object.setObjectContext(this);
 
         graphManager.registerNode(object.getOid(), object);
         graphManager.nodeCreated(object.getOid());

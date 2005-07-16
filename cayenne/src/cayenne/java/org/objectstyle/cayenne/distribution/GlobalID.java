@@ -141,15 +141,18 @@ public class GlobalID implements Serializable {
             return true;
         }
 
-        if (isTemporary()) {
-            return false;
-        }
-
         if (!(object instanceof GlobalID)) {
             return false;
         }
 
         GlobalID id = (GlobalID) object;
+        
+        if (isTemporary()) {
+            return new EqualsBuilder()
+                    .append(entityName, entityName)
+                    .append(key, id.key)
+                    .isEquals();
+        }
 
         if (!Util.nullSafeEquals(entityName, id.entityName)) {
             return false;

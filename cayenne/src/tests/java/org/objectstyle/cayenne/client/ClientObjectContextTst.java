@@ -203,12 +203,14 @@ public class ClientObjectContextTst extends TestCase {
         assertNotNull(object);
         assertTrue(object instanceof MockPersistentObject);
         assertEquals(PersistenceState.NEW, object.getPersistenceState());
+        assertSame(context, object.getObjectContext());
         assertTrue(context.stateRecorder.dirtyNodes(
                 context.graphManager,
                 PersistenceState.NEW).contains(object));
         assertNotNull(object.getOid());
         assertTrue(object.getOid() instanceof GlobalID);
         assertTrue(((GlobalID) object.getOid()).isTemporary());
+
     }
 
     public void testDeleteObject() {

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.service;
 
+import java.util.Collection;
 import java.util.Collections;
 
 import junit.framework.TestCase;
@@ -63,6 +64,7 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.MockDataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.MockDataRowStore;
 import org.objectstyle.cayenne.access.MockPersistenceContext;
 import org.objectstyle.cayenne.access.PersistenceContext;
@@ -123,8 +125,10 @@ public class ObjectDataContextTst extends TestCase {
         context.getObjectStore().addObject(object);
         cache.putSnapshot(oid, Collections.singletonMap("p1", "v1"));
 
+        assertTrue(context.hasChanges());
         context.commitChanges();
         assertTrue(parent.isCommitChangesInContext());
+        assertFalse(context.hasChanges());
     }
 
     public void testPerformNonSelectingQuery() {
@@ -151,5 +155,51 @@ public class ObjectDataContextTst extends TestCase {
 
         context.performSelectQuery(new MockQueryExecutionPlan(true));
         assertTrue(parent.isPerformQuery());
+    }
+
+    public void testUncommittedObjects() {
+
+        MockPersistenceContext parent = new MockPersistenceContext();
+        ObjectDataContext context = new ObjectDataContext(
+                parent,
+                new EntityResolver(),
+                new MockDataRowStore());
+
+        DataObject newObject = new MockDataObject(context, new TempObjectId(
+                MockDataObject.class), PersistenceState.NEW);
+        context.getObjectStore().addObject(newObject);
+        Collection uncommitted1 = context.uncommittedObjects();
+        assertNotNull(uncommitted1);
+        assertEquals(1, uncommitted1.size());
+        assertTrue(uncommitted1.contains(newObject));
+
+        DataObject modifiedObject = new MockDataObject(context, new TempObjectId(
+                MockDataObject.class), PersistenceState.MODIFIED);
+        context.getObjectStore().addObject(modifiedObject);
+        Collection uncommitted2 = context.uncommittedObjects();
+        assertNotNull(uncommitted2);
+        assertEquals(2, uncommitted2.size());
+        assertTrue(uncommitted2.contains(newObject));
+        assertTrue(uncommitted2.contains(modifiedObject));
+
+        DataObject deletedObject = new MockDataObject(context, new TempObjectId(
+                MockDataObject.class), PersistenceState.DELETED);
+        context.getObjectStore().addObject(deletedObject);
+        Collection uncommitted3 = context.uncommittedObjects();
+        assertNotNull(uncommitted3);
+        assertEquals(3, uncommitted3.size());
+        assertTrue(uncommitted3.contains(newObject));
+        assertTrue(uncommitted3.contains(modifiedObject));
+        assertTrue(uncommitted3.contains(deletedObject));
+
+        DataObject committedObject = new MockDataObject(context, new TempObjectId(
+                MockDataObject.class), PersistenceState.COMMITTED);
+        context.getObjectStore().addObject(committedObject);
+        Collection uncommitted4 = context.uncommittedObjects();
+        assertNotNull(uncommitted4);
+        assertEquals(3, uncommitted4.size());
+        assertTrue(uncommitted4.contains(newObject));
+        assertTrue(uncommitted4.contains(modifiedObject));
+        assertTrue(uncommitted4.contains(deletedObject));
     }
 }

@@ -234,6 +234,7 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
                 getParentContext().commitChangesInContext(this, diff);
 
                 // TODO: merge diff to ObjectStore
+               getObjectStore().objectsCommitted();
             }
         }
 
@@ -282,9 +283,7 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
      * Returns a collection of all uncommitted registered objects.
      */
     public Collection uncommittedObjects() {
-        // TODO: whenever this code is merged to DataContext, this method should be moved
-        // to ObjectStore.
-
+   
         int len = getObjectStore().registeredObjectsCount();
         if (len == 0) {
             return Collections.EMPTY_LIST;
@@ -298,8 +297,8 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
             Persistent object = (Persistent) it.next();
             int state = object.getPersistenceState();
             if (state == PersistenceState.MODIFIED
-                    || state == PersistenceState.MODIFIED
-                    || state == PersistenceState.MODIFIED) {
+                    || state == PersistenceState.NEW
+                    || state == PersistenceState.DELETED) {
 
                 objects.add(object);
             }
