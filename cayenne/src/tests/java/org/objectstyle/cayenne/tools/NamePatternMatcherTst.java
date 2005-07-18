@@ -33,6 +33,8 @@
  */
 package org.objectstyle.cayenne.tools;
 
+import org.apache.tools.ant.Task;
+
 import junit.framework.TestCase;
 
 public class NamePatternMatcherTst extends TestCase {
@@ -53,5 +55,29 @@ public class NamePatternMatcherTst extends TestCase {
         assertEquals("EntityEntity", NamePatternMatcher.replaceWildcardInStringWithString("*", "**", "Entity"));
         assertEquals("EditEntityReport.vm", NamePatternMatcher.replaceWildcardInStringWithString("*", "Edit*Report.vm", "Entity"));
         assertEquals("Entity", NamePatternMatcher.replaceWildcardInStringWithString("*", "*", "Entity"));
+    }
+    
+    /**
+     * Test tokenizing
+     */
+    public void testTokenizer()
+    {
+    	Task parentTask = new Task() {
+    	    public void log(String msg, int msgLevel) {
+    	        System.out.println(String.valueOf(msgLevel) + ": " + msg);
+    	    }
+		};
+    	
+    	String includePattern = "billing_*,user?";
+        String excludePattern = null;
+    	NamePatternMatcher namePatternMatcher = new NamePatternMatcher(parentTask, includePattern, excludePattern);
+    	
+    	String itemExcludeFilters[] = namePatternMatcher.itemExcludeFilters;
+    	assertEquals(0, itemExcludeFilters.length);
+
+    	String itemIncludeFilters[] = namePatternMatcher.itemIncludeFilters;
+    	assertEquals(2, itemIncludeFilters.length);
+    	assertEquals("/^billing_.*$/", itemIncludeFilters[0]);
+    	assertEquals("/^user.?$/", itemIncludeFilters[1]);
     }
 }
