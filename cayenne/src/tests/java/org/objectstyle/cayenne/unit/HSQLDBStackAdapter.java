@@ -61,6 +61,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
  * @author Andrei Adamchik
  */
 public class HSQLDBStackAdapter extends AccessStackAdapter {
+
     public HSQLDBStackAdapter(DbAdapter adapter) {
         super(adapter);
     }
@@ -68,12 +69,13 @@ public class HSQLDBStackAdapter extends AccessStackAdapter {
     public boolean supportsHaving() {
         return false;
     }
-    
+
     /**
      * Returns false. This is an HSQLDB bug - I opened a report here:
      * https://sourceforge.net/tracker/?func=detail&aid=1020127&group_id=23316&atid=378131.
      * Hopefully this will be fixed in the future releases.
      */
+    // TODO: this bug was marked as fixed on 07/02/2005 - test with new version...
     public boolean supportsCaseInsensitiveOrder() {
         return false;
     }

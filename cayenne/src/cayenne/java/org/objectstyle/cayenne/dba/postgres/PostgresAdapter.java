@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.dba.postgres;
 
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Iterator;
 
@@ -316,5 +317,26 @@ public class PostgresAdapter extends JdbcAdapter {
 
             super.setJdbcObject(st, val, pos, type, precision);
         }
+    }
+
+    public void bindParameter(
+            PreparedStatement statement,
+            Object object,
+            int pos,
+            int sqlType,
+            int precision) throws SQLException, Exception {
+
+        // Andrus: this addresses a bug with 8.x driver 
+        // (I submitted a bug report #1780 to postgres, hopefully they'll resolve it.)
+        if (object == null) {
+            if (sqlType == Types.BLOB) {
+                sqlType = Types.VARBINARY;
+            }
+            else if (sqlType == Types.CLOB) {
+                sqlType = Types.VARCHAR;
+            }
+        }
+
+        super.bindParameter(statement, object, pos, sqlType, precision);
     }
 }
