@@ -67,6 +67,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.db2.DB2Sniffer;
 import org.objectstyle.cayenne.dba.hsqldb.HSQLDBSniffer;
 import org.objectstyle.cayenne.dba.mysql.MySQLSniffer;
+import org.objectstyle.cayenne.dba.openbase.OpenBaseSniffer;
 import org.objectstyle.cayenne.dba.oracle.OracleSniffer;
 import org.objectstyle.cayenne.dba.postgres.PostgresSniffer;
 import org.objectstyle.cayenne.dba.sqlserver.SQLServerSniffer;
@@ -93,13 +94,14 @@ public class DbAdapterDetector {
         this.factories = new ArrayList();
 
         // configure known predicates
-        addFactory(new PostgresSniffer());
-        addFactory(new HSQLDBSniffer());
-        addFactory(new OracleSniffer());
-        addFactory(new DB2Sniffer());
-        addFactory(new SQLServerSniffer());
-        addFactory(new SybaseSniffer());
         addFactory(new MySQLSniffer());
+        addFactory(new PostgresSniffer());
+        addFactory(new OracleSniffer());
+        addFactory(new SQLServerSniffer());
+        addFactory(new HSQLDBSniffer());
+        addFactory(new DB2Sniffer());
+        addFactory(new SybaseSniffer());
+        addFactory(new OpenBaseSniffer());
     }
 
     /**
