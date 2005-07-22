@@ -225,7 +225,7 @@ public class PropertyListSerialization {
 	}
 
     /**
-     * Returns a quoted Stirng, with all the escapes preprocessed.
+     * Returns a quoted String, with all the escapes preprocessed.
      * May return an unquoted String if it contains on special
      * characters, such as spaces, doublequotes and braces.
      */
