@@ -234,7 +234,7 @@ public class PropertyListSerialization {
 		
 		// scan string for special chars, 
         // if we have them, string must be quoted
-		String special = " \\\"{}();,-\'";
+		String special = " \\\"{}();,-+\'";
 		char[] chars = str.toCharArray();
 		int len = chars.length;
 		for (int i = 0; i < len; i++) {
