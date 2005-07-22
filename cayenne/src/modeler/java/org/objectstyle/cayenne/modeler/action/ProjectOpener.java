@@ -193,10 +193,17 @@ class ProjectOpener extends JFileChooser {
      */
     File getDefaultStartDir() {
         // find start directory in preferences
-        return Application
+        File existingDir = Application
                 .getInstance()
                 .getFrameController()
                 .getLastDirectory()
-                .getExistingDirectory(true);
+                .getExistingDirectory(false);
+
+        if (existingDir == null) {
+            // go to current dir...
+            existingDir = new File(System.getProperty("user.dir"));
+        }
+
+        return existingDir;
     }
 }
