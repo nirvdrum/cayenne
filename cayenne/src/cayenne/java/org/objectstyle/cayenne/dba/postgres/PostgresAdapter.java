@@ -332,9 +332,9 @@ public class PostgresAdapter extends JdbcAdapter {
             if (sqlType == Types.BLOB) {
                 sqlType = Types.VARBINARY;
             }
-            else if (sqlType == Types.CLOB) {
-                sqlType = Types.VARCHAR;
-            }
+//            else if (sqlType == Types.CLOB) {
+//                sqlType = Types.VARCHAR;
+//            }
         }
 
         super.bindParameter(statement, object, pos, sqlType, precision);
