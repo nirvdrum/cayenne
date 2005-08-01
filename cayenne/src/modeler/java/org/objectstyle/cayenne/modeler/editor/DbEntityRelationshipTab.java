@@ -130,12 +130,15 @@ public class DbEntityRelationshipTab extends JPanel implements ActionListener,
 
     protected void init() {
         this.setLayout(new BorderLayout());
-        
+
         JToolBar toolBar = new JToolBar();
         Application app = Application.getInstance();
-        toolBar.add(app.getAction(CreateRelationshipAction.getActionName()).buildButton());
+        toolBar
+                .add(app
+                        .getAction(CreateRelationshipAction.getActionName())
+                        .buildButton());
         toolBar.add(app.getAction(DbEntitySyncAction.getActionName()).buildButton());
-        
+
         toolBar.addSeparator();
 
         resolve = new JButton();
@@ -145,7 +148,10 @@ public class DbEntityRelationshipTab extends JPanel implements ActionListener,
 
         toolBar.addSeparator();
 
-        toolBar.add(app.getAction(RemoveRelationshipAction.getActionName()).buildButton());
+        toolBar
+                .add(app
+                        .getAction(RemoveRelationshipAction.getActionName())
+                        .buildButton());
         add(toolBar, BorderLayout.NORTH);
 
         table = new CayenneTable();
@@ -179,11 +185,17 @@ public class DbEntityRelationshipTab extends JPanel implements ActionListener,
      */
     public void selectRelationship(DbRelationship rel) {
         if (rel == null) {
-            Application.getInstance().getAction(RemoveRelationshipAction.getActionName()).setEnabled(false);
+            Application
+                    .getInstance()
+                    .getAction(RemoveRelationshipAction.getActionName())
+                    .setEnabled(false);
             return;
         }
         // enable the remove button
-        Application.getInstance().getAction(RemoveRelationshipAction.getActionName()).setEnabled(true);
+        Application
+                .getInstance()
+                .getAction(RemoveRelationshipAction.getActionName())
+                .setEnabled(true);
 
         DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
         java.util.List rels = model.getObjectList();
@@ -192,7 +204,7 @@ public class DbEntityRelationshipTab extends JPanel implements ActionListener,
             table.select(relPos);
         }
     }
-    
+
     public void processExistingSelection(EventObject e) {
         if (e instanceof ChangeEvent) {
             table.clearSelection();
@@ -235,6 +247,10 @@ public class DbEntityRelationshipTab extends JPanel implements ActionListener,
     public void currentDbEntityChanged(EntityDisplayEvent e) {
         DbEntity entity = (DbEntity) e.getEntity();
         if (entity != null && e.isEntityChanged()) {
+            // TODO: this line seems to slow down the Modeler significantly sometimes
+            // (esp. noticable if selected entity has no relationships!),
+            // even when this tab is not showing...maybe we should simply mark the view as
+            // dirty and rebuild it when it becomes visible
             rebuildTable(entity);
         }
 
