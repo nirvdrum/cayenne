@@ -83,7 +83,7 @@ public interface ClientMessageHandler {
     int[] onUpdateQuery(UpdateMessage message);
 
     /**
-     * Porcesses a generic query message that can contain both updates and selects.
+     * Processes a generic query message that can contain both updates and selects.
      */
     QueryResponse onGenericQuery(GenericQueryMessage message);
 
