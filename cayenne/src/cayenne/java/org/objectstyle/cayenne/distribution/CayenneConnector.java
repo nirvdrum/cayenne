@@ -69,9 +69,8 @@ public interface CayenneConnector {
 
     /**
      * Establishes remote connection. For protocols that don't support persistent
-     * connections (like HTTP) that could mean establishing a session stored that can be
-     * tracked on subsequent reconnects. Client-side session tokens will likely be stored
-     * within connector object.
+     * connections (like HTTP) that could mean a number of thing. E.g. testing a server
+     * URL, establishing a server-side session to track state across requests, etc.
      */
     void connect() throws CayenneClientException;
 

@@ -71,8 +71,9 @@ import java.io.Serializable;
 public interface ClientMessage extends Serializable {
 
     /**
-     * Invokes an appropriate method on ClientMessageHandler. This is a server-side
-     * "visit" method called by a message receiver.
+     * Implements message dispatch logic on the server. This method is invoked by message
+     * receiver. Normally message implementor would invoke an appropriate method on
+     * ClientMessageHandler, however it is free to perform any other processing.
      */
     Object onReceive(ClientMessageHandler handler);
 }
