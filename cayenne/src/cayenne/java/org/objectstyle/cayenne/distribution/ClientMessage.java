@@ -59,10 +59,10 @@ import java.io.Serializable;
 
 /**
  * Represents a two-way message sent by Cayenne client to Cayenne service. This interface
- * provides a mechanism for a remote message receiver to process message without knowing
- * much about its actual implementation. Concrete messages may also define methods for the
- * sender, but as those have signitures specific to implementation, they are not described
- * by this interface.
+ * provides a mechanism for a remote message receiver to process messages without knowing
+ * much about their actual implementation. Concrete messages may also define methods to
+ * send themselves, but as those have implementation-specific signitures, they are not a
+ * part of this interface.
  * 
  * @since 1.2
  * @author Andrus Adamchik

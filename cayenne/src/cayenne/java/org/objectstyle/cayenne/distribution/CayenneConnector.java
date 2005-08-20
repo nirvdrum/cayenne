@@ -60,8 +60,7 @@ import org.objectstyle.cayenne.client.CayenneClientException;
 /**
  * An interface of a client connector to Cayenne service. Usually one connector per client
  * session is needed. Connector encapsulates all server communications, such as session
- * tracking, wire protocol, etc. It is made very simple and and should be more resilient
- * to server and client version changes.
+ * tracking, wire protocol, etc.
  * 
  * @since 1.2
  * @author Andrus Adamchik

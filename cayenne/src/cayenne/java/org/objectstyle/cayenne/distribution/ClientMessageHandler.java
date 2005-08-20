@@ -62,28 +62,41 @@ import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.graph.GraphDiff;
 
 /**
- * A visitor interface for client command self-dispatching. ClientCommandHandler defines
- * methods for each supported command type. So command implementations can call an
- * appropraite handler method, while concrete handler implementations can provide the
- * actual execution logic.
- * <p>
- * <i>Note: One of the goals of using the Visitor pattern here is eliminating dependency
- * of client-side command on server side classes. </i>
- * </p>
+ * A visitor passed to a client message "onReceive" method. Defines processing methods for
+ * each supported message type. ClientMessage implementors can call an appropriate handler
+ * method, while ClientMessageHandler implementors can provide the actual execution logic
+ * appropriate in a given environment.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
 public interface ClientMessageHandler {
 
+    /**
+     * Processes SelectMessage returning a result as list.
+     */
     List onSelectQuery(SelectMessage message);
 
+    /**
+     * Processes an UpdateMessage returning update counts.
+     */
     int[] onUpdateQuery(UpdateMessage message);
 
+    /**
+     * Porcesses a generic query message that can contain both updates and selects.
+     */
     QueryResponse onGenericQuery(GenericQueryMessage message);
 
+    /**
+     * Processes CommitMessage returning a GraphDiff that describes changes to objects
+     * made by the handler as a result of commit operation. Such changes can include
+     * generated ObjectIds, any server-side commit logic, etc.
+     */
     GraphDiff onCommit(CommitMessage message);
-    
+
+    /**
+     * Processes BootstrapMessage returning ClientEntityResolver with limited ORM
+     * information.
+     */
     ClientEntityResolver onBootstrap(BootstrapMessage message);
-    
 }
