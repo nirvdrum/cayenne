@@ -86,10 +86,9 @@ package org.objectstyle.cayenne.distribution;
 public interface HessianService {
 
     /**
-     * Establishes a session with CayenneService. Performs client authentication and
-     * authorization and in case of success returns a new session id.
+     * Establishes a session with CayenneService.
      */
-    String establishSession(String userName, String password);
+    String establishSession();
 
     /**
      * Processes message on a remote server, returning the result of such processing.

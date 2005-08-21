@@ -124,11 +124,8 @@ public class HessianServiceHandler implements HessianService, Service {
         this.commandHandlers = null;
     }
 
-    public String establishSession(String userName, String password) {
+    public String establishSession() {
         logObj.debug("CayenneHessianService - session requested by client");
-
-        // TODO: for now ignore user name/password...
-
         String id = makeId();
 
         synchronized (commandHandlers) {

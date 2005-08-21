@@ -73,16 +73,12 @@ import com.caucho.hessian.io.HessianProtocolException;
 public class HessianConnector implements CayenneConnector {
 
     protected String url;
-    protected String userName;
-    protected String password;
     protected String sessionId;
 
     protected HessianService service;
 
-    public HessianConnector(String url, String userName, String password) {
+    public HessianConnector(String url) {
         this.url = url;
-        this.userName = userName;
-        this.password = password;
     }
 
     /**
@@ -126,7 +122,7 @@ public class HessianConnector implements CayenneConnector {
 
         // create server session...
         try {
-            this.sessionId = service.establishSession(userName, password);
+            this.sessionId = service.establishSession();
         }
         catch (Throwable th) {
             th = unwindThrowable(th);
