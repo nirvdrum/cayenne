@@ -80,6 +80,16 @@ import org.objectstyle.cayenne.query.NamedQuery;
  */
 public class ClientObjectContextTst extends TestCase {
 
+    public void testConstructor() {
+        
+        ClientObjectContext context = new ClientObjectContext();
+        assertNull(context.getConnector());
+        
+        MockCayenneConnector connector = new MockCayenneConnector();
+        context.setConnector(connector);
+        assertSame(connector, context.getConnector());
+    }
+
     public void testConnector() {
         MockCayenneConnector connector = new MockCayenneConnector();
         ClientObjectContext context = new ClientObjectContext(connector);

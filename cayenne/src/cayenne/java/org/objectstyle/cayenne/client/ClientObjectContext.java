@@ -97,6 +97,14 @@ public class ClientObjectContext implements ObjectContext {
     protected ClientStateRecorder stateRecorder;
 
     /**
+     * Creates a new ClientObjectContext. Note that it is not fully functional until its
+     * "connector" property is set.
+     */
+    public ClientObjectContext() {
+        this(null);
+    }
+
+    /**
      * Creates a new ClientObjectContext, initializaing it with a connector instance that
      * should be used to connect to a remote Cayenne service.
      */
@@ -138,6 +146,13 @@ public class ClientObjectContext implements ObjectContext {
      */
     public CayenneConnector getConnector() {
         return connector;
+    }
+
+    /**
+     * Resets connector.
+     */
+    public void setConnector(CayenneConnector connector) {
+        this.connector = connector;
     }
 
     /**

@@ -64,8 +64,9 @@ import com.caucho.hessian.io.HessianProtocolException;
 
 /**
  * A CayenneConnector that establishes connection to a remotely deployed HessianService.
- * It uses Hessian binary web service protocol working over HTTP. For more info on Hessian
- * see http://www.caucho.com/resin-3.0/protocols/hessian.xtp
+ * It supports HTTP BASIC authentication. HessianConnector uses Hessian binary web service
+ * protocol working over HTTP. For more info on Hessian see
+ * http://www.caucho.com/resin-3.0/protocols/hessian.xtp
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -73,12 +74,38 @@ import com.caucho.hessian.io.HessianProtocolException;
 public class HessianConnector implements CayenneConnector {
 
     protected String url;
+    protected String userName;
+    protected String password;
     protected String sessionId;
 
     protected HessianService service;
 
-    public HessianConnector(String url) {
+    /**
+     * Creates a HessianConnector initializing it with a service URL.
+     */
+    public HessianConnector(String url, String userName, String password) {
+        if (url == null) {
+            throw new IllegalArgumentException("URL of Cayenne service is null.");
+        }
+
         this.url = url;
+        this.userName = userName;
+        this.password = password;
+    }
+
+    /**
+     * Returns a URL of Cayenne service used by this connector.
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     /**
@@ -108,11 +135,12 @@ public class HessianConnector implements CayenneConnector {
             return;
         }
 
-        // get proxy...
+        // init service proxy...
+        HessianProxyFactory factory = new HessianProxyFactory();
+        factory.setUser(userName);
+        factory.setPassword(password);
         try {
-            this.service = (HessianService) new HessianProxyFactory().create(
-                    HessianService.class,
-                    url);
+            this.service = (HessianService) factory.create(HessianService.class, url);
         }
         catch (Throwable th) {
             th = unwindThrowable(th);
@@ -133,7 +161,7 @@ public class HessianConnector implements CayenneConnector {
         }
     }
 
-    protected String buildExceptionMessage(String message, Throwable th) {
+    String buildExceptionMessage(String message, Throwable th) {
 
         StringBuffer buffer = new StringBuffer(message);
         buffer.append(". URL - ").append(url);
@@ -150,7 +178,7 @@ public class HessianConnector implements CayenneConnector {
      * Utility method to get exception cause. Implements special handling of Hessian
      * exceptions.
      */
-    protected Throwable unwindThrowable(Throwable th) {
+    Throwable unwindThrowable(Throwable th) {
         if (th instanceof HessianProtocolException) {
             Throwable cause = ((HessianProtocolException) th).getRootCause();
 
