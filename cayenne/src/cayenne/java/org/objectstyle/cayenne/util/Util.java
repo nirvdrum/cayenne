@@ -88,7 +88,6 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.oro.text.perl.Perl5Util;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.xml.sax.SAXException;
@@ -100,8 +99,6 @@ import org.xml.sax.XMLReader;
  * @author Andrei Adamchik
  */
 public class Util {
-
-    private static final Perl5Util regexUtil = new Perl5Util();
 
     /**
      * Reads file contents, returning it as a String, using System default
@@ -248,17 +245,11 @@ public class Util {
     }
 
     /**
-     * Replaces all backslashes "\" with forward slashes "/". Convenience
-     * method to convert path Strings to URI format.
+     * Replaces all backslashes "\" with forward slashes "/". Convenience method to
+     * convert path Strings to URI format.
      */
     public static String substBackslashes(String string) {
-        if (string == null) {
-            return null;
-        }
-
-        return regexUtil.match("/\\\\/", string)
-            ? regexUtil.substitute("s/\\\\/\\//g", string)
-            : string;
+       return RegexUtil.substBackslashes(string);
     }
 
     /**
@@ -403,13 +394,7 @@ public class Util {
      * For example, a String "a/b/c" will be returned for class name "a.b.c.ClassName".
      */
     public static String getPackagePath(String className) {
-        if (regexUtil.match("/\\./", className)) {
-            String path = regexUtil.substitute("s/\\./\\//g", className);
-            return path.substring(0, path.lastIndexOf("/"));
-        }
-        else {
-            return "";
-        }
+        return RegexUtil.getPackagePath(className);
     }
     
     /**
@@ -594,58 +579,6 @@ public class Util {
      * @since 1.0.6
      */
     public static String sqlPatternToRegex(String pattern, boolean ignoreCase) {
-        if (pattern == null) {
-            throw new NullPointerException("Null pattern.");
-        }
-
-        if (pattern.length() == 0) {
-            throw new IllegalArgumentException("Empty pattern.");
-        }
-
-        StringBuffer buffer = new StringBuffer();
-
-        // convert * into regex syntax
-        // e.g. abc*x becomes /^abc.*x$/
-        // or   abc?x becomes /^abc.?x$/
-        buffer.append("/^");
-        for (int j = 0; j < pattern.length(); j++) {
-            char nextChar = pattern.charAt(j);
-            if (nextChar == '%') {
-                nextChar = '*';
-            }
-
-            if (nextChar == '*' || nextChar == '?') {
-                buffer.append('.');
-            }
-            // escape special chars
-            else if (
-                nextChar == '.'
-                    || nextChar == '/'
-                    || nextChar == '$'
-                    || nextChar == '^') {
-                buffer.append('\\');
-            }
-
-            buffer.append(nextChar);
-        }
-
-        buffer.append("$/");
-
-        if (ignoreCase) {
-            buffer.append('i');
-        }
-
-        String finalPattern = buffer.toString();
-
-        // test the pattern
-        try {
-            regexUtil.match(finalPattern, "abc_123");
-        }
-        catch (Exception e) {
-            throw new IllegalArgumentException(
-                "Error converting pattern: " + e.getLocalizedMessage());
-        }
-
-        return finalPattern;
+        return RegexUtil.sqlPatternToRegex(pattern, ignoreCase);
     }
 }
