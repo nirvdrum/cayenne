@@ -85,9 +85,6 @@ public class ClientObjectContextTst extends TestCase {
         ClientObjectContext context = new ClientObjectContext(connector);
 
         assertSame(connector, context.getConnector());
-
-        // should connect lazily
-        assertFalse(connector.isConnected());
     }
 
     public void testCommitUnchanged() {

@@ -11,8 +11,8 @@
 ##    entityUtils - class for entity "helper" functions: See org.objectstyle.cayenne.gen.EntityUtils
 ##    importUtils - class for import statement management: See org.objectstyle.cayenne.gen.ImportUtils
 ##
-${importUtils.setPackage($entityUtils.subPackageName)}
-${importUtils.addType("${entityUtils.superPackageName}.${entityUtils.superClassName}")}
+${importUtils.setPackage($entityUtils.subPackageName)}##
+${importUtils.addType("${entityUtils.superPackageName}.${entityUtils.superClassName}")}##
 ${importUtils.generate()}
 
 public class ${entityUtils.subClassName} extends ${entityUtils.superClassName} {

@@ -90,12 +90,6 @@ public class LocalConnector implements CayenneConnector {
     }
 
     /**
-     * Does nothing. This connector is local, so there is nothing to connect to.
-     */
-    public void connect() throws CayenneClientException {
-    }
-
-    /**
      * Dispatches a message to an internal handler.
      */
     public Object sendMessage(ClientMessage message) throws CayenneClientException {

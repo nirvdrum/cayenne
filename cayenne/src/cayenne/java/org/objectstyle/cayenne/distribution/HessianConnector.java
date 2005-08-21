@@ -86,13 +86,37 @@ public class HessianConnector implements CayenneConnector {
     }
 
     /**
+     * Sends a message to remote Cayenne service.
+     */
+    public Object sendMessage(ClientMessage message) throws CayenneClientException {
+        // for now only support session-based communications...
+        if (sessionId == null) {
+            connect();
+        }
+
+        try {
+            return service.processMessage(sessionId, message);
+        }
+        catch (Throwable th) {
+            th = unwindThrowable(th);
+            String errorMessage = buildExceptionMessage("Remote error", th);
+            throw new CayenneClientException(errorMessage, th);
+        }
+    }
+
+    /**
      * Establishes a session with remote service.
      */
-    public void connect() throws CayenneClientException {
+    protected synchronized void connect() throws CayenneClientException {
+        if (this.sessionId != null) {
+            return;
+        }
+
         // get proxy...
         try {
-            this.service = (HessianService) new HessianProxyFactory()
-                    .create(HessianService.class, url);
+            this.service = (HessianService) new HessianProxyFactory().create(
+                    HessianService.class,
+                    url);
         }
         catch (Throwable th) {
             th = unwindThrowable(th);
@@ -106,25 +130,10 @@ public class HessianConnector implements CayenneConnector {
         }
         catch (Throwable th) {
             th = unwindThrowable(th);
-            String message = buildExceptionMessage("Error establishing remote session",
+            String message = buildExceptionMessage(
+                    "Error establishing remote session",
                     th);
             throw new CayenneClientException(message, th);
-        }
-    }
-
-    public Object sendMessage(ClientMessage message) throws CayenneClientException {
-        // for now only support session-based communications...
-        if (sessionId == null) {
-            throw new CayenneClientException("Not connected, can't call 'invokeRemote'.");
-        }
-
-        try {
-            return service.processMessage(sessionId, message);
-        }
-        catch (Throwable th) {
-            th = unwindThrowable(th);
-            String errorMessage = buildExceptionMessage("Remote error", th);
-            throw new CayenneClientException(errorMessage, th);
         }
     }
 

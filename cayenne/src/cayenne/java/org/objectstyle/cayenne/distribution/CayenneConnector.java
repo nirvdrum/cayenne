@@ -68,13 +68,6 @@ import org.objectstyle.cayenne.client.CayenneClientException;
 public interface CayenneConnector {
 
     /**
-     * Establishes remote connection. For protocols that don't support persistent
-     * connections (like HTTP) that could mean a number of thing. E.g. testing a server
-     * URL, establishing a server-side session to track state across requests, etc.
-     */
-    void connect() throws CayenneClientException;
-
-    /**
      * Sends a message to the server, returning a reply.
      */
     Object sendMessage(ClientMessage message) throws CayenneClientException;

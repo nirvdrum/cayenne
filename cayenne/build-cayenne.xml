@@ -71,6 +71,8 @@
     <!-- Build "lean" JAR file without dependencies.-->
     <!-- ========================================== -->
     <target name="jar-nodeps" depends="compile,prepare-properties">
+		
+		<!-- server JAR -->
         <jar jarfile="${dist}/lib/cayenne-nodeps.jar">
  			<fileset dir="${core.build}/classes"/>
 			<fileset dir="${core.src}">
@@ -87,6 +89,44 @@
 				<include name=".cayenne/**"/>
             	<include name="dotemplates/**"/>
 			</fileset>
+            
+            <metainf dir="doc/licenses" includes="LICENSE"/>
+            <manifest>
+               <attribute name="Built-By" value="${user.name}"/>
+               <attribute name="Extension-Name" value="org.objectstyle.cayenne"/>
+               <attribute name="Specification-Version" value="${project.name}"/>
+               <attribute name="Specification-Vendor" value="ObjectStyle.org"/>
+               <attribute name="Implementation-Vendor-Id" value="org.objectstyle"/>
+               <attribute name="Implementation-Version" value="${project.version}"/>
+               <attribute name="Implementation-Vendor" value="ObjectStyle.org"/>
+            </manifest>
+        </jar>
+		
+		<!-- client jar -->
+		<jar jarfile="${dist}/lib/cayenne-client-nodeps.jar">
+			
+			<!-- 
+				exclude server-side packages
+				TODO: be more precise - 
+				there is a number of server-side only classes in remaining packages
+			-->
+ 			<fileset dir="${core.build}/classes">
+				<exclude name="org/objectstyle/cayenne/access/**"/>
+				<exclude name="org/objectstyle/cayenne/conf/**"/>
+				<exclude name="org/objectstyle/cayenne/conn/**"/>
+				<exclude name="org/objectstyle/cayenne/dataview/**"/>
+				<exclude name="org/objectstyle/cayenne/dba/**"/>
+				<exclude name="org/objectstyle/cayenne/gen/**"/>
+				<exclude name="org/objectstyle/cayenne/project/**"/>
+				<exclude name="org/objectstyle/cayenne/service/**"/>
+				<exclude name="org/objectstyle/cayenne/tools/**"/>
+				<exclude name="org/objectstyle/cayenne/wocompat/**"/>
+			</fileset>
+			
+			<fileset dir="${core.build.properties}">
+				<include name="**/*.properties"/>
+			</fileset>
+		
             
             <metainf dir="doc/licenses" includes="LICENSE"/>
             <manifest>

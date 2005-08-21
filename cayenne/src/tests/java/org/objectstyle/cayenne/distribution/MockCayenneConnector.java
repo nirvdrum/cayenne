@@ -69,7 +69,6 @@ import org.objectstyle.cayenne.client.CayenneClientException;
 public class MockCayenneConnector implements CayenneConnector {
 
     protected Collection commands;
-    protected boolean connected;
     protected Object fakeResponse;
 
     public MockCayenneConnector() {
@@ -83,7 +82,6 @@ public class MockCayenneConnector implements CayenneConnector {
 
     public void reset() {
         commands.clear();
-        connected = false;
         fakeResponse = null;
     }
 
@@ -95,13 +93,7 @@ public class MockCayenneConnector implements CayenneConnector {
         return commands;
     }
 
-    public boolean isConnected() {
-        return connected;
-    }
-
-    public void connect() throws CayenneClientException {
-        this.connected = true;
-    }
+ 
 
     public Object sendMessage(ClientMessage command) throws CayenneClientException {
         commands.add(command);
