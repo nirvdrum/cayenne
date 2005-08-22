@@ -170,7 +170,8 @@ public class JdbcPkGenerator implements PkGenerator {
         buf
             .append("CREATE TABLE AUTO_PK_SUPPORT (")
             .append("  TABLE_NAME CHAR(100) NOT NULL,")
-            .append("  NEXT_ID INTEGER NOT NULL")
+            .append("  NEXT_ID INTEGER NOT NULL,")
+            .append("  PRIMARY KEY(TABLE_NAME)")
             .append(")");
 
         return buf.toString();
