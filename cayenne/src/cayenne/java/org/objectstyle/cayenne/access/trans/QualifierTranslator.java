@@ -60,6 +60,7 @@ import java.util.List;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.TraversalHandler;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -160,7 +161,7 @@ public class QualifierTranslator
         // check if there are DataObjects among direct children of the Expression
         for (int i = 0; i < 2; i++) {
             Object op = exp.getOperand(i);
-            if (op instanceof DataObject) {
+            if (op instanceof DataObject || op instanceof ObjectId) {
                 matchingObject = true;
 
                 if (objectMatchTranslator == null) {
@@ -472,6 +473,9 @@ public class QualifierTranslator
         }
         else if (val == null || (val instanceof DataObject)) {
             objectMatchTranslator.setDataObject((DataObject) val);
+        }
+        else if(val instanceof ObjectId) {
+            objectMatchTranslator.setObjectId((ObjectId) val);
         }
         else {
             throw new IllegalArgumentException("Attempt to use literal other than DataObject during object match.");

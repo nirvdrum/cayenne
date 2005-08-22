@@ -56,10 +56,15 @@
 package org.objectstyle.cayenne.query;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.util.Util;
 
@@ -85,7 +90,8 @@ public class NamedQuery implements QueryExecutionPlan {
     }
 
     /**
-     * Creates NamedQuery with parameters passed as two matching arrays of keys and values.
+     * Creates NamedQuery with parameters passed as two matching arrays of keys and
+     * values.
      */
     public NamedQuery(String name, String[] keys, Object[] values) {
         this.name = name;
@@ -145,9 +151,52 @@ public class NamedQuery implements QueryExecutionPlan {
     protected Query substituteQuery(EntityResolver resolver) {
         Query query = resolver.lookupQuery(getName());
 
-        if(query instanceof ParameterizedQuery) {
-            // must process the query even if we have no parameters set
-            Map parameters = (this.parameters != null) ? this.parameters : Collections.EMPTY_MAP;
+        if (query instanceof ParameterizedQuery) {
+            // must process the query even if we have no parameters set, so that unused
+            // parts of qualifier could be pruned.
+            Map parameters = (this.parameters != null)
+                    ? this.parameters
+                    : Collections.EMPTY_MAP;
+
+            // substitute client-side objects with server-side ObjectIds.
+
+            // TODO: this looks dirty and may need to be revisited once a switch to
+            // GlobalId/Persistent is done across the board.
+            if (!parameters.isEmpty()) {
+                Map substitutes = null;
+
+                Iterator it = parameters.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry entry = (Map.Entry) it.next();
+
+                    Object value = entry.getValue();
+                    Object substitute = null;
+
+                    if (value instanceof GlobalID) {
+                        substitute = resolver.convertToObjectID((GlobalID) value);
+                    }
+                    else if ((value instanceof Persistent)
+                            && !(value instanceof DataObject)) {
+                        Object id = ((Persistent) value).getOid();
+                        if (id instanceof GlobalID) {
+                            substitute = resolver.convertToObjectID((GlobalID) id);
+                        }
+                    }
+
+                    if (substitute != null) {
+                        if (substitutes == null) {
+                            substitutes = new HashMap(parameters);
+                        }
+
+                        substitutes.put(entry.getKey(), substitute);
+                    }
+                }
+
+                if (substitutes != null) {
+                    parameters = substitutes;
+                }
+            }
+
             query = ((ParameterizedQuery) query).createQuery(parameters);
         }
 

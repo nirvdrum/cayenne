@@ -55,35 +55,53 @@
  */
 package org.objectstyle.cayenne.query;
 
-import junit.framework.TestCase;
-
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.MockDataObject;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.distribution.GlobalID;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
+ * A serializable query that fetches a relationship.
+ * <p>
+ * <strong>As of 1.2M6 this class will likely be removed soon and merged with
+ * RelationshipQuery. Avoid using it directly.</strong>
+ * </p>
+ * 
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class RelationshipQueryTst extends TestCase {
+// TODO: get rid of this class and merge it with RelationshipQuery.
+public class RelationshipQueryRef implements QueryExecutionPlan {
 
-    public void testConstructor() {
-        final ObjEntity target = new ObjEntity("test");
-        DataObject object = new MockDataObject();
-        ObjectId oid = new ObjectId(MockDataObject.class, "a", "b");
-        object.setObjectId(oid);
-        ObjRelationship relationship = new ObjRelationship() {
+    protected GlobalID globalID;
+    protected String relationshipName;
 
-            public Entity getTargetEntity() {
-                return target;
-            }
-        };
+    public RelationshipQueryRef(GlobalID globalID, String relationshipName) {
+        this.globalID = globalID;
+        this.relationshipName = relationshipName;
+    }
 
-        RelationshipQuery query = new RelationshipQuery(object, relationship);
-        assertSame(oid, query.getObjectId());
-        assertSame(target, query.getRoot());
-        assertSame(relationship, query.getRelationship());
+    public Query resolve(EntityResolver resolver) {
+        ObjectId oid = resolver.convertToObjectID(globalID);
+        ObjEntity entity = resolver.lookupObjEntity(oid.getObjectClass());
+        ObjRelationship relationship = (ObjRelationship) entity
+                .getRelationship(relationshipName);
+        return new RelationshipQuery(oid, relationship);
+    }
+
+    public void route(QueryRouter router, EntityResolver resolver) {
+        throw new CayenneRuntimeException(this
+                + " doesn't support its own routing. "
+                + "It should've been delegated to another "
+                + "query during resolution phase.");
+    }
+
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
+        throw new CayenneRuntimeException(this
+                + " doesn't support its own sql actions. "
+                + "It should've been delegated to another "
+                + "query during resolution phase.");
     }
 }

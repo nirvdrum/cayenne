@@ -60,6 +60,7 @@ import java.util.Collections;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.Entity;
@@ -75,7 +76,7 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  */
 public class RelationshipQuery extends AbstractQuery implements GenericSelectQuery {
 
-    protected DataObject object;
+    protected ObjectId objectId;
 
     // TODO: ObjRelationship is not serializable ... need to serialize its name instead
     protected ObjRelationship relationship;
@@ -100,15 +101,19 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
 
         super.setRoot(relationship.getTargetEntity());
 
-        this.object = object;
+        this.objectId = object.getObjectId();
         this.relationship = relationship;
     }
-
+    
     public RelationshipQuery(DataObject object, ObjRelationship relationship) {
+        this(object.getObjectId(), relationship);
+    }
+
+    public RelationshipQuery(ObjectId objectId, ObjRelationship relationship) {
 
         super.setRoot(relationship.getTargetEntity());
 
-        this.object = object;
+        this.objectId = objectId;
         this.relationship = relationship;
     }
 
@@ -116,8 +121,8 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
         return relationship;
     }
 
-    public DataObject getObject() {
-        return object;
+    public ObjectId getObjectId() {
+        return objectId;
     }
 
     public String getCachePolicy() {
@@ -158,7 +163,7 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
 
         ObjEntity targetEntity = (ObjEntity) relationship.getTargetEntity();
         Expression qualifier = ExpressionFactory.matchDbExp(relationship
-                .getReverseDbRelationshipPath(), object);
+                .getReverseDbRelationshipPath(), objectId);
 
         SelectQuery select = new SelectQuery(targetEntity, qualifier);
 

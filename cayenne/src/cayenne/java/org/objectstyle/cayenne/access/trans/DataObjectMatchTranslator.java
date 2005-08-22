@@ -136,11 +136,22 @@ public class DataObjectMatchTranslator {
 
         ObjectId id = obj.getObjectId();
 
+        setObjectId(id);
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public void setObjectId(ObjectId id) {
         if (id == null) {
-            throw new CayenneRuntimeException("Null ObjectId, probably an attempt to use TRANSIENT object as a query parameter.");
-        } else if (id.isTemporary()) {
-            throw new CayenneRuntimeException("Temporary id, probably an attempt to use NEW object as a query parameter.");
-        } else {
+            throw new CayenneRuntimeException(
+                    "Null ObjectId, probably an attempt to use TRANSIENT object as a query parameter.");
+        }
+        else if (id.isTemporary()) {
+            throw new CayenneRuntimeException(
+                    "Temporary id, probably an attempt to use NEW object as a query parameter.");
+        }
+        else {
             values = id.getIdSnapshot();
         }
     }
