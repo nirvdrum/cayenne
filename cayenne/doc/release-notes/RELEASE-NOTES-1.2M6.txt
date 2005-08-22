@@ -13,3 +13,4 @@ Changes/New Features:
 
 * Added support for ObjectIds in qualifier expressions
 * Added support for HTTP basic authentication to HessianConnector
+* Changed AUTO_PK_TABLE default definition to include primary key constraint (somewhat related to CAY-245)
