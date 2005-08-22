@@ -143,7 +143,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
 
     /**
      * Test that a to-many relationship is initialized when a target entity has a compound
-     * PK only partially involved in relationmship.
+     * PK only partially involved in relationship.
      */
     public void testPrefetchToManyOnJoinTable() throws Exception {
         // setup data
@@ -177,9 +177,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     public void testPrefetch3a() throws Exception {
         createTestData("testPaintings");
 
-        ObjEntity paintingEntity = context
-                .getEntityResolver()
-                .lookupObjEntity(Painting.class);
+        ObjEntity paintingEntity = context.getEntityResolver().lookupObjEntity(
+                Painting.class);
         ObjRelationship relationship = (ObjRelationship) paintingEntity
                 .getRelationship("toArtist");
         paintingEntity.removeRelationship("toArtist");
@@ -194,7 +193,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
             assertFalse(toMany.needsFetch());
         }
         finally {
-            //Fix it up again, so other tests do not fail
+            // Fix it up again, so other tests do not fail
             paintingEntity.addRelationship(relationship);
         }
 
@@ -207,9 +206,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     public void testPrefetchOneWayToMany() throws Exception {
         createTestData("testPaintings");
 
-        ObjEntity paintingEntity = context
-                .getEntityResolver()
-                .lookupObjEntity(Painting.class);
+        ObjEntity paintingEntity = context.getEntityResolver().lookupObjEntity(
+                Painting.class);
         ObjRelationship relationship = (ObjRelationship) paintingEntity
                 .getRelationship("toArtist");
         paintingEntity.removeRelationship("toArtist");
@@ -225,7 +223,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
             assertFalse(toMany.needsFetch());
         }
         finally {
-            //Fix it up again, so other tests do not fail
+            // Fix it up again, so other tests do not fail
             paintingEntity.addRelationship(relationship);
         }
 
@@ -258,7 +256,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
 
         Object toOnePrefetch = p1.readNestedProperty("toArtist");
         assertNotNull(toOnePrefetch);
-        assertTrue("Expected DataObject, got: " + toOnePrefetch.getClass().getName(),
+        assertTrue(
+                "Expected DataObject, got: " + toOnePrefetch.getClass().getName(),
                 toOnePrefetch instanceof DataObject);
 
         DataObject a1 = (DataObject) toOnePrefetch;
@@ -312,7 +311,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         assertEquals(1, results.size());
 
         ArtGroup fetchedChild = (ArtGroup) results.get(0);
-        //The parent must be fully fetched, not just HOLLOW (a fault)
+        // The parent must be fully fetched, not just HOLLOW (a fault)
         assertEquals(PersistenceState.COMMITTED, fetchedChild
                 .getToParentGroup()
                 .getPersistenceState());
