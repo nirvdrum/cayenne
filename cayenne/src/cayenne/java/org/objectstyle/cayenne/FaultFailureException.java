@@ -56,9 +56,8 @@
 package org.objectstyle.cayenne;
 
 /**
- * A FaultFailureException is a *runtime* exception that will be thrown when <code>DataObject.resolveFault()</code> finds
- * no matching row exists in the database for the <code>ObjectId</code>.  The class is compatible with JDK 1.3 and at the same
- * time implements enhancements introduced in 1.4, namely chained exceptions.
+ * A runtime exception thrown when <code>DataObject.resolveFault()</code> finds that no
+ * matching row exists in the database for an <code>ObjectId</code>.
  * 
  * @author Mike Kienenberger
  */
@@ -72,8 +71,7 @@ public class FaultFailureException extends CayenneRuntimeException {
     }
 
     /**
-     * Constructs an FaultFailureException with the specified
-     * detail message.
+     * Constructs an FaultFailureException with the specified detail message.
      * 
      * @param msg the detail message.
      */
@@ -82,8 +80,8 @@ public class FaultFailureException extends CayenneRuntimeException {
     }
 
     /**
-     * Constructs an FaultFailureException that wraps a
-     * <code>Throwable</code> thrown elsewhere.
+     * Constructs an FaultFailureException that wraps a <code>Throwable</code> thrown
+     * elsewhere.
      */
     public FaultFailureException(Throwable th) {
         super(th);

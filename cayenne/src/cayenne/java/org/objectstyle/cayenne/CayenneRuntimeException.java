@@ -56,26 +56,27 @@
 package org.objectstyle.cayenne;
 
 /**
- * A CayenneRuntimeException is a generic *runtime*
- * exception that may be thrown by Cayenne framework. 
- * All runtime exceptions in Cayenne would normally inherit 
- * from this class. The class
- * is compatible with JDK 1.3 and at the same time implements
- * enhancements introduced in 1.4, namely chained exceptions.
+ * A generic unchecked exception that may be thrown by Cayenne framework. All runtime
+ * exceptions in Cayenne inherit from this class. CayenneRuntimeException is compatible
+ * with JDK 1.3 and at the same time implements chained exceptions similar to the ones
+ * supported in Java since JDK 1.4.
  * 
  * @author Andrei Adamchik
  */
 public class CayenneRuntimeException extends RuntimeException {
+
     private Throwable _cause;
 
-    /** 
-     * Creates new CayenneRuntimeException without detail message. 
+    /**
+     * Creates new CayenneRuntimeException without detail message.
      */
     public CayenneRuntimeException() {
     }
 
     /**
-     * Constructs an <code>CayenneRuntimeException</code> with the specified detail message.
+     * Constructs an <code>CayenneRuntimeException</code> with the specified detail
+     * message.
+     * 
      * @param msg the detail message.
      */
     public CayenneRuntimeException(String msg) {
@@ -83,8 +84,8 @@ public class CayenneRuntimeException extends RuntimeException {
     }
 
     /**
-     * Constructs an <code>CayenneRuntimeException</code> that 
-     * wraps <code>exception</code> thrown elsewhere.
+     * Constructs an <code>CayenneRuntimeException</code> that wraps
+     * <code>exception</code> thrown elsewhere.
      */
     public CayenneRuntimeException(Throwable th) {
         this(th == null ? (String) null : th.toString(), th);
@@ -101,7 +102,7 @@ public class CayenneRuntimeException extends RuntimeException {
     public Throwable getCause() {
         return _cause;
     }
-    
+
     /**
      * Returns exception message without Cayenne version label.
      * 
@@ -112,13 +113,13 @@ public class CayenneRuntimeException extends RuntimeException {
     }
 
     /**
-     * Returns message that includes Cayenne version label and 
-     * the actual exception message.
+     * Returns message that includes Cayenne version label and the actual exception
+     * message.
      */
     public String getMessage() {
         String message = super.getMessage();
         return (message != null)
-            ? CayenneException.getExceptionLabel() + message
-            : CayenneException.getExceptionLabel() + "(no message)";
+                ? CayenneException.getExceptionLabel() + message
+                : CayenneException.getExceptionLabel() + "(no message)";
     }
 }

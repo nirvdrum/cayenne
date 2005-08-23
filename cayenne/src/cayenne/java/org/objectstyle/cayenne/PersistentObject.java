@@ -58,7 +58,8 @@ package org.objectstyle.cayenne;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
- * A base superclass for client-side Persistent objects.
+ * A convenience base superclass for concrete Persistent objects. It provides properties
+ * declared in Persistent interface and also hooks to ObjectContext to implement faulting.
  * 
  * @since 1.2
  * @author Andrus Adamchik

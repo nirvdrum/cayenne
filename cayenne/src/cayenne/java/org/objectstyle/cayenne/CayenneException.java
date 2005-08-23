@@ -58,16 +58,15 @@ package org.objectstyle.cayenne;
 import org.objectstyle.cayenne.util.LocalizedStringsHandler;
 
 /**
- * A CayenneException is a generic exception that 
- * may be thrown by Cayenne framework. All checked exceptions 
- * in Cayenne would normally inherit from this class. 
- * The class is compatible with JDK 1.3 and at the same 
- * time implements enhancements introduced in 1.4, namely 
- * chained exceptions.
+ * A generic checked exception that may be thrown by Cayenne framework. All checked
+ * exceptions in Cayenne inherit from this class. CayenneException s compatible with JDK
+ * 1.3 and at the same time implements chained exceptions similar to the ones supported in
+ * Java since JDK 1.4.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class CayenneException extends Exception {
+
     private static String exceptionLabel;
 
     static {
@@ -75,7 +74,7 @@ public class CayenneException extends Exception {
         String date = LocalizedStringsHandler.getString("cayenne.build.date");
 
         if (version != null || date != null) {
-			exceptionLabel = "[v." + version + " " + date + "] ";
+            exceptionLabel = "[v." + version + " " + date + "] ";
         }
         else {
             exceptionLabel = "";
@@ -96,6 +95,7 @@ public class CayenneException extends Exception {
 
     /**
      * Constructs an <code>CayenneException</code> with the specified detail message.
+     * 
      * @param msg the detail message.
      */
     public CayenneException(String msg) {
@@ -121,7 +121,7 @@ public class CayenneException extends Exception {
     public Throwable getCause() {
         return _cause;
     }
-    
+
     /**
      * Returns exception message without Cayenne version label.
      * 
@@ -133,8 +133,7 @@ public class CayenneException extends Exception {
 
     public String getMessage() {
         String message = super.getMessage();
-        return (message != null)
-            ? getExceptionLabel() + message
-            : getExceptionLabel() + "(no message)";
+        return (message != null) ? getExceptionLabel() + message : getExceptionLabel()
+                + "(no message)";
     }
 }
