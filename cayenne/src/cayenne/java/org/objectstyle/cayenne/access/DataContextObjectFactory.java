@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
- * An ObjectFactory compatble with pre-ObjectContext DataContext.
+ * An ObjectFactory compatible with pre-ObjectContext DataContext.
  * 
  * @since 1.2
  * @author Andrus Adamchik

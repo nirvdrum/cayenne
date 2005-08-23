@@ -794,7 +794,7 @@ public class DataContext implements QueryEngine, Serializable {
 
     private void registerNewObjectWithEntity(DataObject dataObject, ObjEntity objEntity) {
         // method is private ... assuming all sanity checks on the DataObject have been
-        // performed by the caller depending on the inocation context
+        // performed by the caller depending on the invocation context
 
         if (dataObject.getObjectId() == null) {
             dataObject.setObjectId(new TempObjectId(dataObject.getClass()));
