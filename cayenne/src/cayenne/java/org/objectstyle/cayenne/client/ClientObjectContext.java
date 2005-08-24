@@ -124,6 +124,11 @@ public class ClientObjectContext implements ObjectContext {
                 graphManager));
     }
 
+    /**
+     * Returns a ClientEntityResolver that provides limited mapping information needed for
+     * ClientObjectContext operation. If ClientEntityResolver is not set, this method
+     * would obtain one from the server on demand by sending BootstrapMessage.
+     */
     public ClientEntityResolver getEntityResolver() {
         // load entity resolver on demand
         if (entityResolver == null) {
@@ -149,7 +154,7 @@ public class ClientObjectContext implements ObjectContext {
     }
 
     /**
-     * Resets connector.
+     * Sets CayenneConnector used to access Cayenne web service.
      */
     public void setConnector(CayenneConnector connector) {
         this.connector = connector;

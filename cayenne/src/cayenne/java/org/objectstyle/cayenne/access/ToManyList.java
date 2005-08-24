@@ -294,12 +294,14 @@ public class ToManyList implements List, Serializable {
                     else {
                         if (source.getObjectId().isTemporary()) {
                             throw new CayenneRuntimeException(
-                                    "Can't resolve relationship for temporary id: "
+                                    "Can't resolve relationship '"
+                                            + relationship
+                                            + "' for temporary id: "
                                             + source.getObjectId());
                         }
 
                         RelationshipQuery query = new RelationshipQuery(
-                                source,
+                                source.getObjectId(),
                                 relationship);
 
                         localList = source.getDataContext().performQuery(query);

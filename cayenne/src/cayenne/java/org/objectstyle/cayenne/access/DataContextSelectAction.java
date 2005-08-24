@@ -64,6 +64,8 @@ import org.objectstyle.cayenne.ObjectFactory;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * A DataContext helper that handles select query execution.
@@ -83,7 +85,9 @@ class DataContextSelectAction {
         return performQuery(query, query.getName(), query.isRefreshingObjects());
     }
 
-    List performQuery(GenericSelectQuery query, String cacheKey, boolean refreshCache) {
+    List performQuery(QueryExecutionPlan queryPlan, String cacheKey, boolean refreshCache) {
+        // resolve ....
+        GenericSelectQuery query = resolveQuery(queryPlan);
 
         // check if result pagination is requested
         // let a list handle fetch in this case
@@ -146,7 +150,7 @@ class DataContextSelectAction {
 
         // must fetch...
         SelectObserver observer = new SelectObserver(query.getLoggingLevel());
-        context.performQueries(Collections.singleton(query), observer);
+        context.performQueries(Collections.singletonList(query), observer);
 
         List results;
 
@@ -173,5 +177,21 @@ class DataContextSelectAction {
         }
 
         return results;
+    }
+    
+    
+    /**
+     * Executes query resolving phase...
+     */
+    GenericSelectQuery resolveQuery(QueryExecutionPlan queryPlan) {
+        Query resolved = queryPlan.resolve(context.getEntityResolver());
+
+        if (!(resolved instanceof GenericSelectQuery)) {
+            throw new CayenneRuntimeException(
+                    "QueryExecutionPlan was resolved to a query that is not a GenericSelectQuery: "
+                            + resolved);
+        }
+
+        return (GenericSelectQuery) resolved;
     }
 }

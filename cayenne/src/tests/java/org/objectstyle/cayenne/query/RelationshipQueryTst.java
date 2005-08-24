@@ -57,12 +57,8 @@ package org.objectstyle.cayenne.query;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.MockDataObject;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
  * @author Andrus Adamchik
@@ -70,20 +66,11 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 public class RelationshipQueryTst extends TestCase {
 
     public void testConstructor() {
-        final ObjEntity target = new ObjEntity("test");
-        DataObject object = new MockDataObject();
+
         ObjectId oid = new ObjectId(MockDataObject.class, "a", "b");
-        object.setObjectId(oid);
-        ObjRelationship relationship = new ObjRelationship() {
-
-            public Entity getTargetEntity() {
-                return target;
-            }
-        };
-
-        RelationshipQuery query = new RelationshipQuery(object, relationship);
-        assertSame(oid, query.getObjectId());
-        assertSame(target, query.getRoot());
-        assertSame(relationship, query.getRelationship());
+        RelationshipQuery query = new RelationshipQuery(oid, "relX");
+        assertSame(oid, query.getObjectID());
+        assertNull(query.getRoot());
+        assertSame("relX", query.getRelationshipName());
     }
 }

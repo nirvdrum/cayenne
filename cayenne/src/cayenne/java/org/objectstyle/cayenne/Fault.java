@@ -129,16 +129,15 @@ public abstract class Fault implements Serializable {
             // 1. Target ObjectId can't be fully expressed using the values
             //    from source object snapshot or
             // 2. Target object has subclasses, and it is not clear which class
-            //    ro instantiate.
+            //    to instantiate.
 
             ObjEntity targetEntity = (ObjEntity) relationship.getTargetEntity();
             if (relationship.isSourceIndependentFromTargetChange()) {
 
                 // can't create HOLLOW, do a fetch
 
-                RelationshipQuery query = new RelationshipQuery(
-                        sourceObject,
-                        relationship);
+                RelationshipQuery query = new RelationshipQuery(sourceObject
+                        .getObjectId(), relationship.getName());
                 List objects = context.performQuery(query);
 
                 if (objects.isEmpty()) {

@@ -59,70 +59,61 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
- * A query that selects objects related to a given object. It can be used for resolving
- * to-many relationships. It is in fact used for this purpose internally in Cayenne.
+ * A query that selects objects related to a given object. It is intended for fetching
+ * objects related to a given object using a mapped relationship. Cayenne uses it for this
+ * purpose internally. RelationshipQuery works with either an ObjectId or a GlobalID for a
+ * root object.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
+// TODO: no need to inherit from AbstractQuery once DataContext starts supporting
+// QueryExecutionPlan.
 public class RelationshipQuery extends AbstractQuery implements GenericSelectQuery {
 
-    protected ObjectId objectId;
+    protected GlobalID globalID;
+    protected ObjectId objectID;
+    protected String relationshipName;
 
-    // TODO: ObjRelationship is not serializable ... need to serialize its name instead
-    protected ObjRelationship relationship;
-
-    /**
-     * Creates a new Relationship query based for a DataObject and relationship name. This
-     * constructor will only work if a DataObject has a non-null DataContext.
-     */
-    public RelationshipQuery(DataObject object, String relationshipName) {
-        Entity entity = object.getDataContext().getEntityResolver().lookupObjEntity(
-                object);
-
-        ObjRelationship relationship = (ObjRelationship) entity
-                .getRelationship(relationshipName);
-
-        if (relationship == null) {
-            throw new CayenneRuntimeException("No relationship named "
-                    + relationshipName
-                    + " found in entity "
-                    + entity);
+    public RelationshipQuery(GlobalID globalID, String relationshipName) {
+        if (globalID.isTemporary()) {
+            throw new CayenneRuntimeException(
+                    "Temporary id can't be used in RelationshipQuery: " + globalID);
         }
 
-        super.setRoot(relationship.getTargetEntity());
-
-        this.objectId = object.getObjectId();
-        this.relationship = relationship;
-    }
-    
-    public RelationshipQuery(DataObject object, ObjRelationship relationship) {
-        this(object.getObjectId(), relationship);
+        this.globalID = globalID;
+        this.relationshipName = relationshipName;
     }
 
-    public RelationshipQuery(ObjectId objectId, ObjRelationship relationship) {
+    public RelationshipQuery(ObjectId objectID, String relationshipName) {
+        if (objectID.isTemporary()) {
+            throw new CayenneRuntimeException(
+                    "Temporary id can't be used in RelationshipQuery: " + objectID);
+        }
 
-        super.setRoot(relationship.getTargetEntity());
-
-        this.objectId = objectId;
-        this.relationship = relationship;
+        this.objectID = objectID;
+        this.relationshipName = relationshipName;
     }
 
-    public ObjRelationship getRelationship() {
-        return relationship;
+    public GlobalID getGlobalID() {
+        return globalID;
     }
 
-    public ObjectId getObjectId() {
-        return objectId;
+    public ObjectId getObjectID() {
+        return objectID;
+    }
+
+    public String getRelationshipName() {
+        return relationshipName;
     }
 
     public String getCachePolicy() {
@@ -154,27 +145,57 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
     }
 
     /**
-     * Creates a SelectQuery for relationship, delegating SQLAction creation to this newly
-     * created query.
+     * Substitutes this query with a SelectQuery and routes it down the stack.
      */
-    public SQLAction createSQLAction(SQLActionVisitor visitor) {
+    public Query resolve(EntityResolver resolver) {
+        
+        // substitution has to be done in "resolve" so that DataContext could instantiate the right objects.
 
-        // build a SelectQuery that Cayenne knows how to process.
+        // sanity check
+        if (objectID == null && globalID == null) {
+            throw new CayenneRuntimeException(
+                    "Can't resolve query - both objectID and globalID are null.");
+        }
 
-        ObjEntity targetEntity = (ObjEntity) relationship.getTargetEntity();
+        ObjectId id = (objectID != null) ? objectID : resolver
+                .convertToObjectID(globalID);
+
+        ObjEntity entity = resolver.lookupObjEntity(id.getObjectClass());
+        ObjRelationship relationship = (ObjRelationship) entity
+                .getRelationship(relationshipName);
+
+        if (relationship == null) {
+            throw new CayenneRuntimeException("No relationship named "
+                    + relationshipName
+                    + " found in entity "
+                    + entity);
+        }
+
+        // build executable select...
         Expression qualifier = ExpressionFactory.matchDbExp(relationship
-                .getReverseDbRelationshipPath(), objectId);
+                .getReverseDbRelationshipPath(), id);
 
-        SelectQuery select = new SelectQuery(targetEntity, qualifier);
+        SelectQuery select = new SelectQuery(
+                (ObjEntity) relationship.getTargetEntity(),
+                qualifier);
 
-        // set runtime properrties
+        // set runtime properties
         select.setRefreshingObjects(isRefreshingObjects());
         select.setResolvingInherited(isResolvingInherited());
         select.setPageSize(getPageSize());
         select.setFetchLimit(getFetchLimit());
         select.setFetchingDataRows(isFetchingDataRows());
 
-        // delegate to select query
-        return select.createSQLAction(visitor);
+        return select;
+    }
+
+    /**
+     * Throws an exception as this query is not executable itself.
+     */
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
+        throw new CayenneRuntimeException(this
+                + " doesn't support its own sql actions. "
+                + "It should've been delegated to another "
+                + "query during resolution phase.");
     }
 }
