@@ -55,20 +55,27 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.io.Serializable;
+
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.util.CayenneMapEntry;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
- * A descriptor for the StoredProcedure parameter.
+ * A descriptor for the Procedure parameter.
  * 
  * @author Andrei Adamchik
  */
-public class ProcedureParameter extends MapObject implements XMLSerializable {
+public class ProcedureParameter implements CayenneMapEntry, XMLSerializable, Serializable {
+
     public static final int IN_OUT_PARAMETER = 3;
     public static final int IN_PARAMETER = 1;
     public static final int OUT_PARAMETER = 2;
+
+    protected String name;
+    protected Procedure procedure;
 
     protected int direction = -1;
 
@@ -80,20 +87,40 @@ public class ProcedureParameter extends MapObject implements XMLSerializable {
     protected int type = TypesMapping.NOT_DEFINED;
 
     /**
-     * Constructor for ProcedureParam.
+     * Creates unnamed ProcedureParameter.
      */
     public ProcedureParameter() {
-        super();
     }
 
     public ProcedureParameter(String name) {
-        super(name);
+        setName(name);
     }
 
     public ProcedureParameter(String name, int type, int direction) {
-        super(name);
+        this(name);
         setType(type);
         setDirection(direction);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Object getParent() {
+        return getProcedure();
+    }
+
+    public void setParent(Object parent) {
+        if (parent != null && !(parent instanceof Procedure)) {
+            throw new IllegalArgumentException("Expected null or Procedure, got: "
+                    + parent);
+        }
+
+        setProcedure((Procedure) parent);
     }
 
     /**
@@ -102,7 +129,9 @@ public class ProcedureParameter extends MapObject implements XMLSerializable {
      * @since 1.1
      */
     public void encodeAsXML(XMLEncoder encoder) {
-        encoder.print("<procedure-parameter name=\"" + Util.encodeXmlAttribute(getName()) + '\"');
+        encoder.print("<procedure-parameter name=\""
+                + Util.encodeXmlAttribute(getName())
+                + '\"');
 
         String type = TypesMapping.getSqlNameByType(getType());
         if (type != null) {
@@ -136,16 +165,20 @@ public class ProcedureParameter extends MapObject implements XMLSerializable {
     }
 
     /**
-     * Returns the direction of this parameter. Possible values 
-     * can be IN_PARAMETER, OUT_PARAMETER, IN_OUT_PARAMETER, VOID_PARAMETER.
+     * Returns the direction of this parameter. Possible values can be IN_PARAMETER,
+     * OUT_PARAMETER, IN_OUT_PARAMETER, VOID_PARAMETER.
      */
     public int getDirection() {
         return direction;
     }
 
-    /** Returns the procedure that holds this parameter. */
+    /**
+     * Returns the procedure that holds this parameter.
+     * 
+     * @deprecated since 1.2 use getProcedure() instead.
+     */
     public Procedure getEntity() {
-        return (Procedure) getParent();
+        return getProcedure();
     }
 
     public int getMaxLength() {
@@ -175,15 +208,14 @@ public class ProcedureParameter extends MapObject implements XMLSerializable {
     }
 
     /**
-     * Sets the direction of this parameter. Acceptable values of direction are
-     * defined as int constants in ProcedureParam class. If an attempt is
-     * made to set an invalid attribute's direction, an IllegalArgumentException
-     * is thrown by this method.
+     * Sets the direction of this parameter. Acceptable values of direction are defined as
+     * int constants in ProcedureParam class. If an attempt is made to set an invalid
+     * attribute's direction, an IllegalArgumentException is thrown by this method.
      */
     public void setDirection(int direction) {
         if (direction != IN_PARAMETER
-            && direction != OUT_PARAMETER
-            && direction != IN_OUT_PARAMETER) {
+                && direction != OUT_PARAMETER
+                && direction != IN_OUT_PARAMETER) {
             throw new IllegalArgumentException("Unknown parameter type: " + direction);
         }
 
@@ -202,13 +234,17 @@ public class ProcedureParameter extends MapObject implements XMLSerializable {
         type = i;
     }
 
-    /** Returns the procedure that holds this parameter. */
+    /**
+     * Returns the procedure that holds this parameter.
+     */
     public Procedure getProcedure() {
-        return (Procedure) getParent();
+        return procedure;
     }
 
-    /** Sets the procedure that holds this parameter. */
+    /**
+     * Sets the procedure that holds this parameter.
+     */
     public void setProcedure(Procedure procedure) {
-        setParent(procedure);
+        this.procedure = procedure;
     }
 }

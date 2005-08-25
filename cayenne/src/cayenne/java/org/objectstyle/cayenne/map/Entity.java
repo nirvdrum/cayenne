@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -65,55 +66,93 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.util.CayenneMap;
+import org.objectstyle.cayenne.util.CayenneMapEntry;
+import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
- * An Entity is an abstract descriptor for an entity mapping concept.
- * Entity can represent either a descriptor of database table or
- * a persistent object.
- *
+ * An Entity is an abstract descriptor for an entity mapping concept. Entity can represent
+ * either a descriptor of database table or a persistent object.
+ * 
  * @author Andrei Adamchik
  */
-public abstract class Entity extends MapObject {
+public abstract class Entity implements CayenneMapEntry, XMLSerializable, Serializable {
+
     public static final String PATH_SEPARATOR = ".";
+    
+    protected String name;
+    protected DataMap dataMap;
 
     // ====================================================
     // Attributes
     // ====================================================
     protected CayenneMap attributes = new CayenneMap(this);
-    //  read-through reference for public access
+    // read-through reference for public access
     protected SortedMap attributesMapRef = Collections.unmodifiableSortedMap(attributes);
-    //  read-through reference for public access
-    protected Collection attributesRef =
-        Collections.unmodifiableCollection(attributes.values());
+    // read-through reference for public access
+    protected Collection attributesRef = Collections.unmodifiableCollection(attributes
+            .values());
 
     // ====================================================
     // Relationships
     // ====================================================
     protected CayenneMap relationships = new CayenneMap(this);
-    //  read-through reference for public access
-    protected SortedMap relationshipsMapRef =
-        Collections.unmodifiableSortedMap(relationships);
-    //  read-through reference for public access
-    protected Collection relationshipsRef =
-        Collections.unmodifiableCollection(relationships.values());
+    // read-through reference for public access
+    protected SortedMap relationshipsMapRef = Collections
+            .unmodifiableSortedMap(relationships);
+    // read-through reference for public access
+    protected Collection relationshipsRef = Collections
+            .unmodifiableCollection(relationships.values());
 
+    /**
+     * Creates an unnamed Entity.
+     */
+    public Entity() {
+    }
+
+    /**
+     * Creates a named Entity.
+     */
+    public Entity(String name) {
+        setName(name);
+    }
+    
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Object getParent() {
+        return getDataMap();
+    }
+
+    public void setParent(Object parent) {
+        if (parent != null && !(parent instanceof DataMap)) {
+            throw new IllegalArgumentException("Expected null or DataMap, got: " + parent);
+        }
+
+        setDataMap((DataMap) parent);
+    }
+    
     /**
      * @return parent DataMap of this entity.
      */
     public DataMap getDataMap() {
-        return (DataMap) getParent();
+        return dataMap;
     }
 
     /**
      * Sets parent DataMap of this entity.
      */
     public void setDataMap(DataMap dataMap) {
-        this.setParent(dataMap);
+        this.dataMap = dataMap;
     }
 
     /**
-     * Returns attribute with name <code>attrName</code>.
-     * Will return null if no attribute with this name exists.
+     * Returns attribute with name <code>attrName</code>. Will return null if no
+     * attribute with this name exists.
      */
     public Attribute getAttribute(String attrName) {
         return (Attribute) attributes.get(attrName);
@@ -121,9 +160,8 @@ public abstract class Entity extends MapObject {
 
     /**
      * Adds new attribute to the entity. If attribute has no name,
-     * IllegalArgumentException is thrown.
-     *
-     * Also sets <code>attr</code>'s entity to be this entity.
+     * IllegalArgumentException is thrown. Also sets <code>attr</code>'s entity to be
+     * this entity.
      */
     public void addAttribute(Attribute attr) {
         if (attr.getName() == null) {
@@ -133,7 +171,7 @@ public abstract class Entity extends MapObject {
         attributes.put(attr.getName(), attr);
     }
 
-    /** Removes an attribute named <code>attrName</code>.*/
+    /** Removes an attribute named <code>attrName</code>. */
     public void removeAttribute(String attrName) {
         attributes.remove(attrName);
     }
@@ -143,9 +181,8 @@ public abstract class Entity extends MapObject {
     }
 
     /**
-     * Returns relationship with name <code>relName</code>.
-     * Will return null if no relationship with this name
-     * exists in the entity.
+     * Returns relationship with name <code>relName</code>. Will return null if no
+     * relationship with this name exists in the entity.
      */
     public Relationship getRelationship(String relName) {
         return (Relationship) relationships.get(relName);
@@ -156,7 +193,7 @@ public abstract class Entity extends MapObject {
         relationships.put(rel.getName(), rel);
     }
 
-    /** Removes a relationship named <code>attrName</code>.*/
+    /** Removes a relationship named <code>attrName</code>. */
     public void removeRelationship(String relName) {
         relationships.remove(relName);
     }
@@ -173,9 +210,9 @@ public abstract class Entity extends MapObject {
     }
 
     /**
-     * Returns a relationship that has a specified entity as a target.
-     * If there is more than one relationship for the same target,
-     * it is unpredictable which one will be returned.
+     * Returns a relationship that has a specified entity as a target. If there is more
+     * than one relationship for the same target, it is unpredictable which one will be
+     * returned.
      * 
      * @since 1.1
      */
@@ -203,8 +240,7 @@ public abstract class Entity extends MapObject {
     }
 
     /**
-     * Returns entity attributes as an unmodifiable map. Since 1.1 returns
-     * a SortedMap.
+     * Returns entity attributes as an unmodifiable map. Since 1.1 returns a SortedMap.
      */
     public SortedMap getAttributeMap() {
         return attributesMapRef;
@@ -218,14 +254,14 @@ public abstract class Entity extends MapObject {
     }
 
     /**
-     * Translates Expression rooted in this entity to an analogous expression 
-     * rooted in related entity.
+     * Translates Expression rooted in this entity to an analogous expression rooted in
+     * related entity.
      * 
      * @since 1.1
      */
     public abstract Expression translateToRelatedEntity(
-        Expression expression,
-        String relationshipPath);
+            Expression expression,
+            String relationshipPath);
 
     /**
      * Convenience method returning the last component in the path iterator.
@@ -244,21 +280,20 @@ public abstract class Entity extends MapObject {
     }
 
     /**
-     * Processes expression <code>pathExp</code> and returns an Iterator
-     * of path components that contains a sequence of Attributes and Relationships.
-     * Note that if path is invalid and can not be resolved from this entity,
-     * this method will still return an Iterator, but an attempt to read the first
-     * invalid path component will result in ExpressionException.
+     * Processes expression <code>pathExp</code> and returns an Iterator of path
+     * components that contains a sequence of Attributes and Relationships. Note that if
+     * path is invalid and can not be resolved from this entity, this method will still
+     * return an Iterator, but an attempt to read the first invalid path component will
+     * result in ExpressionException.
      */
     public abstract Iterator resolvePathComponents(Expression pathExp)
-        throws ExpressionException;
+            throws ExpressionException;
 
     /**
-     * Returns an Iterator over the path components that contains a sequence of 
-     * Attributes and Relationships. Note that if path is invalid and can not be 
-     * resolved from this entity, this method will still return an Iterator, 
-     * but an attempt to read the first invalid path component will result in 
-     * ExpressionException.
+     * Returns an Iterator over the path components that contains a sequence of Attributes
+     * and Relationships. Note that if path is invalid and can not be resolved from this
+     * entity, this method will still return an Iterator, but an attempt to read the first
+     * invalid path component will result in ExpressionException.
      */
     public Iterator resolvePathComponents(String path) throws ExpressionException {
         return new PathIterator(path);
@@ -292,11 +327,11 @@ public abstract class Entity extends MapObject {
                 // do a sanity check...
                 if (toks.hasMoreTokens()) {
                     throw new ExpressionException(
-                        "Attribute must be the last component of the path: '"
-                            + pathComp
-                            + "'.",
-                        path,
-                        null);
+                            "Attribute must be the last component of the path: '"
+                                    + pathComp
+                                    + "'.",
+                            path,
+                            null);
                 }
 
                 return attr;
@@ -311,24 +346,24 @@ public abstract class Entity extends MapObject {
             // build error message
             StringBuffer buf = new StringBuffer();
             buf
-                .append("Can't resolve path component: [")
-                .append(currentEnt.getName())
-                .append('.')
-                .append(pathComp)
-                .append("].");
+                    .append("Can't resolve path component: [")
+                    .append(currentEnt.getName())
+                    .append('.')
+                    .append(pathComp)
+                    .append("].");
             throw new ExpressionException(buf.toString(), path, null);
         }
 
         public void remove() {
-            throw new UnsupportedOperationException("'remove' operation is not supported.");
+            throw new UnsupportedOperationException(
+                    "'remove' operation is not supported.");
         }
     }
 
     final MappingNamespace getNonNullNamespace() {
-        MappingNamespace parent = (MappingNamespace) getParent();
+        MappingNamespace parent = getDataMap();
         if (parent == null) {
-            throw new CayenneRuntimeException(
-                "Entity '"
+            throw new CayenneRuntimeException("Entity '"
                     + getName()
                     + "' has no parent MappingNamespace (such as DataMap)");
         }

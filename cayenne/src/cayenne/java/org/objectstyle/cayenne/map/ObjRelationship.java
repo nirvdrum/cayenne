@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.exp.ExpressionException;
@@ -80,18 +79,15 @@ import org.objectstyle.cayenne.util.XMLEncoder;
  */
 public class ObjRelationship extends Relationship implements EventListener {
 
-    private static Logger logObj = Logger.getLogger(ObjRelationship.class);
-
-    int deleteRule = DeleteRule.NO_ACTION;
     boolean readOnly;
     boolean dbRelationshipsRefreshNeeded = true;
 
-    //  Whether optimstic locking should consider this relationship
+    protected int deleteRule = DeleteRule.NO_ACTION;
     protected boolean usedForLocking;
     protected String dbRelationshipPath;
 
-    List dbRelationships = new ArrayList();
-    List dbRelationshipsRef = Collections.unmodifiableList(dbRelationships);
+    protected List dbRelationships = new ArrayList();
+    protected List dbRelationshipsRef = Collections.unmodifiableList(dbRelationships);
 
     public ObjRelationship() {
     }
@@ -108,9 +104,6 @@ public class ObjRelationship extends Relationship implements EventListener {
     public void encodeAsXML(XMLEncoder encoder) {
         ObjEntity source = (ObjEntity) getSourceEntity();
         if (source == null) {
-            logObj
-                    .warn("No source entity, will not encode ObjRelationship: "
-                            + getName());
             return;
         }
 
@@ -141,6 +134,10 @@ public class ObjRelationship extends Relationship implements EventListener {
         encoder.println("\"/>");
     }
 
+    /**
+     * Returns a target ObjEntity of this relationship. Entity is looked up in the parent
+     * DataMap using "targetEntityName".
+     */
     public Entity getTargetEntity() {
         String targetName = getTargetEntityName();
         if (targetName == null) {
@@ -226,7 +223,8 @@ public class ObjRelationship extends Relationship implements EventListener {
             }
         }
 
-        EventManager.getDefaultManager().addListener(this,
+        EventManager.getDefaultManager().addListener(
+                this,
                 "dbRelationshipDidChange",
                 RelationshipEvent.class,
                 DbRelationship.PROPERTY_DID_CHANGE,
@@ -245,8 +243,9 @@ public class ObjRelationship extends Relationship implements EventListener {
         refreshFromPath(true);
 
         dbRelationships.remove(dbRel);
-        //Do not listen any more
-        EventManager.getDefaultManager().removeListener(this,
+        // Do not listen any more
+        EventManager.getDefaultManager().removeListener(
+                this,
                 DbRelationship.PROPERTY_DID_CHANGE,
                 dbRel);
 
@@ -509,7 +508,8 @@ public class ObjRelationship extends Relationship implements EventListener {
             Iterator removeIt = dbRelationships.iterator();
             while (removeIt.hasNext()) {
                 DbRelationship relationship = (DbRelationship) removeIt.next();
-                eventLoop.removeListener(this,
+                eventLoop.removeListener(
+                        this,
                         DbRelationship.PROPERTY_DID_CHANGE,
                         relationship);
 
@@ -533,7 +533,8 @@ public class ObjRelationship extends Relationship implements EventListener {
                         DbRelationship relationship = (DbRelationship) it.next();
 
                         // listen for changes
-                        eventLoop.addListener(this,
+                        eventLoop.addListener(
+                                this,
                                 "dbRelationshipDidChange",
                                 RelationshipEvent.class,
                                 DbRelationship.PROPERTY_DID_CHANGE,
@@ -561,7 +562,7 @@ public class ObjRelationship extends Relationship implements EventListener {
      * relationships.
      */
     final void calculateToManyValue() {
-        //If there is a single toMany along the path, then the flattend
+        // If there is a single toMany along the path, then the flattend
         // rel is toMany. If all are toOne, then the rel is toOne.
         // Simple (non-flattened) relationships form the degenerate case
         // taking the value of the single underlying dbrel.
@@ -625,9 +626,8 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("name", getName())
-                .append("dbRelationshipPath", dbRelationshipPath)
-                .toString();
+        return new ToStringBuilder(this).append("name", getName()).append(
+                "dbRelationshipPath",
+                dbRelationshipPath).toString();
     }
 }

@@ -78,7 +78,6 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.Application;
@@ -93,8 +92,8 @@ import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.modeler.util.TextAdapter;
+import org.objectstyle.cayenne.util.CayenneMapEntry;
 import org.objectstyle.cayenne.util.Util;
-import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.validation.ValidationException;
 import org.scopemvc.util.convertor.StringConvertor;
 import org.scopemvc.util.convertor.StringConvertors;
@@ -111,10 +110,17 @@ import com.jgoodies.forms.layout.FormLayout;
 public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         ExistingSelectionProcessor {
 
-    private static final Object noInheritance = new MapObject(
-            "Direct Mapping to Table/View") {
+    private static final Object noInheritance = new CayenneMapEntry() {
 
-        public void encodeAsXML(XMLEncoder encoder) {
+        public String getName() {
+            return "Direct Mapping to Table/View";
+        }
+
+        public Object getParent() {
+            return null;
+        }
+
+        public void setParent(Object parent) {
         }
     };
 
@@ -251,7 +257,8 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
 
             public void actionPerformed(ActionEvent e) {
                 // Change super-entity
-                MapObject superEntity = (MapObject) superEntityCombo.getSelectedItem();
+                CayenneMapEntry superEntity = (CayenneMapEntry) superEntityCombo
+                        .getSelectedItem();
                 String name = (superEntity == noInheritance) ? null : superEntity
                         .getName();
 
@@ -338,10 +345,9 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         superClassName.setText(entity.getSuperClassName());
         className.setText(entity.getClassName());
         readOnly.setSelected(entity.isReadOnly());
-        
+
         clientClassName.setText(entity.getClientClassName());
         clientSuperClassName.setText(entity.getClientSuperClassName());
-        
 
         StringConvertor convertor = StringConvertors.forClass(Expression.class);
         qualifier.setText(convertor.valueAsString(entity.getDeclaredQualifier()));
@@ -382,9 +388,9 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
             }
         };
 
-        Object[] objEntities = CollectionUtils
-                .select(map.getNamespace().getObjEntities(), inheritanceFilter)
-                .toArray();
+        Object[] objEntities = CollectionUtils.select(
+                map.getNamespace().getObjEntities(),
+                inheritanceFilter).toArray();
         Arrays.sort(objEntities, Comparators.getDataMapChildrenComparator());
         Object[] finalObjEntities = new Object[objEntities.length + 1];
         finalObjEntities[0] = noInheritance;

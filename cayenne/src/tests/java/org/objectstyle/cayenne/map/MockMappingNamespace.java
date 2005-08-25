@@ -76,12 +76,10 @@ public class MockMappingNamespace implements MappingNamespace {
 
     public void addDbEntity(DbEntity entity) {
         dbEntities.put(entity.getName(), entity);
-        entity.setParent(this);
     }
 
     public void addObjEntity(ObjEntity entity) {
         objEntities.put(entity.getName(), entity);
-        entity.setParent(this);
     }
 
     public void addQuery(Query query) {

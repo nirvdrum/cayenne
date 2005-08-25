@@ -254,7 +254,7 @@ public class CAY_207Tst extends PeopleTestCase {
             ObjAttribute ma1 = new ObjAttribute("clientContactType");
             ma1.setDbAttributePath("CLIENT_CONTACT_TYPE");
             ma1.setType(CAY_207String1.class.getName());
-            ma1.setParent(m1);
+            ma1.setEntity(m1);
             m1.addAttribute(ma1);
 
             ObjEntity m2 = new ObjEntity("Manager2");
@@ -264,7 +264,7 @@ public class CAY_207Tst extends PeopleTestCase {
             ObjAttribute ma2 = new ObjAttribute("clientContactType");
             ma2.setDbAttributePath("CLIENT_CONTACT_TYPE");
             ma2.setType(CAY_207String2.class.getName());
-            ma2.setParent(m2);
+            ma2.setEntity(m2);
             m2.addAttribute(ma2);
 
             testMap = new DataMap("CAY-207");

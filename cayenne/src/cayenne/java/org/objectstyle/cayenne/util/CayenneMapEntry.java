@@ -56,26 +56,26 @@
 package org.objectstyle.cayenne.util;
 
 /**
- * Generic interface defining a double-linked entry in CayenneMap.
+ * Defining a double-linked named entry in CayenneMap. 
  * 
  * @author Andrei Adamchik
  */
 public interface CayenneMapEntry {
-	/**
-	 * Returns the name property of this object.
-	 * 
-	 * @return name of this entry.
-	 */
-	public String getName();
 
-	/**
-	 * Returns the parent map.
-	 */
-	public Object getParent();
-	
-	/**
-	 * Stores the parent map.
-	 */
-	public void setParent(Object parent);
+    /**
+     * Returns the name property of this object.
+     * 
+     * @return name of this entry.
+     */
+    public String getName();
+
+    /**
+     * Returns the parent map.
+     */
+    public Object getParent();
+
+    /**
+     * Stores the parent map.
+     */
+    public void setParent(Object parent);
 }
-

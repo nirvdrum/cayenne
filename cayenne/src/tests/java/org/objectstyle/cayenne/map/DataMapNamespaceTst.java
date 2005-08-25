@@ -85,7 +85,7 @@ public class DataMapNamespaceTst extends TestCase {
         assertNull(map.getNamespace());
     }
 
-    public void testGetDbEntity() throws Exception {
+    public void testGetDbEntity()  {
         MockMappingNamespace namespace = new MockMappingNamespace();
         map.setNamespace(namespace);
 

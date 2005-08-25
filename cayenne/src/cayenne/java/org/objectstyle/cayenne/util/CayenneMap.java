@@ -63,20 +63,19 @@ import java.util.SortedMap;
 import org.apache.commons.collections.FastTreeMap;
 
 /**
- * A <code>CayenneMap</code> is a specialized double-linked 
- * ordered map class. Attempts to add objects using
- * an already existing keys will result in 
- * IllegalArgumentExceptions. 
- * 
- * <p>Normally CayenneMap is not subclassed directly,
- * but is rather used as an instance variable within
- * another class. Enclosing instance would set itself
- * as a parent of this map.</p>
- * 
+ * A <code>CayenneMap</code> is a specialized double-linked ordered map class. Attempts
+ * to add objects using an already existing keys will result in IllegalArgumentExceptions.
+ * Any added entries that implement CayenneMapEntry interface will have their parent set
+ * to the parent of this map.
+ * <p>
+ * CayenneMap is not subclassed directly, but is rather used as an instance variable
+ * within another class. Enclosing instance would set itself as a parent of this map.
+ * </p>
  * 
  * @author Andrei Adamchik
  */
 public class CayenneMap extends FastTreeMap {
+
     protected Object parent;
 
     /**
@@ -88,6 +87,7 @@ public class CayenneMap extends FastTreeMap {
 
     /**
      * Constructor for CayenneMap.
+     * 
      * @param c
      */
     public CayenneMap(Object parent, Comparator c) {
@@ -97,6 +97,7 @@ public class CayenneMap extends FastTreeMap {
 
     /**
      * Constructor for CayenneMap.
+     * 
      * @param m
      */
     public CayenneMap(Object parent, Map m) {
@@ -107,6 +108,7 @@ public class CayenneMap extends FastTreeMap {
 
     /**
      * Constructor for CayenneMap.
+     * 
      * @param m
      */
     public CayenneMap(Object parent, SortedMap m) {
@@ -115,9 +117,9 @@ public class CayenneMap extends FastTreeMap {
         putAll(m);
     }
 
-    /** 
-     * Maps specified key-value pair. If value is a
-     * CayenneMapEntry, sets its parent to this map.
+    /**
+     * Maps specified key-value pair. If value is a CayenneMapEntry, sets its parent to
+     * this map.
      * 
      * @see java.util.Map#put(Object, Object)
      */
@@ -131,15 +133,17 @@ public class CayenneMap extends FastTreeMap {
             message.append("'");
 
             if (parent instanceof CayenneMapEntry) {
-                message.append(", parent '").append(
-                    ((CayenneMapEntry) parent).getName()).append(
-                    "'");
+                message
+                        .append(", parent '")
+                        .append(((CayenneMapEntry) parent).getName())
+                        .append("'");
             }
 
             if (value instanceof CayenneMapEntry) {
-                message.append(", child '").append(
-                    ((CayenneMapEntry) value).getName()).append(
-                    "'");
+                message
+                        .append(", child '")
+                        .append(((CayenneMapEntry) value).getName())
+                        .append("'");
             }
             message.append("]");
 
@@ -167,6 +171,7 @@ public class CayenneMap extends FastTreeMap {
 
     /**
      * Returns the parent.
+     * 
      * @return Object
      */
     public Object getParent() {

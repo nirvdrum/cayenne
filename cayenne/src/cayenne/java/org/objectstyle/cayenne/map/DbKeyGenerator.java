@@ -56,26 +56,57 @@
 
 package org.objectstyle.cayenne.map;
 
+import java.io.Serializable;
+
+import org.objectstyle.cayenne.util.CayenneMapEntry;
 import org.objectstyle.cayenne.util.XMLEncoder;
+import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
- * DbKeyGenerator is an abstraction of a primary key generator
- * It configures the primary key generation per DbEntity in a RDBMS independent
- * manner. DbAdapter generates actual key values based on the configuration.
- * For more details see data-map.dtd
- *
+ * DbKeyGenerator is an abstraction of a primary key generator It configures the primary
+ * key generation per DbEntity in a RDBMS independent manner. DbAdapter generates actual
+ * key values based on the configuration. For more details see data-map.dtd
+ * 
  * @author Andriy Shapochka
  */
 
-public class DbKeyGenerator extends MapObject {
+public class DbKeyGenerator implements CayenneMapEntry, XMLSerializable, Serializable {
+
     public static final String ORACLE_TYPE = "ORACLE";
     public static final String NAMED_SEQUENCE_TABLE_TYPE = "NAMED_SEQUENCE_TABLE";
 
-    private String generatorType;
-    private Integer keyCacheSize;
-    private String generatorName;
+    protected String name;
+    protected DbEntity dbEntity;
+    protected String generatorType;
+    protected Integer keyCacheSize;
+    protected String generatorName;
 
     public DbKeyGenerator() {
+    }
+
+    public DbKeyGenerator(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Object getParent() {
+        return getDbEntity();
+    }
+
+    public void setParent(Object parent) {
+        if (parent != null && !(parent instanceof DbEntity)) {
+            throw new IllegalArgumentException("Expected null or DbEntity, got: "
+                    + parent);
+        }
+
+        setDbEntity((DbEntity) parent);
     }
 
     /**
@@ -116,19 +147,19 @@ public class DbKeyGenerator extends MapObject {
     }
 
     public DbEntity getDbEntity() {
-        return (DbEntity) getParent();
+        return dbEntity;
     }
 
-    public void setDbEntity(DbEntity entity) {
-        setParent(entity);
+    public void setDbEntity(DbEntity dbEntity) {
+        this.dbEntity = dbEntity;
     }
 
     public void setGeneratorType(String generatorType) {
         this.generatorType = generatorType;
         if (this.generatorType != null) {
             this.generatorType = this.generatorType.trim().toUpperCase();
-            if (!(ORACLE_TYPE.equals(this.generatorType)
-                || NAMED_SEQUENCE_TABLE_TYPE.equals(this.generatorType)))
+            if (!(ORACLE_TYPE.equals(this.generatorType) || NAMED_SEQUENCE_TABLE_TYPE
+                    .equals(this.generatorType)))
                 this.generatorType = null;
         }
     }
@@ -163,11 +194,11 @@ public class DbKeyGenerator extends MapObject {
 
     public String toString() {
         return "{Type="
-            + generatorType
-            + ", Name="
-            + generatorName
-            + ", Cache="
-            + keyCacheSize
-            + "}";
+                + generatorType
+                + ", Name="
+                + generatorName
+                + ", Cache="
+                + keyCacheSize
+                + "}";
     }
 }

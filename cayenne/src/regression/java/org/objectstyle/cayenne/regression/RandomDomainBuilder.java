@@ -309,7 +309,7 @@ public class RandomDomainBuilder {
         Collections.shuffle(objEntities);
         for (Iterator i = objEntities.iterator(); i.hasNext();) {
             ObjEntity entity = (ObjEntity) i.next();
-            entity.getDbEntity().setParent(dataMap);
+            entity.getDbEntity().setDataMap(dataMap);
             dataMap.addDbEntity(entity.getDbEntity());
             entity.setParent(dataMap);
             dataMap.addObjEntity(entity);

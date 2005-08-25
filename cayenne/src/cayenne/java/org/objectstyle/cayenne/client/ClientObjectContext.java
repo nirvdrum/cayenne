@@ -254,6 +254,9 @@ public class ClientObjectContext implements ObjectContext {
                         "Server returned an object without an id: " + o);
             }
 
+            // before object context is set, init relationship faults
+            // TODO:...
+
             o.setPersistenceState(PersistenceState.COMMITTED);
             o.setObjectContext(this);
             graphManager.registerNode(o.getOid(), o);

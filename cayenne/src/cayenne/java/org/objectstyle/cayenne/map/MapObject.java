@@ -60,58 +60,44 @@ import org.objectstyle.cayenne.util.CayenneMapEntry;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
- * Superclass of DataMap objects. Provides a default implementation
- * of CayenneMapEntry needed to implement a doubly linked maps.
+ * Superclass of DataMap objects. Provides a default implementation of CayenneMapEntry
+ * needed to implement a doubly linked maps.
  * 
  * @author Andrei Adamchik
+ * @deprecated Since 1.2 this class is unused.
  */
 public abstract class MapObject implements CayenneMapEntry, XMLSerializable {
-    protected String objName;
-    protected Object objParent;
+
+    protected String name;
+    protected Object parent;
 
     /**
-     * Constructor for MapObject.
+     * Creates an unnamed MapObject.
      */
     public MapObject() {
-        super();
     }
 
     public MapObject(String name) {
         setName(name);
     }
 
-    /**
-     * @see org.objectstyle.cayenne.util.CayenneMapEntry#getName()
-     */
     public String getName() {
-        return objName;
+        return name;
     }
 
-    /**
-     * @see org.objectstyle.cayenne.util.CayenneMapEntry#getParent()
-     */
     public Object getParent() {
-        return objParent;
+        return parent;
     }
 
-    /**
-     * @see org.objectstyle.cayenne.util.CayenneMapEntry#setParent(Object)
-     */
     public void setParent(Object parent) {
-        this.objParent = parent;
+        this.parent = parent;
     }
 
-    /**
-     * Sets the name.
-     * @param name The name to set
-     */
     public void setName(String name) {
-        this.objName = name;
+        this.name = name;
     }
-    
+
     public String toString() {
-        ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append(getName());
-        return builder.toString();
+        return new ToStringBuilder(this).append("name", getName()).toString();
     }
 }

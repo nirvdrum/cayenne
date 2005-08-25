@@ -55,19 +55,26 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.cayenne.util.CayenneMapEntry;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
+import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
- * A mapping descriptor for a database stored procedure. 
+ * A mapping descriptor for a database stored procedure.
  * 
  * @author Andrei Adamchik
  */
-public class Procedure extends MapObject {
+public class Procedure implements CayenneMapEntry, XMLSerializable, Serializable {
+
+    protected String name;
+    protected DataMap dataMap;
+
     protected String catalog;
     protected String schema;
     protected boolean returningValue;
@@ -77,14 +84,33 @@ public class Procedure extends MapObject {
      * Creates an unnamed procedure object.
      */
     public Procedure() {
-        super();
     }
 
     /**
      * Creates a named Procedure object.
      */
     public Procedure(String name) {
-        super(name);
+        setName(name);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Object getParent() {
+        return getDataMap();
+    }
+
+    public void setParent(Object parent) {
+        if (parent != null && !(parent instanceof DataMap)) {
+            throw new IllegalArgumentException("Expected null or DataMap, got: " + parent);
+        }
+
+        setDataMap((DataMap) parent);
     }
 
     /**
@@ -118,7 +144,7 @@ public class Procedure extends MapObject {
         encoder.indent(1);
         encoder.print(getCallParameters());
         encoder.indent(-1);
-        
+
         encoder.println("</procedure>");
     }
 
@@ -133,14 +159,14 @@ public class Procedure extends MapObject {
      * @return parent DataMap of this entity.
      */
     public DataMap getDataMap() {
-        return (DataMap) getParent();
+        return dataMap;
     }
 
     /**
      * Sets parent DataMap of this entity.
      */
     public void setDataMap(DataMap dataMap) {
-        this.setParent(dataMap);
+        this.dataMap = dataMap;
     }
 
     public void setCallParameters(List parameters) {
@@ -149,8 +175,8 @@ public class Procedure extends MapObject {
     }
 
     /**
-     * Adds new call parameter to the stored procedure. Also sets
-     * <code>param</code>'s parent to be this procedure.
+     * Adds new call parameter to the stored procedure. Also sets <code>param</code>'s
+     * parent to be this procedure.
      */
     public void addCallParameter(ProcedureParameter param) {
         if (param.getName() == null) {
@@ -159,7 +185,7 @@ public class Procedure extends MapObject {
 
         if (callParameters.contains(param)) {
             throw new IllegalArgumentException(
-                "Attempt to add the same parameter more than once:" + param);
+                    "Attempt to add the same parameter more than once:" + param);
         }
 
         param.setProcedure(this);
@@ -191,8 +217,8 @@ public class Procedure extends MapObject {
     }
 
     /**
-     * Returns a list of OUT and INOUT call parameters. If procedure has a
-     * return value, it will also be included as a call parameter.
+     * Returns a list of OUT and INOUT call parameters. If procedure has a return value,
+     * it will also be included as a call parameter.
      */
     public List getCallOutParameters() {
         List outParams = new ArrayList(callParameters.size());
@@ -208,22 +234,22 @@ public class Procedure extends MapObject {
     }
 
     /**
-     * Returns parameter describing the return value of the StoredProcedure, or
-     * null if procedure does not support return values. If procedure supports return parameters,
+     * Returns parameter describing the return value of the StoredProcedure, or null if
+     * procedure does not support return values. If procedure supports return parameters,
      * its first parameter is always assumed to be a return result.
      */
     public ProcedureParameter getResultParam() {
         // if procedure returns parameters, this must be the first parameter
         // otherwise, return null
         return (returningValue && callParameters.size() > 0)
-            ? (ProcedureParameter) callParameters.get(0)
-            : null;
+                ? (ProcedureParameter) callParameters.get(0)
+                : null;
     }
 
     /**
-     * Returns <code>true</code> if a stored procedure returns a value.
-     * The first parameter in a list of parameters will be assumed to be 
-     * a descriptor of return value.
+     * Returns <code>true</code> if a stored procedure returns a value. The first
+     * parameter in a list of parameters will be assumed to be a descriptor of return
+     * value.
      * 
      * @return boolean
      */

@@ -81,7 +81,6 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.event.DbEntityListener;
 import org.objectstyle.cayenne.map.event.DbRelationshipListener;
 import org.objectstyle.cayenne.map.event.EntityEvent;
@@ -101,6 +100,7 @@ import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.modeler.util.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.UIUtil;
+import org.objectstyle.cayenne.util.CayenneMapEntry;
 
 /**
  * Displays DbRelationships for the current DbEntity.
@@ -361,8 +361,8 @@ public class DbEntityRelationshipTab extends JPanel implements ActionListener,
                 int row,
                 int column) {
 
-            if (value instanceof MapObject) {
-                MapObject mapObject = (MapObject) value;
+            if (value instanceof CayenneMapEntry) {
+                CayenneMapEntry mapObject = (CayenneMapEntry) value;
                 String label = mapObject.getName();
 
                 if (mapObject instanceof Entity) {

@@ -14,3 +14,5 @@ Changes/New Features:
 * Added support for ObjectIds in qualifier expressions
 * Added support for HTTP basic authentication to HessianConnector
 * Changed AUTO_PK_TABLE default definition to include primary key constraint (somewhat related to CAY-245)
+* org.objectstyle.cayenne.map.MapObject is deprecated and removed from map package classes 
+  inheritance hierarchy. If you cast Cayenne mapping objects to MapObject, change the cast to CayenneMapEntry

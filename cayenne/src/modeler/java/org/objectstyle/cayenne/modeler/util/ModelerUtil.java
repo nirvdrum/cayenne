@@ -71,9 +71,9 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.MapObject;
-import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.ModelerConstants;
+import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.util.CayenneMapEntry;
 
 /**
  * Various unorganized utility methods used by CayenneModeler.
@@ -91,8 +91,8 @@ public final class ModelerUtil {
         if (object == null) {
             return null;
         }
-        else if (object instanceof MapObject) {
-            return ((MapObject) object).getName();
+        else if (object instanceof CayenneMapEntry) {
+            return ((CayenneMapEntry) object).getName();
         }
         else if (object instanceof String) {
             return (String) object;

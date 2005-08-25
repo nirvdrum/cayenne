@@ -76,6 +76,7 @@ import org.objectstyle.cayenne.map.event.DbRelationshipListener;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
+import org.objectstyle.cayenne.util.CayenneMapEntry;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
@@ -85,9 +86,8 @@ import org.objectstyle.cayenne.util.XMLEncoder;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DbEntity extends Entity implements DbEntityListener, 
-												DbAttributeListener, 
-												DbRelationshipListener {
+public class DbEntity extends Entity implements DbEntityListener, DbAttributeListener,
+        DbRelationshipListener {
 
     protected String catalog;
     protected String schema;
@@ -286,56 +286,56 @@ public class DbEntity extends Entity implements DbEntityListener,
     }
 
     /**
-     * DbEntity property changed. 
-	 * May be name, attribute or relationship added or removed, etc. 
-	 * Attribute and relationship property changes are handled in
-	 * respective listeners.
-	 * @since 1.2 
-	 */
-    public void dbEntityChanged(EntityEvent e){
+     * DbEntity property changed. May be name, attribute or relationship added or removed,
+     * etc. Attribute and relationship property changes are handled in respective
+     * listeners.
+     * 
+     * @since 1.2
+     */
+    public void dbEntityChanged(EntityEvent e) {
         if ((e == null) || (e.getEntity() != this)) {
             // not our concern
             return;
         }
-        
+
         // handle entity name changes
-	    if (e.getId() == EntityEvent.CHANGE && e.isNameChange()){
-	        String newName = e.getNewName();
-	        DataMap map = getDataMap();
-	        if (map != null) {
-	            // handle all of the relationship target names that need to be changed
-	            Iterator ents = map.getDbEntities().iterator();
-	            while (ents.hasNext()) {
-	               DbEntity dbe = (DbEntity) ents.next();
-	               Iterator rit = dbe.getRelationships().iterator();
-	               while (rit.hasNext()){
-	                   DbRelationship rel = (DbRelationship) rit.next();
-		               if (rel.getTargetEntity() == this){
-		                   rel.setTargetEntityName(newName);
-		               }
-	               }
-	            }
-	            // get all of the related object entities
-	            ents = map.getMappedEntities(this).iterator();
-	            while (ents.hasNext()) {
-	               ObjEntity oe = (ObjEntity) ents.next();
-	               if (oe.getDbEntity() == this){
-	                   oe.setDbEntityName(newName);
-	               }
-	            }
-	        }
-	    }
-	}
+        if (e.getId() == EntityEvent.CHANGE && e.isNameChange()) {
+            String newName = e.getNewName();
+            DataMap map = getDataMap();
+            if (map != null) {
+                // handle all of the relationship target names that need to be changed
+                Iterator ents = map.getDbEntities().iterator();
+                while (ents.hasNext()) {
+                    DbEntity dbe = (DbEntity) ents.next();
+                    Iterator rit = dbe.getRelationships().iterator();
+                    while (rit.hasNext()) {
+                        DbRelationship rel = (DbRelationship) rit.next();
+                        if (rel.getTargetEntity() == this) {
+                            rel.setTargetEntityName(newName);
+                        }
+                    }
+                }
+                // get all of the related object entities
+                ents = map.getMappedEntities(this).iterator();
+                while (ents.hasNext()) {
+                    ObjEntity oe = (ObjEntity) ents.next();
+                    if (oe.getDbEntity() == this) {
+                        oe.setDbEntityName(newName);
+                    }
+                }
+            }
+        }
+    }
 
-    /** New entity has been created/added.*/
-	public void dbEntityAdded(EntityEvent e){
-	    // does nothing currently
-	}
+    /** New entity has been created/added. */
+    public void dbEntityAdded(EntityEvent e) {
+        // does nothing currently
+    }
 
-	/** Entity has been removed.*/
-	public void dbEntityRemoved(EntityEvent e){
-	    // does nothing currently
-	}
+    /** Entity has been removed. */
+    public void dbEntityRemoved(EntityEvent e) {
+        // does nothing currently
+    }
 
     public void dbAttributeAdded(AttributeEvent e) {
         this.handleAttributeUpdate(e);
@@ -369,55 +369,56 @@ public class DbEntity extends Entity implements DbEntityListener,
         }
 
         DbAttribute dbAttr = (DbAttribute) attr;
-        
+
         // handle attribute name changes
-	    if (e.getId() == AttributeEvent.CHANGE && e.isNameChange()){
-	        String oldName = e.getOldName();
-	        String newName = e.getNewName();
-	        
-	        DataMap map = getDataMap();
-	        if (map != null) {
-	            Iterator ents = map.getDbEntities().iterator();
-	            while (ents.hasNext()) {
-	                DbEntity ent = (DbEntity) ents.next();
+        if (e.getId() == AttributeEvent.CHANGE && e.isNameChange()) {
+            String oldName = e.getOldName();
+            String newName = e.getNewName();
 
-	                // handle all of the dependent object entity attribute changes
-	                Iterator it = map.getMappedEntities(ent).iterator();
-	                while (it.hasNext()) {
-	                    ObjEntity oe = (ObjEntity) it.next();
-	                    Iterator ait = oe.getAttributes().iterator();
-	                    while (ait.hasNext()) {
-	                        ObjAttribute oa = (ObjAttribute) ait.next();
-	                        if (oa.getDbAttribute() == dbAttr){
-	                            oa.setDbAttributeName(newName);
-	                        }
-	                    }
-	                }
-	                
-	                // handle all of the relationships / joins that use the changed attribute
-	                it = ent.getRelationships().iterator();
-	                while (it.hasNext()) {
-	                    DbRelationship rel = (DbRelationship) it.next();
-	                    Iterator joins = rel.getJoins().iterator();
-	                    while (joins.hasNext()) {
-	                        DbJoin join = (DbJoin) joins.next();
-	                        if (join.getSource() == dbAttr){
-	                            join.setSourceName(newName);
-	                        }
-	                        if (join.getTarget() == dbAttr){
-	                            join.setTargetName(newName);
-	                        }	                        
-	                    }
-	                }
-	            }
-	        }
+            DataMap map = getDataMap();
+            if (map != null) {
+                Iterator ents = map.getDbEntities().iterator();
+                while (ents.hasNext()) {
+                    DbEntity ent = (DbEntity) ents.next();
 
-	        // clear the attribute out of the collection
-	        attributes.remove(oldName);
-	        
-	        // add the attribute back in with the new name
-	        attributes.put(newName, dbAttr);
-	    }
+                    // handle all of the dependent object entity attribute changes
+                    Iterator it = map.getMappedEntities(ent).iterator();
+                    while (it.hasNext()) {
+                        ObjEntity oe = (ObjEntity) it.next();
+                        Iterator ait = oe.getAttributes().iterator();
+                        while (ait.hasNext()) {
+                            ObjAttribute oa = (ObjAttribute) ait.next();
+                            if (oa.getDbAttribute() == dbAttr) {
+                                oa.setDbAttributeName(newName);
+                            }
+                        }
+                    }
+
+                    // handle all of the relationships / joins that use the changed
+                    // attribute
+                    it = ent.getRelationships().iterator();
+                    while (it.hasNext()) {
+                        DbRelationship rel = (DbRelationship) it.next();
+                        Iterator joins = rel.getJoins().iterator();
+                        while (joins.hasNext()) {
+                            DbJoin join = (DbJoin) joins.next();
+                            if (join.getSource() == dbAttr) {
+                                join.setSourceName(newName);
+                            }
+                            if (join.getTarget() == dbAttr) {
+                                join.setTargetName(newName);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // clear the attribute out of the collection
+            attributes.remove(oldName);
+
+            // add the attribute back in with the new name
+            attributes.put(newName, dbAttr);
+        }
 
         // handle PK refresh
         if (primaryKey.contains(dbAttr) || dbAttr.isPrimaryKey()) {
@@ -469,7 +470,7 @@ public class DbEntity extends Entity implements DbEntityListener,
     }
 
     /** Relationship property changed. */
-	public void dbRelationshipChanged(RelationshipEvent e){
+    public void dbRelationshipChanged(RelationshipEvent e) {
         if ((e == null) || (e.getEntity() != this)) {
             // not our concern
             return;
@@ -482,50 +483,51 @@ public class DbEntity extends Entity implements DbEntityListener,
         }
 
         DbRelationship dbRel = (DbRelationship) rel;
-        
+
         // handle relationship name changes
-	    if (e.getId() == RelationshipEvent.CHANGE && e.isNameChange()){
-	        String oldName = e.getOldName();
-	        String newName = e.getNewName();
-	        
-	        DataMap map = getDataMap();
-	        if (map != null) {
-	            // finds all object entities with a db relationship path to the renamed relationship
-	            Iterator ents = map.getObjEntities().iterator();
-	            while (ents.hasNext()) {
-	               ObjEntity oe = (ObjEntity) ents.next();
-                   Iterator rit = oe.getRelationships().iterator();
-                   while (rit.hasNext()) {
+        if (e.getId() == RelationshipEvent.CHANGE && e.isNameChange()) {
+            String oldName = e.getOldName();
+            String newName = e.getNewName();
+
+            DataMap map = getDataMap();
+            if (map != null) {
+                // finds all object entities with a db relationship path to the renamed
+                // relationship
+                Iterator ents = map.getObjEntities().iterator();
+                while (ents.hasNext()) {
+                    ObjEntity oe = (ObjEntity) ents.next();
+                    Iterator rit = oe.getRelationships().iterator();
+                    while (rit.hasNext()) {
                         ObjRelationship or = (ObjRelationship) rit.next();
                         // rename the db relationship path with the new name
-                        if (or.getDbRelationshipPath().equals(oldName)){
+                        if (or.getDbRelationshipPath().equals(oldName)) {
                             or.setDbRelationshipPath(newName);
                         }
                     }
-	            }
-	        }
-	        
-	        // clear the relationship out of the collection
-	        relationships.remove(oldName);
-	        
-	        // add the relationship back in with the new name
-	        relationships.put(newName, dbRel);
-	    }
-	}
-	
-	/** Relationship has been created/added.*/
-	public void dbRelationshipAdded(RelationshipEvent e){
-	    // does nothing currently
-	}
-	
-	/** Relationship has been removed.*/
-	public void dbRelationshipRemoved(RelationshipEvent e){
-	    // does nothing currently
-	}
+                }
+            }
+
+            // clear the relationship out of the collection
+            relationships.remove(oldName);
+
+            // add the relationship back in with the new name
+            relationships.put(newName, dbRel);
+        }
+    }
+
+    /** Relationship has been created/added. */
+    public void dbRelationshipAdded(RelationshipEvent e) {
+        // does nothing currently
+    }
+
+    /** Relationship has been removed. */
+    public void dbRelationshipRemoved(RelationshipEvent e) {
+        // does nothing currently
+    }
 
     /**
-     * Returns true if there is full replacement id is attached to an ObjectId. "Full" means
-     * that all PK columns are present and only PK columns are present.
+     * Returns true if there is full replacement id is attached to an ObjectId. "Full"
+     * means that all PK columns are present and only PK columns are present.
      * 
      * @since 1.2
      */
@@ -536,18 +538,18 @@ public class DbEntity extends Entity implements DbEntityListener,
 
         Map replacement = id.getReplacementIdMap();
         Collection pk = getPrimaryKey();
-        if(pk.size() != replacement.size()) {
+        if (pk.size() != replacement.size()) {
             return false;
         }
-        
+
         Iterator it = pk.iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             DbAttribute attribute = (DbAttribute) it.next();
-            if(!replacement.containsKey(attribute.getName())) {
+            if (!replacement.containsKey(attribute.getName())) {
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -608,9 +610,9 @@ public class DbEntity extends Entity implements DbEntityListener,
             // tail.
             // 3. If relationship path and input have none or some leading components in
             // common,
-            //    (a) strip common leading part;
-            //    (b) reverse the remaining relationship part;
-            //    (c) append remaining input to the reversed remaining relationship.
+            // (a) strip common leading part;
+            // (b) reverse the remaining relationship part;
+            // (c) append remaining input to the reversed remaining relationship.
 
             // case (1)
             if (path.equals(relationshipPath)) {
@@ -653,7 +655,7 @@ public class DbEntity extends Entity implements DbEntityListener,
                 DbRelationship nextDBR = (DbRelationship) relationshipIt.next();
 
                 // expression components may be attributes or relationships
-                MapObject next = (MapObject) pathIt.next();
+                CayenneMapEntry next = (CayenneMapEntry) pathIt.next();
 
                 if (nextDBR != next) {
                     // found split point
@@ -675,7 +677,7 @@ public class DbEntity extends Entity implements DbEntityListener,
 
             while (pathIt.hasNext()) {
                 // components may be attributes or relationships
-                MapObject next = (MapObject) pathIt.next();
+                CayenneMapEntry next = (CayenneMapEntry) pathIt.next();
                 appendPath(finalPath, next);
             }
 
@@ -711,7 +713,7 @@ public class DbEntity extends Entity implements DbEntityListener,
             finalPath.addFirst(revNextDBR.getName());
         }
 
-        private void appendPath(LinkedList finalPath, MapObject pathComponent) {
+        private void appendPath(LinkedList finalPath, CayenneMapEntry pathComponent) {
             finalPath.addLast(pathComponent.getName());
         }
     }

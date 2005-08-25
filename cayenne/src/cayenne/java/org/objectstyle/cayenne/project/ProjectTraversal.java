@@ -64,10 +64,10 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.CayenneMapEntry;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -321,8 +321,8 @@ public class ProjectTraversal {
     
     static class MapObjectComparator implements Comparator {
         public int compare(Object o1, Object o2) {
-            String name1 = ((MapObject) o1).getName();
-            String name2 = ((MapObject) o2).getName();
+            String name1 = ((CayenneMapEntry) o1).getName();
+            String name2 = ((CayenneMapEntry) o2).getName();
 
             if (name1 == null) {
                 return (name2 != null) ? -1 : 0;

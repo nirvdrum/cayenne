@@ -56,31 +56,66 @@
 
 package org.objectstyle.cayenne.map;
 
-/** 
- * An Attribute defines an abstract descriptor of an entity attribute.
+import java.io.Serializable;
+
+import org.objectstyle.cayenne.util.CayenneMapEntry;
+import org.objectstyle.cayenne.util.XMLSerializable;
+
+/**
+ * Defines a property descriptor that is a part of an Entity. Two examples of things that
+ * are described by attributes are Java class properties and database table columns.
  * 
  * @author Andrei Adamchik
  */
-public abstract class Attribute extends MapObject {
+public abstract class Attribute implements CayenneMapEntry, XMLSerializable, Serializable {
 
-	public Attribute() {
-		super();
-	}
-	
-	/**
-	 * Creates a named attribute.
-	 */
-	public Attribute(String name) {
-		super(name);
-	}
+    protected String name;
+    protected Entity entity;
 
-	/** Returns the entity that holds this attribute. */
-	public Entity getEntity() {
-		return (Entity) getParent();
-	}
+    /**
+     * Creates an unnamed Attribute.
+     */
+    public Attribute() {
+    }
 
-	/** Sets the entity that holds this attribute. */
-	public void setEntity(Entity entity) {
-		setParent(entity);
-	}
+    /**
+     * Creates a named Attribute.
+     */
+    public Attribute(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Returns parent entity that holds this attribute.
+     */
+    public Entity getEntity() {
+        return entity;
+    }
+
+    /**
+     * Sets parent entity that holds this attribute.
+     */
+    public void setEntity(Entity entity) {
+        this.entity = entity;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Object getParent() {
+        return getEntity();
+    }
+
+    public void setParent(Object parent) {
+        if (parent != null && !(parent instanceof Entity)) {
+            throw new IllegalArgumentException("Expected null or Entity, got: " + parent);
+        }
+
+        setEntity((Entity) parent);
+    }
 }

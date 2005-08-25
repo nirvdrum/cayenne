@@ -73,12 +73,12 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.MappingNamespace;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.CayenneMapEntry;
 
 /**
  * Utility class that serves as a factory for various project renderers.
@@ -204,8 +204,8 @@ public final class CellRenderers {
             // then set an icon, and then return "this" 
             ImageIcon icon = CellRenderers.iconForObject(value);
 
-            if (value instanceof MapObject) {
-                MapObject mapObject = (MapObject) value;
+            if (value instanceof CayenneMapEntry) {
+                CayenneMapEntry mapObject = (CayenneMapEntry) value;
                 String label = mapObject.getName();
 
                 if (mapObject instanceof Entity) {

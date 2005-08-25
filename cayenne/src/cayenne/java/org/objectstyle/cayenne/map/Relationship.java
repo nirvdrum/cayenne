@@ -55,39 +55,65 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.util.CayenneMapEntry;
+import org.objectstyle.cayenne.util.XMLSerializable;
 
-/** Superclass of metadata relationship classes. */
-public abstract class Relationship extends MapObject {
+/**
+ * Defines a relationship between two entities. In a DataMap graph relationships represent
+ * "arcs" connecting entity "nodes". Relationships are directional, i.e. they have a
+ * notion of source and target entity. This makes DataMap a "digraph".
+ */
+public abstract class Relationship implements CayenneMapEntry, XMLSerializable,
+        Serializable {
+
+    protected String name;
+    protected Entity sourceEntity;
 
     protected String targetEntityName;
     protected boolean toMany;
 
+    /**
+     * Creates an unnamed relationship.
+     */
     public Relationship() {
-        super();
     }
 
+    /**
+     * Creates a named relationship.
+     */
     public Relationship(String name) {
-        this();
-        this.setName(name);
+        setName(name);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
      * Returns relationship source entity.
      */
     public Entity getSourceEntity() {
-        return (Entity) this.getParent();
+        return sourceEntity;
     }
 
     /**
      * Sets relationship source entity.
      */
     public void setSourceEntity(Entity sourceEntity) {
-        setParent(sourceEntity);
+        this.sourceEntity = sourceEntity;
     }
 
-    /** Returns relationship target entity. */
+    /**
+     * Returns a target entity of the relationship.
+     */
     public abstract Entity getTargetEntity();
 
     /**
@@ -95,42 +121,55 @@ public abstract class Relationship extends MapObject {
      */
     public void setTargetEntity(Entity targetEntity) {
         if (targetEntity != null) {
-            this.setTargetEntityName(targetEntity.getName());
+            setTargetEntityName(targetEntity.getName());
         }
         else {
-            this.setTargetEntityName(null);
+            setTargetEntityName(null);
         }
     }
 
     /**
-     * Returns the targetEntityName.
-     * 
-     * @return String
+     * Returns the name of a target entity.
      */
     public String getTargetEntityName() {
         return targetEntityName;
     }
 
     /**
-     * Sets the targetEntityName.
-     * 
-     * @param targetEntityName The targetEntityName to set
+     * Sets the name of relationship target entity.
      */
     public void setTargetEntityName(String targetEntityName) {
         this.targetEntityName = targetEntityName;
     }
 
     /**
-     * Tells whether relationship from source to target is to-one or to-many. If
-     * one-to-many, getxxx() method of the data object class would return a list,
-     * otherwise it returns a single DataObject There is explicitly no setToMany on
-     * Relationship.. only DbRelationship supports such a notion, and ObjRelationship
-     * derives it's value from the underlying DbRelationship(s)
+     * Returns a boolean value that determines relationship multiplicity. This defines
+     * semantics of the connection between two nodes described by the source and target
+     * entities. E.g. to-many relationship between two Persistent object classes means
+     * that a source object would have a collection of target objects. This is a read-only
+     * property.
      */
     public boolean isToMany() {
         return toMany;
     }
 
+    public Object getParent() {
+        return getSourceEntity();
+    }
+
+    public void setParent(Object parent) {
+        if (parent != null && !(parent instanceof Entity)) {
+            throw new IllegalArgumentException("Expected null or Entity, got: " + parent);
+        }
+
+        setSourceEntity((Entity) parent);
+    }
+
+    /**
+     * Returns guaranteed non-null MappingNamespace of this relationship. If it happens to
+     * be null, and exception is thrown. This method is intended for internal use by
+     * Relationship class.
+     */
     final MappingNamespace getNonNullNamespace() {
         Entity entity = getSourceEntity();
 
@@ -143,7 +182,12 @@ public abstract class Relationship extends MapObject {
         return entity.getNonNullNamespace();
     }
 
+    /**
+     * Overrides Object.toString() to return informative description.
+     */
     public String toString() {
-        return new ToStringBuilder(this).append("name", getName()).toString();
+        return new ToStringBuilder(this).append("name", getName()).append(
+                "toMany",
+                isToMany()).toString();
     }
 }

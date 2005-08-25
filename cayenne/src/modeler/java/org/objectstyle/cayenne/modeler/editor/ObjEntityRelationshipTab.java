@@ -82,7 +82,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.event.EntityEvent;
@@ -104,6 +103,7 @@ import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.modeler.util.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.UIUtil;
+import org.objectstyle.cayenne.util.CayenneMapEntry;
 
 /**
  * Displays ObjRelationships for the edited ObjEntity.
@@ -411,8 +411,8 @@ public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplay
                 int row,
                 int column) {
 
-            if (value instanceof MapObject) {
-                MapObject mapObject = (MapObject) value;
+            if (value instanceof CayenneMapEntry) {
+                CayenneMapEntry mapObject = (CayenneMapEntry) value;
                 String label = mapObject.getName();
 
                 if (mapObject instanceof Entity) {

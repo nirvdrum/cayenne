@@ -66,14 +66,15 @@ import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
  * An ObjAttribute is a mapping descriptor of a Java class property.
- *
+ * 
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
 public class ObjAttribute extends Attribute {
+
     protected String type;
     protected boolean usedForLocking;
-    private String dbAttributePath;
+    protected String dbAttributePath;
 
     public ObjAttribute() {
     }
@@ -101,8 +102,8 @@ public class ObjAttribute extends Attribute {
             encoder.print(getType());
             encoder.print('\"');
         }
-        
-        if(isUsedForLocking()) {
+
+        if (isUsedForLocking()) {
             encoder.print(" lock=\"true\"");
         }
 
@@ -116,22 +117,23 @@ public class ObjAttribute extends Attribute {
         encoder.println("/>");
     }
 
-    /** 
-     * Returns fully qualified Java class name of the data object property represented
-     * by this attribute.
+    /**
+     * Returns fully qualified Java class name of the object property represented by this
+     * attribute.
      */
     public String getType() {
         return type;
     }
 
-    /** 
-     * Sets the type of the data object property.
+    /**
+     * Sets the type of the data object property. Type is expected to be a fully qualified
+     * Java class name.
      */
     public void setType(String type) {
         this.type = type;
     }
 
-    /** 
+    /**
      * Returns whether this attribute should be used for locking.
      * 
      * @since 1.1
@@ -140,7 +142,7 @@ public class ObjAttribute extends Attribute {
         return usedForLocking;
     }
 
-    /** 
+    /**
      * Sets whether this attribute should be used for locking.
      * 
      * @since 1.1
@@ -202,14 +204,14 @@ public class ObjAttribute extends Attribute {
 
     /**
      * Returns the dbAttributeName.
+     * 
      * @return String
      */
     public String getDbAttributeName() {
         if (dbAttributePath == null)
             return null;
         int lastPartStart = dbAttributePath.lastIndexOf('.');
-        String lastPart =
-            StringUtils.substring(
+        String lastPart = StringUtils.substring(
                 dbAttributePath,
                 lastPartStart + 1,
                 dbAttributePath.length());
@@ -218,6 +220,7 @@ public class ObjAttribute extends Attribute {
 
     /**
      * Sets the dbAttributeName.
+     * 
      * @param dbAttributeName The dbAttributeName to set
      */
     public void setDbAttributeName(String dbAttributeName) {
@@ -226,8 +229,9 @@ public class ObjAttribute extends Attribute {
             return;
         }
         int lastPartStart = dbAttributePath.lastIndexOf('.');
-        String newPath =
-            (lastPartStart > 0 ? StringUtils.chomp(dbAttributePath, ".") : "");
+        String newPath = (lastPartStart > 0
+                ? StringUtils.chomp(dbAttributePath, ".")
+                : "");
         newPath += (newPath.length() > 0 ? "." : "") + dbAttributeName;
         this.dbAttributePath = newPath;
     }
@@ -244,20 +248,32 @@ public class ObjAttribute extends Attribute {
         return (dbAttributePath != null && dbAttributePath.indexOf('.') >= 0);
     }
 
+    /**
+     * @deprecated Since 1.2 unused.
+     */
     public boolean mapsToDependentDbEntity() {
         Iterator i = getDbPathIterator();
-        if (!i.hasNext())
+        if (!i.hasNext()) {
             return false;
+        }
+
         Object o = i.next();
-        if (!i.hasNext())
+        if (!i.hasNext()) {
             return false;
+        }
+
         Object o1 = i.next();
-        if (!(o1 instanceof DbAttribute))
+        if (!(o1 instanceof DbAttribute)) {
             return false;
+        }
+
         DbRelationship toDependent = (DbRelationship) o;
         return toDependent.isToDependentPK();
     }
 
+    /**
+     * @deprecated Since 1.2 unused.
+     */
     public void validate() throws CayenneException {
         String head = "ObjAttribute: " + getName() + " ";
         ObjEntity ent = (ObjEntity) getEntity();
@@ -280,8 +296,10 @@ public class ObjAttribute extends Attribute {
                 if (pathPart instanceof DbRelationship) {
                     DbRelationship r = (DbRelationship) pathPart;
                     if (r.isToMany())
-                        throw new CayenneException(
-                            head + "DbRelationship: " + r.getName() + " is to-many.");
+                        throw new CayenneException(head
+                                + "DbRelationship: "
+                                + r.getName()
+                                + " is to-many.");
                 }
                 else if (pathPart instanceof DbAttribute) {
                     dbAttributeFound = true;

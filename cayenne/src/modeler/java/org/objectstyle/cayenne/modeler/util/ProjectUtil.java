@@ -98,7 +98,7 @@ public class ProjectUtil {
             return;
         }
 
-        Procedure procedure = parameter.getEntity();
+        Procedure procedure = parameter.getProcedure();
         procedure.removeCallParameter(parameter.getName());
         parameter.setName(newName);
         procedure.addCallParameter(parameter);

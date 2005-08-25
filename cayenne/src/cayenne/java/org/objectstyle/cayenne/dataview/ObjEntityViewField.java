@@ -386,8 +386,8 @@ public class ObjEntityViewField {
             if (fieldAttribute == null)
                 return false;
             boolean same = (objAttribute.equals(fieldAttribute) || (objAttribute
-                    .getParent()
-                    .equals(fieldAttribute.getParent()) && objAttribute.getName().equals(
+                    .getEntity()
+                    .equals(fieldAttribute.getEntity()) && objAttribute.getName().equals(
                     fieldAttribute.getName())));
             return same;
         }
