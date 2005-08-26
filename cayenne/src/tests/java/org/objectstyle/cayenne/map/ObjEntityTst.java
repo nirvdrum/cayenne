@@ -59,16 +59,19 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.util.Util;
 
 public class ObjEntityTst extends CayenneTestCase {
 
-    protected ObjEntity entity;
+    public void testSerializability() throws Exception {
+        ObjEntity entity = new ObjEntity("entity");
 
-    public void setUp() throws Exception {
-        entity = new ObjEntity("entity");
+        ObjEntity d1 = (ObjEntity) Util.cloneViaSerialization(entity);
+        assertEquals(entity.getName(), d1.getName());
     }
 
-    public void testDbEntityName() throws Exception {
+    public void testDbEntityName() {
+        ObjEntity entity = new ObjEntity("entity");
         assertNull(entity.getDbEntityName());
 
         entity.setDbEntityName("dbe");
@@ -78,7 +81,8 @@ public class ObjEntityTst extends CayenneTestCase {
         assertNull(entity.getDbEntityName());
     }
 
-    public void testDbEntity() throws Exception {
+    public void testDbEntity() {
+        ObjEntity entity = new ObjEntity("entity");
         DbEntity dbentity = new DbEntity("dbe");
 
         // need a container
@@ -98,7 +102,8 @@ public class ObjEntityTst extends CayenneTestCase {
         assertSame(dbentity, entity.getDbEntity());
     }
 
-    public void testDbEntityNoContainer() throws Exception {
+    public void testDbEntityNoContainer() {
+        ObjEntity entity = new ObjEntity("entity");
         entity.setDbEntityName("dbe");
 
         try {
@@ -110,13 +115,15 @@ public class ObjEntityTst extends CayenneTestCase {
         }
     }
 
-    public void testClassName() throws Exception {
+    public void testClassName() {
+        ObjEntity entity = new ObjEntity("entity");
         String tstName = "tst_name";
         entity.setClassName(tstName);
         assertEquals(tstName, entity.getClassName());
     }
 
-    public void testSuperClassName() throws Exception {
+    public void testSuperClassName() {
+        ObjEntity entity = new ObjEntity("entity");
         String tstName = "super_tst_name";
         entity.setSuperClassName(tstName);
         assertEquals(tstName, entity.getSuperClassName());
@@ -142,6 +149,7 @@ public class ObjEntityTst extends CayenneTestCase {
     }
 
     public void testReadOnly() throws Exception {
+        ObjEntity entity = new ObjEntity("entity");
         assertFalse(entity.isReadOnly());
         entity.setReadOnly(true);
         assertTrue(entity.isReadOnly());

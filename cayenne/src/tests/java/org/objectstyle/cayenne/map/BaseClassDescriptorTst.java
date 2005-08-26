@@ -55,37 +55,26 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.Iterator;
+import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.util.XMLEncoder;
+public class BaseClassDescriptorTst extends TestCase {
 
-/**
- * @author Andrei Adamchik
- */
-public class MockEntity extends Entity {
+    public void testConstructor() {
+        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
+        };
+        assertNull(d1.getSuperclassDescriptor());
 
-    public MockEntity() {
-        super();
+        BaseClassDescriptor d2 = new BaseClassDescriptor(d1) {
+        };
+        assertNull(d1.getSuperclassDescriptor());
+        assertSame(d1, d2.getSuperclassDescriptor());
     }
 
-    public MockEntity(String name) {
-        super(name);
-    }
+    public void testValid() { // by default BaseClassDescriptor is not compiled...
+        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
+        };
 
-    public Expression translateToRelatedEntity(
-            Expression expression,
-            String relationshipPath) {
-        return null;
+        // by default BaseClassDescriptor is not compiled...
+        assertFalse(d1.isValid());
     }
-
-    public Iterator resolvePathComponents(Expression pathExp) throws ExpressionException {
-        return null;
-    }
-
-    public void encodeAsXML(XMLEncoder encoder) {
-    }
-
 }

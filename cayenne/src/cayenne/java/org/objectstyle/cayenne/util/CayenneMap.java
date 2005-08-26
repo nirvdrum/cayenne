@@ -63,7 +63,7 @@ import java.util.SortedMap;
 import org.apache.commons.collections.FastTreeMap;
 
 /**
- * A <code>CayenneMap</code> is a specialized double-linked ordered map class. Attempts
+ * A <code>CayenneMap</code> is a specialized double-linked sorted map class. Attempts
  * to add objects using an already existing keys will result in IllegalArgumentExceptions.
  * Any added entries that implement CayenneMapEntry interface will have their parent set
  * to the parent of this map.

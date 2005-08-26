@@ -61,8 +61,16 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.util.Util;
 
 public class EntityTst extends CayenneTestCase {
+
+    public void testSerializability() throws Exception {
+        Entity entity = new MockEntity("entity");
+
+        Entity d1 = (Entity) Util.cloneViaSerialization(entity);
+        assertEquals(entity.getName(), d1.getName());
+    }
 
     public void testName() {
         Entity entity = new MockEntity();

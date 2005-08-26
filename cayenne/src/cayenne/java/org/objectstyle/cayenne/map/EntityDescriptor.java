@@ -67,12 +67,12 @@ import java.util.Map;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
- * A default implementation of ClassDescriptor based on ObjEntity.
+ * A ClassDescriptor describing a persistent bean based on ObjEntity.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class EntityClassDescriptor extends BaseClassDescriptor {
+public class EntityDescriptor extends BaseClassDescriptor {
 
     protected ObjEntity entity;
 
@@ -80,7 +80,7 @@ public class EntityClassDescriptor extends BaseClassDescriptor {
      * Creates and compiles a class descriptor for a given entity. A second optional
      * 'superclassDescriptor' parameter should be used if an entity has a super-entity.
      */
-    public EntityClassDescriptor(ObjEntity entity, ClassDescriptor superclassDescriptor) {
+    public EntityDescriptor(ObjEntity entity, ClassDescriptor superclassDescriptor) {
         super(superclassDescriptor);
         this.entity = entity;
 

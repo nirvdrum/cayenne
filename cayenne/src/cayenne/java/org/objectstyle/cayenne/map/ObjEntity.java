@@ -188,7 +188,7 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
             ObjEntity superEntity = getSuperEntity();
             ClassDescriptor superDescriptor = (superEntity != null) ? superEntity
                     .getClassDescriptor() : null;
-            classDescriptor = new EntityClassDescriptor(this, superDescriptor);
+            classDescriptor = new EntityDescriptor(this, superDescriptor);
         }
         return classDescriptor;
     }

@@ -59,17 +59,26 @@ import java.io.Serializable;
 import java.util.Collection;
 
 /**
- * Provides access to a set of persistent properties of a some class and methods for
- * manipulating objects of this classes. ClassDescriptor defines three types of
- * properties: "simple properties" - those corresponding to Cayenne ObjAttributes, "value
- * holder properties" - those corresponding to to-one relationships, and "collection
- * properties" - those corresponding to to-many relationships.
+ * Provides access to a set of persistent properties of a Java Bean and methods for
+ * manipulating objects of this classes.
+ * <p>
+ * ClassDescriptor defines three types of properties: "simple properties" - those
+ * corresponding to Cayenne ObjAttributes, "value holder properties" - those corresponding
+ * to to-one relationships, and "collection properties" - those corresponding to to-many
+ * relationships. This classification corresponds to the common structure of Cayenne
+ * persistent objects.
+ * </p>
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
 // TODO: replace ObjectFactory with ClassDescriptor...
 public interface ClassDescriptor extends Serializable {
+
+    /**
+     * Returns a class supported by this descriptor.
+     */
+    Class getObjectClass();
 
     /**
      * Returns a PropertyValueFactory used to create collections and value holders.

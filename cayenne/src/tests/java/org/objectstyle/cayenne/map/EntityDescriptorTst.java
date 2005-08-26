@@ -55,37 +55,46 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.Iterator;
+import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.util.XMLEncoder;
+import org.objectstyle.cayenne.util.Util;
 
-/**
- * @author Andrei Adamchik
- */
-public class MockEntity extends Entity {
+public class EntityDescriptorTst extends TestCase {
 
-    public MockEntity() {
-        super();
+    public void testConstructor() {
+        ObjEntity e1 = new ObjEntity("TestEntity");
+        e1.setClassName(String.class.getName());
+
+        EntityDescriptor d1 = new EntityDescriptor(e1, null);
+        assertNull(d1.getSuperclassDescriptor());
+
+        BaseClassDescriptor mockSuper = new BaseClassDescriptor(null) {
+        };
+        EntityDescriptor d2 = new EntityDescriptor(e1, mockSuper);
+        assertSame(mockSuper, d2.getSuperclassDescriptor());
     }
 
-    public MockEntity(String name) {
-        super(name);
+    public void testCompile() {
+        ObjEntity e1 = new ObjEntity("TestEntity");
+        e1.setClassName(Integer.class.getName());
+
+        // compilation must be done in constructor...
+        EntityDescriptor d1 = new EntityDescriptor(e1, null);
+        assertTrue(d1.isValid());
     }
 
-    public Expression translateToRelatedEntity(
-            Expression expression,
-            String relationshipPath) {
-        return null;
-    }
+    public void testCompileOnDeserialization() throws Exception {
+        ObjEntity e1 = new ObjEntity("TestEntity");
+        e1.setClassName(Integer.class.getName());
 
-    public Iterator resolvePathComponents(Expression pathExp) throws ExpressionException {
-        return null;
-    }
+        EntityDescriptor d1 = new EntityDescriptor(e1, null);
 
-    public void encodeAsXML(XMLEncoder encoder) {
-    }
+        EntityDescriptor d2 = (EntityDescriptor) Util.cloneViaSerialization(d1);
+        assertNotSame(d1, d2);
 
+        // must recompile self on deserilaization
+        assertTrue(d2.isValid());
+
+        assertEquals(e1.getName(), d2.getEntity().getName());
+    }
 }

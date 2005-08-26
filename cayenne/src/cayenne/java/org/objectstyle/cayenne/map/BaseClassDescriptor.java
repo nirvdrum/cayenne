@@ -55,15 +55,14 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.Collection;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
- * A convenience superclass of Cayenne ClassDescriptors.
+ * A superclass of Cayenne ClassDescriptors. Defines all main bean descriptor parameters
+ * and operations. Subclasses must provide methods to initialize the descriptor.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -90,10 +89,24 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
     }
 
     /**
-     * Prepares the descriptor for normal operation.Without this step a descriptor won't
-     * work. "compile" is internally called after deserialization.
+     * Returns true if a descriptor is initialized and ready for operation.
      */
-    protected abstract void compile();
+    public boolean isValid() {
+        return objectClass != null
+                && declaredProperties != null
+                && simpleProperties != null
+                && valueHolderProperties != null
+                && collectionProperties != null
+                && declaredPropertiesRef != null;
+    }
+
+    public Class getObjectClass() {
+        return objectClass;
+    }
+
+    public void setObjectClass(Class objectClass) {
+        this.objectClass = objectClass;
+    }
 
     public ValueHolderFactory getValueHolderFactory() {
         return valueHolderFactory;
@@ -223,15 +236,4 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
                     + "'", e);
         }
     }
-
-    /**
-     * Deserialization method that recompiles the descriptor.
-     */
-    private void readObject(ObjectInputStream in) throws IOException,
-            ClassNotFoundException {
-
-        in.defaultReadObject();
-        compile();
-    }
-
 }

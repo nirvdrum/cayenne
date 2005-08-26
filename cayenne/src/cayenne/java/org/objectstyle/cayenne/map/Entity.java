@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
@@ -78,7 +80,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
 public abstract class Entity implements CayenneMapEntry, XMLSerializable, Serializable {
 
     public static final String PATH_SEPARATOR = ".";
-    
+
     protected String name;
     protected DataMap dataMap;
 
@@ -87,35 +89,41 @@ public abstract class Entity implements CayenneMapEntry, XMLSerializable, Serial
     // ====================================================
     protected CayenneMap attributes = new CayenneMap(this);
     // read-through reference for public access
-    protected SortedMap attributesMapRef = Collections.unmodifiableSortedMap(attributes);
+    protected transient SortedMap attributesMapRef;
     // read-through reference for public access
-    protected Collection attributesRef = Collections.unmodifiableCollection(attributes
-            .values());
+    protected transient Collection attributesRef;
 
     // ====================================================
     // Relationships
     // ====================================================
     protected CayenneMap relationships = new CayenneMap(this);
     // read-through reference for public access
-    protected SortedMap relationshipsMapRef = Collections
-            .unmodifiableSortedMap(relationships);
+    protected transient SortedMap relationshipsMapRef;
     // read-through reference for public access
-    protected Collection relationshipsRef = Collections
-            .unmodifiableCollection(relationships.values());
+    protected transient Collection relationshipsRef;
 
     /**
      * Creates an unnamed Entity.
      */
     public Entity() {
+        this(null);
     }
 
     /**
      * Creates a named Entity.
      */
     public Entity(String name) {
+        prepareRefCollections();
         setName(name);
     }
-    
+
+    void prepareRefCollections() {
+        attributesMapRef = Collections.unmodifiableSortedMap(attributes);
+        attributesRef = Collections.unmodifiableCollection(attributes.values());
+        relationshipsMapRef = Collections.unmodifiableSortedMap(relationships);
+        relationshipsRef = Collections.unmodifiableCollection(relationships.values());
+    }
+
     public String getName() {
         return name;
     }
@@ -135,7 +143,7 @@ public abstract class Entity implements CayenneMapEntry, XMLSerializable, Serial
 
         setDataMap((DataMap) parent);
     }
-    
+
     /**
      * @return parent DataMap of this entity.
      */
@@ -369,5 +377,18 @@ public abstract class Entity implements CayenneMapEntry, XMLSerializable, Serial
         }
 
         return parent;
+    }
+
+    /**
+     * Deserialization method that created read-through collection wrappers.
+     */
+    private void readObject(ObjectInputStream in) throws IOException,
+            ClassNotFoundException {
+
+        in.defaultReadObject();
+
+        // manual restoration is needed as our tests show that read-through collections
+        // cause serialization problems, so they are made transient.
+        prepareRefCollections();
     }
 }
