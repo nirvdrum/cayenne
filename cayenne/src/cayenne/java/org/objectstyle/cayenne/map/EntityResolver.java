@@ -119,10 +119,10 @@ public class EntityResolver implements MappingNamespace {
      */
     public EntityResolver(Collection dataMaps) {
         this();
-        this.maps.addAll(dataMaps); //Take a copy
+        this.maps.addAll(dataMaps); // Take a copy
         this.constructCache();
     }
-    
+
     /**
      * Converts ObjectId to GlobalID.
      * 
@@ -142,7 +142,7 @@ public class EntityResolver implements MappingNamespace {
             return new GlobalID(entity.getName(), id.getIdSnapshot());
         }
     }
-    
+
     /**
      * Converts GlobalID to ObjectId.
      * 
@@ -162,28 +162,16 @@ public class EntityResolver implements MappingNamespace {
                 ? new TempObjectId(objectClass, id.getKey())
                 : new ObjectId(objectClass, id.getObjectIdKeys());
     }
-    
+
     /**
-     * Returns ClientEntityResolver that maps client classes to entity names.
+     * Returns ClientEntityResolver with mapping information that should be accessible to
+     * the client.
      * 
      * @since 1.2
      */
     public ClientEntityResolver getClientEntityResolver() {
         // TODO: cache client resolver
-        Map entityNameByClientClass = new HashMap();
-
-        Iterator it = getObjEntities().iterator();
-        while (it.hasNext()) {
-            ObjEntity entity = (ObjEntity) it.next();
-            String clientClassName = entity.getClientClassName();
-            if (clientClassName == null) {
-                clientClassName = entity.getClassName();
-            }
-
-            entityNameByClientClass.put(clientClassName, entity.getName());
-        }
-
-        return new ClientEntityResolver(entityNameByClientClass);
+        return new ClientEntityResolver(getObjEntities());
     }
 
     /**

@@ -56,34 +56,95 @@
 package org.objectstyle.cayenne.client;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
+import org.objectstyle.cayenne.map.ObjEntity;
+
 /**
- * An object that provides limited mapping information to the client applications.
+ * Provides a view of the mapping information to the client applications. Entities are
+ * indexed by persistent object class and by entity name.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
 public class ClientEntityResolver implements Serializable {
 
-    protected Map entityNameByClientClass;
+    protected Map entitiesByClassName;
+    protected Map entitiesByName;
 
-    public ClientEntityResolver(Map entityNameByClientClass) {
-        this.entityNameByClientClass = entityNameByClientClass;
+    /**
+     * Creates a client entity resolver initializing it with collection of ObjEntities.
+     */
+    public ClientEntityResolver(Collection entities) {
+        this.entitiesByClassName = new HashMap();
+        this.entitiesByName = new HashMap();
+
+        index(entities);
     }
 
     /**
-     * Returns the name of Cayenne entity for a given object class. If a class is not
-     * mapped, its superclass is checked, all the way to the base class.
+     * Indexes a collection of entities for faster lookup.
+     */
+    protected void index(Collection entities) {
+        entitiesByClassName.clear();
+        entitiesByName.clear();
+
+        Iterator it = entities.iterator();
+        while (it.hasNext()) {
+            ObjEntity entity = (ObjEntity) it.next();
+
+            if (entity.getName() == null) {
+                throw new CayenneClientException("Invalid entity, name is null: "
+                        + entity);
+            }
+
+            if (entity.getClassName() == null) {
+                throw new CayenneClientException(
+                        "Invalid entity, Java class name is null: " + entity);
+            }
+
+            entitiesByName.put(entity.getName(), entity);
+            entitiesByClassName.put(entity.getClassName(), entity);
+        }
+    }
+
+    /**
+     * Returns a guaranteed non-null client ObjEntity for a given entity name. If entity
+     * name is not mapped, its superclass is checked, all the way to the base class. If no
+     * mapping is found in the hierarchy, a CayenneClientException is thrown.
      * 
      * @throws CayenneClientException if a class is not mapped.
      */
-    public String lookupEntity(Class objectClass) {
+    public ObjEntity lookupEntity(String entityName) {
+        if (entityName == null) {
+            throw new CayenneClientException("Null entityName.");
+        }
+
+        ObjEntity entity = (ObjEntity) entitiesByName.get(entityName);
+
+        if (entity == null) {
+            throw new CayenneClientException("Unmapped entity: " + entityName);
+        }
+
+        return entity;
+    }
+
+    /**
+     * Returns a guaranteed non-null client ObjEntity for a given object class. If class
+     * is not mapped, its superclass is checked, all the way to the base class. If no
+     * mapping is found in the hierarchy, a CayenneClientException is thrown.
+     * 
+     * @throws CayenneClientException if a class is not mapped.
+     */
+    public ObjEntity lookupEntity(Class objectClass) {
         if (objectClass == null) {
             throw new CayenneClientException("Null object class.");
         }
 
-        String entity = doLookupEntity(objectClass);
+        ObjEntity entity = doLookupEntity(objectClass);
 
         if (entity == null) {
             throw new CayenneClientException("Unmapped class hierarchy: " + objectClass);
@@ -91,12 +152,17 @@ public class ClientEntityResolver implements Serializable {
         return entity;
     }
 
-    protected String doLookupEntity(Class objectClass) {
+    /**
+     * A recursive method to lookup entity by class. For internal use only.
+     */
+    protected ObjEntity doLookupEntity(Class objectClass) {
         if (objectClass == null) {
             return null;
         }
 
-        String entity = (String) entityNameByClientClass.get(objectClass.getName());
+        // do lookup by class name. This is a more reliable key than class itself due to
+        // hierachical class loaders
+        ObjEntity entity = (ObjEntity) entitiesByClassName.get(objectClass.getName());
         return (entity != null) ? entity : doLookupEntity(objectClass.getSuperclass());
     }
 }

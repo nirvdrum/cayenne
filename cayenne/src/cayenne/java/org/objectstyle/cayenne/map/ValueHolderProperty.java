@@ -53,43 +53,51 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.map;
 
-import java.util.List;
+import java.lang.reflect.Method;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.ObjectFactory;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.ValueHolder;
 
 /**
- * A default implementation of ObjectFactory interface that creates objects registered
- * with ObjectContext.
+ * A descriptor for a property with indirect access via a ValueHolder. Defines normal
+ * setters and getters but also two additional optional accessors for the ValueHolder
+ * object that stores property value.
+ * <p>
+ * ValueHolder property name is derived from a property name using a naming convention.
+ * E.g. if an object that has a property <em>someProperty</em> and wants Cayenne to take
+ * care of the ValueHolders initialization, it should implement accessors using the
+ * following naming convention: <em>public void setSomePropertyHolder(ValueHolder)</em>
+ * and <em>public ValueHolder getSomePropertyHolder()</em>.
+ * </p>
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class EntityObjectFactory implements ObjectFactory {
+public class ValueHolderProperty extends Property {
 
-    ObjectContext context;
-    boolean refreshObjects;
-    boolean resolveInheritance;
+    /**
+     * A property name suffix for the property that is implemented with a ValueHolder.
+     */
+    public static final String HOLDER_NAME_SUFFIX = "Holder";
 
-    EntityObjectFactory(ObjectContext context, GenericSelectQuery query) {
-        this(context, query.isRefreshingObjects(), query.isResolvingInherited());
+    protected Method valueHolderReadMethod;
+    protected Method valueHolderWriteMethod;
+
+    public ValueHolderProperty(String propertyName, Class beanClass) {
+        this(propertyName, beanClass, null);
     }
 
-    EntityObjectFactory(ObjectContext context, boolean refreshObjects,
-            boolean resolveInheritance) {
+    public ValueHolderProperty(String propertyName, Class beanClass, Class valueClass) {
 
-        this.context = context;
-        this.refreshObjects = refreshObjects;
-        this.resolveInheritance = resolveInheritance;
+        super(propertyName, beanClass, valueClass);
+
+        String base = capitalize(propertyName + HOLDER_NAME_SUFFIX);
+        valueHolderReadMethod = findGetter("get" + base, beanClass);
+        valueHolderWriteMethod = findMatchingSetter(
+                "set" + base,
+                beanClass,
+                ValueHolder.class);
     }
 
-    public List objectsFromDataRows(ObjEntity entity, List rows) {
-        // TODO: implement
-        throw new CayenneRuntimeException("Not implemented yet");
-    }
 }

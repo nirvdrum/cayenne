@@ -58,95 +58,102 @@ package org.objectstyle.cayenne;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
-/** 
+/**
  * Defines basic methods for a persistent object in Cayenne.
  * 
  * @author Andrei Adamchik
  */
 public interface DataObject extends Persistent {
+
     public static final long DEFAULT_VERSION = Long.MIN_VALUE;
 
     ObjectId getObjectId();
 
     void setObjectId(ObjectId id);
-    
-    /** 
-     * Returns a data context this object is registered with, or null
-     * if this object has no associated DataContext.
+
+    /**
+     * Returns a data context this object is registered with, or null if this object has
+     * no associated DataContext.
      */
     public DataContext getDataContext();
 
-    /** 
-     * Sets object DataContext. 
+    /**
+     * Sets object DataContext.
      */
     public void setDataContext(DataContext ctxt);
 
-    /** 
+    /**
      * Modifies a value of a named property without altering the object state in any way,
-     * and without triggering any database operations. This method is intended mostly for internal
-     * use by Cayenne framework, and shouldn't be called from the application code. 
+     * and without triggering any database operations. This method is intended mostly for
+     * internal use by Cayenne framework, and shouldn't be called from the application
+     * code.
      */
     public void writePropertyDirectly(String propertyName, Object val);
 
-    /** 
-     * Returns mapped property value as curently stored in the DataObject.
-     * Returned value maybe a fault or a real value. This method will not attempt 
-     * to resolve faults, or to read unmapped properties.
+    /**
+     * Returns mapped property value as curently stored in the DataObject. Returned value
+     * maybe a fault or a real value. This method will not attempt to resolve faults, or
+     * to read unmapped properties.
      */
     public Object readPropertyDirectly(String propertyName);
 
     /**
-     * Returns a value of the property identified by a property path. Supports reading both
-     * mapped and unmapped properties. Unmapped properties are accessed in a manner consistent 
-     * with JavaBeans specification.
-     * 
+     * Returns a value of the property identified by a property path. Supports reading
+     * both mapped and unmapped properties. Unmapped properties are accessed in a manner
+     * consistent with JavaBeans specification.
      * <p>
-     * Property path (or nested property) is a 
-     * dot-separated path used to traverse object relationships until the final object 
-     * is found. If a null object found while traversing path, null is returned. If a 
-     * list is encountered in the middle of the path, CayenneRuntimeException is thrown.
-     * Unlike {@link #readPropertyDirectly(String)}, this method will resolve an object
-     * if it is HOLLOW.
-     *
-     * <p>Examples:</p>
+     * Property path (or nested property) is a dot-separated path used to traverse object
+     * relationships until the final object is found. If a null object found while
+     * traversing path, null is returned. If a list is encountered in the middle of the
+     * path, CayenneRuntimeException is thrown. Unlike
+     * {@link #readPropertyDirectly(String)}, this method will resolve an object if it is
+     * HOLLOW.
+     * <p>
+     * Examples:
+     * </p>
      * <ul>
-     *    <li>Read this object property:<br>
-     *    <code>String name = (String)artist.readNestedProperty("name");</code><br><br></li>
-     *
-     *    <li>Read an object related to this object:<br>
-     *    <code>Gallery g = (Gallery)paintingInfo.readNestedProperty("toPainting.toGallery");</code>
-     *    <br><br></li>
-     *
-     *    <li>Read a property of an object related to this object: <br>
-     *    <code>String name = (String)painting.readNestedProperty("toArtist.artistName");</code>
-     *    <br><br></li>
-     *
-     *    <li>Read to-many relationship list:<br>
-     *    <code>List exhibits = (List)painting.readNestedProperty("toGallery.exhibitArray");</code>
-     *    <br><br></li>
-     *
-     *    <li>Read to-many relationship in the middle of the path <b>(throws exception)</b>:<br>
-     *    <code>String name = (String)artist.readNestedProperty("paintingArray.paintingName");</code>
-     *   <br><br></li>
+     * <li>Read this object property:<br>
+     * <code>String name = (String)artist.readNestedProperty("name");</code><br>
+     * <br>
+     * </li>
+     * <li>Read an object related to this object:<br>
+     * <code>Gallery g = (Gallery)paintingInfo.readNestedProperty("toPainting.toGallery");</code>
+     * <br>
+     * <br>
+     * </li>
+     * <li>Read a property of an object related to this object: <br>
+     * <code>String name = (String)painting.readNestedProperty("toArtist.artistName");</code>
+     * <br>
+     * <br>
+     * </li>
+     * <li>Read to-many relationship list:<br>
+     * <code>List exhibits = (List)painting.readNestedProperty("toGallery.exhibitArray");</code>
+     * <br>
+     * <br>
+     * </li>
+     * <li>Read to-many relationship in the middle of the path <b>(throws exception)</b>:<br>
+     * <code>String name = (String)artist.readNestedProperty("paintingArray.paintingName");</code>
+     * <br>
+     * <br>
+     * </li>
      * </ul>
      * 
      * @since 1.0.5
-     *
      */
     public Object readNestedProperty(String path);
-    
+
     /**
-    * Returns a value of the property identified by propName. Resolves faults if needed.
-    * This method can safely be used instead of or in addition to the auto-generated property
-    * accessors in subclasses of CayenneDataObject.
-    */
+     * Returns a value of the property identified by propName. Resolves faults if needed.
+     * This method can safely be used instead of or in addition to the auto-generated
+     * property accessors in subclasses of CayenneDataObject.
+     */
     public Object readProperty(String propName);
 
     /**
-    * Sets the property with the name propName to the new value val. Resolves faults if needed
-    * This method can safely be used instead of or in addition to the auto-generated property
-    * modifiers in subclasses of CayenneDataObject.
-    */
+     * Sets the property with the name propName to the new value val. Resolves faults if
+     * needed This method can safely be used instead of or in addition to the
+     * auto-generated property modifiers in subclasses of CayenneDataObject.
+     */
     public void writeProperty(String propName, Object val);
 
     public void addToManyTarget(String relName, DataObject val, boolean setReverse);
@@ -156,14 +163,13 @@ public interface DataObject extends Persistent {
     public void setToOneTarget(String relName, DataObject val, boolean setReverse);
 
     /**
-     * Notification method called by DataContext after the object 
-     * was read from the database.
+     * Notification method called by DataContext after the object was read from the
+     * database.
      */
     public void fetchFinished();
 
     /**
-     * Returns a version of a DataRow snapshot that was used to 
-     * create this object.
+     * Returns a version of a DataRow snapshot that was used to create this object.
      * 
      * @since 1.1
      */
@@ -175,8 +181,8 @@ public interface DataObject extends Persistent {
     public void setSnapshotVersion(long snapshotVersion);
 
     /**
-     * Initializes object with data from cache or from the database,
-     * if this object is not fully resolved.
+     * Initializes object with data from cache or from the database, if this object is not
+     * fully resolved.
      * 
      * @since 1.1
      */
@@ -192,18 +198,18 @@ public interface DataObject extends Persistent {
     public void validateForInsert(ValidationResult validationResult);
 
     /**
-     * Performs property validation of the MODIFIED object, appending any validation failures
-     * to the provided validationResult object. This method is invoked by DataContext
-     * before committing a MODIFIED object to the database.
+     * Performs property validation of the MODIFIED object, appending any validation
+     * failures to the provided validationResult object. This method is invoked by
+     * DataContext before committing a MODIFIED object to the database.
      * 
      * @since 1.1
      */
     public void validateForUpdate(ValidationResult validationResult);
 
     /**
-     * Performs property validation of the DELETED object, appending any validation failures
-     * to the provided validationResult object. This method is invoked by DataContext
-     * before committing a DELETED object to the database.
+     * Performs property validation of the DELETED object, appending any validation
+     * failures to the provided validationResult object. This method is invoked by
+     * DataContext before committing a DELETED object to the database.
      * 
      * @since 1.1
      */

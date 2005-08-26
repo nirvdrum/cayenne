@@ -61,6 +61,7 @@ import java.util.Iterator;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.StringUtils;
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
@@ -87,6 +88,34 @@ public class ObjAttribute extends Attribute {
         setName(name);
         setType(type);
         setEntity(entity);
+    }
+
+    /**
+     * Returns Java class of an object property described by this attribute. Wraps any
+     * thrown exceptions into CayenneRuntimeException.
+     * 
+     * @since 1.2
+     */
+    public Class getJavaClass(ClassLoader classLoader) {
+        if (this.getType() == null) {
+            return null;
+        }
+
+        try {
+            // tolerate null class loader
+            if (classLoader == null) {
+                return Class.forName(this.getType());
+            }
+            else {
+                return classLoader.loadClass(this.getType());
+            }
+        }
+        catch (ClassNotFoundException e) {
+            throw new CayenneRuntimeException("Failed to load class for name '"
+                    + this.getType()
+                    + "': "
+                    + e.getMessage(), e);
+        }
     }
 
     /**
@@ -314,5 +343,20 @@ public class ObjAttribute extends Attribute {
         catch (Exception ex) {
             throw new CayenneException(head + ex.getMessage(), ex);
         }
+    }
+
+    /**
+     * Returns an ObjAttribute stripped of any server-side information, such as
+     * DbAttribute mapping.
+     * 
+     * @since 1.2
+     */
+    public ObjAttribute getClientAttribute() {
+        ObjAttribute attribute = new ObjAttribute(getName());
+        attribute.setType(getType());
+
+        // TODO: will likely need "userForLocking" property as well.
+
+        return attribute;
     }
 }

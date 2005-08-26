@@ -59,7 +59,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
@@ -75,6 +74,8 @@ import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.graph.OperationRecorder;
+import org.objectstyle.cayenne.map.ClassDescriptor;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
@@ -216,17 +217,11 @@ public class ClientObjectContext implements ObjectContext {
             throw new NullPointerException("Persistent class can't be null.");
         }
 
-        Persistent object = null;
-        try {
-            object = (Persistent) persistentClass.newInstance();
-        }
-        catch (Exception ex) {
-            throw new CayenneRuntimeException(
-                    "Error instantiating persistent object of class " + persistentClass,
-                    ex);
-        }
+        ObjEntity entity = getEntityResolver().lookupEntity(persistentClass);
+        ClassDescriptor descriptor = entity.getClassDescriptor();
+        Persistent object = (Persistent) descriptor.createObject();
 
-        object.setOid(new GlobalID(getEntityResolver().lookupEntity(persistentClass)));
+        object.setOid(new GlobalID(entity.getName()));
         object.setPersistenceState(PersistenceState.NEW);
         object.setObjectContext(this);
 
@@ -240,12 +235,16 @@ public class ClientObjectContext implements ObjectContext {
         return new UpdateMessage(query).send(connector);
     }
 
+    // TODO: maybe change the api to be "performSelectQuery(Class, QUeryExecutionPlan)"?
     public List performSelectQuery(QueryExecutionPlan query) {
         List objects = new SelectMessage(query).send(connector);
 
-        // register objects with graphManager
+        // postprocess fetched objects...
+
+        ClassDescriptor descriptor = null;
         Iterator it = objects.iterator();
         while (it.hasNext()) {
+
             Persistent o = (Persistent) it.next();
 
             // sanity check
@@ -254,8 +253,18 @@ public class ClientObjectContext implements ObjectContext {
                         "Server returned an object without an id: " + o);
             }
 
+            // detect result type on the first iteration .. assuming that all objects are
+            // either the same type or a part of the same inheritance hierarchy (see TODO
+            // note above)
+            if (descriptor == null) {
+                descriptor = getEntityResolver()
+                        .lookupEntity(o.getClass())
+                        .getClassDescriptor();
+            }
+
             // before object context is set, init relationship faults
-            // TODO:...
+
+            descriptor.injectRelationshipFaults(o);
 
             o.setPersistenceState(PersistenceState.COMMITTED);
             o.setObjectContext(this);

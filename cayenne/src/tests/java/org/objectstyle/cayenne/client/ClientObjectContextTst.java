@@ -56,13 +56,12 @@
 package org.objectstyle.cayenne.client;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.MockPersistentObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
@@ -73,6 +72,7 @@ import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.distribution.MockCayenneConnector;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.OperationRecorder;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.NamedQuery;
 
 /**
@@ -81,10 +81,10 @@ import org.objectstyle.cayenne.query.NamedQuery;
 public class ClientObjectContextTst extends TestCase {
 
     public void testConstructor() {
-        
+
         ClientObjectContext context = new ClientObjectContext();
         assertNull(context.getConnector());
-        
+
         MockCayenneConnector connector = new MockCayenneConnector();
         context.setConnector(connector);
         assertSame(connector, context.getConnector());
@@ -144,11 +144,11 @@ public class ClientObjectContextTst extends TestCase {
         };
 
         ClientObjectContext context = new ClientObjectContext(connector);
+        ObjEntity entity = new ObjEntity("test_entity");
+        entity.setClassName(MockPersistentObject.class.getName());
 
-        Map resolverMap = Collections.singletonMap(
-                MockPersistentObject.class.getName(),
-                "test_entity");
-        context.setEntityResolver(new ClientEntityResolver(resolverMap));
+        Collection entities = Collections.singleton(entity);
+        context.setEntityResolver(new ClientEntityResolver(entities));
         Persistent object = context.newObject(MockPersistentObject.class);
 
         // record change here to make it available to the anonymous connector method..
@@ -177,6 +177,12 @@ public class ClientObjectContextTst extends TestCase {
         };
 
         ClientObjectContext context = new ClientObjectContext(connector);
+        ObjEntity entity = new ObjEntity("test_entity");
+        entity.setClassName(MockPersistentObject.class.getName());
+
+        Collection entities = Collections.singleton(entity);
+        context.setEntityResolver(new ClientEntityResolver(entities));
+        
         List list = context.performSelectQuery(new NamedQuery("dummy"));
         assertNotNull(list);
         assertEquals(1, list.size());
@@ -188,19 +194,22 @@ public class ClientObjectContextTst extends TestCase {
     }
 
     public void testNewObject() {
-        Map resolverMap = Collections.singletonMap(
-                MockPersistentObject.class.getName(),
-                "test_entity");
+
         MockCayenneConnector connector = new MockCayenneConnector();
         ClientObjectContext context = new ClientObjectContext(connector);
-        context.setEntityResolver(new ClientEntityResolver(resolverMap));
+
+        ObjEntity entity = new ObjEntity("test_entity");
+        entity.setClassName(MockPersistentObject.class.getName());
+
+        Collection entities = Collections.singleton(entity);
+        context.setEntityResolver(new ClientEntityResolver(entities));
 
         // an invalid class should blow
         try {
             context.newObject(Object.class);
             fail("ClientObjectContext created an object that is not persistent.");
         }
-        catch (CayenneRuntimeException e) {
+        catch (CayenneClientException e) {
             // expected
         }
 
@@ -221,12 +230,14 @@ public class ClientObjectContextTst extends TestCase {
     }
 
     public void testDeleteObject() {
-        Map resolverMap = Collections.singletonMap(
-                MockPersistentObject.class.getName(),
-                "test_entity");
+
         MockCayenneConnector connector = new MockCayenneConnector();
         ClientObjectContext context = new ClientObjectContext(connector);
-        context.setEntityResolver(new ClientEntityResolver(resolverMap));
+        ObjEntity entity = new ObjEntity("test_entity");
+        entity.setClassName(MockPersistentObject.class.getName());
+
+        Collection entities = Collections.singleton(entity);
+        context.setEntityResolver(new ClientEntityResolver(entities));
 
         // TRANSIENT ... should quietly ignore it
         Persistent transientObject = new MockPersistentObject();

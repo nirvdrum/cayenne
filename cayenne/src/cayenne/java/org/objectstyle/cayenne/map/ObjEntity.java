@@ -78,16 +78,16 @@ import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
- * ObjEntity is a mapping descriptor for a DataObject Java class.
- * It contains the information about the Java class itself, as well
- * as its mapping to the DbEntity layer.
- *
+ * ObjEntity is a mapping descriptor for a DataObject Java class. It contains the
+ * information about the Java class itself, as well as its mapping to the DbEntity layer.
+ * 
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class ObjEntity extends Entity implements ObjEntityListener, 
-												ObjAttributeListener, 
-												ObjRelationshipListener {
+// TODO: make this a ServerObjectEntity or something...
+public class ObjEntity extends Entity implements ObjEntityListener, ObjAttributeListener,
+        ObjRelationshipListener {
+
     final public static int LOCK_TYPE_NONE = 0;
     final public static int LOCK_TYPE_OPTIMISTIC = 1;
 
@@ -97,18 +97,20 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     protected String superEntityName;
     protected Expression qualifier;
     protected boolean readOnly;
-    protected int lockType = LOCK_TYPE_NONE;
-    
+    protected int lockType;
+
     protected String clientClassName;
     protected String clientSuperClassName;
 
+    protected ClassDescriptor classDescriptor;
+
     public ObjEntity() {
-        super();
+        this(null);
     }
 
     public ObjEntity(String name) {
-        this();
-        this.setName(name);
+        setName(name);
+        lockType = LOCK_TYPE_NONE;
     }
 
     /**
@@ -130,7 +132,7 @@ public class ObjEntity extends Entity implements ObjEntityListener,
             encoder.print("\" className=\"");
             encoder.print(getClassName());
         }
-        
+
         if (getClientClassName() != null) {
             encoder.print("\" clientClassName=\"");
             encoder.print(getClientClassName());
@@ -153,7 +155,7 @@ public class ObjEntity extends Entity implements ObjEntityListener,
             encoder.print("\" superClassName=\"");
             encoder.print(getSuperClassName());
         }
-        
+
         if (getSuperEntityName() == null && getClientSuperClassName() != null) {
             encoder.print("\" clientSuperClassName=\"");
             encoder.print(getClientSuperClassName());
@@ -176,16 +178,78 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Returns Java class of persistent objects described by this entity.
-     * Casts any thrown exceptions into CayenneRuntimeException.
+     * Returns a ClassDescriptor for this ObjEntity. If class descriptor is null, creates
+     * and caches it on the fly.
+     * 
+     * @since 1.2
+     */
+    public ClassDescriptor getClassDescriptor() {
+        if (classDescriptor == null) {
+            ObjEntity superEntity = getSuperEntity();
+            ClassDescriptor superDescriptor = (superEntity != null) ? superEntity
+                    .getClassDescriptor() : null;
+            classDescriptor = new EntityClassDescriptor(this, superDescriptor);
+        }
+        return classDescriptor;
+    }
+
+    /**
+     * Sets ClassDescriptor of this entity overriding the default one.
+     * 
+     * @since 1.2
+     */
+    public void setClassDescriptor(ClassDescriptor classDescriptor) {
+        this.classDescriptor = classDescriptor;
+    }
+
+    /**
+     * Returns an ObjEntity stripped of any server-side information, such as DbEntity
+     * mapping. "clientClassName" property of this entity is used to intialize "className"
+     * property of returned entity.
+     * 
+     * @since 1.2
+     */
+    public ObjEntity getClientEntity() {
+
+        ObjEntity entity = new ObjEntity(getName());
+        entity.setClassName(getClientClassName());
+        entity.setSuperClassName(getClientSuperClassName());
+        entity.setSuperEntityName(getSuperEntityName());
+
+        // TODO: should we also copy lock type?
+
+        // copy attributes
+        Iterator attributes = getDeclaredAttributes().iterator();
+        while (attributes.hasNext()) {
+            ObjAttribute attribute = (ObjAttribute) attributes.next();
+
+            // TODO: filter attributes disallowed on the server...
+            entity.addAttribute(attribute.getClientAttribute());
+        }
+
+        // copy relationships
+        Iterator relationships = getDeclaredRelationships().iterator();
+        while (relationships.hasNext()) {
+            ObjRelationship relationship = (ObjRelationship) relationships.next();
+
+            // TODO: filter attributes disallowed on the server...
+            entity.addRelationship(relationship.getClientRelationship());
+        }
+
+        return entity;
+    }
+
+    /**
+     * Returns Java class of persistent objects described by this entity. Casts any thrown
+     * exceptions into CayenneRuntimeException.
      * 
      * @since 1.0.7
      */
     public Class getJavaClass(ClassLoader classLoader) {
-        if(this.getClassName() == null) {
+        if (this.getClassName() == null) {
             return null;
         }
-        
+
         try {
             // tolerate null class loader
             if (classLoader == null) {
@@ -196,25 +260,22 @@ public class ObjEntity extends Entity implements ObjEntityListener,
             }
         }
         catch (ClassNotFoundException e) {
-            throw new CayenneRuntimeException(
-                "Failed to load class for name '"
+            throw new CayenneRuntimeException("Failed to load class for name '"
                     + this.getClassName()
                     + "': "
-                    + e.getMessage(),
-                e);
+                    + e.getMessage(), e);
         }
     }
 
     /**
-     * Returns the type of lock used by this ObjEntity. If this 
-     * entity is not locked, this method would look in a super entity
-     * recursively, until it finds a lock somewhere in the inheritance
-     * hierarchy.
+     * Returns the type of lock used by this ObjEntity. If this entity is not locked, this
+     * method would look in a super entity recursively, until it finds a lock somewhere in
+     * the inheritance hierarchy.
      * 
      * @since 1.1
      */
     public int getLockType() {
-        // if this entity has an explicit lock, 
+        // if this entity has an explicit lock,
         // no need to lookup inheritance hierarchy
         if (lockType != LOCK_TYPE_NONE) {
             return lockType;
@@ -225,8 +286,8 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Returns the type of lock used by this ObjEntity, regardless of
-     * what locking type is used by super entities.
+     * Returns the type of lock used by this ObjEntity, regardless of what locking type is
+     * used by super entities.
      * 
      * @since 1.1
      */
@@ -244,10 +305,9 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Returns a qualifier that imposes a restriction on what objects
-     * belong to this entity. Returned qualifier is the one declared
-     * in this entity, and does not include qualifiers declared in
-     * super entities.
+     * Returns a qualifier that imposes a restriction on what objects belong to this
+     * entity. Returned qualifier is the one declared in this entity, and does not include
+     * qualifiers declared in super entities.
      * 
      * @since 1.1
      */
@@ -265,8 +325,7 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Sets a qualifier that imposes a limit on what objects
-     * belong to this entity.
+     * Sets a qualifier that imposes a limit on what objects belong to this entity.
      * 
      * @since 1.1
      */
@@ -283,22 +342,21 @@ public class ObjEntity extends Entity implements ObjEntityListener,
         this.superEntityName = superEntityName;
     }
 
-    /** 
+    /**
      * Returns the name of DataObject class described by this entity.
      */
     public String getClassName() {
         return className;
     }
 
-    /** 
+    /**
      * Sets the name of the DataObject class described by this entity.
      */
     public void setClassName(String className) {
         this.className = className;
     }
-    
 
-    /** 
+    /**
      * Returns the name of ClientDataObject class described by this entity.
      * 
      * @since 1.2
@@ -307,7 +365,7 @@ public class ObjEntity extends Entity implements ObjEntityListener,
         return clientClassName;
     }
 
-    /** 
+    /**
      * Sets the name of the ClientDataObject class described by this entity.
      * 
      * @since 1.2
@@ -315,12 +373,11 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     public void setClientClassName(String clientClassName) {
         this.clientClassName = clientClassName;
     }
-    
 
     /**
-     * Returns a fully-qualified name of the super class of the DataObject class.
-     * This value is used as a hint for class generation. If the entity inherits from 
-     * another entity, a superclass is the class of that entity.
+     * Returns a fully-qualified name of the super class of the DataObject class. This
+     * value is used as a hint for class generation. If the entity inherits from another
+     * entity, a superclass is the class of that entity.
      */
     public String getSuperClassName() {
         ObjEntity superEntity = getSuperEntity();
@@ -328,16 +385,17 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Sets a fully-qualified name of the super class of the DataObject class.
-     * This value is used as a hint for class generation.
-     * 
-     * <p><i>An attempt to set superclass on an inherited entity has no effect, since
-     * a class of the super entity is always used as a superclass.</i></p>
+     * Sets a fully-qualified name of the super class of the DataObject class. This value
+     * is used as a hint for class generation.
+     * <p>
+     * <i>An attempt to set superclass on an inherited entity has no effect, since a class
+     * of the super entity is always used as a superclass.</i>
+     * </p>
      */
     public void setSuperClassName(String superClassName) {
         this.superClassName = superClassName;
     }
-    
+
     /**
      * Returns a fully-qualified name of the client-side super class of the DataObject
      * class. This value is used as a hint for class generation. If the entity inherits
@@ -372,13 +430,12 @@ public class ObjEntity extends Entity implements ObjEntityListener,
      * @since 1.1
      */
     public ObjEntity getSuperEntity() {
-        return (superEntityName != null)
-            ? getNonNullNamespace().getObjEntity(superEntityName)
-            : null;
+        return (superEntityName != null) ? getNonNullNamespace().getObjEntity(
+                superEntityName) : null;
     }
 
-    /** 
-     * Returns a DbEntity associated with this ObjEntity. 
+    /**
+     * Returns a DbEntity associated with this ObjEntity.
      */
     public DbEntity getDbEntity() {
 
@@ -407,8 +464,8 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Returns a named attribute that either belongs to this ObjEntity or is
-     * inherited. Returns null if no matching attribute is found.
+     * Returns a named attribute that either belongs to this ObjEntity or is inherited.
+     * Returns null if no matching attribute is found.
      */
     public Attribute getAttribute(String name) {
         Attribute attribute = super.getAttribute(name);
@@ -425,8 +482,8 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Returns a SortedMap of all attributes that either belong to this ObjEntity 
-     * or inherited.
+     * Returns a SortedMap of all attributes that either belong to this ObjEntity or
+     * inherited.
      */
     public SortedMap getAttributeMap() {
         if (superEntityName == null) {
@@ -451,8 +508,8 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Returns a Collection of all attributes that either belong to 
-     * this ObjEntity or inherited.
+     * Returns a Collection of all attributes that either belong to this ObjEntity or
+     * inherited.
      */
     public Collection getAttributes() {
         if (superEntityName == null) {
@@ -463,8 +520,8 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Returns a Collection of all attributes that belong to 
-     * this ObjEntity, excluding inherited attributes.
+     * Returns a Collection of all attributes that belong to this ObjEntity, excluding
+     * inherited attributes.
      * 
      * @since 1.1
      */
@@ -473,8 +530,8 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Returns a named Relationship that either belongs to this ObjEntity or is
-     * inherited. Returns null if no matching attribute is found.
+     * Returns a named Relationship that either belongs to this ObjEntity or is inherited.
+     * Returns null if no matching attribute is found.
      */
     public Relationship getRelationship(String name) {
         Relationship relationship = super.getRelationship(name);
@@ -521,8 +578,8 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Returns a Collection of all relationships that belong to 
-     * this ObjEntity, excluding inherited attributes.
+     * Returns a Collection of all relationships that belong to this ObjEntity, excluding
+     * inherited attributes.
      * 
      * @since 1.1
      */
@@ -546,9 +603,8 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Returns ObjRelationship of this entity that maps to
-     * <code>dbRelationship</code> parameter. Returns null if no
-     * such relationship is found.
+     * Returns ObjRelationship of this entity that maps to <code>dbRelationship</code>
+     * parameter. Returns null if no such relationship is found.
      */
     public ObjRelationship getRelationshipForDbRelationship(DbRelationship dbRelationship) {
         Iterator it = getRelationshipMap().entrySet().iterator();
@@ -568,9 +624,9 @@ public class ObjEntity extends Entity implements ObjEntityListener,
         return null;
     }
 
-    /** 
-     * Clears all the mapping between this obj entity and its current db entity.
-     *  Clears mapping between entities, attributes and relationships. 
+    /**
+     * Clears all the mapping between this obj entity and its current db entity. Clears
+     * mapping between entities, attributes and relationships.
      */
     public void clearDbMapping() {
         if (dbEntityName == null)
@@ -594,9 +650,9 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Returns <code>true</code> if this ObjEntity represents
-     * a set of read-only objects.
-     *
+     * Returns <code>true</code> if this ObjEntity represents a set of read-only
+     * objects.
+     * 
      * @return boolean
      */
     public boolean isReadOnly() {
@@ -608,8 +664,8 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Returns true if this entity directly or indirectly inherits
-     * from a given entity, false otherwise.
+     * Returns true if this entity directly or indirectly inherits from a given entity,
+     * false otherwise.
      * 
      * @since 1.1
      */
@@ -630,14 +686,14 @@ public class ObjEntity extends Entity implements ObjEntityListener,
         return (superEntity != null) ? superEntity.isSubentityOf(entity) : false;
     }
 
-    public Iterator resolvePathComponents(Expression pathExp)
-        throws ExpressionException {
+    public Iterator resolvePathComponents(Expression pathExp) throws ExpressionException {
 
         // resolve DB_PATH if we can
         if (pathExp.getType() == Expression.DB_PATH) {
             if (getDbEntity() == null) {
-                throw new ExpressionException(
-                    "Can't resolve DB_PATH '" + pathExp + "', DbEntity is not set.");
+                throw new ExpressionException("Can't resolve DB_PATH '"
+                        + pathExp
+                        + "', DbEntity is not set.");
             }
 
             return getDbEntity().resolvePathComponents(pathExp);
@@ -647,8 +703,7 @@ public class ObjEntity extends Entity implements ObjEntityListener,
             return new PathIterator((String) pathExp.getOperand(0));
         }
 
-        throw new ExpressionException(
-            "Invalid expression type: '"
+        throw new ExpressionException("Invalid expression type: '"
                 + pathExp.expName()
                 + "',  OBJ_PATH is expected.");
     }
@@ -667,9 +722,9 @@ public class ObjEntity extends Entity implements ObjEntityListener,
 
         if (getDbEntity() == null) {
             throw new CayenneRuntimeException(
-                "Can't translate expression to DB_PATH, no DbEntity for '"
-                    + getName()
-                    + "'.");
+                    "Can't translate expression to DB_PATH, no DbEntity for '"
+                            + getName()
+                            + "'.");
         }
 
         // converts all OBJ_PATH expressions to DB_PATH expressions
@@ -678,14 +733,14 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     /**
-     * Transforms an Expression rooted in this entity to an analogous expression 
-     * rooted in related entity.
+     * Transforms an Expression rooted in this entity to an analogous expression rooted in
+     * related entity.
      * 
      * @since 1.1
      */
     public Expression translateToRelatedEntity(
-        Expression expression,
-        String relationshipPath) {
+            Expression expression,
+            String relationshipPath) {
 
         if (expression == null) {
             return null;
@@ -697,7 +752,7 @@ public class ObjEntity extends Entity implements ObjEntityListener,
 
         if (getDbEntity() == null) {
             throw new CayenneRuntimeException(
-                "Can't transform expression, no DbEntity for '" + getName() + "'.");
+                    "Can't transform expression, no DbEntity for '" + getName() + "'.");
         }
 
         // converts all OBJ_PATH expressions to DB_PATH expressions
@@ -712,7 +767,8 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     }
 
     final class DBPathConverter implements Transformer {
-        // TODO: make it a public method - resolveDBPathComponents or something... 
+
+        // TODO: make it a public method - resolveDBPathComponents or something...
         // seems generally useful
         String toDbPath(Iterator objectPathComponents) {
             StringBuffer buf = new StringBuffer();
@@ -722,15 +778,16 @@ public class ObjEntity extends Entity implements ObjEntityListener,
                 Iterator dbSubpath;
 
                 if (component instanceof ObjRelationship) {
-                    dbSubpath =
-                        ((ObjRelationship) component).getDbRelationships().iterator();
+                    dbSubpath = ((ObjRelationship) component)
+                            .getDbRelationships()
+                            .iterator();
                 }
                 else if (component instanceof ObjAttribute) {
                     dbSubpath = ((ObjAttribute) component).getDbPathIterator();
                 }
                 else {
-                    throw new CayenneRuntimeException(
-                        "Unknown path component: " + component);
+                    throw new CayenneRuntimeException("Unknown path component: "
+                            + component);
                 }
 
                 while (dbSubpath.hasNext()) {
@@ -784,78 +841,78 @@ public class ObjEntity extends Entity implements ObjEntityListener,
     public void setDbEntityName(String string) {
         dbEntityName = string;
     }
-    
+
     /**
-     * ObjEntity property changed. 
-	 * May be name, attribute or relationship added or removed, etc. 
-	 * Attribute and relationship property changes are handled in
-	 * respective listeners.
-	 * @since 1.2 
-	 */
-    public void objEntityChanged(EntityEvent e){
+     * ObjEntity property changed. May be name, attribute or relationship added or
+     * removed, etc. Attribute and relationship property changes are handled in respective
+     * listeners.
+     * 
+     * @since 1.2
+     */
+    public void objEntityChanged(EntityEvent e) {
         if ((e == null) || (e.getEntity() != this)) {
             // not our concern
             return;
         }
-        
+
         // handle entity name changes
-	    if (e.getId() == EntityEvent.CHANGE && e.isNameChange()){
-	        String oldName = e.getOldName();
-	        String newName = e.getNewName();
-	        
-	        DataMap map = getDataMap();
-	        if (map != null) {
-               ObjEntity oe = (ObjEntity) e.getEntity();
-               Iterator rit = oe.getRelationships().iterator();
-               while (rit.hasNext()){
-                   ObjRelationship or = (ObjRelationship) rit.next();
-                   or = or.getReverseRelationship();
-                   if (null != or && or.targetEntityName.equals(oldName)){
-                       or.targetEntityName = newName;
-                   }
-               }
-	        }
-	    }
-	}
-    
-	/** New entity has been created/added.*/
-	public void objEntityAdded(EntityEvent e){
-	    // does nothing currently
-	}
-	
-	/** Entity has been removed.*/
-	public void objEntityRemoved(EntityEvent e){
-	    // does nothing currently
-	}
+        if (e.getId() == EntityEvent.CHANGE && e.isNameChange()) {
+            String oldName = e.getOldName();
+            String newName = e.getNewName();
 
-	/** Attribute property changed. */
-	public void objAttributeChanged(AttributeEvent e){
-	    // does nothing currently
-	}
-	
-	/** New attribute has been created/added.*/
-	public void objAttributeAdded(AttributeEvent e){
-	    // does nothing currently
-	}
-	
-	/** Attribute has been removed.*/
-	public void objAttributeRemoved(AttributeEvent e){
-	    // does nothing currently
-	}
+            DataMap map = getDataMap();
+            if (map != null) {
+                ObjEntity oe = (ObjEntity) e.getEntity();
+                Iterator rit = oe.getRelationships().iterator();
+                while (rit.hasNext()) {
+                    ObjRelationship or = (ObjRelationship) rit.next();
+                    or = or.getReverseRelationship();
+                    if (null != or && or.targetEntityName.equals(oldName)) {
+                        or.targetEntityName = newName;
+                    }
+                }
+            }
+        }
+    }
 
-	/** Relationship property changed. */
-    public void objRelationshipChanged(RelationshipEvent e){
-	    // does nothing currently
-	}
+    /** New entity has been created/added. */
+    public void objEntityAdded(EntityEvent e) {
+        // does nothing currently
+    }
+
+    /** Entity has been removed. */
+    public void objEntityRemoved(EntityEvent e) {
+        // does nothing currently
+    }
+
+    /** Attribute property changed. */
+    public void objAttributeChanged(AttributeEvent e) {
+        // does nothing currently
+    }
+
+    /** New attribute has been created/added. */
+    public void objAttributeAdded(AttributeEvent e) {
+        // does nothing currently
+    }
+
+    /** Attribute has been removed. */
+    public void objAttributeRemoved(AttributeEvent e) {
+        // does nothing currently
+    }
+
+    /** Relationship property changed. */
+    public void objRelationshipChanged(RelationshipEvent e) {
+        // does nothing currently
+    }
 
     /** Relationship has been created/added. */
-    public void objRelationshipAdded(RelationshipEvent e){
-	    // does nothing currently
-	}
+    public void objRelationshipAdded(RelationshipEvent e) {
+        // does nothing currently
+    }
 
     /** Relationship has been removed. */
-    public void objRelationshipRemoved(RelationshipEvent e){
-	    // does nothing currently
-	}
-    
+    public void objRelationshipRemoved(RelationshipEvent e) {
+        // does nothing currently
+    }
+
 }

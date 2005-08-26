@@ -630,4 +630,26 @@ public class ObjRelationship extends Relationship implements EventListener {
                 "dbRelationshipPath",
                 dbRelationshipPath).toString();
     }
+
+    /**
+     * Returns an ObjAttribute stripped of any server-side information, such as
+     * DbAttribute mapping.
+     * 
+     * @since 1.2
+     */
+    public ObjRelationship getClientRelationship() {
+        ObjRelationship reverse = getReverseRelationship();
+        String reverseName = reverse != null ? reverse.getName() : null;
+        ObjRelationship relationship = new ClientObjRelationship(
+                getName(),
+                reverseName,
+                isReadOnly());
+
+        setTargetEntityName(getTargetEntityName());
+        setDeleteRule(getDeleteRule());
+
+        // TODO: copy locking flag...
+
+        return relationship;
+    }
 }
