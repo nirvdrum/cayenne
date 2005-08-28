@@ -89,12 +89,12 @@ public class DeleteBatchQuery extends BatchQuery {
      * @param nullQualifierNames DbAttribute names in the WHERE clause that have null values.
      * @param batchCapacity Estimated size of the batch.
      */
-    public DeleteBatchQuery(DbEntity objectEntity,
+    public DeleteBatchQuery(DbEntity dbEntity,
         List qualifierAttributes,
         Collection nullQualifierNames,
         int batchCapacity) {
         
-        super(objectEntity);
+        super(dbEntity);
         
         this.qualifierAttributes = qualifierAttributes;
         this.nullQualifierNames =
@@ -103,7 +103,6 @@ public class DeleteBatchQuery extends BatchQuery {
         qualifierSnapshots = new ArrayList(batchCapacity);
         dbAttributes = new ArrayList(qualifierAttributes.size());
         dbAttributes.addAll(qualifierAttributes);
-        // dbAttributes = getDbEntity().getPrimaryKey();
     }
 
     /**

@@ -59,8 +59,8 @@ import java.util.Collection;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.PersistentObjectList;
 import org.objectstyle.cayenne.PersistentObjectHolder;
+import org.objectstyle.cayenne.PersistentObjectList;
 import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.query.RelationshipQuery;
 
 /**
  * A default ValueHolderFactory for Persistent objects. Only works for parent objects that
- * implement Persistent interface and use GlobalID for their ObjectId.
+ * implement Persistent interface and use GlobalID for their object id.
  * 
  * @since 1.2
  * @author Andrus Adamchik

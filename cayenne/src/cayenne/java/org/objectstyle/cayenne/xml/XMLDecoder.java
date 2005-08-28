@@ -327,7 +327,7 @@ public class XMLDecoder {
      *            properties correlate.
      * @return A new instance of the object represented by the XML.
      * @throws CayenneRuntimeException
-     * @see XMLMappingUtil#decode(Element)
+     * @see XMLMappingUtil#decode(org.jdom.Element)
      */
     public Object decode(Reader xml, String mappingUrl) throws CayenneRuntimeException {
         // Parse the XML document into a JDOM representation.

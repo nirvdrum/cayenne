@@ -59,10 +59,10 @@ import java.io.Serializable;
 import java.util.Collection;
 
 /**
- * An interface that encapsulates results of query execution. QueryResponse provides a way
- * to the caller to process execution results in their own special way. This may be
- * helpful in cases like stored procedures or query batches, when there is more than one
- * result. QueryResponse can contain a mix of collections of objects and update counts.
+ * Encapsulates results of query execution. A caller can use QueryResponse to inspect and
+ * process <i>full</i> results of the query. QueryResponse can contain a mix of object or
+ * data row collections and update counts. Such complex results are common when using
+ * stored procedures or batches.
  * 
  * @since 1.2
  * @author Andrus Adamchik

@@ -58,8 +58,8 @@ package org.objectstyle.cayenne;
 import java.util.List;
 
 /**
- * A ValueHolder implementation that holds a single Persistent object, lazily resolving it
- * on the first access.
+ * A ValueHolder implementation that holds a single Persistent object related to an object
+ * used to initialize PersistentObjectHolder. Value is resolved on first access.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -76,10 +76,12 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
     /**
      * Returns a value resolving it via a query on the first call to this method.
      */
-    public Object getValue() {
+    public Object getValue(Class valueClass) throws CayenneRuntimeException {
         if (!resolved) {
             resolve();
         }
+
+        typeSafetyCheck(valueClass, value);
 
         return value;
     }
@@ -87,9 +89,27 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
     /**
      * Sets an object value, marking this ValueHolder as resolved.
      */
-    public synchronized void setValue(Object value) {
+    public synchronized void setValue(Class valueClass, Object value)
+            throws CayenneRuntimeException {
+
+        typeSafetyCheck(valueClass, value);
+
         this.value = value;
-        resolved = true;
+        this.resolved = true;
+    }
+
+    /**
+     * Performs a type-safety check on the value. A value must be of the specified class
+     * or its sublcass or implement specified interface. Otherwise CayenneRuntimeException
+     * is thrown.
+     */
+    protected void typeSafetyCheck(Class valueClass, Object value) {
+        if (value != null && !(valueClass.isInstance(value))) {
+            throw new CayenneRuntimeException("Expected value of class '"
+                    + valueClass.getName()
+                    + "', got: "
+                    + value.getClass().getName());
+        }
     }
 
     protected synchronized void resolve() {

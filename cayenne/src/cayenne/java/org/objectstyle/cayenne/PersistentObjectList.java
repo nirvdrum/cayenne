@@ -77,11 +77,11 @@ public class PersistentObjectList extends RelationshipFault implements List {
     protected LinkedList removedFromUnresolved;
 
     /**
-     * Creates PersistentListHolder initializing it with ObjectContext and query to
-     * resolve the list.
+     * Creates PersistentObjectList initializing it with list owner persistent object and
+     * relationship name that this list maps to.
      * 
-     * @param parentObject persistent object that owns this list.
-     * @param listQuery a query used to resolve the list
+     * @param relationshipOwner persistent object that owns this list.
+     * @param relationshipName a query used to resolve the list
      */
     public PersistentObjectList(Persistent relationshipOwner, String relationshipName) {
         super(relationshipOwner, relationshipName);
@@ -151,7 +151,8 @@ public class PersistentObjectList extends RelationshipFault implements List {
             return false;
         }
 
-        return resolvedObjectList().equals(((PersistentObjectList) o).resolvedObjectList());
+        return resolvedObjectList().equals(
+                ((PersistentObjectList) o).resolvedObjectList());
     }
 
     public int hashCode() {

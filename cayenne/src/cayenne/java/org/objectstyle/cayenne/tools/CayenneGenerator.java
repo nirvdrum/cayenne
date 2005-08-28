@@ -210,7 +210,7 @@ public class CayenneGenerator extends CayenneTask {
     /**
      * Sets the additional DataMaps.
      * 
-     * @param additionalMaps The additional DataMaps to set
+     * @param additionalMapsPath The additional DataMaps to set
      */
     public void setAdditionalMaps(Path additionalMapsPath) {
         String additionalMapFilenames[] = additionalMapsPath.list();

@@ -58,8 +58,24 @@ package org.objectstyle.cayenne;
 import java.io.Serializable;
 
 /**
- * A ValueHolder interface used for deferred faulting of to-one relationships. It is
- * needed to distinguish between null destination and an unresolved object.
+ * Provides a level of indirection for property value access, most often used for deferred
+ * faulting of to-one relationships. A ValueHolder abstracts how a property value is
+ * obtained (fetched from DB, etc.), thus simplifying design of an object that uses it.
+ * <p>
+ * Here is an example of a bean property implemented using ValueHolder:
+ * </p>
+ * 
+ * <pre>
+ * protected ValueHolder somePropertyHolder;
+ * 
+ * public SomeClass getSomeProperty() {
+ *     return (SomeClass) somePropertyHolder.getValue();
+ * }
+ * 
+ * public void setSomeProperty(SomeClass newValue) {
+ *     somePropertyHolder.setValue(newValue);
+ * }
+ * </pre>
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -68,11 +84,19 @@ public interface ValueHolder extends Serializable {
 
     /**
      * Returns an object stored by this ValueHolder.
+     * 
+     * @param valueClass A class expected for the returned value. A value must be of the
+     *            specified class or its sublcass or implement specified interface.
+     *            Otherwise CayenneRuntimeException is thrown.
      */
-    Object getValue();
+    Object getValue(Class valueClass) throws CayenneRuntimeException;
 
     /**
      * Sets an object stored by this ValueHolder.
+     * 
+     * @param valueClass A class expected for the set value. A value must be of the
+     *            specified class or its sublcass or implement specified interface.
+     *            Otherwise CayenneRuntimeException is thrown.
      */
-    void setValue(Object value);
+    void setValue(Class valueClass, Object value) throws CayenneRuntimeException;
 }
