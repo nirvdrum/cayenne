@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventListener;
@@ -87,13 +89,20 @@ public class ObjRelationship extends Relationship implements EventListener {
     protected String dbRelationshipPath;
 
     protected List dbRelationships = new ArrayList();
-    protected List dbRelationshipsRef = Collections.unmodifiableList(dbRelationships);
+    protected transient List dbRelationshipsRef = Collections
+            .unmodifiableList(dbRelationships);
 
     public ObjRelationship() {
+        this(null);
     }
 
     public ObjRelationship(String name) {
         super(name);
+        prepareRefCollections();
+    }
+
+    void prepareRefCollections() {
+        dbRelationshipsRef = Collections.unmodifiableList(dbRelationships);
     }
 
     /**
@@ -165,6 +174,10 @@ public class ObjRelationship extends Relationship implements EventListener {
         }
 
         Entity target = this.getTargetEntity();
+        if(target == null) {
+            return null;
+        }
+        
         Entity src = this.getSourceEntity();
 
         Iterator it = target.getRelationships().iterator();
@@ -640,16 +653,27 @@ public class ObjRelationship extends Relationship implements EventListener {
     public ObjRelationship getClientRelationship() {
         ObjRelationship reverse = getReverseRelationship();
         String reverseName = reverse != null ? reverse.getName() : null;
+
         ObjRelationship relationship = new ClientObjRelationship(
                 getName(),
                 reverseName,
                 isReadOnly());
 
-        setTargetEntityName(getTargetEntityName());
-        setDeleteRule(getDeleteRule());
+        relationship.setTargetEntityName(getTargetEntityName());
+        relationship.setDeleteRule(getDeleteRule());
 
         // TODO: copy locking flag...
 
         return relationship;
+    }
+
+    /**
+     * Deserialization method that created read-through collection wrappers.
+     */
+    private void readObject(ObjectInputStream in) throws IOException,
+            ClassNotFoundException {
+
+        in.defaultReadObject();
+        prepareRefCollections();
     }
 }

@@ -235,7 +235,7 @@ public class ClientObjectContext implements ObjectContext {
         return new UpdateMessage(query).send(connector);
     }
 
-    // TODO: maybe change the api to be "performSelectQuery(Class, QUeryExecutionPlan)"?
+    // TODO: maybe change the api to be "performSelectQuery(Class, QueryExecutionPlan)"?
     public List performSelectQuery(QueryExecutionPlan query) {
         List objects = new SelectMessage(query).send(connector);
 
@@ -261,8 +261,6 @@ public class ClientObjectContext implements ObjectContext {
                         .lookupEntity(o.getClass())
                         .getClassDescriptor();
             }
-
-            // before object context is set, init relationship faults
 
             descriptor.injectRelationshipFaults(o);
 

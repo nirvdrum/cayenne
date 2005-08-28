@@ -38,6 +38,7 @@ import java.util.List;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.util.Util;
 
 public class ObjRelationshipTst extends CayenneTestCase {
 
@@ -47,7 +48,34 @@ public class ObjRelationshipTst extends CayenneTestCase {
     protected DbEntity paintingDbEntity = getDbEntity("PAINTING");
     protected DbEntity galleryDBEntity = getDbEntity("GALLERY");
 
-    public void testGetReverseDbRealtionshipPath() {
+    public void testSerializability() throws Exception {
+        ObjRelationship r1 = new ObjRelationship("r1");
+
+        ObjRelationship r2 = (ObjRelationship) Util.cloneViaSerialization(r1);
+        assertEquals(r1.getName(), r2.getName());
+        assertEquals(r1.getDbRelationships(), r2.getDbRelationships());
+    }
+
+    public void testGetClientRelationship() {
+        final ObjEntity target = new ObjEntity("te1");
+        ObjRelationship r1 = new ObjRelationship("r1") {
+
+            public Entity getTargetEntity() {
+                return target;
+            }
+        };
+        
+        r1.setDeleteRule(DeleteRule.NULLIFY);
+        r1.setTargetEntityName("te1");
+
+        ObjRelationship r2 = r1.getClientRelationship();
+        assertNotNull(r2);
+        assertEquals(r1.getName(), r2.getName());
+        assertEquals(r1.getTargetEntityName(), r2.getTargetEntityName());
+        assertEquals(r1.getDeleteRule(), r2.getDeleteRule());
+    }
+
+    public void testGetReverseDbRelationshipPath() {
         ObjEntity artistObjEnt = getObjEntity("Artist");
         ObjEntity paintingObjEnt = getObjEntity("Painting");
 
@@ -315,7 +343,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
         assertTrue(relationship.isFlattened());
 
         relationship.removeDbRelationship(r1);
-        assertFalse(relationship.isToMany()); //only remaining rel is r2... a toOne
+        assertFalse(relationship.isToMany()); // only remaining rel is r2... a toOne
         assertEquals(1, relationship.getDbRelationships().size());
         assertEquals(r2, relationship.getDbRelationships().get(0));
         assertFalse(relationship.isFlattened());
@@ -324,7 +352,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
     }
 
     public void testReadOnlyMoreThan3DbRelsRelationship() {
-        //Readonly is a flattened relationship that isn't over a single many->many link
+        // Readonly is a flattened relationship that isn't over a single many->many link
         // table
         DbRelationship r1 = new DbRelationship();
         DbRelationship r2 = new DbRelationship();
@@ -351,7 +379,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
 
     }
 
-    //Test for a read-only flattened relationship that is readonly because it's dbrel
+    // Test for a read-only flattened relationship that is readonly because it's dbrel
     // sequence is "incorrect" (or rather, unsupported)
     public void testIncorrectSequenceReadOnlyRelationship() {
         DbRelationship r1 = new DbRelationship();
@@ -373,7 +401,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
         assertTrue(relationship.isToMany());
     }
 
-    //Test a relationship loaded from the test datamap that we know should be flattened
+    // Test a relationship loaded from the test datamap that we know should be flattened
     public void testKnownFlattenedRelationship() {
         ObjEntity artistEnt = getObjEntity("Artist");
         ObjRelationship theRel = (ObjRelationship) artistEnt
@@ -391,7 +419,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
             fail("Should have failed with IllegalArgumentException");
         }
         catch (IllegalArgumentException e) {
-            //Good... it should throw an exception
+            // Good... it should throw an exception
         }
     }
 
@@ -415,7 +443,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
         relationship.addDbRelationship(r1);
         assertTrue(relationship.isToMany());
 
-        //rel should be watching r1 (events) to see when that changes
+        // rel should be watching r1 (events) to see when that changes
         r1.setToMany(false);
         assertFalse(relationship.isToMany());
     }

@@ -63,6 +63,32 @@ import org.objectstyle.cayenne.util.Util;
 
 public class ObjEntityTst extends CayenneTestCase {
 
+    public void testGetClientEntity() {
+        final ObjEntity target = new ObjEntity("te1");
+
+        ObjEntity e1 = new ObjEntity("entity");
+        e1.setClassName("x.y.z");
+        e1.setClientClassName("a.b.c");
+        e1.addAttribute(new ObjAttribute("A1"));
+        e1.addAttribute(new ObjAttribute("A2"));
+
+        ObjRelationship r1 = new ObjRelationship("r1") {
+
+            public Entity getTargetEntity() {
+                return target;
+            }
+        };
+
+        e1.addRelationship(r1);
+
+        ObjEntity e2 = e1.getClientEntity();
+        assertNotNull(e2);
+        assertEquals(e1.getName(), e2.getName());
+        assertEquals(e1.getClientClassName(), e2.getClassName());
+        assertEquals(e1.getAttributes().size(), e2.getAttributes().size());
+        assertEquals(e1.getRelationships().size(), e2.getRelationships().size());
+    }
+
     public void testSerializability() throws Exception {
         ObjEntity entity = new ObjEntity("entity");
 

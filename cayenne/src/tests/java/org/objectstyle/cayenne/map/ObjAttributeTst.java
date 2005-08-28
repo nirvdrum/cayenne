@@ -52,29 +52,47 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import java.sql.Types;
 
-public class ObjAttributeTst extends CayenneTestCase {
-    protected ObjAttribute attr;
-    
-    public void setUp() throws Exception {
-        attr = new ObjAttribute();
+import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.util.Util;
+
+public class ObjAttributeTst extends TestCase {
+
+    public void testDbAttribute() {
+        ObjAttribute attribute = new ObjAttribute("a1");
+
+        DbAttribute dbAttr = new DbAttribute("tst_name", Types.INTEGER, null);
+        attribute.setDbAttribute(dbAttr);
+        assertEquals(dbAttr.getName(), attribute.getDbAttributeName());
     }
-    
-    public void testDbAttribute() throws Exception {
-        DbAttribute dbAttr = new DbAttribute("tst_name", java.sql.Types.INTEGER, null);
-        attr.setDbAttribute(dbAttr);
-        assertEquals(dbAttr.getName(), attr.getDbAttributeName());
-    }
-    
-    
-    public void testType() throws Exception {
+
+    public void testType() {
+        ObjAttribute attribute = new ObjAttribute("a1");
+
         String type = "org.aa.zz";
-        attr.setType(type);
-        assertEquals(type, attr.getType());
+        attribute.setType(type);
+        assertEquals(type, attribute.getType());
     }
-    
+
+    public void testSerializability() throws Exception {
+        ObjAttribute a1 = new ObjAttribute("a1");
+
+        ObjAttribute a2 = (ObjAttribute) Util.cloneViaSerialization(a1);
+        assertEquals(a1.getName(), a2.getName());
+    }
+
+    public void testGetClientAttribute() {
+        ObjAttribute a1 = new ObjAttribute("a1");
+        a1.setType("x.y.z");
+
+        ObjAttribute a2 = a1.getClientAttribute();
+        assertNotNull(a2);
+        assertEquals(a1.getName(), a2.getName());
+        assertEquals(a1.getType(), a2.getType());
+    }
 }
