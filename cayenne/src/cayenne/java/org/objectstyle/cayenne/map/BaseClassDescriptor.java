@@ -186,14 +186,13 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
      * Initializes relationships properties of an object.
      */
     public void injectRelationshipFaults(Object o) {
+        if (valueHolderFactory == null) {
+            valueHolderFactory = new DefaultValueHolderFactory();
+        }
 
         // first call super...
         if (getSuperclassDescriptor() != null) {
             getSuperclassDescriptor().injectRelationshipFaults(o);
-        }
-
-        if (valueHolderFactory == null) {
-            throw new CayenneRuntimeException("'valueHolderFactory' is null");
         }
 
         // inject value holders...
