@@ -55,10 +55,12 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ValueHolder;
 
 /**
  * A superclass of Cayenne ClassDescriptors. Defines all main bean descriptor parameters
@@ -190,49 +192,63 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
             getSuperclassDescriptor().injectRelationshipFaults(o);
         }
 
+        if (valueHolderFactory == null) {
+            throw new CayenneRuntimeException("'valueHolderFactory' is null");
+        }
+
         // inject value holders...
+        for (int i = 0; i < valueHolderProperties.length; i++) {
+            if (valueHolderProperties[i].getValueHolderWriteMethod() != null) {
+                ValueHolder valueHolder = valueHolderFactory.createValueHolder(
+                        o,
+                        valueHolderProperties[i]);
+                invokeSetter(
+                        valueHolderProperties[i].getValueHolderWriteMethod(),
+                        o,
+                        valueHolder);
+            }
+            // else - object takes care of value holder creation on its own (e.g. in
+            // costructor)..
+        }
 
         // inject collections...
-    }
-
-    public Object readMappedProperty(String propertyName, Object object) {
-        Property property = getProperty(propertyName);
-        if (property == null) {
-            throw new CayenneRuntimeException("Unmapped property: " + propertyName);
-        }
-
-        if (property.getReadMethod() == null) {
-            throw new CayenneRuntimeException("Write-only property: " + propertyName);
-        }
-
-        try {
-            return property.getReadMethod().invoke(object, null);
-        }
-        catch (Throwable e) {
-            throw new CayenneRuntimeException("Error reading property '"
-                    + propertyName
-                    + "'", e);
+        for (int i = 0; i < collectionProperties.length; i++) {
+            if (collectionProperties[i].getWriteMethod() != null) {
+                Collection collection = valueHolderFactory.createCollection(
+                        o,
+                        collectionProperties[i]);
+                invokeSetter(collectionProperties[i].getWriteMethod(), o, collection);
+            }
+            // else - object takes care of collection creation on its own (e.g. in
+            // costructor)..
         }
     }
 
-    public void writeMappedProperty(String propertyName, Object object, Object newValue) {
-        Property descriptor = getProperty(propertyName);
-        if (descriptor == null) {
-            throw new CayenneRuntimeException("Unmapped property: " + propertyName);
+    /**
+     * Calls a setter method with a single argument on an object, rethrowing any
+     * exceptions wrapped in unchecked CayenneRuntimeException.
+     */
+    protected void invokeSetter(Method method, Object object, Object newValue)
+            throws CayenneRuntimeException {
+
+        if (method == null) {
+            throw new CayenneRuntimeException("Null setter method.");
         }
 
-        if (descriptor.getWriteMethod() == null) {
-            throw new CayenneRuntimeException("Read-only property: " + propertyName);
+        if (object == null) {
+            throw new CayenneRuntimeException("An attempt to call a method '"
+                    + method.getName()
+                    + "' on a null object.");
         }
 
         try {
-            descriptor.getWriteMethod().invoke(object, new Object[] {
+            method.invoke(object, new Object[] {
                 newValue
             });
         }
         catch (Throwable e) {
-            throw new CayenneRuntimeException("Error writing property '"
-                    + propertyName
+            throw new CayenneRuntimeException("Error calling a setter method '"
+                    + method.getName()
                     + "'", e);
         }
     }

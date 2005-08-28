@@ -67,7 +67,19 @@ import org.objectstyle.cayenne.ValueHolder;
  */
 public interface ValueHolderFactory {
 
-    ValueHolder createValueHolder(String propertyName);
+    /**
+     * Creates a ValueHolder that will be injected in the object.
+     * 
+     * @param parentObject an object a ValueHolder is for.
+     * @param property a property descriptor for the collection.
+     */
+    ValueHolder createValueHolder(Object parentObject, Property property);
 
-    Collection createCollection(String propertyName);
+    /**
+     * Creates a Collection that will be injected in the object.
+     * 
+     * @param parentObject an object a Collection is for.
+     * @param property a Property descriptor for the collection.
+     */
+    Collection createCollection(Object parentObject, Property property);
 }

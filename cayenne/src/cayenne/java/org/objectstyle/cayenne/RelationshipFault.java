@@ -53,67 +53,72 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne;
 
-import java.lang.reflect.Method;
+import java.util.List;
 
-import org.objectstyle.cayenne.ValueHolder;
+import org.objectstyle.cayenne.distribution.GlobalID;
+import org.objectstyle.cayenne.query.RelationshipQuery;
 
 /**
- * A descriptor for a property with indirect access via a ValueHolder. Defines normal
- * setters and getters but also two additional optional accessors for the ValueHolder
- * object that stores property value.
- * <p>
- * ValueHolder property name is derived from a property name using a naming convention.
- * E.g. if an object that has a property <em>someProperty</em> and wants Cayenne to take
- * care of the ValueHolders initialization, it should implement accessors using the
- * following naming convention: <em>public void setSomePropertyHolder(ValueHolder)</em>
- * and <em>public ValueHolder getSomePropertyHolder()</em>.
- * </p>
+ * An abstract superlcass of lazily faulted to-one and to-many relationships.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ValueHolderProperty extends Property {
+public abstract class RelationshipFault {
+
+    protected Persistent relationshipOwner;
+    protected String relationshipName;
+
+    public RelationshipFault(Persistent relationshipOwner, String relationshipName) {
+        if (relationshipOwner == null) {
+            throw new NullPointerException("'relationshipOwner' can't be null.");
+        }
+
+        if (relationshipName == null) {
+            throw new NullPointerException("'relationshipName' can't be null.");
+        }
+
+        this.relationshipOwner = relationshipOwner;
+        this.relationshipName = relationshipName;
+    }
+
+    public String getRelationshipName() {
+        return relationshipName;
+    }
+
+    public Persistent getRelationshipOwner() {
+        return relationshipOwner;
+    }
+
+    protected boolean isTransientParent() {
+        int state = relationshipOwner.getPersistenceState();
+        return state == PersistenceState.NEW || state == PersistenceState.TRANSIENT;
+    }
+
+    protected boolean isUncommittedParent() {
+        int state = relationshipOwner.getPersistenceState();
+        return state == PersistenceState.MODIFIED || state == PersistenceState.DELETED;
+    }
 
     /**
-     * A property name suffix for the property that is implemented with a ValueHolder.
+     * Executes a query that returns related objects. Subclasses would invoke this method
+     * whenever they need to resolve a fault.
      */
-    public static final String HOLDER_NAME_SUFFIX = "Holder";
+    protected List resolveFromDB() {
+        // TODO: maybe we should redefine persistent "oid" as GlobalID? Having it as
+        // "Object" does no good if we have to introduce hidden casts everywhere.
 
-    protected Method valueHolderReadMethod;
-    protected Method valueHolderWriteMethod;
+        if (!(relationshipOwner.getOid() instanceof GlobalID)) {
+            throw new CayenneRuntimeException(
+                    "ValueHolder owner is expected to have GlobalID. Actual id: "
+                            + relationshipOwner.getOid());
+        }
 
-    public ValueHolderProperty(String propertyName, Class beanClass) {
-        this(propertyName, beanClass, null);
+        GlobalID gid = (GlobalID) relationshipOwner.getOid();
+
+        return relationshipOwner.getObjectContext().performSelectQuery(
+                new RelationshipQuery(gid, relationshipName));
     }
-
-    public ValueHolderProperty(String propertyName, Class beanClass, Class valueClass) {
-
-        super(propertyName, beanClass, valueClass);
-
-        String base = capitalize(propertyName + HOLDER_NAME_SUFFIX);
-        valueHolderReadMethod = findGetter("get" + base, beanClass);
-        valueHolderWriteMethod = findMatchingSetter(
-                "set" + base,
-                beanClass,
-                ValueHolder.class);
-    }
-
-    public Method getValueHolderReadMethod() {
-        return valueHolderReadMethod;
-    }
-
-    public void setValueHolderReadMethod(Method valueHolderReadMethod) {
-        this.valueHolderReadMethod = valueHolderReadMethod;
-    }
-
-    public Method getValueHolderWriteMethod() {
-        return valueHolderWriteMethod;
-    }
-
-    public void setValueHolderWriteMethod(Method valueHolderWriteMethod) {
-        this.valueHolderWriteMethod = valueHolderWriteMethod;
-    }
-
 }

@@ -53,67 +53,65 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne;
 
-import java.lang.reflect.Method;
-
-import org.objectstyle.cayenne.ValueHolder;
+import java.util.List;
 
 /**
- * A descriptor for a property with indirect access via a ValueHolder. Defines normal
- * setters and getters but also two additional optional accessors for the ValueHolder
- * object that stores property value.
- * <p>
- * ValueHolder property name is derived from a property name using a naming convention.
- * E.g. if an object that has a property <em>someProperty</em> and wants Cayenne to take
- * care of the ValueHolders initialization, it should implement accessors using the
- * following naming convention: <em>public void setSomePropertyHolder(ValueHolder)</em>
- * and <em>public ValueHolder getSomePropertyHolder()</em>.
- * </p>
+ * A ValueHolder implementation that holds a single Persistent object, lazily resolving it
+ * on the first access.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ValueHolderProperty extends Property {
+public class PersistentObjectHolder extends RelationshipFault implements ValueHolder {
+
+    protected boolean resolved;
+    protected Object value;
+
+    public PersistentObjectHolder(Persistent relationshipOwner, String relationshipName) {
+        super(relationshipOwner, relationshipName);
+    }
 
     /**
-     * A property name suffix for the property that is implemented with a ValueHolder.
+     * Returns a value resolving it via a query on the first call to this method.
      */
-    public static final String HOLDER_NAME_SUFFIX = "Holder";
+    public Object getValue() {
+        if (!resolved) {
+            resolve();
+        }
 
-    protected Method valueHolderReadMethod;
-    protected Method valueHolderWriteMethod;
-
-    public ValueHolderProperty(String propertyName, Class beanClass) {
-        this(propertyName, beanClass, null);
+        return value;
     }
 
-    public ValueHolderProperty(String propertyName, Class beanClass, Class valueClass) {
-
-        super(propertyName, beanClass, valueClass);
-
-        String base = capitalize(propertyName + HOLDER_NAME_SUFFIX);
-        valueHolderReadMethod = findGetter("get" + base, beanClass);
-        valueHolderWriteMethod = findMatchingSetter(
-                "set" + base,
-                beanClass,
-                ValueHolder.class);
+    /**
+     * Sets an object value, marking this ValueHolder as resolved.
+     */
+    public synchronized void setValue(Object value) {
+        this.value = value;
+        resolved = true;
     }
 
-    public Method getValueHolderReadMethod() {
-        return valueHolderReadMethod;
-    }
+    protected synchronized void resolve() {
+        if (resolved) {
+            return;
+        }
 
-    public void setValueHolderReadMethod(Method valueHolderReadMethod) {
-        this.valueHolderReadMethod = valueHolderReadMethod;
-    }
+        List objects = resolveFromDB();
 
-    public Method getValueHolderWriteMethod() {
-        return valueHolderWriteMethod;
-    }
+        if (objects.size() == 0) {
+            this.value = null;
+        }
+        else if (objects.size() == 1) {
+            this.value = objects.get(0);
+        }
+        else {
+            throw new FaultFailureException(
+                    "Expected either no objects or a single object, instead fault query resolved to "
+                            + objects.size()
+                            + " objects.");
+        }
 
-    public void setValueHolderWriteMethod(Method valueHolderWriteMethod) {
-        this.valueHolderWriteMethod = valueHolderWriteMethod;
+        resolved = true;
     }
-
 }

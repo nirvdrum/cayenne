@@ -55,65 +55,62 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.lang.reflect.Method;
+import java.util.Collection;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.PersistentObjectList;
+import org.objectstyle.cayenne.PersistentObjectHolder;
 import org.objectstyle.cayenne.ValueHolder;
+import org.objectstyle.cayenne.distribution.GlobalID;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.query.RelationshipQuery;
 
 /**
- * A descriptor for a property with indirect access via a ValueHolder. Defines normal
- * setters and getters but also two additional optional accessors for the ValueHolder
- * object that stores property value.
- * <p>
- * ValueHolder property name is derived from a property name using a naming convention.
- * E.g. if an object that has a property <em>someProperty</em> and wants Cayenne to take
- * care of the ValueHolders initialization, it should implement accessors using the
- * following naming convention: <em>public void setSomePropertyHolder(ValueHolder)</em>
- * and <em>public ValueHolder getSomePropertyHolder()</em>.
- * </p>
+ * A default ValueHolderFactory for Persistent objects. Only works for parent objects that
+ * implement Persistent interface and use GlobalID for their ObjectId.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ValueHolderProperty extends Property {
+public class DefaultValueHolderFactory implements ValueHolderFactory {
 
-    /**
-     * A property name suffix for the property that is implemented with a ValueHolder.
-     */
-    public static final String HOLDER_NAME_SUFFIX = "Holder";
+    public ValueHolder createValueHolder(Object parentObject, Property property) {
+        if (!(parentObject instanceof Persistent)) {
+            throw new CayenneRuntimeException(
+                    "ValueHolder owner is expected to be non-null Persistent object. Actual: "
+                            + parentObject);
+        }
 
-    protected Method valueHolderReadMethod;
-    protected Method valueHolderWriteMethod;
-
-    public ValueHolderProperty(String propertyName, Class beanClass) {
-        this(propertyName, beanClass, null);
+        Persistent persistent = (Persistent) parentObject;
+        return new PersistentObjectHolder(persistent, property.getPropertyName());
     }
 
-    public ValueHolderProperty(String propertyName, Class beanClass, Class valueClass) {
+    public Collection createCollection(Object parentObject, Property property) {
+        if (!(parentObject instanceof Persistent)) {
+            throw new CayenneRuntimeException(
+                    "ValueHolder owner is expected to be non-null Persistent object. Actual: "
+                            + parentObject);
+        }
 
-        super(propertyName, beanClass, valueClass);
-
-        String base = capitalize(propertyName + HOLDER_NAME_SUFFIX);
-        valueHolderReadMethod = findGetter("get" + base, beanClass);
-        valueHolderWriteMethod = findMatchingSetter(
-                "set" + base,
-                beanClass,
-                ValueHolder.class);
+        Persistent persistent = (Persistent) parentObject;
+        return new PersistentObjectList(persistent, property.getPropertyName());
     }
 
-    public Method getValueHolderReadMethod() {
-        return valueHolderReadMethod;
-    }
+    protected QueryExecutionPlan getRelationshipQuery(
+            Persistent object,
+            String relationshpName) {
+        // TODO: maybe we should redefine persistent "oid" as GlobalID? Having it as
+        // object does no good anyway as it introduces hidden casts.
 
-    public void setValueHolderReadMethod(Method valueHolderReadMethod) {
-        this.valueHolderReadMethod = valueHolderReadMethod;
-    }
+        if (!(object.getOid() instanceof GlobalID)) {
+            throw new CayenneRuntimeException(
+                    "ValueHolder owner is expected to have GlobalID. Actual id: "
+                            + object.getOid());
+        }
 
-    public Method getValueHolderWriteMethod() {
-        return valueHolderWriteMethod;
-    }
+        GlobalID gid = (GlobalID) object.getOid();
 
-    public void setValueHolderWriteMethod(Method valueHolderWriteMethod) {
-        this.valueHolderWriteMethod = valueHolderWriteMethod;
+        return new RelationshipQuery(gid, relationshpName);
     }
-
 }
