@@ -63,6 +63,39 @@ import org.objectstyle.cayenne.util.Util;
 
 public class ObjEntityTst extends CayenneTestCase {
 
+    public void testClassDescriptor() {
+        ObjEntity e1 = new ObjEntity("e1");
+        e1.setClassName(Object.class.getName());
+
+        // class descriptor must be built on demand...
+        ClassDescriptor descriptor = e1.getClassDescriptor();
+        assertNotNull(descriptor);
+        assertNull(descriptor.getSuperclassDescriptor());
+
+        // test that we can reset it to a custom value
+        ClassDescriptor customDescriptor = new MockClassDescriptor();
+        e1.setClassDescriptor(customDescriptor);
+        assertSame(customDescriptor, e1.getClassDescriptor());
+    }
+
+    public void testClassDescriptorWithSuperEntity() {
+        DataMap map = new DataMap();
+
+        ObjEntity e1 = new ObjEntity("e1");
+        e1.setClassName(Object.class.getName());
+        map.addObjEntity(e1);
+
+        // test that super descriptor is set
+        ObjEntity e2 = new ObjEntity("e2");
+        e2.setClassName(String.class.getName());
+        map.addObjEntity(e2);
+        e2.setSuperEntityName(e1.getName());
+
+        ClassDescriptor descriptor = e2.getClassDescriptor();
+        assertNotNull(descriptor);
+        assertNotNull(descriptor.getSuperclassDescriptor());
+    }
+
     public void testGetClientEntity() {
         final ObjEntity target = new ObjEntity("te1");
 

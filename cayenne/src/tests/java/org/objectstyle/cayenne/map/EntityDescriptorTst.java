@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.map;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.util.Util;
 
 public class EntityDescriptorTst extends TestCase {
@@ -96,5 +97,40 @@ public class EntityDescriptorTst extends TestCase {
         assertTrue(d2.isValid());
 
         assertEquals(e1.getName(), d2.getEntity().getName());
+    }
+
+    public void testProperties() {
+        DataMap map = new DataMap();
+
+        ObjEntity e1 = new ObjEntity("TestEntity");
+        map.addObjEntity(e1);
+        e1.setClassName(Artist.class.getName());
+        e1.addAttribute(new ObjAttribute(Artist.ARTIST_NAME_PROPERTY, String.class
+                .getName(), e1));
+
+        ObjRelationship toMany = new ObjRelationship(Artist.PAINTING_ARRAY_PROPERTY) {
+
+            public boolean isToMany() {
+                return true;
+            }
+        };
+        toMany.setTargetEntityName(e1.getName());
+
+        e1.addRelationship(toMany);
+
+        EntityDescriptor d1 = new EntityDescriptor(e1, null);
+
+        assertSame(e1, d1.getEntity());
+        assertNotNull(d1.getObjectClass());
+        assertEquals(Artist.class.getName(), d1.getObjectClass().getName());
+
+        // properties that exist in the entity must be included
+        assertNotNull(d1.getDeclaredProperty(Artist.ARTIST_NAME_PROPERTY));
+
+        // properties not described in the entity must not be included
+        assertNull(d1.getDeclaredProperty(Artist.DATE_OF_BIRTH_PROPERTY));
+
+        // collection properties must be returned just as simple properties do...
+        assertNotNull(d1.getDeclaredProperty(Artist.PAINTING_ARRAY_PROPERTY));
     }
 }

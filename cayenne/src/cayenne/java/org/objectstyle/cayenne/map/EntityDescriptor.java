@@ -65,6 +65,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
  * A ClassDescriptor describing a persistent bean based on ObjEntity.
@@ -161,6 +162,12 @@ public class EntityDescriptor extends BaseClassDescriptor {
 
             ObjRelationship relationship = (ObjRelationship) it.next();
             ObjEntity targetEntity = (ObjEntity) relationship.getTargetEntity();
+            
+            if (targetEntity == null) {
+                throw new CayenneRuntimeException("Relationship '"
+                        + relationship.getName()
+                        + "' has no target entity.");
+            }
 
             if (relationship.isToMany()) {
                 CollectionProperty property = new CollectionProperty(relationship

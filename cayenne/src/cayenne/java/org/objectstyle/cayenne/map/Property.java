@@ -131,16 +131,17 @@ public class Property implements Serializable {
     public Property(String propertyName, Class beanClass, Class propertyType) {
         this(propertyName, beanClass);
 
-        if (propertyType != null && !propertyType.equals(this.propertyType)) {
-
-            String typeName = (propertyType != null) ? propertyType.getName() : null;
+        if (propertyType != null
+                && !propertyType.getName().equals(this.propertyType.getName())) {
 
             throw new CayenneRuntimeException("Invalid property type. Expected '"
                     + propertyType.getName()
                     + "' got '"
-                    + typeName
-                    + "'. Bean class: "
-                    + beanClass.getName());
+                    + this.propertyType.getName()
+                    + "'. Property: "
+                    + beanClass.getName()
+                    + "."
+                    + propertyName);
         }
     }
 

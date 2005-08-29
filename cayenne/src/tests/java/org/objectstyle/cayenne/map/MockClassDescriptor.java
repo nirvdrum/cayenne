@@ -53,35 +53,56 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit;
+package org.objectstyle.cayenne.map;
 
-import java.io.File;
+import java.util.Collection;
 
-import junit.framework.TestCase;
+public class MockClassDescriptor implements ClassDescriptor {
 
-import org.objectstyle.cayenne.conf.Configuration;
-
-/**
- * A test case that requires no DB access.
- * 
- * @since 1.1
- * @author Andrei Adamchik
- */
-public abstract class BasicTestCase extends TestCase {
-
-    static {
-        Configuration.configureCommonLogging();
+    public Class getObjectClass() {
+        return null;
     }
 
-    protected File getTestResourcesDir() {
-        return CayenneTestResources.getResources().getTestResourcesDir();
+    public ValueHolderFactory getValueHolderFactory() {
+        return null;
     }
 
-    /**
-     * Returns directory that should be used by all test cases that perform file
-     * operations.
-     */
-    protected File getTestDir() {
-        return CayenneTestResources.getResources().getTestDir();
+    public void setValueHolderFactory(ValueHolderFactory factory) {
     }
+
+    public ClassDescriptor getSuperclassDescriptor() {
+        return null;
+    }
+
+    public Object createObject() {
+        return null;
+    }
+
+    public void injectRelationshipFaults(Object o) {
+    }
+
+    public Property getProperty(String propertyName) {
+        return null;
+    }
+
+    public Property getDeclaredProperty(String propertyName) {
+        return null;
+    }
+
+    public Collection getDeclaredPropertyNames() {
+        return null;
+    }
+
+    public Property[] getDeclaredSimpleProperties() {
+        return null;
+    }
+
+    public ValueHolderProperty[] getDeclaredValueHolderProperties() {
+        return null;
+    }
+
+    public CollectionProperty[] getDeclaredCollectionProperties() {
+        return null;
+    }
+
 }
