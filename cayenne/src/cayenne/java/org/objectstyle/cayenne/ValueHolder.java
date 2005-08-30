@@ -66,14 +66,14 @@ import java.io.Serializable;
  * </p>
  * 
  * <pre>
- * protected ValueHolder somePropertyHolder;
+ * protected ValueHolder someProperty;
  * 
  * public SomeClass getSomeProperty() {
- *     return (SomeClass) somePropertyHolder.getValue();
+ *     return (SomeClass) somePropertyHolder.getValue(SomeClass.class);
  * }
  * 
  * public void setSomeProperty(SomeClass newValue) {
- *     somePropertyHolder.setValue(newValue);
+ *     somePropertyHolder.setValue(SomeClass.class, newValue);
  * }
  * </pre>
  * 

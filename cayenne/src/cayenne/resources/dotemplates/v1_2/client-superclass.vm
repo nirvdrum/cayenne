@@ -73,13 +73,6 @@ public class ${entityUtils.superClassName} extends ${entityUtils.baseClassName} 
 ## Create list add/remove/get methods
 #foreach( $rel in ${objEntity.DeclaredRelationships} )
 #if( $rel.ToMany )
-    /**
-     * Sets '$rel.Name' lazy list. In most cases this method shouldn't be used directly as
-     * the list is initialized by Cayenne.
-     */
-	public void set${stringUtils.capitalized($rel.Name)}(List list) {
-        this.${rel.Name} = list;
-    }
 #if ( ! $rel.ReadOnly )
     public void addTo${stringUtils.capitalized($rel.Name)}($importUtils.formatJavaType(${rel.TargetEntity.ClientClassName}) obj) {
         willRead("${rel.Name}");
@@ -95,13 +88,6 @@ public class ${entityUtils.superClassName} extends ${entityUtils.baseClassName} 
         return ${rel.Name};
     }
 #else
-    /**
-     * Sets ValueHolder of '$rel.Name' property. Cayenne uses this setter to inject a ValueHolder.
-     */
-    public void set${stringUtils.capitalized($rel.Name)}Holder(ValueHolder holder) {
-        this.${rel.Name}Holder = holder;
-    }
-
 #if ( !${objEntity.isReadOnly()} && !$rel.ReadOnly )
     public void set${stringUtils.capitalized($rel.Name)}(${importUtils.formatJavaType($rel.TargetEntity.ClientClassName)} $stringUtils.formatVariableName(${rel.Name})) {
         willWrite("${rel.Name}", get${stringUtils.capitalized($rel.Name)}(), $stringUtils.formatVariableName(${rel.Name}));

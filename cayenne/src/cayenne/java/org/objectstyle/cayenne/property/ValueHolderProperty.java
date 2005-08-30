@@ -53,28 +53,62 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.property;
 
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.PersistentObjectHolder;
+import org.objectstyle.cayenne.ValueHolder;
 
-public class BaseClassDescriptorTst extends TestCase {
+/**
+ * Provides access to a property implemented as a ValueHolder Field.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+public class ValueHolderProperty extends FieldProperty {
 
-    public void testConstructor() {
-        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
-        };
-        assertNull(d1.getSuperclassDescriptor());
-
-        BaseClassDescriptor d2 = new BaseClassDescriptor(d1) {
-        };
-        assertNull(d1.getSuperclassDescriptor());
-        assertSame(d1, d2.getSuperclassDescriptor());
+    public ValueHolderProperty(Class beanClass, String propertyName) {
+        super(beanClass, propertyName, ValueHolder.class);
     }
 
-    public void testValid() { // by default BaseClassDescriptor is not compiled...
-        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
-        };
+    /**
+     * Injects a ValueHolder in the object if it hasn't been done yet.
+     */
+    public void willRead(Object object) throws PropertyAccessException {
+        ensureValueHolderSet(object);
+    }
 
-        // by default BaseClassDescriptor is not compiled...
-        assertFalse(d1.isValid());
+    /**
+     * Injects a ValueHolder in the object if it hasn't been done yet.
+     */
+    public void willWrite(Object object) throws PropertyAccessException {
+        ensureValueHolderSet(object);
+    }
+
+    /**
+     * Checks that an object's ValueHolder field described by this property is set,
+     * injecting a ValueHolder if needed.
+     */
+    protected void ensureValueHolderSet(Object object) throws PropertyAccessException {
+        if (directRead(object) == null) {
+            directWrite(object, createValueHolder(object));
+        }
+    }
+
+    /**
+     * Creates a ValueHolder for an object. Default implementation requires that an object
+     * implements Persistent interface.
+     */
+    protected ValueHolder createValueHolder(Object object)
+            throws PropertyAccessException {
+        if (!(object instanceof Persistent)) {
+
+            throw new PropertyAccessException(
+                    "ValueHolders for non-persistent objects are not supported.",
+                    this,
+                    object);
+        }
+
+        return new PersistentObjectHolder((Persistent) object, getPropertyName());
     }
 }

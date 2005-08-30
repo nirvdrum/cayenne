@@ -53,14 +53,12 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.property;
 
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ValueHolder;
 
 /**
  * A superclass of Cayenne ClassDescriptors. Defines all main bean descriptor parameters
@@ -72,14 +70,10 @@ import org.objectstyle.cayenne.ValueHolder;
 public abstract class BaseClassDescriptor implements ClassDescriptor {
 
     protected ClassDescriptor superclassDescriptor;
-    protected ValueHolderFactory valueHolderFactory;
 
     // compiled properties ... all declared as transient
     protected transient Class objectClass;
     protected transient Map declaredProperties;
-    protected transient Property[] simpleProperties;
-    protected transient ValueHolderProperty[] valueHolderProperties;
-    protected transient CollectionProperty[] collectionProperties;
     protected transient Map declaredPropertiesRef;
 
     /**
@@ -96,9 +90,6 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
     public boolean isValid() {
         return objectClass != null
                 && declaredProperties != null
-                && simpleProperties != null
-                && valueHolderProperties != null
-                && collectionProperties != null
                 && declaredPropertiesRef != null;
     }
 
@@ -108,26 +99,6 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
 
     public void setObjectClass(Class objectClass) {
         this.objectClass = objectClass;
-    }
-
-    public ValueHolderFactory getValueHolderFactory() {
-        return valueHolderFactory;
-    }
-
-    public void setValueHolderFactory(ValueHolderFactory propertyValueFactory) {
-        this.valueHolderFactory = propertyValueFactory;
-    }
-
-    public CollectionProperty[] getDeclaredCollectionProperties() {
-        return collectionProperties;
-    }
-
-    public Property[] getDeclaredSimpleProperties() {
-        return simpleProperties;
-    }
-
-    public ValueHolderProperty[] getDeclaredValueHolderProperties() {
-        return valueHolderProperties;
     }
 
     /**
@@ -141,8 +112,8 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
      * Recursively looks up property descriptor in this class descriptor and all
      * superclass descriptors.
      */
-    public Property getProperty(String propertyName) {
-        Property property = getDeclaredProperty(propertyName);
+    public PersistentProperty getProperty(String propertyName) {
+        PersistentProperty property = getDeclaredProperty(propertyName);
 
         if (property == null && superclassDescriptor != null) {
             property = superclassDescriptor.getProperty(propertyName);
@@ -151,8 +122,8 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         return property;
     }
 
-    public Property getDeclaredProperty(String propertyName) {
-        return (Property) declaredProperties.get(propertyName);
+    public PersistentProperty getDeclaredProperty(String propertyName) {
+        return (PersistentProperty) declaredProperties.get(propertyName);
     }
 
     /**
@@ -178,76 +149,6 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         catch (Throwable e) {
             throw new CayenneRuntimeException("Error creating object of class '"
                     + objectClass.getName()
-                    + "'", e);
-        }
-    }
-
-    /**
-     * Initializes relationships properties of an object.
-     */
-    public void injectRelationshipFaults(Object o) {
-        if (valueHolderFactory == null) {
-            valueHolderFactory = new DefaultValueHolderFactory();
-        }
-
-        // first call super...
-        if (getSuperclassDescriptor() != null) {
-            getSuperclassDescriptor().injectRelationshipFaults(o);
-        }
-
-        // inject value holders...
-        for (int i = 0; i < valueHolderProperties.length; i++) {
-            if (valueHolderProperties[i].getValueHolderWriteMethod() != null) {
-                ValueHolder valueHolder = valueHolderFactory.createValueHolder(
-                        o,
-                        valueHolderProperties[i]);
-                invokeSetter(
-                        valueHolderProperties[i].getValueHolderWriteMethod(),
-                        o,
-                        valueHolder);
-            }
-            // else - object takes care of value holder creation on its own (e.g. in
-            // costructor)..
-        }
-
-        // inject collections...
-        for (int i = 0; i < collectionProperties.length; i++) {
-            if (collectionProperties[i].getWriteMethod() != null) {
-                Collection collection = valueHolderFactory.createCollection(
-                        o,
-                        collectionProperties[i]);
-                invokeSetter(collectionProperties[i].getWriteMethod(), o, collection);
-            }
-            // else - object takes care of collection creation on its own (e.g. in
-            // costructor)..
-        }
-    }
-
-    /**
-     * Calls a setter method with a single argument on an object, rethrowing any
-     * exceptions wrapped in unchecked CayenneRuntimeException.
-     */
-    protected void invokeSetter(Method method, Object object, Object newValue)
-            throws CayenneRuntimeException {
-
-        if (method == null) {
-            throw new CayenneRuntimeException("Null setter method.");
-        }
-
-        if (object == null) {
-            throw new CayenneRuntimeException("An attempt to call a method '"
-                    + method.getName()
-                    + "' on a null object.");
-        }
-
-        try {
-            method.invoke(object, new Object[] {
-                newValue
-            });
-        }
-        catch (Throwable e) {
-            throw new CayenneRuntimeException("Error calling a setter method '"
-                    + method.getName()
                     + "'", e);
         }
     }

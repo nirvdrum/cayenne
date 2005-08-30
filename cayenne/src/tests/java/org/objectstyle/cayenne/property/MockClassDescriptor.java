@@ -53,39 +53,17 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.property;
 
 import java.util.Collection;
 
 public class MockClassDescriptor implements ClassDescriptor {
 
-    public Class getObjectClass() {
-        return null;
-    }
-
-    public ValueHolderFactory getValueHolderFactory() {
-        return null;
-    }
-
-    public void setValueHolderFactory(ValueHolderFactory factory) {
-    }
-
-    public ClassDescriptor getSuperclassDescriptor() {
-        return null;
-    }
-
     public Object createObject() {
         return null;
     }
 
-    public void injectRelationshipFaults(Object o) {
-    }
-
-    public Property getProperty(String propertyName) {
-        return null;
-    }
-
-    public Property getDeclaredProperty(String propertyName) {
+    public PersistentProperty getDeclaredProperty(String propertyName) {
         return null;
     }
 
@@ -93,16 +71,15 @@ public class MockClassDescriptor implements ClassDescriptor {
         return null;
     }
 
-    public Property[] getDeclaredSimpleProperties() {
+    public Class getObjectClass() {
         return null;
     }
 
-    public ValueHolderProperty[] getDeclaredValueHolderProperties() {
+    public PersistentProperty getProperty(String propertyName) {
         return null;
     }
 
-    public CollectionProperty[] getDeclaredCollectionProperties() {
+    public ClassDescriptor getSuperclassDescriptor() {
         return null;
     }
-
 }

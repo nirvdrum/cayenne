@@ -53,64 +53,62 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.property;
 
-import java.util.Collection;
+import java.util.List;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.PersistentObjectHolder;
 import org.objectstyle.cayenne.PersistentObjectList;
-import org.objectstyle.cayenne.ValueHolder;
-import org.objectstyle.cayenne.distribution.GlobalID;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
-import org.objectstyle.cayenne.query.RelationshipQuery;
 
 /**
- * A default ValueHolderFactory for Persistent objects. Only works for parent objects that
- * implement Persistent interface and use GlobalID for their object id.
+ * Provides access to a property implemented as a List Field.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class DefaultValueHolderFactory implements ValueHolderFactory {
+public class ListProperty extends FieldProperty {
 
-    public ValueHolder createValueHolder(Object parentObject, Property property) {
-        if (!(parentObject instanceof Persistent)) {
-            throw new CayenneRuntimeException(
-                    "ValueHolder owner is expected to be non-null Persistent object. Actual: "
-                            + parentObject);
-        }
-
-        Persistent persistent = (Persistent) parentObject;
-        return new PersistentObjectHolder(persistent, property.getPropertyName());
+    public ListProperty(Class beanClass, String propertyName) {
+        super(beanClass, propertyName, List.class);
     }
 
-    public Collection createCollection(Object parentObject, Property property) {
-        if (!(parentObject instanceof Persistent)) {
-            throw new CayenneRuntimeException(
-                    "ValueHolder owner is expected to be non-null Persistent object. Actual: "
-                            + parentObject);
-        }
-
-        Persistent persistent = (Persistent) parentObject;
-        return new PersistentObjectList(persistent, property.getPropertyName());
+    /**
+     * Injects a List in the object if it hasn't been done yet.
+     */
+    public void willRead(Object object) throws PropertyAccessException {
+        ensureListSet(object);
     }
 
-    protected QueryExecutionPlan getRelationshipQuery(
-            Persistent object,
-            String relationshpName) {
-        // TODO: maybe we should redefine persistent "oid" as GlobalID? Having it as
-        // object does no good anyway as it introduces hidden casts.
+    /**
+     * Injects a List in the object if it hasn't been done yet.
+     */
+    public void willWrite(Object object) throws PropertyAccessException {
+        ensureListSet(object);
+    }
 
-        if (!(object.getOid() instanceof GlobalID)) {
-            throw new CayenneRuntimeException(
-                    "ValueHolder owner is expected to have GlobalID. Actual id: "
-                            + object.getOid());
+    /**
+     * Checks that an object's List field described by this property is set, injecting a
+     * List if needed.
+     */
+    protected void ensureListSet(Object object) throws PropertyAccessException {
+        if (directRead(object) == null) {
+            directWrite(object, createList(object));
+        }
+    }
+
+    /**
+     * Creates a List for an object. Default implementation requires that an object
+     * implements Persistent interface.
+     */
+    protected List createList(Object object) throws PropertyAccessException {
+        if (!(object instanceof Persistent)) {
+
+            throw new PropertyAccessException(
+                    "ValueHolders for non-persistent objects are not supported.",
+                    this,
+                    object);
         }
 
-        GlobalID gid = (GlobalID) object.getOid();
-
-        return new RelationshipQuery(gid, relationshpName);
+        return new PersistentObjectList((Persistent) object, getPropertyName());
     }
 }

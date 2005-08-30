@@ -57,15 +57,17 @@ package org.objectstyle.cayenne.map;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.property.BaseClassDescriptor;
+import org.objectstyle.cayenne.property.ClassDescriptor;
+import org.objectstyle.cayenne.property.FieldProperty;
+import org.objectstyle.cayenne.property.ListProperty;
+import org.objectstyle.cayenne.property.ValueHolderProperty;
 
 /**
  * A ClassDescriptor describing a persistent bean based on ObjEntity.
@@ -124,21 +126,16 @@ public class EntityDescriptor extends BaseClassDescriptor {
     protected void compileAttributes(ClassLoader loader, Map allDescriptors) {
 
         // only include this entity attributes and skip superclasses...
-        Collection attributes = entity.getDeclaredAttributes();
-        Collection properties = new ArrayList(attributes.size());
-
-        Iterator it = attributes.iterator();
+        Iterator it = entity.getDeclaredAttributes().iterator();
         while (it.hasNext()) {
             ObjAttribute attribute = (ObjAttribute) it.next();
 
-            Property property = new Property(attribute.getName(), objectClass, attribute
-                    .getJavaClass(loader));
+            FieldProperty property = new FieldProperty(
+                    objectClass,
+                    attribute.getName(),
+                    attribute.getJavaClass(loader));
             allDescriptors.put(attribute.getName(), property);
-            properties.add(property);
         }
-
-        this.simpleProperties = (Property[]) properties.toArray(new Property[properties
-                .size()]);
     }
 
     /**
@@ -147,47 +144,25 @@ public class EntityDescriptor extends BaseClassDescriptor {
      * "compile" method.
      */
     protected void compileRelationships(ClassLoader loader, Map allDescriptors) {
-        Collection relationships = entity.getDeclaredRelationships();
 
-        if (relationships.isEmpty()) {
-            this.collectionProperties = new CollectionProperty[0];
-            this.valueHolderProperties = new ValueHolderProperty[0];
-            return;
-        }
-
-        Collection valueHolders = new ArrayList();
-        Collection collections = new ArrayList();
-        Iterator it = relationships.iterator();
+        // only include this entity relationships and skip superclasses...
+        Iterator it = entity.getDeclaredRelationships().iterator();
         while (it.hasNext()) {
 
             ObjRelationship relationship = (ObjRelationship) it.next();
-            ObjEntity targetEntity = (ObjEntity) relationship.getTargetEntity();
-            
-            if (targetEntity == null) {
-                throw new CayenneRuntimeException("Relationship '"
-                        + relationship.getName()
-                        + "' has no target entity.");
-            }
 
             if (relationship.isToMany()) {
-                CollectionProperty property = new CollectionProperty(relationship
-                        .getName(), objectClass, targetEntity.getJavaClass(loader));
+                ListProperty property = new ListProperty(objectClass, relationship
+                        .getName());
                 allDescriptors.put(relationship.getName(), property);
-                collections.add(property);
             }
             else {
-                ValueHolderProperty property = new ValueHolderProperty(relationship
-                        .getName(), objectClass, targetEntity.getJavaClass(loader));
+                ValueHolderProperty property = new ValueHolderProperty(
+                        objectClass,
+                        relationship.getName());
                 allDescriptors.put(relationship.getName(), property);
-                valueHolders.add(property);
             }
         }
-
-        this.collectionProperties = (CollectionProperty[]) collections
-                .toArray(new CollectionProperty[collections.size()]);
-
-        this.valueHolderProperties = (ValueHolderProperty[]) valueHolders
-                .toArray(new ValueHolderProperty[valueHolders.size()]);
     }
 
     /**

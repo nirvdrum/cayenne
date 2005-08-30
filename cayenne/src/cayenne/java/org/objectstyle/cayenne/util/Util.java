@@ -71,6 +71,8 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -580,5 +582,16 @@ public class Util {
      */
     public static String sqlPatternToRegex(String pattern, boolean ignoreCase) {
         return RegexUtil.sqlPatternToRegex(pattern, ignoreCase);
+    }
+    
+    /**
+     * Returns true if a Member is accessible via reflection under normal Java access
+     * controls.
+     * 
+     * @since 1.2
+     */
+    public static boolean isAccessible(Member member) {
+        return Modifier.isPublic(member.getModifiers())
+                && Modifier.isPublic(member.getDeclaringClass().getModifiers());
     }
 }

@@ -40,13 +40,6 @@ public class _ClientMtTable1 extends PersistentObject {
     }
     
     
-    /**
-     * Sets 'table2Array' lazy list. In most cases this method shouldn't be used directly as
-     * the list is initialized by Cayenne.
-     */
-	public void setTable2Array(List list) {
-        this.table2Array = list;
-    }
     public void addToTable2Array(ClientMtTable2 obj) {
         willRead("table2Array");
         // TODO:

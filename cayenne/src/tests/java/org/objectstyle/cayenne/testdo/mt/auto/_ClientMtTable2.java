@@ -27,13 +27,6 @@ public class _ClientMtTable2 extends PersistentObject {
     }
     
     
-    /**
-     * Sets ValueHolder of 'table1' property. Cayenne uses this setter to inject a ValueHolder.
-     */
-    public void setTable1Holder(ValueHolder holder) {
-        this.table1Holder = holder;
-    }
-
     public void setTable1(ClientMtTable1 table1) {
         willWrite("table1", getTable1(), table1);
         this.table1Holder.setValue(ClientMtTable1.class, table1);

@@ -57,7 +57,9 @@ package org.objectstyle.cayenne.map;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.property.BaseClassDescriptor;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
+import org.objectstyle.cayenne.testdo.mt.MtTable1;
 import org.objectstyle.cayenne.util.Util;
 
 public class EntityDescriptorTst extends TestCase {
@@ -104,11 +106,13 @@ public class EntityDescriptorTst extends TestCase {
 
         ObjEntity e1 = new ObjEntity("TestEntity");
         map.addObjEntity(e1);
-        e1.setClassName(Artist.class.getName());
-        e1.addAttribute(new ObjAttribute(Artist.ARTIST_NAME_PROPERTY, String.class
-                .getName(), e1));
+        e1.setClassName(ClientMtTable1.class.getName());
+        e1.addAttribute(new ObjAttribute(
+                ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY,
+                String.class.getName(),
+                e1));
 
-        ObjRelationship toMany = new ObjRelationship(Artist.PAINTING_ARRAY_PROPERTY) {
+        ObjRelationship toMany = new ObjRelationship(MtTable1.TABLE2ARRAY_PROPERTY) {
 
             public boolean isToMany() {
                 return true;
@@ -122,15 +126,15 @@ public class EntityDescriptorTst extends TestCase {
 
         assertSame(e1, d1.getEntity());
         assertNotNull(d1.getObjectClass());
-        assertEquals(Artist.class.getName(), d1.getObjectClass().getName());
+        assertEquals(ClientMtTable1.class.getName(), d1.getObjectClass().getName());
 
         // properties that exist in the entity must be included
-        assertNotNull(d1.getDeclaredProperty(Artist.ARTIST_NAME_PROPERTY));
+        assertNotNull(d1.getDeclaredProperty(ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY));
 
         // properties not described in the entity must not be included
-        assertNull(d1.getDeclaredProperty(Artist.DATE_OF_BIRTH_PROPERTY));
+        assertNull(d1.getDeclaredProperty(ClientMtTable1.SERVER_ATTRIBUTE1_PROPERTY));
 
         // collection properties must be returned just as simple properties do...
-        assertNotNull(d1.getDeclaredProperty(Artist.PAINTING_ARRAY_PROPERTY));
+        assertNotNull(d1.getDeclaredProperty(ClientMtTable1.TABLE2ARRAY_PROPERTY));
     }
 }

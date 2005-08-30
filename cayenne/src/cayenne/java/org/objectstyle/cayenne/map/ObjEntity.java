@@ -73,6 +73,7 @@ import org.objectstyle.cayenne.map.event.ObjAttributeListener;
 import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
+import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.util.CayenneMapEntry;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;

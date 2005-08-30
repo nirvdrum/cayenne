@@ -53,33 +53,30 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.property;
 
-import java.util.Collection;
+import org.objectstyle.cayenne.property.BaseClassDescriptor;
 
-import org.objectstyle.cayenne.ValueHolder;
+import junit.framework.TestCase;
 
-/**
- * A factory for object ValueHolders and Collections.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public interface ValueHolderFactory {
+public class BaseClassDescriptorTst extends TestCase {
 
-    /**
-     * Creates a ValueHolder that will be injected in the object.
-     * 
-     * @param parentObject an object a ValueHolder is for.
-     * @param property a property descriptor for the collection.
-     */
-    ValueHolder createValueHolder(Object parentObject, Property property);
+    public void testConstructor() {
+        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
+        };
+        assertNull(d1.getSuperclassDescriptor());
 
-    /**
-     * Creates a Collection that will be injected in the object.
-     * 
-     * @param parentObject an object a Collection is for.
-     * @param property a Property descriptor for the collection.
-     */
-    Collection createCollection(Object parentObject, Property property);
+        BaseClassDescriptor d2 = new BaseClassDescriptor(d1) {
+        };
+        assertNull(d1.getSuperclassDescriptor());
+        assertSame(d1, d2.getSuperclassDescriptor());
+    }
+
+    public void testValid() { // by default BaseClassDescriptor is not compiled...
+        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
+        };
+
+        // by default BaseClassDescriptor is not compiled...
+        assertFalse(d1.isValid());
+    }
 }

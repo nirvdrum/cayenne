@@ -74,8 +74,9 @@ import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.graph.OperationRecorder;
-import org.objectstyle.cayenne.map.ClassDescriptor;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.property.ClassDescriptor;
+import org.objectstyle.cayenne.property.PersistentProperty;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
@@ -241,7 +242,6 @@ public class ClientObjectContext implements ObjectContext {
 
         // postprocess fetched objects...
 
-        ClassDescriptor descriptor = null;
         Iterator it = objects.iterator();
         while (it.hasNext()) {
 
@@ -252,17 +252,6 @@ public class ClientObjectContext implements ObjectContext {
                 throw new CayenneClientException(
                         "Server returned an object without an id: " + o);
             }
-
-            // detect result type on the first iteration .. assuming that all objects are
-            // either the same type or a part of the same inheritance hierarchy (see TODO
-            // note above)
-            if (descriptor == null) {
-                descriptor = getEntityResolver()
-                        .lookupEntity(o.getClass())
-                        .getClassDescriptor();
-            }
-
-            descriptor.injectRelationshipFaults(o);
 
             o.setPersistenceState(PersistenceState.COMMITTED);
             o.setObjectContext(this);
@@ -276,11 +265,23 @@ public class ClientObjectContext implements ObjectContext {
         return new GenericQueryMessage(query).send(connector);
     }
 
-    public void objectWillRead(Persistent dataObject, String property) {
-        if (dataObject.getPersistenceState() == PersistenceState.HOLLOW) {
+    public void objectWillRead(Persistent object, String property) {
+        if (object.getPersistenceState() == PersistenceState.HOLLOW) {
             // must resolve...
             throw new CayenneClientException("Resolving an object is Unimplemented");
         }
+
+        // inject value holders
+
+        // TODO: maybe it is more efficient to inject value holders once for all objects
+        // after the fetch? ... I guess this depends on the ratio of how many objects were
+        // fetched to how many of them are later accessed.
+        PersistentProperty propertyDescriptor = getEntityResolver().lookupEntity(
+                object.getClass()).getClassDescriptor().getDeclaredProperty(property);
+        if (propertyDescriptor != null) {
+            propertyDescriptor.willRead(object);
+        }
+        // else - non-persistent property that called objectWillRead for whatever reason.
     }
 
     public void objectWillWrite(
@@ -293,6 +294,18 @@ public class ClientObjectContext implements ObjectContext {
         if (object.getPersistenceState() == PersistenceState.COMMITTED) {
             object.setPersistenceState(PersistenceState.MODIFIED);
         }
+
+        // inject value holders
+
+        // TODO: maybe it is more efficient to inject value holders once for all objects
+        // after the fetch? ... I guess this depends on the ratio of how many objects were
+        // fetched to how many of them are later accessed.
+        PersistentProperty propertyDescriptor = getEntityResolver().lookupEntity(
+                object.getClass()).getClassDescriptor().getDeclaredProperty(property);
+        if (propertyDescriptor != null) {
+            propertyDescriptor.willWrite(object, newValue);
+        }
+        // else - non-persistent property that called objectWillRead for whatever reason.
 
         graphManager.nodePropertyChanged(object.getOid(), property, oldValue, newValue);
     }

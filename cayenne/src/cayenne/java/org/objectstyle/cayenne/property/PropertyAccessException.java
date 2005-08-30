@@ -53,60 +53,45 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.property;
 
-import java.lang.reflect.Method;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
- * A descriptor of a Collection property. Defines normal setters and getters but also
- * additional optional accessors to add and remove objects from collection.
- * <p>
- * Names of the extra methods are derived from a property name using a naming convention.
- * E.g. if an object that has a property <em>someProperty</em> wants Cayenne to take
- * care of the collection initialization, it should implement methods using the following
- * naming convention: <em>public void addToSomeProperty(SomeClass)</em> and
- * <em>public void removeFromSomeProperty(SomeClass)</em>.
- * </p>
+ * An unchecked exception thrown on errors during property access.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class CollectionProperty extends Property {
+public class PropertyAccessException extends CayenneRuntimeException {
 
-    public static final String ADD_TO_NAME_PREFIX = "addTo";
-    public static final String REMOVE_FROM_NAME_PREFIX = "removeFrom";
+    protected PersistentProperty property;
+    protected Object source;
 
-    protected Method addToCollectionMethod;
-    protected Method removeFromCollectionMethod;
-
-    public CollectionProperty(String propertyName, Class beanClass, Class targetClass) {
-
-        super(propertyName, beanClass);
-
-        String base = capitalize(propertyName);
-        addToCollectionMethod = findMatchingSetter(
-                ADD_TO_NAME_PREFIX + base,
-                beanClass,
-                targetClass);
-        removeFromCollectionMethod = findMatchingSetter(
-                REMOVE_FROM_NAME_PREFIX + base,
-                beanClass,
-                targetClass);
+    public PropertyAccessException(String message, PersistentProperty property,
+            Object source) {
+        this(message, property, source, null);
     }
 
-    public Method getAddToCollectionMethod() {
-        return addToCollectionMethod;
+    public PropertyAccessException(String message, PersistentProperty property,
+            Object source, Throwable cause) {
+        super(message, cause);
+
+        this.property = property;
+        this.source = source;
     }
 
-    public void setAddToCollectionMethod(Method addToCollectionMethod) {
-        this.addToCollectionMethod = addToCollectionMethod;
+    /**
+     * Returns property descritptor that was used to access the property.
+     */
+    public PersistentProperty getProperty() {
+        return property;
     }
 
-    public Method getRemoveFromCollectionMethod() {
-        return removeFromCollectionMethod;
-    }
-
-    public void setRemoveFromCollectionMethod(Method removeFromCollectionMethod) {
-        this.removeFromCollectionMethod = removeFromCollectionMethod;
+    /**
+     * Returns an object that caused an error.
+     */
+    public Object getSource() {
+        return source;
     }
 }

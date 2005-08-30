@@ -53,67 +53,56 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.property;
 
-import java.lang.reflect.Method;
-
-import org.objectstyle.cayenne.ValueHolder;
+import java.io.Serializable;
+import java.util.Collection;
 
 /**
- * A descriptor for a property with indirect access via a ValueHolder. Defines normal
- * setters and getters but also two additional optional accessors for the ValueHolder
- * object that stores property value.
- * <p>
- * ValueHolder property name is derived from a property name using a naming convention.
- * E.g. if an object that has a property <em>someProperty</em> and wants Cayenne to take
- * care of the ValueHolders initialization, it should implement accessors using the
- * following naming convention: <em>public void setSomePropertyHolder(ValueHolder)</em>
- * and <em>public ValueHolder getSomePropertyHolder()</em>.
- * </p>
+ * Provides access to a set of persistent properties of a Java Bean and methods for
+ * manipulating such bean.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ValueHolderProperty extends Property {
+// TODO: replace ObjectFactory with ClassDescriptor...
+public interface ClassDescriptor extends Serializable {
 
     /**
-     * A property name suffix for the property that is implemented with a ValueHolder.
+     * Returns a bean class mapped by this descriptor.
      */
-    public static final String HOLDER_NAME_SUFFIX = "Holder";
+    Class getObjectClass();
 
-    protected Method valueHolderReadMethod;
-    protected Method valueHolderWriteMethod;
+    /**
+     * Returns a descriptor of the mapped superclass or null if the descriptor's entity
+     * sits at the top of inheritance hierarchy or no inheritance is mapped.
+     */
+    ClassDescriptor getSuperclassDescriptor();
 
-    public ValueHolderProperty(String propertyName, Class beanClass) {
-        this(propertyName, beanClass, null);
-    }
+    /**
+     * Creates a new instance of a class described by this object.
+     */
+    Object createObject();
 
-    public ValueHolderProperty(String propertyName, Class beanClass, Class valueClass) {
+    /**
+     * Returns a Java Bean property descriptor matching property name or null if such
+     * property is not found. Lookup includes properties from this descriptor and all its
+     * superclass decsriptors. Returned property maybe any one of simple, value holder or
+     * collection properties.
+     */
+    PersistentProperty getProperty(String propertyName);
 
-        super(propertyName, beanClass, valueClass);
+    /**
+     * Returns a Java Bean property descriptor matching property name or null if such
+     * property is not found. Lookup DOES NOT including properties from the superclass
+     * decsriptors. Returned property maybe any one of simple, value holder or collection
+     * properties.
+     */
+    PersistentProperty getDeclaredProperty(String propertyName);
 
-        String base = capitalize(propertyName + HOLDER_NAME_SUFFIX);
-        valueHolderReadMethod = findGetter("get" + base, beanClass);
-        valueHolderWriteMethod = findMatchingSetter(
-                "set" + base,
-                beanClass,
-                ValueHolder.class);
-    }
-
-    public Method getValueHolderReadMethod() {
-        return valueHolderReadMethod;
-    }
-
-    public void setValueHolderReadMethod(Method valueHolderReadMethod) {
-        this.valueHolderReadMethod = valueHolderReadMethod;
-    }
-
-    public Method getValueHolderWriteMethod() {
-        return valueHolderWriteMethod;
-    }
-
-    public void setValueHolderWriteMethod(Method valueHolderWriteMethod) {
-        this.valueHolderWriteMethod = valueHolderWriteMethod;
-    }
-
+    /**
+     * Returns all property names mapped in this descriptor, not including properties from
+     * the superclass decsriptors.
+     */
+    Collection getDeclaredPropertyNames();
 }
