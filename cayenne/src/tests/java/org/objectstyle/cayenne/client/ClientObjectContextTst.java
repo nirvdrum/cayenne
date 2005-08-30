@@ -63,7 +63,6 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.MockPersistentObject;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.distribution.ClientMessage;
@@ -128,10 +127,7 @@ public class ClientObjectContextTst extends TestCase {
 
     public void testCommitChangesNew() {
         final OperationRecorder recorder = new OperationRecorder();
-        final Object newObjectId = new ObjectId(
-                MockPersistentObject.class,
-                "key",
-                "generated");
+        final Object newObjectId = new GlobalID("test", "key", "generated");
 
         // test that ids that are passed back are actually propagated to the right
         // objects...
@@ -152,19 +148,19 @@ public class ClientObjectContextTst extends TestCase {
         Persistent object = context.newObject(MockPersistentObject.class);
 
         // record change here to make it available to the anonymous connector method..
-        recorder.nodeIdChanged(object.getOid(), newObjectId);
+        recorder.nodeIdChanged(object.getGlobalID(), newObjectId);
 
         // check that a generated object ID is assigned back to the object...
-        assertNotSame(newObjectId, object.getOid());
+        assertNotSame(newObjectId, object.getGlobalID());
         context.commit();
-        assertSame(newObjectId, object.getOid());
+        assertSame(newObjectId, object.getGlobalID());
         assertSame(object, context.graphManager.getNode(newObjectId));
     }
 
     public void testPerformSelectQuery() {
         final MockPersistentObject o1 = new MockPersistentObject();
-        Object oid1 = new Object();
-        o1.setOid(oid1);
+        GlobalID oid1 = new GlobalID("test");
+        o1.setGlobalID(oid1);
 
         MockCayenneConnector connector = new MockCayenneConnector() {
 
@@ -182,7 +178,7 @@ public class ClientObjectContextTst extends TestCase {
 
         Collection entities = Collections.singleton(entity);
         context.setEntityResolver(new ClientEntityResolver(entities));
-        
+
         List list = context.performSelectQuery(new NamedQuery("dummy"));
         assertNotNull(list);
         assertEquals(1, list.size());
@@ -223,9 +219,9 @@ public class ClientObjectContextTst extends TestCase {
         assertTrue(context.stateRecorder.dirtyNodes(
                 context.graphManager,
                 PersistenceState.NEW).contains(object));
-        assertNotNull(object.getOid());
-        assertTrue(object.getOid() instanceof GlobalID);
-        assertTrue(((GlobalID) object.getOid()).isTemporary());
+        assertNotNull(object.getGlobalID());
+        assertTrue(object.getGlobalID() instanceof GlobalID);
+        assertTrue(((GlobalID) object.getGlobalID()).isTemporary());
 
     }
 
@@ -255,21 +251,21 @@ public class ClientObjectContextTst extends TestCase {
         // COMMITTED
         Persistent committed = new MockPersistentObject();
         committed.setPersistenceState(PersistenceState.COMMITTED);
-        committed.setOid(new ObjectId(MockPersistentObject.class, "key", "value1"));
+        committed.setGlobalID(new GlobalID("MockPersistentObject", "key", "value1"));
         context.deleteObject(committed);
         assertEquals(PersistenceState.DELETED, committed.getPersistenceState());
 
         // MODIFIED
         Persistent modified = new MockPersistentObject();
         modified.setPersistenceState(PersistenceState.MODIFIED);
-        modified.setOid(new ObjectId(MockPersistentObject.class, "key", "value2"));
+        modified.setGlobalID(new GlobalID("MockPersistentObject", "key", "value2"));
         context.deleteObject(modified);
         assertEquals(PersistenceState.DELETED, modified.getPersistenceState());
 
         // DELETED
         Persistent deleted = new MockPersistentObject();
         deleted.setPersistenceState(PersistenceState.DELETED);
-        deleted.setOid(new ObjectId(MockPersistentObject.class, "key", "value3"));
+        deleted.setGlobalID(new GlobalID("MockPersistentObject", "key", "value3"));
         context.deleteObject(deleted);
         assertEquals(PersistenceState.DELETED, committed.getPersistenceState());
     }

@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.client;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.MockPersistentObject;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.graph.GraphMap;
 import org.objectstyle.cayenne.graph.MockGraphMap;
 
@@ -89,10 +89,10 @@ public class ClientStateRecorderTst extends TestCase {
         assertTrue(recorder.dirtyNodes(map, PersistenceState.HOLLOW).isEmpty());
 
         MockPersistentObject modified = new MockPersistentObject();
-        modified.setOid(new ObjectId(Object.class, "key", "value1"));
+        modified.setGlobalID(new GlobalID("MockPersistentObject", "key", "value1"));
         modified.setPersistenceState(PersistenceState.MODIFIED);
-        map.registerNode(modified.getOid(), modified);
-        recorder.nodePropertyChanged(modified.getOid(), "a", "b", "c");
+        map.registerNode(modified.getGlobalID(), modified);
+        recorder.nodePropertyChanged(modified.getGlobalID(), "a", "b", "c");
 
         assertTrue(recorder.dirtyNodes(map, PersistenceState.MODIFIED).contains(modified));
         assertTrue(recorder.dirtyNodes(map, PersistenceState.COMMITTED).isEmpty());
@@ -102,10 +102,10 @@ public class ClientStateRecorderTst extends TestCase {
         assertTrue(recorder.dirtyNodes(map, PersistenceState.HOLLOW).isEmpty());
 
         MockPersistentObject deleted = new MockPersistentObject();
-        deleted.setOid(new ObjectId(Object.class, "key", "value2"));
+        deleted.setGlobalID(new GlobalID("MockPersistentObject", "key", "value2"));
         deleted.setPersistenceState(PersistenceState.DELETED);
-        map.registerNode(deleted.getOid(), deleted);
-        recorder.nodeRemoved(deleted.getOid());
+        map.registerNode(deleted.getGlobalID(), deleted);
+        recorder.nodeRemoved(deleted.getGlobalID());
 
         assertTrue(recorder.dirtyNodes(map, PersistenceState.MODIFIED).contains(modified));
         assertTrue(recorder.dirtyNodes(map, PersistenceState.COMMITTED).isEmpty());
@@ -124,10 +124,10 @@ public class ClientStateRecorderTst extends TestCase {
 
         // introduce a fake dirty object
         MockPersistentObject object = new MockPersistentObject();
-        object.setOid(new ObjectId(Object.class, "key", "value"));
+        object.setGlobalID(new GlobalID("MockPersistentObject", "key", "value"));
         object.setPersistenceState(PersistenceState.MODIFIED);
-        map.registerNode(object.getOid(), object);
-        recorder.nodePropertyChanged(object.getOid(), "a", "b", "c");
+        map.registerNode(object.getGlobalID(), object);
+        recorder.nodePropertyChanged(object.getGlobalID(), "a", "b", "c");
 
         assertTrue(recorder.dirtyNodes(map).contains(object));
 
@@ -144,9 +144,9 @@ public class ClientStateRecorderTst extends TestCase {
 
         // introduce a fake dirty object
         MockPersistentObject object = new MockPersistentObject();
-        object.setOid(new ObjectId(Object.class, "key", "value"));
+        object.setGlobalID(new GlobalID("MockPersistentObject", "key", "value"));
         object.setPersistenceState(PersistenceState.MODIFIED);
-        recorder.nodePropertyChanged(object.getOid(), "xyz", "a", "b");
+        recorder.nodePropertyChanged(object.getGlobalID(), "xyz", "a", "b");
 
         assertTrue(recorder.hasChanges());
 

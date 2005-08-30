@@ -200,14 +200,14 @@ public class ClientObjectContext implements ObjectContext {
         if (object.getPersistenceState() == PersistenceState.NEW) {
             // kick it out of context
             object.setPersistenceState(PersistenceState.TRANSIENT);
-            graphManager.unregisterNode(object.getOid());
+            graphManager.unregisterNode(object.getGlobalID());
             return;
         }
 
         // TODO: no delete rules (yet)
 
         object.setPersistenceState(PersistenceState.DELETED);
-        graphManager.nodeRemoved(object.getOid());
+        graphManager.nodeRemoved(object.getGlobalID());
     }
 
     /**
@@ -222,12 +222,12 @@ public class ClientObjectContext implements ObjectContext {
         ClassDescriptor descriptor = entity.getClassDescriptor();
         Persistent object = (Persistent) descriptor.createObject();
 
-        object.setOid(new GlobalID(entity.getName()));
+        object.setGlobalID(new GlobalID(entity.getName()));
         object.setPersistenceState(PersistenceState.NEW);
         object.setObjectContext(this);
 
-        graphManager.registerNode(object.getOid(), object);
-        graphManager.nodeCreated(object.getOid());
+        graphManager.registerNode(object.getGlobalID(), object);
+        graphManager.nodeCreated(object.getGlobalID());
 
         return object;
     }
@@ -248,14 +248,14 @@ public class ClientObjectContext implements ObjectContext {
             Persistent o = (Persistent) it.next();
 
             // sanity check
-            if (o.getOid() == null) {
+            if (o.getGlobalID() == null) {
                 throw new CayenneClientException(
                         "Server returned an object without an id: " + o);
             }
 
             o.setPersistenceState(PersistenceState.COMMITTED);
             o.setObjectContext(this);
-            graphManager.registerNode(o.getOid(), o);
+            graphManager.registerNode(o.getGlobalID(), o);
         }
 
         return objects;
@@ -307,7 +307,7 @@ public class ClientObjectContext implements ObjectContext {
         }
         // else - non-persistent property that called objectWillRead for whatever reason.
 
-        graphManager.nodePropertyChanged(object.getOid(), property, oldValue, newValue);
+        graphManager.nodePropertyChanged(object.getGlobalID(), property, oldValue, newValue);
     }
 
     public Collection uncommittedObjects() {

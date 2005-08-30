@@ -60,11 +60,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.PersistentObject;
+import org.objectstyle.cayenne.distribution.GlobalID;
 
 /**
  * @author Andrus Adamchik
@@ -88,13 +84,13 @@ public class PersistentObjectTst extends TestCase {
     }
 
     public void testOid() {
-        ObjectId id = new ObjectId(Object.class, "a", "b");
+        GlobalID id = new GlobalID("test");
 
         PersistentObject object = new MockPersistentObject();
 
-        assertNull(object.getOid());
-        object.setOid(id);
-        assertSame(id, object.getOid());
+        assertNull(object.getGlobalID());
+        object.setGlobalID(id);
+        assertSame(id, object.getGlobalID());
     }
 
     public void testWillReadTransient() {

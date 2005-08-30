@@ -58,6 +58,7 @@ package org.objectstyle.cayenne;
 import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
@@ -65,7 +66,7 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  */
 public class MockDataObject implements DataObject {
 
-    protected Object oid;
+    protected GlobalID globalID;
     protected ObjectId objectId;
     protected int persistenceState;
     protected DataContext context;
@@ -169,19 +170,19 @@ public class MockDataObject implements DataObject {
     public void validateForDelete(ValidationResult validationResult) {
     }
 
-    public Object getOid() {
-        return oid;
-    }
-
-    public void setOid(Object oid) {
-        this.oid = oid;
-    }
-
     public ObjectContext getObjectContext() {
         return objectContext;
     }
 
     public void setObjectContext(ObjectContext objectContext) {
         this.objectContext = objectContext;
+    }
+
+    public GlobalID getGlobalID() {
+        return globalID;
+    }
+
+    public void setGlobalID(GlobalID globalID) {
+        this.globalID = globalID;
     }
 }

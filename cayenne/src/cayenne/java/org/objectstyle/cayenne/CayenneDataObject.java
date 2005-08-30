@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -83,7 +84,6 @@ import org.objectstyle.cayenne.validation.ValidationResult;
 import org.objectstyle.cayenne.xml.XMLDecoder;
 import org.objectstyle.cayenne.xml.XMLEncoder;
 import org.objectstyle.cayenne.xml.XMLSerializable;
-
 
 /**
  * A default implementation of DataObject interface. It is normally used as a superclass
@@ -119,7 +119,7 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
             this.persistenceState = PersistenceState.TRANSIENT;
         }
     }
-    
+
     /**
      * Returns mapped ObjEntity for this object. If an object is transient or is not
      * mapped returns null.
@@ -316,7 +316,7 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
         }
 
         willConnect(relName, value);
-        
+
         ObjRelationship relationship = this.getRelationshipNamed(relName);
         if (relationship == null) {
             throw new NullPointerException("Can't find relationship: " + relName);
@@ -357,23 +357,23 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
             return;
         }
 
-        ObjRelationship relationship = this
-                .getRelationshipNamed(relationshipName);
+        ObjRelationship relationship = this.getRelationshipNamed(relationshipName);
         if (relationship == null) {
-            throw new NullPointerException("Can't find relationship: "
-                    + relationshipName);
+            throw new NullPointerException("Can't find relationship: " + relationshipName);
         }
 
         // if "setReverse" is false, avoid unneeded processing of flattened
         // relationship
-        getDataContext().getObjectStore().objectRelationshipSet(this, value,
-                relationship, setReverse);
+        getDataContext().getObjectStore().objectRelationshipSet(
+                this,
+                value,
+                relationship,
+                setReverse);
 
         if (setReverse) {
             // unset old reverse relationship
             if (oldTarget instanceof DataObject) {
-                unsetReverseRelationship(relationshipName,
-                        (DataObject) oldTarget);
+                unsetReverseRelationship(relationshipName, (DataObject) oldTarget);
             }
 
             // set new reverse relationship
@@ -384,29 +384,28 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
 
         writeProperty(relationshipName, value);
     }
-    
+
     /**
-     * Called before establishing a relationship with another object. Applies
-     * "persistence by reachability" logic, pulling one of the two objects to a
-     * DataConext of another object in case one of the objects is transient. If
-     * both objects are persistent, and they don't have the same DataContext, 
-     * CayenneRuntimeException is thrown.
+     * Called before establishing a relationship with another object. Applies "persistence
+     * by reachability" logic, pulling one of the two objects to a DataConext of another
+     * object in case one of the objects is transient. If both objects are persistent, and
+     * they don't have the same DataContext, CayenneRuntimeException is thrown.
      * 
      * @since 1.2
      */
     protected void willConnect(String relationshipName, DataObject dataObject) {
         // first handle most common case - both objects are in the same
         // DataContext or target is null
-        if (dataObject == null
-                || this.getDataContext() == dataObject.getDataContext()) {
+        if (dataObject == null || this.getDataContext() == dataObject.getDataContext()) {
             return;
-        } else if (this.getDataContext() == null
-                && dataObject.getDataContext() != null) {
+        }
+        else if (this.getDataContext() == null && dataObject.getDataContext() != null) {
             dataObject.getDataContext().registerNewObject(this);
-        } else if (this.getDataContext() != null
-                && dataObject.getDataContext() == null) {
+        }
+        else if (this.getDataContext() != null && dataObject.getDataContext() == null) {
             this.getDataContext().registerNewObject(dataObject);
-        } else {
+        }
+        else {
             throw new CayenneRuntimeException(
                     "Cannot set object as destination of relationship "
                             + relationshipName
@@ -520,8 +519,8 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
         out.writeInt(persistenceState);
 
         switch (persistenceState) {
-            //New, modified or transient or deleted - write the whole shebang
-            //The other states (committed, hollow) all need just ObjectId
+            // New, modified or transient or deleted - write the whole shebang
+            // The other states (committed, hollow) all need just ObjectId
             case PersistenceState.TRANSIENT:
             case PersistenceState.NEW:
             case PersistenceState.MODIFIED:
@@ -547,7 +546,7 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
             case PersistenceState.COMMITTED:
             case PersistenceState.HOLLOW:
                 this.persistenceState = PersistenceState.HOLLOW;
-                //props will be populated when required (readProperty called)
+                // props will be populated when required (readProperty called)
                 values = new HashMap();
                 break;
         }
@@ -591,13 +590,13 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
             throw new CayenneRuntimeException(
                     "No ObjEntity mapping found for DataObject " + getClass().getName());
         }
-        
+
         DataNode node = getDataContext().lookupDataNode(objEntity.getDataMap());
         if (node == null) {
             throw new CayenneRuntimeException("No DataNode found for objEntity: "
                     + objEntity.getName());
         }
-        
+
         ExtendedTypeMap types = node.getAdapter().getExtendedTypes();
 
         // validate mandatory attributes
@@ -744,8 +743,6 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
     public void validateForDelete(ValidationResult validationResult) {
         // does nothing
     }
-    
-
 
     /**
      * Encodes object to XML using provided encoder.
@@ -766,19 +763,23 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
             encoder.encodeProperty(name, readNestedProperty(name));
         }
     }
-    
+
     public void decodeFromXML(XMLDecoder decoder) {
         ObjEntity object = null;
-        
-        // TODO: relying on singleton Configuration is a bad idea... 
+
+        // TODO: relying on singleton Configuration is a bad idea...
         // Probably decoder itself can optionally store a DataContext or an EntityResolver
         // to provide "context" appropriate for a given environment
-        for (Iterator it = Configuration.getSharedConfiguration().getDomain().getDataNodes().iterator(); it.hasNext();) {
+        for (Iterator it = Configuration
+                .getSharedConfiguration()
+                .getDomain()
+                .getDataNodes()
+                .iterator(); it.hasNext();) {
             DataNode dn = (DataNode) it.next();
-            
+
             EntityResolver er = dn.getEntityResolver();
             object = er.lookupObjEntity(getClass());
-            
+
             if (null != object) {
                 break;
             }
@@ -796,8 +797,9 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
      * 
      * @since 1.2
      */
-    public Object getOid() {
-        return getObjectId();
+    public GlobalID getGlobalID() {
+        return (dataContext != null) ? dataContext.getEntityResolver().convertToGlobalID(
+                getObjectId()) : null;
     }
 
     /**
@@ -805,15 +807,15 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
      * 
      * @since 1.2
      */
-    public void setOid(Object oid) {
-        if (oid == null || oid instanceof ObjectId) {
-            setObjectId((ObjectId) oid);
+    public void setGlobalID(GlobalID globalID) {
+        if (globalID == null || getDataContext() == null) {
+            setObjectId(null);
         }
-
-        throw new IllegalArgumentException(
-                "CayenneDataObject only supports ObjectId ids, got: " + oid);
+        else {
+            setObjectId(getDataContext().getEntityResolver().convertToObjectID(globalID));
+        }
     }
-    
+
     /**
      * Returns this object's DataContext.
      * 

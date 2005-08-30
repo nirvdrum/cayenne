@@ -191,11 +191,11 @@ public class ServerObjectContextTst extends CayenneTestCase {
         Object result = results.get(0);
         assertTrue(result instanceof ClientMtTable1);
         ClientMtTable1 clientObject = (ClientMtTable1) result;
-        assertNotNull(clientObject.getOid());
+        assertNotNull(clientObject.getGlobalID());
 
         GlobalID refId = getDomain().getEntityResolver().convertToGlobalID(
                 new ObjectId(MtTable1.class, "key", 1));
-        assertEquals(refId, clientObject.getOid());
+        assertEquals(refId, clientObject.getGlobalID());
     }
 
     public void testOnGenericQuery() {

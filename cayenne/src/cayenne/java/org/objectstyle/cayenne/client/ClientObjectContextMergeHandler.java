@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.client;
 
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.graph.BeanMergeHandler;
 import org.objectstyle.cayenne.graph.GraphMap;
 
@@ -83,7 +84,7 @@ class ClientObjectContextMergeHandler extends BeanMergeHandler {
 
             if (node instanceof Persistent) {
                 // inject new id
-                ((Persistent) node).setOid(newId);
+                ((Persistent) node).setGlobalID((GlobalID) newId);
             }
 
             // notify state recorder

@@ -177,10 +177,9 @@ public class NamedQuery implements QueryExecutionPlan {
                     }
                     else if ((value instanceof Persistent)
                             && !(value instanceof DataObject)) {
-                        Object id = ((Persistent) value).getOid();
-                        if (id instanceof GlobalID) {
-                            substitute = resolver.convertToObjectID((GlobalID) id);
-                        }
+
+                        substitute = resolver.convertToObjectID(((Persistent) value)
+                                .getGlobalID());
                     }
 
                     if (substitute != null) {

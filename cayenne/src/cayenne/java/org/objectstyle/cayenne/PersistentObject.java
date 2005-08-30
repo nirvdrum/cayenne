@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.objectstyle.cayenne.distribution.GlobalID;
 
 /**
  * A convenience base superclass for concrete Persistent objects. It provides properties
@@ -66,7 +67,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  */
 public abstract class PersistentObject implements Persistent {
 
-    protected Object oid;
+    protected GlobalID globalID;
     protected int persistenceState;
     protected transient ObjectContext objectContext;
 
@@ -112,12 +113,12 @@ public abstract class PersistentObject implements Persistent {
         this.objectContext = objectContext;
     }
 
-    public Object getOid() {
-        return oid;
+    public GlobalID getGlobalID() {
+        return globalID;
     }
 
-    public void setOid(Object oid) {
-        this.oid = oid;
+    public void setGlobalID(GlobalID globalID) {
+        this.globalID = globalID;
     }
 
     public String toString() {

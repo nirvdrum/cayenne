@@ -57,7 +57,6 @@ package org.objectstyle.cayenne;
 
 import java.util.List;
 
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.query.RelationshipQuery;
 
 /**
@@ -107,18 +106,7 @@ public abstract class RelationshipFault {
      * whenever they need to resolve a fault.
      */
     protected List resolveFromDB() {
-        // TODO: maybe we should redefine persistent "oid" as GlobalID? Having it as
-        // "Object" does no good if we have to introduce hidden casts everywhere.
-
-        if (!(relationshipOwner.getOid() instanceof GlobalID)) {
-            throw new CayenneRuntimeException(
-                    "ValueHolder owner is expected to have GlobalID. Actual id: "
-                            + relationshipOwner.getOid());
-        }
-
-        GlobalID gid = (GlobalID) relationshipOwner.getOid();
-
         return relationshipOwner.getObjectContext().performSelectQuery(
-                new RelationshipQuery(gid, relationshipName));
+                new RelationshipQuery(relationshipOwner.getGlobalID(), relationshipName));
     }
 }

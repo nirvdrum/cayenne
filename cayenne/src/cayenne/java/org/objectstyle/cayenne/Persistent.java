@@ -57,6 +57,8 @@ package org.objectstyle.cayenne;
 
 import java.io.Serializable;
 
+import org.objectstyle.cayenne.distribution.GlobalID;
+
 /**
  * Defines minimum API of an object that can be persisted via Cayenne.
  * 
@@ -68,12 +70,12 @@ public interface Persistent extends Serializable {
     /**
      * Returns an object id of this object.
      */
-    Object getOid();
+    GlobalID getGlobalID();
 
     /**
      * Sets an object id of this object.
      */
-    void setOid(Object oid);
+    void setGlobalID(GlobalID globalID);
 
     int getPersistenceState();
 

@@ -91,9 +91,20 @@ public class GlobalID implements Serializable {
         this.key = IDUtil.pseudoUniqueByteSequence16();
     }
 
+    /**
+     * Creates a TEMPORARY id with a specified entity name and a binary key. It is a
+     * caller responsibility to provide a globally unique binary key.
+     */
     public GlobalID(String entityName, byte[] key) {
         this.entityName = entityName;
         this.key = key;
+    }
+
+    /**
+     * Creates a portable permanent GlobalID.
+     */
+    public GlobalID(String entityName, String key, Object value) {
+        this(entityName, Collections.singletonMap(key, value));
     }
 
     /**

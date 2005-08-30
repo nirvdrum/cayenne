@@ -92,7 +92,7 @@ class ClientServerUtils {
 
         // copy ID
         if (clientObject instanceof Persistent) {
-            ((Persistent) clientObject).setOid(resolver.convertToGlobalID(object.getObjectId()));
+            ((Persistent) clientObject).setGlobalID(resolver.convertToGlobalID(object.getObjectId()));
         }
 
         // TODO: implement attribute filtering for client..
