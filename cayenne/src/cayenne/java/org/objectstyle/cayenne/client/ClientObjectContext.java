@@ -265,7 +265,7 @@ public class ClientObjectContext implements ObjectContext {
         return new GenericQueryMessage(query).send(connector);
     }
 
-    public void objectWillRead(Persistent object, String property) {
+    public void beforePropertyRead(Persistent object, String property) {
         if (object.getPersistenceState() == PersistenceState.HOLLOW) {
             // must resolve...
             throw new CayenneClientException("Resolving an object is Unimplemented");
@@ -284,11 +284,7 @@ public class ClientObjectContext implements ObjectContext {
         // else - non-persistent property that called objectWillRead for whatever reason.
     }
 
-    public void objectWillWrite(
-            Persistent object,
-            String property,
-            Object oldValue,
-            Object newValue) {
+    public void beforePropertyWritten(Persistent object, String property, Object newValue) {
 
         // change state...
         if (object.getPersistenceState() == PersistenceState.COMMITTED) {
@@ -303,11 +299,17 @@ public class ClientObjectContext implements ObjectContext {
         PersistentProperty propertyDescriptor = getEntityResolver().lookupEntity(
                 object.getClass()).getClassDescriptor().getDeclaredProperty(property);
         if (propertyDescriptor != null) {
+            propertyDescriptor.willRead(object);
+            Object oldValue = propertyDescriptor.directRead(object);
             propertyDescriptor.willWrite(object, newValue);
+
+            graphManager.nodePropertyChanged(
+                    object.getGlobalID(),
+                    property,
+                    oldValue,
+                    newValue);
         }
         // else - non-persistent property that called objectWillRead for whatever reason.
-
-        graphManager.nodePropertyChanged(object.getGlobalID(), property, oldValue, newValue);
     }
 
     public Collection uncommittedObjects() {

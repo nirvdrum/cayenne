@@ -82,7 +82,7 @@ public class PropertyAccessException extends CayenneRuntimeException {
     }
 
     /**
-     * Returns property descritptor that was used to access the property.
+     * Returns property descriptor that was used to access the property.
      */
     public PersistentProperty getProperty() {
         return property;

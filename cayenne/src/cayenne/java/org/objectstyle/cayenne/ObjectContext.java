@@ -105,20 +105,19 @@ public interface ObjectContext extends Serializable {
     void deleteObject(Persistent object);
 
     /**
-     * A callback method that is invoked whenver a persistent object property is about to
-     * be read. Allows ObjectContext to resolve faults on demand.
+     * A callback method that child Persistent objects are expected to call from inside
+     * the getter before returning a value of a persistent property. Such callback allows
+     * ObjectContext to "inflate" unresolved objects on demand.
      */
-    void objectWillRead(Persistent object, String property);
+    void beforePropertyRead(Persistent object, String property);
 
     /**
-     * A callback method that is invoked whenver a persistent object property is about to
-     * be changed. Allows ObjectContext to track object changes.
+     * A callback method that child Persistent objects are expected to call from inside
+     * the setter before modifying a value of a persistent property. Such callback allows
+     * ObjectContext to "inflate" unresolved objects on demand and also track object
+     * changes.
      */
-    void objectWillWrite(
-            Persistent object,
-            String property,
-            Object oldValue,
-            Object newValue);
+    void beforePropertyWritten(Persistent object, String property, Object newValue);
 
     /**
      * Commits changes made to this ObjectContext persistent objects. If an ObjectContext

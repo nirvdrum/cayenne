@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.distribution.GlobalID;
  * @since 1.2
  * @author Andrus Adamchik
  */
+// TODO: with field-based access there is no need to declare setters...
 public interface Persistent extends Serializable {
 
     /**

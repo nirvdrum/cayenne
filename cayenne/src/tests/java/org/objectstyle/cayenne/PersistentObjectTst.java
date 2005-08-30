@@ -97,14 +97,14 @@ public class PersistentObjectTst extends TestCase {
         PersistentObject object = new MockPersistentObject();
 
         // check that no exception is thrown...
-        object.willRead("someProperty");
+        object.beforePropertyRead("someProperty");
     }
 
-    public void testWillWriteTransient() {
+    public void testWillUpdateTransient() {
         PersistentObject object = new MockPersistentObject();
 
         // check that no exception is thrown...
-        object.willWrite("someProperty", new Object(), new Object());
+        object.beforePropertyWritten("someProperty", new Object());
     }
 
     public void testWillRead() {
@@ -112,44 +112,39 @@ public class PersistentObjectTst extends TestCase {
         final Map readProperties = new HashMap();
         ObjectContext context = new MockObjectContext() {
 
-            public void objectWillRead(Persistent persistent, String property) {
+            public void beforePropertyRead(Persistent persistent, String property) {
                 readProperties.put(persistent, property);
             }
         };
 
         PersistentObject object = new MockPersistentObject();
         object.setObjectContext(context);
-        object.willRead("someProperty");
+        object.beforePropertyRead("someProperty");
         assertEquals("someProperty", readProperties.get(object));
     }
 
-    public void testWillWrite() {
+    public void testWillUpdate() {
 
         final Map writtenProperties = new HashMap();
-        final Map oldValues = new HashMap();
         final Map newValues = new HashMap();
         ObjectContext context = new MockObjectContext() {
 
-            public void objectWillWrite(
+            public void beforePropertyWritten(
                     Persistent persistent,
                     String property,
-                    Object oldValue,
                     Object newValue) {
 
                 writtenProperties.put(persistent, property);
-                oldValues.put(persistent, oldValue);
                 newValues.put(persistent, newValue);
             }
         };
 
-        Object oldValue = new Object();
         Object newValue = new Object();
 
         PersistentObject object = new MockPersistentObject();
         object.setObjectContext(context);
-        object.willWrite("writtenProperty", oldValue, newValue);
+        object.beforePropertyWritten("writtenProperty", newValue);
         assertEquals("writtenProperty", writtenProperties.get(object));
-        assertEquals(oldValue, oldValues.get(object));
         assertEquals(newValue, newValues.get(object));
     }
 }

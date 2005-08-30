@@ -104,14 +104,10 @@ public class MockObjectContext extends MockPersistenceContext implements ObjectC
         return null;
     }
 
-    public void objectWillRead(Persistent persistent, String property) {
+    public void beforePropertyRead(Persistent persistent, String property) {
     }
 
-    public void objectWillWrite(
-            Persistent persistent,
-            String property,
-            Object oldValue,
-            Object newValue) {
+    public void beforePropertyWritten(Persistent persistent, String property, Object newValue) {
     }
 
     public Collection uncommittedObjects() {

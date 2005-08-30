@@ -78,18 +78,18 @@ public abstract class PersistentObject implements Persistent {
     /**
      * Notifies parent ObjectContext that this object is about to access a property.
      */
-    protected void willRead(String property) {
+    protected void beforePropertyRead(String property) {
         if (objectContext != null) {
-            objectContext.objectWillRead(this, property);
+            objectContext.beforePropertyRead(this, property);
         }
     }
 
     /**
      * Notifies parent ObjectContext that this object is about to modify a property.
      */
-    protected void willWrite(String property, Object oldValue, Object newValue) {
+    protected void beforePropertyWritten(String property, Object newValue) {
         if (objectContext != null) {
-            objectContext.objectWillWrite(this, property, oldValue, newValue);
+            objectContext.beforePropertyWritten(this, property, newValue);
         }
     }
 

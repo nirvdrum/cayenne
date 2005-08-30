@@ -15,8 +15,9 @@ ${importUtils.setPackage($entityUtils.subPackageName)}##
 ${importUtils.addType("${entityUtils.superPackageName}.${entityUtils.superClassName}")}##
 ${importUtils.generate()}
 
+/**
+ * A persistent class mapped as "${objEntity.name}" Cayenne entity.
+ */
 public class ${entityUtils.subClassName} extends ${entityUtils.superClassName} {
 
 }
-
-
