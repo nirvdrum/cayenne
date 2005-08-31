@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.util.Util;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class FieldProperty implements PersistentProperty {
+public class FieldProperty implements Property {
 
     protected String propertyName;
     protected Field field;
@@ -104,18 +104,11 @@ public class FieldProperty implements PersistentProperty {
     /**
      * Does nothing.
      */
-    public void willRead(Object object) throws PropertyAccessException {
+    public void prepareForAccess(Object object) throws PropertyAccessException {
         // noop
     }
 
-    /**
-     * Does nothing.
-     */
-    public void willWrite(Object object, Object newValue) throws PropertyAccessException {
-        // noop
-    }
-    
-    public void copy(Object from, Object to) throws PropertyAccessException {
+    public void copyProperty(Object from, Object to) throws PropertyAccessException {
         directWrite(to, directRead(from));
     }
 
@@ -200,7 +193,7 @@ public class FieldProperty implements PersistentProperty {
 
         // TODO: support property names following other common naming patterns, such as
         // "_propertyName"
-        
+
         try {
             return beanClass.getDeclaredField(fieldName);
         }

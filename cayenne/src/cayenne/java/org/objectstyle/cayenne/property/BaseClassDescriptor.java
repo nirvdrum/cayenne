@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
  * A superclass of Cayenne ClassDescriptors. Defines all main bean descriptor parameters
- * and operations. Subclasses must provide methods to initialize the descriptor.
+ * and operations. Subclasses would provide methods to initialize the descriptor.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -99,10 +99,6 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         return objectClass;
     }
 
-    public void setObjectClass(Class objectClass) {
-        this.objectClass = objectClass;
-    }
-
     /**
      * Returns a read-only collection of property names mapped in this descriptor.
      */
@@ -126,8 +122,8 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
      * Recursively looks up property descriptor in this class descriptor and all
      * superclass descriptors.
      */
-    public PersistentProperty getProperty(String propertyName) {
-        PersistentProperty property = getDeclaredProperty(propertyName);
+    public Property getProperty(String propertyName) {
+        Property property = getDeclaredProperty(propertyName);
 
         if (property == null && superclassDescriptor != null) {
             property = superclassDescriptor.getProperty(propertyName);
@@ -136,8 +132,8 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         return property;
     }
 
-    public PersistentProperty getDeclaredProperty(String propertyName) {
-        return (PersistentProperty) declaredProperties.get(propertyName);
+    public Property getDeclaredProperty(String propertyName) {
+        return (Property) declaredProperties.get(propertyName);
     }
 
     /**
@@ -157,38 +153,49 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
                     "Null objectClass. Descriptor wasn't initialized properly.");
         }
 
-        Object object;
         try {
-            object = objectClass.newInstance();
+            return objectClass.newInstance();
         }
         catch (Throwable e) {
             throw new CayenneRuntimeException("Error creating object of class '"
                     + objectClass.getName()
                     + "'", e);
         }
-
-        // inject collections and value holders
-        Iterator it = getPropertyNames().iterator();
-        while (it.hasNext()) {
-            String name = (String) it.next();
-            getProperty(name).willRead(object);
-        }
-
-        return object;
     }
 
-    public void copyObjectProperties(Object from, Object to)
-            throws PropertyAccessException {
+    /**
+     * Invokes 'prepareForAccess' of a super descriptor and then invokes
+     * 'prepareForAccess' of each declared property.
+     */
+    public void prepareForAccess(Object object) throws PropertyAccessException {
 
         // do super first
         if (getSuperclassDescriptor() != null) {
-            getSuperclassDescriptor().copyObjectProperties(from, to);
+            getSuperclassDescriptor().prepareForAccess(object);
         }
 
         Iterator it = getDeclaredPropertyNames().iterator();
         while (it.hasNext()) {
             String name = (String) it.next();
-            getProperty(name).copy(from, to);
+            getProperty(name).prepareForAccess(object);
+        }
+    }
+
+    /**
+     * Invokes 'copyProperties' of a super descriptor and then invokes 'copyProperty' of
+     * each declared property.
+     */
+    public void copyProperties(Object from, Object to) throws PropertyAccessException {
+
+        // do super first
+        if (getSuperclassDescriptor() != null) {
+            getSuperclassDescriptor().copyProperties(from, to);
+        }
+
+        Iterator it = getDeclaredPropertyNames().iterator();
+        while (it.hasNext()) {
+            String name = (String) it.next();
+            getProperty(name).copyProperty(from, to);
         }
     }
 }

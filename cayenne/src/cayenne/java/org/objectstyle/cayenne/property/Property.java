@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface PersistentProperty extends Serializable {
+public interface Property extends Serializable {
 
     /**
      * Returns property name.
@@ -17,19 +17,15 @@ public interface PersistentProperty extends Serializable {
     String getPropertyName();
 
     /**
-     * Returns property type.
+     * Returns property declared Java class.
      */
     Class getPropertyType();
 
     /**
-     * Performs any needed processing right before a property will be read.
+     * Performs any needed processing right before object property is accessed for read or
+     * write.
      */
-    void willRead(Object object) throws PropertyAccessException;
-
-    /**
-     * Performs any needed processing right before a property will be written.
-     */
-    void willWrite(Object object, Object newValue) throws PropertyAccessException;
+    void prepareForAccess(Object object) throws PropertyAccessException;
 
     /**
      * Reads and returns a property value of an object, skipping any special
@@ -42,9 +38,9 @@ public interface PersistentProperty extends Serializable {
      * resolving faults, etc.
      */
     void directWrite(Object object, Object value) throws PropertyAccessException;
-    
+
     /**
-     * Copies a property from one object to another.
+     * Copies a property value from one object to another.
      */
-    void copy(Object from, Object to) throws PropertyAccessException;
+    void copyProperty(Object from, Object to) throws PropertyAccessException;
 }

@@ -95,7 +95,7 @@ public class FieldPropertyTst extends TestCase {
         
         TestBean to = new TestBean();
         
-        property.copy(from, to);
+        property.copyProperty(from, to);
         assertEquals("123", to.getString());
     }
 }

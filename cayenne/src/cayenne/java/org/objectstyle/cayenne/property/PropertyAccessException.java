@@ -65,15 +65,15 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  */
 public class PropertyAccessException extends CayenneRuntimeException {
 
-    protected PersistentProperty property;
+    protected Property property;
     protected Object source;
 
-    public PropertyAccessException(String message, PersistentProperty property,
+    public PropertyAccessException(String message, Property property,
             Object source) {
         this(message, property, source, null);
     }
 
-    public PropertyAccessException(String message, PersistentProperty property,
+    public PropertyAccessException(String message, Property property,
             Object source, Throwable cause) {
         super(message, cause);
 
@@ -84,7 +84,7 @@ public class PropertyAccessException extends CayenneRuntimeException {
     /**
      * Returns property descriptor that was used to access the property.
      */
-    public PersistentProperty getProperty() {
+    public Property getProperty() {
         return property;
     }
 

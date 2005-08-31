@@ -85,31 +85,40 @@ public interface ClassDescriptor extends Serializable {
     Object createObject();
 
     /**
-     * Copies persistent properties of one object to another.
+     * Prepares object properties for access. This may include injection of value holders
+     * into the object and such.
      */
-    void copyObjectProperties(Object from, Object to) throws PropertyAccessException;
+    void prepareForAccess(Object object) throws PropertyAccessException;
 
     /**
-     * Returns a Java Bean property descriptor matching property name or null if such
-     * property is not found. Lookup includes properties from this descriptor and all its
+     * Copies persistent properties of one object to another.
+     */
+    void copyProperties(Object from, Object to) throws PropertyAccessException;
+
+    /**
+     * Returns a Java Bean property descriptor matching property name or null if no such
+     * property is found. Lookup includes properties from this descriptor and all its
      * superclass decsriptors. Returned property maybe any one of simple, value holder or
      * collection properties.
      */
-    PersistentProperty getProperty(String propertyName);
+    Property getProperty(String propertyName);
 
     /**
-     * Returns a Java Bean property descriptor matching property name or null if such
-     * property is not found. Lookup DOES NOT including properties from the superclass
+     * Returns a Java Bean property descriptor matching property name or null if no such
+     * property is found. Lookup DOES NOT including properties from the superclass
      * decsriptors. Returned property maybe any one of simple, value holder or collection
      * properties.
      */
-    PersistentProperty getDeclaredProperty(String propertyName);
+    Property getDeclaredProperty(String propertyName);
 
     /**
      * Returns all property names mapped in this descriptor, not including properties from
      * the superclass decsriptors.
      */
     Collection getDeclaredPropertyNames();
-    
+
+    /**
+     * Returns all property names mapped in this descriptor and all its superdescriptors.
+     */
     Collection getPropertyNames();
 }

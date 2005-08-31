@@ -71,22 +71,14 @@ public class ValueHolderProperty extends FieldProperty {
         super(beanClass, propertyName, ValueHolder.class);
     }
 
-    public void copy(Object from, Object to) throws PropertyAccessException {
-        // TODO: at least invalidate the ValueHolder somehow..?
-        ensureValueHolderSet(to);
+    public void copyProperty(Object from, Object to) throws PropertyAccessException {
+        // TODO: at least invalidate the ValueHolder somehow..
     }
 
     /**
      * Injects a ValueHolder in the object if it hasn't been done yet.
      */
-    public void willRead(Object object) throws PropertyAccessException {
-        ensureValueHolderSet(object);
-    }
-
-    /**
-     * Injects a ValueHolder in the object if it hasn't been done yet.
-     */
-    public void willWrite(Object object) throws PropertyAccessException {
+    public void prepareForAccess(Object object) throws PropertyAccessException {
         ensureValueHolderSet(object);
     }
 

@@ -117,6 +117,9 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
             return;
         }
 
+        // TODO: should build a HOLLOW object instead of running a query if relationship
+        // is required and thus expected to be not null.
+
         List objects = resolveFromDB();
 
         if (objects.size() == 0) {

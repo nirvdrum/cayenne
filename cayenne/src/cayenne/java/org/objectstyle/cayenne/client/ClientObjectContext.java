@@ -76,7 +76,7 @@ import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.graph.OperationRecorder;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.property.ClassDescriptor;
-import org.objectstyle.cayenne.property.PersistentProperty;
+import org.objectstyle.cayenne.property.Property;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
 
@@ -221,7 +221,9 @@ public class ClientObjectContext implements ObjectContext {
 
         ObjEntity entity = getEntityResolver().lookupEntity(persistentClass);
         ClassDescriptor descriptor = entity.getClassDescriptor();
+
         Persistent object = (Persistent) descriptor.createObject();
+        descriptor.prepareForAccess(object);
 
         object.setGlobalID(new GlobalID(entity.getName()));
         object.setPersistenceState(PersistenceState.NEW);
@@ -266,13 +268,13 @@ public class ClientObjectContext implements ObjectContext {
                     ObjEntity entity = getEntityResolver().lookupEntity(
                             cachedObject.getGlobalID().getEntityName());
 
-                    entity.getClassDescriptor().copyObjectProperties(
-                            fetchedObject,
-                            cachedObject);
-
+                    ClassDescriptor descriptor = entity.getClassDescriptor();
                     if (cachedObject.getPersistenceState() == PersistenceState.HOLLOW) {
                         cachedObject.setPersistenceState(PersistenceState.COMMITTED);
+                        descriptor.prepareForAccess(cachedObject);
                     }
+
+                    descriptor.copyProperties(fetchedObject, cachedObject);
                 }
             }
             else {
@@ -290,31 +292,28 @@ public class ClientObjectContext implements ObjectContext {
     }
 
     public void beforePropertyRead(Persistent object, String property) {
-        // resolve hollow objects....
+        // resolve fault
         if (object.getPersistenceState() == PersistenceState.HOLLOW) {
             performSelectQuery(new SingleObjectQuery(object.getGlobalID()));
         }
     }
 
     public void beforePropertyWritten(Persistent object, String property, Object newValue) {
+        // resolve fault
+        if (object.getPersistenceState() == PersistenceState.HOLLOW) {
+            performSelectQuery(new SingleObjectQuery(object.getGlobalID()));
+        }
 
         // change state...
         if (object.getPersistenceState() == PersistenceState.COMMITTED) {
             object.setPersistenceState(PersistenceState.MODIFIED);
         }
 
-        // inject value holders
-
-        // TODO: maybe it is more efficient to inject value holders once for all objects
-        // after the fetch? ... I guess this depends on the ratio of how many objects were
-        // fetched to how many of them are later accessed.
-        PersistentProperty propertyDescriptor = getEntityResolver().lookupEntity(
+        // extract old value and notify graph manager
+        Property propertyDescriptor = getEntityResolver().lookupEntity(
                 object.getClass()).getClassDescriptor().getDeclaredProperty(property);
         if (propertyDescriptor != null) {
-            propertyDescriptor.willRead(object);
             Object oldValue = propertyDescriptor.directRead(object);
-            propertyDescriptor.willWrite(object, newValue);
-
             graphManager.nodePropertyChanged(
                     object.getGlobalID(),
                     property,
