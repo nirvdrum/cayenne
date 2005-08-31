@@ -292,17 +292,11 @@ public class ClientObjectContext implements ObjectContext {
     }
 
     public void beforePropertyRead(Persistent object, String property) {
-        // resolve fault
-        if (object.getPersistenceState() == PersistenceState.HOLLOW) {
-            performSelectQuery(new SingleObjectQuery(object.getGlobalID()));
-        }
+        ensureFaultResolved(object);
     }
 
     public void beforePropertyWritten(Persistent object, String property, Object newValue) {
-        // resolve fault
-        if (object.getPersistenceState() == PersistenceState.HOLLOW) {
-            performSelectQuery(new SingleObjectQuery(object.getGlobalID()));
-        }
+        ensureFaultResolved(object);
 
         // change state...
         if (object.getPersistenceState() == PersistenceState.COMMITTED) {
@@ -310,9 +304,14 @@ public class ClientObjectContext implements ObjectContext {
         }
 
         // extract old value and notify graph manager
-        Property propertyDescriptor = getEntityResolver().lookupEntity(
-                object.getClass()).getClassDescriptor().getDeclaredProperty(property);
-        if (propertyDescriptor != null) {
+        Property propertyDescriptor = getEntityResolver()
+                .lookupEntity(object.getClass())
+                .getClassDescriptor()
+                .getProperty(property);
+
+        // indirect properties will take care of themselves...
+        if (propertyDescriptor != null && !propertyDescriptor.isIndirect()) {
+
             Object oldValue = propertyDescriptor.directRead(object);
             graphManager.nodePropertyChanged(
                     object.getGlobalID(),
@@ -320,7 +319,6 @@ public class ClientObjectContext implements ObjectContext {
                     oldValue,
                     newValue);
         }
-        // else - non-persistent property that called objectWillRead for whatever reason.
     }
 
     public Collection uncommittedObjects() {
@@ -343,4 +341,12 @@ public class ClientObjectContext implements ObjectContext {
         return stateRecorder.dirtyNodes(graphManager, PersistenceState.NEW);
     }
 
+    /**
+     * Checks if an object is HOLLOW and if so, resolves it.
+     */
+    protected void ensureFaultResolved(Persistent object) {
+        if (object.getPersistenceState() == PersistenceState.HOLLOW) {
+            performSelectQuery(new SingleObjectQuery(object.getGlobalID()));
+        }
+    }
 }

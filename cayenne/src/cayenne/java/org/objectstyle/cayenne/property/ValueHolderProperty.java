@@ -71,6 +71,13 @@ public class ValueHolderProperty extends FieldProperty {
         super(beanClass, propertyName, ValueHolder.class);
     }
 
+    /**
+     * Returns true.
+     */
+    public boolean isIndirect() {
+        return true;
+    }
+
     public void copyProperty(Object from, Object to) throws PropertyAccessException {
         // TODO: at least invalidate the ValueHolder somehow..
     }

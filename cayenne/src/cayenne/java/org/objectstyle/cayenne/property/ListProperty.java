@@ -71,6 +71,13 @@ public class ListProperty extends FieldProperty {
     public ListProperty(Class beanClass, String propertyName) {
         super(beanClass, propertyName, List.class);
     }
+    
+    /**
+     * Returns true.
+     */
+    public boolean isIndirect() {
+        return true;
+    }
 
     public void copyProperty(Object from, Object to) throws PropertyAccessException {
         // TODO: at least invalidate the list somehow..

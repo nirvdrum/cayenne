@@ -93,6 +93,13 @@ public class FieldProperty implements Property {
         this.field = prepareField(beanClass, propertyName, propertyType);
     }
 
+    /**
+     * Returns false.
+     */
+    public boolean isIndirect() {
+        return false;
+    }
+
     public String getPropertyName() {
         return propertyName;
     }
