@@ -72,6 +72,11 @@ public class ListProperty extends FieldProperty {
         super(beanClass, propertyName, List.class);
     }
 
+    public void copy(Object from, Object to) throws PropertyAccessException {
+        // TODO: at least invalidate the list somehow..
+        ensureListSet(to);
+    }
+
     /**
      * Injects a List in the object if it hasn't been done yet.
      */

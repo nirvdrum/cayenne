@@ -171,7 +171,17 @@ public class EntityResolver implements MappingNamespace {
      */
     public ClientEntityResolver getClientEntityResolver() {
         // TODO: cache client resolver
-        return new ClientEntityResolver(getObjEntities());
+
+        // translate to client entities
+        Collection serverEntities = getObjEntities();
+        Collection clientEntities = new ArrayList(serverEntities.size());
+        Iterator it = serverEntities.iterator();
+        while (it.hasNext()) {
+            ObjEntity serverEntity = (ObjEntity) it.next();
+            clientEntities.add(serverEntity.getClientEntity());
+        }
+
+        return new ClientEntityResolver(clientEntities);
     }
 
     /**

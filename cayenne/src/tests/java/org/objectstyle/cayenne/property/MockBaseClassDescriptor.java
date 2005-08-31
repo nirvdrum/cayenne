@@ -55,43 +55,20 @@
  */
 package org.objectstyle.cayenne.property;
 
-import junit.framework.TestCase;
+import java.util.Collections;
+import java.util.HashMap;
 
-import org.objectstyle.cayenne.unit.util.TestBean;
+public class MockBaseClassDescriptor extends BaseClassDescriptor {
 
-public class BaseClassDescriptorTst extends TestCase {
-
-    public void testConstructor() {
-        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
-        };
-        assertNull(d1.getSuperclassDescriptor());
-
-        BaseClassDescriptor d2 = new BaseClassDescriptor(d1) {
-        };
-        assertNull(d1.getSuperclassDescriptor());
-        assertSame(d1, d2.getSuperclassDescriptor());
+    public MockBaseClassDescriptor() {
+        this(null);
     }
 
-    public void testValid() { // by default BaseClassDescriptor is not compiled...
-        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
-        };
+    public MockBaseClassDescriptor(ClassDescriptor superclassDescriptor) {
+        super(superclassDescriptor);
 
-        // by default BaseClassDescriptor is not compiled...
-        assertFalse(d1.isValid());
+        this.declaredProperties = new HashMap();
+        this.declaredPropertiesRef = Collections.unmodifiableMap(declaredProperties);
     }
 
-    public void testCopyObjectProperties() {
-        FieldProperty property = new FieldProperty(TestBean.class, "string", String.class);
-        BaseClassDescriptor d1 = new MockBaseClassDescriptor();
-
-        d1.declaredProperties.put(property.getPropertyName(), property);
-
-        TestBean from = new TestBean();
-        from.setString("123");
-
-        TestBean to = new TestBean();
-
-        d1.copyObjectProperties(from, to);
-        assertEquals("123", to.getString());
-    }
 }

@@ -78,6 +78,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.property.PersistentProperty;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.query.SingleObjectQuery;
 
 /**
  * An client tier ObjectContext implementation in a 3+ tier Cayenne application. Instead
@@ -245,17 +246,40 @@ public class ClientObjectContext implements ObjectContext {
         Iterator it = objects.iterator();
         while (it.hasNext()) {
 
-            Persistent o = (Persistent) it.next();
+            Persistent fetchedObject = (Persistent) it.next();
 
             // sanity check
-            if (o.getGlobalID() == null) {
+            if (fetchedObject.getGlobalID() == null) {
                 throw new CayenneClientException(
-                        "Server returned an object without an id: " + o);
+                        "Server returned an object without an id: " + fetchedObject);
             }
 
-            o.setPersistenceState(PersistenceState.COMMITTED);
-            o.setObjectContext(this);
-            graphManager.registerNode(o.getGlobalID(), o);
+            Persistent cachedObject = (Persistent) graphManager.getNode(fetchedObject
+                    .getGlobalID());
+
+            if (cachedObject != null) {
+
+                if (cachedObject.getPersistenceState() != PersistenceState.MODIFIED) {
+                    // TODO: implement smart merge for modified objects...
+
+                    // refresh existing object...
+                    ObjEntity entity = getEntityResolver().lookupEntity(
+                            cachedObject.getGlobalID().getEntityName());
+
+                    entity.getClassDescriptor().copyObjectProperties(
+                            fetchedObject,
+                            cachedObject);
+
+                    if (cachedObject.getPersistenceState() == PersistenceState.HOLLOW) {
+                        cachedObject.setPersistenceState(PersistenceState.COMMITTED);
+                    }
+                }
+            }
+            else {
+                fetchedObject.setPersistenceState(PersistenceState.COMMITTED);
+                fetchedObject.setObjectContext(this);
+                graphManager.registerNode(fetchedObject.getGlobalID(), fetchedObject);
+            }
         }
 
         return objects;
@@ -266,22 +290,10 @@ public class ClientObjectContext implements ObjectContext {
     }
 
     public void beforePropertyRead(Persistent object, String property) {
+        // resolve hollow objects....
         if (object.getPersistenceState() == PersistenceState.HOLLOW) {
-            // must resolve...
-            throw new CayenneClientException("Resolving an object is Unimplemented");
+            performSelectQuery(new SingleObjectQuery(object.getGlobalID()));
         }
-
-        // inject value holders
-
-        // TODO: maybe it is more efficient to inject value holders once for all objects
-        // after the fetch? ... I guess this depends on the ratio of how many objects were
-        // fetched to how many of them are later accessed.
-        PersistentProperty propertyDescriptor = getEntityResolver().lookupEntity(
-                object.getClass()).getClassDescriptor().getDeclaredProperty(property);
-        if (propertyDescriptor != null) {
-            propertyDescriptor.willRead(object);
-        }
-        // else - non-persistent property that called objectWillRead for whatever reason.
     }
 
     public void beforePropertyWritten(Persistent object, String property, Object newValue) {
@@ -331,4 +343,5 @@ public class ClientObjectContext implements ObjectContext {
         // TODO: sync on graphManager?
         return stateRecorder.dirtyNodes(graphManager, PersistenceState.NEW);
     }
+
 }

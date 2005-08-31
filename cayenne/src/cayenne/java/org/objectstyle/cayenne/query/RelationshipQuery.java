@@ -148,9 +148,27 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
      * Substitutes this query with a SelectQuery and routes it down the stack.
      */
     public Query resolve(EntityResolver resolver) {
-        
-        // substitution has to be done in "resolve" so that DataContext could instantiate the right objects.
+        return buildReplacementQuery(resolver);
+    }
 
+    /**
+     * Substitutes this query with a SelectQuery and routes it down the stack.
+     */
+    public void route(QueryRouter router, EntityResolver resolver) {
+        buildReplacementQuery(resolver).route(router, resolver);
+    }
+
+    /**
+     * Throws an exception as this query is not executable itself.
+     */
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
+        throw new CayenneRuntimeException(this
+                + " doesn't support its own sql actions. "
+                + "It should've been delegated to another "
+                + "query during resolution phase.");
+    }
+
+    protected Query buildReplacementQuery(EntityResolver resolver) {
         // sanity check
         if (objectID == null && globalID == null) {
             throw new CayenneRuntimeException(
@@ -187,15 +205,5 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
         select.setFetchingDataRows(isFetchingDataRows());
 
         return select;
-    }
-
-    /**
-     * Throws an exception as this query is not executable itself.
-     */
-    public SQLAction createSQLAction(SQLActionVisitor visitor) {
-        throw new CayenneRuntimeException(this
-                + " doesn't support its own sql actions. "
-                + "It should've been delegated to another "
-                + "query during resolution phase.");
     }
 }

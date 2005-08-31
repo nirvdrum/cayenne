@@ -53,45 +53,82 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.property;
+package org.objectstyle.cayenne.query;
 
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.distribution.GlobalID;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.EntityResolver;
 
-import org.objectstyle.cayenne.unit.util.TestBean;
+/**
+ * A query that returns a single object matching a GlobalID or an ObjectId.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+// TODO: implement some sort of batch faulting for multiple ids....
+public class SingleObjectQuery implements QueryExecutionPlan {
 
-public class BaseClassDescriptorTst extends TestCase {
+    protected GlobalID globalID;
+    protected ObjectId objectID;
 
-    public void testConstructor() {
-        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
-        };
-        assertNull(d1.getSuperclassDescriptor());
+    public SingleObjectQuery(GlobalID globalID) {
+        if (globalID == null) {
+            throw new NullPointerException("Null globalID");
+        }
 
-        BaseClassDescriptor d2 = new BaseClassDescriptor(d1) {
-        };
-        assertNull(d1.getSuperclassDescriptor());
-        assertSame(d1, d2.getSuperclassDescriptor());
+        this.globalID = globalID;
     }
 
-    public void testValid() { // by default BaseClassDescriptor is not compiled...
-        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
-        };
+    public SingleObjectQuery(ObjectId objectID) {
+        if (objectID == null) {
+            throw new NullPointerException("Null objectID");
+        }
 
-        // by default BaseClassDescriptor is not compiled...
-        assertFalse(d1.isValid());
+        this.objectID = objectID;
     }
 
-    public void testCopyObjectProperties() {
-        FieldProperty property = new FieldProperty(TestBean.class, "string", String.class);
-        BaseClassDescriptor d1 = new MockBaseClassDescriptor();
+    public GlobalID getGlobalID() {
+        return globalID;
+    }
 
-        d1.declaredProperties.put(property.getPropertyName(), property);
+    public ObjectId getObjectID() {
+        return objectID;
+    }
 
-        TestBean from = new TestBean();
-        from.setString("123");
+    public Query resolve(EntityResolver resolver) {
+        // TODO: this query wouldn't take advantage of the cache... may need support at
+        // the framework level to provide the result from cache or add cache access
+        // ability to the query lifecycle API.
+        return buildReplacementQuery(resolver);
+    }
 
-        TestBean to = new TestBean();
+    public void route(QueryRouter router, EntityResolver resolver) {
+        buildReplacementQuery(resolver).route(router, resolver);
+    }
 
-        d1.copyObjectProperties(from, to);
-        assertEquals("123", to.getString());
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
+        throw new CayenneRuntimeException(this
+                + " doesn't support its own sql actions. "
+                + "It should've been delegated to another "
+                + "query during resolution or routing phase.");
+    }
+
+    /**
+     * Creates a query that should be run instead of this query.
+     */
+    protected Query buildReplacementQuery(EntityResolver resolver) {
+        if (objectID == null && globalID == null) {
+            throw new CayenneRuntimeException(
+                    "Can't resolve query - both objectID and globalID are null.");
+        }
+
+        ObjectId id = (objectID != null) ? objectID : resolver
+                .convertToObjectID(globalID);
+
+        return new SelectQuery(id.getObjectClass(), ExpressionFactory.matchAllDbExp(id
+                .getIdSnapshot(), Expression.EQUAL_TO));
     }
 }

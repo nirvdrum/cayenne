@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.client;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -112,13 +113,20 @@ public class ClientEntityResolver implements Serializable {
     }
 
     /**
+     * Returns the names of all mapped entities.
+     */
+    public Collection getEntityNames() {
+        return Collections.unmodifiableCollection(entitiesByName.keySet());
+    }
+
+    /**
      * Returns a guaranteed non-null client ObjEntity for a given entity name. If entity
      * name is not mapped, its superclass is checked, all the way to the base class. If no
      * mapping is found in the hierarchy, a CayenneClientException is thrown.
      * 
      * @throws CayenneClientException if a class is not mapped.
      */
-    public ObjEntity lookupEntity(String entityName) {
+    public ObjEntity lookupEntity(String entityName) throws CayenneClientException {
         if (entityName == null) {
             throw new CayenneClientException("Null entityName.");
         }
@@ -139,7 +147,7 @@ public class ClientEntityResolver implements Serializable {
      * 
      * @throws CayenneClientException if a class is not mapped.
      */
-    public ObjEntity lookupEntity(Class objectClass) {
+    public ObjEntity lookupEntity(Class objectClass) throws CayenneClientException {
         if (objectClass == null) {
             throw new CayenneClientException("Null object class.");
         }

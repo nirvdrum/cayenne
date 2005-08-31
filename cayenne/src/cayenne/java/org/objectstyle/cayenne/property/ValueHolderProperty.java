@@ -71,6 +71,11 @@ public class ValueHolderProperty extends FieldProperty {
         super(beanClass, propertyName, ValueHolder.class);
     }
 
+    public void copy(Object from, Object to) throws PropertyAccessException {
+        // TODO: at least invalidate the ValueHolder somehow..?
+        ensureValueHolderSet(to);
+    }
+
     /**
      * Injects a ValueHolder in the object if it hasn't been done yet.
      */
@@ -99,8 +104,7 @@ public class ValueHolderProperty extends FieldProperty {
      * Creates a ValueHolder for an object. Default implementation requires that an object
      * implements Persistent interface.
      */
-    protected ValueHolder createValueHolder(Object object)
-            throws PropertyAccessException {
+    protected ValueHolder createValueHolder(Object object) throws PropertyAccessException {
         if (!(object instanceof Persistent)) {
 
             throw new PropertyAccessException(

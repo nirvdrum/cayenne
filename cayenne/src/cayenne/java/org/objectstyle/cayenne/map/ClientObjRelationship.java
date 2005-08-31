@@ -66,11 +66,19 @@ class ClientObjRelationship extends ObjRelationship {
 
     String reverseRelationshipName;
     boolean readOnly;
+    boolean toMany;
 
-    ClientObjRelationship(String name, String reverseRelationshipName, boolean readOnly) {
+    ClientObjRelationship(String name, String reverseRelationshipName, boolean toMany,
+            boolean readOnly) {
+
         super(name);
+        this.toMany = toMany;
         this.readOnly = readOnly;
         this.reverseRelationshipName = reverseRelationshipName;
+    }
+
+    public boolean isToMany() {
+        return toMany;
     }
 
     public boolean isReadOnly() {

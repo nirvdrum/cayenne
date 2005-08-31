@@ -62,62 +62,87 @@ import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.client.CayenneClientException;
+import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
+import org.objectstyle.cayenne.testdo.mt.MtTable1;
+import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestResources;
 
 public class EntityResolverTst extends CayenneTestCase {
-    protected EntityResolver resolver;
 
-    protected void setUp() throws Exception {
-        super.setUp();
+    public void testGetClientEntityResolver() {
 
-        resolver = new EntityResolver(getDomain().getDataMaps());
+        AccessStack stack = CayenneTestResources.getResources().getAccessStack(
+                MULTI_TIER_ACCESS_STACK);
+
+        EntityResolver resolver = new EntityResolver(stack.getDataDomain().getDataMaps());
+        ClientEntityResolver clientResolver = resolver.getClientEntityResolver();
+        assertNotNull(clientResolver);
+
+        // make sure that client entities got translated properly...
+
+        try {
+            assertNotNull(clientResolver.lookupEntity("MtTable1"));
+        }
+        catch (CayenneClientException e) {
+            fail("'MtTable1' entity is not mapped. All entities: "
+                    + clientResolver.getEntityNames());
+        }
+
+        assertNotNull(clientResolver.lookupEntity(ClientMtTable1.class));
+
+        try {
+            clientResolver.lookupEntity(MtTable1.class);
+            fail("Expected to fail - server class shouldn't be available on the client");
+        }
+        catch (CayenneClientException e) {
+            // expected...
+        }
     }
 
-    private void assertIsArtistDbEntity(DbEntity ae) {
-        assertNotNull(ae);
-        assertEquals(ae, getDbEntity("ARTIST"));
-    }
+    // //Test DbEntitylookups
 
-    private void assertIsArtistObjEntity(ObjEntity ae) {
-        assertNotNull(ae);
-        assertEquals(ae, getObjEntity("Artist"));
-    }
-
-    ////Test DbEntitylookups
-
-    public void testLookupDbEntityByClass() throws Exception {
+    public void testLookupDbEntityByClass() {
+        EntityResolver resolver = new EntityResolver(getDomain().getDataMaps());
         assertIsArtistDbEntity(resolver.lookupDbEntity(Artist.class));
     }
 
     public void testLookupDbEntityByDataobject() throws Exception {
-        Artist artist =
-            (Artist) this.createDataContext().createAndRegisterNewObject("Artist");
+        EntityResolver resolver = new EntityResolver(getDomain().getDataMaps());
+        Artist artist = (Artist) this.createDataContext().createAndRegisterNewObject(
+                "Artist");
         assertIsArtistDbEntity(resolver.lookupDbEntity(artist));
     }
 
-    ////Test ObjEntity lookups
+    // //Test ObjEntity lookups
 
-    public void testGetObjEntity() throws Exception {
+    public void testGetObjEntity() {
+        EntityResolver resolver = new EntityResolver(getDomain().getDataMaps());
         assertIsArtistObjEntity(resolver.getObjEntity("Artist"));
     }
 
-    public void testLookupObjEntityByClass() throws Exception {
+    public void testLookupObjEntityByClass() {
+        EntityResolver resolver = new EntityResolver(getDomain().getDataMaps());
         assertIsArtistObjEntity(resolver.lookupObjEntity(Artist.class));
     }
 
-    public void testLookupObjEntityByInstance() throws Exception {
+    public void testLookupObjEntityByInstance() {
+        EntityResolver resolver = new EntityResolver(getDomain().getDataMaps());
         assertIsArtistObjEntity(resolver.lookupObjEntity(new Artist()));
     }
 
-    public void testLookupObjEntityByDataobject() throws Exception {
-        Artist artist =
-            (Artist) this.createDataContext().createAndRegisterNewObject("Artist");
+    public void testLookupObjEntityByDataobject() {
+        EntityResolver resolver = new EntityResolver(getDomain().getDataMaps());
+        Artist artist = (Artist) this.createDataContext().createAndRegisterNewObject(
+                "Artist");
         assertIsArtistObjEntity(resolver.lookupObjEntity(artist));
     }
 
-    public void testGetDataMapList() throws Exception {
+    public void testGetDataMapList() {
         DataMap m1 = new DataMap();
         DataMap m2 = new DataMap();
         List list = new ArrayList();
@@ -131,7 +156,7 @@ public class EntityResolverTst extends CayenneTestCase {
         assertTrue(maps.containsAll(list));
     }
 
-    public void testAddDataMap() throws Exception {
+    public void testAddDataMap() {
 
         // create empty resolver
         EntityResolver resolver = new EntityResolver();
@@ -150,7 +175,7 @@ public class EntityResolverTst extends CayenneTestCase {
         assertEquals(resolver, m1.getNamespace());
     }
 
-    public void testRemoveDataMap() throws Exception {
+    public void testRemoveDataMap() {
         // create a resolver with a single map
         DataMap m1 = new DataMap();
         ObjEntity oe1 = new ObjEntity("test");
@@ -169,7 +194,7 @@ public class EntityResolverTst extends CayenneTestCase {
         assertNull(resolver.lookupObjEntity(Object.class));
     }
 
-    public void testAddObjEntity() throws Exception {
+    public void testAddObjEntity() {
         // create a resolver with a single map
         DataMap m1 = new DataMap();
         ObjEntity oe1 = new ObjEntity("test1");
@@ -188,7 +213,7 @@ public class EntityResolverTst extends CayenneTestCase {
         assertSame(oe2, resolver.lookupObjEntity(String.class));
     }
 
-    public void testGetQuery() throws Exception {
+    public void testGetQuery() {
         // create a resolver with a single map
         DataMap m1 = new DataMap();
         Query q = new MockQuery("query1");
@@ -204,4 +229,15 @@ public class EntityResolverTst extends CayenneTestCase {
         m1.addQuery(q2);
         assertSame(q2, resolver.getQuery("query2"));
     }
+
+    private void assertIsArtistDbEntity(DbEntity ae) {
+        assertNotNull(ae);
+        assertEquals(ae, getDbEntity("ARTIST"));
+    }
+
+    private void assertIsArtistObjEntity(ObjEntity ae) {
+        assertNotNull(ae);
+        assertEquals(ae, getObjEntity("Artist"));
+    }
+
 }

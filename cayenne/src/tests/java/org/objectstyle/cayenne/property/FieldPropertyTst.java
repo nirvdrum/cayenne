@@ -55,43 +55,47 @@
  */
 package org.objectstyle.cayenne.property;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.cayenne.unit.util.TestBean;
 
-public class BaseClassDescriptorTst extends TestCase {
+import junit.framework.TestCase;
+
+public class FieldPropertyTst extends TestCase {
 
     public void testConstructor() {
-        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
-        };
-        assertNull(d1.getSuperclassDescriptor());
-
-        BaseClassDescriptor d2 = new BaseClassDescriptor(d1) {
-        };
-        assertNull(d1.getSuperclassDescriptor());
-        assertSame(d1, d2.getSuperclassDescriptor());
-    }
-
-    public void testValid() { // by default BaseClassDescriptor is not compiled...
-        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
-        };
-
-        // by default BaseClassDescriptor is not compiled...
-        assertFalse(d1.isValid());
-    }
-
-    public void testCopyObjectProperties() {
         FieldProperty property = new FieldProperty(TestBean.class, "string", String.class);
-        BaseClassDescriptor d1 = new MockBaseClassDescriptor();
 
-        d1.declaredProperties.put(property.getPropertyName(), property);
+        assertEquals("string", property.getPropertyName());
+        assertEquals(String.class.getName(), property.getPropertyType().getName());
+    }
 
+    public void testGet() {
+        FieldProperty property = new FieldProperty(TestBean.class, "string", String.class);
+
+        TestBean object = new TestBean();
+        object.setString("abc");
+
+        assertEquals("abc", property.directRead(object));
+    }
+
+    public void testSet() {
+        FieldProperty property = new FieldProperty(TestBean.class, "string", String.class);
+
+        TestBean object = new TestBean();
+
+        assertNull(object.getString());
+
+        property.directWrite(object, "xyz");
+        assertEquals("xyz", object.getString());
+    }
+
+    public void testCopy() {
+        FieldProperty property = new FieldProperty(TestBean.class, "string", String.class);
         TestBean from = new TestBean();
         from.setString("123");
-
+        
         TestBean to = new TestBean();
-
-        d1.copyObjectProperties(from, to);
+        
+        property.copy(from, to);
         assertEquals("123", to.getString());
     }
 }

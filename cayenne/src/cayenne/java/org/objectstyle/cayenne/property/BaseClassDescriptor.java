@@ -55,7 +55,9 @@
  */
 package org.objectstyle.cayenne.property;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -108,6 +110,18 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         return declaredPropertiesRef.keySet();
     }
 
+    public Collection getPropertyNames() {
+        if (getSuperclassDescriptor() == null) {
+            return getDeclaredPropertyNames();
+        }
+
+        // TODO: cache this?
+        Collection allNames = new ArrayList(getDeclaredPropertyNames());
+        allNames.addAll(getSuperclassDescriptor().getPropertyNames());
+
+        return allNames;
+    }
+
     /**
      * Recursively looks up property descriptor in this class descriptor and all
      * superclass descriptors.
@@ -143,13 +157,38 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
                     "Null objectClass. Descriptor wasn't initialized properly.");
         }
 
+        Object object;
         try {
-            return objectClass.newInstance();
+            object = objectClass.newInstance();
         }
         catch (Throwable e) {
             throw new CayenneRuntimeException("Error creating object of class '"
                     + objectClass.getName()
                     + "'", e);
+        }
+
+        // inject collections and value holders
+        Iterator it = getPropertyNames().iterator();
+        while (it.hasNext()) {
+            String name = (String) it.next();
+            getProperty(name).willRead(object);
+        }
+
+        return object;
+    }
+
+    public void copyObjectProperties(Object from, Object to)
+            throws PropertyAccessException {
+
+        // do super first
+        if (getSuperclassDescriptor() != null) {
+            getSuperclassDescriptor().copyObjectProperties(from, to);
+        }
+
+        Iterator it = getDeclaredPropertyNames().iterator();
+        while (it.hasNext()) {
+            String name = (String) it.next();
+            getProperty(name).copy(from, to);
         }
     }
 }

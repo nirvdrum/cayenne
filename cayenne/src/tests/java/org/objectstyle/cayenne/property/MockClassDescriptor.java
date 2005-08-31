@@ -63,11 +63,19 @@ public class MockClassDescriptor implements ClassDescriptor {
         return null;
     }
 
+    public void copyObjectProperties(Object from, Object to)
+            throws PropertyAccessException {
+    }
+
     public PersistentProperty getDeclaredProperty(String propertyName) {
         return null;
     }
 
     public Collection getDeclaredPropertyNames() {
+        return null;
+    }
+
+    public Collection getPropertyNames() {
         return null;
     }
 

@@ -72,13 +72,13 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
-import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.event.EventBridge;
 import org.objectstyle.cayenne.event.EventBridgeFactory;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SingleObjectQuery;
 
 /**
  * A fixed size cache of DataRows keyed by ObjectId.
@@ -305,7 +305,9 @@ public class DataRowStore implements Serializable {
         }
 
         // try getting it from database
-        SelectQuery select = QueryUtils.selectObjectForId(oid);
+        
+        // TODO: replace this with SingleObjectQuery...
+        Query select = new SingleObjectQuery(oid).resolve(engine.getEntityResolver());
         SelectObserver observer = new SelectObserver();
         engine.performQueries(Collections.singletonList(select), observer);
         List results = observer.getResults(select);

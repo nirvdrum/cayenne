@@ -114,6 +114,10 @@ public class FieldProperty implements PersistentProperty {
     public void willWrite(Object object, Object newValue) throws PropertyAccessException {
         // noop
     }
+    
+    public void copy(Object from, Object to) throws PropertyAccessException {
+        directWrite(to, directRead(from));
+    }
 
     public Object directRead(Object object) throws PropertyAccessException {
         try {
@@ -190,12 +194,13 @@ public class FieldProperty implements PersistentProperty {
 
     /**
      * Recursively looks for a named field in a class hierarchy.
-     * 
-     * @throws NoSuchFieldException
-     * @throws SecurityException
      */
     protected Field lookupFieldInHierarchy(Class beanClass, String fieldName)
             throws SecurityException, NoSuchFieldException {
+
+        // TODO: support property names following other common naming patterns, such as
+        // "_propertyName"
+        
         try {
             return beanClass.getDeclaredField(fieldName);
         }

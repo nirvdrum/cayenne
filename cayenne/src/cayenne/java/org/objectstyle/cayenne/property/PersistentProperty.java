@@ -42,4 +42,9 @@ public interface PersistentProperty extends Serializable {
      * resolving faults, etc.
      */
     void directWrite(Object object, Object value) throws PropertyAccessException;
+    
+    /**
+     * Copies a property from one object to another.
+     */
+    void copy(Object from, Object to) throws PropertyAccessException;
 }

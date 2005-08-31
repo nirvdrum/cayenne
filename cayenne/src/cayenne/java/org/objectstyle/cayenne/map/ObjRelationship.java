@@ -174,10 +174,10 @@ public class ObjRelationship extends Relationship implements EventListener {
         }
 
         Entity target = this.getTargetEntity();
-        if(target == null) {
+        if (target == null) {
             return null;
         }
-        
+
         Entity src = this.getSourceEntity();
 
         Iterator it = target.getRelationships().iterator();
@@ -657,6 +657,7 @@ public class ObjRelationship extends Relationship implements EventListener {
         ObjRelationship relationship = new ClientObjRelationship(
                 getName(),
                 reverseName,
+                isToMany(),
                 isReadOnly());
 
         relationship.setTargetEntityName(getTargetEntityName());

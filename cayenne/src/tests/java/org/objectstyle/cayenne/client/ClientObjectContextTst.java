@@ -60,8 +60,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.cayenne.MockPersistentObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
@@ -73,11 +71,22 @@ import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.OperationRecorder;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.NamedQuery;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
+import org.objectstyle.cayenne.unit.AccessStack;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestResources;
 
 /**
  * @author Andrus Adamchik
  */
-public class ClientObjectContextTst extends TestCase {
+public class ClientObjectContextTst extends CayenneTestCase {
+
+    protected AccessStack buildAccessStack() {
+        return CayenneTestResources
+                .getResources()
+                .getAccessStack(MULTI_TIER_ACCESS_STACK);
+    }
 
     public void testConstructor() {
 
@@ -155,6 +164,52 @@ public class ClientObjectContextTst extends TestCase {
         context.commit();
         assertSame(newObjectId, object.getGlobalID());
         assertSame(object, context.graphManager.getNode(newObjectId));
+    }
+
+    public void testBeforePropertyReadShouldInflateHollow() {
+
+        GlobalID gid = new GlobalID("MtTable1", "a", "b");
+        final ClientMtTable1 inflated = new ClientMtTable1();
+        inflated.setPersistenceState(PersistenceState.COMMITTED);
+        inflated.setGlobalID(gid);
+        inflated.setGlobalAttribute1("abc");
+
+        MockCayenneConnector connector = new MockCayenneConnector() {
+
+            public Object sendMessage(ClientMessage message)
+                    throws CayenneClientException {
+                return Arrays.asList(new Object[] {
+                    inflated
+                });
+            }
+        };
+
+        // check that a HOLLOW object is infalted on "beforePropertyRead"
+        ClientMtTable1 hollow = new ClientMtTable1();
+        hollow.setPersistenceState(PersistenceState.HOLLOW);
+        hollow.setGlobalID(gid);
+
+        final boolean[] selectExecuted = new boolean[1];
+        ClientObjectContext context = new ClientObjectContext(connector) {
+
+            public List performSelectQuery(QueryExecutionPlan query) {
+                selectExecuted[0] = true;
+                return super.performSelectQuery(query);
+            }
+        };
+
+        context.setEntityResolver(getDomain()
+                .getEntityResolver()
+                .getClientEntityResolver());
+
+        context.graphManager.registerNode(hollow.getGlobalID(), hollow);
+
+        // testing this...
+        context.beforePropertyRead(hollow, ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY);
+        assertTrue(selectExecuted[0]);
+        assertEquals(inflated.getGlobalAttribute1Direct(), hollow
+                .getGlobalAttribute1Direct());
+        assertEquals(PersistenceState.COMMITTED, hollow.getPersistenceState());
     }
 
     public void testPerformSelectQuery() {

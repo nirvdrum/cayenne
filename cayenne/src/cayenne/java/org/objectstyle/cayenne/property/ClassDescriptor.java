@@ -85,6 +85,11 @@ public interface ClassDescriptor extends Serializable {
     Object createObject();
 
     /**
+     * Copies persistent properties of one object to another.
+     */
+    void copyObjectProperties(Object from, Object to) throws PropertyAccessException;
+
+    /**
      * Returns a Java Bean property descriptor matching property name or null if such
      * property is not found. Lookup includes properties from this descriptor and all its
      * superclass decsriptors. Returned property maybe any one of simple, value holder or
@@ -105,4 +110,6 @@ public interface ClassDescriptor extends Serializable {
      * the superclass decsriptors.
      */
     Collection getDeclaredPropertyNames();
+    
+    Collection getPropertyNames();
 }

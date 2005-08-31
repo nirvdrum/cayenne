@@ -59,17 +59,29 @@ import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.MockDataObject;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.distribution.GlobalID;
 
 /**
  * @author Andrus Adamchik
  */
 public class RelationshipQueryTst extends TestCase {
 
-    public void testConstructor() {
+    public void testConstructorObjectId() {
 
         ObjectId oid = new ObjectId(MockDataObject.class, "a", "b");
         RelationshipQuery query = new RelationshipQuery(oid, "relX");
         assertSame(oid, query.getObjectID());
+        assertNull(query.getGlobalID());
+        assertNull(query.getRoot());
+        assertSame("relX", query.getRelationshipName());
+    }
+    
+    public void testConstructorGlobalId() {
+
+        GlobalID oid = new GlobalID("test", "a", "b");
+        RelationshipQuery query = new RelationshipQuery(oid, "relX");
+        assertSame(oid, query.getGlobalID());
+        assertNull(query.getObjectID());
         assertNull(query.getRoot());
         assertSame("relX", query.getRelationshipName());
     }

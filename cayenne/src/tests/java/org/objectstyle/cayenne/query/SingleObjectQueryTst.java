@@ -53,45 +53,30 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.property;
+package org.objectstyle.cayenne.query;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.unit.util.TestBean;
+import org.objectstyle.cayenne.MockDataObject;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.distribution.GlobalID;
 
-public class BaseClassDescriptorTst extends TestCase {
+public class SingleObjectQueryTst extends TestCase {
 
-    public void testConstructor() {
-        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
-        };
-        assertNull(d1.getSuperclassDescriptor());
+    public void testConstructorObjectId() {
 
-        BaseClassDescriptor d2 = new BaseClassDescriptor(d1) {
-        };
-        assertNull(d1.getSuperclassDescriptor());
-        assertSame(d1, d2.getSuperclassDescriptor());
+        ObjectId oid = new ObjectId(MockDataObject.class, "a", "b");
+        SingleObjectQuery query = new SingleObjectQuery(oid);
+
+        assertSame(oid, query.getObjectID());
+        assertNull(query.getGlobalID());
     }
 
-    public void testValid() { // by default BaseClassDescriptor is not compiled...
-        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
-        };
+    public void testConstructorGlobalId() {
 
-        // by default BaseClassDescriptor is not compiled...
-        assertFalse(d1.isValid());
-    }
-
-    public void testCopyObjectProperties() {
-        FieldProperty property = new FieldProperty(TestBean.class, "string", String.class);
-        BaseClassDescriptor d1 = new MockBaseClassDescriptor();
-
-        d1.declaredProperties.put(property.getPropertyName(), property);
-
-        TestBean from = new TestBean();
-        from.setString("123");
-
-        TestBean to = new TestBean();
-
-        d1.copyObjectProperties(from, to);
-        assertEquals("123", to.getString());
+        GlobalID oid = new GlobalID("test", "a", "b");
+        SingleObjectQuery query = new SingleObjectQuery(oid);
+        assertSame(oid, query.getGlobalID());
+        assertNull(query.getObjectID());
     }
 }
