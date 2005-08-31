@@ -76,7 +76,6 @@ import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.graph.OperationRecorder;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.property.ClassDescriptor;
-import org.objectstyle.cayenne.property.Property;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
 
@@ -291,33 +290,48 @@ public class ClientObjectContext implements ObjectContext {
         return new GenericQueryMessage(query).send(connector);
     }
 
-    public void beforePropertyRead(Persistent object, String property) {
+    public void prepareForAccess(Persistent object, String property) {
         ensureFaultResolved(object);
     }
 
-    public void beforePropertyWritten(Persistent object, String property, Object newValue) {
-        ensureFaultResolved(object);
+    public void propertyChanged(
+            Persistent object,
+            String property,
+            Object oldValue,
+            Object newValue) {
 
         // change state...
         if (object.getPersistenceState() == PersistenceState.COMMITTED) {
             object.setPersistenceState(PersistenceState.MODIFIED);
         }
 
-        // extract old value and notify graph manager
-        Property propertyDescriptor = getEntityResolver()
-                .lookupEntity(object.getClass())
-                .getClassDescriptor()
-                .getProperty(property);
+        // notify graph manager
+        graphManager.nodePropertyChanged(
+                object.getGlobalID(),
+                property,
+                oldValue,
+                newValue);
+    }
 
-        // indirect properties will take care of themselves...
-        if (propertyDescriptor != null && !propertyDescriptor.isIndirect()) {
+    public void addedToCollectionProperty(
+            Persistent object,
+            String property,
+            Persistent added) {
 
-            Object oldValue = propertyDescriptor.directRead(object);
-            graphManager.nodePropertyChanged(
-                    object.getGlobalID(),
-                    property,
-                    oldValue,
-                    newValue);
+        // notify graph manager
+        if (added != null) {
+            graphManager.arcCreated(object.getGlobalID(), added.getGlobalID(), property);
+        }
+    }
+
+    public void removedFromCollectionProperty(
+            Persistent object,
+            String property,
+            Persistent removed) {
+        // notify graph manager
+        if (removed != null) {
+            graphManager
+                    .arcDeleted(object.getGlobalID(), removed.getGlobalID(), property);
         }
     }
 

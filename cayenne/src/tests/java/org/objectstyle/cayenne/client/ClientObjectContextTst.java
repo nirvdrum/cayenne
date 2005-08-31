@@ -205,7 +205,7 @@ public class ClientObjectContextTst extends CayenneTestCase {
         context.graphManager.registerNode(hollow.getGlobalID(), hollow);
 
         // testing this...
-        context.beforePropertyRead(hollow, ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY);
+        context.prepareForAccess(hollow, ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY);
         assertTrue(selectExecuted[0]);
         assertEquals(inflated.getGlobalAttribute1Direct(), hollow
                 .getGlobalAttribute1Direct());

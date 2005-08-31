@@ -18,21 +18,39 @@ public class _ClientMtTable2 extends PersistentObject {
     protected ValueHolder table1;
 
     public String getGlobalAttribute() {
-        beforePropertyRead("globalAttribute");
+        if(objectContext != null) {
+            objectContext.prepareForAccess(this, "globalAttribute");
+        }
+        
         return globalAttribute;
     }
     public void setGlobalAttribute(String globalAttribute) {
-        beforePropertyWritten("globalAttribute", globalAttribute);
+        if(objectContext != null) {
+            objectContext.prepareForAccess(this, "globalAttribute");
+        }
+        
+        Object oldValue = this.globalAttribute;
         this.globalAttribute = globalAttribute;
+        
+        // notify objectContext about simple property change
+        if(objectContext != null) {
+            objectContext.propertyChanged(this, "globalAttribute", oldValue, globalAttribute);
+        }
     }
     
     
     public ClientMtTable1 getTable1() {
-        beforePropertyRead("table1");
+        if(objectContext != null) {
+            objectContext.prepareForAccess(this, "table1");
+        }
+        
         return (ClientMtTable1) table1.getValue(ClientMtTable1.class);
     }
     public void setTable1(ClientMtTable1 table1) {
-        beforePropertyWritten("table1", table1);
+        if(objectContext != null) {
+            objectContext.prepareForAccess(this, "table1");
+        }
+        
         this.table1.setValue(ClientMtTable1.class, table1);
     }
     

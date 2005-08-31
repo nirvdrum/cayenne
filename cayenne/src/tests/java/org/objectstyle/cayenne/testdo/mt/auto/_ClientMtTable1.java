@@ -21,35 +21,68 @@ public class _ClientMtTable1 extends PersistentObject {
     protected List table2Array;
 
     public String getGlobalAttribute1() {
-        beforePropertyRead("globalAttribute1");
+        if(objectContext != null) {
+            objectContext.prepareForAccess(this, "globalAttribute1");
+        }
+        
         return globalAttribute1;
     }
     public void setGlobalAttribute1(String globalAttribute1) {
-        beforePropertyWritten("globalAttribute1", globalAttribute1);
+        if(objectContext != null) {
+            objectContext.prepareForAccess(this, "globalAttribute1");
+        }
+        
+        Object oldValue = this.globalAttribute1;
         this.globalAttribute1 = globalAttribute1;
+        
+        // notify objectContext about simple property change
+        if(objectContext != null) {
+            objectContext.propertyChanged(this, "globalAttribute1", oldValue, globalAttribute1);
+        }
     }
     
     
     public String getServerAttribute1() {
-        beforePropertyRead("serverAttribute1");
+        if(objectContext != null) {
+            objectContext.prepareForAccess(this, "serverAttribute1");
+        }
+        
         return serverAttribute1;
     }
     public void setServerAttribute1(String serverAttribute1) {
-        beforePropertyWritten("serverAttribute1", serverAttribute1);
+        if(objectContext != null) {
+            objectContext.prepareForAccess(this, "serverAttribute1");
+        }
+        
+        Object oldValue = this.serverAttribute1;
         this.serverAttribute1 = serverAttribute1;
+        
+        // notify objectContext about simple property change
+        if(objectContext != null) {
+            objectContext.propertyChanged(this, "serverAttribute1", oldValue, serverAttribute1);
+        }
     }
     
     
     public List getTable2Array() {
-        beforePropertyRead("table2Array");
+        if(objectContext != null) {
+            objectContext.prepareForAccess(this, "table2Array");
+        }
+        
         return table2Array;
     }
     public void addToTable2Array(ClientMtTable2 object) {
-        beforePropertyWritten("table2Array", object);
+        if(objectContext != null) {
+            objectContext.prepareForAccess(this, "table2Array");
+        }
+        
         this.table2Array.add(object);
     }
     public void removeFromTable2Array(ClientMtTable2 object) {
-        beforePropertyWritten("table2Array", object);
+        if(objectContext != null) {
+            objectContext.prepareForAccess(this, "table2Array");
+        }
+        
         this.table2Array.remove(object);
     }
     

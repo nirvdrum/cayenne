@@ -115,23 +115,49 @@ public class PersistentObjectList extends RelationshipFault implements List {
     // ====================================================
 
     public boolean add(Object o) {
-        return (isFault()) ? addLocal(o) : objectList.add(o);
+        if ((isFault()) ? addLocal(o) : objectList.add(o)) {
+            postprocessAdd(o);
+            return true;
+        }
+
+        return false;
     }
 
-    public void add(int index, Object element) {
-        resolvedObjectList().add(index, element);
+    public void add(int index, Object o) {
+        resolvedObjectList().add(index, o);
+        postprocessAdd(o);
     }
 
     public boolean addAll(Collection c) {
-        return resolvedObjectList().addAll(c);
+        if (resolvedObjectList().addAll(c)) {
+            // TODO: here we assume that all objects were added, while addAll may
+            // technically return true and add only some objects... need a smarter
+            // approach (maybe use "contains" in postprocessAdd"?)
+            postprocessAdd(c);
+
+            return true;
+        }
+
+        return false;
     }
 
     public boolean addAll(int index, Collection c) {
-        return resolvedObjectList().addAll(index, c);
+        if (resolvedObjectList().addAll(index, c)) {
+            // TODO: here we assume that all objects were added, while addAll may
+            // technically return true and add only some objects... need a smarter
+            // approach (maybe use "contains" in postprocessAdd"?)
+            postprocessAdd(c);
+
+            return true;
+        }
+
+        return false;
     }
 
     public void clear() {
-        resolvedObjectList().clear();
+        List resolved = resolvedObjectList();
+        postprocessRemove(resolved);
+        resolved.clear();
     }
 
     public boolean contains(Object o) {
@@ -188,23 +214,44 @@ public class PersistentObjectList extends RelationshipFault implements List {
     }
 
     public Object remove(int index) {
-        return resolvedObjectList().remove(index);
+        Object removed = resolvedObjectList().remove(index);
+        postprocessRemove(removed);
+        return removed;
     }
 
     public boolean remove(Object o) {
-        return (isFault()) ? removeLocal(o) : objectList.remove(o);
+        if ((isFault()) ? removeLocal(o) : objectList.remove(o)) {
+            postprocessRemove(o);
+            return true;
+        }
+
+        return false;
     }
 
     public boolean removeAll(Collection c) {
-        return resolvedObjectList().removeAll(c);
+        if (resolvedObjectList().removeAll(c)) {
+            // TODO: here we assume that all objects were removed, while removeAll may
+            // technically return true and remove only some objects... need a smarter
+            // approach
+            postprocessRemove(c);
+            return true;
+        }
+
+        return false;
     }
 
     public boolean retainAll(Collection c) {
+        // TODO: handle object graoh change notifications on object removals...
         return resolvedObjectList().retainAll(c);
     }
 
-    public Object set(int index, Object element) {
-        return resolvedObjectList().set(index, element);
+    public Object set(int index, Object o) {
+        Object oldValue = resolvedObjectList().set(index, o);
+
+        postprocessAdd(o);
+        postprocessRemove(oldValue);
+
+        return oldValue;
     }
 
     public int size() {
@@ -212,6 +259,8 @@ public class PersistentObjectList extends RelationshipFault implements List {
     }
 
     public List subList(int fromIndex, int toIndex) {
+        // TODO: should we wrap a sublist into a list that does notifications on
+        // additions/removals?
         return resolvedObjectList().subList(fromIndex, toIndex);
     }
 
@@ -329,5 +378,41 @@ public class PersistentObjectList extends RelationshipFault implements List {
         // this is really meaningless, since we don't know
         // if an object was present in the list
         return true;
+    }
+
+    void postprocessAdd(Collection collection) {
+        Iterator it = collection.iterator();
+        while (it.hasNext()) {
+            postprocessAdd(it.next());
+        }
+    }
+
+    void postprocessRemove(Collection collection) {
+        Iterator it = collection.iterator();
+        while (it.hasNext()) {
+            postprocessRemove(it.next());
+        }
+    }
+
+    void postprocessAdd(Object addedObject) {
+        // notify ObjectContext
+        if (relationshipOwner.getObjectContext() != null
+                && addedObject instanceof Persistent) {
+            relationshipOwner.getObjectContext().addedToCollectionProperty(
+                    relationshipOwner,
+                    relationshipName,
+                    (Persistent) addedObject);
+        }
+    }
+
+    void postprocessRemove(Object removedObject) {
+        // notify ObjectContext
+        if (relationshipOwner.getObjectContext() != null
+                && removedObject instanceof Persistent) {
+            relationshipOwner.getObjectContext().removedFromCollectionProperty(
+                    relationshipOwner,
+                    relationshipName,
+                    (Persistent) removedObject);
+        }
     }
 }

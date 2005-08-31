@@ -104,10 +104,26 @@ public class MockObjectContext extends MockPersistenceContext implements ObjectC
         return null;
     }
 
-    public void beforePropertyRead(Persistent persistent, String property) {
+    public void prepareForAccess(Persistent persistent, String property) {
     }
 
-    public void beforePropertyWritten(Persistent persistent, String property, Object newValue) {
+    public void propertyChanged(
+            Persistent persistent,
+            String property,
+            Object oldValue,
+            Object newValue) {
+    }
+
+    public void addedToCollectionProperty(
+            Persistent object,
+            String property,
+            Persistent added) {
+    }
+
+    public void removedFromCollectionProperty(
+            Persistent object,
+            String property,
+            Persistent removed) {
     }
 
     public Collection uncommittedObjects() {

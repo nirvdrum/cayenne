@@ -55,9 +55,6 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.distribution.GlobalID;
@@ -83,7 +80,7 @@ public class PersistentObjectTst extends TestCase {
         assertEquals(PersistenceState.DELETED, object.getPersistenceState());
     }
 
-    public void testOid() {
+    public void testGlobalID() {
         GlobalID id = new GlobalID("test");
 
         PersistentObject object = new MockPersistentObject();
@@ -91,60 +88,5 @@ public class PersistentObjectTst extends TestCase {
         assertNull(object.getGlobalID());
         object.setGlobalID(id);
         assertSame(id, object.getGlobalID());
-    }
-
-    public void testWillReadTransient() {
-        PersistentObject object = new MockPersistentObject();
-
-        // check that no exception is thrown...
-        object.beforePropertyRead("someProperty");
-    }
-
-    public void testWillUpdateTransient() {
-        PersistentObject object = new MockPersistentObject();
-
-        // check that no exception is thrown...
-        object.beforePropertyWritten("someProperty", new Object());
-    }
-
-    public void testWillRead() {
-
-        final Map readProperties = new HashMap();
-        ObjectContext context = new MockObjectContext() {
-
-            public void beforePropertyRead(Persistent persistent, String property) {
-                readProperties.put(persistent, property);
-            }
-        };
-
-        PersistentObject object = new MockPersistentObject();
-        object.setObjectContext(context);
-        object.beforePropertyRead("someProperty");
-        assertEquals("someProperty", readProperties.get(object));
-    }
-
-    public void testWillUpdate() {
-
-        final Map writtenProperties = new HashMap();
-        final Map newValues = new HashMap();
-        ObjectContext context = new MockObjectContext() {
-
-            public void beforePropertyWritten(
-                    Persistent persistent,
-                    String property,
-                    Object newValue) {
-
-                writtenProperties.put(persistent, property);
-                newValues.put(persistent, newValue);
-            }
-        };
-
-        Object newValue = new Object();
-
-        PersistentObject object = new MockPersistentObject();
-        object.setObjectContext(context);
-        object.beforePropertyWritten("writtenProperty", newValue);
-        assertEquals("writtenProperty", writtenProperties.get(object));
-        assertEquals(newValue, newValues.get(object));
     }
 }

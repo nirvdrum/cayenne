@@ -13,7 +13,7 @@ public interface Property extends Serializable {
 
     /**
      * Returns true if a property is implemented with a level of indirection, e.g. via a
-     * ValueHoilder or Collection.
+     * ValueHolder or Collection.
      */
     boolean isIndirect();
 

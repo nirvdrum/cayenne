@@ -77,11 +77,11 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
      * Returns a value resolving it via a query on the first call to this method.
      */
     public Object getValue(Class valueClass) throws CayenneRuntimeException {
+        typeSafetyCheck(valueClass, value);
+
         if (!resolved) {
             resolve();
         }
-
-        typeSafetyCheck(valueClass, value);
 
         return value;
     }
@@ -89,13 +89,31 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
     /**
      * Sets an object value, marking this ValueHolder as resolved.
      */
-    public synchronized void setValue(Class valueClass, Object value)
+    public synchronized Object setValue(Class valueClass, Object value)
             throws CayenneRuntimeException {
 
         typeSafetyCheck(valueClass, value);
 
-        this.value = value;
-        this.resolved = true;
+        if (!resolved) {
+            resolve();
+        }
+
+        Object oldValue = this.value;
+
+        if (oldValue != value) {
+            this.value = value;
+
+            // notify ObjectContext
+            if (relationshipOwner.getObjectContext() != null) {
+                relationshipOwner.getObjectContext().propertyChanged(
+                        relationshipOwner,
+                        relationshipName,
+                        oldValue,
+                        value);
+            }
+        }
+
+        return oldValue;
     }
 
     /**
@@ -112,6 +130,9 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
         }
     }
 
+    /**
+     * Reads an object from the database.
+     */
     protected synchronized void resolve() {
         if (resolved) {
             return;
