@@ -261,7 +261,6 @@ public class DbEntityAttributeTab
 
         String[] types = TypesMapping.getDatabaseTypes();
         JComboBox comboBox = CayenneWidgetFactory.createComboBox(types, true);
-        comboBox.setEditable(true);
         col.setCellEditor(new DefaultCellEditor(comboBox));
 
         table.getSelectionModel().addListSelectionListener(this);
