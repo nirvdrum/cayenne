@@ -103,7 +103,7 @@ import org.objectstyle.cayenne.util.Util;
  * cases this is the only access class directly used in the application.
  * <p>
  * Most common DataContext use pattern is to create one DataContext per session. "Session"
- * may be a an HttpSesession in a web application, or any other similar concept in a
+ * may be a an HttpSession in a web application, or any other similar concept in a
  * multiuser application.
  * </p>
  * <p>
@@ -922,7 +922,7 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Returns a DataNode that should hanlde queries for all DataMap components.
+     * Returns a DataNode that should handle queries for all DataMap components.
      * 
      * @since 1.1
      */
