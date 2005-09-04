@@ -6,7 +6,7 @@
 	</properties>
 	<body>
 		<section name="Success Stories">
-			<p><strong>National Hockey League</strong> (<a target="_new" 
+			<p><strong>National Hockey League</strong> (<a target="_new"
 				href="http://www.nhl.com/">http://www.nhl.com/</a>)</p>
 			<p>After the initial trial of Cayenne in October 2002, NHL switched 
 				all their public applications running at <a target="_new" 
@@ -18,6 +18,28 @@
 				Software</a> the site was successfully launched to production. 
 				Currently applications receive more than 5 million hits a day. 
 				</p>
+			<p><strong>Global Legal Information Network (GLIN)</strong> (<a target="_new" 
+				href="http://www.glin.gov/">http://www.glin.gov/</a>)</p>
+			<p>GLIN is a legal repository for the Law Library
+			of Congress. It has been around for 30 years, and in digital
+			form since the early 90s. However, it was only partially publicly
+			available before last February when a Cayenne-based system was launched.
+			The system has roughly 200,000 records, spanning 200 gb of fulltext data
+			and 15 gb of associated metadata. It represents
+			the world's largest publicly available legal index, spanning 10
+			languages and 35 jurisdictions. The system is accessible in 4
+			languages currently and will support 14 languages in the nearest future, thus becoming 
+			the most internationalized site in the federal government, after the IRS.
+			</p>
+
+			<p><strong>RossoAlice</strong> (<a target="_new" 
+				href="http://www.rossoalice.it/">http://www.rossoalice.it/</a>)</p>
+			<p>
+			RossoAlice is an Italian media portal. This is a site where users can download music, watch films,  
+			download games, watch television news and more. The java database layer for the 
+			authentication / authorization  component is developed with Cayenne.
+			</p>
+
 			<p><strong>Pixxures Inc.</strong> (<a target="_new" 
 				href="http://www.pixxures.ca/">http://www.pixxures.ca/</a>)</p>
 			<p><a target="_new" href="http://www.pixxures.ca/">Pixxures 

@@ -10,10 +10,10 @@
         <!-- Contributors section -->
         <section name="Cayenne Contributors">
 
-            <p>The people listed below have made significant contributions to Cayenne.
-            If you would like to contribute to Cayenne, please go to 
-            <a href="how-can-i-help.html">this page</a>, where you may find a few useful hints.
-            The most obvious first step is joining the developer mailing list.</p>
+            <p>Committers are those who have "write" permissions to Cayenne CVS and do in fact check in code. 
+	There is also many other folks who helped in many different ways, including graphic design, testing, 
+	providing bug fixes, etc. We appreciate their help and would like to give them credit.
+	If you think this page is missing a name that should be mentioned, please send a note to cayenne-devel.</p>
 
             <subsection name="Committers">
             <table>
@@ -32,12 +32,12 @@
             <tr>
                 <td>Holger Hoffstaette</td>
                 <td>holger at wizards dot de</td>
-                <td>-</td>
+                <td> </td>
             </tr>
             <tr>
                 <td>Craig Miskell</td>
-                <td>-</td>
-                <td>-</td>
+                <td> </td>
+                <td> </td>
             </tr>
             <tr>
                 <td>Andriy Shapochka</td>
@@ -57,78 +57,25 @@
 	<tr>
                 <td>Mike Kienenberger</td>
                 <td>mkienenb at alaska dot net</td>
-				<td>-</td>
+	  	<td> </td>
+            </tr>
+	<tr>
+                <td>Michael Gentry</td>
+                <td> </td>
+	    <td> </td>
             </tr>
             </table>
             <p> </p>  
             </subsection>
             
             
-            <subsection name="Contributors">
-            <table>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Web</th>
-            </tr>
-            <tr>
-                <td>Arndt Brenschede</td>
-                <td>Arndt dot Brenschede at diamos dot com</td>
-                <td><a href="http://www.diamos.com/">http://www.diamos.com</a></td>
-            </tr>
-            <tr>
-                <td>Anna Drapeza</td>
-                <td>anna at ipm dot by</td>
-                <td>-</td>
-            </tr>
-            <tr>
-                <td>Scott Finnery</td>
-                <td>scott at codefuey dot com</td>
-				<td>-</td>
-            </tr>
-            
-            <tr>
-                <td>Nataliya Kholodna</td>
-                <td>nkholodna at mail dot ru</td>
-				<td>-</td>
-            </tr>
-            <tr>
-                <td>Dirk Olmes</td>
-                <td>dirk dot olmes at gmx dot de</td>
-                <td>-</td>
-            </tr>
-            </table>
-            <p> </p>  
-            </subsection>
-        
-        <subsection name="Others Who Helped Us in the Past">
-            <table>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Web</th>
-            </tr>
-            <tr>
-                <td>Anton Apolit</td>
-                <td>anton at logical dash process dot com</td>
-                <td>-</td>
-            </tr>
-            <tr>
-                <td>David Cooper</td>
-                <td>snowbladin at yahoo dot com</td>
-                <td><a href="http://livingroad.com/">http://livingroad.com</a></td>
-            </tr>
-             <tr>
-                <td>Maria Vashkevich</td>
-                <td>m dot vashkevich at zaval dot org</td>
-                <td>-</td>
-            </tr>
-            <tr>
-                <td>Fabricio Voznika</td>
-                <td>-</td>
-                <td>-</td>
-            </tr>
-            </table>
+            <subsection name="Other Contributors">
+	<p>Arndt Brenschede (Arndt dot Brenschede at diamos dot com), Anna Drapeza (anna at ipm dot by),
+       	Scott Finnery (scott at codefuey dot com), Nataliya Kholodna (nkholodna at mail dot ru),
+	Dirk Olmes (dirk dot olmes at gmx dot de), Anton Apolit (anton at logical dash process dot com), 
+	Fabricio Voznika, David Cooper, Kevin Menard.
+	</p>
+	<p></p>
             </subsection>
         </section>
     </body>

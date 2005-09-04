@@ -14,18 +14,19 @@
         
 
         <section name="Project News">
-<p><u><i>[May 7, 2005]</i></u> <strong>Cayenne 1.2M4 Released</strong></p>
-		<p>A new M4 milestone release of Cayenne 1.2 is available. It includes Modeler improvements, Antlib descriptor,
-		Derby DbAdapter and a bunch of bug fixes. Check out
-		<a href="http://objectstyle.org/confluence/display/CAY/2005/05/07/">full release announcement</a>
-		for the download URL, screenshot of the new Modeler and a full list of new features.</p>
+
+	<p><u><i>[Sep 4, 2005]</i></u> <strong>More Cayenne Success Stories</strong></p>
+	<p>Recently two more big sites reported success using Cayenne. First one is 
+	US Government <a target="_new" href="http://www.glin.gov/">Global Legal 
+	Information Network</a> (GLIN) - a huge full-text searchable online database 
+	of legal information. (They are doing some very interesting stuff with database internationalization!)
+	Second one is <a target="_new" href="http://www.rossoalice.it/">RossoAlice</a> - 
+	an Italian media portal. For more details go <a href="poweredby.html">here</a>.</p>
 
 
-
-<p><u><i>[April 29, 2005]</i></u> <strong>Cayenne 1.1.2 Released</strong></p>
-		<p>A new maintenance release of Cayenne stable 1.1 version is <a href="http://prdownloads.sourceforge.net/cayenne/cayenne-1.1.2.tar.gz?download">now available</a>. It fixes a few bugs, including a serious one - a deadlock on remote notifications. See release <a href="http://objectstyle.org/confluence/display/CAY/2005/04/29">blog entry</a>
-		 for more details.</p>
-
+<p><u><i>[July 22, 2005]</i></u> <strong>Cayenne 1.2M5 Released</strong></p>
+		<p>A new M5 milestone release of Cayenne 1.2 is available. It features extended class generator Ant task (hint: you can generate much more than just DataObjects), stabilized XML encoder/decoder API, working preview of the multi-tier ObjectContext, and lots of bug fixes. Check out
+		<a href="http://objectstyle.org/confluence/display/CAY/2005/07/22/">full release announcement</a> on our blog.</p>
            
 
         <p><u><i>[Aug 30, 2004]</i></u> <strong>Cayenne on the Cover of JavaWorld Japan</strong></p>
@@ -61,7 +62,8 @@
         </p>
 <p> </p>
         
-        <p><a href="http://objectstyle.org/confluence/pages/viewrecentblogposts.action?key=CAY"><strong>other news...</strong></a> <a href="http://objectstyle.org/confluence/display/CAY/Old+News+Archive"><strong>old news...</strong></a></p>
+        <p><a href="http://objectstyle.org/confluence/pages/viewrecentblogposts.action?key=CAY"><strong>other news...</strong></a></p>
+	<p><a href="http://objectstyle.org/confluence/display/CAY/Old+News+Archive"><strong>old news...</strong></a></p>
         
         </section>
         
