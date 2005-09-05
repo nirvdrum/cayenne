@@ -92,6 +92,10 @@ public class ClientEntityResolver implements Serializable {
     protected void index(Collection entities) {
         entitiesByClassName.clear();
         entitiesByName.clear();
+        
+        if(entities == null) {
+            return;
+        }
 
         Iterator it = entities.iterator();
         while (it.hasNext()) {

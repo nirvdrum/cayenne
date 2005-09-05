@@ -417,7 +417,7 @@ public class DbEntity extends Entity implements DbEntityListener, DbAttributeLis
             attributes.remove(oldName);
 
             // add the attribute back in with the new name
-            attributes.put(newName, dbAttr);
+            super.addAttribute(dbAttr);
         }
 
         // handle PK refresh
@@ -469,7 +469,9 @@ public class DbEntity extends Entity implements DbEntityListener, DbAttributeLis
         }
     }
 
-    /** Relationship property changed. */
+    /**
+     * Relationship property changed.
+     */
     public void dbRelationshipChanged(RelationshipEvent e) {
         if ((e == null) || (e.getEntity() != this)) {
             // not our concern
@@ -511,7 +513,7 @@ public class DbEntity extends Entity implements DbEntityListener, DbAttributeLis
             relationships.remove(oldName);
 
             // add the relationship back in with the new name
-            relationships.put(newName, dbRel);
+            super.addRelationship(dbRel);
         }
     }
 

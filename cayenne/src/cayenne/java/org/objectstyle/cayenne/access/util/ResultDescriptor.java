@@ -448,7 +448,7 @@ public class ResultDescriptor {
         }
 
         public Object getParent() {
-            return parameter.getParent();
+            return parameter.getProcedure();
         }
 
         public ProcedureParameter getParameter() {

@@ -197,7 +197,7 @@ public class UtilTst extends TestCase {
 
     public void testCloneViaSerialization() throws java.lang.Exception {
         // need a special subclass of Object to make "clone" method public
-        SerializableObject o1 = new SerializableObject();
+        MockSerializable o1 = new MockSerializable();
         Object o2 = Util.cloneViaSerialization(o1);
         assertEquals(o1, o2);
         assertTrue(o1 != o2);

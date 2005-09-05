@@ -42,6 +42,7 @@
 			<include name="${jdom.jar}"/>
 			<include name="${commons.dbcp.jar}"/>
 			<include name="${commons.pool.jar}"/>
+			<include name="${hessian.jar}"/>
 		</fileset>
 		<fileset dir="${ant.home}/lib">
 			<include name="*.jar"/>

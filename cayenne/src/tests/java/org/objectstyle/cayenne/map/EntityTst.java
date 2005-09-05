@@ -61,6 +61,7 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.util.TestUtil;
 import org.objectstyle.cayenne.util.Util;
 
 public class EntityTst extends CayenneTestCase {
@@ -70,6 +71,21 @@ public class EntityTst extends CayenneTestCase {
 
         Entity d1 = (Entity) Util.cloneViaSerialization(entity);
         assertEquals(entity.getName(), d1.getName());
+
+        entity.addAttribute(new MockAttribute("xyz"));
+        Entity d2 = (Entity) Util.cloneViaSerialization(entity);
+        assertNotNull(d2.getAttribute("xyz"));
+    }
+
+    public void testSerializabilityWithHessian() throws Throwable {
+        Entity entity = new MockEntity("entity");
+
+        Entity d1 = (Entity) TestUtil.cloneViaHessianSerialization(entity);
+        assertEquals(entity.getName(), d1.getName());
+
+        entity.addAttribute(new MockAttribute("xyz"));
+        Entity d2 = (Entity) TestUtil.cloneViaHessianSerialization(entity);
+        assertNotNull(d2.getAttribute("xyz"));
     }
 
     public void testName() {

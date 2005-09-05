@@ -74,6 +74,10 @@ import org.apache.commons.collections.FastTreeMap;
  * 
  * @author Andrei Adamchik
  */
+// WARNING: CayenneMap is not serializable via Hessian serialization mechanism used by
+// CayenneConnector implementation.
+// TODO: deprecate this ugly map. it is only used in Configuration and DataMap.
+// Those classes should handle setting parent the way Entity does now
 public class CayenneMap extends FastTreeMap {
 
     protected Object parent;

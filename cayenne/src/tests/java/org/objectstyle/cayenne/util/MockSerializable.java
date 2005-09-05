@@ -52,14 +52,17 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne.util;
 
-public class SerializableObject implements java.io.Serializable { 
-	public boolean equals(Object obj) {
-	   if(obj == null)
-	   	return false;
-	   
-	   return obj.getClass() == this.getClass();
-	}
+import java.io.Serializable;
+
+public class MockSerializable implements Serializable {
+
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+
+        return obj.getClass() == this.getClass();
+    }
 }

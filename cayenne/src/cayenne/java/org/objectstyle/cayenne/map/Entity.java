@@ -63,11 +63,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.SortedMap;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.util.CayenneMap;
 import org.objectstyle.cayenne.util.CayenneMapEntry;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
@@ -87,7 +87,8 @@ public abstract class Entity implements CayenneMapEntry, XMLSerializable, Serial
     // ====================================================
     // Attributes
     // ====================================================
-    protected CayenneMap attributes = new CayenneMap(this);
+    protected SortedMap attributes = new TreeMap();
+
     // read-through reference for public access
     protected transient SortedMap attributesMapRef;
     // read-through reference for public access
@@ -96,7 +97,7 @@ public abstract class Entity implements CayenneMapEntry, XMLSerializable, Serial
     // ====================================================
     // Relationships
     // ====================================================
-    protected CayenneMap relationships = new CayenneMap(this);
+    protected SortedMap relationships = new TreeMap();
     // read-through reference for public access
     protected transient SortedMap relationshipsMapRef;
     // read-through reference for public access
@@ -159,24 +160,39 @@ public abstract class Entity implements CayenneMapEntry, XMLSerializable, Serial
     }
 
     /**
-     * Returns attribute with name <code>attrName</code>. Will return null if no
-     * attribute with this name exists.
+     * Returns attribute with name <code>attributeName</code> or null if no attribute
+     * with this name exists.
      */
-    public Attribute getAttribute(String attrName) {
-        return (Attribute) attributes.get(attrName);
+    public Attribute getAttribute(String attributeName) {
+        return (Attribute) attributes.get(attributeName);
     }
 
     /**
-     * Adds new attribute to the entity. If attribute has no name,
-     * IllegalArgumentException is thrown. Also sets <code>attr</code>'s entity to be
-     * this entity.
+     * Adds new attribute to the entity, setting its parent entity to be this object. If
+     * attribute has no name, IllegalArgumentException is thrown.
      */
-    public void addAttribute(Attribute attr) {
-        if (attr.getName() == null) {
+    public void addAttribute(Attribute attribute) {
+        if (attribute.getName() == null) {
             throw new IllegalArgumentException("Attempt to insert unnamed attribute.");
         }
 
-        attributes.put(attr.getName(), attr);
+        // block overrides
+
+        // TODO: change method signature to return replaced attribute and make sure the
+        // Modeler handles it...
+        Object existingAttribute = attributes.get(attribute.getName());
+        if (existingAttribute != null) {
+            if (existingAttribute == attribute) {
+                return;
+            }
+            else {
+                throw new IllegalArgumentException("An attempt to override attribute '"
+                        + attribute.getName());
+            }
+        }
+
+        attributes.put(attribute.getName(), attribute);
+        attribute.setEntity(this);
     }
 
     /** Removes an attribute named <code>attrName</code>. */
@@ -197,8 +213,28 @@ public abstract class Entity implements CayenneMapEntry, XMLSerializable, Serial
     }
 
     /** Adds new relationship to the entity. */
-    public void addRelationship(Relationship rel) {
-        relationships.put(rel.getName(), rel);
+    public void addRelationship(Relationship relationship) {
+        if (relationship.getName() == null) {
+            throw new IllegalArgumentException("Attempt to insert unnamed relationship.");
+        }
+
+        // block overrides
+
+        // TODO: change method signature to return replaced attribute and make sure the
+        // Modeler handles it...
+        Object existingRelationship = relationships.get(relationship.getName());
+        if (existingRelationship != null) {
+            if (existingRelationship == relationship) {
+                return;
+            }
+            else {
+                throw new IllegalArgumentException(
+                        "An attempt to override relationship '" + relationship.getName());
+            }
+        }
+
+        relationships.put(relationship.getName(), relationship);
+        relationship.setSourceEntity(this);
     }
 
     /** Removes a relationship named <code>attrName</code>. */
