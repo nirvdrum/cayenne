@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.distribution;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.util.Util;
 
@@ -65,13 +67,16 @@ import com.caucho.hessian.io.HessianProtocolException;
 /**
  * A CayenneConnector that establishes connection to a remotely deployed HessianService.
  * It supports HTTP BASIC authentication. HessianConnector uses Hessian binary web service
- * protocol working over HTTP. For more info on Hessian see
- * http://www.caucho.com/resin-3.0/protocols/hessian.xtp
+ * protocol working over HTTP. For more info on Hessian see Cauch site at <a
+ * href="http://www.caucho.com/resin-3.0/protocols/hessian.xtp">http://www.caucho.com/resin-3.0/protocols/hessian.xtp</a>.
+ * HessianConnector supports logging of the sent messages via Jakarta commons-logging API.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
 public class HessianConnector implements CayenneConnector {
+
+    protected Log logger;
 
     protected String url;
     protected String userName;
@@ -81,7 +86,18 @@ public class HessianConnector implements CayenneConnector {
     protected HessianService service;
 
     /**
-     * Creates a HessianConnector initializing it with a service URL.
+     * A shortcut for HessianConnector(String,String,String) used when no HTTP basic
+     * authentication is required.
+     */
+    public HessianConnector(String url) {
+        this(url, null, null);
+    }
+
+    /**
+     * Creates a HessianConnector initializing it with a service URL. User name and
+     * password are needed only if basic authentication is used. Otherwise they can be
+     * null. URL on the other hand is required. Null URL would cause an
+     * IllegalArgumentException.
      */
     public HessianConnector(String url, String userName, String password) {
         if (url == null) {
@@ -91,6 +107,7 @@ public class HessianConnector implements CayenneConnector {
         this.url = url;
         this.userName = userName;
         this.password = password;
+        this.logger = LogFactory.getLog(getClass());
     }
 
     /**
@@ -100,10 +117,18 @@ public class HessianConnector implements CayenneConnector {
         return url;
     }
 
+    /**
+     * Returns user name that is used for basic authentication when connecting to the
+     * cayenne server.
+     */
     public String getUserName() {
         return userName;
     }
 
+    /**
+     * Returns password that is used for basic authentication when connecting to the
+     * cayenne server.
+     */
     public String getPassword() {
         return password;
     }
@@ -112,19 +137,53 @@ public class HessianConnector implements CayenneConnector {
      * Sends a message to remote Cayenne service.
      */
     public Object sendMessage(ClientMessage message) throws CayenneClientException {
+        if (message == null) {
+            throw new NullPointerException("Null message");
+        }
+
         // for now only support session-based communications...
         if (sessionId == null) {
             connect();
         }
 
+        long t0 = 0;
+        String messageLabel = "";
+        if (logger.isInfoEnabled()) {
+            t0 = System.currentTimeMillis();
+            messageLabel = message.toString();
+            logger.info("Sending message: " + messageLabel);
+        }
+
+        Object response;
         try {
-            return service.processMessage(sessionId, message);
+            response = service.processMessage(sessionId, message);
         }
         catch (Throwable th) {
             th = unwindThrowable(th);
             String errorMessage = buildExceptionMessage("Remote error", th);
+
+            if (logger.isInfoEnabled()) {
+                long time = System.currentTimeMillis() - t0;
+                logger.info("*** Message error for "
+                        + messageLabel
+                        + " - took "
+                        + time
+                        + " ms.");
+            }
+
             throw new CayenneClientException(errorMessage, th);
         }
+
+        if (logger.isInfoEnabled()) {
+            long time = System.currentTimeMillis() - t0;
+            logger.info("=== Message processed "
+                    + messageLabel
+                    + " - took "
+                    + time
+                    + " ms.");
+        }
+
+        return response;
     }
 
     /**
@@ -133,6 +192,25 @@ public class HessianConnector implements CayenneConnector {
     protected synchronized void connect() throws CayenneClientException {
         if (this.sessionId != null) {
             return;
+        }
+
+        long t0 = 0;
+        if (logger.isInfoEnabled()) {
+            t0 = System.currentTimeMillis();
+            StringBuffer log = new StringBuffer("Connecting to [");
+            if (userName != null) {
+                log.append(userName);
+
+                if (password != null) {
+                    log.append(":*******");
+                }
+
+                log.append("@");
+            }
+
+            log.append(url);
+            log.append("]");
+            logger.info(log.toString());
         }
 
         // init service proxy...
@@ -151,6 +229,15 @@ public class HessianConnector implements CayenneConnector {
         // create server session...
         try {
             this.sessionId = service.establishSession();
+
+            if (logger.isInfoEnabled()) {
+                long time = System.currentTimeMillis() - t0;
+                logger.info("=== Connected, session id: "
+                        + sessionId
+                        + " - took "
+                        + time
+                        + " ms.");
+            }
         }
         catch (Throwable th) {
             th = unwindThrowable(th);

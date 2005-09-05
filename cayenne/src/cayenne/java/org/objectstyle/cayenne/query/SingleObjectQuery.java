@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.query;
 
+import org.apache.commons.lang.StringUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.distribution.GlobalID;
@@ -130,5 +131,14 @@ public class SingleObjectQuery implements QueryExecutionPlan {
 
         return new SelectQuery(id.getObjectClass(), ExpressionFactory.matchAllDbExp(id
                 .getIdSnapshot(), Expression.EQUAL_TO));
+    }
+
+    /**
+     * Overrides toString() outputting a short string with query class and ObjectId or
+     * GlobalID.
+     */
+    public String toString() {
+        Object suffix = (objectID != null) ? (Object) objectID : globalID;
+        return StringUtils.substringAfterLast(getClass().getName(), ".") + ":" + suffix;
     }
 }

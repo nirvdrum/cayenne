@@ -55,49 +55,21 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.objectstyle.cayenne.client.CayenneClientException;
+import junit.framework.TestCase;
 
-/**
- * A convenience common superclass of client messages.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public abstract class AbstractMessage implements ClientMessage {
+public class HessianConnectorTst extends TestCase {
 
-    public abstract Object onReceive(ClientMessageHandler handler);
-
-    /**
-     * Convenience method to send this message over CayenneConnector and get a result of a
-     * specific class. Use by subclasses to implement safe casting of result.
-     * 
-     * @throws org.objectstyle.cayenne.client.CayenneClientException if an underlying
-     *             connector exception occured, or a result is not of expected type.
-     */
-    protected Object send(CayenneConnector connector, Class resultClass) {
-        Object result = connector.sendMessage(this);
-
-        if (result != null && !resultClass.isInstance(result)) {
-            String resultString = new ToStringBuilder(result).toString();
-            throw new CayenneClientException("Expected result type: "
-                    + resultClass.getName()
-                    + ", actual: "
-                    + resultString);
-        }
-
-        return result;
+    public void testConstructor1Arg() {
+        HessianConnector c = new HessianConnector("a");
+        assertEquals("a", c.getUrl());
+        assertNull(c.getUserName());
+        assertNull(c.getPassword());
     }
-
-    /**
-     * Overrides toString() outputting short name of the message derived from the long
-     * class name.
-     */
-    public String toString() {
-        String messageClass = StringUtils.substringAfterLast(getClass().getName(), ".");
-        return StringUtils.substringBeforeLast(messageClass, "Message")
-                + "@"
-                + System.identityHashCode(this);
+    
+    public void testConstructor3Arg() {
+        HessianConnector c = new HessianConnector("a", "b", "c");
+        assertEquals("a", c.getUrl());
+        assertEquals("b", c.getUserName());
+        assertEquals("c", c.getPassword());
     }
 }

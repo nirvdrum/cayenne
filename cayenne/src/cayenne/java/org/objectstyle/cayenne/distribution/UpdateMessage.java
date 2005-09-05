@@ -86,4 +86,10 @@ public class UpdateMessage extends AbstractMessage {
     public int[] send(CayenneConnector connector) {
         return (int[]) send(connector, int[].class);
     }
+
+    public String toString() {
+        StringBuffer buffer = new StringBuffer(super.toString());
+        buffer.append("[").append(queryPlan).append("]");
+        return buffer.toString();
+    }
 }

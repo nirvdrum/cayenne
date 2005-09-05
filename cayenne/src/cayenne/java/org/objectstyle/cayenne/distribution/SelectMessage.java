@@ -70,7 +70,7 @@ public class SelectMessage extends AbstractMessage {
     public SelectMessage(QueryExecutionPlan queryPlan) {
         this.queryPlan = queryPlan;
     }
-    
+
     public QueryExecutionPlan getQueryPlan() {
         return queryPlan;
     }
@@ -87,5 +87,11 @@ public class SelectMessage extends AbstractMessage {
      */
     public List send(CayenneConnector connector) {
         return (List) send(connector, List.class);
+    }
+
+    public String toString() {
+        StringBuffer buffer = new StringBuffer(super.toString());
+        buffer.append("[").append(queryPlan).append("]");
+        return buffer.toString();
     }
 }

@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.query;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.apache.commons.lang.StringUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.distribution.GlobalID;
@@ -205,5 +206,15 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
         select.setFetchingDataRows(isFetchingDataRows());
 
         return select;
+    }
+
+    /**
+     * Overrides toString() outputting a short string with query class and relationship
+     * name.
+     */
+    public String toString() {
+        return StringUtils.substringAfterLast(getClass().getName(), ".")
+                + ":"
+                + getRelationshipName();
     }
 }

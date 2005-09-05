@@ -60,7 +60,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.StringUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.Persistent;
@@ -202,7 +202,12 @@ public class NamedQuery implements QueryExecutionPlan {
         return query;
     }
 
+    /**
+     * Overrides toString() outputting a short string with query class and name.
+     */
     public String toString() {
-        return new ToStringBuilder(this).append("name", name).toString();
+        return StringUtils.substringAfterLast(getClass().getName(), ".")
+                + ":"
+                + getName();
     }
 }
