@@ -69,7 +69,9 @@ public class LocalConnectorTst extends TestCase {
         assertSame(handler1, connector1.getHandler());
 
         ClientMessageHandler handler2 = new MockClientMessageHandler();
-        LocalConnector connector2 = new LocalConnector(handler2, true);
+        LocalConnector connector2 = new LocalConnector(
+                handler2,
+                LocalConnector.JAVA_SERIALIZATION);
         assertTrue(connector2.isSerializingMessages());
         assertSame(handler2, connector2.getHandler());
     }
@@ -95,7 +97,9 @@ public class LocalConnectorTst extends TestCase {
         ClientMessageHandler handler = new MockClientMessageHandler();
 
         // create connector without serialization support...
-        LocalConnector connector = new LocalConnector(handler, true);
+        LocalConnector connector = new LocalConnector(
+                handler,
+                LocalConnector.HESSIAN_SERIALIZATION);
 
         // indirectly test that a dispatch was done on a different message
         // a better test would involve some serialization tricks with

@@ -55,13 +55,15 @@
  */
 package org.objectstyle.cayenne.distribution;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.util.Util;
 
 /**
  * A "local" connector used mainly to enable testing of all parts of a distributed
- * application in a single virtual machine. To better reproduce test conditions, it can
- * optionally serialize all messages passed through it, and then pass a deserialized
+ * application in a single Java virtual machine. To better reproduce test conditions, it
+ * can optionally serialize all messages passed through it, and then pass a deserialized
  * version to the handler.
  * 
  * @since 1.2
@@ -69,20 +71,40 @@ import org.objectstyle.cayenne.util.Util;
  */
 public class LocalConnector implements CayenneConnector {
 
-    protected ClientMessageHandler handler;
-    protected boolean serializingMessages;
+    public static final int NO_SERIALIZATION = 0;
+    public static final int JAVA_SERIALIZATION = 1;
+    public static final int HESSIAN_SERIALIZATION = 2;
 
+    protected Log logger;
+    protected ClientMessageHandler handler;
+    protected int serializationPolicy;
+
+    /**
+     * Creates LocalConnector with specified handler and no serialization.
+     */
     public LocalConnector(ClientMessageHandler handler) {
-        this(handler, false);
+        this(handler, NO_SERIALIZATION);
     }
 
-    public LocalConnector(ClientMessageHandler handler, boolean serializingMessages) {
+    /**
+     * Creates a LocalConnector with specified handler and serialization policy. Valid
+     * policies are defined as final static int field in this class.
+     */
+    public LocalConnector(ClientMessageHandler handler, int serializationPolicy) {
         this.handler = handler;
-        this.serializingMessages = serializingMessages;
+
+        // convert invalid policy to NO_SER..
+        this.serializationPolicy = serializationPolicy == JAVA_SERIALIZATION
+                || serializationPolicy == HESSIAN_SERIALIZATION
+                ? serializationPolicy
+                : NO_SERIALIZATION;
+
+        this.logger = LogFactory.getLog(getClass());
     }
 
     public boolean isSerializingMessages() {
-        return serializingMessages;
+        return serializationPolicy == JAVA_SERIALIZATION
+                || serializationPolicy == HESSIAN_SERIALIZATION;
     }
 
     public ClientMessageHandler getHandler() {
@@ -93,16 +115,58 @@ public class LocalConnector implements CayenneConnector {
      * Dispatches a message to an internal handler.
      */
     public Object sendMessage(ClientMessage message) throws CayenneClientException {
-        if (isSerializingMessages()) {
 
-            try {
-                message = (ClientMessage) Util.cloneViaSerialization(message);
-            }
-            catch (Exception ex) {
-                throw new CayenneClientException("Error serializing message", ex);
-            }
+        long t0 = 0;
+        String messageLabel = "";
+        if (logger.isInfoEnabled()) {
+            t0 = System.currentTimeMillis();
+            messageLabel = message.toString();
+            logger.info("Sending message: " + messageLabel);
         }
-        return message.onReceive(handler);
-    }
 
+        ClientMessage processedMessage;
+
+        try {
+            switch (serializationPolicy) {
+                case HESSIAN_SERIALIZATION:
+                    processedMessage = (ClientMessage) HessianConnector
+                            .cloneViaHessianSerialization(message);
+                    break;
+
+                case JAVA_SERIALIZATION:
+                    processedMessage = (ClientMessage) Util
+                            .cloneViaSerialization(message);
+                    break;
+
+                default:
+                    processedMessage = message;
+            }
+
+            Object response = processedMessage.onReceive(handler);
+
+            if (logger.isInfoEnabled()) {
+                long time = System.currentTimeMillis() - t0;
+                logger.info("=== Message processed "
+                        + messageLabel
+                        + " - took "
+                        + time
+                        + " ms.");
+            }
+
+            return response;
+        }
+        catch (Exception ex) {
+            if (logger.isInfoEnabled()) {
+                long time = System.currentTimeMillis() - t0;
+                logger.info("*** Message error for "
+                        + messageLabel
+                        + " - took "
+                        + time
+                        + " ms.");
+            }
+
+            throw new CayenneClientException("Error sending message", ex);
+        }
+
+    }
 }

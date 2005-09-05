@@ -55,6 +55,10 @@
  */
 package org.objectstyle.cayenne.distribution;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.objectstyle.cayenne.client.CayenneClientException;
@@ -62,6 +66,8 @@ import org.objectstyle.cayenne.util.Util;
 
 import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.hessian.client.HessianRuntimeException;
+import com.caucho.hessian.io.HessianInput;
+import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.HessianProtocolException;
 
 /**
@@ -69,7 +75,7 @@ import com.caucho.hessian.io.HessianProtocolException;
  * It supports HTTP BASIC authentication. HessianConnector uses Hessian binary web service
  * protocol working over HTTP. For more info on Hessian see Cauch site at <a
  * href="http://www.caucho.com/resin-3.0/protocols/hessian.xtp">http://www.caucho.com/resin-3.0/protocols/hessian.xtp</a>.
- * HessianConnector supports logging of the sent messages via Jakarta commons-logging API.
+ * HessianConnector supports logging of message traffic via Jakarta commons-logging API.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -84,6 +90,22 @@ public class HessianConnector implements CayenneConnector {
     protected String sessionId;
 
     protected HessianService service;
+
+    /**
+     * A utility method that clones an object using Hessian serialization/deserialization
+     * mechanism which is different from default Java serialization.
+     */
+    public static Object cloneViaHessianSerialization(Serializable object)
+            throws Exception {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        HessianOutput out = new HessianOutput(bytes);
+        out.writeObject(object);
+
+        byte[] data = bytes.toByteArray();
+
+        HessianInput in = new HessianInput(new ByteArrayInputStream(data));
+        return in.readObject();
+    }
 
     /**
      * A shortcut for HessianConnector(String,String,String) used when no HTTP basic

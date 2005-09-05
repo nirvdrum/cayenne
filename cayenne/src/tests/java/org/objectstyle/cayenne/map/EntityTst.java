@@ -58,10 +58,10 @@ package org.objectstyle.cayenne.map;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.objectstyle.cayenne.distribution.HessianConnector;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.TestUtil;
 import org.objectstyle.cayenne.util.Util;
 
 public class EntityTst extends CayenneTestCase {
@@ -77,14 +77,14 @@ public class EntityTst extends CayenneTestCase {
         assertNotNull(d2.getAttribute("xyz"));
     }
 
-    public void testSerializabilityWithHessian() throws Throwable {
+    public void testSerializabilityWithHessian() throws Exception {
         Entity entity = new MockEntity("entity");
 
-        Entity d1 = (Entity) TestUtil.cloneViaHessianSerialization(entity);
+        Entity d1 = (Entity) HessianConnector.cloneViaHessianSerialization(entity);
         assertEquals(entity.getName(), d1.getName());
 
         entity.addAttribute(new MockAttribute("xyz"));
-        Entity d2 = (Entity) TestUtil.cloneViaHessianSerialization(entity);
+        Entity d2 = (Entity) HessianConnector.cloneViaHessianSerialization(entity);
         assertNotNull(d2.getAttribute("xyz"));
     }
 
