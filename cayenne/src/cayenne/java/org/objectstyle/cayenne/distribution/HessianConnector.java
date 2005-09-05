@@ -59,8 +59,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.util.Util;
 
@@ -80,9 +78,7 @@ import com.caucho.hessian.io.HessianProtocolException;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class HessianConnector implements CayenneConnector {
-
-    protected Log logger;
+public class HessianConnector extends BaseConnector {
 
     protected String url;
     protected String userName;
@@ -129,7 +125,6 @@ public class HessianConnector implements CayenneConnector {
         this.url = url;
         this.userName = userName;
         this.password = password;
-        this.logger = LogFactory.getLog(getClass());
     }
 
     /**
@@ -156,56 +151,27 @@ public class HessianConnector implements CayenneConnector {
     }
 
     /**
-     * Sends a message to remote Cayenne service.
+     * Establishes server session if needed.
      */
-    public Object sendMessage(ClientMessage message) throws CayenneClientException {
-        if (message == null) {
-            throw new NullPointerException("Null message");
-        }
-
+    protected void beforeSendMessage(ClientMessage message) throws CayenneClientException {
         // for now only support session-based communications...
         if (sessionId == null) {
             connect();
         }
+    }
 
-        long t0 = 0;
-        String messageLabel = "";
-        if (logger.isInfoEnabled()) {
-            t0 = System.currentTimeMillis();
-            messageLabel = message.toString();
-            logger.info("Sending message: " + messageLabel);
-        }
-
-        Object response;
+    /**
+     * Sends a message to remote Cayenne Hessian service.
+     */
+    protected Object doSendMessage(ClientMessage message) throws CayenneClientException {
         try {
-            response = service.processMessage(sessionId, message);
+            return service.processMessage(sessionId, message);
         }
         catch (Throwable th) {
             th = unwindThrowable(th);
             String errorMessage = buildExceptionMessage("Remote error", th);
-
-            if (logger.isInfoEnabled()) {
-                long time = System.currentTimeMillis() - t0;
-                logger.info("*** Message error for "
-                        + messageLabel
-                        + " - took "
-                        + time
-                        + " ms.");
-            }
-
             throw new CayenneClientException(errorMessage, th);
         }
-
-        if (logger.isInfoEnabled()) {
-            long time = System.currentTimeMillis() - t0;
-            logger.info("=== Message processed "
-                    + messageLabel
-                    + " - took "
-                    + time
-                    + " ms.");
-        }
-
-        return response;
     }
 
     /**

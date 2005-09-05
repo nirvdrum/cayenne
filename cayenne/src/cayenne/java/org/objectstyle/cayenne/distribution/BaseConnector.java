@@ -55,47 +55,96 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.objectstyle.cayenne.client.CayenneClientException;
 
 /**
- * A convenience common superclass of client messages.
+ * A convenience superlcass of client connectors that provides common logging
+ * functionality.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public abstract class AbstractMessage implements ClientMessage {
+public abstract class BaseConnector implements CayenneConnector {
 
-    public abstract Object onReceive(ClientMessageHandler handler);
+    protected Log logger;
 
     /**
-     * Convenience method to send this message over CayenneConnector and get a result of a
-     * specific class. Use by subclasses to implement safe casting of result.
-     * 
-     * @throws org.objectstyle.cayenne.client.CayenneClientException if an underlying
-     *             connector exception occured, or a result is not of expected type.
+     * Default constructor that initializes logging.
      */
-    protected Object send(CayenneConnector connector, Class resultClass) {
-        Object result = connector.sendMessage(this);
+    protected BaseConnector() {
+        this.logger = LogFactory.getLog(getClass());
+    }
 
-        if (result != null && !resultClass.isInstance(result)) {
-            String resultString = new ToStringBuilder(result).toString();
-            throw new CayenneClientException("Expected result type: "
-                    + resultClass.getName()
-                    + ", actual: "
-                    + resultString);
+    /**
+     * Invokes 'beforeSendMessage' on self, then invokes 'doSendMessage'. Implements basic
+     * logging functionality. Do not override this method unless absolutely necessary.
+     * Override 'beforeSendMessage' and 'doSendMessage' instead.
+     */
+    public Object sendMessage(ClientMessage message) throws CayenneClientException {
+        if (message == null) {
+            throw new NullPointerException("Null message");
         }
 
-        return result;
+        beforeSendMessage(message);
+
+        // log start...
+        long t0 = 0;
+        String messageLabel = "";
+        int messageId = 0;
+        if (logger.isInfoEnabled()) {
+            t0 = System.currentTimeMillis();
+            messageLabel = message.toString();
+            messageId = System.identityHashCode(message);
+            logger.info("Sending message " + messageId + ": " + messageLabel);
+        }
+
+        Object response;
+        try {
+            response = doSendMessage(message);
+        }
+        catch (CayenneClientException e) {
+
+            // log error
+            if (logger.isInfoEnabled()) {
+                long time = System.currentTimeMillis() - t0;
+                logger.info("*** Message error for "
+                        + messageId
+                        + ": "
+                        + messageLabel
+                        + " - took "
+                        + time
+                        + " ms.");
+            }
+
+            throw e;
+        }
+
+        // log success...
+        if (logger.isInfoEnabled()) {
+            long time = System.currentTimeMillis() - t0;
+            logger.info("=== Message processed "
+                    + messageId
+                    + ": "
+                    + messageLabel
+                    + " - took "
+                    + time
+                    + " ms.");
+        }
+
+        return response;
     }
 
     /**
-     * Overrides toString() outputting short name of the message derived from the long
-     * class name.
+     * Called before logging the beginning of message processing.
      */
-    public String toString() {
-        String messageClass = StringUtils.substringAfterLast(getClass().getName(), ".");
-        return StringUtils.substringBeforeLast(messageClass, "Message");
-    }
+    protected abstract void beforeSendMessage(ClientMessage message)
+            throws CayenneClientException;
+
+    /**
+     * The worker method invoked to process message.
+     */
+    protected abstract Object doSendMessage(ClientMessage message)
+            throws CayenneClientException;
 }

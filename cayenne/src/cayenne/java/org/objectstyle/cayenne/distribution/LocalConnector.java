@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.util.Util;
 
@@ -69,13 +67,12 @@ import org.objectstyle.cayenne.util.Util;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class LocalConnector implements CayenneConnector {
+public class LocalConnector extends BaseConnector {
 
     public static final int NO_SERIALIZATION = 0;
     public static final int JAVA_SERIALIZATION = 1;
     public static final int HESSIAN_SERIALIZATION = 2;
 
-    protected Log logger;
     protected ClientMessageHandler handler;
     protected int serializationPolicy;
 
@@ -98,8 +95,6 @@ public class LocalConnector implements CayenneConnector {
                 || serializationPolicy == HESSIAN_SERIALIZATION
                 ? serializationPolicy
                 : NO_SERIALIZATION;
-
-        this.logger = LogFactory.getLog(getClass());
     }
 
     public boolean isSerializingMessages() {
@@ -112,17 +107,16 @@ public class LocalConnector implements CayenneConnector {
     }
 
     /**
+     * Does nothing.
+     */
+    protected void beforeSendMessage(ClientMessage message) {
+        // noop
+    }
+
+    /**
      * Dispatches a message to an internal handler.
      */
-    public Object sendMessage(ClientMessage message) throws CayenneClientException {
-
-        long t0 = 0;
-        String messageLabel = "";
-        if (logger.isInfoEnabled()) {
-            t0 = System.currentTimeMillis();
-            messageLabel = message.toString();
-            logger.info("Sending message: " + messageLabel);
-        }
+    protected Object doSendMessage(ClientMessage message) throws CayenneClientException {
 
         ClientMessage processedMessage;
 
@@ -142,29 +136,9 @@ public class LocalConnector implements CayenneConnector {
                     processedMessage = message;
             }
 
-            Object response = processedMessage.onReceive(handler);
-
-            if (logger.isInfoEnabled()) {
-                long time = System.currentTimeMillis() - t0;
-                logger.info("=== Message processed "
-                        + messageLabel
-                        + " - took "
-                        + time
-                        + " ms.");
-            }
-
-            return response;
+            return processedMessage.onReceive(handler);
         }
         catch (Exception ex) {
-            if (logger.isInfoEnabled()) {
-                long time = System.currentTimeMillis() - t0;
-                logger.info("*** Message error for "
-                        + messageLabel
-                        + " - took "
-                        + time
-                        + " ms.");
-            }
-
             throw new CayenneClientException("Error sending message", ex);
         }
 
