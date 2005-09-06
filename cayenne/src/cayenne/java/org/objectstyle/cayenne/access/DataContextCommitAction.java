@@ -110,9 +110,9 @@ class DataContextCommitAction {
     private List objEntitiesToDelete;
     private List objEntitiesToUpdate;
     private List nodeHelpers;
-    private List insObjects; //event support
-    private List delObjects; //event support
-    private List updObjects; //event support
+    private List insObjects; // event support
+    private List delObjects; // event support
+    private List updObjects; // event support
 
     DataContextCommitAction(DataContext contextToCommit) {
         context = contextToCommit;
@@ -184,7 +184,8 @@ class DataContextCommitAction {
 
                             if (queries.size() > 0) {
                                 // note: observer throws on error
-                                nodeHelper.getNode().performQueries(queries,
+                                nodeHelper.getNode().performQueries(
+                                        queries,
                                         observer,
                                         transaction);
                             }
@@ -218,8 +219,7 @@ class DataContextCommitAction {
         }
     }
 
-    private void prepareInsertQueries(DataNodeCommitAction commitHelper)
-            throws CayenneException {
+    private void prepareInsertQueries(DataNodeCommitAction commitHelper) {
 
         List entities = commitHelper.getObjEntitiesForInsert();
         if (entities.isEmpty()) {
@@ -250,7 +250,8 @@ class DataContextCommitAction {
                 boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
                 DbRelationship masterDependentDbRel = (isMasterDbEntity
                         ? null
-                        : findMasterToDependentDbRelationship(entity.getDbEntity(),
+                        : findMasterToDependentDbRelationship(
+                                entity.getDbEntity(),
                                 dbEntity));
 
                 List objects = (List) newObjectsByObjEntity.get(entity.getClassName());
@@ -266,7 +267,8 @@ class DataContextCommitAction {
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
-                    Map snapshot = BatchQueryUtils.buildSnapshotForInsert(entity,
+                    Map snapshot = BatchQueryUtils.buildSnapshotForInsert(
+                            entity,
                             o,
                             masterDependentDbRel,
                             supportsGeneratedKeys);
@@ -281,8 +283,7 @@ class DataContextCommitAction {
         }
     }
 
-    private void prepareDeleteQueries(DataNodeCommitAction commitHelper)
-            throws CayenneException {
+    private void prepareDeleteQueries(DataNodeCommitAction commitHelper) {
 
         List entities = commitHelper.getObjEntitiesForDelete();
         if (entities.isEmpty()) {
@@ -313,7 +314,8 @@ class DataContextCommitAction {
                 boolean isRootDbEntity = (entity.getDbEntity() == dbEntity);
                 DbRelationship masterDependentDbRel = (isRootDbEntity
                         ? null
-                        : findMasterToDependentDbRelationship(entity.getDbEntity(),
+                        : findMasterToDependentDbRelationship(
+                                entity.getDbEntity(),
                                 dbEntity));
 
                 List objects = (List) objectsToDeleteByObjEntity.get(entity
@@ -348,7 +350,8 @@ class DataContextCommitAction {
                     if (optimisticLocking) {
                         // clone snapshot and add extra keys...
                         qualifierSnapshot = new HashMap(qualifierSnapshot);
-                        appendOptimisticLockingAttributes(qualifierSnapshot,
+                        appendOptimisticLockingAttributes(
+                                qualifierSnapshot,
                                 o,
                                 qualifierAttributes);
                     }
@@ -391,8 +394,7 @@ class DataContextCommitAction {
         }
     }
 
-    private void prepareUpdateQueries(DataNodeCommitAction commitHelper)
-            throws CayenneException {
+    private void prepareUpdateQueries(DataNodeCommitAction commitHelper) {
         List entities = commitHelper.getObjEntitiesForUpdate();
         if (entities.isEmpty()) {
             return;
@@ -420,7 +422,8 @@ class DataContextCommitAction {
 
                 DbRelationship masterDependentDbRel = (isRootDbEntity)
                         ? null
-                        : findMasterToDependentDbRelationship(entity.getDbEntity(),
+                        : findMasterToDependentDbRelationship(
+                                entity.getDbEntity(),
                                 dbEntity);
                 List objects = (List) objectsToUpdateByObjEntity.get(entity
                         .getClassName());
@@ -428,7 +431,8 @@ class DataContextCommitAction {
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
 
-                    Map snapshot = BatchQueryUtils.buildSnapshotForUpdate(entity,
+                    Map snapshot = BatchQueryUtils.buildSnapshotForUpdate(
+                            entity,
                             o,
                             masterDependentDbRel);
 
@@ -457,7 +461,8 @@ class DataContextCommitAction {
                     if (optimisticLocking) {
                         // clone snapshot and add extra keys...
                         qualifierSnapshot = new HashMap(qualifierSnapshot);
-                        appendOptimisticLockingAttributes(qualifierSnapshot,
+                        appendOptimisticLockingAttributes(
+                                qualifierSnapshot,
                                 o,
                                 qualifierAttributes);
                     }
@@ -493,7 +498,8 @@ class DataContextCommitAction {
                     batch.add(qualifierSnapshot, snapshot);
 
                     if (isRootDbEntity) {
-                        updateId(idSnapshot,
+                        updateId(
+                                idSnapshot,
                                 o.getObjectId().getReplacementIdMap(),
                                 snapshot);
                         updObjects.add(o);
@@ -628,7 +634,7 @@ class DataContextCommitAction {
     /**
      * Organizes committed objects by node, performs sorting operations.
      */
-    private void categorizeObjects() throws CayenneException {
+    private void categorizeObjects() {
         this.nodeHelpers = new ArrayList();
 
         Iterator it = context.getObjectStore().getObjectIterator();
@@ -656,22 +662,25 @@ class DataContextCommitAction {
         }
     }
 
-    private void objectToInsert(DataObject o) throws CayenneException {
-        classifyByEntityAndNode(o,
+    private void objectToInsert(DataObject o) {
+        classifyByEntityAndNode(
+                o,
                 newObjectsByObjEntity,
                 objEntitiesToInsert,
                 DataNodeCommitAction.INSERT);
     }
 
-    private void objectToDelete(DataObject o) throws CayenneException {
-        classifyByEntityAndNode(o,
+    private void objectToDelete(DataObject o) {
+        classifyByEntityAndNode(
+                o,
                 objectsToDeleteByObjEntity,
                 objEntitiesToDelete,
                 DataNodeCommitAction.DELETE);
     }
 
-    private void objectToUpdate(DataObject o) throws CayenneException {
-        classifyByEntityAndNode(o,
+    private void objectToUpdate(DataObject o) {
+        classifyByEntityAndNode(
+                o,
                 objectsToUpdateByObjEntity,
                 objEntitiesToUpdate,
                 DataNodeCommitAction.UPDATE);

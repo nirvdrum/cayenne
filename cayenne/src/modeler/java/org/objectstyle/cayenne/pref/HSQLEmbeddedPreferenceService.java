@@ -207,7 +207,7 @@ public class HSQLEmbeddedPreferenceService extends CayennePreferenceService {
      * Copies one database to another. Caller must provide HSQLDB locks on target for this
      * to work reliably.
      */
-    void moveDB(String masterBaseName, String targetBaseName) throws IOException {
+    void moveDB(String masterBaseName, String targetBaseName) {
 
         File[] filesToMove = dbDirectory.listFiles(new HSQLDBFileFilter(masterBaseName));
         if (filesToMove != null) {
@@ -229,7 +229,7 @@ public class HSQLEmbeddedPreferenceService extends CayennePreferenceService {
      * Copies one database to another. Caller must provide HSQLDB locks for this to work
      * reliably.
      */
-    void copyDB(String masterBaseName, String targetBaseName) throws IOException {
+    void copyDB(String masterBaseName, String targetBaseName) {
 
         File[] filesToCopy = dbDirectory.listFiles(new HSQLDBFileFilter(masterBaseName));
         if (filesToCopy != null) {
@@ -246,11 +246,12 @@ public class HSQLEmbeddedPreferenceService extends CayennePreferenceService {
             }
         }
     }
-    
+
     // filers HSQLDB files
     final class HSQLDBFileFilter implements FileFilter {
+
         String baseName;
-        
+
         HSQLDBFileFilter(String baseName) {
             this.baseName = baseName;
         }

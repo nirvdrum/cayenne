@@ -73,6 +73,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
 import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
@@ -277,7 +278,22 @@ public class ClientObjectContextTst extends CayenneTestCase {
         assertNotNull(object.getGlobalID());
         assertTrue(object.getGlobalID() instanceof GlobalID);
         assertTrue(((GlobalID) object.getGlobalID()).isTemporary());
+    }
 
+    public void testNewObjectShouldInflateHolders() {
+
+        ClientObjectContext context = new ClientObjectContext(new MockCayenneConnector());
+        context.setEntityResolver(getDomain()
+                .getEntityResolver()
+                .getClientEntityResolver());
+
+        // to one
+        ClientMtTable2 o1 = (ClientMtTable2) context.newObject(ClientMtTable2.class);
+        assertNotNull(o1.getTable1Direct());
+
+        // to many
+        ClientMtTable1 o2 = (ClientMtTable1) context.newObject(ClientMtTable1.class);
+        assertNotNull(o2.getTable2ArrayDirect());
     }
 
     public void testDeleteObject() {

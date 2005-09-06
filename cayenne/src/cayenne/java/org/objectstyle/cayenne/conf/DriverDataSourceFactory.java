@@ -202,7 +202,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
             super(parser, parentHandler);
         }
 
-        public void init(String name, Attributes attrs) throws SAXException {
+        public void init(String name, Attributes attrs) {
             String className = attrs.getValue("", "class");
             logObj.log(logLevel, "loading driver " + className);
             driverInfo = new DataSourceInfo();
@@ -274,8 +274,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
             super(parser, parentHandler);
         }
 
-        public void init(String name, Attributes atts, DataSourceInfo driverInfo)
-                throws SAXException {
+        public void init(String name, Attributes atts, DataSourceInfo driverInfo) {
             logObj.log(logLevel, "loading user name and password.");
             driverInfo.setUserName(atts.getValue("userName"));
             driverInfo.setPassword(atts.getValue("password"));

@@ -77,6 +77,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Andrei Adamchik
  */
 public class ConfigLoader {
+
     protected XMLReader parser;
     protected ConfigLoaderDelegate delegate;
 
@@ -91,9 +92,10 @@ public class ConfigLoader {
     }
 
     /**
-      * Returns the delegate.
-      * @return ConfigLoaderDelegate
-      */
+     * Returns the delegate.
+     * 
+     * @return ConfigLoaderDelegate
+     */
     public ConfigLoaderDelegate getDelegate() {
         return delegate;
     }
@@ -133,59 +135,52 @@ public class ConfigLoader {
     private class RootHandler extends DefaultHandler {
 
         /**
-         * Handles the start of a datadomains element. A domains handler is created
-         * and initialised with the element name and attributes.
-         *
-         * @exception SAXException if the tag given is not
-         *                              <code>"domains"</code>
+         * Handles the start of a datadomains element. A domains handler is created and
+         * initialised with the element name and attributes.
+         * 
+         * @exception SAXException if the tag given is not <code>"domains"</code>
          */
         public void startElement(
-            String namespaceURI,
-            String localName,
-            String qName,
-            Attributes attrs)
-            throws SAXException {
+                String namespaceURI,
+                String localName,
+                String qName,
+                Attributes attrs) throws SAXException {
             if (localName.equals("domains")) {
                 delegate.shouldLoadProjectVersion(attrs.getValue("", "project-version"));
                 new DomainsHandler(parser, this);
             }
             else {
-                throw new SAXParseException(
-                    "<domains> should be the root element. <"
+                throw new SAXParseException("<domains> should be the root element. <"
                         + localName
-                        + "> is unexpected.",
-                    null);
+                        + "> is unexpected.", null);
             }
         }
     }
 
     /**
-    * Handler for the top level "project" element.
-    */
+     * Handler for the top level "project" element.
+     */
     private class DomainsHandler extends AbstractHandler {
 
         /**
          * Constructor which just delegates to the superconstructor.
-         *
-         * @param parentHandler The handler which should be restored to the
-         *                      parser at the end of the element.
-         *                      Must not be <code>null</code>.
+         * 
+         * @param parentHandler The handler which should be restored to the parser at the
+         *            end of the element. Must not be <code>null</code>.
          */
         public DomainsHandler(XMLReader parser, ContentHandler parentHandler) {
             super(parser, parentHandler);
         }
 
         /**
-         * Handles the start of a top-level element within the project. An
-         * appropriate handler is created and initialised with the details
-         * of the element.
+         * Handles the start of a top-level element within the project. An appropriate
+         * handler is created and initialised with the details of the element.
          */
         public void startElement(
-            String namespaceURI,
-            String localName,
-            String qName,
-            Attributes atts)
-            throws SAXException {
+                String namespaceURI,
+                String localName,
+                String qName,
+                Attributes atts) throws SAXException {
             if (localName.equals("domain")) {
                 new DomainHandler(getParser(), this).init(localName, atts);
             }
@@ -193,8 +188,7 @@ public class ConfigLoader {
                 new ViewHandler(getParser(), this).init(atts);
             }
             else {
-                String message =
-                    "<domain> or <view> are only valid children of <domains>. <"
+                String message = "<domain> or <view> are only valid children of <domains>. <"
                         + localName
                         + "> is unexpected.";
                 throw new SAXParseException(message, null);
@@ -208,8 +202,7 @@ public class ConfigLoader {
             super(parser, parentHandler);
         }
 
-        public void init(Attributes attrs) throws SAXException {
-
+        public void init(Attributes attrs) {
             String name = attrs.getValue("", "name");
             String location = attrs.getValue("", "location");
             delegate.shouldRegisterDataView(name, location);
@@ -217,9 +210,10 @@ public class ConfigLoader {
     }
 
     /**
-      * Handler for the "domain" element.
-      */
+     * Handler for the "domain" element.
+     */
     private class DomainHandler extends AbstractHandler {
+
         private String domainName;
         private Map properties;
         private Map mapLocations;
@@ -228,7 +222,7 @@ public class ConfigLoader {
             super(parser, parentHandler);
         }
 
-        public void init(String name, Attributes attrs) throws SAXException {
+        public void init(String name, Attributes attrs) {
             domainName = attrs.getValue("", "name");
             mapLocations = new HashMap();
             properties = new HashMap();
@@ -236,11 +230,10 @@ public class ConfigLoader {
         }
 
         public void startElement(
-            String namespaceURI,
-            String localName,
-            String qName,
-            Attributes atts)
-            throws SAXException {
+                String namespaceURI,
+                String localName,
+                String qName,
+                Attributes atts) throws SAXException {
 
             if (localName.equals("property")) {
                 new PropertyHandler(getParser(), this).init(atts, properties);
@@ -251,10 +244,10 @@ public class ConfigLoader {
                 loadProperties();
 
                 new MapHandler(getParser(), this).init(
-                    localName,
-                    atts,
-                    domainName,
-                    mapLocations);
+                        localName,
+                        atts,
+                        domainName,
+                        mapLocations);
             }
             else if (localName.equals("node")) {
                 // "node" elements go after "map" elements
@@ -264,8 +257,7 @@ public class ConfigLoader {
                 new NodeHandler(getParser(), this).init(localName, atts, domainName);
             }
             else {
-                String message =
-                    "<node> or <map> should be the children of <domain>. <"
+                String message = "<node> or <map> should be the children of <domain>. <"
                         + localName
                         + "> is unexpected.";
                 throw new SAXParseException(message, null);
@@ -279,7 +271,7 @@ public class ConfigLoader {
 
         private void loadProperties() {
             if (properties.size() > 0) {
-                // load all properties 
+                // load all properties
                 delegate.shouldLoadDataDomainProperties(domainName, properties);
 
                 // clean properties to avoid loading them twice
@@ -289,7 +281,7 @@ public class ConfigLoader {
 
         private void loadMaps() {
             if (mapLocations.size() > 0) {
-                // load all maps 
+                // load all maps
                 delegate.shouldLoadDataMaps(domainName, mapLocations);
                 // clean map locations to avoid loading maps twice
                 mapLocations.clear();
@@ -303,7 +295,7 @@ public class ConfigLoader {
             super(parser, parentHandler);
         }
 
-        public void init(Attributes attrs, Map properties) throws SAXException {
+        public void init(Attributes attrs, Map properties) {
 
             String name = attrs.getValue("", "name");
             String value = attrs.getValue("", "value");
@@ -314,6 +306,7 @@ public class ConfigLoader {
     }
 
     private class MapHandler extends AbstractHandler {
+
         protected String domainName;
         protected String mapName;
         protected String location;
@@ -323,8 +316,7 @@ public class ConfigLoader {
             super(parser, parentHandler);
         }
 
-        public void init(String name, Attributes attrs, String domainName, Map locations)
-            throws SAXException {
+        public void init(String name, Attributes attrs, String domainName, Map locations) {
             this.domainName = domainName;
             this.mapLocations = locations;
             mapName = attrs.getValue("", "name");
@@ -332,23 +324,22 @@ public class ConfigLoader {
         }
 
         public void startElement(
-            String namespaceURI,
-            String localName,
-            String qName,
-            Attributes attrs)
-            throws SAXException {
+                String namespaceURI,
+                String localName,
+                String qName,
+                Attributes attrs) throws SAXException {
             if (localName.equals("dep-map-ref")) {
 
-                // this is no longer supported, but kept as noop 
+                // this is no longer supported, but kept as noop
                 // for backwards compatibility
                 new DepMapRefHandler(getParser(), this).init(localName, attrs);
             }
             else {
                 throw new SAXParseException(
-                    "<dep-map-ref> should be the only map child. <"
-                        + localName
-                        + "> is unexpected.",
-                    null);
+                        "<dep-map-ref> should be the only map child. <"
+                                + localName
+                                + "> is unexpected.",
+                        null);
             }
         }
 
@@ -359,6 +350,7 @@ public class ConfigLoader {
 
     /** Handles processing of "node" element. */
     private class NodeHandler extends AbstractHandler {
+
         protected String nodeName;
         protected String domainName;
 
@@ -366,8 +358,7 @@ public class ConfigLoader {
             super(parser, parentHandler);
         }
 
-        public void init(String name, Attributes attrs, String domainName)
-            throws SAXException {
+        public void init(String name, Attributes attrs, String domainName) {
             this.domainName = domainName;
 
             nodeName = attrs.getValue("", "name");
@@ -375,33 +366,30 @@ public class ConfigLoader {
             String adapterClass = attrs.getValue("", "adapter");
             String factoryName = attrs.getValue("", "factory");
             delegate.shouldLoadDataNode(
-                domainName,
-                nodeName,
-                dataSrcLocation,
-                adapterClass,
-                factoryName);
+                    domainName,
+                    nodeName,
+                    dataSrcLocation,
+                    adapterClass,
+                    factoryName);
         }
 
         public void startElement(
-            String namespaceURI,
-            String localName,
-            String qName,
-            Attributes attrs)
-            throws SAXException {
+                String namespaceURI,
+                String localName,
+                String qName,
+                Attributes attrs) throws SAXException {
 
             if (localName.equals("map-ref")) {
                 new MapRefHandler(getParser(), this).init(
-                    localName,
-                    attrs,
-                    domainName,
-                    nodeName);
+                        localName,
+                        attrs,
+                        domainName,
+                        nodeName);
             }
             else {
-                throw new SAXParseException(
-                    "<map-ref> should be the only node child. <"
+                throw new SAXParseException("<map-ref> should be the only node child. <"
                         + localName
-                        + "> is unexpected.",
-                    null);
+                        + "> is unexpected.", null);
             }
         }
     }
@@ -413,22 +401,17 @@ public class ConfigLoader {
             super(parser, parentHandler);
         }
 
-        public void init(String name, Attributes attrs)
-            throws SAXException {
+        public void init(String name, Attributes attrs) {
         }
     }
 
     private class MapRefHandler extends AbstractHandler {
+
         public MapRefHandler(XMLReader parser, ContentHandler parentHandler) {
             super(parser, parentHandler);
         }
 
-        public void init(
-            String name,
-            Attributes attrs,
-            String domainName,
-            String nodeName)
-            throws SAXException {
+        public void init(String name, Attributes attrs, String domainName, String nodeName) {
             String mapName = attrs.getValue("", "name");
             delegate.shouldLinkDataMap(domainName, nodeName, mapName);
         }

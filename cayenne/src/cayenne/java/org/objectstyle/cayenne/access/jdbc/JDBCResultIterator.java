@@ -109,7 +109,7 @@ public class JDBCResultIterator implements ResultIterator {
      */
     public JDBCResultIterator(Connection connection, Statement statement,
             ResultSet resultSet, RowDescriptor descriptor, int fetchLimit)
-            throws SQLException, CayenneException {
+            throws CayenneException {
 
         this.connection = connection;
         this.statement = statement;
@@ -159,18 +159,13 @@ public class JDBCResultIterator implements ResultIterator {
                     "An attempt to read uninitialized row or past the end of the iterator.");
         }
 
-        try {
-            // read
-            Map row = readDataRow();
+        // read
+        Map row = readDataRow();
 
-            // rewind
-            checkNextRow();
+        // rewind
+        checkNextRow();
 
-            return row;
-        }
-        catch (SQLException sqex) {
-            throw new CayenneException("Exception reading ResultSet.", sqex);
-        }
+        return row;
     }
 
     /**
@@ -189,20 +184,15 @@ public class JDBCResultIterator implements ResultIterator {
             indexPK();
         }
 
-        try {
-            // read ...
-            // TODO: note a mismatch with 1.1 API - ID positions are preset and are
-            // not affected by the entity specified (think of deprecating/replacing this)
-            Map row = readIdRow();
+        // read ...
+        // TODO: note a mismatch with 1.1 API - ID positions are preset and are
+        // not affected by the entity specified (think of deprecating/replacing this)
+        Map row = readIdRow();
 
-            // rewind
-            checkNextRow();
+        // rewind
+        checkNextRow();
 
-            return row;
-        }
-        catch (SQLException sqex) {
-            throw new CayenneException("Exception reading ResultSet.", sqex);
-        }
+        return row;
     }
 
     public void skipDataRow() throws CayenneException {
@@ -211,12 +201,7 @@ public class JDBCResultIterator implements ResultIterator {
                     "An attempt to read uninitialized row or past the end of the iterator.");
         }
 
-        try {
-            checkNextRow();
-        }
-        catch (SQLException sqex) {
-            throw new CayenneException("Exception reading ResultSet.", sqex);
-        }
+        checkNextRow();
     }
 
     /**
@@ -291,18 +276,23 @@ public class JDBCResultIterator implements ResultIterator {
      * Moves internal ResultSet cursor position down one row. Checks if the next row is
      * available.
      */
-    protected void checkNextRow() throws SQLException, CayenneException {
+    protected void checkNextRow() throws CayenneException {
         nextRow = false;
-        if ((fetchLimit <= 0 || fetchedSoFar < fetchLimit) && resultSet.next()) {
-            nextRow = true;
-            fetchedSoFar++;
+        try {
+            if ((fetchLimit <= 0 || fetchedSoFar < fetchLimit) && resultSet.next()) {
+                nextRow = true;
+                fetchedSoFar++;
+            }
+        }
+        catch (SQLException e) {
+            throw new CayenneException("Error rewinding ResultSet", e);
         }
     }
 
     /**
      * Reads a row from the internal ResultSet at the current cursor position.
      */
-    protected Map readDataRow() throws SQLException, CayenneException {
+    protected Map readDataRow() throws CayenneException {
         try {
             Map dataRow = new DataRow(mapCapacity);
             ExtendedType[] converters = rowDescriptor.getConverters();
@@ -333,7 +323,7 @@ public class JDBCResultIterator implements ResultIterator {
      * Reads a row from the internal ResultSet at the current cursor position, processing
      * only columns that are part of the ObjectId of a target class.
      */
-    protected Map readIdRow() throws SQLException, CayenneException {
+    protected Map readIdRow() throws CayenneException {
         try {
             Map idRow = new DataRow(2);
             ExtendedType[] converters = rowDescriptor.getConverters();
@@ -346,7 +336,8 @@ public class JDBCResultIterator implements ResultIterator {
                 int index = pkIndices[i];
 
                 // note: jdbc column indexes start from 1, not 0 as in arrays
-                Object val = converters[index].materializeObject(resultSet,
+                Object val = converters[index].materializeObject(
+                        resultSet,
                         index + 1,
                         columns[index].getJdbcType());
                 idRow.put(columns[index].getLabel(), val);
