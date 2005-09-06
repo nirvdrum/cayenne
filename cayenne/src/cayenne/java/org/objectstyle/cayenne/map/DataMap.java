@@ -65,12 +65,12 @@ import java.util.SortedMap;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
-import org.objectstyle.cayenne.map.event.DbEntityListener;
 import org.objectstyle.cayenne.map.event.DbAttributeListener;
+import org.objectstyle.cayenne.map.event.DbEntityListener;
 import org.objectstyle.cayenne.map.event.DbRelationshipListener;
 import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.map.event.ObjAttributeListener;
+import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.project.Project;
@@ -89,10 +89,9 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * @author Andrei Adamchik
  * @author Craig Miskell
  */
-public class DataMap implements XMLSerializable, MappingNamespace, 
-								DbEntityListener, DbAttributeListener, DbRelationshipListener, 
-								ObjEntityListener, ObjAttributeListener, ObjRelationshipListener
-{
+public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListener,
+        DbAttributeListener, DbRelationshipListener, ObjEntityListener,
+        ObjAttributeListener, ObjRelationshipListener {
 
     /**
      * Defines the name of the property for default DB schema.
@@ -131,53 +130,10 @@ public class DataMap implements XMLSerializable, MappingNamespace,
     protected String defaultSuperclass;
     protected int defaultLockType;
 
-    // ====================================================
-    // ObjEntities
-    // ====================================================
     private CayenneMap objEntityMap = new CayenneMap(this);
-
-    // read-through reference for public access
-    private SortedMap objEntityMapRef = Collections.unmodifiableSortedMap(objEntityMap);
-
-    // read-through reference for public access to the ObjEntities
-    private Collection objEntityValuesRef = Collections
-            .unmodifiableCollection(objEntityMap.values());
-
-    // ====================================================
-    // DbEntities
-    // ====================================================
     private CayenneMap dbEntityMap = new CayenneMap(this);
-
-    // read-through reference for public access
-    private SortedMap dbEntityMapRef = Collections.unmodifiableSortedMap(dbEntityMap);
-
-    // read-through reference for public access
-    private Collection dbEntityValuesRef = Collections.unmodifiableCollection(dbEntityMap
-            .values());
-
-    // ====================================================
-    // Procedures
-    // ====================================================
     private CayenneMap procedureMap = new CayenneMap(this);
-
-    // read-through reference for public access
-    private SortedMap procedureMapRef = Collections.unmodifiableSortedMap(procedureMap);
-
-    // read-through reference for public access
-    private Collection procedureValuesRef = Collections
-            .unmodifiableCollection(procedureMap.values());
-
-    // ====================================================
-    // Queries
-    // ====================================================
     private CayenneMap queryMap = new CayenneMap(this);
-
-    // read-through reference for public access
-    private SortedMap queryMapRef = Collections.unmodifiableSortedMap(queryMap);
-
-    // read-through reference for public access
-    private Collection queriesValuesRef = Collections.unmodifiableCollection(queryMap
-            .values());
 
     /**
      * Creates a new DataMap.
@@ -342,8 +298,8 @@ public class DataMap implements XMLSerializable, MappingNamespace,
     }
 
     /**
-     * Adds all Object and DB entities and Queries from another map to this map. Overwrites all
-     * existing entities and queries with the new ones.
+     * Adds all Object and DB entities and Queries from another map to this map.
+     * Overwrites all existing entities and queries with the new ones.
      * <p>
      * <i>TODO: will need to implement advanced merge that allows different policies for
      * overwriting entities / queries. </i>
@@ -363,7 +319,7 @@ public class DataMap implements XMLSerializable, MappingNamespace,
             this.removeObjEntity(ent.getName());
             this.addObjEntity(ent);
         }
-        
+
         Iterator queries = new ArrayList(map.getQueries()).iterator();
         while (queries.hasNext()) {
             Query query = (Query) queries.next();
@@ -393,7 +349,7 @@ public class DataMap implements XMLSerializable, MappingNamespace,
      * by ObjEntity name.
      */
     public SortedMap getObjEntityMap() {
-        return objEntityMapRef;
+        return Collections.unmodifiableSortedMap(objEntityMap);
     }
 
     /**
@@ -401,7 +357,7 @@ public class DataMap implements XMLSerializable, MappingNamespace,
      * DbEntity name.
      */
     public SortedMap getDbEntityMap() {
-        return dbEntityMapRef;
+        return Collections.unmodifiableSortedMap(dbEntityMap);
     }
 
     /**
@@ -455,14 +411,16 @@ public class DataMap implements XMLSerializable, MappingNamespace,
      * @since 1.1
      */
     public SortedMap getQueryMap() {
-        return queryMapRef;
+        return Collections.unmodifiableSortedMap(queryMap);
     }
 
     /**
+     * Returns an unmodifiable collection of mapped queries.
+     * 
      * @since 1.1
      */
     public Collection getQueries() {
-        return queriesValuesRef;
+        return Collections.unmodifiableCollection(queryMap.values());
     }
 
     /**
@@ -488,10 +446,10 @@ public class DataMap implements XMLSerializable, MappingNamespace,
     }
 
     /**
-     * Returns a list of ObjEntities stored in this DataMap.
+     * Returns an unmodifiable collection of ObjEntities stored in this DataMap.
      */
     public Collection getObjEntities() {
-        return objEntityValuesRef;
+        return Collections.unmodifiableCollection(objEntityMap.values());
     }
 
     /**
@@ -508,7 +466,7 @@ public class DataMap implements XMLSerializable, MappingNamespace,
      * Returns all DbEntities in this DataMap.
      */
     public Collection getDbEntities() {
-        return dbEntityValuesRef;
+        return Collections.unmodifiableCollection(dbEntityMap.values());
     }
 
     /**
@@ -570,7 +528,7 @@ public class DataMap implements XMLSerializable, MappingNamespace,
 
         Collection allEntities = (namespace != null)
                 ? namespace.getObjEntities()
-                : objEntityValuesRef;
+                : getObjEntities();
 
         if (allEntities.isEmpty()) {
             return Collections.EMPTY_LIST;
@@ -681,7 +639,7 @@ public class DataMap implements XMLSerializable, MappingNamespace,
      * Returns stored procedures associated with this DataMap.
      */
     public Collection getProcedures() {
-        return procedureValuesRef;
+        return Collections.unmodifiableCollection(procedureMap.values());
     }
 
     /**
@@ -717,7 +675,7 @@ public class DataMap implements XMLSerializable, MappingNamespace,
      * Returns a sorted unmodifiable map of Procedures in this DataMap keyed by name.
      */
     public SortedMap getProcedureMap() {
-        return procedureMapRef;
+        return Collections.unmodifiableSortedMap(procedureMap);
     }
 
     /**
@@ -753,7 +711,7 @@ public class DataMap implements XMLSerializable, MappingNamespace,
     public void setDefaultLockType(int defaultLockType) {
         this.defaultLockType = defaultLockType;
     }
-    
+
     /**
      * Returns default server package with ".client" suffix.
      * 
@@ -806,148 +764,149 @@ public class DataMap implements XMLSerializable, MappingNamespace,
         this.defaultSuperclass = defaultSuperclass;
     }
 
-	/**
-     * DbEntity property changed. 
-	 * May be name, attribute or relationship added or removed, etc. 
-	 * Attribute and relationship property changes are handled in
-	 * respective listeners.
-	 * @since 1.2 
-	 */
-    public void dbEntityChanged(EntityEvent e){
-	    Entity entity = e.getEntity();
-	    if (entity instanceof DbEntity){
-	        ((DbEntity)entity).dbEntityChanged(e);
-	        
-	        // finish up the name change here because we
-	        // do not have direct access to the dbEntityMap
-	        if (e.isNameChange()){
-		        // remove the entity from the map with the old name
-		        dbEntityMap.remove(e.getOldName());
-
-		        // add the entity back in with the new name
-		        dbEntityMap.put(e.getNewName(), entity);
-		        
-	            // important - clear parent namespace:
-	            MappingNamespace ns = getNamespace();
-	            if (ns instanceof EntityResolver) {
-	                ((EntityResolver) ns).clearCache();
-	            }	            
-	        }
-	    }
-	}
-   
-	/** New entity has been created/added.*/
-	public void dbEntityAdded(EntityEvent e){
-	    // does nothing currently
-	}
-	/** Entity has been removed.*/
-	public void dbEntityRemoved(EntityEvent e){
-	    // does nothing currently
-	}
-
-	/** Attribute property changed. */
-	public void dbAttributeChanged(AttributeEvent e){
-	    Entity entity = e.getEntity();
-	    if (entity instanceof DbEntity){
-	        ((DbEntity)entity).dbAttributeChanged(e);
-	    }
-	}
-	
-	/** New attribute has been created/added.*/
-	public void dbAttributeAdded(AttributeEvent e){
-	    // does nothing currently
-	}
-	
-	/** Attribute has been removed.*/
-	public void dbAttributeRemoved(AttributeEvent e){
-	    // does nothing currently
-	}
-
-	/** Relationship property changed. */
-	public void dbRelationshipChanged(RelationshipEvent e){
-	    Entity entity = e.getEntity();
-	    if (entity instanceof DbEntity){
-	        ((DbEntity)entity).dbRelationshipChanged(e);
-	    }
-	}
-	
-	/** Relationship has been created/added.*/
-	public void dbRelationshipAdded(RelationshipEvent e){
-	    // does nothing currently
-	}
-	
-	/** Relationship has been removed.*/
-	public void dbRelationshipRemoved(RelationshipEvent e){
-	    // does nothing currently
-	}
-
     /**
-     * ObjEntity property changed. 
-	 * May be name, attribute or relationship added or removed, etc. 
-	 * Attribute and relationship property changes are handled in
-	 * respective listeners.
-	 * @since 1.2 
-	 */
-    public void objEntityChanged(EntityEvent e){
-	    Entity entity = e.getEntity();
-	    if (entity instanceof ObjEntity){
-	        ((ObjEntity)entity).objEntityChanged(e);
+     * DbEntity property changed. May be name, attribute or relationship added or removed,
+     * etc. Attribute and relationship property changes are handled in respective
+     * listeners.
+     * 
+     * @since 1.2
+     */
+    public void dbEntityChanged(EntityEvent e) {
+        Entity entity = e.getEntity();
+        if (entity instanceof DbEntity) {
+            ((DbEntity) entity).dbEntityChanged(e);
 
-	        // finish up the name change here because we
-	        // do not have direct access to the objEntityMap
-	        if (e.isNameChange()){
-		        // remove the entity from the map with the old name
-		        objEntityMap.remove(e.getOldName());
+            // finish up the name change here because we
+            // do not have direct access to the dbEntityMap
+            if (e.isNameChange()) {
+                // remove the entity from the map with the old name
+                dbEntityMap.remove(e.getOldName());
 
-		        // add the entity back in with the new name
-		        objEntityMap.put(e.getNewName(), entity);
-		        
-	            // important - clear parent namespace:
-	            MappingNamespace ns = getNamespace();
-	            if (ns instanceof EntityResolver) {
-	                ((EntityResolver) ns).clearCache();
-	            }	            
-	        }
-	    }
-	}
-    
-	/** New entity has been created/added.*/
-	public void objEntityAdded(EntityEvent e){
-	    // does nothing currently
-	}
-	
-	/** Entity has been removed.*/
-	public void objEntityRemoved(EntityEvent e){
-	    // does nothing currently
-	}
+                // add the entity back in with the new name
+                dbEntityMap.put(e.getNewName(), entity);
 
-	/** Attribute property changed. */
-	public void objAttributeChanged(AttributeEvent e){
-	    // does nothing currently
-	}
-	
-	/** New attribute has been created/added.*/
-	public void objAttributeAdded(AttributeEvent e){
-	    // does nothing currently
-	}
-	
-	/** Attribute has been removed.*/
-	public void objAttributeRemoved(AttributeEvent e){
-	    // does nothing currently
-	}
+                // important - clear parent namespace:
+                MappingNamespace ns = getNamespace();
+                if (ns instanceof EntityResolver) {
+                    ((EntityResolver) ns).clearCache();
+                }
+            }
+        }
+    }
 
-	/** Relationship property changed. */
-    public void objRelationshipChanged(RelationshipEvent e){
-	    // does nothing currently
-	}
+    /** New entity has been created/added. */
+    public void dbEntityAdded(EntityEvent e) {
+        // does nothing currently
+    }
+
+    /** Entity has been removed. */
+    public void dbEntityRemoved(EntityEvent e) {
+        // does nothing currently
+    }
+
+    /** Attribute property changed. */
+    public void dbAttributeChanged(AttributeEvent e) {
+        Entity entity = e.getEntity();
+        if (entity instanceof DbEntity) {
+            ((DbEntity) entity).dbAttributeChanged(e);
+        }
+    }
+
+    /** New attribute has been created/added. */
+    public void dbAttributeAdded(AttributeEvent e) {
+        // does nothing currently
+    }
+
+    /** Attribute has been removed. */
+    public void dbAttributeRemoved(AttributeEvent e) {
+        // does nothing currently
+    }
+
+    /** Relationship property changed. */
+    public void dbRelationshipChanged(RelationshipEvent e) {
+        Entity entity = e.getEntity();
+        if (entity instanceof DbEntity) {
+            ((DbEntity) entity).dbRelationshipChanged(e);
+        }
+    }
 
     /** Relationship has been created/added. */
-    public void objRelationshipAdded(RelationshipEvent e){
-	    // does nothing currently
-	}
+    public void dbRelationshipAdded(RelationshipEvent e) {
+        // does nothing currently
+    }
 
     /** Relationship has been removed. */
-    public void objRelationshipRemoved(RelationshipEvent e){
-	    // does nothing currently
-	}
+    public void dbRelationshipRemoved(RelationshipEvent e) {
+        // does nothing currently
+    }
+
+    /**
+     * ObjEntity property changed. May be name, attribute or relationship added or
+     * removed, etc. Attribute and relationship property changes are handled in respective
+     * listeners.
+     * 
+     * @since 1.2
+     */
+    public void objEntityChanged(EntityEvent e) {
+        Entity entity = e.getEntity();
+        if (entity instanceof ObjEntity) {
+            ((ObjEntity) entity).objEntityChanged(e);
+
+            // finish up the name change here because we
+            // do not have direct access to the objEntityMap
+            if (e.isNameChange()) {
+                // remove the entity from the map with the old name
+                objEntityMap.remove(e.getOldName());
+
+                // add the entity back in with the new name
+                objEntityMap.put(e.getNewName(), entity);
+
+                // important - clear parent namespace:
+                MappingNamespace ns = getNamespace();
+                if (ns instanceof EntityResolver) {
+                    ((EntityResolver) ns).clearCache();
+                }
+            }
+        }
+    }
+
+    /** New entity has been created/added. */
+    public void objEntityAdded(EntityEvent e) {
+        // does nothing currently
+    }
+
+    /** Entity has been removed. */
+    public void objEntityRemoved(EntityEvent e) {
+        // does nothing currently
+    }
+
+    /** Attribute property changed. */
+    public void objAttributeChanged(AttributeEvent e) {
+        // does nothing currently
+    }
+
+    /** New attribute has been created/added. */
+    public void objAttributeAdded(AttributeEvent e) {
+        // does nothing currently
+    }
+
+    /** Attribute has been removed. */
+    public void objAttributeRemoved(AttributeEvent e) {
+        // does nothing currently
+    }
+
+    /** Relationship property changed. */
+    public void objRelationshipChanged(RelationshipEvent e) {
+        // does nothing currently
+    }
+
+    /** Relationship has been created/added. */
+    public void objRelationshipAdded(RelationshipEvent e) {
+        // does nothing currently
+    }
+
+    /** Relationship has been removed. */
+    public void objRelationshipRemoved(RelationshipEvent e) {
+        // does nothing currently
+    }
 }

@@ -72,9 +72,27 @@ public class EntityTst extends CayenneTestCase {
         Entity d1 = (Entity) Util.cloneViaSerialization(entity);
         assertEquals(entity.getName(), d1.getName());
 
-        entity.addAttribute(new MockAttribute("xyz"));
+        entity.addAttribute(new MockAttribute("abc"));
+        entity.addRelationship(new MockRelationship("xyz"));
         Entity d2 = (Entity) Util.cloneViaSerialization(entity);
-        assertNotNull(d2.getAttribute("xyz"));
+        assertNotNull(d2.getAttribute("abc"));
+
+        // test that ref collection wrappers are still working
+        assertNotNull(d2.getAttributes());
+        assertEquals(entity.getAttributes().size(), d2.getAttributes().size());
+        assertTrue(d2.getAttributes().contains(d2.getAttribute("abc")));
+
+        assertNotNull(d2.getRelationships());
+        assertEquals(entity.getRelationships().size(), d2.getRelationships().size());
+        assertTrue(d2.getRelationships().contains(d2.getRelationship("xyz")));
+
+        assertNotNull(d2.getAttributeMap());
+        assertEquals(entity.getAttributes().size(), d2.getAttributeMap().size());
+        assertSame(d2.getAttribute("abc"), d2.getAttributeMap().get("abc"));
+
+        assertNotNull(d2.getRelationshipMap());
+        assertEquals(entity.getRelationships().size(), d2.getRelationshipMap().size());
+        assertSame(d2.getRelationship("xyz"), d2.getRelationshipMap().get("xyz"));
     }
 
     public void testSerializabilityWithHessian() throws Exception {
@@ -83,9 +101,28 @@ public class EntityTst extends CayenneTestCase {
         Entity d1 = (Entity) HessianConnector.cloneViaHessianSerialization(entity);
         assertEquals(entity.getName(), d1.getName());
 
-        entity.addAttribute(new MockAttribute("xyz"));
+        entity.addAttribute(new MockAttribute("abc"));
+        entity.addRelationship(new MockRelationship("xyz"));
         Entity d2 = (Entity) HessianConnector.cloneViaHessianSerialization(entity);
-        assertNotNull(d2.getAttribute("xyz"));
+        assertNotNull(d2.getAttribute("abc"));
+        assertNotNull(d2.getRelationship("xyz"));
+
+        // test that ref collection wrappers are still working
+        assertNotNull(d2.getAttributes());
+        assertEquals(entity.getAttributes().size(), d2.getAttributes().size());
+        assertTrue(d2.getAttributes().contains(d2.getAttribute("abc")));
+
+        assertNotNull(d2.getRelationships());
+        assertEquals(entity.getRelationships().size(), d2.getRelationships().size());
+        assertTrue(d2.getAttributes().contains(d2.getAttribute("abc")));
+
+        assertNotNull(d2.getAttributeMap());
+        assertEquals(entity.getAttributes().size(), d2.getAttributeMap().size());
+        assertSame(d2.getAttribute("abc"), d2.getAttributeMap().get("abc"));
+
+        assertNotNull(d2.getRelationshipMap());
+        assertEquals(entity.getRelationships().size(), d2.getRelationshipMap().size());
+        assertSame(d2.getRelationship("xyz"), d2.getRelationshipMap().get("xyz"));
     }
 
     public void testName() {

@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
@@ -84,24 +82,8 @@ public abstract class Entity implements CayenneMapEntry, XMLSerializable, Serial
     protected String name;
     protected DataMap dataMap;
 
-    // ====================================================
-    // Attributes
-    // ====================================================
-    protected SortedMap attributes = new TreeMap();
-
-    // read-through reference for public access
-    protected transient SortedMap attributesMapRef;
-    // read-through reference for public access
-    protected transient Collection attributesRef;
-
-    // ====================================================
-    // Relationships
-    // ====================================================
-    protected SortedMap relationships = new TreeMap();
-    // read-through reference for public access
-    protected transient SortedMap relationshipsMapRef;
-    // read-through reference for public access
-    protected transient Collection relationshipsRef;
+    protected SortedMap attributes;
+    protected SortedMap relationships;
 
     /**
      * Creates an unnamed Entity.
@@ -114,17 +96,15 @@ public abstract class Entity implements CayenneMapEntry, XMLSerializable, Serial
      * Creates a named Entity.
      */
     public Entity(String name) {
-        prepareRefCollections();
+        this.attributes = new TreeMap();
+        this.relationships = new TreeMap();
+
         setName(name);
     }
 
-    void prepareRefCollections() {
-        attributesMapRef = Collections.unmodifiableSortedMap(attributes);
-        attributesRef = Collections.unmodifiableCollection(attributes.values());
-        relationshipsMapRef = Collections.unmodifiableSortedMap(relationships);
-        relationshipsRef = Collections.unmodifiableCollection(relationships.values());
-    }
-
+    /**
+     * Returns entity name. Name is a unique identifier of the entity within its DataMap.
+     */
     public String getName() {
         return name;
     }
@@ -247,10 +227,12 @@ public abstract class Entity implements CayenneMapEntry, XMLSerializable, Serial
     }
 
     /**
-     * Returns a map of relationships sorted by name.
+     * Returns an unmodifiable map of relationships sorted by name.
      */
     public SortedMap getRelationshipMap() {
-        return relationshipsMapRef;
+        // create a new instance ... earlier attempts to cache it in the entity caused
+        // serialization issues (esp. with Hessian).
+        return Collections.unmodifiableSortedMap(relationships);
     }
 
     /**
@@ -277,24 +259,30 @@ public abstract class Entity implements CayenneMapEntry, XMLSerializable, Serial
     }
 
     /**
-     * Returns a collection of Relationships that exist in this entity.
+     * Returns an unmodifiable collection of Relationships that exist in this entity.
      */
     public Collection getRelationships() {
-        return relationshipsRef;
+        // create a new instance ... earlier attempts to cache it in the entity caused
+        // serialization issues (esp. with Hessian).
+        return Collections.unmodifiableCollection(relationships.values());
     }
 
     /**
-     * Returns entity attributes as an unmodifiable map. Since 1.1 returns a SortedMap.
+     * Returns an unmodifiable sorted map of entity attributes.
      */
     public SortedMap getAttributeMap() {
-        return attributesMapRef;
+        // create a new instance ... earlier attempts to cache it in the entity caused
+        // serialization issues (esp. with Hessian).
+        return Collections.unmodifiableSortedMap(attributes);
     }
 
     /**
-     * Returns entity attributes.
+     * Returns an unmodifiable collection of entity attributes.
      */
     public Collection getAttributes() {
-        return attributesRef;
+        // create a new instance ... earlier attempts to cache it in the entity caused
+        // serialization issues (esp. with Hessian).
+        return Collections.unmodifiableCollection(attributes.values());
     }
 
     /**
@@ -413,18 +401,5 @@ public abstract class Entity implements CayenneMapEntry, XMLSerializable, Serial
         }
 
         return parent;
-    }
-
-    /**
-     * Deserialization method that created read-through collection wrappers.
-     */
-    private void readObject(ObjectInputStream in) throws IOException,
-            ClassNotFoundException {
-
-        in.defaultReadObject();
-
-        // manual restoration is needed as our tests show that read-through collections
-        // cause serialization problems, so they are made transient.
-        prepareRefCollections();
     }
 }

@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.map;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -208,12 +209,10 @@ public class Procedure implements CayenneMapEntry, XMLSerializable, Serializable
     }
 
     /**
-     * Returns a list of call parameters.
-     * 
-     * @return List
+     * Returns an unmodifiable list of call parameters.
      */
     public List getCallParameters() {
-        return callParameters;
+        return Collections.unmodifiableList(callParameters);
     }
 
     /**

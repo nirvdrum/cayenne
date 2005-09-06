@@ -92,18 +92,11 @@ public class DbEntity extends Entity implements DbEntityListener, DbAttributeLis
     protected String catalog;
     protected String schema;
     protected List primaryKey;
-    protected List primaryKeyRef;
 
     /**
      * @since 1.2
      */
     protected Collection generatedAttributes;
-
-    /**
-     * @since 1.2
-     */
-    protected Collection generatedAttributesRef;
-
     protected DbKeyGenerator primaryKeyGenerator;
 
     /**
@@ -113,11 +106,7 @@ public class DbEntity extends Entity implements DbEntityListener, DbAttributeLis
         super();
 
         this.primaryKey = new ArrayList(2);
-        this.primaryKeyRef = Collections.unmodifiableList(primaryKey);
-
         this.generatedAttributes = new ArrayList(2);
-        this.generatedAttributesRef = Collections
-                .unmodifiableCollection(generatedAttributes);
     }
 
     /**
@@ -204,8 +193,10 @@ public class DbEntity extends Entity implements DbEntityListener, DbAttributeLis
      * Returns an unmodifiable list of DbAttributes representing the primary key of the
      * table described by this DbEntity.
      */
+    // TODO: (Andrus 09/06/2005) Change to Collection ... no reason to keep as list other
+    // than backwards compatibility
     public List getPrimaryKey() {
-        return primaryKeyRef;
+        return Collections.unmodifiableList(primaryKey);
     }
 
     /**
@@ -215,9 +206,12 @@ public class DbEntity extends Entity implements DbEntityListener, DbAttributeLis
      * @since 1.2
      */
     public Collection getGeneratedAttributes() {
-        return generatedAttributesRef;
+        return Collections.unmodifiableCollection(generatedAttributes);
     }
 
+    /**
+     * Overrides super to fire an AttributeEvent.
+     */
     public void addAttribute(Attribute attr) {
         super.addAttribute(attr);
         this.dbAttributeAdded(new AttributeEvent(this, attr, this, MapEvent.ADD));

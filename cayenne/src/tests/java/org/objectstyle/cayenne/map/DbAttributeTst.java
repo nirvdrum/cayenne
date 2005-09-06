@@ -67,101 +67,100 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
 public class DbAttributeTst extends CayenneTestCase {
 
     public void testConstructor1() throws Exception {
-    	DbAttribute a = new DbAttribute("abc");
-    	assertEquals("abc", a.getName());
-    	assertEquals(TypesMapping.NOT_DEFINED, a.getType());
-    	assertNull(a.getEntity());
+        DbAttribute a = new DbAttribute("abc");
+        assertEquals("abc", a.getName());
+        assertEquals(TypesMapping.NOT_DEFINED, a.getType());
+        assertNull(a.getEntity());
     }
-    
+
     public void testConstructor2() throws Exception {
-    	int type = Types.INTEGER;
-    	DbEntity dbe = new DbEntity("e");
-    	DbAttribute a = new DbAttribute("abc", type, dbe);
-    	assertEquals("abc", a.getName());
-    	assertEquals(type, a.getType());
-    	assertSame(dbe, a.getEntity());
+        int type = Types.INTEGER;
+        DbEntity dbe = new DbEntity("e");
+        DbAttribute a = new DbAttribute("abc", type, dbe);
+        assertEquals("abc", a.getName());
+        assertEquals(type, a.getType());
+        assertSame(dbe, a.getEntity());
     }
 
-	public void testPrimaryKeyEmpty() {
-		DbEntity dbe = new DbEntity("e");
-		assertNotNull(dbe.getPrimaryKey());
+    public void testPrimaryKeyEmpty() {
+        DbEntity dbe = new DbEntity("e");
+        assertNotNull(dbe.getPrimaryKey());
 
-		DbAttribute a = new DbAttribute("abc", Types.INTEGER, dbe);
-		dbe.addAttribute(a);
-		assertNotNull(dbe.getPrimaryKey());
-		assertEquals(0, dbe.getPrimaryKey().size());
-	}
+        DbAttribute a = new DbAttribute("abc", Types.INTEGER, dbe);
+        dbe.addAttribute(a);
+        assertNotNull(dbe.getPrimaryKey());
+        assertEquals(0, dbe.getPrimaryKey().size());
+    }
 
-	public void testPrimaryKeyAdded() {
-		DbEntity dbe = new DbEntity("e");
-		DbAttribute a = new DbAttribute("abc", Types.INTEGER, dbe);
-		a.setPrimaryKey(true);
-		dbe.addAttribute(a);
-		List pk = dbe.getPrimaryKey();
-		assertNotNull(pk);
-		assertEquals(1, pk.size());
-		assertSame(pk, dbe.getPrimaryKey());
-	}
+    public void testPrimaryKeyAdded() {
+        DbEntity dbe = new DbEntity("e");
+        DbAttribute a = new DbAttribute("abc", Types.INTEGER, dbe);
+        a.setPrimaryKey(true);
+        dbe.addAttribute(a);
+        List pk = dbe.getPrimaryKey();
+        assertNotNull(pk);
+        assertEquals(1, pk.size());
+        assertEquals(pk, dbe.getPrimaryKey());
+    }
 
-	public void testPrimaryKeyAttributeChanged() {
-		DbEntity dbe = new DbEntity("e");
-		DbAttribute a = new DbAttribute("abc", Types.INTEGER, dbe);
-		dbe.addAttribute(a);
-		List pk = dbe.getPrimaryKey();
-		assertNotNull(pk);
-		assertEquals(0, pk.size());
-		assertSame(pk, dbe.getPrimaryKey());
+    public void testPrimaryKeyAttributeChanged() {
+        DbEntity dbe = new DbEntity("e");
+        DbAttribute a = new DbAttribute("abc", Types.INTEGER, dbe);
+        dbe.addAttribute(a);
+        List pk = dbe.getPrimaryKey();
+        assertNotNull(pk);
+        assertEquals(0, pk.size());
+        assertEquals(pk, dbe.getPrimaryKey());
 
-		a.setPrimaryKey(true);
-		pk = dbe.getPrimaryKey();
-		assertNotNull(pk);
-		assertEquals(1, pk.size());
-		assertSame(pk, dbe.getPrimaryKey());
-	}
+        a.setPrimaryKey(true);
+        pk = dbe.getPrimaryKey();
+        assertNotNull(pk);
+        assertEquals(1, pk.size());
+        assertEquals(pk, dbe.getPrimaryKey());
+    }
 
-	public void testPrimaryKeyRemoved() {
-		DbEntity dbe = new DbEntity("e");
-		DbAttribute a = new DbAttribute("abc", Types.INTEGER, dbe);
-		a.setPrimaryKey(true);
-		dbe.addAttribute(a);
-		List pk = dbe.getPrimaryKey();
-		assertNotNull(pk);
-		assertEquals(1, pk.size());
-		assertSame(pk, dbe.getPrimaryKey());
+    public void testPrimaryKeyRemoved() {
+        DbEntity dbe = new DbEntity("e");
+        DbAttribute a = new DbAttribute("abc", Types.INTEGER, dbe);
+        a.setPrimaryKey(true);
+        dbe.addAttribute(a);
+        List pk = dbe.getPrimaryKey();
+        assertNotNull(pk);
+        assertEquals(1, pk.size());
+        assertEquals(pk, dbe.getPrimaryKey());
 
-		dbe.removeAttribute(a.getName());
-		pk = dbe.getPrimaryKey();
-		assertNotNull(pk);
-		assertEquals(0, pk.size());
-		assertSame(pk, dbe.getPrimaryKey());
-	}
+        dbe.removeAttribute(a.getName());
+        pk = dbe.getPrimaryKey();
+        assertNotNull(pk);
+        assertEquals(0, pk.size());
+        assertEquals(pk, dbe.getPrimaryKey());
+    }
 
-	public void testAttributesCleared() {
-		DbEntity dbe = new DbEntity("e");
-		DbAttribute a = new DbAttribute("abc", Types.INTEGER, dbe);
-		a.setPrimaryKey(true);
-		dbe.addAttribute(a);
-		List pk = dbe.getPrimaryKey();
-		assertNotNull(pk);
-		assertEquals(1, pk.size());
-		assertSame(pk, dbe.getPrimaryKey());
+    public void testAttributesCleared() {
+        DbEntity dbe = new DbEntity("e");
+        DbAttribute a = new DbAttribute("abc", Types.INTEGER, dbe);
+        a.setPrimaryKey(true);
+        dbe.addAttribute(a);
+        List pk = dbe.getPrimaryKey();
+        assertNotNull(pk);
+        assertEquals(1, pk.size());
+        assertEquals(pk, dbe.getPrimaryKey());
 
-		dbe.clearAttributes();
-		pk = dbe.getPrimaryKey();
-		assertNotNull(pk);
-		assertEquals(0, pk.size());
-		assertSame(pk, dbe.getPrimaryKey());
-	}
-	
-	public void testAutoIncrement() throws Exception {
-	    DbAttribute attribute = new DbAttribute();
-	    assertFalse(attribute.isGenerated());
-	    
-	    attribute.setGenerated(true);
-	    assertTrue(attribute.isGenerated());
-	    
-	    attribute.setGenerated(false);
-	    assertFalse(attribute.isGenerated());
-	}
+        dbe.clearAttributes();
+        pk = dbe.getPrimaryKey();
+        assertNotNull(pk);
+        assertEquals(0, pk.size());
+        assertEquals(pk, dbe.getPrimaryKey());
+    }
+
+    public void testAutoIncrement() throws Exception {
+        DbAttribute attribute = new DbAttribute();
+        assertFalse(attribute.isGenerated());
+
+        attribute.setGenerated(true);
+        assertTrue(attribute.isGenerated());
+
+        attribute.setGenerated(false);
+        assertFalse(attribute.isGenerated());
+    }
 }
-

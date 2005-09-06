@@ -126,8 +126,6 @@ public abstract class Configuration {
 
     /** Lookup map that stores DataDomains with names as keys. */
     protected CayenneMap dataDomains = new CayenneMap(this);
-    protected Collection dataDomainsRef = Collections.unmodifiableCollection(dataDomains
-            .values());
     protected DataSourceFactory overrideFactory;
     protected ConfigStatus loadStatus = new ConfigStatus();
     protected String domainConfigurationName = DEFAULT_DOMAIN_FILE;
@@ -504,7 +502,7 @@ public abstract class Configuration {
      * Returns an unmodifiable collection of registered {@link DataDomain}objects.
      */
     public Collection getDomains() {
-        return this.dataDomainsRef;
+        return Collections.unmodifiableCollection(dataDomains.values());
     }
 
     /**
