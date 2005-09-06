@@ -53,72 +53,48 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.map;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
-import org.objectstyle.cayenne.distribution.GlobalID;
+import org.objectstyle.cayenne.distribution.HessianConnector;
+import org.objectstyle.cayenne.util.Util;
 
-/**
- * A convenience base superclass for concrete Persistent objects. It provides properties
- * declared in Persistent interface and also hooks to ObjectContext to implement faulting.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public abstract class PersistentObject implements Persistent {
+import junit.framework.TestCase;
 
-    protected GlobalID globalID;
-    protected int persistenceState;
-    protected transient ObjectContext objectContext;
+public class ClientObjectRelationshipTst extends TestCase {
 
-    public PersistentObject() {
-        this.persistenceState = PersistenceState.TRANSIENT;
+    public void testSerializability() throws Exception {
+
+        ClientObjRelationship r1 = new ClientObjRelationship("r1", "rr1", true, true);
+        ClientObjRelationship r2 = (ClientObjRelationship) Util.cloneViaSerialization(r1);
+        assertEquals(r1.getName(), r2.getName());
+        assertEquals(r1.getReverseRelationship(), r2.getReverseRelationship());
+        assertEquals(r1.isToMany(), r2.isToMany());
+        assertEquals(r1.isReadOnly(), r2.isReadOnly());
+
+        ClientObjRelationship r3 = new ClientObjRelationship("r3", null, false, false);
+        ClientObjRelationship r4 = (ClientObjRelationship) Util.cloneViaSerialization(r3);
+        assertEquals(r3.getName(), r4.getName());
+        assertNull(r4.getReverseRelationship());
+        assertEquals(r3.isToMany(), r4.isToMany());
+        assertEquals(r3.isReadOnly(), r4.isReadOnly());
     }
 
-    public int getPersistenceState() {
-        return persistenceState;
-    }
+    public void testSerializabilityViaHessian() throws Exception {
 
-    public void setPersistenceState(int persistenceState) {
-        this.persistenceState = persistenceState;
+        ClientObjRelationship r1 = new ClientObjRelationship("r1", "rr1", true, true);
+        ClientObjRelationship r2 = (ClientObjRelationship) HessianConnector
+                .cloneViaHessianSerialization(r1);
+        assertEquals(r1.getName(), r2.getName());
+        assertEquals(r1.getReverseRelationship(), r2.getReverseRelationship());
+        assertEquals(r1.isToMany(), r2.isToMany());
+        assertEquals(r1.isReadOnly(), r2.isReadOnly());
 
-        if (persistenceState == PersistenceState.TRANSIENT) {
-            this.objectContext = null;
-        }
-    }
-
-    public ObjectContext getObjectContext() {
-        return objectContext;
-    }
-
-    public void setObjectContext(ObjectContext objectContext) {
-        this.objectContext = objectContext;
-    }
-
-    public GlobalID getGlobalID() {
-        return globalID;
-    }
-
-    public void setGlobalID(GlobalID globalID) {
-        this.globalID = globalID;
-    }
-
-    public String toString() {
-        ToStringBuilder builder = new ToStringBuilder(
-                this,
-                ToStringStyle.SHORT_PREFIX_STYLE);
-
-        String state = PersistenceState.persistenceStateName(getPersistenceState());
-        String context = (objectContext != null) ? StringUtils.substringAfterLast(
-                objectContext.getClass().getName(),
-                ".")
-                + "@"
-                + System.identityHashCode(objectContext) : "null";
-
-        return builder.append("id", getGlobalID()).append("state", state).append(
-                "context",
-                context).toString();
+        ClientObjRelationship r3 = new ClientObjRelationship("r3", null, false, false);
+        ClientObjRelationship r4 = (ClientObjRelationship) HessianConnector
+                .cloneViaHessianSerialization(r3);
+        assertEquals(r3.getName(), r4.getName());
+        assertNull(r4.getReverseRelationship());
+        assertEquals(r3.isToMany(), r4.isToMany());
+        assertEquals(r3.isReadOnly(), r4.isReadOnly());
     }
 }

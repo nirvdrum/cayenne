@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventListener;
@@ -89,8 +87,6 @@ public class ObjRelationship extends Relationship implements EventListener {
     protected String dbRelationshipPath;
 
     protected List dbRelationships = new ArrayList();
-    protected transient List dbRelationshipsRef = Collections
-            .unmodifiableList(dbRelationships);
 
     public ObjRelationship() {
         this(null);
@@ -98,11 +94,6 @@ public class ObjRelationship extends Relationship implements EventListener {
 
     public ObjRelationship(String name) {
         super(name);
-        prepareRefCollections();
-    }
-
-    void prepareRefCollections() {
-        dbRelationshipsRef = Collections.unmodifiableList(dbRelationships);
     }
 
     /**
@@ -211,7 +202,7 @@ public class ObjRelationship extends Relationship implements EventListener {
      */
     public List getDbRelationships() {
         refreshFromPath(true);
-        return dbRelationshipsRef;
+        return Collections.unmodifiableList(dbRelationships);
     }
 
     /** Appends a DbRelationship to the existing list of DbRelationships. */
@@ -666,15 +657,5 @@ public class ObjRelationship extends Relationship implements EventListener {
         // TODO: copy locking flag...
 
         return relationship;
-    }
-
-    /**
-     * Deserialization method that created read-through collection wrappers.
-     */
-    private void readObject(ObjectInputStream in) throws IOException,
-            ClassNotFoundException {
-
-        in.defaultReadObject();
-        prepareRefCollections();
     }
 }

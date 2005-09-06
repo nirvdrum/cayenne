@@ -64,6 +64,7 @@ import java.util.Map;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.objectstyle.cayenne.util.IDUtil;
 import org.objectstyle.cayenne.util.Util;
 
@@ -229,7 +230,10 @@ public class GlobalID implements Serializable {
     }
 
     public String toString() {
-        ToStringBuilder builder = new ToStringBuilder(this);
+
+        ToStringBuilder builder = new ToStringBuilder(
+                this,
+                ToStringStyle.SHORT_PREFIX_STYLE);
 
         builder.append("entityName", entityName);
         builder.append("temporary", isTemporary());

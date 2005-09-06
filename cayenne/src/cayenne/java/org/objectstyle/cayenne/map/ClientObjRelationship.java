@@ -65,24 +65,27 @@ package org.objectstyle.cayenne.map;
 class ClientObjRelationship extends ObjRelationship {
 
     String reverseRelationshipName;
-    boolean readOnly;
-    boolean toMany;
+
+    // note that field names are different from the ones defined by super for the same
+    // property... This is needed so that Hessian sreialization mechanism could work.
+    boolean clientReadOnly;
+    boolean clientToMany;
 
     ClientObjRelationship(String name, String reverseRelationshipName, boolean toMany,
             boolean readOnly) {
 
         super(name);
-        this.toMany = toMany;
-        this.readOnly = readOnly;
+        this.clientToMany = toMany;
+        this.clientReadOnly = readOnly;
         this.reverseRelationshipName = reverseRelationshipName;
     }
 
     public boolean isToMany() {
-        return toMany;
+        return clientToMany;
     }
 
     public boolean isReadOnly() {
-        return readOnly;
+        return clientReadOnly;
     }
 
     public ObjRelationship getReverseRelationship() {

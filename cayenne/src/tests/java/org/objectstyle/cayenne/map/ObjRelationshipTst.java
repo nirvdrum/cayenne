@@ -72,10 +72,11 @@ public class ObjRelationshipTst extends CayenneTestCase {
 
     public void testSerializability() throws Exception {
         ObjRelationship r1 = new ObjRelationship("r1");
+        r1.setDbRelationshipPath("aaaa");
 
         ObjRelationship r2 = (ObjRelationship) Util.cloneViaSerialization(r1);
         assertEquals(r1.getName(), r2.getName());
-        assertEquals(r1.getDbRelationships(), r2.getDbRelationships());
+        assertEquals(r1.getDbRelationshipPath(), r2.getDbRelationshipPath());
     }
 
     public void testGetClientRelationship() {
