@@ -81,12 +81,17 @@ public class GlobalID implements Serializable {
     protected Map objectIdKeys;
 
     protected byte[] key;
+    
+    // exists for deserialization with Hessian and similar
+    private GlobalID() {
+        
+    }
 
     /**
-     * Creates a TEMPORARY id.
+     * Creates a TEMPORARY GlobalID. Assignes a generated unique key. 
      */
-    // TODO: this may be confusing - there is nothing in constructor that hints that this
-    // is a temp id
+    // TODO: (Andrus 09/2005) this may be confusing - there is nothing in constructor that
+    // hints that this is a temp id
     public GlobalID(String entityName) {
         this.entityName = entityName;
         this.key = IDUtil.pseudoUniqueByteSequence16();

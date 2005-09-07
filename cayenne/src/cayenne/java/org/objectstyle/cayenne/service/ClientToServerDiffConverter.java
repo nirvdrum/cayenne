@@ -98,6 +98,11 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
             Object oldValue,
             Object newValue) {
 
+        // convert related objects to server-side objects
+        if (newValue instanceof Persistent) {
+            newValue = findObject(((Persistent) newValue).getGlobalID());
+        }
+
         Persistent object = findObject(nodeId);
         try {
             PropertyUtils.setSimpleProperty(object, property, newValue);

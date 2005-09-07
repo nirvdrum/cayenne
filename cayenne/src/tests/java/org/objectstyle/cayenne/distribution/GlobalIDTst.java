@@ -53,59 +53,62 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne.distribution;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.MockDataObject;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.distribution.GlobalID;
-import org.objectstyle.cayenne.distribution.HessianConnector;
 import org.objectstyle.cayenne.util.Util;
 
-/**
- * @author Andrus Adamchik
- */
-public class RelationshipQueryTst extends TestCase {
+public class GlobalIDTst extends TestCase {
 
-    public void testConstructorObjectId() {
+    public void testConstructor() {
+        GlobalID temp1 = new GlobalID("e");
+        assertEquals("e", temp1.getEntityName());
+        assertTrue(temp1.isTemporary());
+        assertNotNull(temp1.getKey());
 
-        ObjectId oid = new ObjectId(MockDataObject.class, "a", "b");
-        RelationshipQuery query = new RelationshipQuery(oid, "relX");
-        assertSame(oid, query.getObjectID());
-        assertNull(query.getGlobalID());
-        assertNull(query.getRoot());
-        assertSame("relX", query.getRelationshipName());
+        byte[] key = new byte[] {
+                1, 2, 3
+        };
+        GlobalID temp2 = new GlobalID("e1", key);
+        assertEquals("e1", temp2.getEntityName());
+        assertTrue(temp2.isTemporary());
+        assertSame(key, temp2.getKey());
     }
 
-    public void testConstructorGlobalId() {
-
-        GlobalID oid = new GlobalID("test", "a", "b");
-        RelationshipQuery query = new RelationshipQuery(oid, "relX");
-        assertSame(oid, query.getGlobalID());
-        assertNull(query.getObjectID());
-        assertNull(query.getRoot());
-        assertSame("relX", query.getRelationshipName());
+    public void testSerializabilityTemp() throws Exception {
+        GlobalID temp1 = new GlobalID("e");
+        GlobalID temp2 = (GlobalID) Util.cloneViaSerialization(temp1);
+        
+        assertTrue(temp1.isTemporary());
+        assertNotSame(temp1, temp2);
+        assertEquals(temp1, temp2);
     }
 
-    public void testSerializability() throws Exception {
-        GlobalID oid = new GlobalID("test", "a", "b");
-        RelationshipQuery query = new RelationshipQuery(oid, "relX");
-
-        RelationshipQuery q1 = (RelationshipQuery) Util.cloneViaSerialization(query);
-        assertNotNull(q1);
-        assertEquals(oid, q1.getGlobalID());
-        assertEquals("relX", q1.getRelationshipName());
+    public void testSerializabilityPerm() throws Exception {
+        GlobalID perm1 = new GlobalID("e", "a", "b");
+        GlobalID perm2 = (GlobalID) Util.cloneViaSerialization(perm1);
+       
+        assertFalse(perm2.isTemporary());
+        assertNotSame(perm1, perm2);
+        assertEquals(perm1, perm2);
     }
 
-    public void testSerializabilityWithHessian() throws Exception {
-        GlobalID oid = new GlobalID("test", "a", "b");
-        RelationshipQuery query = new RelationshipQuery(oid, "relX");
+    public void testHessianSerializabilityTemp() throws Exception {
+        GlobalID temp1 = new GlobalID("e");
+        GlobalID temp2 = (GlobalID) HessianConnector.cloneViaHessianSerialization(temp1);
+        
+        assertTrue(temp1.isTemporary());
+        assertNotSame(temp1, temp2);
+        assertEquals(temp1, temp2);
+    }
 
-        RelationshipQuery q1 = (RelationshipQuery) HessianConnector
-                .cloneViaHessianSerialization(query);
-        assertNotNull(q1);
-        assertEquals(oid, q1.getGlobalID());
-        assertEquals("relX", q1.getRelationshipName());
+    public void testHessianSerializabilityPerm() throws Exception {
+        GlobalID perm1 = new GlobalID("e", "a", "b");
+        GlobalID perm2 = (GlobalID) HessianConnector.cloneViaHessianSerialization(perm1);
+        
+        assertFalse(perm2.isTemporary());
+        assertNotSame(perm1, perm2);
+        assertEquals(perm1, perm2);
     }
 }

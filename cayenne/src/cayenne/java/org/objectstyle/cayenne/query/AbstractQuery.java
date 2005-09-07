@@ -56,6 +56,8 @@
 
 package org.objectstyle.cayenne.query;
 
+import java.io.IOException;
+
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -79,7 +81,16 @@ public abstract class AbstractQuery implements Query {
     protected Object root;
     protected String name;
 
-    protected Level logLevel = DEFAULT_LOG_LEVEL;
+    protected transient Level logLevel = DEFAULT_LOG_LEVEL;
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException,
+            ClassNotFoundException {
+
+        // addressing the fact that logLevel is not serializable
+
+        in.defaultReadObject();
+        logLevel = DEFAULT_LOG_LEVEL;
+    }
 
     /**
      * Returns a symbolic name of the query.

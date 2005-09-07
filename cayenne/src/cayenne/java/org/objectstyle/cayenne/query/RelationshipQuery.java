@@ -85,7 +85,19 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
     protected ObjectId objectID;
     protected String relationshipName;
 
+    // exists for deserialization with Hessian
+    private RelationshipQuery() {
+
+    }
+
+    /**
+     * Creates a RelationshipQuery based on source object GlobalID and relationship name.
+     */
     public RelationshipQuery(GlobalID globalID, String relationshipName) {
+        if (globalID == null) {
+            throw new CayenneRuntimeException("Null globalID");
+        }
+
         if (globalID.isTemporary()) {
             throw new CayenneRuntimeException(
                     "Temporary id can't be used in RelationshipQuery: " + globalID);
@@ -95,7 +107,14 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
         this.relationshipName = relationshipName;
     }
 
+    /**
+     * Creates a RelationshipQuery based on source object ObjectId and relationship name.
+     */
     public RelationshipQuery(ObjectId objectID, String relationshipName) {
+        if (objectID == null) {
+            throw new CayenneRuntimeException("Null objectID");
+        }
+
         if (objectID.isTemporary()) {
             throw new CayenneRuntimeException(
                     "Temporary id can't be used in RelationshipQuery: " + objectID);
