@@ -113,7 +113,7 @@ public class DataDomain implements QueryEngine, PersistenceContext {
      */
     protected Map properties = Collections.synchronizedMap(new TreeMap());
 
-    protected org.objectstyle.cayenne.map.EntityResolver entityResolver;
+    protected EntityResolver entityResolver;
     protected PrimaryKeyHelper primaryKeyHelper;
     protected DataRowStore sharedSnapshotCache;
     protected TransactionDelegate transactionDelegate;
