@@ -69,8 +69,24 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
     protected boolean resolved;
     protected Object value;
 
+    // exists for the benefit of manual serialization schemes such as the one in Hessian.
+    private PersistentObjectHolder() {
+
+    }
+
     public PersistentObjectHolder(Persistent relationshipOwner, String relationshipName) {
         super(relationshipOwner, relationshipName);
+
+        if (isTransientParent()) {
+            resolved = true;
+        }
+    }
+
+    /**
+     * Returns true if this holder is not resolved, meaning its object is not yet known.
+     */
+    public boolean isFault() {
+        return !resolved;
     }
 
     /**

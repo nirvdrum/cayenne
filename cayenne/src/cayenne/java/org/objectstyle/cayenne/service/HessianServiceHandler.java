@@ -156,7 +156,8 @@ public class HessianServiceHandler implements HessianService, Service {
             return command.onReceive(handler);
         }
         catch (Throwable th) {
-            logObj.debug("error processing message", Util.unwindException(th));
+            th = Util.unwindException(th);
+            logObj.debug("error processing message", th);
             throw th;
         }
     }

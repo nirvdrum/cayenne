@@ -63,6 +63,8 @@ import java.util.List;
 import org.objectstyle.cayenne.MockPersistentObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.PersistentObjectHolder;
+import org.objectstyle.cayenne.PersistentObjectList;
 import org.objectstyle.cayenne.distribution.ClientMessage;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GlobalID;
@@ -287,13 +289,18 @@ public class ClientObjectContextTst extends CayenneTestCase {
                 .getEntityResolver()
                 .getClientEntityResolver());
 
+        // test that holders are present and that they are resolved... (new object has no
+        // relationships by definition, so no need to keep holders as faults).
+
         // to one
         ClientMtTable2 o1 = (ClientMtTable2) context.newObject(ClientMtTable2.class);
         assertNotNull(o1.getTable1Direct());
+        assertFalse(((PersistentObjectHolder) o1.getTable1Direct()).isFault());
 
         // to many
         ClientMtTable1 o2 = (ClientMtTable1) context.newObject(ClientMtTable1.class);
         assertNotNull(o2.getTable2ArrayDirect());
+        assertFalse(((PersistentObjectList) o2.getTable2ArrayDirect()).isFault());
     }
 
     public void testDeleteObject() {

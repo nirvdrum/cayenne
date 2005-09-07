@@ -76,6 +76,11 @@ public class PersistentObjectList extends RelationshipFault implements List {
     protected LinkedList addedToUnresolved;
     protected LinkedList removedFromUnresolved;
 
+    // exists for the benefit of manual serialization schemes such as the one in Hessian.
+    private PersistentObjectList() {
+
+    }
+
     /**
      * Creates PersistentObjectList initializing it with list owner persistent object and
      * relationship name that this list maps to.
@@ -86,8 +91,7 @@ public class PersistentObjectList extends RelationshipFault implements List {
     public PersistentObjectList(Persistent relationshipOwner, String relationshipName) {
         super(relationshipOwner, relationshipName);
 
-        // if not a fault, set object list right away...
-        if (!isFault()) {
+        if (isTransientParent()) {
             objectList = new LinkedList();
         }
     }

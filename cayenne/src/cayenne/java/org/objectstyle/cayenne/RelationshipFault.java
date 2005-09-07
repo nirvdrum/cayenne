@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.query.RelationshipQuery;
@@ -69,6 +70,10 @@ public abstract class RelationshipFault {
 
     protected Persistent relationshipOwner;
     protected String relationshipName;
+
+    protected RelationshipFault() {
+
+    }
 
     public RelationshipFault(Persistent relationshipOwner, String relationshipName) {
         if (relationshipOwner == null) {
@@ -106,6 +111,11 @@ public abstract class RelationshipFault {
      * whenever they need to resolve a fault.
      */
     protected List resolveFromDB() {
+        // non-persistent objects shouldn't trigger a fetch
+        if (isTransientParent()) {
+            return new ArrayList();
+        }
+
         return relationshipOwner.getObjectContext().performSelectQuery(
                 new RelationshipQuery(relationshipOwner.getGlobalID(), relationshipName));
     }
