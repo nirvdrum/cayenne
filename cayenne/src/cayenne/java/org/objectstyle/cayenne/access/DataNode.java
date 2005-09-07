@@ -464,6 +464,15 @@ public class DataNode implements QueryEngine {
     public EntitySorter getEntitySorter() {
         return entitySorter;
     }
+    
+    /**
+     * Sets an EntitySorter that is used to order objects on commit.
+     * 
+     * @since 1.2
+     */
+    public void setEntitySorter(EntitySorter entitySorter) {
+        this.entitySorter = entitySorter;
+    }
 
     /**
      * Tries to close JDBC connections opened by this node's data source.
