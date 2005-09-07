@@ -93,13 +93,6 @@ public class FieldProperty implements Property {
         this.field = prepareField(beanClass, propertyName, propertyType);
     }
 
-    /**
-     * Returns false.
-     */
-    public boolean isIndirect() {
-        return false;
-    }
-
     public String getPropertyName() {
         return propertyName;
     }
@@ -115,11 +108,20 @@ public class FieldProperty implements Property {
         // noop
     }
 
-    public void copyProperty(Object from, Object to) throws PropertyAccessException {
-        directWrite(to, directRead(from));
+    public void copyValue(Object from, Object to) throws PropertyAccessException {
+        writeValue(to, readField(to), readField(from));
     }
 
-    public Object directRead(Object object) throws PropertyAccessException {
+    public Object readValue(Object object) throws PropertyAccessException {
+        return readField(object);
+    }
+
+    public void writeValue(Object object, Object oldValue, Object newValue)
+            throws PropertyAccessException {
+        writeField(object, newValue);
+    }
+
+    protected Object readField(Object object) throws PropertyAccessException {
         try {
             return field.get(object);
         }
@@ -130,12 +132,12 @@ public class FieldProperty implements Property {
                     object,
                     th);
         }
-
     }
 
-    public void directWrite(Object object, Object value) throws PropertyAccessException {
+    protected void writeField(Object object, Object newValue)
+            throws PropertyAccessException {
         try {
-            field.set(object, value);
+            field.set(object, newValue);
         }
         catch (Throwable th) {
             throw new PropertyAccessException(
@@ -177,7 +179,7 @@ public class FieldProperty implements Property {
 
         // check that the field is of expected class...
         if (propertyType != null) {
-            if (!propertyType.getName().equals(field.getType().getName())) {
+            if (!propertyType.isAssignableFrom(field.getType())) {
                 throw new CayenneRuntimeException("Expected property type '"
                         + propertyType.getName()
                         + "', got '"

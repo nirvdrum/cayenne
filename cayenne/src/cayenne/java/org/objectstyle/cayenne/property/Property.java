@@ -12,12 +12,6 @@ import java.io.Serializable;
 public interface Property extends Serializable {
 
     /**
-     * Returns true if a property is implemented with a level of indirection, e.g. via a
-     * ValueHolder or Collection.
-     */
-    boolean isIndirect();
-
-    /**
      * Returns property name.
      */
     String getPropertyName();
@@ -34,19 +28,19 @@ public interface Property extends Serializable {
     void prepareForAccess(Object object) throws PropertyAccessException;
 
     /**
-     * Reads and returns a property value of an object, skipping any special
-     * preprocessing, such as resolving faults, etc.
+     * Returns a property value of an object.
      */
-    Object directRead(Object object) throws PropertyAccessException;
+    Object readValue(Object object) throws PropertyAccessException;
 
     /**
-     * Sets a property value of an object skipping any special preprocessing, such as
-     * resolving faults, etc.
+     * Sets a property value of an object. Old value of the property is specified as a
+     * hint.
      */
-    void directWrite(Object object, Object value) throws PropertyAccessException;
+    void writeValue(Object object, Object oldValue, Object newValue)
+            throws PropertyAccessException;
 
     /**
      * Copies a property value from one object to another.
      */
-    void copyProperty(Object from, Object to) throws PropertyAccessException;
+    void copyValue(Object from, Object to) throws PropertyAccessException;
 }

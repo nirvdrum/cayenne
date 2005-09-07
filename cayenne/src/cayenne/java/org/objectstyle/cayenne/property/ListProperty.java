@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.property;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.PersistentObjectList;
@@ -66,45 +66,16 @@ import org.objectstyle.cayenne.PersistentObjectList;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ListProperty extends FieldProperty {
+public class ListProperty extends CollectionProperty {
 
-    public ListProperty(Class beanClass, String propertyName) {
-        super(beanClass, propertyName, List.class);
-    }
-    
-    /**
-     * Returns true.
-     */
-    public boolean isIndirect() {
-        return true;
-    }
-
-    public void copyProperty(Object from, Object to) throws PropertyAccessException {
-        // TODO: at least invalidate the list somehow..
+    public ListProperty(Class beanClass, String propertyName, String reversePropertyName) {
+        super(beanClass, propertyName, reversePropertyName);
     }
 
     /**
-     * Injects a List in the object if it hasn't been done yet.
+     * Creates a List for an object. Expects an object to be an instance of Persistent.
      */
-    public void prepareForAccess(Object object) throws PropertyAccessException {
-        ensureListSet(object);
-    }
-
-    /**
-     * Checks that an object's List field described by this property is set, injecting a
-     * List if needed.
-     */
-    protected void ensureListSet(Object object) throws PropertyAccessException {
-        if (directRead(object) == null) {
-            directWrite(object, createList(object));
-        }
-    }
-
-    /**
-     * Creates a List for an object. Default implementation requires that an object
-     * implements Persistent interface.
-     */
-    protected List createList(Object object) throws PropertyAccessException {
+    protected Collection createCollection(Object object) throws PropertyAccessException {
         if (!(object instanceof Persistent)) {
 
             throw new PropertyAccessException(

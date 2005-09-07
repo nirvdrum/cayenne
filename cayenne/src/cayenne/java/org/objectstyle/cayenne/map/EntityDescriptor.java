@@ -153,13 +153,14 @@ public class EntityDescriptor extends BaseClassDescriptor {
 
             if (relationship.isToMany()) {
                 ListProperty property = new ListProperty(objectClass, relationship
-                        .getName());
+                        .getName(), relationship.getReverseRelationshipName());
                 allDescriptors.put(relationship.getName(), property);
             }
             else {
                 ValueHolderProperty property = new ValueHolderProperty(
                         objectClass,
-                        relationship.getName());
+                        relationship.getName(),
+                        relationship.getReverseRelationshipName());
                 allDescriptors.put(relationship.getName(), property);
             }
         }

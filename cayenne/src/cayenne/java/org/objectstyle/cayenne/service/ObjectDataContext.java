@@ -331,22 +331,4 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
         throw new CayenneRuntimeException(
                 "Persistent interface methods are not yet handled.");
     }
-
-    public void addedToCollectionProperty(
-            Persistent object,
-            String property,
-            Persistent added) {
-        // TODO: implement me
-        throw new CayenneRuntimeException(
-                "Persistent interface methods are not yet handled.");
-    }
-
-    public void removedFromCollectionProperty(
-            Persistent object,
-            String property,
-            Persistent removed) {
-        // TODO: implement me
-        throw new CayenneRuntimeException(
-                "Persistent interface methods are not yet handled.");
-    }
 }

@@ -94,6 +94,9 @@ public class ClientObjectContextTst extends CayenneTestCase {
     public void testConstructor() {
 
         ClientObjectContext context = new ClientObjectContext();
+        
+        // test default property parameters
+        assertNotNull(context.getGraphManager());
         assertNull(context.getConnector());
 
         MockCayenneConnector connector = new MockCayenneConnector();
@@ -217,7 +220,7 @@ public class ClientObjectContextTst extends CayenneTestCase {
 
     public void testPerformSelectQuery() {
         final MockPersistentObject o1 = new MockPersistentObject();
-        GlobalID oid1 = new GlobalID("test");
+        GlobalID oid1 = new GlobalID("test_entity");
         o1.setGlobalID(oid1);
 
         MockCayenneConnector connector = new MockCayenneConnector() {

@@ -195,7 +195,7 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         Iterator it = getDeclaredPropertyNames().iterator();
         while (it.hasNext()) {
             String name = (String) it.next();
-            getProperty(name).copyProperty(from, to);
+            getProperty(name).copyValue(from, to);
         }
     }
 }

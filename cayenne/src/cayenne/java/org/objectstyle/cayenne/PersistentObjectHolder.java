@@ -138,7 +138,7 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
      * is thrown.
      */
     protected void typeSafetyCheck(Class valueClass, Object value) {
-        if (value != null && !(valueClass.isInstance(value))) {
+        if (valueClass != null && value != null && !(valueClass.isInstance(value))) {
             throw new CayenneRuntimeException("Expected value of class '"
                     + valueClass.getName()
                     + "', got: "

@@ -53,55 +53,19 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.property;
 
 /**
- * A read-only ObjRelationship relationship that caches some information that is
- * dynamically calculated in a superclass.
+ * A Property that represents an "arc" connecting source node to the target node in the
+ * graph.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ClientObjRelationship extends ObjRelationship {
+public interface ArcProperty extends Property {
 
-    String reverseRelationshipName;
-
-    // note that field names are different from the ones defined by super for the same
-    // property... This is needed so that Hessian sreialization mechanism could work.
-    boolean clientReadOnly;
-    boolean clientToMany;
-
-    ClientObjRelationship(String name, String reverseRelationshipName, boolean toMany,
-            boolean readOnly) {
-
-        super(name);
-        this.clientToMany = toMany;
-        this.clientReadOnly = readOnly;
-        this.reverseRelationshipName = reverseRelationshipName;
-    }
-
-    public boolean isToMany() {
-        return clientToMany;
-    }
-
-    public boolean isReadOnly() {
-        return clientReadOnly;
-    }
-
-    public String getReverseRelationshipName() {
-        return reverseRelationshipName;
-    }
-
-    public ObjRelationship getReverseRelationship() {
-        if (reverseRelationshipName == null) {
-            return null;
-        }
-
-        Entity target = getTargetEntity();
-        if (target == null) {
-            return null;
-        }
-
-        return (ObjRelationship) target.getRelationship(reverseRelationshipName);
-    }
+    /**
+     * Returns a name of the reverse arc. Returns null if no reverse arc exists.
+     */
+    String getReversePropertyName();
 }

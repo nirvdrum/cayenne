@@ -399,24 +399,30 @@ public class PersistentObjectList extends RelationshipFault implements List {
     }
 
     void postprocessAdd(Object addedObject) {
+
         // notify ObjectContext
-        if (relationshipOwner.getObjectContext() != null
-                && addedObject instanceof Persistent) {
-            relationshipOwner.getObjectContext().addedToCollectionProperty(
+        if (relationshipOwner.getObjectContext() != null) {
+            relationshipOwner.getObjectContext().propertyChanged(
                     relationshipOwner,
                     relationshipName,
-                    (Persistent) addedObject);
+                    null,
+                    addedObject);
         }
     }
 
     void postprocessRemove(Object removedObject) {
+
         // notify ObjectContext
-        if (relationshipOwner.getObjectContext() != null
-                && removedObject instanceof Persistent) {
-            relationshipOwner.getObjectContext().removedFromCollectionProperty(
+        if (relationshipOwner.getObjectContext() != null) {
+            relationshipOwner.getObjectContext().propertyChanged(
                     relationshipOwner,
                     relationshipName,
-                    (Persistent) removedObject);
+                    removedObject,
+                    null);
         }
+    }
+
+    public String toString() {
+        return (objectList != null) ? objectList.toString() : "[<unresolved>]";
     }
 }

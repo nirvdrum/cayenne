@@ -148,6 +148,17 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
+     * Returns the name of a complimentary relationship going in the opposite direction or
+     * null if it doesn't exist.
+     * 
+     * @since 1.2
+     */
+    public String getReverseRelationshipName() {
+        ObjRelationship reverse = getReverseRelationship();
+        return (reverse != null) ? reverse.getName() : null;
+    }
+
+    /**
      * Returns a "complimentary" ObjRelationship going in the opposite direction. Returns
      * null if no such relationship is found.
      */

@@ -53,96 +53,98 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.property;
 
-import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
-
-import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
- * A Cayenne object facade to a persistent store. Instances of ObjectContext are used in
- * the application code to access Cayenne persistence features.
+ * Provides access to a property implemented as a Collection Field.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface ObjectContext extends Serializable {
+public abstract class CollectionProperty extends FieldProperty implements ArcProperty,
+        IndirectProperty {
+
+    protected String reversePropertyName;
+
+    public CollectionProperty(Class beanClass, String propertyName,
+            String reversePropertyName) {
+        super(beanClass, propertyName, Collection.class);
+        this.reversePropertyName = reversePropertyName;
+    }
+
+    public String getReversePropertyName() {
+        return reversePropertyName;
+    }
+
+    public void copyValue(Object from, Object to) throws PropertyAccessException {
+        // TODO: at least invalidate the list somehow..
+    }
 
     /**
-     * Returns a collection of objects that are registered with this ObjectContext and
-     * have a state PersistenceState.NEW
+     * Injects a List in the object if it hasn't been done yet.
      */
-    Collection newObjects();
+    public void prepareForAccess(Object object) throws PropertyAccessException {
+        ensureCollectionSet(object);
+    }
+
+    public Object readValueHolder(Object object) throws PropertyAccessException {
+        return readField(object);
+    }
+
+    public void writeValueHolder(Object object, Object valueHolder)
+            throws PropertyAccessException {
+        writeField(object, valueHolder);
+    }
 
     /**
-     * Returns a collection of objects that are registered with this ObjectContext and
-     * have a state PersistenceState.DELETED
+     * Throws an exception, as there is more than one value in a collection described by
+     * this property.
      */
-    Collection deletedObjects();
+    public Object readValue(Object object) throws PropertyAccessException {
+        throw new PropertyAccessException(
+                "'readValue' is undefined in ListProperty",
+                this,
+                object);
+    }
 
     /**
-     * Returns a collection of objects that are registered with this ObjectContext and
-     * have a state PersistenceState.MODIFIED
+     * Removes teh old value from the collection, adds the new value.
      */
-    Collection modifiedObjects();
+    public void writeValue(Object object, Object oldValue, Object newValue)
+            throws PropertyAccessException {
+
+        Collection collection = ensureCollectionSet(object);
+
+        if (oldValue != null) {
+            collection.remove(oldValue);
+        }
+
+        if (newValue != null) {
+            collection.add(newValue);
+        }
+    }
 
     /**
-     * Returns a collection of MODIFIED, DELETED or NEW objects.
+     * Checks that an object's List field described by this property is set, injecting a
+     * List if needed.
      */
-    Collection uncommittedObjects();
+    protected Collection ensureCollectionSet(Object object)
+            throws PropertyAccessException {
+
+        Collection collection = (Collection) readValueHolder(object);
+        if (collection == null) {
+            collection = createCollection(object);
+            writeValueHolder(object, collection);
+        }
+
+        return collection;
+    }
 
     /**
-     * Creates a new persistent object scheduled to be inserted on next commit.
+     * Creates a Collection for an object.
      */
-    Persistent newObject(Class persistentClass);
-
-    /**
-     * Schedules a persistent object for deletion on next commit.
-     */
-    void deleteObject(Persistent object);
-
-    /**
-     * A callback method that child Persistent objects are expected to call from inside
-     * the getter before returning a value of a persistent property. Such callback allows
-     * ObjectContext to "inflate" unresolved objects on demand.
-     */
-    void prepareForAccess(Persistent object, String property);
-
-    /**
-     * A callback method that child Persistent objects are expected to call from inside
-     * the setter after modifying a value of a persistent property.
-     */
-    void propertyChanged(
-            Persistent object,
-            String property,
-            Object oldValue,
-            Object newValue);
-
-    /**
-     * Commits changes made to this ObjectContext persistent objects. If an ObjectContext
-     * is a part of an ObjectContext hierarchy, this method call triggers commit all the
-     * way to the external data store.
-     * 
-     * @return GraphDiff that contains changes made to objects during commit. This
-     *         includes things like generated ids, etc.
-     */
-    GraphDiff commit();
-
-    /**
-     * Executes a selecting query, returning a list of persistent objects or data rows.
-     */
-    List performSelectQuery(QueryExecutionPlan queryPlan);
-
-    /**
-     * Executes a non-selecting query returning an array of update counts.
-     */
-    int[] performUpdateQuery(QueryExecutionPlan queryPlan);
-
-    /**
-     * Executes any kind of query providing the result in a form of QueryResponse.
-     */
-    QueryResponse performGenericQuery(QueryExecutionPlan queryPlan);
+    protected abstract Collection createCollection(Object object)
+            throws PropertyAccessException;
 }

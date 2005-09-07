@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne.property;
 
-import org.objectstyle.cayenne.unit.util.TestBean;
-
 import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.unit.util.TestBean;
 
 public class FieldPropertyTst extends TestCase {
 
@@ -74,7 +74,7 @@ public class FieldPropertyTst extends TestCase {
         TestBean object = new TestBean();
         object.setString("abc");
 
-        assertEquals("abc", property.directRead(object));
+        assertEquals("abc", property.readValue(object));
     }
 
     public void testSet() {
@@ -84,7 +84,7 @@ public class FieldPropertyTst extends TestCase {
 
         assertNull(object.getString());
 
-        property.directWrite(object, "xyz");
+        property.writeValue(object, null, "xyz");
         assertEquals("xyz", object.getString());
     }
 
@@ -92,10 +92,10 @@ public class FieldPropertyTst extends TestCase {
         FieldProperty property = new FieldProperty(TestBean.class, "string", String.class);
         TestBean from = new TestBean();
         from.setString("123");
-        
+
         TestBean to = new TestBean();
-        
-        property.copyProperty(from, to);
+
+        property.copyValue(from, to);
         assertEquals("123", to.getString());
     }
 }

@@ -55,12 +55,14 @@
  */
 package org.objectstyle.cayenne.service;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Relationship;
 
 /**
  * A GraphChangeHandler that propagates submitted object graph changes to an underlying
@@ -69,6 +71,7 @@ import org.objectstyle.cayenne.graph.GraphChangeHandler;
  * @since 1.2
  * @author Andrus Adamchik
  */
+// TODO: (Andrus, 09/2005) Server-side ClassDescriptor is needed to handle all that...
 class ClientToServerDiffConverter implements GraphChangeHandler {
 
     ObjectDataContext context;
@@ -99,13 +102,11 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
             Object newValue) {
 
         // convert related objects to server-side objects
-        if (newValue instanceof Persistent) {
-            newValue = findObject(((Persistent) newValue).getGlobalID());
-        }
 
-        Persistent object = findObject(nodeId);
+        DataObject object = findObject(nodeId);
+
         try {
-            PropertyUtils.setSimpleProperty(object, property, newValue);
+            object.writeProperty(property, newValue);
         }
         catch (Exception e) {
             throw new CayenneRuntimeException("Error setting property: " + property, e);
@@ -113,16 +114,39 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
     }
 
     public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
-        throw new CayenneRuntimeException(
-                "TODO: implement relationship change updates...");
+
+        DataObject source = findObject(nodeId);
+
+        // find whether this is to-one or to-many
+        ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
+        Relationship relationship = sourceEntity.getRelationship(arcId.toString());
+
+        DataObject target = findObject(targetNodeId);
+        if (relationship.isToMany()) {
+            source.addToManyTarget(relationship.getName(), target, true);
+        }
+        else {
+            source.setToOneTarget(relationship.getName(), target, true);
+        }
     }
 
     public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
-        throw new CayenneRuntimeException(
-                "TODO: implement relationship change updates...");
+        DataObject source = findObject(nodeId);
+
+        // find whether this is to-one or to-many
+        ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
+        Relationship relationship = sourceEntity.getRelationship(arcId.toString());
+
+        DataObject target = findObject(targetNodeId);
+        if (relationship.isToMany()) {
+            source.removeToManyTarget(relationship.getName(), target, true);
+        }
+        else {
+            source.setToOneTarget(relationship.getName(), null, true);
+        }
     }
 
-    Persistent findObject(Object nodeId) {
+    DataObject findObject(Object nodeId) {
         ObjectId id = toObjectId(nodeId);
         return context.getObjectStore().getObject(id);
     }

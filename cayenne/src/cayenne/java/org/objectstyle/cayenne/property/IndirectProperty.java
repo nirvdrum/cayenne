@@ -53,55 +53,25 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.property;
 
 /**
- * A read-only ObjRelationship relationship that caches some information that is
- * dynamically calculated in a superclass.
+ * A Property implemented using a level of indirection, such as ValueHolder or a
+ * Collection.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ClientObjRelationship extends ObjRelationship {
+public interface IndirectProperty extends Property {
 
-    String reverseRelationshipName;
+    /**
+     * Returns property value holder of an object.
+     */
+    Object readValueHolder(Object object) throws PropertyAccessException;
 
-    // note that field names are different from the ones defined by super for the same
-    // property... This is needed so that Hessian sreialization mechanism could work.
-    boolean clientReadOnly;
-    boolean clientToMany;
-
-    ClientObjRelationship(String name, String reverseRelationshipName, boolean toMany,
-            boolean readOnly) {
-
-        super(name);
-        this.clientToMany = toMany;
-        this.clientReadOnly = readOnly;
-        this.reverseRelationshipName = reverseRelationshipName;
-    }
-
-    public boolean isToMany() {
-        return clientToMany;
-    }
-
-    public boolean isReadOnly() {
-        return clientReadOnly;
-    }
-
-    public String getReverseRelationshipName() {
-        return reverseRelationshipName;
-    }
-
-    public ObjRelationship getReverseRelationship() {
-        if (reverseRelationshipName == null) {
-            return null;
-        }
-
-        Entity target = getTargetEntity();
-        if (target == null) {
-            return null;
-        }
-
-        return (ObjRelationship) target.getRelationship(reverseRelationshipName);
-    }
+    /**
+     * Sets a property value holder of an object.
+     */
+    void writeValueHolder(Object object, Object valueHolder)
+            throws PropertyAccessException;
 }

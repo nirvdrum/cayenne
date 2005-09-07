@@ -98,6 +98,8 @@ public class ClientObjectContext implements ObjectContext {
     protected OperationRecorder changeRecorder;
     protected ClientStateRecorder stateRecorder;
 
+    ClientObjectContextGraphAction graphAction;
+
     /**
      * Creates a new ClientObjectContext. Note that it is not fully functional until its
      * "connector" property is set.
@@ -124,6 +126,8 @@ public class ClientObjectContext implements ObjectContext {
         graphManager.setRemoteChangeHandler(new ClientObjectContextMergeHandler(
                 stateRecorder,
                 graphManager));
+
+        graphAction = new ClientObjectContextGraphAction(this);
     }
 
     /**
@@ -136,7 +140,7 @@ public class ClientObjectContext implements ObjectContext {
         if (entityResolver == null) {
             synchronized (this) {
                 if (entityResolver == null) {
-                    entityResolver = new BootstrapMessage().sendBootstrap(connector);
+                    setEntityResolver(new BootstrapMessage().sendBootstrap(connector));
                 }
             }
         }
@@ -146,6 +150,14 @@ public class ClientObjectContext implements ObjectContext {
 
     public void setEntityResolver(ClientEntityResolver entityResolver) {
         this.entityResolver = entityResolver;
+    }
+
+    public GraphManager getGraphManager() {
+        return graphManager;
+    }
+
+    public void setGraphManager(GraphManager graphManager) {
+        this.graphManager = graphManager;
     }
 
     /**
@@ -241,8 +253,14 @@ public class ClientObjectContext implements ObjectContext {
     // TODO: maybe change the api to be "performSelectQuery(Class, QueryExecutionPlan)"?
     public List performSelectQuery(QueryExecutionPlan query) {
         List objects = new SelectMessage(query).send(connector);
+        if (objects.isEmpty()) {
+            return objects;
+        }
 
         // postprocess fetched objects...
+
+        // assume all objects are of the same type...
+        ClassDescriptor descriptor = getClassDescriptor((Persistent) objects.get(0));
 
         Iterator it = objects.iterator();
         while (it.hasNext()) {
@@ -264,10 +282,7 @@ public class ClientObjectContext implements ObjectContext {
                     // TODO: implement smart merge for modified objects...
 
                     // refresh existing object...
-                    ObjEntity entity = getEntityResolver().lookupEntity(
-                            cachedObject.getGlobalID().getEntityName());
 
-                    ClassDescriptor descriptor = entity.getClassDescriptor();
                     if (cachedObject.getPersistenceState() == PersistenceState.HOLLOW) {
                         cachedObject.setPersistenceState(PersistenceState.COMMITTED);
                         descriptor.prepareForAccess(cachedObject);
@@ -279,6 +294,7 @@ public class ClientObjectContext implements ObjectContext {
             else {
                 fetchedObject.setPersistenceState(PersistenceState.COMMITTED);
                 fetchedObject.setObjectContext(this);
+                descriptor.prepareForAccess(fetchedObject);
                 graphManager.registerNode(fetchedObject.getGlobalID(), fetchedObject);
             }
         }
@@ -300,39 +316,7 @@ public class ClientObjectContext implements ObjectContext {
             Object oldValue,
             Object newValue) {
 
-        // change state...
-        if (object.getPersistenceState() == PersistenceState.COMMITTED) {
-            object.setPersistenceState(PersistenceState.MODIFIED);
-        }
-
-        // notify graph manager
-        graphManager.nodePropertyChanged(
-                object.getGlobalID(),
-                property,
-                oldValue,
-                newValue);
-    }
-
-    public void addedToCollectionProperty(
-            Persistent object,
-            String property,
-            Persistent added) {
-
-        // notify graph manager
-        if (added != null) {
-            graphManager.arcCreated(object.getGlobalID(), added.getGlobalID(), property);
-        }
-    }
-
-    public void removedFromCollectionProperty(
-            Persistent object,
-            String property,
-            Persistent removed) {
-        // notify graph manager
-        if (removed != null) {
-            graphManager
-                    .arcDeleted(object.getGlobalID(), removed.getGlobalID(), property);
-        }
+        graphAction.handlePropertyChange(object, property, oldValue, newValue);
     }
 
     public Collection uncommittedObjects() {
@@ -362,5 +346,11 @@ public class ClientObjectContext implements ObjectContext {
         if (object.getPersistenceState() == PersistenceState.HOLLOW) {
             performSelectQuery(new SingleObjectQuery(object.getGlobalID()));
         }
+    }
+
+    protected ClassDescriptor getClassDescriptor(Persistent object) {
+        ObjEntity entity = getEntityResolver().lookupEntity(
+                object.getGlobalID().getEntityName());
+        return entity.getClassDescriptor();
     }
 }

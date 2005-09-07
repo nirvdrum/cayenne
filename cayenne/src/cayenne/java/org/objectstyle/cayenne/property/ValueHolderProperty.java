@@ -65,20 +65,23 @@ import org.objectstyle.cayenne.ValueHolder;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ValueHolderProperty extends FieldProperty {
+public class ValueHolderProperty extends FieldProperty implements ArcProperty,
+        IndirectProperty {
 
-    public ValueHolderProperty(Class beanClass, String propertyName) {
+    protected String reversePropertyName;
+
+    public ValueHolderProperty(Class beanClass, String propertyName,
+            String reversePropertyName) {
         super(beanClass, propertyName, ValueHolder.class);
+
+        this.reversePropertyName = reversePropertyName;
     }
 
-    /**
-     * Returns true.
-     */
-    public boolean isIndirect() {
-        return true;
+    public String getReversePropertyName() {
+        return reversePropertyName;
     }
 
-    public void copyProperty(Object from, Object to) throws PropertyAccessException {
+    public void copyValue(Object from, Object to) throws PropertyAccessException {
         // TODO: at least invalidate the ValueHolder somehow..
     }
 
@@ -89,13 +92,34 @@ public class ValueHolderProperty extends FieldProperty {
         ensureValueHolderSet(object);
     }
 
+    public Object readValueHolder(Object object) throws PropertyAccessException {
+        return readField(object);
+    }
+
+    public void writeValueHolder(Object object, Object valueHolder)
+            throws PropertyAccessException {
+        writeField(object, valueHolder);
+    }
+
+    public Object readValue(Object object) throws PropertyAccessException {
+        ensureValueHolderSet(object);
+        return ((ValueHolder) readValueHolder(object)).getValue(null);
+    }
+
+    public void writeValue(Object object, Object oldValue, Object newValue)
+            throws PropertyAccessException {
+
+        ensureValueHolderSet(object);
+        ((ValueHolder) readValueHolder(object)).setValue(null, newValue);
+    }
+
     /**
      * Checks that an object's ValueHolder field described by this property is set,
      * injecting a ValueHolder if needed.
      */
     protected void ensureValueHolderSet(Object object) throws PropertyAccessException {
-        if (directRead(object) == null) {
-            directWrite(object, createValueHolder(object));
+        if (readValueHolder(object) == null) {
+            writeValueHolder(object, createValueHolder(object));
         }
     }
 
