@@ -56,8 +56,8 @@
 package org.objectstyle.cayenne.client;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.PersistenceState;
@@ -262,7 +262,7 @@ public class ClientObjectContext implements ObjectContext {
         // assume all objects are of the same type...
         ClassDescriptor descriptor = getClassDescriptor((Persistent) objects.get(0));
 
-        Iterator it = objects.iterator();
+        ListIterator it = objects.listIterator();
         while (it.hasNext()) {
 
             Persistent fetchedObject = (Persistent) it.next();
@@ -289,6 +289,7 @@ public class ClientObjectContext implements ObjectContext {
                     }
 
                     descriptor.copyProperties(fetchedObject, cachedObject);
+                    it.set(cachedObject);
                 }
             }
             else {

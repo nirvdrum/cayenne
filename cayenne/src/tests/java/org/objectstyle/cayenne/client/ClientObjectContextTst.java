@@ -94,7 +94,7 @@ public class ClientObjectContextTst extends CayenneTestCase {
     public void testConstructor() {
 
         ClientObjectContext context = new ClientObjectContext();
-        
+
         // test default property parameters
         assertNotNull(context.getGraphManager());
         assertNull(context.getConnector());
@@ -248,6 +248,36 @@ public class ClientObjectContextTst extends CayenneTestCase {
         // ObjectContext must be injected
         assertEquals(context, o1.getObjectContext());
         assertSame(o1, context.graphManager.getNode(oid1));
+    }
+
+    public void testPerformSelectQueryOverrideCached() {
+        ObjEntity entity = new ObjEntity("test_entity");
+        entity.setClassName(MockPersistentObject.class.getName());
+        Collection entities = Collections.singleton(entity);
+        ClientEntityResolver resolver = new ClientEntityResolver(entities);
+        ClientObjectContext context = new ClientObjectContext();
+        context.setEntityResolver(resolver);
+
+        GlobalID oid = new GlobalID("test_entity", "x", "y");
+
+        MockPersistentObject o1 = new MockPersistentObject(oid);
+        context.graphManager.registerNode(oid, o1);
+        assertSame(o1, context.getGraphManager().getNode(oid));
+
+        // another object with the same GID ... we must merge it with cached and return
+        // cached object instead of the one fetched
+        MockPersistentObject o2 = new MockPersistentObject(oid);
+        MockCayenneConnector connector = new MockCayenneConnector(Arrays
+                .asList(new Object[] {
+                    o2
+                }));
+
+        context.setConnector(connector);
+        List list = context.performSelectQuery(new NamedQuery("dummy"));
+        assertNotNull(list);
+        assertEquals(1, list.size());
+        assertTrue("Expected cached object, got: " + list, list.contains(o1));
+        assertSame(o1, context.graphManager.getNode(oid));
     }
 
     public void testNewObject() {

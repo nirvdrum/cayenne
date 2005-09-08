@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne;
 
-import org.objectstyle.cayenne.PersistentObject;
+import org.objectstyle.cayenne.distribution.GlobalID;
 
 /**
  * Concrete ClientDataObject used for unit testing.
@@ -64,4 +64,11 @@ import org.objectstyle.cayenne.PersistentObject;
  */
 public class MockPersistentObject extends PersistentObject {
 
+    public MockPersistentObject() {
+
+    }
+
+    public MockPersistentObject(GlobalID oid) {
+        setGlobalID(oid);
+    }
 }
