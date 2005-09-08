@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -362,6 +363,23 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         query.setParentQualifier(parentQualifier);
         query.setRoot(root);
 
+        // The following algorithm is for building the new query name based
+        // on the original query name and a hashcode of the map of parameters.
+        // This way the query clone can take advantage of caching.  Fixes
+        // problem reported in CAY-360.
+
+        Iterator        keyValuePairs  = parameters.entrySet().iterator();
+        HashCodeBuilder parametersHash = new HashCodeBuilder();
+
+        while (keyValuePairs.hasNext()) {
+          Map.Entry entry = (Map.Entry) keyValuePairs.next();
+
+          parametersHash.append(entry.getKey());
+          parametersHash.append(entry.getValue());
+        }
+
+        query.setName("__CayenneInternalQuery__" + name + "__" + parametersHash.toHashCode());
+
         if (prefetches != null) {
             query.addPrefetches(prefetches);
         }
@@ -378,10 +396,6 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         if (qualifier != null) {
             query.setQualifier(qualifier.expWithParameters(parameters, pruneMissing));
         }
-
-        // TODO: implement algorithm for building the name based on the original name and
-        // the hashcode of the map of parameters. This way query clone can take advantage
-        // of caching.
 
         return query;
     }
