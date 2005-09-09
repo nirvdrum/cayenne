@@ -569,7 +569,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
         int count = getOperandCount();
         for (int i = 0, j = 0; i < count; i++) {
             Object operand = getOperand(i);
-            Object transformedChild = operand;
+            Object transformedChild;
 
             if (operand instanceof Expression) {
                 transformedChild = ((Expression) operand).transform(transformer);
@@ -577,13 +577,18 @@ public abstract class Expression implements Serializable, XMLSerializable {
             else if (transformer != null) {
                 transformedChild = transformer.transform(operand);
             }
+            else {
+                transformedChild = operand;
+            }
 
             if (transformedChild != null) {
                 Object value = (transformedChild != nullValue) ? transformedChild : null;
                 copy.setOperand(j, value);
                 j++;
             }
-            else if (pruneNodeForPrunedChild(operand)) {
+            // only prune the node if transformer indicated so. No transformer - no
+            // pruning.
+            else if (transformer != null && pruneNodeForPrunedChild(operand)) {
                 // bail out early...
                 return null;
             }
