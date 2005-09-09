@@ -80,7 +80,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  */
 public abstract class Expression implements Serializable, XMLSerializable {
 
-    private final static Object nullValue = new Object();
+    public final static Object NULL_VALUE = new Object();
 
     public static final int AND = 0;
     public static final int OR = 1;
@@ -345,7 +345,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
                 if (!(object instanceof ExpressionParameter)) {
                     // this check is needed to preserve nulls that are not parameters and
                     // therefore should not be pruned.
-                    return object != null ? object : nullValue;
+                    return object != null ? object : NULL_VALUE;
                 }
 
                 String name = ((ExpressionParameter) object).getName();
@@ -364,7 +364,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
                     // wrap lists (for now); also support null parameters
                     return (value != null)
                             ? ExpressionFactory.wrapPathOperand(value)
-                            : nullValue;
+                            : NULL_VALUE;
                 }
             }
         };
@@ -555,7 +555,8 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * copy of this expression.
      * <p>
      * To force a node and its children to be pruned from the copy, Transformer should
-     * return null for a given node.
+     * return null for a given node. To preserve nulls in the tree, Transformer must
+     * return Expression.NULL_VALUE.
      * <p>
      * There is one limitation on what Transformer is expected to do: if a node is an
      * Expression it must be transformed to null or another Expression. Any other object
@@ -581,14 +582,16 @@ public abstract class Expression implements Serializable, XMLSerializable {
                 transformedChild = operand;
             }
 
-            if (transformedChild != null) {
-                Object value = (transformedChild != nullValue) ? transformedChild : null;
+            // prune null children only if there is a transformer and it indicated so
+            boolean prune = transformer != null && transformedChild == null;
+
+            if (!prune) {
+                Object value = (transformedChild != NULL_VALUE) ? transformedChild : null;
                 copy.setOperand(j, value);
                 j++;
             }
-            // only prune the node if transformer indicated so. No transformer - no
-            // pruning.
-            else if (transformer != null && pruneNodeForPrunedChild(operand)) {
+
+            if (prune && pruneNodeForPrunedChild(operand)) {
                 // bail out early...
                 return null;
             }
