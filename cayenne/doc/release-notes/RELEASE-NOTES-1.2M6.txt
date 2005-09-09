@@ -16,3 +16,5 @@ Changes/New Features:
 * Changed AUTO_PK_TABLE default definition to include primary key constraint (somewhat related to CAY-245)
 * org.objectstyle.cayenne.map.MapObject is deprecated and removed from map package classes 
   inheritance hierarchy. If you cast Cayenne mapping objects to MapObject, change the cast to CayenneMapEntry
+* A contract between Expression and Transformer in Expression.transform(..) is altered. Now Transformer must return 
+  Expression.PRUNED_NODE to indicate that a node subtree has to go. 

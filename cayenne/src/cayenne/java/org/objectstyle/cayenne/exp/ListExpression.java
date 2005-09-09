@@ -87,22 +87,24 @@ public class ListExpression extends Expression {
         return false;
     }
 
-    public Expression transform(Transformer transformer) {
-        Expression copy = super.transform(transformer);
+    protected Object transformExpression(Transformer transformer) {
+        Object transformed = super.transformExpression(transformer);
 
-        if (!(copy instanceof ListExpression)) {
-            return copy;
+        if (!(transformed instanceof ListExpression)) {
+            return transformed;
         }
+        
+        ListExpression listExpression = (ListExpression) transformed;
 
         // prune itself if the transformation resulted in 
         // no children or a single child
-        switch (copy.getOperandCount()) {
+        switch (listExpression.getOperandCount()) {
             case 1 :
-                return (Expression) copy.getOperand(0);
+                return listExpression.getOperand(0);
             case 0 :
-                return null;
+                return PRUNED_NODE;
             default :
-                return copy;
+                return listExpression;
         }
     }
 

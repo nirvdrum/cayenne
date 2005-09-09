@@ -80,7 +80,13 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  */
 public abstract class Expression implements Serializable, XMLSerializable {
 
-    public final static Object NULL_VALUE = new Object();
+    /**
+     * A value that a Transformer might return to indicate that a node has to be pruned
+     * from the expression tre eduring transformation.
+     * 
+     * @since 1.2
+     */
+    public final static Object PRUNED_NODE = new Object();
 
     public static final int AND = 0;
     public static final int OR = 1;
@@ -343,15 +349,13 @@ public abstract class Expression implements Serializable, XMLSerializable {
 
             public Object transform(Object object) {
                 if (!(object instanceof ExpressionParameter)) {
-                    // this check is needed to preserve nulls that are not parameters and
-                    // therefore should not be pruned.
-                    return object != null ? object : NULL_VALUE;
+                    return object;
                 }
 
                 String name = ((ExpressionParameter) object).getName();
                 if (!parameters.containsKey(name)) {
                     if (pruneMissing) {
-                        return null;
+                        return PRUNED_NODE;
                     }
                     else {
                         throw new ExpressionException("Missing required parameter: $"
@@ -364,7 +368,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
                     // wrap lists (for now); also support null parameters
                     return (value != null)
                             ? ExpressionFactory.wrapPathOperand(value)
-                            : NULL_VALUE;
+                            : null;
                 }
             }
         };
@@ -555,17 +559,32 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * copy of this expression.
      * <p>
      * To force a node and its children to be pruned from the copy, Transformer should
-     * return null for a given node. To preserve nulls in the tree, Transformer must
-     * return Expression.NULL_VALUE.
-     * <p>
-     * There is one limitation on what Transformer is expected to do: if a node is an
+     * return Expression.PRUNED_NODE. Otherwise an expectation is that if a node is an
      * Expression it must be transformed to null or another Expression. Any other object
-     * type would result in an exception.
+     * type would result in a ExpressionException.
      * 
      * @since 1.1
      */
     public Expression transform(Transformer transformer) {
+        Object transformed = transformExpression(transformer);
 
+        if (transformed == PRUNED_NODE || transformed == null) {
+            return null;
+        }
+        else if (transformed instanceof Expression) {
+            return (Expression) transformed;
+        }
+
+        throw new ExpressionException("Invalid transformed expression: " + transformed);
+    }
+
+    /**
+     * A recursive method called from "transform" to do the actual transformation.
+     * 
+     * @return null, Expression.PRUNED_NODE or transformed expression.
+     * @since 1.2
+     */
+    protected Object transformExpression(Transformer transformer) {
         Expression copy = shallowCopy();
         int count = getOperandCount();
         for (int i = 0, j = 0; i < count; i++) {
@@ -573,7 +592,8 @@ public abstract class Expression implements Serializable, XMLSerializable {
             Object transformedChild;
 
             if (operand instanceof Expression) {
-                transformedChild = ((Expression) operand).transform(transformer);
+                transformedChild = ((Expression) operand)
+                        .transformExpression(transformer);
             }
             else if (transformer != null) {
                 transformedChild = transformer.transform(operand);
@@ -583,17 +603,16 @@ public abstract class Expression implements Serializable, XMLSerializable {
             }
 
             // prune null children only if there is a transformer and it indicated so
-            boolean prune = transformer != null && transformedChild == null;
+            boolean prune = transformer != null && transformedChild == PRUNED_NODE;
 
             if (!prune) {
-                Object value = (transformedChild != NULL_VALUE) ? transformedChild : null;
-                copy.setOperand(j, value);
+                copy.setOperand(j, transformedChild);
                 j++;
             }
 
             if (prune && pruneNodeForPrunedChild(operand)) {
                 // bail out early...
-                return null;
+                return PRUNED_NODE;
             }
         }
 

@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.exp.parser;
 
 import org.apache.commons.collections.Transformer;
-import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 
 /**
@@ -76,22 +75,24 @@ public abstract class AggregateConditionNode extends SimpleNode {
         return false;
     }
 
-    public Expression transform(Transformer transformer) {
-        Expression copy = super.transform(transformer);
+    protected Object transformExpression(Transformer transformer) {
+        Object transformed = super.transformExpression(transformer);
 
-        if (!(copy instanceof AggregateConditionNode)) {
-            return copy;
+        if (!(transformed instanceof AggregateConditionNode)) {
+            return transformed;
         }
+        
+        AggregateConditionNode condition = (AggregateConditionNode) transformed;
 
         // prune itself if the transformation resulted in 
         // no children or a single child
-        switch (copy.getOperandCount()) {
+        switch (condition.getOperandCount()) {
             case 1 :
-                return (Expression) copy.getOperand(0);
+                return condition.getOperand(0);
             case 0 :
-                return null;
+                return PRUNED_NODE;
             default :
-                return copy;
+                return condition;
         }
     }
 
