@@ -97,7 +97,7 @@ public class CayenneProject {
     private List dataViews = new ArrayList();
     private Map objEntityMap = new TreeMap();
     private Map fieldLookupsTemp = new HashMap();
-    private ObjEntity[] objEntities;
+    private DVObjEntity[] objEntities;
     private List loadErrors = new ArrayList();
     private List saveErrors = new ArrayList();
     private Map dataViewsElements = new HashMap();
@@ -135,7 +135,7 @@ public class CayenneProject {
         return dataViews;
     }
 
-    public ObjEntity[] getObjEntities() {
+    public DVObjEntity[] getObjEntities() {
         return objEntities;
     }
 
@@ -255,8 +255,8 @@ public class CayenneProject {
         fw.close();
     }
 
-    public ObjEntity getObjEntity(String name) {
-        return (ObjEntity) objEntityMap.get(name);
+    public DVObjEntity getObjEntity(String name) {
+        return (DVObjEntity) objEntityMap.get(name);
     }
 
     public DataView createDataView() {
@@ -288,7 +288,7 @@ public class CayenneProject {
         Map removingObjEntityViews = new HashMap();
         for (Iterator j = dataView.getObjEntityViews().iterator(); j.hasNext();) {
             ObjEntityView view = (ObjEntityView) j.next();
-            ObjEntity entity = view.getObjEntity();
+            DVObjEntity entity = view.getObjEntity();
             if (entity != null) {
                 removingObjEntityViews.put(view, new Integer(entity
                         .getIndexOfObjEntityView(view)));
@@ -332,7 +332,7 @@ public class CayenneProject {
                 String location = map.getAttributeValue("location");
                 boolean loading = true;
                 for (Iterator itr = dataMaps.iterator(); itr.hasNext();) {
-                    DataMap nextDataMap = (DataMap) itr.next();
+                    DVDataMap nextDataMap = (DVDataMap) itr.next();
                     if (nextDataMap.getName().equalsIgnoreCase(name)) {
                         if (!nextDataMap.getFile().getName().equalsIgnoreCase(location)) {
                             loadErrors.add("<b>"
@@ -352,7 +352,7 @@ public class CayenneProject {
                     loadDataMap(name, location);
                 }
             }
-            objEntities = (ObjEntity[]) objEntityMap.values().toArray(new ObjEntity[] {});
+            objEntities = (DVObjEntity[]) objEntityMap.values().toArray(new DVObjEntity[] {});
         }
         objEntitiesNames.clear();
 
@@ -395,8 +395,8 @@ public class CayenneProject {
             String[] lookupNames = (String[]) fieldLookupsTemp.get(field);
             String lookupViewName = lookupNames[0];
             String lookupFieldName = lookupNames[1];
-            ObjRelationship relationship = field.getObjRelationship();
-            ObjEntity targetObjEntity = relationship.getTargetObjEntity();
+            DVObjRelationship relationship = field.getObjRelationship();
+            DVObjEntity targetObjEntity = relationship.getTargetObjEntity();
             if (targetObjEntity != null) {
                 for (Iterator itr = targetObjEntity.getObjEntityViews().iterator(); itr
                         .hasNext();) {
@@ -465,14 +465,14 @@ public class CayenneProject {
             Element elem = doc.getRootElement();
             if (elem.getName().equals("data-map")) {
                 String dataMapName = (name != null ? name : location);
-                DataMap dataMap = new DataMap(this, dataMapName, file);
+                DVDataMap dataMap = new DVDataMap(this, dataMapName, file);
                 dataMap.setName(dataMapName);
                 List elements = elem.getChildren("obj-entity");
                 Iterator it = elements.iterator();
                 while (it.hasNext()) {
                     try {
                         Element element = (Element) it.next();
-                        ObjEntity entity = new ObjEntity(dataMap, element);
+                        DVObjEntity entity = new DVObjEntity(dataMap, element);
                         if (objEntitiesNames.add(entity.getName()) == false) {
                             String entityPath = "<b>"
                                     + dataMap.getName()
@@ -496,7 +496,7 @@ public class CayenneProject {
                 it = elements.iterator();
                 while (it.hasNext()) {
                     Element element = (Element) it.next();
-                    ObjRelationship objRelationship = new ObjRelationship(
+                    DVObjRelationship objRelationship = new DVObjRelationship(
                             dataMap,
                             element);
                     dataMap.addObjRelationship(objRelationship);

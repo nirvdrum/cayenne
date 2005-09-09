@@ -66,14 +66,14 @@ import javax.swing.table.*;
  */
 
 public class AttributesTableModel extends AbstractTableModel {
-  private ObjEntity objEntity;
+  private DVObjEntity objEntity;
   private String[] columnNames= {"Name", "Type"};
 
 
   public AttributesTableModel() {
   }
   /*Sets another objEntity*/
-  public void setObjEntity(ObjEntity objEntity){
+  public void setObjEntity(DVObjEntity objEntity){
     this.objEntity = objEntity;
     fireTableStructureChanged();
   }
@@ -103,7 +103,7 @@ public class AttributesTableModel extends AbstractTableModel {
   }
   /*Returns the value for the cell at column - index and row -index. */
   public Object getValueAt(int row, int column){
-    ObjAttribute attribute = objEntity.getObjAttribute(row);
+    DVObjAttribute attribute = objEntity.getObjAttribute(row);
     switch (column){
       case 0:
         return attribute.getName();

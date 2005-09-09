@@ -271,7 +271,7 @@ class DVModelerFrameHelper {
         openProject && dataViewTabSelected);
     addNewObjEntityViewAction.setEnabled(
         node instanceof DataView ||
-        node instanceof ObjEntity);
+        node instanceof DVObjEntity);
     addNewFieldAction.setEnabled(
         node instanceof ObjEntityView);
     deleteAction.setEnabled(
@@ -416,7 +416,7 @@ class DVModelerFrameHelper {
     if (tabIndex == 0) {
       TreePath path = dataViewTree.getSelectionPath();
       DataView dataView = (DataView)path.getLastPathComponent();
-      ObjEntity selectedObjEntity = (ObjEntity)JOptionPane.showInputDialog(
+      DVObjEntity selectedObjEntity = (DVObjEntity)JOptionPane.showInputDialog(
           dvModelerFrame,
           "Select ObjEntity",
           "DVModeler :: New Entity View",
@@ -433,7 +433,7 @@ class DVModelerFrameHelper {
     } else if (tabIndex == 1) {
       TreePath path = dataMapTree.getSelectionPath();
 
-      ObjEntity objEntity = (ObjEntity)path.getLastPathComponent();
+      DVObjEntity objEntity = (DVObjEntity)path.getLastPathComponent();
       /* DataView choice */
       Object[] dataViews = cayenneProject.getDataViews().toArray();
       if (dataViews.length == 0) {
@@ -659,7 +659,7 @@ class DVModelerFrameHelper {
       ObjEntityView view = (ObjEntityView)node;
       DataView dataView = view.getDataView();
       int indexInDataView = dataView.getIndexOfObjEntityView(view);
-      ObjEntity entity = view.getObjEntity();
+      DVObjEntity entity = view.getObjEntity();
 
       int indexInDataMap = -1;
 
@@ -750,11 +750,11 @@ class DVModelerFrameHelper {
     dataViewTree.setSelectionPath(new TreePath(path));
   }
 
-  private void selectObjEntity(ObjEntity entity){
+  private void selectObjEntity(DVObjEntity entity){
     JTree dataMapTree = dvModelerFrame.getDataMapTree();
 
     DataMapTreeModel dataMapTreeModel = (DataMapTreeModel)dataMapTree.getModel();
-    DataMap dataMap = entity.getDataMap();
+    DVDataMap dataMap = entity.getDataMap();
     Object[] path = new Object[] {dataMapTreeModel.getRoot(),
                                   dataMap,
                                   entity
@@ -777,8 +777,8 @@ class DVModelerFrameHelper {
 
       dataViewTree.setSelectionPath(new TreePath(path));
     } else {
-      ObjEntity entity = view.getObjEntity();
-      DataMap dataMap = entity.getDataMap();
+      DVObjEntity entity = view.getObjEntity();
+      DVDataMap dataMap = entity.getDataMap();
       DataMapTreeModel dataMapTreeModel = (DataMapTreeModel)dataMapTree.getModel();
 
       Object[] path = new Object[]{dataMapTreeModel.getRoot(),
@@ -807,8 +807,8 @@ class DVModelerFrameHelper {
     JTree dataMapTree = dvModelerFrame.getDataMapTree();
 
     DataMapTreeModel dataMapTreeModel = (DataMapTreeModel)dataMapTree.getModel();
-    ObjEntity entity = view.getObjEntity();
-    DataMap dataMap = entity.getDataMap();
+    DVObjEntity entity = view.getObjEntity();
+    DVDataMap dataMap = entity.getDataMap();
     Object[] path = new Object[] {dataMapTreeModel.getRoot(),
                                         dataMap,
                                         entity,
@@ -833,8 +833,8 @@ class DVModelerFrameHelper {
 
       dataViewTree.setSelectionPath(new TreePath(path));
     } else {
-      ObjEntity entity = view.getObjEntity();
-      DataMap dataMap = entity.getDataMap();
+      DVObjEntity entity = view.getObjEntity();
+      DVDataMap dataMap = entity.getDataMap();
       DataMapTreeModel dataMapTreeModel = (DataMapTreeModel)dataMapTree.getModel();
 
       Object[] path = new Object[]{dataMapTreeModel.getRoot(),
@@ -888,15 +888,15 @@ class DVModelerFrameHelper {
     if (node == null){
       dvModelerFrame.getTopCardPanel().showPanel(null);
       showBottomEmptyPanel();
-    }else if (node instanceof DataMap){
+    }else if (node instanceof DVDataMap){
       dvModelerFrame.getTopCardPanel().showPanel((DVObject)node);
       showBottomEmptyPanel();
       topTitle = "Data View \"" +
                  node +
                  "\" :: Properties";
-    } else if (node instanceof ObjEntity){
+    } else if (node instanceof DVObjEntity){
       dvModelerFrame.getTopCardPanel().showPanel((DVObject)node);
-      ObjEntity objEntity = (ObjEntity)node;
+      DVObjEntity objEntity = (DVObjEntity)node;
       showRelatioshipsTable(objEntity);
       topTitle = "Entity \"" +
                  node +
@@ -1001,7 +1001,7 @@ class DVModelerFrameHelper {
     cardLayout.show(bottomCardPanel, "fieldsTable");
   }
 
-  private void showRelatioshipsTable(ObjEntity objEntity){
+  private void showRelatioshipsTable(DVObjEntity objEntity){
     java.util.List relationships = new ArrayList();
     relationships.addAll(objEntity.getDataMap().getObjRelationshipsBySource(objEntity));
     relationships.addAll(objEntity.getDataMap().getObjRelationshipsByTarget(objEntity));

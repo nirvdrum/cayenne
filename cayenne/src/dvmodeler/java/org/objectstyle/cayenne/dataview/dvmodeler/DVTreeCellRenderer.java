@@ -103,10 +103,10 @@ public class DVTreeCellRenderer extends DefaultTreeCellRenderer {
       this.setBackgroundNonSelectionColor(Color.WHITE);
     }*/
 
-    if (value instanceof DataMap) {
+    if (value instanceof DVDataMap) {
       setForegroundColor(Color.BLACK);
       setIcon(dataMapNodeIcon);
-    } else if (value instanceof ObjEntity) {
+    } else if (value instanceof DVObjEntity) {
       setForegroundColor(Color.BLACK);
       setIcon(objEntityNodeIcon);
     } else if (value instanceof DataView) {

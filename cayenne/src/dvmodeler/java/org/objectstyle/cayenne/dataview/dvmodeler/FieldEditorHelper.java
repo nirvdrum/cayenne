@@ -205,7 +205,7 @@ class FieldEditorHelper {
 
   private void calcTypeComboAction(ActionEvent e){
     String comboCalcType = (String)calcTypeCombo.getSelectedItem();
-    ObjEntity objEntity = objEntityViewField.getObjEntityView().getObjEntity();
+    DVObjEntity objEntity = objEntityViewField.getObjEntityView().getObjEntity();
 
     if (comboCalcType.equals("No Calculation")){
       objEntityViewField.setCalcType("nocalc");
@@ -215,7 +215,7 @@ class FieldEditorHelper {
       lookupFieldCombo.setEnabled(false);
 
 
-      ObjAttribute nullAttribute = null;
+      DVObjAttribute nullAttribute = null;
       java.util.List attributes = new ArrayList();
       attributes.add(nullAttribute);
       if (objEntity != null){
@@ -244,7 +244,7 @@ class FieldEditorHelper {
       lookupViewCombo.setEnabled(true);
       lookupFieldCombo.setEnabled(true);
 
-      ObjRelationship nullRelationship = null;
+      DVObjRelationship nullRelationship = null;
       java.util.List relationships = new ArrayList();
       relationships.add(nullRelationship);
       if (objEntity != null){
@@ -254,11 +254,11 @@ class FieldEditorHelper {
       DefaultComboBoxModel relationshipsDefaultModel = new DefaultComboBoxModel(relationships.toArray());
       objRelationshipCombo.setModel(relationshipsDefaultModel);
 
-      ObjRelationship fieldRelationship = objEntityViewField.getObjRelationship();
+      DVObjRelationship fieldRelationship = objEntityViewField.getObjRelationship();
       if(fieldRelationship != null){
         boolean flagSetSelectedItem = false;
         for (Iterator itr = relationships.iterator();itr.hasNext();){
-          ObjRelationship relationship = (ObjRelationship)itr.next();
+          DVObjRelationship relationship = (DVObjRelationship)itr.next();
           if ((relationship != null) && (fieldRelationship.getName().equals(relationship.getName()))){
             objRelationshipCombo.setSelectedItem(fieldRelationship);
             flagSetSelectedItem = true;
@@ -338,15 +338,15 @@ class FieldEditorHelper {
   }
 
   private void objRelationshipComboAction(ActionEvent e){
-    ObjRelationship selectedObjRelationship = (ObjRelationship)objRelationshipCombo.getSelectedItem();
-    ObjRelationship fieldObjRelationship = objEntityViewField.getObjRelationship();
+    DVObjRelationship selectedObjRelationship = (DVObjRelationship)objRelationshipCombo.getSelectedItem();
+    DVObjRelationship fieldObjRelationship = objEntityViewField.getObjRelationship();
 
     if (selectedObjRelationship != fieldObjRelationship){
       objEntityViewField.setObjRelationship(selectedObjRelationship);
     }
 
     if (selectedObjRelationship != null){
-      ObjEntity targetObjEntity = selectedObjRelationship.getTargetObjEntity();
+      DVObjEntity targetObjEntity = selectedObjRelationship.getTargetObjEntity();
 
       ObjEntityView nullView = null;
       java.util.List lookupViews = new ArrayList();
@@ -384,8 +384,8 @@ class FieldEditorHelper {
 
   private void objAttributeComboAction(ActionEvent e){
 
-    ObjAttribute selectedObjAttribute = (ObjAttribute)objAttributeCombo.getSelectedItem();
-    ObjAttribute fieldObjAttribute = objEntityViewField.getObjAttribute();
+    DVObjAttribute selectedObjAttribute = (DVObjAttribute)objAttributeCombo.getSelectedItem();
+    DVObjAttribute fieldObjAttribute = objEntityViewField.getObjAttribute();
     if (selectedObjAttribute != fieldObjAttribute){
       objEntityViewField.setObjAttribute(selectedObjAttribute);
     }

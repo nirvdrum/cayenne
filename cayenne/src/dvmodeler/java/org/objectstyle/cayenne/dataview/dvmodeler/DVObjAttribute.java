@@ -56,40 +56,42 @@
 
 package org.objectstyle.cayenne.dataview.dvmodeler;
 
+import java.util.*;
 import org.jdom.*;
 
 /**
- *
  *
  * @author Nataliya Kholodna
  * @version 1.0
  */
 
-public class ObjRelationship extends DVObject {
-  ObjEntity sourceObjEntity;
-  ObjEntity targetObjEntity;
-  boolean toMany;
+public class DVObjAttribute extends DVObject {
+  String type = "";
+  List loadErrors = new ArrayList();
 
-  public ObjRelationship(DataMap dataMap, Element element) {
-    setName(element.getAttributeValue("name"));
-    String sourceName =  element.getAttributeValue("source");
-    sourceObjEntity = dataMap.getObjEntity(sourceName);
-    String targetName = element.getAttributeValue("target");
-    targetObjEntity = dataMap.getObjEntity(targetName);
-    String toManyString = element.getAttributeValue("toMany");
-    toMany = Boolean.valueOf(toManyString).booleanValue();
+  public DVObjAttribute(Element element) {
+    String attributeValue = element.getAttributeValue("name");
+    if ((attributeValue == null) || (attributeValue.length() == 0)){
+      setName("");
+      loadErrors.add("ObjAttribute has no name<br><br>");
+    } else {
+      setName(attributeValue);
+    }
+    attributeValue = element.getAttributeValue("type");
+    if ((attributeValue == null) || (attributeValue.length() == 0)){
+      type = "";
+      loadErrors.add( "ObjAttribute \"" + getName() + "\" has no attribute \"type\"<br><br>");
+    } else {
+      type = attributeValue;
+    }
   }
 
-  public ObjEntity getSourceObjEntity(){
-    return sourceObjEntity;
+  public List getLoadErrors(){
+    return Collections.unmodifiableList(loadErrors);
   }
 
-  public ObjEntity getTargetObjEntity(){
-    return targetObjEntity;
-  }
-
-  public boolean isToMany(){
-    return toMany;
+  public String getType(){
+    return type;
   }
 
   public String toString(){

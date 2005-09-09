@@ -104,7 +104,7 @@ public class RelationshipsTableModel extends AbstractTableModel {
 
   /*Returns the value for the cell at column index and row index. */
   public Object getValueAt(int row, int column){
-    ObjRelationship relationship = (ObjRelationship)objRelationships.get(row);
+    DVObjRelationship relationship = (DVObjRelationship)objRelationships.get(row);
     switch (column){
       case 0:
         return relationship.getName();

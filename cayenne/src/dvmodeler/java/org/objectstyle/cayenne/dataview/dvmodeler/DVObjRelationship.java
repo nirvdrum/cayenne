@@ -56,42 +56,40 @@
 
 package org.objectstyle.cayenne.dataview.dvmodeler;
 
-import java.util.*;
 import org.jdom.*;
 
 /**
+ *
  *
  * @author Nataliya Kholodna
  * @version 1.0
  */
 
-public class ObjAttribute extends DVObject {
-  String type = "";
-  List loadErrors = new ArrayList();
+public class DVObjRelationship extends DVObject {
+  DVObjEntity sourceObjEntity;
+  DVObjEntity targetObjEntity;
+  boolean toMany;
 
-  public ObjAttribute(Element element) {
-    String attributeValue = element.getAttributeValue("name");
-    if ((attributeValue == null) || (attributeValue.length() == 0)){
-      setName("");
-      loadErrors.add("ObjAttribute has no name<br><br>");
-    } else {
-      setName(attributeValue);
-    }
-    attributeValue = element.getAttributeValue("type");
-    if ((attributeValue == null) || (attributeValue.length() == 0)){
-      type = "";
-      loadErrors.add( "ObjAttribute \"" + getName() + "\" has no attribute \"type\"<br><br>");
-    } else {
-      type = attributeValue;
-    }
+  public DVObjRelationship(DVDataMap dataMap, Element element) {
+    setName(element.getAttributeValue("name"));
+    String sourceName =  element.getAttributeValue("source");
+    sourceObjEntity = dataMap.getObjEntity(sourceName);
+    String targetName = element.getAttributeValue("target");
+    targetObjEntity = dataMap.getObjEntity(targetName);
+    String toManyString = element.getAttributeValue("toMany");
+    toMany = Boolean.valueOf(toManyString).booleanValue();
   }
 
-  public List getLoadErrors(){
-    return Collections.unmodifiableList(loadErrors);
+  public DVObjEntity getSourceObjEntity(){
+    return sourceObjEntity;
   }
 
-  public String getType(){
-    return type;
+  public DVObjEntity getTargetObjEntity(){
+    return targetObjEntity;
+  }
+
+  public boolean isToMany(){
+    return toMany;
   }
 
   public String toString(){

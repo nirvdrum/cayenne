@@ -65,19 +65,19 @@ import java.io.*;
  * @version 1.0
  */
 
-public class DataMap extends DVObject {
+public class DVDataMap extends DVObject {
   private CayenneProject cayenneProject;
   private List objEntities = new ArrayList();
   private List objRelationships = new ArrayList();
   private File file;
 
-  public DataMap(CayenneProject cayenneProject, String name, File file){
+  public DVDataMap(CayenneProject cayenneProject, String name, File file){
     setName(name);
     this.cayenneProject = cayenneProject;
     this.file = file;
   }
 
-  public DataMap(CayenneProject cayenneProject, File file){
+  public DVDataMap(CayenneProject cayenneProject, File file){
     setName(file.getName());
     this.cayenneProject = cayenneProject;
     this.file = file;
@@ -89,21 +89,21 @@ public class DataMap extends DVObject {
 
   public void addObjEntityView(ObjEntityView objEntityView){
     String objEntityName = objEntityView.getObjEntity().getName();
-    ObjEntity entity = this.getObjEntity(objEntityName);
+    DVObjEntity entity = this.getObjEntity(objEntityName);
     entity.addObjEntityView(objEntityView);
   }
 
-  public void addObjRelationship(ObjRelationship objRelationship){
+  public void addObjRelationship(DVObjRelationship objRelationship){
 
     objRelationships.add(objRelationship);
   }
 
-  public List getObjRelationshipsBySource(ObjEntity objEntity){
+  public List getObjRelationshipsBySource(DVObjEntity objEntity){
     List list = new ArrayList();
     Iterator itr = objRelationships.iterator();
     while (itr.hasNext()){
       Object o = itr.next();
-      ObjRelationship objRelationship = (ObjRelationship)o;
+      DVObjRelationship objRelationship = (DVObjRelationship)o;
       if (objRelationship.getSourceObjEntity() == objEntity){
         list.add(objRelationship);
       }
@@ -111,12 +111,12 @@ public class DataMap extends DVObject {
     return Collections.unmodifiableList(list);
   }
 
-  public List getObjRelationshipsBySourceToOne(ObjEntity objEntity){
+  public List getObjRelationshipsBySourceToOne(DVObjEntity objEntity){
     List list = new ArrayList();
     Iterator itr = objRelationships.iterator();
     while (itr.hasNext()){
       Object o = itr.next();
-      ObjRelationship objRelationship = (ObjRelationship)o;
+      DVObjRelationship objRelationship = (DVObjRelationship)o;
       if ((objRelationship.getSourceObjEntity() == objEntity)
          && (!objRelationship.isToMany())){
         list.add(objRelationship);
@@ -125,12 +125,12 @@ public class DataMap extends DVObject {
     return Collections.unmodifiableList(list);
   }
 
-  public List getObjRelationshipsByTarget(ObjEntity objEntity){
+  public List getObjRelationshipsByTarget(DVObjEntity objEntity){
     List list = new ArrayList();
     Iterator itr = objRelationships.iterator();
     while (itr.hasNext()){
       Object o = itr.next();
-      ObjRelationship objRelationship = (ObjRelationship)o;
+      DVObjRelationship objRelationship = (DVObjRelationship)o;
       if (objRelationship.getTargetObjEntity() == objEntity){
         list.add(objRelationship);
       }
@@ -138,11 +138,11 @@ public class DataMap extends DVObject {
     return Collections.unmodifiableList(list);
   }
 
-  public ObjRelationship getObjRelationship(String name, ObjEntity source){
+  public DVObjRelationship getObjRelationship(String name, DVObjEntity source){
     Iterator itr = objRelationships.iterator();
     while (itr.hasNext()){
       Object o = itr.next();
-      ObjRelationship objRelationship = (ObjRelationship)o;
+      DVObjRelationship objRelationship = (DVObjRelationship)o;
       if ((objRelationship.getSourceObjEntity() == source) && (objRelationship.getName().equals(name))){
         return objRelationship;
       }
@@ -162,15 +162,15 @@ public class DataMap extends DVObject {
     return Collections.unmodifiableList(objEntities);
   }
 
-  public void addObjEntity(ObjEntity objEntity){
+  public void addObjEntity(DVObjEntity objEntity){
     objEntities.add(objEntity);
   }
 
-  public ObjEntity getObjEntity(String name){
+  public DVObjEntity getObjEntity(String name){
     Iterator itr = objEntities.iterator();
     while (itr.hasNext()){
       Object o = itr.next();
-      ObjEntity objEnt = (ObjEntity)o;
+      DVObjEntity objEnt = (DVObjEntity)o;
       if (objEnt.getName().equals(name)){
         return objEnt;
       }
@@ -178,11 +178,11 @@ public class DataMap extends DVObject {
     return null;
   }
 
-  public ObjEntity getObjEntity(int index){
-    return (ObjEntity)(objEntities.get(index));
+  public DVObjEntity getObjEntity(int index){
+    return (DVObjEntity)(objEntities.get(index));
   }
 
-  public int getIndexOfObjEntity(ObjEntity objEntity){
+  public int getIndexOfObjEntity(DVObjEntity objEntity){
     return objEntities.indexOf(objEntity);
   }
 
@@ -195,7 +195,7 @@ public class DataMap extends DVObject {
     Iterator itr = objEntities.iterator();
     while (itr.hasNext()){
       Object o = itr.next();
-      ObjEntity entity =(ObjEntity)o;
+      DVObjEntity entity =(DVObjEntity)o;
       for(int i = 0; i < entity.getObjEntityViewCount(); i++){
         entity.getObjEntityView(i).clearObjEntity();
       }

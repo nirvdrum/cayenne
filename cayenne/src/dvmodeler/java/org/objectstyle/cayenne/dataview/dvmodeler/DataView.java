@@ -142,7 +142,7 @@ public class DataView extends DVObject {
   }
 
   public void removeObjEntityView(ObjEntityView objEntityView){
-    ObjEntity entity = objEntityView.getObjEntity();
+    DVObjEntity entity = objEntityView.getObjEntity();
     if (entity != null){
       entity.removeObjEntityView(objEntityView);
     }
@@ -178,7 +178,7 @@ public class DataView extends DVObject {
     if (objEntityViews.size() != 0){
       for (Iterator j = this.getObjEntityViews().iterator(); j.hasNext();){
         ObjEntityView view = (ObjEntityView)j.next();
-        ObjEntity entity = view.getObjEntity();
+        DVObjEntity entity = view.getObjEntity();
         entity.removeObjEntityView(view);
       }
       objEntityViews.clear();

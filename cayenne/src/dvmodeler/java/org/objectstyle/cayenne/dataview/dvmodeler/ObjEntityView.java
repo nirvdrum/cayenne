@@ -67,7 +67,7 @@ import org.jdom.*;
 
 public class ObjEntityView extends DVObject {
   private DataView dataView;
-  private ObjEntity objEntity;
+  private DVObjEntity objEntity;
 
   private List objEntityViewFields = new ArrayList();
 
@@ -94,7 +94,7 @@ public class ObjEntityView extends DVObject {
       objEntity = null;
       loadErrors.add(viewPath + "ObjEntity View has no attribute \"obj-entity-name\"<br><br>");
     } else {
-      ObjEntity entity = project.getObjEntity(attributeValue);
+      DVObjEntity entity = project.getObjEntity(attributeValue);
       if (entity != null){
         objEntity = entity;
         objEntity.addObjEntityView(this);
@@ -148,7 +148,7 @@ public class ObjEntityView extends DVObject {
     objEntity = null;
   }
 
-  public void setObjEntity(ObjEntity objEntity){
+  public void setObjEntity(DVObjEntity objEntity){
     if(this.objEntity != null){
       this.objEntity.removeObjEntityView(this);
     }
@@ -160,7 +160,7 @@ public class ObjEntityView extends DVObject {
     }
   }
 
-  public ObjEntity getObjEntity(){
+  public DVObjEntity getObjEntity(){
     try{
       return objEntity;
     } catch(Exception e){

@@ -87,11 +87,11 @@ public class DataMapTreeModel implements TreeModel{
   public Object getChild(Object parent, int index) {
     if (root.equals(parent)) {
       return dataMaps.get(index);
-    } else if (parent instanceof DataMap){
-      DataMap p = (DataMap)parent;
+    } else if (parent instanceof DVDataMap){
+      DVDataMap p = (DVDataMap)parent;
       return p.getObjEntity(index);
-    } else if (parent instanceof ObjEntity){
-      ObjEntity p = (ObjEntity)parent;
+    } else if (parent instanceof DVObjEntity){
+      DVObjEntity p = (DVObjEntity)parent;
       return p.getObjEntityView(index);
     } else if (parent instanceof ObjEntityView){
       ObjEntityView p = (ObjEntityView)parent;
@@ -105,11 +105,11 @@ public class DataMapTreeModel implements TreeModel{
   public int getChildCount(Object parent) {
     if (root.equals(parent)) {
       return dataMaps.size();
-    } else if (parent instanceof DataMap){
-      DataMap p = (DataMap)parent;
+    } else if (parent instanceof DVDataMap){
+      DVDataMap p = (DVDataMap)parent;
       return p.getObjEntityCount();
-    } else if (parent instanceof ObjEntity){
-      ObjEntity p = (ObjEntity)parent;
+    } else if (parent instanceof DVObjEntity){
+      DVObjEntity p = (DVObjEntity)parent;
       return p.getObjEntityViewCount();
     } else if (parent instanceof ObjEntityView){
       ObjEntityView p = (ObjEntityView)parent;
@@ -124,11 +124,11 @@ public class DataMapTreeModel implements TreeModel{
   public int getIndexOfChild(Object parent, Object child) {
     if (root.equals(parent)) {
       return dataMaps.indexOf(child);
-    } else if (parent instanceof DataMap){
-      DataMap p = (DataMap)parent;
-      return p.getIndexOfObjEntity((ObjEntity)child);
-    } else if (parent instanceof ObjEntity){
-      ObjEntity p = (ObjEntity)parent;
+    } else if (parent instanceof DVDataMap){
+      DVDataMap p = (DVDataMap)parent;
+      return p.getIndexOfObjEntity((DVObjEntity)child);
+    } else if (parent instanceof DVObjEntity){
+      DVObjEntity p = (DVObjEntity)parent;
       return p.getIndexOfObjEntityView((ObjEntityView)child);
     } else if (parent instanceof ObjEntityView){
       ObjEntityView p = (ObjEntityView)parent;
@@ -150,11 +150,11 @@ public class DataMapTreeModel implements TreeModel{
   public boolean isLeaf(Object node) {
     if (root.equals(node)) {
       return dataMaps == null || dataMaps.isEmpty();
-    } else if (node instanceof DataMap){
-      DataMap p = (DataMap)node;
+    } else if (node instanceof DVDataMap){
+      DVDataMap p = (DVDataMap)node;
       return p.getObjEntityCount() == 0;
-    } else if (node instanceof ObjEntity){
-      ObjEntity p = (ObjEntity)node;
+    } else if (node instanceof DVObjEntity){
+      DVObjEntity p = (DVObjEntity)node;
       return p.getObjEntityViewCount() == 0;
     } else if (node instanceof ObjEntityView){
       ObjEntityView p = (ObjEntityView)node;
@@ -227,19 +227,19 @@ public class DataMapTreeModel implements TreeModel{
     }
   }
 
-  public void replaceObjEntityView(ObjEntity oldObjEntity,
+  public void replaceObjEntityView(DVObjEntity oldObjEntity,
                                    int oldIndex,
-                                   ObjEntity newObjEntity,
+                                   DVObjEntity newObjEntity,
                                    ObjEntityView objEntityView) {
 
-    DataMap oldDataMap = oldObjEntity.getDataMap();
+    DVDataMap oldDataMap = oldObjEntity.getDataMap();
     fireTreeNodesRemoved(new TreeModelEvent(
         this,
         new Object[] {root, oldDataMap, oldObjEntity},
         new int[] {oldIndex},
         new Object[] {objEntityView}));
 
-    DataMap newDataMap = newObjEntity.getDataMap();
+    DVDataMap newDataMap = newObjEntity.getDataMap();
 
     int newIndex = newObjEntity.getIndexOfObjEntityView(objEntityView);
     fireTreeNodesInserted(new TreeModelEvent(
@@ -251,10 +251,10 @@ public class DataMapTreeModel implements TreeModel{
   }
 
   public TreePath objEntityViewAdded(ObjEntityView view) {
-    ObjEntity entity = view.getObjEntity();
+    DVObjEntity entity = view.getObjEntity();
     if (entity == null)
       return null;
-    DataMap dataMap = entity.getDataMap();
+    DVDataMap dataMap = entity.getDataMap();
     int index = entity.getIndexOfObjEntityView(view);
     fireTreeNodesInserted(new TreeModelEvent(
         this,
@@ -264,8 +264,8 @@ public class DataMapTreeModel implements TreeModel{
     return new TreePath(new Object[] {root, dataMap, entity, view});
   }
 
-  public void objEntityViewRemoved(ObjEntity entity, ObjEntityView view, int index) {
-    DataMap dataMap = entity.getDataMap();
+  public void objEntityViewRemoved(DVObjEntity entity, ObjEntityView view, int index) {
+    DVDataMap dataMap = entity.getDataMap();
     fireTreeNodesRemoved(new TreeModelEvent(
         this,
         new Object[] {root, dataMap, entity},
@@ -277,9 +277,9 @@ public class DataMapTreeModel implements TreeModel{
     HashMap views = (HashMap)removingViews;
     for(Iterator j = views.keySet().iterator(); j.hasNext();){
       ObjEntityView view = (ObjEntityView)j.next();
-      ObjEntity entity = view.getObjEntity();
+      DVObjEntity entity = view.getObjEntity();
       Integer index = (Integer)views.get(view);
-      DataMap dataMap = entity.getDataMap();
+      DVDataMap dataMap = entity.getDataMap();
 
       fireTreeNodesRemoved(new TreeModelEvent(
           this,
@@ -291,10 +291,10 @@ public class DataMapTreeModel implements TreeModel{
 
 
   public TreePath objEntityViewChanged(ObjEntityView view) {
-    ObjEntity entity = view.getObjEntity();
+    DVObjEntity entity = view.getObjEntity();
     if (entity == null)
       return null;
-    DataMap dataMap = entity.getDataMap();
+    DVDataMap dataMap = entity.getDataMap();
     int index = entity.getIndexOfObjEntityView(view);
     fireTreeNodesChanged(new TreeModelEvent(
         this,
@@ -306,10 +306,10 @@ public class DataMapTreeModel implements TreeModel{
 
   public TreePath fieldAdded(ObjEntityViewField field) {
     ObjEntityView owner = field.getObjEntityView();
-    ObjEntity entity = owner.getObjEntity();
+    DVObjEntity entity = owner.getObjEntity();
     if (entity == null)
       return null;
-    DataMap dataMap = entity.getDataMap();
+    DVDataMap dataMap = entity.getDataMap();
     int index = owner.getIndexOfObjEntityViewField(field);
     fireTreeNodesInserted(new TreeModelEvent(
         this,
@@ -321,9 +321,9 @@ public class DataMapTreeModel implements TreeModel{
 
   public void fieldRemoved(ObjEntityViewField field, int index) {
     ObjEntityView owner = field.getObjEntityView();
-    ObjEntity entity = owner.getObjEntity();
+    DVObjEntity entity = owner.getObjEntity();
 
-    DataMap dataMap = entity.getDataMap();
+    DVDataMap dataMap = entity.getDataMap();
     fireTreeNodesRemoved(new TreeModelEvent(
         this,
         new Object[] {root, dataMap, entity, owner},
@@ -334,10 +334,10 @@ public class DataMapTreeModel implements TreeModel{
 
   public TreePath fieldChanged(ObjEntityViewField field) {
     ObjEntityView owner = field.getObjEntityView();
-    ObjEntity entity = owner.getObjEntity();
+    DVObjEntity entity = owner.getObjEntity();
     if (entity == null)
       return null;
-    DataMap dataMap = entity.getDataMap();
+    DVDataMap dataMap = entity.getDataMap();
     int index = owner.getIndexOfObjEntityViewField(field);
     fireTreeNodesChanged(new TreeModelEvent(
         this,

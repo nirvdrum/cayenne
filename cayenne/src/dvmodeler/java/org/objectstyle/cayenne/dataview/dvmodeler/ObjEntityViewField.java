@@ -67,8 +67,8 @@ import org.jdom.*;
 
 public class ObjEntityViewField extends DVObject {
   private ObjEntityView objEntityView;
-  private ObjRelationship objRelationship;//implied
-  private ObjAttribute objAttribute;//implied
+  private DVObjRelationship objRelationship;//implied
+  private DVObjAttribute objAttribute;//implied
   private int prefIndex;
   private boolean editable;//required
   private String calcType = "";//required
@@ -183,7 +183,7 @@ public class ObjEntityViewField extends DVObject {
         loadErrors.add(fieldPath + "field attribute \"calc-type\" has value \"nocalc\", " +
           "but field has no attribute \"obj-attribute-name\"<br><br>");
       } else{
-        ObjEntity entity = objEntityView.getObjEntity();
+        DVObjEntity entity = objEntityView.getObjEntity();
         if (entity != null){
           objAttribute = entity.getObjAttribute(attributeValue);
           if (objAttribute == null){
@@ -205,10 +205,10 @@ public class ObjEntityViewField extends DVObject {
           lookup = new Lookup(this);
           loadErrors.add(fieldPath + "field has no attribute \"obj-relationship-name\"<br><br>");
         } else{
-          ObjEntity objEntity = objEntityView.getObjEntity();
+          DVObjEntity objEntity = objEntityView.getObjEntity();
           List relationships = objEntity.getDataMap().getObjRelationshipsBySourceToOne(objEntity);
           for (Iterator j = relationships.iterator(); j.hasNext();){
-            ObjRelationship relationship = (ObjRelationship)j.next();
+            DVObjRelationship relationship = (DVObjRelationship)j.next();
             if (relationship.getName().equals(attributeValue)){
               objRelationship = relationship;
             }
@@ -333,25 +333,25 @@ public class ObjEntityViewField extends DVObject {
     return calcType;
   }
 
-  public void setObjRelationship(ObjRelationship relationship){
-    ObjRelationship oldRelationship = objRelationship;
+  public void setObjRelationship(DVObjRelationship relationship){
+    DVObjRelationship oldRelationship = objRelationship;
     objRelationship = relationship;
 
     propertyChangeListeners.firePropertyChange("objRelationship", oldRelationship, objRelationship);
 
   }
-  public ObjRelationship getObjRelationship(){
+  public DVObjRelationship getObjRelationship(){
     return objRelationship;
   }
 
 
-  public void setObjAttribute(ObjAttribute attribute){
-    ObjAttribute oldObjAttribute = objAttribute;
+  public void setObjAttribute(DVObjAttribute attribute){
+    DVObjAttribute oldObjAttribute = objAttribute;
     objAttribute = attribute;
     propertyChangeListeners.firePropertyChange("objAttribute", oldObjAttribute, objAttribute);
 
   }
-  public ObjAttribute getObjAttribute(){
+  public DVObjAttribute getObjAttribute(){
     return objAttribute;
   }
 

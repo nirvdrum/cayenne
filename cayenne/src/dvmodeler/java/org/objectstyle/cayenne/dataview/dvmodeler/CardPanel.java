@@ -212,8 +212,8 @@ public class CardPanel extends JPanel{
   /*shows  definning by selectedObject panel */
   public void showPanel(DVObject selectedObject){
     this.selectedObject = null;
-    if (selectedObject instanceof DataMap){
-      DataMap dataMap = (DataMap)selectedObject;
+    if (selectedObject instanceof DVDataMap){
+      DVDataMap dataMap = (DVDataMap)selectedObject;
       dataMapNameField.setText(dataMap.getName());
       dataMapFileField.setText(dataMap.getFile().getName());
       cardLayout.show(this, "dataMapPanel");
@@ -226,8 +226,8 @@ public class CardPanel extends JPanel{
           "New Data View"));
 
       cardLayout.show(this, "dataViewPanel");
-    } else if (selectedObject instanceof ObjEntity){
-      ObjEntity objEntity = (ObjEntity)selectedObject;
+    } else if (selectedObject instanceof DVObjEntity){
+      DVObjEntity objEntity = (DVObjEntity)selectedObject;
       AttributesTableModel attributesTableModel =
           (AttributesTableModel)attributesTable.getModel();
       attributesTableModel.setObjEntity(objEntity);
@@ -237,7 +237,7 @@ public class CardPanel extends JPanel{
       dataViewField.setText(objEntityView.getDataView().getName());
       viewNameField.setText(objEntityView.getName());
 
-      ObjEntity objEntity = objEntityView.getObjEntity();
+      DVObjEntity objEntity = objEntityView.getObjEntity();
       if (objEntity == null){
         objEntityCombo.setSelectedIndex(0);
       } else {
@@ -270,9 +270,9 @@ public class CardPanel extends JPanel{
       return;
     }
 
-    ObjEntity[] projectEntities = project.getObjEntities();
-    ObjEntity[] entities = new ObjEntity[projectEntities.length + 1];
-    ObjEntity nullEntity = null;
+    DVObjEntity[] projectEntities = project.getObjEntities();
+    DVObjEntity[] entities = new DVObjEntity[projectEntities.length + 1];
+    DVObjEntity nullEntity = null;
     entities[0] = nullEntity;
 
     for (int j = 0; j < projectEntities.length; j++){
@@ -298,8 +298,8 @@ public class CardPanel extends JPanel{
   }
 
   private void objEntityComboAction(ActionEvent e){
-    ObjEntity selectedObjEntity = (ObjEntity)objEntityCombo.getSelectedItem();
-    ObjEntity objEntity = objEntityView.getObjEntity();
+    DVObjEntity selectedObjEntity = (DVObjEntity)objEntityCombo.getSelectedItem();
+    DVObjEntity objEntity = objEntityView.getObjEntity();
     if ((objEntity != selectedObjEntity)){
       if ((objEntity != null) && (selectedObjEntity != null)){
         java.util.List relationships = selectedObjEntity.getDataMap().getObjRelationshipsBySourceToOne(selectedObjEntity);
@@ -325,10 +325,10 @@ public class CardPanel extends JPanel{
             }
           }
           if(field.getCalcType().equals("lookup")){
-            ObjRelationship fieldRelationship = field.getObjRelationship();
+            DVObjRelationship fieldRelationship = field.getObjRelationship();
             if (fieldRelationship != null){
               String relationshipName = fieldRelationship.getName();
-              ObjEntity targetObjEntity = fieldRelationship.getTargetObjEntity();
+              DVObjEntity targetObjEntity = fieldRelationship.getTargetObjEntity();
               Lookup lookup = field.getLookup();
               Lookup nullLookup = new Lookup(field);
               nullLookup.setLookupField(null);
@@ -337,7 +337,7 @@ public class CardPanel extends JPanel{
               field.setObjRelationship(null);
               field.setLookup(nullLookup);
               for (Iterator j = relationships.iterator(); j.hasNext();){
-                ObjRelationship relationship = (ObjRelationship)j.next();
+                DVObjRelationship relationship = (DVObjRelationship)j.next();
                 if ((relationship.getName().equals(relationshipName))&&
                     (relationship.getTargetObjEntity() == targetObjEntity)){
                   field.setObjRelationship(relationship);

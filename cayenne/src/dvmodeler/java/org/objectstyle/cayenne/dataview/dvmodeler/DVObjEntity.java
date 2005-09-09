@@ -65,8 +65,8 @@ import org.jdom.*;
  * @version 1.0
  */
 
-public class ObjEntity extends DVObject {
-  private DataMap dataMap;
+public class DVObjEntity extends DVObject {
+  private DVDataMap dataMap;
   private String className;
   private List objAttributes = new ArrayList();
   private List objEntityViews = new ArrayList();
@@ -74,7 +74,7 @@ public class ObjEntity extends DVObject {
 
   private Set objAttributesNames = new HashSet();
 
-  public ObjEntity(DataMap dataMap, Element element) throws DVModelerException{
+  public DVObjEntity(DVDataMap dataMap, Element element) throws DVModelerException{
     this.dataMap = dataMap;
     String entityPath = "<b>" + dataMap.getName() + ".";
     String attributeValue = element.getAttributeValue("name");
@@ -100,7 +100,7 @@ public class ObjEntity extends DVObject {
       Object o = itr.next();
       Element e = (Element)o;
       if (e.getName().equals("obj-attribute")){
-        ObjAttribute objAttribute = new ObjAttribute(e);
+        DVObjAttribute objAttribute = new DVObjAttribute(e);
         objAttributes.add(objAttribute);
         if (objAttributesNames.add(objAttribute.getName()) == false){
           String path = "<b>" + dataMap + "." + getName() + "</b><br>";
@@ -119,7 +119,7 @@ public class ObjEntity extends DVObject {
     dataMap.addObjEntity(this);
   }
 
-  public ObjEntity(DataMap dataMap){
+  public DVObjEntity(DVDataMap dataMap){
     this.dataMap = dataMap;
     setName("ObjEntity");
     className = "";
@@ -130,11 +130,11 @@ public class ObjEntity extends DVObject {
     return Collections.unmodifiableList(loadErrors);
   }
 
-  public void setDataMap(DataMap dataMap){
+  public void setDataMap(DVDataMap dataMap){
     this.dataMap = dataMap;
   }
 
-  public DataMap getDataMap(){
+  public DVDataMap getDataMap(){
     return dataMap;
   }
 
@@ -150,11 +150,11 @@ public class ObjEntity extends DVObject {
     return Collections.unmodifiableList(objAttributes);
   }
 
-  public ObjAttribute getObjAttribute(String name){
+  public DVObjAttribute getObjAttribute(String name){
   	Iterator itr = objAttributes.iterator();
   	while (itr.hasNext()){
   		Object o = itr.next();
-  		ObjAttribute attribute = (ObjAttribute)o;
+  		DVObjAttribute attribute = (DVObjAttribute)o;
   		if(attribute.getName().equals(name)){
   		  return attribute;
   		}
@@ -162,8 +162,8 @@ public class ObjEntity extends DVObject {
   	return null;
   }
 
-  public ObjAttribute getObjAttribute(int index){
-    return (ObjAttribute)objAttributes.get(index);
+  public DVObjAttribute getObjAttribute(int index){
+    return (DVObjAttribute)objAttributes.get(index);
   }
 
   public List getObjEntityViews(){
