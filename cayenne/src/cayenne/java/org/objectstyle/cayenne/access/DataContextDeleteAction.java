@@ -97,6 +97,19 @@ class DataContextDeleteAction {
             return false;
         }
 
+        if (object.getDataContext() == null) {
+            throw new CayenneRuntimeException(
+                    "Attempt to delete unregistered non-TRANSIENT object: " + object);
+        }
+
+        if (object.getDataContext() != dataContext) {
+            throw new CayenneRuntimeException(
+                    "Attempt to delete object regsitered in a different DataContext. Object: "
+                            + object
+                            + ", data context: "
+                            + dataContext);
+        }
+
         // must resolve HOLLOW objects before delete... needed
         // to process relationships and optimistric locking...
         object.resolveFault();
@@ -117,8 +130,8 @@ class DataContextDeleteAction {
         // duplicating some code from ObjectStore.retainSnapshot, as we have to do it
         // in two phases, extracting snapshot here, but retaining it after the
         // successful deletion only...
-        DataRow snapshot = dataContext.getObjectStore().getCachedSnapshot(object
-                .getObjectId());
+        DataRow snapshot = dataContext.getObjectStore().getCachedSnapshot(
+                object.getObjectId());
         if (snapshot == null) {
             snapshot = dataContext.currentSnapshot(object);
         }
@@ -140,8 +153,8 @@ class DataContextDeleteAction {
 
         // if an object was NEW, we must throw it out of the ObjectStore
 
-        dataContext.getObjectStore().objectsUnregistered(Collections
-                .singletonList(object));
+        dataContext.getObjectStore().objectsUnregistered(
+                Collections.singletonList(object));
         object.setDataContext(null);
     }
 
@@ -202,7 +215,8 @@ class DataContextDeleteAction {
                 Iterator iterator = relatedObjects.iterator();
                 while (iterator.hasNext()) {
                     DataObject relatedObject = (DataObject) iterator.next();
-                    objectStore.flattenedRelationshipUnset(object,
+                    objectStore.flattenedRelationshipUnset(
+                            object,
                             relationship,
                             relatedObject);
                 }
@@ -235,7 +249,8 @@ class DataContextDeleteAction {
                         Iterator iterator = relatedObjects.iterator();
                         while (iterator.hasNext()) {
                             DataObject relatedObject = (DataObject) iterator.next();
-                            relatedObject.setToOneTarget(inverseRelationship.getName(),
+                            relatedObject.setToOneTarget(
+                                    inverseRelationship.getName(),
                                     null,
                                     true);
                         }
