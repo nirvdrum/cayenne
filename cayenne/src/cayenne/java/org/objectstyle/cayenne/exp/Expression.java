@@ -75,12 +75,11 @@ import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
-/** 
- * Superclass of Cayenne expressions that defines basic
- * API for expressions use.
+/**
+ * Superclass of Cayenne expressions that defines basic API for expressions use.
  */
 public abstract class Expression implements Serializable, XMLSerializable {
-    
+
     private final static Object nullValue = new Object();
 
     public static final int AND = 0;
@@ -119,54 +118,48 @@ public abstract class Expression implements Serializable, XMLSerializable {
      */
     public static final int ANY = 24;
 
-    /** 
-     * Expression interpreted as raw SQL. 
-     * No translations will be done for this kind of expressions. 
+    /**
+     * Expression interpreted as raw SQL. No translations will be done for this kind of
+     * expressions.
      */
     public static final int RAW_SQL = 25;
 
-    /** 
-     * Expression describes a path relative to an ObjEntity.
-     * OBJ_PATH expression is resolved relative to some root ObjEntity. Path expression components
-     * are separated by "." (dot). Path can point to either one of these:
+    /**
+     * Expression describes a path relative to an ObjEntity. OBJ_PATH expression is
+     * resolved relative to some root ObjEntity. Path expression components are separated
+     * by "." (dot). Path can point to either one of these:
      * <ul>
-     *    <li><i>An attribute of root ObjEntity.</i>
-     *    For entity Gallery OBJ_PATH expression "galleryName" will point to ObjAttribute "galleryName" 
-     *    <li><i>Another ObjEntity related to root ObjEntity via a chain of relationships.</i>
-     *    For entity Gallery OBJ_PATH expression "paintingArray.toArtist" will point to ObjEntity "Artist" 
-     *    <li><i>ObjAttribute of another ObjEntity related to root ObjEntity via a chain of relationships.</i>
-     *    For entity Gallery OBJ_PATH expression "paintingArray.toArtist.artistName" will point to ObjAttribute "artistName" 
+     * <li><i>An attribute of root ObjEntity.</i> For entity Gallery OBJ_PATH expression
+     * "galleryName" will point to ObjAttribute "galleryName"
+     * <li><i>Another ObjEntity related to root ObjEntity via a chain of relationships.</i>
+     * For entity Gallery OBJ_PATH expression "paintingArray.toArtist" will point to
+     * ObjEntity "Artist"
+     * <li><i>ObjAttribute of another ObjEntity related to root ObjEntity via a chain of
+     * relationships.</i> For entity Gallery OBJ_PATH expression
+     * "paintingArray.toArtist.artistName" will point to ObjAttribute "artistName"
      * </ul>
      */
     public static final int OBJ_PATH = 26;
 
-    /** 
-     * Expression describes a path relative to a DbEntity.
-     * DB_PATH expression is resolved relative to some root DbEntity. 
-     * Path expression components are separated by "." (dot). Path can 
-     * point to either one of these:
+    /**
+     * Expression describes a path relative to a DbEntity. DB_PATH expression is resolved
+     * relative to some root DbEntity. Path expression components are separated by "."
+     * (dot). Path can point to either one of these:
      * <ul>
-     *    <li><i>An attribute of root DbEntity.</i>
-     *    For entity GALLERY, DB_PATH expression "GALLERY_NAME" will point 
-     *    to a DbAttribute "GALLERY_NAME".
-     * 	  </li>
-     * 
-     *    <li><i>Another DbEntity related to root DbEntity via a chain of relationships.</i>
-     *    For entity GALLERY DB_PATH expression "paintingArray.toArtist" will point to 
-     *    DbEntity "ARTIST".
-     *    </li>
-     * 
-     *    <li><i>DbAttribute of another ObjEntity related to root DbEntity via a chain 
-     *    of relationships.</i>
-     *    For entity GALLERY DB_PATH expression "paintingArray.toArtist.ARTIST_NAME" will point 
-     *    to DbAttribute "ARTIST_NAME".
-     *    </li>
+     * <li><i>An attribute of root DbEntity.</i> For entity GALLERY, DB_PATH expression
+     * "GALLERY_NAME" will point to a DbAttribute "GALLERY_NAME". </li>
+     * <li><i>Another DbEntity related to root DbEntity via a chain of relationships.</i>
+     * For entity GALLERY DB_PATH expression "paintingArray.toArtist" will point to
+     * DbEntity "ARTIST". </li>
+     * <li><i>DbAttribute of another ObjEntity related to root DbEntity via a chain of
+     * relationships.</i> For entity GALLERY DB_PATH expression
+     * "paintingArray.toArtist.ARTIST_NAME" will point to DbAttribute "ARTIST_NAME". </li>
      * </ul>
      */
     public static final int DB_PATH = 27;
 
-    /** 
-     * Interpreted as a comma-separated list of literals. 
+    /**
+     * Interpreted as a comma-separated list of literals.
      */
     public static final int LIST = 28;
 
@@ -179,7 +172,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * Currently not supported in Cayenne.
      */
     public static final int COUNT = 30;
-    
+
     /**
      * Currently not supported in Cayenne.
      */
@@ -208,9 +201,8 @@ public abstract class Expression implements Serializable, XMLSerializable {
     protected int type;
 
     /**
-     * Parses string, converting it to Expression. If string does
-     * not represent a semantically correct expression, an ExpressionException
-     * is thrown.
+     * Parses string, converting it to Expression. If string does not represent a
+     * semantically correct expression, an ExpressionException is thrown.
      * 
      * @since 1.1
      */
@@ -238,49 +230,49 @@ public abstract class Expression implements Serializable, XMLSerializable {
      */
     public String expName() {
         switch (type) {
-            case AND :
+            case AND:
                 return "AND";
-            case OR :
+            case OR:
                 return "OR";
-            case NOT :
+            case NOT:
                 return "NOT";
-            case EQUAL_TO :
+            case EQUAL_TO:
                 return "=";
-            case NOT_EQUAL_TO :
+            case NOT_EQUAL_TO:
                 return "<>";
-            case LESS_THAN :
+            case LESS_THAN:
                 return "<";
-            case LESS_THAN_EQUAL_TO :
+            case LESS_THAN_EQUAL_TO:
                 return "<=";
-            case GREATER_THAN :
+            case GREATER_THAN:
                 return ">";
-            case GREATER_THAN_EQUAL_TO :
+            case GREATER_THAN_EQUAL_TO:
                 return ">=";
-            case BETWEEN :
+            case BETWEEN:
                 return "BETWEEN";
-            case IN :
+            case IN:
                 return "IN";
-            case LIKE :
+            case LIKE:
                 return "LIKE";
-            case LIKE_IGNORE_CASE :
+            case LIKE_IGNORE_CASE:
                 return "LIKE_IGNORE_CASE";
-            case EXISTS :
+            case EXISTS:
                 return "EXISTS";
-            case OBJ_PATH :
+            case OBJ_PATH:
                 return "OBJ_PATH";
-            case DB_PATH :
+            case DB_PATH:
                 return "DB_PATH";
-            case LIST :
+            case LIST:
                 return "LIST";
-            case NOT_BETWEEN :
+            case NOT_BETWEEN:
                 return "NOT BETWEEN";
-            case NOT_IN :
+            case NOT_IN:
                 return "NOT IN";
-            case NOT_LIKE :
+            case NOT_LIKE:
                 return "NOT LIKE";
-            case NOT_LIKE_IGNORE_CASE :
+            case NOT_LIKE_IGNORE_CASE:
                 return "NOT LIKE IGNORE CASE";
-            default :
+            default:
                 return "other";
         }
     }
@@ -307,9 +299,9 @@ public abstract class Expression implements Serializable, XMLSerializable {
         return true;
     }
 
-    /** 
-     * Returns a type of expression. Most common types are defined 
-     * as public static fields of this interface.
+    /**
+     * Returns a type of expression. Most common types are defined as public static fields
+     * of this interface.
      */
     public int getType() {
         return type;
@@ -327,34 +319,33 @@ public abstract class Expression implements Serializable, XMLSerializable {
     }
 
     /**
-     * Creates and returns a new Expression instance using this expression as a
-     * prototype. All ExpressionParam operands are substituted with the values
-     * in the <code>params</code> map. 
+     * Creates and returns a new Expression instance using this expression as a prototype.
+     * All ExpressionParam operands are substituted with the values in the
+     * <code>params</code> map.
+     * <p>
+     * <i>Null values in the <code>params</code> map should be explicitly created in the
+     * map for the corresponding key. </i>
+     * </p>
      * 
-     * <p><i>Null values in the <code>params</code> map should be
-     * explicitly created in the map for the corresponding key.
-     * </i></p>
-     * 
-     * @param parameters a map of parameters, with each key being a string name of
-     * an expression parameter, and value being the value that should be used in
-     * the final expression.
-     * @param pruneMissing If <code>true</code>, subexpressions that rely
-     * on missing parameters will be pruned from the resulting tree. If
-     * <code>false</code>, any missing values will generate an exception.
-     * 
-     * @return Expression resulting from the substitution of parameters with
-     * real values, or null if the whole expression was pruned, due to the
-     * missing parameters.
+     * @param parameters a map of parameters, with each key being a string name of an
+     *            expression parameter, and value being the value that should be used in
+     *            the final expression.
+     * @param pruneMissing If <code>true</code>, subexpressions that rely on missing
+     *            parameters will be pruned from the resulting tree. If <code>false</code>,
+     *            any missing values will generate an exception.
+     * @return Expression resulting from the substitution of parameters with real values,
+     *         or null if the whole expression was pruned, due to the missing parameters.
      */
-    public Expression expWithParameters(
-        final Map parameters,
-        final boolean pruneMissing) {
+    public Expression expWithParameters(final Map parameters, final boolean pruneMissing) {
 
         // create transformer for named parameters
         Transformer transformer = new Transformer() {
+
             public Object transform(Object object) {
                 if (!(object instanceof ExpressionParameter)) {
-                    return object;
+                    // this check is needed to preserve nulls that are not parameters and
+                    // therefore should not be pruned.
+                    return object != null ? object : nullValue;
                 }
 
                 String name = ((ExpressionParameter) object).getName();
@@ -363,8 +354,8 @@ public abstract class Expression implements Serializable, XMLSerializable {
                         return null;
                     }
                     else {
-                        throw new ExpressionException(
-                            "Missing required parameter: $" + name);
+                        throw new ExpressionException("Missing required parameter: $"
+                                + name);
                     }
                 }
                 else {
@@ -381,11 +372,10 @@ public abstract class Expression implements Serializable, XMLSerializable {
         return transform(transformer);
     }
 
-    /** 
-     * Creates a new expression that joins this object
-     * with another expression, using specified join type.
-     * It is very useful for incrementally building chained expressions,
-     * like long AND or OR statements. 
+    /**
+     * Creates a new expression that joins this object with another expression, using
+     * specified join type. It is very useful for incrementally building chained
+     * expressions, like long AND or OR statements.
      */
     public Expression joinExp(int type, Expression exp) {
         Expression join = ExpressionFactory.expressionOfType(type);
@@ -420,28 +410,24 @@ public abstract class Expression implements Serializable, XMLSerializable {
         return exp;
     }
 
-    /** 
-     * Returns a count of operands of this expression. In real life there are
-     * unary (count == 1), binary (count == 2) and ternary (count == 3) 
-     * expressions.
+    /**
+     * Returns a count of operands of this expression. In real life there are unary (count ==
+     * 1), binary (count == 2) and ternary (count == 3) expressions.
      */
     public abstract int getOperandCount();
 
-    /** 
-     * Returns a value of operand at <code>index</code>. 
-     * Operand indexing starts at 0. 
+    /**
+     * Returns a value of operand at <code>index</code>. Operand indexing starts at 0.
      */
     public abstract Object getOperand(int index);
 
-    /** 
-     * Sets a value of operand at <code>index</code>. 
-     * Operand indexing starts at 0.
+    /**
+     * Sets a value of operand at <code>index</code>. Operand indexing starts at 0.
      */
     public abstract void setOperand(int index, Object value);
 
     /**
-     * Calculates expression value with object as a context for 
-     * path expressions.
+     * Calculates expression value with object as a context for path expressions.
      * 
      * @since 1.1
      */
@@ -450,8 +436,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
     }
 
     /**
-     * Calculates expression boolean value with object as a context for 
-     * path expressions.
+     * Calculates expression boolean value with object as a context for path expressions.
      * 
      * @since 1.1
      */
@@ -466,13 +451,13 @@ public abstract class Expression implements Serializable, XMLSerializable {
         if (objects == null || objects.size() == 0) {
             return Collections.EMPTY_LIST;
         }
-        
+
         return (List) filter(objects, new LinkedList());
     }
-    
+
     /**
-     * Adds objects matching this expression from the source collection 
-     * to the target collection.
+     * Adds objects matching this expression from the source collection to the target
+     * collection.
      * 
      * @since 1.1
      */
@@ -484,7 +469,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
                 target.add(o);
             }
         }
-        
+
         return target;
     }
 
@@ -505,25 +490,25 @@ public abstract class Expression implements Serializable, XMLSerializable {
     public abstract Expression shallowCopy();
 
     /**
-     * Returns true if this node should be pruned from expression tree
-     * in the event a child is removed.
+     * Returns true if this node should be pruned from expression tree in the event a
+     * child is removed.
      * 
      * @since 1.1
      */
     protected abstract boolean pruneNodeForPrunedChild(Object prunedChild);
 
     /**
-     * Restructures expression to make sure that there are no children of the 
-     * same type as this expression.
+     * Restructures expression to make sure that there are no children of the same type as
+     * this expression.
      * 
-     * @since 1.1 
+     * @since 1.1
      */
     protected abstract void flattenTree();
 
     /**
-     * Traverses itself and child expressions, notifying visitor via callback
-     * methods as it goes. This is an Expression-specific implementation of
-     * the "Visitor" design pattern.
+     * Traverses itself and child expressions, notifying visitor via callback methods as
+     * it goes. This is an Expression-specific implementation of the "Visitor" design
+     * pattern.
      * 
      * @since 1.1
      */
@@ -536,8 +521,8 @@ public abstract class Expression implements Serializable, XMLSerializable {
     }
 
     /**
-     * Traverses itself and child expressions, notifying visitor via callback
-     * methods as it goes.
+     * Traverses itself and child expressions, notifying visitor via callback methods as
+     * it goes.
      * 
      * @since 1.1
      */
@@ -565,20 +550,17 @@ public abstract class Expression implements Serializable, XMLSerializable {
     }
 
     /**
-     * Creates a transformed copy of this expression, applying 
-     * transformation provided by Transformer to all its nodes.
-     * Null transformer will result in an identical deep copy of
-     * this expression.
+     * Creates a transformed copy of this expression, applying transformation provided by
+     * Transformer to all its nodes. Null transformer will result in an identical deep
+     * copy of this expression.
+     * <p>
+     * To force a node and its children to be pruned from the copy, Transformer should
+     * return null for a given node.
+     * <p>
+     * There is one limitation on what Transformer is expected to do: if a node is an
+     * Expression it must be transformed to null or another Expression. Any other object
+     * type would result in an exception.
      * 
-     * <p>To force a node and its children to be pruned from the 
-     * copy, Transformer should return null for a given node.
-     * 
-     * <p>There is one limitation on what Transformer is expected to do: 
-     * if a node is an Expression it must be transformed to null
-     * or another Expression. Any other object type would result in an 
-     * exception. 
-     * 
-     *
      * @since 1.1
      */
     public Expression transform(Transformer transformer) {
@@ -607,12 +589,13 @@ public abstract class Expression implements Serializable, XMLSerializable {
             }
         }
 
-        // all the children are processed, only now transform this copy 
+        // all the children are processed, only now transform this copy
         return (transformer != null) ? (Expression) transformer.transform(copy) : copy;
     }
 
     /**
      * Encodes itself, wrapping the string into XML CDATA section.
+     * 
      * @since 1.1
      */
     public void encodeAsXML(XMLEncoder encoder) {
@@ -622,19 +605,18 @@ public abstract class Expression implements Serializable, XMLSerializable {
     }
 
     /**
-     * Stores a String representation of Expression using a provided
-     * PrintWriter.
+     * Stores a String representation of Expression using a provided PrintWriter.
      * 
      * @since 1.1
      */
     public abstract void encodeAsString(PrintWriter pw);
 
     /**
-     * Convenience method to log nested expressions. Used mainly for debugging.
-     * Called from "toString".
+     * Convenience method to log nested expressions. Used mainly for debugging. Called
+     * from "toString".
      * 
-     * @deprecated Since 1.1 <code>encode</code> is used to recursively
-     * print expressions.
+     * @deprecated Since 1.1 <code>encode</code> is used to recursively print
+     *             expressions.
      */
     protected void toStringBuffer(StringBuffer buf) {
         for (int i = 0; i < getOperandCount(); i++) {

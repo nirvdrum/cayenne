@@ -4,10 +4,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.exp.TstTraversalHandler;
-import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**
  * Tests parameterized expressions of the new form introduced in 1.1
@@ -15,40 +16,43 @@ import org.objectstyle.cayenne.unit.BasicTestCase;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class ParameterizedExpressionTst extends BasicTestCase {
+public class ParameterizedExpressionTst extends TestCase {
+
+    public void testNulls() {
+        Expression e1 = Expression.fromString("x = null");
+        Expression e2 = e1.expWithParameters(Collections.EMPTY_MAP, true);
+        assertNotNull(e2);
+        TstTraversalHandler.compareExps(e1, e2);
+    }
+
     /**
-     * Tests how parameter substitution algorithm works on an expression
-     * with no parameters.
+     * Tests how parameter substitution algorithm works on an expression with no
+     * parameters.
      * 
      * @throws Exception
      */
-    public void testCopy1() throws Exception {
+    public void testCopy1() {
         Expression e1 = Expression.fromString("k1 = 'v1' or k2 = 'v2' or k3 = 'v3'");
         Expression e2 = e1.expWithParameters(Collections.EMPTY_MAP, true);
         TstTraversalHandler.compareExps(e1, e2);
     }
 
     /**
-     * Tests how parameter substitution algorithm works on an expression
-     * with no parameters.
-     *
-     * @throws Exception
+     * Tests how parameter substitution algorithm works on an expression with no
+     * parameters.
      */
-    public void testCopy2() throws Exception {
-        Expression e1 =
-            Expression.fromString(
-                "(k1 = 'v1' and k2 = 'v2' and k3 = 'v3') or (k1 = 'v1')");
+    public void testCopy2() {
+        Expression e1 = Expression
+                .fromString("(k1 = 'v1' and k2 = 'v2' and k3 = 'v3') or (k1 = 'v1')");
         Expression e2 = e1.expWithParameters(Collections.EMPTY_MAP, true);
         TstTraversalHandler.compareExps(e1, e2);
     }
 
     /**
-     * Tests how parameter substitution algorithm works on an expression
-     * with no parameters.
-     *
-     * @throws Exception
+     * Tests how parameter substitution algorithm works on an expression with no
+     * parameters.
      */
-    public void testFailOnMissingParams() throws Exception {
+    public void testFailOnMissingParams() {
         Expression e1 = Expression.fromString("k1 = $test or k2 = 'v2' or k3 = 'v3'");
 
         try {
@@ -60,7 +64,7 @@ public class ParameterizedExpressionTst extends BasicTestCase {
         }
     }
 
-    public void testParams1() throws Exception {
+    public void testParams1() {
         Expression e1 = Expression.fromString("k1 = $test");
 
         Map map = new HashMap();
@@ -72,7 +76,7 @@ public class ParameterizedExpressionTst extends BasicTestCase {
         assertEquals("xyz", e2.getOperand(1));
     }
 
-    public void testParams2() throws Exception {
+    public void testParams2() {
         Expression e1 = Expression.fromString("k1 like $test");
 
         Map map = new HashMap();
@@ -84,7 +88,7 @@ public class ParameterizedExpressionTst extends BasicTestCase {
         assertEquals("xyz", e2.getOperand(1));
     }
 
-    public void testNoParams1() throws Exception {
+    public void testNoParams1() {
         Expression e1 = Expression.fromString("k1 = $test");
         Expression e2 = e1.expWithParameters(Collections.EMPTY_MAP, true);
 
@@ -92,10 +96,9 @@ public class ParameterizedExpressionTst extends BasicTestCase {
         assertNull(e2);
     }
 
-    public void testNoParams2() throws Exception {
-        Expression e1 =
-            Expression.fromString(
-                "k1 = $test1 or k2 = $test2 or k3 = $test3 or k4 = $test4");
+    public void testNoParams2() {
+        Expression e1 = Expression
+                .fromString("k1 = $test1 or k2 = $test2 or k3 = $test3 or k4 = $test4");
 
         Map params = new HashMap();
         params.put("test2", "abc");
@@ -113,10 +116,9 @@ public class ParameterizedExpressionTst extends BasicTestCase {
         assertEquals("xyz", k3.getOperand(1));
     }
 
-    public void testNoParams3() throws Exception {
-        Expression e1 =
-            Expression.fromString(
-                "k1 = $test1 or k2 = $test2 or k3 = $test3 or k4 = $test4");
+    public void testNoParams3() {
+        Expression e1 = Expression
+                .fromString("k1 = $test1 or k2 = $test2 or k3 = $test3 or k4 = $test4");
 
         Map params = new HashMap();
         params.put("test4", "123");
