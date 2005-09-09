@@ -82,7 +82,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
 
     /**
      * A value that a Transformer might return to indicate that a node has to be pruned
-     * from the expression tre eduring transformation.
+     * from the expression during the transformation.
      * 
      * @since 1.2
      */
