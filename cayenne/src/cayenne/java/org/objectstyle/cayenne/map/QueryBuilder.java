@@ -105,41 +105,41 @@ public abstract class QueryBuilder {
     }
 
     /**
-     * Determines query root based on configuration info.
+     * Determines query root based on configuration info, falls back to a DataMap root if
+     * the data is invalid.
      * 
      * @throws CayenneRuntimeException if a valid root can't be established.
      */
     protected Object getRoot() {
 
-        if (rootType == null || DATA_MAP_ROOT.equals(rootType)) {
-            return dataMap;
-        }
-        else if (rootName == null) {
-            return null;
+        Object root = null;
+
+        if (rootType == null || DATA_MAP_ROOT.equals(rootType) || rootName == null) {
+            root = dataMap;
         }
         else if (OBJ_ENTITY_ROOT.equals(rootType)) {
-            return dataMap.getObjEntity(rootName);
+            root = dataMap.getObjEntity(rootName);
         }
         else if (DB_ENTITY_ROOT.equals(rootType)) {
-            return dataMap.getDbEntity(rootName);
+            root = dataMap.getDbEntity(rootName);
         }
         else if (PROCEDURE_ROOT.equals(rootType)) {
-            return dataMap.getProcedure(rootName);
+            root = dataMap.getProcedure(rootName);
         }
         else if (JAVA_CLASS_ROOT.equals(rootType)) {
             // setting root to ObjEntity, since creating a Class requires
             // the knowledge of the ClassLoader
-            return dataMap.getObjEntityForJavaClass(rootName);
+            root = dataMap.getObjEntityForJavaClass(rootName);
         }
 
-        return dataMap;
+        return (root != null) ? root : dataMap;
     }
 
     public void setSelecting(String selecting) {
         // "true" is a default per DTD
         this.selecting = ("false".equalsIgnoreCase(selecting)) ? false : true;
     }
-    
+
     public void setResultType(String resultType) {
         this.resultType = resultType;
     }
