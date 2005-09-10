@@ -63,10 +63,12 @@ import java.awt.event.ActionListener;
 import java.util.Iterator;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -78,16 +80,13 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.EntityTreeModel;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.modeler.util.MultiColumnBrowser;
 import org.objectstyle.cayenne.modeler.util.UIUtil;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.CayenneMapEntry;
-
-import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * A panel for picking SelectQuery orderings.
@@ -113,6 +112,7 @@ public class SelectQueryOrderingTab extends JPanel {
     protected JTable table;
 
     protected CardLayout cardLayout;
+    protected JPanel messagePanel;
 
     public SelectQueryOrderingTab(ProjectController mediator) {
         this.mediator = mediator;
@@ -122,44 +122,17 @@ public class SelectQueryOrderingTab extends JPanel {
     }
 
     protected void initView() {
-        // create widgets
-        JButton addButton = createAddPathButton();
-        JButton removeButton = createRemovePathButton();
 
-        browser = new MultiColumnBrowser();
-        browser.setPreferredColumnSize(BROWSER_CELL_DIM);
-        browser.setDefaultRenderer();
-
-        table = new JTable();
-        table.setRowHeight(25);
-        table.setRowMargin(3);
-        table.setPreferredScrollableViewportSize(TABLE_DIM);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        // assemble
-
-        CellConstraints cc = new CellConstraints();
-        // "fill:350dlu" is used instead of preferred size, so
-        // that bottom browser does not resize all the way when the window is enlarged
-        PanelBuilder builder = new PanelBuilder(new FormLayout(
-                "fill:350dlu, 3dlu, fill:80dlu",
-                "3dlu, top:p:grow, 3dlu, fill:100dlu"));
-
-        // orderings table must grow as the panel is resized
-        builder.add(new JScrollPane(table), cc.xywh(1, 1, 1, 2, "d, fill"));
-        builder.add(removeButton, cc.xy(3, 2, "d, top"));
-        builder.add(new JScrollPane(
-                browser,
-                JScrollPane.VERTICAL_SCROLLBAR_NEVER,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), cc.xywh(1, 4, 1, 1));
-
-        // while browser must fill the whole area, button must stay on top
-        builder.add(addButton, cc.xy(3, 4, "d, top"));
-
+        messagePanel = new JPanel(new BorderLayout());
         cardLayout = new CardLayout();
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(createEditorPanel(), BorderLayout.CENTER);
+        mainPanel.add(createSelectorPanel(), BorderLayout.SOUTH);
+
         setLayout(cardLayout);
-        add(builder.getPanel(), REAL_PANEL);
-        add(createPlaceholderPanel(), PLACEHOLDER_PANEL);
+        add(mainPanel, REAL_PANEL);
+        add(messagePanel, PLACEHOLDER_PANEL);
     }
 
     protected void initController() {
@@ -179,12 +152,12 @@ public class SelectQueryOrderingTab extends JPanel {
         Query query = mediator.getCurrentQuery();
 
         if (!(query instanceof SelectQuery)) {
-            cardLayout.show(this, PLACEHOLDER_PANEL);
+            processInvalidModel("Unknown query.");
             return;
         }
 
         if (!(query.getRoot() instanceof Entity)) {
-            cardLayout.show(this, PLACEHOLDER_PANEL);
+            processInvalidModel("SelectQuery has no root set.");
             return;
         }
 
@@ -198,38 +171,69 @@ public class SelectQueryOrderingTab extends JPanel {
         cardLayout.show(this, REAL_PANEL);
     }
 
-    protected JPanel createPlaceholderPanel() {
-        JLabel message = new JLabel(
-                "Can't edit ordering - query has no root set.",
-                JLabel.CENTER);
+    protected void processInvalidModel(String message) {
+        JLabel messageLabel = new JLabel(message, JLabel.CENTER);
+
+        messagePanel.removeAll();
+        messagePanel.add(messageLabel, BorderLayout.CENTER);
+        cardLayout.show(this, PLACEHOLDER_PANEL);
+    }
+
+    protected JPanel createEditorPanel() {
+
+        table = new JTable();
+        table.setRowHeight(25);
+        table.setRowMargin(3);
+        table.setPreferredScrollableViewportSize(TABLE_DIM);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(message, BorderLayout.CENTER);
+        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+
         return panel;
     }
 
-    protected JButton createAddPathButton() {
-        JButton button = new JButton("Add Ordering");
-        button.addActionListener(new ActionListener() {
+    protected JPanel createSelectorPanel() {
+        browser = new MultiColumnBrowser();
+        browser.setPreferredColumnSize(BROWSER_CELL_DIM);
+        browser.setDefaultRenderer();
 
-            public void actionPerformed(ActionEvent event) {
-                addOrdering();
-            }
-        });
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(createToolbar(), BorderLayout.NORTH);
+        panel.add(new JScrollPane(
+                browser,
+                JScrollPane.VERTICAL_SCROLLBAR_NEVER,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
 
-        return button;
+        return panel;
     }
 
-    protected JButton createRemovePathButton() {
-        JButton button = new JButton("Remove Ordering");
-        button.addActionListener(new ActionListener() {
+    protected JComponent createToolbar() {
 
-            public void actionPerformed(ActionEvent event) {
-                removeOrdering();
+        JButton add = new JButton("Add Ordering", ModelerUtil
+                .buildIcon("icon-move_up.gif"));
+        add.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                addOrdering();
             }
+
         });
 
-        return button;
+        JButton remove = new JButton("Remove Ordering", ModelerUtil
+                .buildIcon("icon-move_down.gif"));
+        remove.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                removeOrdering();
+            }
+
+        });
+
+        JToolBar toolbar = new JToolBar();
+        toolbar.add(add);
+        toolbar.add(remove);
+        return toolbar;
     }
 
     protected TreeModel createBrowserModel(Entity entity) {

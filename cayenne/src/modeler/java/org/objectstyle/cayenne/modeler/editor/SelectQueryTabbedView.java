@@ -92,10 +92,10 @@ public class SelectQueryTabbedView extends JTabbedPane {
         addTab("General", new JScrollPane(mainTab));
 
         this.orderingTab = new SelectQueryOrderingTab(mediator);
-        addTab("Orderings", new JScrollPane(orderingTab));
+        addTab("Orderings", orderingTab);
 
         this.prefetchTab = new SelectQueryPrefetchTab(mediator);
-        addTab("Prefetches", new JScrollPane(prefetchTab));
+        addTab("Prefetches", prefetchTab);
     }
 
     private void initController() {

@@ -55,13 +55,12 @@
  */
 package org.objectstyle.cayenne.modeler.editor;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.JComponent;
+import javax.swing.JToolBar;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.tree.TreeModel;
@@ -73,6 +72,7 @@ import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.EntityTreeModel;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 
 /**
  * Subclass of the SelectQueryOrderingTab configured to work with prefetches.
@@ -84,39 +84,33 @@ public class SelectQueryPrefetchTab extends SelectQueryOrderingTab {
     public SelectQueryPrefetchTab(ProjectController mediator) {
         super(mediator);
     }
-    
-    protected JPanel createPlaceholderPanel() {
-        JLabel message = new JLabel(
-                "Can't edit prefetches - query has no root set.",
-                JLabel.CENTER);
 
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add(message, BorderLayout.CENTER);
-        return panel;
-    }
+    protected JComponent createToolbar() {
 
-    protected JButton createAddPathButton() {
-        JButton button = new JButton("Add Prefetch");
-        button.addActionListener(new ActionListener() {
+        JButton add = new JButton("Add Prefetch", ModelerUtil
+                .buildIcon("icon-move_up.gif"));
+        add.addActionListener(new ActionListener() {
 
-            public void actionPerformed(ActionEvent event) {
+            public void actionPerformed(ActionEvent e) {
                 addPrefetch();
             }
+
         });
 
-        return button;
-    }
+        JButton remove = new JButton("Remove Prefetch", ModelerUtil
+                .buildIcon("icon-move_down.gif"));
+        remove.addActionListener(new ActionListener() {
 
-    protected JButton createRemovePathButton() {
-        JButton button = new JButton("Remove Prefetch");
-        button.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent event) {
+            public void actionPerformed(ActionEvent e) {
                 removePrefetch();
             }
+
         });
 
-        return button;
+        JToolBar toolbar = new JToolBar();
+        toolbar.add(add);
+        toolbar.add(remove);
+        return toolbar;
     }
 
     protected TreeModel createBrowserModel(Entity entity) {
