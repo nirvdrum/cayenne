@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.swing.KeyStroke;
 
@@ -107,7 +109,7 @@ public class RemoveAction extends CayenneAction {
         super(getActionName(), application);
     }
 
-    protected RemoveAction(String actionName, Application application){
+    protected RemoveAction(String actionName, Application application) {
         super(actionName, application);
     }
 
@@ -251,21 +253,42 @@ public class RemoveAction extends CayenneAction {
      */
     protected void removeObjEntity() {
         ProjectController mediator = getProjectController();
-        ObjEntity ent = mediator.getCurrentObjEntity();
+        ObjEntity entity = mediator.getCurrentObjEntity();
 
         DataMap map = mediator.getCurrentDataMap();
-        map.removeObjEntity(ent.getName(), true);
+        map.removeObjEntity(entity.getName(), true);
         mediator.fireObjEntityEvent(new EntityEvent(
                 Application.getFrame(),
-                ent,
+                entity,
                 MapEvent.REMOVE));
+
+        // remove queries that depend on entity
+        // TODO: (Andrus, 09/09/2005) show warning dialog?
+
+        // clone to be able to remove within iterator...
+        Iterator it = new ArrayList(map.getQueries()).iterator();
+        while (it.hasNext()) {
+            Query next = (Query) it.next();
+
+            if (next.getRoot() == entity
+                    || (next.getRoot() instanceof String && next
+                            .getRoot()
+                            .toString()
+                            .equals(entity.getName()))) {
+                map.removeQuery(next.getName());
+                mediator.fireQueryEvent(new QueryEvent(
+                        Application.getFrame(),
+                        next,
+                        MapEvent.REMOVE));
+            }
+        }
     }
 
     protected void removeProcedureParameter() {
         ProjectController mediator = getProjectController();
         ProcedureParameter parameter = mediator.getCurrentProcedureParameter();
         mediator.getCurrentProcedure().removeCallParameter(parameter.getName());
-        
+
         ProcedureParameterEvent e = new ProcedureParameterEvent(
                 Application.getFrame(),
                 parameter,

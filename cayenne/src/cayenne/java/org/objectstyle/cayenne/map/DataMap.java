@@ -619,7 +619,9 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
         ObjEntity entity = (ObjEntity) objEntityMap.remove(objEntityName);
 
         if (entity != null && clearDependencies) {
-            Iterator entities = this.getObjEntityMap().values().iterator();
+            
+            // remove relationships that point to this entity
+            Iterator entities = getObjEntities().iterator();
             while (entities.hasNext()) {
                 ObjEntity ent = (ObjEntity) entities.next();
                 // take a copy since we're going to modifiy the entity

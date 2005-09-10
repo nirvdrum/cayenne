@@ -132,7 +132,7 @@ public abstract class QueryBuilder {
             return dataMap.getObjEntityForJavaClass(rootName);
         }
 
-        return null;
+        return dataMap;
     }
 
     public void setSelecting(String selecting) {
