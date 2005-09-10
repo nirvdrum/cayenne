@@ -56,12 +56,14 @@
 package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Iterator;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -101,11 +103,16 @@ public class SelectQueryOrderingTab extends JPanel {
     static final String ASCENDING_HEADER = "Ascending";
     static final String IGNORE_CASE_HEADER = "Ignore Case";
 
+    static final String REAL_PANEL = "real";
+    static final String PLACEHOLDER_PANEL = "placeholder";
+
     protected ProjectController mediator;
     protected SelectQuery selectQuery;
 
     protected MultiColumnBrowser browser;
     protected JTable table;
+
+    protected CardLayout cardLayout;
 
     public SelectQueryOrderingTab(ProjectController mediator) {
         this.mediator = mediator;
@@ -130,7 +137,6 @@ public class SelectQueryOrderingTab extends JPanel {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         // assemble
-        setLayout(new BorderLayout());
 
         CellConstraints cc = new CellConstraints();
         // "fill:350dlu" is used instead of preferred size, so
@@ -149,7 +155,11 @@ public class SelectQueryOrderingTab extends JPanel {
 
         // while browser must fill the whole area, button must stay on top
         builder.add(addButton, cc.xy(3, 4, "d, top"));
-        add(builder.getPanel(), BorderLayout.CENTER);
+
+        cardLayout = new CardLayout();
+        setLayout(cardLayout);
+        add(builder.getPanel(), REAL_PANEL);
+        add(createPlaceholderPanel(), PLACEHOLDER_PANEL);
     }
 
     protected void initController() {
@@ -169,24 +179,33 @@ public class SelectQueryOrderingTab extends JPanel {
         Query query = mediator.getCurrentQuery();
 
         if (!(query instanceof SelectQuery)) {
-            setVisible(false);
+            cardLayout.show(this, PLACEHOLDER_PANEL);
             return;
         }
 
         if (!(query.getRoot() instanceof Entity)) {
-            setVisible(false);
+            cardLayout.show(this, PLACEHOLDER_PANEL);
             return;
         }
 
         this.selectQuery = (SelectQuery) query;
-
         browser.setModel(createBrowserModel((Entity) selectQuery.getRoot()));
         table.setModel(createTableModel());
 
         // init column sizes
         table.getColumnModel().getColumn(0).setPreferredWidth(250);
 
-        setVisible(true);
+        cardLayout.show(this, REAL_PANEL);
+    }
+
+    protected JPanel createPlaceholderPanel() {
+        JLabel message = new JLabel(
+                "Can't edit ordering - query has no root set.",
+                JLabel.CENTER);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(message, BorderLayout.CENTER);
+        return panel;
     }
 
     protected JButton createAddPathButton() {

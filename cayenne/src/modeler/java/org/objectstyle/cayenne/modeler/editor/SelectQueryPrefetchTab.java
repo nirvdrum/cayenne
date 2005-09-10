@@ -55,10 +55,13 @@
  */
 package org.objectstyle.cayenne.modeler.editor;
 
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.tree.TreeModel;
@@ -80,6 +83,16 @@ public class SelectQueryPrefetchTab extends SelectQueryOrderingTab {
 
     public SelectQueryPrefetchTab(ProjectController mediator) {
         super(mediator);
+    }
+    
+    protected JPanel createPlaceholderPanel() {
+        JLabel message = new JLabel(
+                "Can't edit prefetches - query has no root set.",
+                JLabel.CENTER);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(message, BorderLayout.CENTER);
+        return panel;
     }
 
     protected JButton createAddPathButton() {
