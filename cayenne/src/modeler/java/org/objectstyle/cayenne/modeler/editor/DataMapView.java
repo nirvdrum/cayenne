@@ -204,7 +204,7 @@ public class DataMapView extends JPanel {
                 updateDefaultSuperclass);
         builder.append("Optimistic Locking:", defaultLockType, updateDefaultLockType);
 
-        builder.appendSeparator("Client Support Defaults");
+        builder.appendSeparator("Client Class Defaults");
         builder.append("Allow Client Entities:", clientSupport, new JPanel());
         defaultClientPackageLabel = builder.append(
                 "Client Java Package:",
