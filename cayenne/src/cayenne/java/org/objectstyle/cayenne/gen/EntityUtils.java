@@ -81,13 +81,13 @@ public class EntityUtils {
 
     protected DataMap primaryDataMap;
     protected ObjEntity objEntity;
-    
-    public EntityUtils(DataMap dataMap, ObjEntity objEntity, String fqnBaseClass, String fqnSuperClass, String fqnSubClass)
-    {
+
+    public EntityUtils(DataMap dataMap, ObjEntity objEntity, String fqnBaseClass,
+            String fqnSuperClass, String fqnSubClass) {
         super();
-        
+
         StringUtils stringUtils = StringUtils.getInstance();
-        
+
         this.baseClassName = stringUtils.stripPackageName(fqnBaseClass);
         this.basePackageName = stringUtils.stripClass(fqnBaseClass);
         this.superClassName = stringUtils.stripPackageName(fqnSuperClass);
@@ -96,10 +96,10 @@ public class EntityUtils {
         this.subPackageName = stringUtils.stripClass(fqnSubClass);
 
         this.primaryDataMap = dataMap;
-        
+
         this.objEntity = objEntity;
     }
-    
+
     /**
      * Returns class name (without a package) of the sub class associated with this
      * generator.
@@ -109,16 +109,16 @@ public class EntityUtils {
     }
 
     /**
-     * Returns the super class (without a package) of the data object class
-     * associated with this generator
+     * Returns the super class (without a package) of the data object class associated
+     * with this generator
      */
     public String getSuperClassName() {
         return superClassName;
     }
 
     /**
-     * Returns the base class (without a package) of the data object class
-     * associated with this generator. Class name must not include a package.
+     * Returns the base class (without a package) of the data object class associated with
+     * this generator. Class name must not include a package.
      */
     public String getBaseClassName() {
         return baseClassName;
@@ -132,16 +132,16 @@ public class EntityUtils {
     }
 
     /**
-     * Returns <code>superPackageName</code> property that defines a
-     * superclass's package name.
+     * Returns <code>superPackageName</code> property that defines a superclass's
+     * package name.
      */
     public String getSuperPackageName() {
         return superPackageName;
     }
 
     /**
-     * Returns <code>basePackageName</code> property that defines a
-     * baseclass's (superclass superclass) package name.
+     * Returns <code>basePackageName</code> property that defines a baseclass's
+     * (superclass superclass) package name.
      */
     public String getBasePackageName() {
         return basePackageName;
@@ -149,7 +149,6 @@ public class EntityUtils {
 
     /**
      * @return Returns the primary DataMap.
-     * 
      * @since 1.2
      */
     public DataMap getPrimaryDataMap() {
@@ -167,8 +166,6 @@ public class EntityUtils {
 
     /**
      * Returns true if current ObjEntity contains at least one toMany relationship.
-     * 
-     * @since 1.2
      */
     public boolean hasToManyRelationships() {
         return hasToManyRelationships(objEntity);
@@ -176,48 +173,102 @@ public class EntityUtils {
 
     /**
      * Returns true if an ObjEntity contains at least one toMany relationship.
-     * 
-     * @since 1.2
      */
     public boolean hasToManyRelationships(ObjEntity anObjEntity) {
         if (anObjEntity == null) {
             return false;
         }
-        
+
         Iterator it = anObjEntity.getRelationships().iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             Relationship r = (Relationship) it.next();
-            if(r.isToMany()) {
+            if (r.isToMany()) {
                 return true;
             }
         }
 
         return false;
     }
-    
+
     /**
-     * Returns true if current ObjEntity contains at least one toOne relationship.
+     * Returns true if current ObjEntity contains at least one toMany relationship, ignoring
+     * those declared in superentities.
      * 
      * @since 1.2
+     */
+    public boolean hasToManyDeclaredRelationships() {
+        return hasToManyDeclaredRelationships(objEntity);
+    }
+
+    /**
+     * Returns true if an ObjEntity contains at least one toMany relationship, ignoring
+     * those declared in superentities.
+     * 
+     * @since 1.2
+     */
+    public boolean hasToManyDeclaredRelationships(ObjEntity anObjEntity) {
+        if (anObjEntity == null) {
+            return false;
+        }
+
+        Iterator it = anObjEntity.getDeclaredRelationships().iterator();
+        while (it.hasNext()) {
+            Relationship r = (Relationship) it.next();
+            if (r.isToMany()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true if current ObjEntity contains at least one toOne relationship.
      */
     public boolean hasToOneRelationships() {
         return hasToOneRelationships(objEntity);
     }
-    
+
     /**
      * Returns true if an ObjEntity contains at least one toOne relationship.
-     * 
-     * @since 1.2
      */
     public boolean hasToOneRelationships(ObjEntity anObjEntity) {
         if (anObjEntity == null) {
             return false;
         }
-        
+
         Iterator it = anObjEntity.getRelationships().iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             Relationship r = (Relationship) it.next();
-            if(false == r.isToMany()) {
+            if (false == r.isToMany()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true if current ObjEntity contains at least one toOne relationship, ignoring
+     * those declared in superentities.
+     */
+    public boolean hasToOneDeclaredRelationships() {
+        return hasToOneDeclaredRelationships(objEntity);
+    }
+
+    /**
+     * Returns true if an ObjEntity contains at least one toOne relationship, ignoring
+     * those declared in superentities.
+     */
+    public boolean hasToOneDeclaredRelationships(ObjEntity anObjEntity) {
+        if (anObjEntity == null) {
+            return false;
+        }
+
+        Iterator it = anObjEntity.getDeclaredRelationships().iterator();
+        while (it.hasNext()) {
+            Relationship r = (Relationship) it.next();
+            if (!r.isToMany()) {
                 return true;
             }
         }

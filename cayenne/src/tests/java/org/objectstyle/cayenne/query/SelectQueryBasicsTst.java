@@ -286,8 +286,7 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
     }
 
     /**
-     * "queryWithParameters" must not copy the name as name is used as the cache key and
-     * new query shouldn't run against the same cache.
+     * "queryWithParameters" must create a different name for the named query.
      */
     public void testQueryWithParamsSkipName() {
         SelectQuery q = new SelectQuery();
@@ -297,7 +296,8 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
 
         SelectQuery q1 = q.queryWithParameters(Collections.EMPTY_MAP);
         assertEquals("name", q.getName());
-        assertNull(q1.getName());
+        assertNotNull(q1.getName());
+        assertFalse(q.getName().equals(q1.getName()));
     }
 
     /**

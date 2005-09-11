@@ -339,19 +339,17 @@ public abstract class MapClassGenerator {
         }
 
         while (it.hasNext()) {
-            ObjEntity ent = (ObjEntity) it.next();
+            ObjEntity entity = (ObjEntity) it.next();
 
             // use client name, and if not specified use regular class name
-            String fqnSubClass = ent.getClientClassName();
+            String fqnSubClass = entity.getClientClassName();
             if (fqnSubClass == null) {
-                fqnSubClass = ent.getClassName();
+                fqnSubClass = entity.getClassName();
             }
 
-            // use PersistentObject instead of CayenneDataObject as base ... 
-            // TODO: for now custom superclass will be shared between server and client
-            // need to address that
-            String fqnBaseClass = (null != ent.getSuperClassName()) ? ent
-                    .getSuperClassName() : PersistentObject.class.getName();
+            // use PersistentObject instead of CayenneDataObject as base ...
+            String fqnBaseClass = (entity.getClientSuperClassName() != null) ? entity
+                    .getClientSuperClassName() : PersistentObject.class.getName();
 
             StringUtils stringUtils = StringUtils.getInstance();
 
@@ -364,23 +362,25 @@ public abstract class MapClassGenerator {
             String superPackageName = this.superPkg;
             String fqnSuperClass = superPackageName + "." + superClassName;
 
-            Writer superOut = openWriter(ent, superPackageName, superClassName);
+            Writer superOut = openWriter(entity, superPackageName, superClassName);
 
             if (superOut != null) {
-                superGenSetup.generateClass(superOut,
+                superGenSetup.generateClass(
+                        superOut,
                         dataMap,
-                        ent,
+                        entity,
                         fqnBaseClass,
                         fqnSuperClass,
                         fqnSubClass);
                 closeWriter(superOut);
             }
 
-            Writer mainOut = openWriter(ent, subPackageName, subClassName);
+            Writer mainOut = openWriter(entity, subPackageName, subClassName);
             if (mainOut != null) {
-                mainGenSetup.generateClass(mainOut,
+                mainGenSetup.generateClass(
+                        mainOut,
                         dataMap,
-                        ent,
+                        entity,
                         fqnBaseClass,
                         fqnSuperClass,
                         fqnSubClass);

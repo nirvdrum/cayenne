@@ -18,10 +18,10 @@ $importUtils.addType(${attr.Type})##
 #foreach( $rel in ${objEntity.DeclaredRelationships} )
 $importUtils.addType(${rel.TargetEntity.ClientClassName})##
 #end
-#if( ${entityUtils.hasToManyRelationships()} )
+#if( ${entityUtils.hasToManyDeclaredRelationships()} )
 ${importUtils.addType('java.util.List')}##
 #end
-#if( ${entityUtils.hasToOneRelationships()} )
+#if( ${entityUtils.hasToOneDeclaredRelationships()} )
 ${importUtils.addType('org.objectstyle.cayenne.ValueHolder')}##
 #end
 ${importUtils.generate()}
