@@ -66,11 +66,8 @@ import javax.swing.JList;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.objectstyle.cayenne.modeler.pref.ComponentGeometry;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
-import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.pref.PreferenceEditor;
-import org.objectstyle.cayenne.pref.PreferenceException;
 
 /**
  * A controller for editing Modeler preferences.
@@ -110,7 +107,9 @@ public class PreferenceDialog extends CayenneController {
             public void valueChanged(ListSelectionEvent e) {
                 Object selection = list.getSelectedValue();
                 if (selection != null) {
-                    showDetailViewAction(selection.toString());
+                    view.getDetailLayout().show(
+                            view.getDetailPanel(),
+                            selection.toString());
                 }
             }
         });
@@ -149,52 +148,22 @@ public class PreferenceDialog extends CayenneController {
      */
     public void showDataSourceEditorAction(Object dataSourceKey) {
         // this will install needed controller
-        showDetailViewAction(DATA_SOURCES_KEY);
+        view.getDetailLayout().show(view.getDetailPanel(), DATA_SOURCES_KEY);
 
         DataSourcePreferences controller = (DataSourcePreferences) detailControllers
                 .get(DATA_SOURCES_KEY);
         controller.editDataSourceAction(dataSourceKey);
     }
 
-    /**
-     * Switches preference detail view to the editor identified by provided name.
-     */
-    public void showDetailViewAction(String name) {
-
-        if (!detailControllers.containsKey(name)) {
-            CayenneController c;
-
-            if (GENERAL_KEY.equals(name)) {
-                c = new GeneralPreferences(this);
-            }
-            else if (DATA_SOURCES_KEY.equals(name)) {
-                c = new DataSourcePreferences(this);
-            }
-            else if (CLASS_PATH_KEY.equals(name)) {
-                c = new ClasspathPreferences(this);
-            }
-            else {
-                throw new PreferenceException("Unknown detail key: " + name);
-            }
-
-            detailControllers.put(name, c);
-            view.getDetailPanel().add(c.getView(), name);
-
-            // this is needed to display freshly added panel...
-            view.getDetailPanel().getParent().validate();
-        }
-
-        view.getDetailLayout().show(view.getDetailPanel(), name);
-    }
-
     public void startupAction() {
 
-        // bind own view preferences
-        Domain prefDomain = application.getPreferenceDomain().getSubdomain(
-                view.getClass());
-        ComponentGeometry geometry = ComponentGeometry.getPreference(prefDomain);
-        geometry.bind(view, 650, 350);
-        geometry.bindIntProperty(view.getSplit(), "dividerLocation", 220);
+        // init known panels
+        regsiterPanel(GENERAL_KEY, new GeneralPreferences(this));
+        regsiterPanel(DATA_SOURCES_KEY, new DataSourcePreferences(this));
+        regsiterPanel(CLASS_PATH_KEY, new ClasspathPreferences(this));
+        view.getDetailLayout().show(view.getDetailPanel(), GENERAL_KEY);
+        view.getSplit().setDividerLocation(150);
+        view.pack();
 
         // show
         centerView();
@@ -203,7 +172,11 @@ public class PreferenceDialog extends CayenneController {
         view.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         view.setModal(true);
         view.setVisible(true);
+    }
 
+    protected void regsiterPanel(String name, CayenneController panelController) {
+        detailControllers.put(name, panelController);
+        view.getDetailPanel().add(panelController.getView(), name);
     }
 
     public Component getView() {

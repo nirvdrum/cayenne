@@ -95,9 +95,7 @@ public class DBConnectionInfoEditorView extends JPanel {
         labels = new ArrayList();
 
         // assemble
-        FormLayout layout = new FormLayout(
-                "right:pref, 3dlu, fill:max(50dlu;pref):grow",
-                "");
+        FormLayout layout = new FormLayout("right:pref, 3dlu, fill:160:grow", "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
