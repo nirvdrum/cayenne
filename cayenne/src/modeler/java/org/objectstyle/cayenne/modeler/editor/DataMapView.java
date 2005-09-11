@@ -181,9 +181,7 @@ public class DataMapView extends JPanel {
         };
 
         // assemble
-        FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, fill:max(110dlu;pref), 3dlu, fill:90",
-                "");
+        FormLayout layout = new FormLayout("right:70dlu, 3dlu, fill:110dlu, 3dlu, fill:90", "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
@@ -199,11 +197,11 @@ public class DataMapView extends JPanel {
                 defaultPackage.getComponent(),
                 updateDefaultPackage);
         builder.append(
-                "DataObject Superclass:",
+                "Custom Superclass:",
                 defaultSuperclass.getComponent(),
                 updateDefaultSuperclass);
         builder.append("Optimistic Locking:", defaultLockType, updateDefaultLockType);
-        
+
         builder.appendSeparator("Client Support Defaults");
         builder.append("Allow Client Entities:", clientSupport, new JPanel());
         defaultClientPackageLabel = builder.append(

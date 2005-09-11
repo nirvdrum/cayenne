@@ -67,6 +67,8 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -127,6 +129,8 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
     protected ProjectController mediator;
     protected TextAdapter name;
     protected TextAdapter className;
+
+    protected JLabel superclassLabel;
     protected TextAdapter superClassName;
     protected TextAdapter qualifier;
     protected JComboBox dbEntityCombo;
@@ -136,6 +140,12 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
     protected JCheckBox readOnly;
     protected JCheckBox optimisticLocking;
 
+    protected JComponent clientSeparator;
+    protected JLabel serverOnlyLabel;
+    protected JLabel clientClassNameLabel;
+    protected JLabel clientSuperClassNameLabel;
+
+    protected JCheckBox serverOnly;
     protected TextAdapter clientClassName;
     protected TextAdapter clientSuperClassName;
 
@@ -184,6 +194,17 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
             }
         };
 
+        dbEntityCombo = CayenneWidgetFactory.createComboBox();
+        superEntityCombo = CayenneWidgetFactory.createComboBox();
+
+        readOnly = new JCheckBox();
+        optimisticLocking = new JCheckBox();
+
+        tableLabel = CayenneWidgetFactory.createLabelButton("Table/View:");
+        syncWithDbEntityButton = CayenneWidgetFactory.createButton("Sync w/DbEntity");
+        syncWithDbEntityButton.setIcon(ModelerUtil.buildIcon("icon-sync.gif"));
+
+        serverOnly = new JCheckBox();
         clientClassName = new TextAdapter(new JTextField()) {
 
             protected void updateModel(String text) {
@@ -197,19 +218,9 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
             }
         };
 
-        dbEntityCombo = CayenneWidgetFactory.createComboBox();
-        superEntityCombo = CayenneWidgetFactory.createComboBox();
-
-        readOnly = new JCheckBox();
-        optimisticLocking = new JCheckBox();
-
-        tableLabel = CayenneWidgetFactory.createLabelButton("Table/View:");
-        syncWithDbEntityButton = CayenneWidgetFactory.createButton("Sync w/DbEntity");
-        syncWithDbEntityButton.setIcon(ModelerUtil.buildIcon("icon-sync.gif"));
-
         // assemble
         FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, fill:max(200dlu;pref), 3dlu, fill:140",
+                "right:70dlu, 3dlu, fill:135dlu, 3dlu, fill:63dlu",
                 "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
@@ -222,14 +233,19 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         builder.appendSeparator();
 
         builder.append("Java Class:", className.getComponent(), 3);
-        builder.append("Superclass:", superClassName.getComponent(), 3);
-        builder.append("Qualifier", qualifier.getComponent(), 3);
+        superclassLabel = builder.append("Superclass:", superClassName.getComponent(), 3);
+        builder.append("Qualifier:", qualifier.getComponent(), 3);
         builder.append("Read-Only:", readOnly, 3);
         builder.append("Optimistic Locking:", optimisticLocking, 3);
 
-        builder.appendSeparator("Java Client");
-        builder.append("Client Java Class:", clientClassName.getComponent(), 3);
-        builder.append("Client Superclass:", clientSuperClassName.getComponent(), 3);
+        clientSeparator = builder.appendSeparator("Java Client");
+        serverOnlyLabel = builder.append("Not for Client Use:", serverOnly, 3);
+        clientClassNameLabel = builder.append("Client Java Class:", clientClassName
+                .getComponent(), 3);
+        clientSuperClassNameLabel = builder.append(
+                "Client Superclass:",
+                clientSuperClassName.getComponent(),
+                3);
 
         add(builder.getPanel(), BorderLayout.CENTER);
     }
@@ -269,7 +285,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
 
                     // if a super-entity selected, disable table selection
                     // and also update parent DbEntity selection...
-                    activateFields(name == null);
+                    toggleEnabled(name == null, !serverOnly.isSelected());
                     dbEntityCombo.getModel().setSelectedItem(entity.getDbEntity());
                     superClassName.setText(entity.getSuperClassName());
 
@@ -331,6 +347,18 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
                 }
             }
         });
+
+        serverOnly.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                ObjEntity entity = mediator.getCurrentObjEntity();
+                if (entity != null) {
+                    entity.setServerOnly(serverOnly.isSelected());
+                    toggleEnabled(dbEntityCombo.isEnabled(), !serverOnly.isSelected());
+                    mediator.fireObjEntityEvent(new EntityEvent(this, entity));
+                }
+            }
+        });
     }
 
     /**
@@ -346,6 +374,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         className.setText(entity.getClassName());
         readOnly.setSelected(entity.isReadOnly());
 
+        serverOnly.setSelected(entity.isServerOnly());
         clientClassName.setText(entity.getClientClassName());
         clientSuperClassName.setText(entity.getClientSuperClassName());
 
@@ -368,8 +397,10 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         dbEntityCombo.setRenderer(CellRenderers.entityListRendererWithIcons(map));
         dbEntityCombo.setModel(dbModel);
 
-        // if a super-entity selected, disable table selection
-        activateFields(entity.getSuperEntityName() == null);
+        // toggle visibilty and editability rules
+
+        toggleClientFieldsVisible(map.isClientSupported());
+        toggleEnabled(entity.getSuperEntityName() == null, !entity.isServerOnly());
 
         // init ObjEntities for inheritance
         Predicate inheritanceFilter = new Predicate() {
@@ -586,12 +617,32 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         return pkg + name;
     }
 
-    void activateFields(boolean active) {
-        superClassName.getComponent().setEnabled(active);
-        superClassName.getComponent().setEditable(active);
-        clientSuperClassName.getComponent().setEnabled(active);
-        clientSuperClassName.getComponent().setEditable(active);
-        dbEntityCombo.setEnabled(active);
+    void toggleClientFieldsVisible(boolean visible) {
+
+        clientSeparator.setVisible(visible);
+        clientSuperClassNameLabel.setVisible(visible);
+        clientClassNameLabel.setVisible(visible);
+        serverOnlyLabel.setVisible(visible);
+
+        clientClassName.getComponent().setVisible(visible);
+        clientSuperClassName.getComponent().setVisible(visible);
+        serverOnly.setVisible(visible);
+    }
+
+    void toggleEnabled(boolean directTableMapping, boolean clientFieldsEnabled) {
+        superClassName.getComponent().setEnabled(directTableMapping);
+        superclassLabel.setEnabled(directTableMapping);
+
+        dbEntityCombo.setEnabled(directTableMapping);
+        syncWithDbEntityButton.setEnabled(directTableMapping);
+        tableLabel.setEnabled(directTableMapping);
+
+        clientSuperClassName.getComponent().setEnabled(
+                directTableMapping && clientFieldsEnabled);
+        clientSuperClassNameLabel.setEnabled(directTableMapping && clientFieldsEnabled);
+
+        clientClassNameLabel.setEnabled(clientFieldsEnabled);
+        clientClassName.getComponent().setEnabled(clientFieldsEnabled);
     }
 
     public void processExistingSelection(EventObject e) {

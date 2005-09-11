@@ -520,6 +520,9 @@ public class MapLoader extends DefaultHandler {
 
         String readOnly = atts.getValue("", "readOnly");
         objEntity.setReadOnly(TRUE.equalsIgnoreCase(readOnly));
+        
+        String serverOnly = atts.getValue("", "serverOnly");
+        objEntity.setServerOnly(TRUE.equalsIgnoreCase(serverOnly));
 
         String lockType = atts.getValue("", "lock-type");
         if ("optimistic".equals(lockType)) {

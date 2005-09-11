@@ -130,6 +130,10 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
             encoder.print(getSuperEntityName());
         }
 
+        if (isServerOnly()) {
+            encoder.print("\" serverOnly=\"true");
+        }
+        
         if (getClassName() != null) {
             encoder.print("\" className=\"");
             encoder.print(getClassName());

@@ -135,7 +135,7 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
 
     private void initView() {
         this.setLayout(new BorderLayout());
-        
+
         JToolBar toolBar = new JToolBar();
         Application app = Application.getInstance();
         toolBar.add(app.getAction(CreateObjEntityAction.getActionName()).buildButton());
@@ -143,7 +143,10 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
         toolBar.addSeparator();
 
         toolBar.add(app.getAction(CreateAttributeAction.getActionName()).buildButton());
-        toolBar.add(app.getAction(CreateRelationshipAction.getActionName()).buildButton());
+        toolBar
+                .add(app
+                        .getAction(CreateRelationshipAction.getActionName())
+                        .buildButton());
         add(toolBar, BorderLayout.NORTH);
 
         // create widgets
@@ -165,26 +168,24 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
 
         customPKGenerator = new JCheckBox();
         customPKGeneratorLabel = CayenneWidgetFactory
-                .createLabel("Customize primary key generation");
+                .createLabel("Customize Primary key generation");
         customPKGeneratorNote = CayenneWidgetFactory
                 .createLabel("(currently ignored by all adapters except Oracle)");
         customPKGeneratorNote.setFont(customPKGeneratorNote.getFont().deriveFont(10));
         customPKGeneratorNameLabel = CayenneWidgetFactory
-                .createLabel("Database object name: ");
-        customPKSizeLabel = CayenneWidgetFactory.createLabel("Cached PK Size: ");
+                .createLabel("DB Object Name:");
+        customPKSizeLabel = CayenneWidgetFactory.createLabel("Cached PK Size:");
 
         customPKName = CayenneWidgetFactory.createTextField();
         customPKSize = CayenneWidgetFactory.createTextField();
 
         // assemble
-        FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, fill:max(200dlu;pref)",
-                "");
+        FormLayout layout = new FormLayout("right:70dlu, 3dlu, fill:200dlu", "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
         builder.appendSeparator("DbEntity Configuration");
-        builder.append("DbEntity name:", name.getComponent());
+        builder.append("DbEntity Name:", name.getComponent());
         builder.append(schemaLabel, schema);
         builder.append(parentLabel, parentEntities);
 
@@ -228,13 +229,11 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
         parentLabel.addActionListener(this);
         customPKGenerator.addActionListener(this);
     }
-    
+
     public void processExistingSelection(EventObject e) {
-        EntityDisplayEvent ede = new EntityDisplayEvent(
-                this,
-                mediator.getCurrentDbEntity(),
-                mediator.getCurrentDataMap(),
-                mediator.getCurrentDataDomain());
+        EntityDisplayEvent ede = new EntityDisplayEvent(this, mediator
+                .getCurrentDbEntity(), mediator.getCurrentDataMap(), mediator
+                .getCurrentDataDomain());
         mediator.fireDbEntityDisplayEvent(ede);
     }
 
@@ -373,7 +372,7 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
             // completely new name, set new name for entity
             EntityEvent e = new EntityEvent(this, entity, entity.getName());
             entity.setName(newName);
-            //ProjectUtil.setDbEntityName(entity, newName);
+            // ProjectUtil.setDbEntityName(entity, newName);
             mediator.fireDbEntityEvent(e);
         }
         else {
