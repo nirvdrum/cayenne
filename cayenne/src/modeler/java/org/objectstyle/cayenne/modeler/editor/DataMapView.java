@@ -111,10 +111,18 @@ public class DataMapView extends JPanel {
     protected TextAdapter defaultPackage;
     protected TextAdapter defaultSuperclass;
     protected JCheckBox defaultLockType;
+
     protected JButton updateDefaultSchema;
     protected JButton updateDefaultPackage;
     protected JButton updateDefaultSuperclass;
     protected JButton updateDefaultLockType;
+
+    // client stuff
+    protected JCheckBox clientSupport;
+
+    protected JLabel defaultClientPackageLabel;
+    protected TextAdapter defaultClientPackage;
+    protected JButton updateDefaultClientPackage;
 
     public DataMapView(ProjectController eventController) {
         this.eventController = eventController;
@@ -163,6 +171,15 @@ public class DataMapView extends JPanel {
         updateDefaultLockType = new JButton("Update");
         defaultLockType = new JCheckBox();
 
+        clientSupport = new JCheckBox();
+        updateDefaultClientPackage = new JButton("Update...");
+        defaultClientPackage = new TextAdapter(new JTextField()) {
+
+            protected void updateModel(String text) {
+                setDefaultClientPackage(text);
+            }
+        };
+
         // assemble
         FormLayout layout = new FormLayout(
                 "right:max(50dlu;pref), 3dlu, fill:max(110dlu;pref), 3dlu, fill:90",
@@ -176,10 +193,7 @@ public class DataMapView extends JPanel {
         builder.append("DataNode:", nodeSelector, 3);
 
         builder.appendSeparator("Entity Defaults");
-        builder.append(
-                "DB Schema:",
-                defaultSchema.getComponent(),
-                updateDefaultSchema);
+        builder.append("DB Schema:", defaultSchema.getComponent(), updateDefaultSchema);
         builder.append(
                 "Java Package:",
                 defaultPackage.getComponent(),
@@ -189,6 +203,13 @@ public class DataMapView extends JPanel {
                 defaultSuperclass.getComponent(),
                 updateDefaultSuperclass);
         builder.append("Optimistic Locking:", defaultLockType, updateDefaultLockType);
+        
+        builder.appendSeparator("Client Support Defaults");
+        builder.append("Allow Client Entities:", clientSupport, new JPanel());
+        defaultClientPackageLabel = builder.append(
+                "Client Java Package:",
+                defaultClientPackage.getComponent(),
+                updateDefaultClientPackage);
 
         this.setLayout(new BorderLayout());
         add(builder.getPanel(), BorderLayout.CENTER);
@@ -218,6 +239,20 @@ public class DataMapView extends JPanel {
                 setDefaultLockType(defaultLockType.isSelected()
                         ? ObjEntity.LOCK_TYPE_OPTIMISTIC
                         : ObjEntity.LOCK_TYPE_NONE);
+            }
+        });
+
+        clientSupport.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                setClientSupport(clientSupport.isSelected());
+            }
+        });
+
+        updateDefaultClientPackage.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                updateDefaultClientPackage();
             }
         });
 
@@ -290,6 +325,17 @@ public class DataMapView extends JPanel {
         defaultPackage.setText(map.getDefaultPackage());
         defaultSchema.setText(map.getDefaultSchema());
         defaultSuperclass.setText(map.getDefaultSuperclass());
+
+        // client defaults
+        clientSupport.setSelected(map.isClientSupported());
+        defaultClientPackage.setText(map.getDefaultClientPackage());
+        toggleClientProperties(map.isClientSupported());
+    }
+
+    private void toggleClientProperties(boolean enabled) {
+        defaultClientPackage.getComponent().setEnabled(enabled);
+        updateDefaultClientPackage.setEnabled(enabled);
+        defaultClientPackageLabel.setEnabled(enabled);
     }
 
     void setDefaultLockType(int lockType) {
@@ -306,6 +352,21 @@ public class DataMapView extends JPanel {
 
         dataMap.setDefaultLockType(lockType);
         eventController.fireDataMapEvent(new DataMapEvent(this, dataMap));
+    }
+
+    void setClientSupport(boolean flag) {
+        DataMap dataMap = eventController.getCurrentDataMap();
+
+        if (dataMap == null) {
+            return;
+        }
+
+        if (dataMap.isClientSupported() != flag) {
+            dataMap.setClientSupported(flag);
+
+            toggleClientProperties(flag);
+            eventController.fireDataMapEvent(new DataMapEvent(this, dataMap));
+        }
     }
 
     void setDefaultPackage(String newDefaultPackage) {
@@ -325,13 +386,39 @@ public class DataMapView extends JPanel {
         }
 
         dataMap.setDefaultPackage(newDefaultPackage);
-        
+
         // update class generation preferences
         eventController.getDataMapPreferences().setSuperclassPackage(
                 newDefaultPackage,
                 DataMapDefaults.DEFAULT_SUPERCLASS_PACKAGE);
-        
-        
+
+        eventController.fireDataMapEvent(new DataMapEvent(this, dataMap));
+    }
+
+    void setDefaultClientPackage(String newDefaultPackage) {
+        DataMap dataMap = eventController.getCurrentDataMap();
+
+        if (dataMap == null) {
+            return;
+        }
+
+        if (newDefaultPackage != null && newDefaultPackage.trim().length() == 0) {
+            newDefaultPackage = null;
+        }
+
+        String oldPackage = dataMap.getDefaultClientPackage();
+        if (Util.nullSafeEquals(newDefaultPackage, oldPackage)) {
+            return;
+        }
+
+        dataMap.setDefaultClientPackage(newDefaultPackage);
+
+        // TODO: (andrus, 09/10/2005) - add the same logic for the client package
+        // update class generation preferences
+        // eventController.getDataMapPreferences().setSuperclassPackage(
+        // newDefaultPackage,
+        // DataMapDefaults.DEFAULT_SUPERCLASS_PACKAGE);
+
         eventController.fireDataMapEvent(new DataMapEvent(this, dataMap));
     }
 
@@ -497,6 +584,19 @@ public class DataMapView extends JPanel {
 
         if (dataMap.getObjEntities().size() > 0) {
             new PackageUpdateController(eventController, dataMap).startup();
+        }
+    }
+
+    void updateDefaultClientPackage() {
+        DataMap dataMap = eventController.getCurrentDataMap();
+
+        if (dataMap == null) {
+            return;
+        }
+
+        if (dataMap.getObjEntities().size() > 0) {
+            // TODO: unfinished
+            // new PackageUpdateController(eventController, dataMap).startup();
         }
     }
 

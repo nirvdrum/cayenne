@@ -100,6 +100,7 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
     protected boolean readOnly;
     protected int lockType;
 
+    protected boolean serverOnly;
     protected String clientClassName;
     protected String clientSuperClassName;
 
@@ -303,6 +304,36 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
      */
     public void setDeclaredLockType(int i) {
         lockType = i;
+    }
+
+    /**
+     * Returns true if this entity is allowed to be used on the client. Checks that parent
+     * DataMap allows client entities and also that this entity is not explicitly disabled
+     * for the client use.
+     * 
+     * @since 1.2
+     */
+    public boolean isClientAllowed() {
+        return (getDataMap() == null || isServerOnly()) ? false : getDataMap()
+                .isClientSupported();
+    }
+
+    /**
+     * Returns true if this entity is not available on the client.
+     * 
+     * @since 1.2
+     */
+    public boolean isServerOnly() {
+        return serverOnly;
+    }
+
+    /**
+     * Sets whether this entity is available on the client.
+     * 
+     * @since 1.2
+     */
+    public void setServerOnly(boolean serverOnly) {
+        this.serverOnly = serverOnly;
     }
 
     /**

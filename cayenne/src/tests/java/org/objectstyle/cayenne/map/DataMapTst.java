@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.map;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -69,14 +70,22 @@ import org.objectstyle.cayenne.query.SelectQuery;
  */
 public class DataMapTst extends TestCase {
 
-    protected DataMap map;
+    public void testInitWithProperties() {
+        Map properties = new HashMap();
+        properties.put(DataMap.CLIENT_SUPPORTED_PROPERTY, "true");
+        properties.put(DataMap.DEFAULT_CLIENT_PACKAGE_PROPERTY, "aaaaa");
 
-    protected void setUp() throws Exception {
-        super.setUp();
-        map = new DataMap();
+        DataMap map = new DataMap();
+        map.initWithProperties(properties);
+
+        assertTrue(map.isClientSupported());
+        assertEquals("aaaaa", map.getDefaultClientPackage());
+
+        // TODO: test other defaults
     }
 
-    public void testDefaultSchema() throws Exception {
+    public void testDefaultSchema() {
+        DataMap map = new DataMap();
         String tstSchema = "tst_schema";
         assertNull(map.getDefaultSchema());
         map.setDefaultSchema(tstSchema);
@@ -86,7 +95,19 @@ public class DataMapTst extends TestCase {
         assertNull(map.getDefaultSchema());
     }
 
-    public void testDefaultPackage() throws Exception {
+    public void testDefaultClientPackage() {
+        DataMap map = new DataMap();
+        String tstPackage = "tst.pkg";
+        assertNull(map.getDefaultClientPackage());
+        map.setDefaultClientPackage(tstPackage);
+        assertEquals(tstPackage, map.getDefaultClientPackage());
+
+        map.setDefaultClientPackage(null);
+        assertNull(map.getDefaultClientPackage());
+    }
+
+    public void testDefaultPackage() {
+        DataMap map = new DataMap();
         String tstPackage = "tst.pkg";
         assertNull(map.getDefaultPackage());
         map.setDefaultPackage(tstPackage);
@@ -96,7 +117,8 @@ public class DataMapTst extends TestCase {
         assertNull(map.getDefaultPackage());
     }
 
-    public void testDefaultSuperclass() throws Exception {
+    public void testDefaultSuperclass() {
+        DataMap map = new DataMap();
         String tstSuperclass = "tst_superclass";
         assertNull(map.getDefaultSuperclass());
         map.setDefaultSuperclass(tstSuperclass);
@@ -106,7 +128,8 @@ public class DataMapTst extends TestCase {
         assertNull(map.getDefaultSuperclass());
     }
 
-    public void testDefaultLockType() throws Exception {
+    public void testDefaultLockType() {
+        DataMap map = new DataMap();
         assertEquals(ObjEntity.LOCK_TYPE_NONE, map.getDefaultLockType());
         map.setDefaultLockType(ObjEntity.LOCK_TYPE_OPTIMISTIC);
         assertEquals(ObjEntity.LOCK_TYPE_OPTIMISTIC, map.getDefaultLockType());
@@ -115,20 +138,23 @@ public class DataMapTst extends TestCase {
         assertEquals(ObjEntity.LOCK_TYPE_NONE, map.getDefaultLockType());
     }
 
-    public void testName() throws Exception {
+    public void testName() {
+        DataMap map = new DataMap();
         String tstName = "tst_name";
         map.setName(tstName);
         assertEquals(tstName, map.getName());
     }
 
-    public void testLocation() throws Exception {
+    public void testLocation() {
+        DataMap map = new DataMap();
         String tstName = "tst_name";
         assertNull(map.getLocation());
         map.setLocation(tstName);
         assertEquals(tstName, map.getLocation());
     }
 
-    public void testAddObjEntity() throws Exception {
+    public void testAddObjEntity() {
+        DataMap map = new DataMap();
         ObjEntity e = new ObjEntity("b");
         e.setClassName("b");
         map.addObjEntity(e);
@@ -136,8 +162,10 @@ public class DataMapTst extends TestCase {
         assertSame(map, e.getDataMap());
     }
 
-    public void testAddEntityWithSameName() throws Exception {
-        //Give them different class-names... we are only testing for the same entity name
+    public void testAddEntityWithSameName() {
+        DataMap map = new DataMap();
+
+        // Give them different class-names... we are only testing for the same entity name
         // being a problem
         ObjEntity e1 = new ObjEntity("c");
         e1.setClassName("c1");
@@ -153,6 +181,7 @@ public class DataMapTst extends TestCase {
     }
 
     public void testRemoveThenAddNullClassName() {
+        DataMap map = new DataMap();
         // It should be possible to cleanly remove and then add the same entity again.
         // Uncovered the need for this while testing modeller manually.
 
@@ -186,6 +215,8 @@ public class DataMapTst extends TestCase {
         e1.addRelationship(r2);
         e2.addRelationship(r3);
         e2.addRelationship(r4);
+
+        DataMap map = new DataMap();
         map.addObjEntity(e1);
         map.addObjEntity(e2);
 
@@ -203,6 +234,8 @@ public class DataMapTst extends TestCase {
 
         ObjEntity e1 = new ObjEntity("g");
         ObjEntity e2 = new ObjEntity("h");
+
+        DataMap map = new DataMap();
         map.addObjEntity(e1);
         map.addObjEntity(e2);
     }
@@ -210,49 +243,59 @@ public class DataMapTst extends TestCase {
     public void testRemoveThenAddRealClassName() {
         ObjEntity e = new ObjEntity("f");
         e.setClassName("f");
+
+        DataMap map = new DataMap();
         map.addObjEntity(e);
 
         map.removeObjEntity(e.getName(), false);
         map.addObjEntity(e);
     }
 
-    public void testAddDbEntity() throws Exception {
+    public void testAddDbEntity() {
         DbEntity e = new DbEntity("b");
+
+        DataMap map = new DataMap();
         map.addDbEntity(e);
         assertSame(e, map.getDbEntity(e.getName()));
         assertSame(map, e.getDataMap());
     }
 
-    public void testAddQuery() throws Exception {
+    public void testAddQuery() {
         Query q = new SelectQuery();
         q.setName("a");
+
+        DataMap map = new DataMap();
         map.addQuery(q);
         assertSame(q, map.getQuery("a"));
     }
 
-    public void testRemoveQuery() throws Exception {
+    public void testRemoveQuery() {
         Query q = new SelectQuery();
         q.setName("a");
+
+        DataMap map = new DataMap();
         map.addQuery(q);
         assertSame(q, map.getQuery("a"));
         map.removeQuery("a");
         assertNull(map.getQuery("a"));
     }
 
-    public void testGetQueryMap() throws Exception {
+    public void testGetQueryMap() {
         Query q = new SelectQuery();
         q.setName("a");
+
+        DataMap map = new DataMap();
         map.addQuery(q);
         Map queries = map.getQueryMap();
         assertEquals(1, queries.size());
         assertSame(q, queries.get("a"));
     }
 
-
-
     // make sure deleting a DbEntity & other entity's relationships to it
     // works & does not cause a ConcurrentModificationException
     public void testRemoveDbEntity() {
+
+        DataMap map = new DataMap();
 
         // create a twisty maze of intermingled relationships.
         DbEntity e1 = (DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);
@@ -298,25 +341,26 @@ public class DataMapTst extends TestCase {
     }
 
     public void testChildProcedures() throws Exception {
-        checkProcedures(new String[0]);
+        DataMap map = new DataMap();
+        checkProcedures(map, new String[0]);
 
         map.addProcedure(new Procedure("proc1"));
-        checkProcedures(new String[] {
+        checkProcedures(map, new String[] {
             "proc1"
         });
 
         map.addProcedure(new Procedure("proc2"));
-        checkProcedures(new String[] {
+        checkProcedures(map, new String[] {
                 "proc1", "proc2"
         });
 
         map.removeProcedure("proc2");
-        checkProcedures(new String[] {
+        checkProcedures(map, new String[] {
             "proc1"
         });
     }
 
-    protected void checkProcedures(String[] expectedNames) throws Exception {
+    protected void checkProcedures(DataMap map, String[] expectedNames) throws Exception {
         int len = expectedNames.length;
         Map proceduresMap = map.getProcedureMap();
         Collection proceduresCollection = map.getProcedures();

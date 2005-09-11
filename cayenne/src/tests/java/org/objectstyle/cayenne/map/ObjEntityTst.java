@@ -65,6 +65,32 @@ import org.objectstyle.cayenne.util.Util;
 
 public class ObjEntityTst extends CayenneTestCase {
 
+    public void testServerOnly() {
+        ObjEntity e1 = new ObjEntity("e1");
+
+        assertFalse(e1.isServerOnly());
+        e1.setServerOnly(true);
+        assertTrue(e1.isServerOnly());
+    }
+
+    public void testClientAllowed() {
+        ObjEntity e1 = new ObjEntity("e1");
+
+        assertFalse("No parent DataMap should have automatically disabled client.", e1
+                .isClientAllowed());
+
+        DataMap map = new DataMap("m1");
+        e1.setDataMap(map);
+
+        assertFalse(e1.isClientAllowed());
+
+        map.setClientSupported(true);
+        assertTrue(e1.isClientAllowed());
+
+        e1.setServerOnly(true);
+        assertFalse(e1.isClientAllowed());
+    }
+
     public void testClassDescriptor() {
         ObjEntity e1 = new ObjEntity("e1");
         e1.setClassName(Object.class.getName());

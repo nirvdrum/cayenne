@@ -94,6 +94,20 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
         ObjAttributeListener, ObjRelationshipListener {
 
     /**
+     * Defines whether a DataMap supports client entities.
+     * 
+     * @since 1.2
+     */
+    public static final String CLIENT_SUPPORTED_PROPERTY = "clientSupported";
+
+    /**
+     * Defines the name of the property for default client Java class package.
+     * 
+     * @since 1.2
+     */
+    public static final String DEFAULT_CLIENT_PACKAGE_PROPERTY = "defaultClientPackage";
+
+    /**
      * Defines the name of the property for default DB schema.
      * 
      * @since 1.1
@@ -130,25 +144,31 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
     protected String defaultSuperclass;
     protected int defaultLockType;
 
+    protected boolean clientSupported;
+    protected String defaultClientPackage;
+
     private CayenneMap objEntityMap = new CayenneMap(this);
     private CayenneMap dbEntityMap = new CayenneMap(this);
     private CayenneMap procedureMap = new CayenneMap(this);
     private CayenneMap queryMap = new CayenneMap(this);
 
     /**
-     * Creates a new DataMap.
+     * Creates a new unnamed DataMap.
      */
     public DataMap() {
-        // must do this to setup defaults
-        initWithProperties(Collections.EMPTY_MAP);
+        this(null);
     }
 
     /**
      * Creates a new named DataMap.
      */
     public DataMap(String mapName) {
-        this();
-        this.setName(mapName);
+        this(mapName, Collections.EMPTY_MAP);
+    }
+
+    public DataMap(String mapName, Map properties) {
+        setName(mapName);
+        initWithProperties(properties);
     }
 
     /**
@@ -167,6 +187,8 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
         Object packageName = properties.get(DEFAULT_PACKAGE_PROPERTY);
         Object schema = properties.get(DEFAULT_SCHEMA_PROPERTY);
         Object superclass = properties.get(DEFAULT_SUPERCLASS_PROPERTY);
+        Object clientEntities = properties.get(CLIENT_SUPPORTED_PROPERTY);
+        Object clientPackageName = properties.get(DEFAULT_CLIENT_PACKAGE_PROPERTY);
 
         this.defaultLockType = "optimistic".equals(lockType)
                 ? ObjEntity.LOCK_TYPE_OPTIMISTIC
@@ -175,6 +197,10 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
         this.defaultPackage = (packageName != null) ? packageName.toString() : null;
         this.defaultSchema = (schema != null) ? schema.toString() : null;
         this.defaultSuperclass = (superclass != null) ? superclass.toString() : null;
+        this.clientSupported = (clientEntities != null) ? "true"
+                .equalsIgnoreCase(clientEntities.toString()) : false;
+        this.defaultClientPackage = (clientPackageName != null) ? clientPackageName
+                .toString() : null;
     }
 
     /**
@@ -217,6 +243,14 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
 
         if (!Util.isEmptyString(defaultSuperclass)) {
             encoder.printProperty(DEFAULT_SUPERCLASS_PROPERTY, defaultSuperclass);
+        }
+
+        if (clientSupported) {
+            encoder.printProperty(CLIENT_SUPPORTED_PROPERTY, "true");
+        }
+
+        if (!Util.isEmptyString(defaultClientPackage)) {
+            encoder.printProperty(DEFAULT_CLIENT_PACKAGE_PROPERTY, defaultClientPackage);
         }
 
         // procedures
@@ -287,14 +321,14 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
     }
 
     /**
-     * Returns "name" property value.
+     * Returns the name of this DataMap.
      */
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
-        this.name = (name != null ? name : "unnamed");
+        this.name = name;
     }
 
     /**
@@ -619,7 +653,7 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
         ObjEntity entity = (ObjEntity) objEntityMap.remove(objEntityName);
 
         if (entity != null && clearDependencies) {
-            
+
             // remove relationships that point to this entity
             Iterator entities = getObjEntities().iterator();
             while (entities.hasNext()) {
@@ -715,13 +749,33 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
     }
 
     /**
-     * Returns default server package with ".client" suffix.
+     * @since 1.2
+     */
+    public boolean isClientSupported() {
+        return clientSupported;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setClientSupported(boolean clientSupport) {
+        this.clientSupported = clientSupport;
+    }
+
+    /**
+     * Returns default client package.
      * 
      * @since 1.2
      */
     public String getDefaultClientPackage() {
-        return Util.isEmptyString(getDefaultPackage()) ? null : getDefaultPackage()
-                + ".client";
+        return defaultClientPackage;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setDefaultClientPackage(String defaultClientPackage) {
+        this.defaultClientPackage = defaultClientPackage;
     }
 
     /**
