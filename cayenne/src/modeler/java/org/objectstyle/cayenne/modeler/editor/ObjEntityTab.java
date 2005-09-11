@@ -69,7 +69,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
@@ -87,6 +86,7 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
 import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
 import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
+import org.objectstyle.cayenne.modeler.dialog.objentity.ClassNameUpdater;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
@@ -539,38 +539,13 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
             mediator.fireObjEntityEvent(e);
 
             // suggest to update class name
-            String suggestedClassName = suggestedClassName(entity);
-
-            // make sure the current class name is not the default name or blank
-            String entityClassName = entity.getClassName();
-            if (entityClassName == null
-                    || entityClassName.length() == 0
-                    || entityClassName.endsWith("UntitledObjEntity")) {
-                className.setText(suggestedClassName);
-                entity.setClassName(suggestedClassName);
-            }
-
-            if (suggestedClassName != null
-                    && !suggestedClassName.equals(entity.getClassName())) {
-                JOptionPane pane = new JOptionPane(
-                        new Object[] {
-                                "Change class name to match new entity name?",
-                                "Suggested class name: " + suggestedClassName
-                        },
-                        JOptionPane.QUESTION_MESSAGE,
-                        JOptionPane.OK_CANCEL_OPTION,
-                        null,
-                        new Object[] {
-                                "Change", "Cancel"
-                        });
-
-                pane
-                        .createDialog(Application.getFrame(), "Update Class Name")
-                        .setVisible(true);
-                if ("Change".equals(pane.getValue())) {
-                    className.setText(suggestedClassName);
-                    setClassName(suggestedClassName);
-                }
+            ClassNameUpdater nameUpdater = new ClassNameUpdater(Application
+                    .getInstance()
+                    .getFrameController(), entity);
+            
+            if (nameUpdater.doNameUpdate()) {
+                className.setText(entity.getClassName());
+                clientClassName.setText(entity.getClientClassName());
             }
         }
         else {
@@ -579,41 +554,6 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
                     + newName
                     + "'.");
         }
-    }
-
-    /**
-     * Build a class name based on current entity name.
-     */
-    private String suggestedClassName(ObjEntity entity) {
-        String name = entity.getName();
-        if (name == null || name.trim().length() == 0) {
-            return null;
-        }
-
-        // build suggested package...
-        String oldFQN = entity.getClassName();
-        String pkg = (entity.getDataMap() != null) ? entity
-                .getDataMap()
-                .getDefaultPackage() : null;
-
-        if (oldFQN != null && oldFQN.lastIndexOf('.') > 0) {
-            pkg = oldFQN.substring(0, oldFQN.lastIndexOf('.'));
-        }
-
-        if (pkg == null) {
-            pkg = "";
-        }
-        else {
-            pkg = pkg + '.';
-        }
-
-        // build suggested class name
-        int dot = name.lastIndexOf('.');
-        if (dot >= 0 && dot < name.length() - 1) {
-            name = name.substring(dot + 1);
-        }
-
-        return pkg + name;
     }
 
     void toggleClientFieldsVisible(boolean visible) {
