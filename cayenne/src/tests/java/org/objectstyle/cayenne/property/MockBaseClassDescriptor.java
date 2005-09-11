@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.property;
 
-import java.util.Collections;
 import java.util.HashMap;
 
 public class MockBaseClassDescriptor extends BaseClassDescriptor {
@@ -68,7 +67,6 @@ public class MockBaseClassDescriptor extends BaseClassDescriptor {
         super(superclassDescriptor);
 
         this.declaredProperties = new HashMap();
-        this.declaredPropertiesRef = Collections.unmodifiableMap(declaredProperties);
     }
 
 }

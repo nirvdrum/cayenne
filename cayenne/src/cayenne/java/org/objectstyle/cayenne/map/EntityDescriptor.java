@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.map;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -117,7 +116,6 @@ public class EntityDescriptor extends BaseClassDescriptor {
         compileRelationships(loader, allDescriptors);
 
         this.declaredProperties = allDescriptors;
-        this.declaredPropertiesRef = Collections.unmodifiableMap(declaredProperties);
     }
 
     /**

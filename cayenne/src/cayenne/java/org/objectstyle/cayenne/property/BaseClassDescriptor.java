@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.property;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -76,7 +77,6 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
     // compiled properties ... all declared as transient
     protected transient Class objectClass;
     protected transient Map declaredProperties;
-    protected transient Map declaredPropertiesRef;
 
     /**
      * Creates an uncompiled BaseClassDescriptor. Subclasses may add a call to "compile"
@@ -90,9 +90,7 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
      * Returns true if a descriptor is initialized and ready for operation.
      */
     public boolean isValid() {
-        return objectClass != null
-                && declaredProperties != null
-                && declaredPropertiesRef != null;
+        return objectClass != null && declaredProperties != null;
     }
 
     public Class getObjectClass() {
@@ -103,7 +101,8 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
      * Returns a read-only collection of property names mapped in this descriptor.
      */
     public Collection getDeclaredPropertyNames() {
-        return declaredPropertiesRef.keySet();
+        return declaredProperties != null ? Collections
+                .unmodifiableCollection(declaredProperties.keySet()) : null;
     }
 
     public Collection getPropertyNames() {
@@ -174,10 +173,10 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
             getSuperclassDescriptor().prepareForAccess(object);
         }
 
-        Iterator it = getDeclaredPropertyNames().iterator();
+        Iterator it = declaredProperties.values().iterator();
         while (it.hasNext()) {
-            String name = (String) it.next();
-            getProperty(name).prepareForAccess(object);
+            Property property = (Property) it.next();
+            property.prepareForAccess(object);
         }
     }
 
@@ -192,10 +191,10 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
             getSuperclassDescriptor().copyProperties(from, to);
         }
 
-        Iterator it = getDeclaredPropertyNames().iterator();
+        Iterator it = declaredProperties.values().iterator();
         while (it.hasNext()) {
-            String name = (String) it.next();
-            getProperty(name).copyValue(from, to);
+            Property property = (Property) it.next();
+            property.copyValue(from, to);
         }
     }
 }
