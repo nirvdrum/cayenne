@@ -59,7 +59,6 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.exp.parser.ParseException;
 import org.objectstyle.cayenne.util.Util;
-import org.scopemvc.util.convertor.StringConvertor;
 
 /**
  * A Scope convertor that allows to display expressions in text fields.
@@ -67,7 +66,7 @@ import org.scopemvc.util.convertor.StringConvertor;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class ExpressionConvertor implements StringConvertor {
+public class ExpressionConvertor {
 
     public String valueAsString(Object value) throws IllegalArgumentException {
         if (value == null) {

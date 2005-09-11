@@ -73,14 +73,13 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
+import org.objectstyle.cayenne.modeler.util.ExpressionConvertor;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.TextAdapter;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
-import org.scopemvc.util.convertor.StringConvertor;
-import org.scopemvc.util.convertor.StringConvertors;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -241,7 +240,7 @@ public class SelectQueryMainTab extends JPanel {
             return;
         }
         
-        StringConvertor convertor = StringConvertors.forClass(Expression.class);
+        ExpressionConvertor convertor = new ExpressionConvertor();
         try {
             String oldQualifier = convertor.valueAsString(query.getQualifier());
             if (!Util.nullSafeEquals(oldQualifier, text)) {

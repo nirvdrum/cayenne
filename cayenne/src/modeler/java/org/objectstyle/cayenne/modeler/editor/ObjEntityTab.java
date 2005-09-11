@@ -92,13 +92,12 @@ import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
+import org.objectstyle.cayenne.modeler.util.ExpressionConvertor;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.modeler.util.TextAdapter;
 import org.objectstyle.cayenne.util.CayenneMapEntry;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
-import org.scopemvc.util.convertor.StringConvertor;
-import org.scopemvc.util.convertor.StringConvertors;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
@@ -378,8 +377,8 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         clientClassName.setText(entity.getClientClassName());
         clientSuperClassName.setText(entity.getClientSuperClassName());
 
-        StringConvertor convertor = StringConvertors.forClass(Expression.class);
-        qualifier.setText(convertor.valueAsString(entity.getDeclaredQualifier()));
+        qualifier.setText(new ExpressionConvertor().valueAsString(entity
+                .getDeclaredQualifier()));
 
         // TODO: fix inheritance - we should allow to select optimistic
         // lock if superclass is not already locked,
@@ -498,7 +497,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         ObjEntity entity = mediator.getCurrentObjEntity();
         if (entity != null) {
 
-            StringConvertor convertor = StringConvertors.forClass(Expression.class);
+            ExpressionConvertor convertor = new ExpressionConvertor();
             try {
                 String oldQualifier = convertor.valueAsString(entity
                         .getDeclaredQualifier());
