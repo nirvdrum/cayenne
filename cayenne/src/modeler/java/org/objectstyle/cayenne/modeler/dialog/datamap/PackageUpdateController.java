@@ -74,8 +74,12 @@ public class PackageUpdateController extends DefaultsPreferencesController {
     public static final String ALL_CONTROL = "cayenne.modeler.datamap.defaultprefs.package.radio";
     public static final String UNINIT_CONTROL = "cayenne.modeler.datamap.defaultprefs.packagenull.radio";
 
-    public PackageUpdateController(ProjectController mediator, DataMap dataMap) {
+    protected boolean clientUpdate;
+
+    public PackageUpdateController(ProjectController mediator, DataMap dataMap,
+            boolean clientUpdate) {
         super(mediator, dataMap);
+        this.clientUpdate = clientUpdate;
     }
 
     /**
@@ -99,7 +103,7 @@ public class PackageUpdateController extends DefaultsPreferencesController {
 
     protected void updatePackage() {
         boolean doAll = ((DefaultsPreferencesModel) getModel()).isAllEntities();
-        String defaultPackage = dataMap.getDefaultPackage();
+        String defaultPackage = getDefaultPackage();
         if (Util.isEmptyString(defaultPackage)) {
             defaultPackage = "";
         }
@@ -110,19 +114,11 @@ public class PackageUpdateController extends DefaultsPreferencesController {
         Iterator it = dataMap.getObjEntities().iterator();
         while (it.hasNext()) {
             ObjEntity entity = (ObjEntity) it.next();
-            if (doAll || Util.isEmptyString(entity.getClassName())) {
-                String oldName = entity.getClassName();
+            if (doAll || Util.isEmptyString(getClassName(entity))) {
+                String oldName = getClassName(entity);
                 String className = extractClassName(Util.isEmptyString(oldName) ? entity
                         .getName() : oldName);
-                String newName = defaultPackage + className;
-
-                if (!Util.nullSafeEquals(newName, oldName)) {
-                    entity.setClassName(newName);
-
-                    // any way to batch events, a big change will flood the app with
-                    // entity events..?
-                    mediator.fireDbEntityEvent(new EntityEvent(this, entity));
-                }
+                setClassName(entity, defaultPackage + className);
             }
         }
 
@@ -138,5 +134,28 @@ public class PackageUpdateController extends DefaultsPreferencesController {
         return (dot < 0) ? name : (dot + 1 < name.length())
                 ? name.substring(dot + 1)
                 : "";
+    }
+
+    protected String getDefaultPackage() {
+        return clientUpdate ? dataMap.getDefaultClientPackage() : dataMap
+                .getDefaultPackage();
+    }
+
+    protected String getClassName(ObjEntity entity) {
+        return clientUpdate ? entity.getClientClassName() : entity.getClassName();
+    }
+
+    protected void setClassName(ObjEntity entity, String newName) {
+        if (!Util.nullSafeEquals(newName, getClassName(entity))) {
+
+            if (clientUpdate) {
+                entity.setClientClassName(newName);
+            }
+            else {
+                entity.setClassName(newName);
+            }
+
+            mediator.fireObjEntityEvent(new EntityEvent(this, entity));
+        }
     }
 }

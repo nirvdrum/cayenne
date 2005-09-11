@@ -181,7 +181,9 @@ public class DataMapView extends JPanel {
         };
 
         // assemble
-        FormLayout layout = new FormLayout("right:70dlu, 3dlu, fill:110dlu, 3dlu, fill:90", "");
+        FormLayout layout = new FormLayout(
+                "right:70dlu, 3dlu, fill:110dlu, 3dlu, fill:90",
+                "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
@@ -581,7 +583,7 @@ public class DataMapView extends JPanel {
         }
 
         if (dataMap.getObjEntities().size() > 0) {
-            new PackageUpdateController(eventController, dataMap).startup();
+            new PackageUpdateController(eventController, dataMap, false).startup();
         }
     }
 
@@ -593,8 +595,7 @@ public class DataMapView extends JPanel {
         }
 
         if (dataMap.getObjEntities().size() > 0) {
-            // TODO: unfinished
-            // new PackageUpdateController(eventController, dataMap).startup();
+            new PackageUpdateController(eventController, dataMap, true).startup();
         }
     }
 

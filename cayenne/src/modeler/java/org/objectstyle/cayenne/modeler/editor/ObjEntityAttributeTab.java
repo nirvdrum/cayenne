@@ -112,7 +112,7 @@ public class ObjEntityAttributeTab extends JPanel implements ObjEntityDisplayLis
 
     private void init() {
         this.setLayout(new BorderLayout());
-        
+
         JToolBar toolBar = new JToolBar();
         Application app = Application.getInstance();
         toolBar.add(app.getAction(CreateAttributeAction.getActionName()).buildButton());
@@ -124,7 +124,7 @@ public class ObjEntityAttributeTab extends JPanel implements ObjEntityDisplayLis
         table = new CayenneTable();
         table.setDefaultRenderer(String.class, new CellRenderer());
 
-        add(PanelFactory.createTablePanel(table, null) , BorderLayout.CENTER);
+        add(PanelFactory.createTablePanel(table, null), BorderLayout.CENTER);
     }
 
     private void initController() {
@@ -145,11 +145,17 @@ public class ObjEntityAttributeTab extends JPanel implements ObjEntityDisplayLis
      */
     public void selectAttribute(ObjAttribute attr) {
         if (attr == null) {
-            Application.getInstance().getAction(RemoveAttributeAction.getActionName()).setEnabled(false);
+            Application
+                    .getInstance()
+                    .getAction(RemoveAttributeAction.getActionName())
+                    .setEnabled(false);
             return;
         }
         // enable the remove button
-        Application.getInstance().getAction(RemoveAttributeAction.getActionName()).setEnabled(true);
+        Application
+                .getInstance()
+                .getAction(RemoveAttributeAction.getActionName())
+                .setEnabled(true);
 
         ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
         java.util.List attrs = model.getObjectList();
@@ -158,7 +164,7 @@ public class ObjEntityAttributeTab extends JPanel implements ObjEntityDisplayLis
             table.select(attrPos);
         }
     }
-    
+
     public void processExistingSelection(EventObject e) {
         if (e instanceof ChangeEvent) {
             table.clearSelection();
@@ -176,7 +182,7 @@ public class ObjEntityAttributeTab extends JPanel implements ObjEntityDisplayLis
                 .getCurrentObjEntity(), mediator.getCurrentDataMap(), mediator
                 .getCurrentDataDomain());
 
-        mediator.fireObjAttributeDisplayEvent(ev);            
+        mediator.fireObjAttributeDisplayEvent(ev);
     }
 
     public void objAttributeChanged(AttributeEvent e) {
@@ -250,9 +256,9 @@ public class ObjEntityAttributeTab extends JPanel implements ObjEntityDisplayLis
         dbNameColumn.setMinWidth(150);
 
         if (model.getEntity().getDbEntity() != null) {
-            JComboBox dbAttributesCombo = CayenneWidgetFactory.createComboBox(ModelerUtil
-                    .getDbAttributeNames(mediator, mediator
-                            .getCurrentObjEntity()
+            JComboBox dbAttributesCombo = CayenneWidgetFactory
+                    .createComboBox(ModelerUtil.getDbAttributeNames(mediator, model
+                            .getEntity()
                             .getDbEntity()), true);
 
             dbAttributesCombo.setEditable(false);
