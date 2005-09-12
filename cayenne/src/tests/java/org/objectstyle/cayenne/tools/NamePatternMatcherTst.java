@@ -80,4 +80,29 @@ public class NamePatternMatcherTst extends TestCase {
     	assertEquals("/^billing_.*$/", itemIncludeFilters[0]);
     	assertEquals("/^user.?$/", itemIncludeFilters[1]);
     }
+
+    /**
+     * Test tokenizing
+     */
+    public void testTokenizerEntities()
+    {
+    	Task parentTask = new Task() {
+    	    public void log(String msg, int msgLevel) {
+    	        System.out.println(String.valueOf(msgLevel) + ": " + msg);
+    	    }
+		};
+    	
+    	String includePattern = "Organization,SecGroup,SecIndividual";
+        String excludePattern = null;
+    	NamePatternMatcher namePatternMatcher = new NamePatternMatcher(parentTask, includePattern, excludePattern);
+    	
+    	String itemExcludeFilters[] = namePatternMatcher.itemExcludeFilters;
+    	assertEquals(0, itemExcludeFilters.length);
+
+    	String itemIncludeFilters[] = namePatternMatcher.itemIncludeFilters;
+    	assertEquals(3, itemIncludeFilters.length);
+    	assertEquals("/^Organization$/", itemIncludeFilters[0]);
+    	assertEquals("/^SecGroup$/", itemIncludeFilters[1]);
+    	assertEquals("/^SecIndividual$/", itemIncludeFilters[2]);
+    }
 }
