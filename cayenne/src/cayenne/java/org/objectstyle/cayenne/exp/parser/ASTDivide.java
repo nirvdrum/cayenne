@@ -118,7 +118,7 @@ public class ASTDivide extends SimpleNode {
      * Creates a copy of this expression node, without copying children.
      */
     public Expression shallowCopy() {
-        return new ASTGreater(id);
+        return new ASTDivide(id);
     }
 
     protected String getExpressionOperator(int index) {

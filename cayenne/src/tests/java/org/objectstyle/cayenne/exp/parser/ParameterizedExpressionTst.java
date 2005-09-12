@@ -48,6 +48,12 @@ public class ParameterizedExpressionTst extends TestCase {
         TstTraversalHandler.compareExps(e1, e2);
     }
 
+    public void testCopy3() {
+        Expression e1 = Expression.fromString("(k1 / 2) = (k2 * 2)");
+        Expression e2 = e1.expWithParameters(Collections.EMPTY_MAP, true);
+        TstTraversalHandler.compareExps(e1, e2);
+    }
+
     /**
      * Tests how parameter substitution algorithm works on an expression with no
      * parameters.
