@@ -78,6 +78,7 @@ public class ImportUtils {
 //        "long", "double", "byte", "boolean", "float", "short", "int" };
 
     protected Map importTypesMap = new HashMap();
+    protected Map reservedImportTypesMap = new HashMap();  // Types forced to be FQN
     
     protected String packageName;
     
@@ -86,51 +87,95 @@ public class ImportUtils {
         super();
     }
     
-    public void addType(String typeName)
+    protected boolean isTypeRegistered(String typeName)
     {
         // Not sure why this would ever happen, but it did
-        if (null == typeName)  return;
+        if (null == typeName)  return false;
         
         StringUtils stringUtils = StringUtils.getInstance();
         String typeClassName = stringUtils.stripPackageName(typeName);
         String typePackageName = stringUtils.stripClass(typeName);
         
-        if (typePackageName.length() == 0)  return; // disallow non-packaged types (primatives, probably)
-        if ("java.lang".equals(typePackageName))  return;
-        if (packageName.equals(typePackageName))  return;
+        if (typePackageName.length() == 0)  return false; // disallow non-packaged types (primatives, probably)
+        if ("java.lang".equals(typePackageName))  return false;
+        if (typePackageName.equals(packageName))  return false;
         
         // Can only have one type -- rest must use fqn
-        if (importTypesMap.containsKey(typeClassName))  return;
+        if (reservedImportTypesMap.containsKey(typeClassName))  return false;
+        if (importTypesMap.containsKey(typeClassName))  return false;
+        
+        return true;
+    }
+    
+    /**
+     * Reserve a fully-qualified data type class name so it cannot be used by another class.
+     * No import statements will be generated for reserved types.
+     * Typically, this is the fully-qualified class name of the class being generated.
+     * @param typeName FQ data type class name.
+     */
+    public void addReservedType(String typeName)
+    {
+        if (! isTypeRegistered(typeName))  return;
+        
+        StringUtils stringUtils = StringUtils.getInstance();
+        String typeClassName = stringUtils.stripPackageName(typeName);
+        
+        reservedImportTypesMap.put(typeClassName, typeName);
+    }
+    
+    /**
+     * Register a fully-qualified data type class name.
+     * For example, org.objectstyle.cayenne.CayenneDataObject
+     * @param typeName FQ data type class name.
+     */
+    public void addType(String typeName)
+    {
+        if (! isTypeRegistered(typeName))  return;
+        
+        StringUtils stringUtils = StringUtils.getInstance();
+        String typeClassName = stringUtils.stripPackageName(typeName);
         
         importTypesMap.put(typeClassName, typeName);
     }
     
+    /**
+     * Add the package name to use for this importUtil invocation.
+     * @param packageName
+     */
     public void setPackage(String packageName)
     {
         this.packageName = packageName;
     }
     
     /**
-     * Removes registered package and type name prefixes from java types 
+     * Removes registered package and non-reserved registered type name prefixes from java types 
      */
     public String formatJavaType(String typeName) {
         if (typeName != null) {
             StringUtils stringUtils = StringUtils.getInstance();
             String typeClassName = stringUtils.stripPackageName(typeName);
             
-            if (importTypesMap.containsKey(typeClassName))
+            if (! reservedImportTypesMap.containsKey(typeClassName))
             {
-                if (typeName.equals(importTypesMap.get(typeClassName)))  return typeClassName;
+                if (importTypesMap.containsKey(typeClassName))
+                {
+                    if (typeName.equals(importTypesMap.get(typeClassName)))  return typeClassName;
+                }
             }
             
             String typePackageName = stringUtils.stripClass(typeName);
             if ("java.lang".equals(typePackageName))  return typeClassName;
-            if (packageName.equals(typePackageName))  return typeClassName;
+            if ((null != packageName) && (packageName.equals(typePackageName)))
+            	return typeClassName;
         }
 
         return typeName;
     }
     
+    /**
+     * Generate package and list of import statements based on the registered types.
+     * @return
+     */
     public String generate()
     {
         StringBuffer outputBuffer = new StringBuffer();
