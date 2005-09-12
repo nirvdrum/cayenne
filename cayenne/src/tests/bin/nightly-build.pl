@@ -34,7 +34,7 @@ use Cwd;
 # These must be defined as environment variables
 # (May need to modify script to make this configurable on the command line)
 $ENV{'JAVA_HOME'} = "/opt/java";
-$ENV{'ANT_HOME'} = "/opt/ant";
+$ENV{'ANT_HOME'} = "/opt/ant/current";
 
 our ($opt_u, $opt_m, $opt_n, $opt_d);
 getopts('unm:d:');
