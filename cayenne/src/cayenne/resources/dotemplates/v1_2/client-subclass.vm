@@ -12,6 +12,7 @@
 ##    importUtils - class for import statement management: See org.objectstyle.cayenne.gen.ImportUtils
 ##
 ${importUtils.setPackage($entityUtils.subPackageName)}##
+${importUtils.addReservedType("${$entityUtils.subPackageName}.${entityUtils.subClassName}")}##
 ${importUtils.addType("${entityUtils.superPackageName}.${entityUtils.superClassName}")}##
 ${importUtils.generate()}
 

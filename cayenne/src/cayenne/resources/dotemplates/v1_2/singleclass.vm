@@ -11,6 +11,7 @@
 ##
 ##
 ${importUtils.setPackage($entityUtils.subPackageName)}##
+${importUtils.addReservedType("${entityUtils.subPackageName}.${entityUtils.subClassName}")}##
 ${importUtils.addType("${entityUtils.basePackageName}.${entityUtils.baseClassName}")}##
 #foreach( $attr in ${objEntity.DeclaredAttributes} )
 $importUtils.addType(${attr.Type})##
