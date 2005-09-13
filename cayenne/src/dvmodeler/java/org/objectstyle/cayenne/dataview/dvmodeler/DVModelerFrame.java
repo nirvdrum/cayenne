@@ -61,6 +61,8 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Insets;
 
+import java.awt.event.KeyEvent;
+
 import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
@@ -156,6 +158,7 @@ public class DVModelerFrame extends JFrame {
     menuBar.putClientProperty(Options.HEADER_STYLE_KEY, HeaderStyle.BOTH);
 
     JMenu menuFile = new JMenu("File");
+    menuFile.setMnemonic(KeyEvent.VK_F);
     menuBar.add(menuFile);
     menuFile.add(openAction);
     saveAction.setEnabled(false);
@@ -186,6 +189,7 @@ public class DVModelerFrame extends JFrame {
     menuFile.add(exit);
 
     JMenu menuEdit = new JMenu("Edit");
+    menuEdit.setMnemonic(KeyEvent.VK_E);
     menuBar.add(menuEdit);
     menuEdit.add(addNewDataViewAction);
     menuEdit.add(addNewObjEntityViewAction);

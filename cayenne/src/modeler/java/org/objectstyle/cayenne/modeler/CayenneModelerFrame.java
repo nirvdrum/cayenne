@@ -60,6 +60,8 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
 
+import java.awt.event.KeyEvent;
+
 import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -163,6 +165,11 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         JMenu projectMenu = new JMenu("Project");
         JMenu toolMenu = new JMenu("Tools");
         JMenu helpMenu = new JMenu("Help");
+
+		fileMenu.setMnemonic(KeyEvent.VK_F);
+		projectMenu.setMnemonic(KeyEvent.VK_P);
+		toolMenu.setMnemonic(KeyEvent.VK_T);
+		helpMenu.setMnemonic(KeyEvent.VK_H);
 
         fileMenu.add(getAction(NewProjectAction.getActionName()).buildMenu());
         fileMenu.add(getAction(OpenProjectAction.getActionName()).buildMenu());
