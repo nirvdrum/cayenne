@@ -48,7 +48,7 @@ public class UtilTst extends TestCase {
     private String fTmpFileName;
     private File fTmpFileCopy;
 
-    protected void setUp() throws java.lang.Exception {
+    protected void setUp() throws Exception {
         fTmpFileName = "." + File.separator + System.currentTimeMillis() + ".tmp";
 
         fTmpFileInCurrentDir = new File(fTmpFileName);
@@ -69,7 +69,18 @@ public class UtilTst extends TestCase {
             throw new Exception("Error deleting temporary file: " + fTmpFileCopy);
 
     }
-    
+
+    public void testGetJavaClass() throws Exception {
+        assertEquals(byte.class.getName(), Util.getJavaClass(null, "byte").getName());
+        assertEquals(byte[].class.getName(), Util.getJavaClass(null, "byte[]").getName());
+        assertEquals(String[].class.getName(), Util.getJavaClass(
+                null,
+                "java.lang.String[]").getName());
+        assertEquals(new UtilTst[0].getClass().getName(), Util.getJavaClass(
+                null,
+                getClass().getName() + "[]").getName());
+    }
+
     public void testToMap() {
         Object[] keys = new Object[] {
                 "a", "b"

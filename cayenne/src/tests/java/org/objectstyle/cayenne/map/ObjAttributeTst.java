@@ -95,4 +95,25 @@ public class ObjAttributeTst extends TestCase {
         assertEquals(a1.getName(), a2.getName());
         assertEquals(a1.getType(), a2.getType());
     }
+
+    public void testGetJavaClass() throws Exception {
+
+        ObjAttribute a1 = new ObjAttribute("test");
+        a1.setType("byte");
+        assertEquals(byte.class.getName(), a1.getJavaClass(
+                Thread.currentThread().getContextClassLoader()).getName());
+
+        a1.setType("byte[]");
+        assertEquals(byte[].class.getName(), a1.getJavaClass(
+                Thread.currentThread().getContextClassLoader()).getName());
+
+        a1.setType("java.lang.Byte");
+        assertEquals(Byte.class.getName(), a1.getJavaClass(
+                Thread.currentThread().getContextClassLoader()).getName());
+
+        a1.setType("java.lang.Byte[]");
+        assertEquals(Byte[].class.getName(), a1.getJavaClass(
+                Thread.currentThread().getContextClassLoader()).getName());
+    }
+
 }

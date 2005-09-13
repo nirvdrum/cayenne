@@ -103,12 +103,7 @@ public class ObjAttribute extends Attribute {
 
         try {
             // tolerate null class loader
-            if (classLoader == null) {
-                return Class.forName(this.getType());
-            }
-            else {
-                return classLoader.loadClass(this.getType());
-            }
+            return Util.getJavaClass(classLoader, getType());
         }
         catch (ClassNotFoundException e) {
             throw new CayenneRuntimeException("Failed to load class for name '"

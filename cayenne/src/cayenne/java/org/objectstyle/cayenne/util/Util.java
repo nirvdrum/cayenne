@@ -103,15 +103,15 @@ import org.xml.sax.XMLReader;
 public class Util {
 
     /**
-     * Reads file contents, returning it as a String, using System default
-     * line separator.
+     * Reads file contents, returning it as a String, using System default line separator.
      */
     public static String stringFromFile(File file) throws IOException {
         return stringFromFile(file, System.getProperty("line.separator"));
     }
 
     /**
-     * Reads file contents, returning it as a String, joining lines with provided separator.
+     * Reads file contents, returning it as a String, joining lines with provided
+     * separator.
      */
     public static String stringFromFile(File file, String joinWith) throws IOException {
         StringBuffer buf = new StringBuffer();
@@ -130,8 +130,8 @@ public class Util {
     }
 
     /**
-     * Copies file contents from source to destination.
-     * Makes up for the lack of file copying utilities in Java
+     * Copies file contents from source to destination. Makes up for the lack of file
+     * copying utilities in Java
      */
     public static boolean copy(File source, File destination) {
         BufferedInputStream fin = null;
@@ -175,8 +175,9 @@ public class Util {
         BufferedOutputStream fout = null;
         try {
             int bufSize = 8 * 1024;
-            urlin =
-                new BufferedInputStream(from.openConnection().getInputStream(), bufSize);
+            urlin = new BufferedInputStream(
+                    from.openConnection().getInputStream(),
+                    bufSize);
             fout = new BufferedOutputStream(new FileOutputStream(to), bufSize);
             copyPipe(urlin, fout, bufSize);
         }
@@ -206,8 +207,8 @@ public class Util {
     }
 
     /**
-     * Reads data from the input and writes it to the output, 
-     * until the end of the input stream.
+     * Reads data from the input and writes it to the output, until the end of the input
+     * stream.
      * 
      * @param in
      * @param out
@@ -215,7 +216,7 @@ public class Util {
      * @throws IOException
      */
     public static void copyPipe(InputStream in, OutputStream out, int bufSizeHint)
-        throws IOException {
+            throws IOException {
         int read = -1;
         byte[] buf = new byte[bufSizeHint];
         while ((read = in.read(buf, 0, bufSizeHint)) >= 0) {
@@ -225,8 +226,8 @@ public class Util {
     }
 
     /**
-     * Deletes a file or directory, allowing recursive directory
-     * deletion. This is an improved version of File.delete() method.
+     * Deletes a file or directory, allowing recursive directory deletion. This is an
+     * improved version of File.delete() method.
      */
     public static boolean delete(String filePath, boolean recursive) {
         File file = new File(filePath);
@@ -251,13 +252,13 @@ public class Util {
      * convert path Strings to URI format.
      */
     public static String substBackslashes(String string) {
-       return RegexUtil.substBackslashes(string);
+        return RegexUtil.substBackslashes(string);
     }
 
     /**
-     * Looks up and returns the root cause of an exception. If none is found, 
-     * returns supplied Throwable object unchanged. If root is found,
-     * recursively "unwraps" it, and returns the result to the user.
+     * Looks up and returns the root cause of an exception. If none is found, returns
+     * supplied Throwable object unchanged. If root is found, recursively "unwraps" it,
+     * and returns the result to the user.
      */
     public static Throwable unwindException(Throwable th) {
         if (th instanceof CayenneException) {
@@ -295,28 +296,26 @@ public class Util {
     }
 
     /**
-     * Compares two objects similar to "Object.equals(Object)". 
-     * Unlike Object.equals(..), this method doesn't throw an exception
-     * if any of the two objects is null.
+     * Compares two objects similar to "Object.equals(Object)". Unlike Object.equals(..),
+     * this method doesn't throw an exception if any of the two objects is null.
      */
     public static boolean nullSafeEquals(Object obj1, Object obj2) {
         if (obj1 == null && obj2 == null) {
             return true;
         }
-        else if (obj1 != null)
-        {
-          // Arrays must be handled differently since equals() only does
-          // an "==" for an array and ignores equivalence.  If an array, use
-          // the Jakarta Commons Language component EqualsBuilder to determine
-          // the types contained in the array and do individual comparisons.
-          if (obj1.getClass().isArray()) {
-            EqualsBuilder builder = new EqualsBuilder();
-            builder.append(obj1, obj2);
-            return builder.isEquals();
-          }
-          else { // It is NOT an array, so use regular equals()
-            return obj1.equals(obj2);
-          }
+        else if (obj1 != null) {
+            // Arrays must be handled differently since equals() only does
+            // an "==" for an array and ignores equivalence. If an array, use
+            // the Jakarta Commons Language component EqualsBuilder to determine
+            // the types contained in the array and do individual comparisons.
+            if (obj1.getClass().isArray()) {
+                EqualsBuilder builder = new EqualsBuilder();
+                builder.append(obj1, obj2);
+                return builder.isEquals();
+            }
+            else { // It is NOT an array, so use regular equals()
+                return obj1.equals(obj2);
+            }
         }
         else {
             return false;
@@ -324,9 +323,9 @@ public class Util {
     }
 
     /**
-     * Compares two objects similar to "Comparable.compareTo(Object)". 
-     * Unlike Comparable.compareTo(..), this method doesn't throw an exception
-     * if any of the two objects is null.
+     * Compares two objects similar to "Comparable.compareTo(Object)". Unlike
+     * Comparable.compareTo(..), this method doesn't throw an exception if any of the two
+     * objects is null.
      * 
      * @since 1.1
      */
@@ -370,12 +369,12 @@ public class Util {
     }
 
     /**
-     * Creates an XMLReader with default feature set. Note that all Cayenne
-     * internal XML parsers should probably use XMLReader obtained via this
-     * method for consistency sake, and can customize feature sets as needed.
+     * Creates an XMLReader with default feature set. Note that all Cayenne internal XML
+     * parsers should probably use XMLReader obtained via this method for consistency
+     * sake, and can customize feature sets as needed.
      */
-    public static XMLReader createXmlReader()
-        throws SAXException, ParserConfigurationException {
+    public static XMLReader createXmlReader() throws SAXException,
+            ParserConfigurationException {
         SAXParserFactory spf = SAXParserFactory.newInstance();
 
         // Create a JAXP SAXParser
@@ -391,14 +390,15 @@ public class Util {
     }
 
     /**
-     * Returns package name for the Java class as a path separated with forward slash ("/").
-     * Method is used to lookup resources that are located in package subdirectories.
-     * For example, a String "a/b/c" will be returned for class name "a.b.c.ClassName".
+     * Returns package name for the Java class as a path separated with forward slash
+     * ("/"). Method is used to lookup resources that are located in package
+     * subdirectories. For example, a String "a/b/c" will be returned for class name
+     * "a.b.c.ClassName".
      */
     public static String getPackagePath(String className) {
         return RegexUtil.getPackagePath(className);
     }
-    
+
     /**
      * Creates a mutable map out of two arrays with keys and values.
      * 
@@ -434,9 +434,8 @@ public class Util {
 
         // if dot is in the first position,
         // we are dealing with a hidden file rather than an extension
-        return (dotInd > 0 && dotInd < fileName.length())
-            ? fileName.substring(dotInd + 1)
-            : null;
+        return (dotInd > 0 && dotInd < fileName.length()) ? fileName
+                .substring(dotInd + 1) : null;
     }
 
     /**
@@ -449,7 +448,7 @@ public class Util {
         // we are dealing with a hidden file rather than an extension
         return (dotInd > 0) ? fileName.substring(0, dotInd) : fileName;
     }
-    
+
     /**
      * Strips "\n", "\r\n", "\r" from the argument string.
      * 
@@ -464,7 +463,7 @@ public class Util {
         StringBuffer buffer = new StringBuffer(len);
         for (int i = 0; i < len; i++) {
             char c = string.charAt(i);
-            
+
             // skip \n, \r, \r\n
             switch (c) {
                 case '\n':
@@ -483,7 +482,7 @@ public class Util {
         return buffer.toString();
     }
 
-    /** 
+    /**
      * Encodes a string so that it can be used as an attribute value in an XML document.
      * Will do conversion of the greater/less signs, quotes and ampersands.
      */
@@ -519,17 +518,16 @@ public class Util {
      * Trims long strings substituting middle part with "...".
      * 
      * @param str String to trim.
-     * @param maxLength maximum allowable length. Must be at least 5,
-     * or an IllegalArgumentException is thrown.
-     * 
+     * @param maxLength maximum allowable length. Must be at least 5, or an
+     *            IllegalArgumentException is thrown.
      * @return String
      */
     public static String prettyTrim(String str, int maxLength) {
         if (maxLength < 5) {
             throw new IllegalArgumentException(
-                "Algorithm for 'prettyTrim' works only with length >= 5. "
-                    + "Supplied length is "
-                    + maxLength);
+                    "Algorithm for 'prettyTrim' works only with length >= 5. "
+                            + "Supplied length is "
+                            + maxLength);
         }
 
         if (str == null || str.length() <= maxLength) {
@@ -545,10 +543,9 @@ public class Util {
     }
 
     /**
-     * Returns a sorted iterator from an unsorted one. 
-     * Use this method as a last resort, since it is 
-     * much less efficient then just sorting a collection 
-     * that backs the original iterator.
+     * Returns a sorted iterator from an unsorted one. Use this method as a last resort,
+     * since it is much less efficient then just sorting a collection that backs the
+     * original iterator.
      */
     public static Iterator sortedIterator(Iterator it, Comparator comparator) {
         List list = new ArrayList();
@@ -572,9 +569,8 @@ public class Util {
 
     /**
      * Converts a SQL-style pattern to a valid Perl regular expression. E.g.:
-     * 
      * <p>
-     * <code>"billing_%"</code> will become <code>/^billing_.*$/</code> 
+     * <code>"billing_%"</code> will become <code>/^billing_.*$/</code>
      * <p>
      * <code>"user?"</code> will become <code>/^user.?$/</code>
      * 
@@ -583,7 +579,7 @@ public class Util {
     public static String sqlPatternToRegex(String pattern, boolean ignoreCase) {
         return RegexUtil.sqlPatternToRegex(pattern, ignoreCase);
     }
-    
+
     /**
      * Returns true if a Member is accessible via reflection under normal Java access
      * controls.
@@ -593,5 +589,87 @@ public class Util {
     public static boolean isAccessible(Member member) {
         return Modifier.isPublic(member.getModifiers())
                 && Modifier.isPublic(member.getDeclaringClass().getModifiers());
+    }
+
+    /**
+     * Creates a Java class, handling regular class names as well as single-dimensional
+     * arrays and primitive types.
+     */
+    public static Class getJavaClass(ClassLoader classLoader, String className)
+            throws ClassNotFoundException {
+
+        // is there a better way to get array class from string name?
+
+        if (className == null) {
+            throw new ClassNotFoundException("Null class name");
+        }
+
+        if (classLoader == null) {
+            classLoader = Util.class.getClassLoader();
+        }
+
+        // use custom logic on failure only, assuming primitives and arrays are not that
+        // common
+        try {
+            return Class.forName(className, true, classLoader);
+        }
+        catch (ClassNotFoundException e) {
+            if (!className.endsWith("[]")) {
+                if ("byte".equals(className)) {
+                    return Byte.TYPE;
+                }
+                else if ("int".equals(className)) {
+                    return Integer.TYPE;
+                }
+                else if ("short".equals(className)) {
+                    return Short.TYPE;
+                }
+                else if ("char".equals(className)) {
+                    return Character.TYPE;
+                }
+                else if ("double".equals(className)) {
+                    return Double.TYPE;
+                }
+                else if ("float".equals(className)) {
+                    return Float.TYPE;
+                }
+                else if ("boolean".equals(className)) {
+                    return Boolean.TYPE;
+                }
+
+                throw e;
+            }
+
+            if (className.length() < 3) {
+                throw new IllegalArgumentException("Invalid class name: " + className);
+            }
+
+            // TODO: support for multi-dim arrays
+            className = className.substring(0, className.length() - 2);
+
+            if ("byte".equals(className)) {
+                return byte[].class;
+            }
+            else if ("int".equals(className)) {
+                return int[].class;
+            }
+            else if ("short".equals(className)) {
+                return short[].class;
+            }
+            else if ("char".equals(className)) {
+                return char[].class;
+            }
+            else if ("double".equals(className)) {
+                return double[].class;
+            }
+            else if ("float".equals(className)) {
+                return float[].class;
+            }
+            else if ("boolean".equals(className)) {
+                return boolean[].class;
+            }
+
+            return Class.forName("[L" + className + ";", true, classLoader);
+        }
     }
 }
