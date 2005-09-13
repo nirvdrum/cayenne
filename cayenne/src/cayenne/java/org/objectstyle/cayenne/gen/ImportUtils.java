@@ -87,7 +87,7 @@ public class ImportUtils {
         super();
     }
     
-    protected boolean isTypeRegistered(String typeName)
+    protected boolean canRegisterType(String typeName)
     {
         // Not sure why this would ever happen, but it did
         if (null == typeName)  return false;
@@ -98,7 +98,6 @@ public class ImportUtils {
         
         if (typePackageName.length() == 0)  return false; // disallow non-packaged types (primatives, probably)
         if ("java.lang".equals(typePackageName))  return false;
-        if (typePackageName.equals(packageName))  return false;
         
         // Can only have one type -- rest must use fqn
         if (reservedImportTypesMap.containsKey(typeClassName))  return false;
@@ -115,7 +114,7 @@ public class ImportUtils {
      */
     public void addReservedType(String typeName)
     {
-        if (! isTypeRegistered(typeName))  return;
+        if (! canRegisterType(typeName))  return;
         
         StringUtils stringUtils = StringUtils.getInstance();
         String typeClassName = stringUtils.stripPackageName(typeName);
@@ -130,11 +129,14 @@ public class ImportUtils {
      */
     public void addType(String typeName)
     {
-        if (! isTypeRegistered(typeName))  return;
+        if (! canRegisterType(typeName))  return;
         
         StringUtils stringUtils = StringUtils.getInstance();
+        String typePackageName = stringUtils.stripClass(typeName);
         String typeClassName = stringUtils.stripPackageName(typeName);
         
+        if (typePackageName.equals(packageName))  return;
+
         importTypesMap.put(typeClassName, typeName);
     }
     

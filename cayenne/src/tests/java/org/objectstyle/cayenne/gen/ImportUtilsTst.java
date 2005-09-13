@@ -113,6 +113,22 @@ public class ImportUtilsTst extends TestCase {
 		assertEquals("<" + generatedStatements + "> contains <" + nonReservedType + ">", -1, generatedStatements.indexOf(nonReservedType));
     }
     
+    public void testAddTypeAfterPackageReservedTypeGeneratesNoImportStatement() throws Exception {
+    	final String baseType = "myType";
+    	final String packageType = "org.myPackage";
+    	final String reservedType = packageType + "." + baseType;
+    	final String nonReservedType = "org.myPackage2." + baseType;
+    	
+		importUtils.setPackage(packageType);
+		importUtils.addReservedType(reservedType);
+    	importUtils.addType(nonReservedType);
+    	
+    	String generatedStatements = importUtils.generate();
+
+		assertEquals("<" + generatedStatements + "> contains <" + reservedType + ">", -1, generatedStatements.indexOf(reservedType));
+		assertEquals("<" + generatedStatements + "> contains <" + nonReservedType + ">", -1, generatedStatements.indexOf(nonReservedType));
+    }
+    
     public void testAddTypeAfterTypeGeneratesNoImportStatement() throws Exception {
     	final String baseType = "myType";
     	final String firstType = "org.myPackage." + baseType;
