@@ -71,7 +71,7 @@ public class ImportUtilsTst extends TestCase {
 	
     public void testSetPackageGeneratesPackageStatement() throws Exception {
     	final String packageName = "org.myPackage";
-    	final String expectedPackageStatement = "package " + packageName + ";" + System.getProperty("line.separator");
+    	final String expectedPackageStatement = "package " + packageName + ";";
     	
 		importUtils.setPackage(packageName);
     	
@@ -82,12 +82,12 @@ public class ImportUtilsTst extends TestCase {
     
     public void testAddTypeGeneratesImportStatement() throws Exception {
     	final String type = "org.myPackage.myType";
-    	final String expectedImportStatement = "import " + type + ";\n";
+    	final String expectedImportStatement = "import " + type + ";";
     	
 		importUtils.addType(type);
     	
     	String generatedStatements = importUtils.generate();
-		assertTrue("<" + generatedStatements + "> does not contain <" + expectedImportStatement + ">", -1 == generatedStatements.indexOf(expectedImportStatement));
+		assertFalse("<" + generatedStatements + "> does not contain <" + expectedImportStatement + ">", -1 == generatedStatements.indexOf(expectedImportStatement));
     	assertEquals("import statement appears multiple times.", generatedStatements.lastIndexOf(expectedImportStatement), generatedStatements.lastIndexOf(expectedImportStatement));
     }
     
@@ -118,14 +118,14 @@ public class ImportUtilsTst extends TestCase {
     	final String firstType = "org.myPackage." + baseType;
     	final String secondType = "org.myPackage2." + baseType;
     	
-    	final String expectedImportStatement = "import " + firstType + ";\n";
+    	final String expectedImportStatement = "import " + firstType + ";";
 
 		importUtils.addType(firstType);
     	importUtils.addType(secondType);
     	
     	String generatedStatements = importUtils.generate();
 		
-    	assertTrue("<" + generatedStatements + "> does not contain <" + expectedImportStatement + ">", -1 == generatedStatements.indexOf(expectedImportStatement));
+    	assertFalse("<" + generatedStatements + "> does not contain <" + expectedImportStatement + ">", -1 == generatedStatements.indexOf(expectedImportStatement));
     	assertEquals("import statement appears multiple times.", generatedStatements.lastIndexOf(expectedImportStatement), generatedStatements.lastIndexOf(expectedImportStatement));
 
     	assertEquals("<" + generatedStatements + "> contains <" + secondType + ">", -1, generatedStatements.indexOf(secondType));
