@@ -71,12 +71,12 @@ public class ImportUtilsTst extends TestCase {
 	
     public void testSetPackageGeneratesPackageStatement() throws Exception {
     	final String packageName = "org.myPackage";
-    	final String expectedPackageStatement = "package " + packageName + ";\n";
+    	final String expectedPackageStatement = "package " + packageName + ";" + System.getProperty("line.separator");
     	
 		importUtils.setPackage(packageName);
     	
     	String generatedStatements = importUtils.generate();
-		assertFalse("<" + generatedStatements + "> does not start with <" + expectedPackageStatement + ">", generatedStatements.startsWith(expectedPackageStatement));
+		assertTrue("<" + generatedStatements + "> does not start with <" + expectedPackageStatement + ">", generatedStatements.startsWith(expectedPackageStatement));
     	assertEquals("package statement appears multiple times.", generatedStatements.lastIndexOf(expectedPackageStatement), generatedStatements.lastIndexOf(expectedPackageStatement));
     }
     
