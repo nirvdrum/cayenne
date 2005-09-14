@@ -98,6 +98,10 @@ public class ClientObjectContext implements ObjectContext {
     protected OperationRecorder changeRecorder;
     protected ClientStateRecorder stateRecorder;
 
+    // note that it is important to reuse the same action within the property change
+    // thread to avoid a loop of "propertyChange" calls on handling reverse relationships.
+    // Here we go further and make action a thread-safe ivar that tracks its own thread
+    // state.
     ClientObjectContextGraphAction graphAction;
 
     /**

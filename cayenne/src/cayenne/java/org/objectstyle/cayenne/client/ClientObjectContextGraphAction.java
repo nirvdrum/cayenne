@@ -16,9 +16,19 @@ import org.objectstyle.cayenne.property.Property;
 class ClientObjectContextGraphAction {
 
     ClientObjectContext context;
+    ThreadLocal arcChangeInProcess;
 
     ClientObjectContextGraphAction(ClientObjectContext context) {
         this.context = context;
+        this.arcChangeInProcess = new ThreadLocal();
+    }
+
+    boolean isArchChangeInProcess() {
+        return arcChangeInProcess.get() != null;
+    }
+
+    void setArcChangeInProcess(boolean flag) {
+        arcChangeInProcess.set(flag ? Boolean.TRUE : null);
     }
 
     /**
@@ -38,35 +48,73 @@ class ClientObjectContextGraphAction {
 
         // relationship property
         if (property instanceof ArcProperty) {
-            if (oldValue instanceof Persistent) {
-                context.getGraphManager().arcDeleted(
-                        object.getGlobalID(),
-                        ((Persistent) oldValue).getGlobalID(),
-                        propertyName);
 
-                unsetReverse((ArcProperty) property, object, (Persistent) oldValue);
-                markAsDirty(object);
+            try {
+                handleArcPropertyChange(
+                        object,
+                        (ArcProperty) property,
+                        oldValue,
+                        newValue);
             }
-
-            if (newValue instanceof Persistent) {
-                context.getGraphManager().arcCreated(
-                        object.getGlobalID(),
-                        ((Persistent) newValue).getGlobalID(),
-                        propertyName);
-
-                setReverse((ArcProperty) property, object, (Persistent) newValue);
-                markAsDirty(object);
+            finally {
+                setArcChangeInProcess(false);
             }
         }
         // simple property
         else {
-            context.getGraphManager().nodePropertyChanged(
+            handleSimplePropertyChange(object, propertyName, oldValue, newValue);
+        }
+    }
+
+    void handleArcPropertyChange(
+            Persistent object,
+            ArcProperty property,
+            Object oldValue,
+            Object newValue) {
+
+        boolean arcChangeInProcess = isArchChangeInProcess();
+
+        // prevent reverse actions down the stack
+        setArcChangeInProcess(true);
+
+        if (oldValue instanceof Persistent) {
+            context.getGraphManager().arcDeleted(
                     object.getGlobalID(),
-                    propertyName,
-                    oldValue,
-                    newValue);
+                    ((Persistent) oldValue).getGlobalID(),
+                    property.getPropertyName());
+
+            if (!arcChangeInProcess) {
+                unsetReverse(property, object, (Persistent) oldValue);
+            }
+
             markAsDirty(object);
         }
+
+        if (newValue instanceof Persistent) {
+            context.getGraphManager().arcCreated(
+                    object.getGlobalID(),
+                    ((Persistent) newValue).getGlobalID(),
+                    property.getPropertyName());
+
+            if (!arcChangeInProcess) {
+                setReverse(property, object, (Persistent) newValue);
+            }
+            
+            markAsDirty(object);
+        }
+    }
+
+    void handleSimplePropertyChange(
+            Persistent object,
+            String propertyName,
+            Object oldValue,
+            Object newValue) {
+        context.getGraphManager().nodePropertyChanged(
+                object.getGlobalID(),
+                propertyName,
+                oldValue,
+                newValue);
+        markAsDirty(object);
     }
 
     /**
