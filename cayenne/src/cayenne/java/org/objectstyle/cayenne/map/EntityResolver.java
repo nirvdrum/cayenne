@@ -99,6 +99,7 @@ public class EntityResolver implements MappingNamespace {
     protected List maps;
     protected List mapsRef;
     protected Map entityInheritanceCache;
+    protected ClientEntityResolver clientEntityResolver;
 
     /**
      * Creates new EntityResolver.
@@ -170,18 +171,28 @@ public class EntityResolver implements MappingNamespace {
      * @since 1.2
      */
     public ClientEntityResolver getClientEntityResolver() {
-        // TODO: cache client resolver
 
-        // translate to client entities
-        Collection serverEntities = getObjEntities();
-        Collection clientEntities = new ArrayList(serverEntities.size());
-        Iterator it = serverEntities.iterator();
-        while (it.hasNext()) {
-            ObjEntity serverEntity = (ObjEntity) it.next();
-            clientEntities.add(serverEntity.getClientEntity());
+        if (clientEntityResolver == null) {
+
+            synchronized (this) {
+
+                if (clientEntityResolver == null) {
+
+                    // translate to client entities
+                    Collection serverEntities = getObjEntities();
+                    Collection clientEntities = new ArrayList(serverEntities.size());
+                    Iterator it = serverEntities.iterator();
+                    while (it.hasNext()) {
+                        ObjEntity serverEntity = (ObjEntity) it.next();
+                        clientEntities.add(serverEntity.getClientEntity());
+                    }
+
+                    clientEntityResolver = new ClientEntityResolver(clientEntities);
+                }
+            }
         }
 
-        return new ClientEntityResolver(clientEntities);
+        return clientEntityResolver;
     }
 
     /**
@@ -266,6 +277,7 @@ public class EntityResolver implements MappingNamespace {
         objEntityCache.clear();
         procedureCache.clear();
         entityInheritanceCache.clear();
+        clientEntityResolver = null;
     }
 
     /**

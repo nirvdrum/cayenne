@@ -13,6 +13,12 @@
 		<db-attribute name="TABLE1_ID" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="TABLE2_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 	</db-entity>
+	<db-entity name="MT_TABLE3">
+		<db-attribute name="BINARY_COLUMN" type="VARBINARY" length="100"/>
+		<db-attribute name="CHAR_COLUMN" type="VARCHAR" length="100"/>
+		<db-attribute name="INT_COLUMN" type="INTEGER"/>
+		<db-attribute name="TABLE3_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
 	<obj-entity name="MtTable1" className="org.objectstyle.cayenne.testdo.mt.MtTable1" clientClassName="org.objectstyle.cayenne.testdo.mt.ClientMtTable1" dbEntityName="MT_TABLE1">
 		<obj-attribute name="globalAttribute1" type="java.lang.String" db-attribute-path="GLOBAL_ATTRIBUTE1"/>
 		<obj-attribute name="serverAttribute1" type="java.lang.String" db-attribute-path="SERVER_ATTRIBUTE1"/>
@@ -22,6 +28,11 @@
 	</obj-entity>
 	<obj-entity name="MtTable2" className="org.objectstyle.cayenne.testdo.mt.MtTable2" clientClassName="org.objectstyle.cayenne.testdo.mt.ClientMtTable2" dbEntityName="MT_TABLE2">
 		<obj-attribute name="globalAttribute" type="java.lang.String" db-attribute-path="GLOBAL_ATTRIBUTE"/>
+	</obj-entity>
+	<obj-entity name="MtTable3" className="org.objectstyle.cayenne.testdo.mt.MtTable3" clientClassName="org.objectstyle.cayenne.testdo.mt.ClientMtTable3" dbEntityName="MT_TABLE3">
+		<obj-attribute name="binaryColumn" type="byte[]" db-attribute-path="BINARY_COLUMN"/>
+		<obj-attribute name="charColumn" type="java.lang.String" db-attribute-path="CHAR_COLUMN"/>
+		<obj-attribute name="intColumn" type="java.lang.Integer" db-attribute-path="INT_COLUMN"/>
 	</obj-entity>
 	<db-relationship name="table2Array" source="MT_TABLE1" target="MT_TABLE2" toMany="true">
 		<db-attribute-pair source="TABLE1_ID" target="TABLE1_ID"/>

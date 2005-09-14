@@ -442,7 +442,7 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
     public String getClientSuperClassName() {
         ObjEntity superEntity = getSuperEntity();
         return (superEntity != null)
-                ? superEntity.getClientSuperClassName()
+                ? superEntity.getClientClassName()
                 : clientSuperClassName;
     }
 

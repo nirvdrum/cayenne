@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
@@ -78,7 +79,11 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable1Subclass;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable3;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
+import org.objectstyle.cayenne.testdo.mt.MtTable1Subclass;
+import org.objectstyle.cayenne.testdo.mt.MtTable3;
 import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
@@ -159,7 +164,7 @@ public class ServerObjectContextTst extends CayenneTestCase {
         assertTrue(parent.isPerformQuery());
     }
 
-    public void testOnSelectQuery() {
+    public void testOnSelectQueryGlobalIDInjection() {
 
         final ObjEntity entity = getDomain().getEntityResolver().lookupObjEntity(
                 MtTable1.class);
@@ -196,6 +201,88 @@ public class ServerObjectContextTst extends CayenneTestCase {
         GlobalID refId = getDomain().getEntityResolver().convertToGlobalID(
                 new ObjectId(MtTable1.class, "key", 1));
         assertEquals(refId, clientObject.getGlobalID());
+    }
+
+    public void testOnSelectQueryValuePropagation() {
+
+        final ObjEntity entity = getDomain().getEntityResolver().lookupObjEntity(
+                MtTable3.class);
+
+        MtTable3 serverObject = new MtTable3() {
+
+            public ObjEntity getObjEntity() {
+                return entity;
+            }
+
+            public ObjectId getObjectId() {
+                return new ObjectId(MtTable3.class, "key", 1);
+            }
+        };
+
+        serverObject.setBinaryColumn(new byte[] {
+                1, 2, 3
+        });
+        serverObject.setCharColumn("abc");
+        serverObject.setIntColumn(new Integer(4));
+
+        MockPersistenceContext parent = new MockPersistenceContext(getDomain()
+                .getEntityResolver(), Collections.singletonList(serverObject));
+
+        ServerObjectContext context = new ServerObjectContext(parent, getDomain()
+                .getEntityResolver(), new MockDataRowStore());
+
+        SelectMessage message = new SelectMessage(new MockGenericSelectQuery(true));
+        List results = context.onSelectQuery(message);
+
+        assertNotNull(results);
+        assertEquals(1, results.size());
+
+        Object result = results.get(0);
+        assertTrue("Result is of wrong type: " + result, result instanceof ClientMtTable3);
+        ClientMtTable3 clientObject = (ClientMtTable3) result;
+
+        assertEquals(serverObject.getCharColumn(), clientObject.getCharColumn());
+        assertEquals(serverObject.getIntColumn(), clientObject.getIntColumn());
+        assertTrue(new EqualsBuilder().append(
+                clientObject.getBinaryColumn(),
+                serverObject.getBinaryColumn()).isEquals());
+    }
+
+    public void testOnSelectQueryValuePropagationInheritance() {
+
+        final ObjEntity entity = getDomain().getEntityResolver().lookupObjEntity(
+                MtTable1Subclass.class);
+
+        MtTable1Subclass serverObject = new MtTable1Subclass() {
+
+            public ObjEntity getObjEntity() {
+                return entity;
+            }
+
+            public ObjectId getObjectId() {
+                return new ObjectId(MtTable1Subclass.class, "key", 1);
+            }
+        };
+
+        serverObject.setGlobalAttribute1("abc");
+
+        MockPersistenceContext parent = new MockPersistenceContext(getDomain()
+                .getEntityResolver(), Collections.singletonList(serverObject));
+
+        ServerObjectContext context = new ServerObjectContext(parent, getDomain()
+                .getEntityResolver(), new MockDataRowStore());
+
+        SelectMessage message = new SelectMessage(new MockGenericSelectQuery(true));
+        List results = context.onSelectQuery(message);
+
+        assertNotNull(results);
+        assertEquals(1, results.size());
+
+        Object result = results.get(0);
+        assertTrue("Result is of wrong type: " + result, result instanceof ClientMtTable1Subclass);
+        ClientMtTable1Subclass clientObject = (ClientMtTable1Subclass) result;
+
+        assertEquals(serverObject.getGlobalAttribute1(), clientObject.getGlobalAttribute1());
     }
 
     public void testOnGenericQuery() {

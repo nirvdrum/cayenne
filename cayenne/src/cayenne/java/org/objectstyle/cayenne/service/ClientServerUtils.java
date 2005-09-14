@@ -60,6 +60,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.Persistent;
@@ -73,6 +74,8 @@ import org.objectstyle.cayenne.map.ObjEntity;
 // TODO: create a generic GraphSerializer, maybe using the same approach as XML
 // serialization mechanism only based on Java serialization.
 class ClientServerUtils {
+    
+    private final static Logger logObj = Logger.getLogger(ClientServerUtils.class);
 
     static Object toClientObject(EntityResolver resolver, CayenneDataObject object)
             throws Exception {
@@ -101,6 +104,7 @@ class ClientServerUtils {
         Iterator it = entity.getAttributeMap().keySet().iterator();
         while (it.hasNext()) {
             String key = (String) it.next();
+            logObj.warn("will set '" + key + "' to " + object.readProperty(key));
             PropertyUtils.setProperty(clientObject, key, object.readProperty(key));
         }
 
