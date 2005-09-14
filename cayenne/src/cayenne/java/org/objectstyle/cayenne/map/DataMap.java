@@ -442,6 +442,27 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
     }
 
     /**
+     * @since 1.2
+     */
+    public void clearObjEntities() {
+        objEntityMap.clear();
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public void clearDbEntities() {
+        dbEntityMap.clear();
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public void clearProcedures() {
+        procedureMap.clear();
+    }
+    
+    /**
      * @since 1.1
      */
     public SortedMap getQueryMap() {

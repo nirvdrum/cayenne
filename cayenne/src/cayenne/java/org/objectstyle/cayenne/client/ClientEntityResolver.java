@@ -57,11 +57,11 @@ package org.objectstyle.cayenne.client;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
@@ -74,26 +74,33 @@ import org.objectstyle.cayenne.map.ObjEntity;
 public class ClientEntityResolver implements Serializable {
 
     protected Map entitiesByClassName;
-    protected Map entitiesByName;
+
+    // TODO: (andrus, 09/13/2005) keeping a data map here (and much worse - injecting it
+    // into ObjEntities) is needed to build descriptors with the right inheritance
+    // structure. We should make a decision and probably stop passing ObjENtities to the
+    // client alltogether ... then ClientEntityResolver will only contain descriptors and
+    // won't need this cludge.
+    DataMap entityNamespace;
 
     /**
      * Creates a client entity resolver initializing it with collection of ObjEntities.
      */
     public ClientEntityResolver(Collection entities) {
         this.entitiesByClassName = new HashMap();
-        this.entitiesByName = new HashMap();
+        this.entityNamespace = new DataMap();
 
         index(entities);
     }
 
     /**
-     * Indexes a collection of entities for faster lookup.
+     * Indexes a collection of entities for faster lookup, injects an internal DataMap in
+     * the entities to provide them with a namespace to lookup related entities.
      */
     protected void index(Collection entities) {
         entitiesByClassName.clear();
-        entitiesByName.clear();
-        
-        if(entities == null) {
+        entityNamespace.clearObjEntities();
+
+        if (entities == null) {
             return;
         }
 
@@ -111,7 +118,8 @@ public class ClientEntityResolver implements Serializable {
                         "Invalid entity, Java class name is null: " + entity);
             }
 
-            entitiesByName.put(entity.getName(), entity);
+            // this will set parent DataMap of the entity...
+            entityNamespace.addObjEntity(entity);
             entitiesByClassName.put(entity.getClassName(), entity);
         }
     }
@@ -120,7 +128,7 @@ public class ClientEntityResolver implements Serializable {
      * Returns the names of all mapped entities.
      */
     public Collection getEntityNames() {
-        return Collections.unmodifiableCollection(entitiesByName.keySet());
+        return entityNamespace.getObjEntityMap().keySet();
     }
 
     /**
@@ -135,7 +143,7 @@ public class ClientEntityResolver implements Serializable {
             throw new CayenneClientException("Null entityName.");
         }
 
-        ObjEntity entity = (ObjEntity) entitiesByName.get(entityName);
+        ObjEntity entity = entityNamespace.getObjEntity(entityName);
 
         if (entity == null) {
             throw new CayenneClientException("Unmapped entity: " + entityName);
