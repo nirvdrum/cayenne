@@ -55,75 +55,10 @@
  */
 package org.objectstyle.cayenne.property;
 
-import junit.framework.TestCase;
+public class TestFields {
 
-import org.objectstyle.cayenne.unit.util.TestBean;
-
-public class FieldPropertyTst extends TestCase {
-
-    public void testConstructor() {
-        FieldProperty property = new FieldProperty(TestBean.class, "string", String.class);
-
-        assertEquals("string", property.getPropertyName());
-        assertEquals(String.class.getName(), property.getPropertyType().getName());
-    }
-
-    public void testGet() {
-        FieldProperty property = new FieldProperty(TestBean.class, "string", String.class);
-
-        TestBean object = new TestBean();
-        object.setString("abc");
-
-        assertEquals("abc", property.readValue(object));
-    }
-
-    public void testWriteValue() {
-
-        TestFields object = new TestFields();
-
-        // string
-        new FieldProperty(TestFields.class, "stringField", String.class).writeValue(
-                object,
-                null,
-                "aaa");
-        assertEquals("aaa", object.stringField);
-
-        // primitive int
-        new FieldProperty(TestFields.class, "intField", Integer.TYPE).writeValue(
-                object,
-                null,
-                new Integer(6));
-        assertEquals(6, object.intField);
-
-        // primitive array
-        byte[] bytes = new byte[] {
-                1, 2, 3
-        };
-        new FieldProperty(TestFields.class, "byteArrayField", byte[].class).writeValue(
-                object,
-                null,
-                bytes);
-        assertSame(bytes, object.byteArrayField);
-
-        // object array
-        String[] strings = new String[] {
-                "a", "b"
-        };
-        new FieldProperty(TestFields.class, "stringArrayField", String[].class).writeValue(
-                object,
-                null,
-                strings);
-        assertSame(strings, object.stringArrayField);
-    }
-
-    public void testCopy() {
-        FieldProperty property = new FieldProperty(TestBean.class, "string", String.class);
-        TestBean from = new TestBean();
-        from.setString("123");
-
-        TestBean to = new TestBean();
-
-        property.copyValue(from, to);
-        assertEquals("123", to.getString());
-    }
+    protected String stringField;
+    protected int intField;
+    protected byte[] byteArrayField;
+    protected String[] stringArrayField;
 }
