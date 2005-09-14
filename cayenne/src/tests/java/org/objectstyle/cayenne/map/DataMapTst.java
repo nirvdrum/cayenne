@@ -61,14 +61,40 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.distribution.HessianConnector;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * DataMap unit tests.
  */
 public class DataMapTst extends TestCase {
+
+    public void testSerializability() throws Exception {
+        DataMap m1 = new DataMap("abc");
+        DataMap d1 = (DataMap) Util.cloneViaSerialization(m1);
+        assertEquals(m1.getName(), d1.getName());
+
+        ObjEntity oe1 = new ObjEntity("oe1");
+        m1.addObjEntity(oe1);
+
+        DataMap d2 = (DataMap) Util.cloneViaSerialization(m1);
+        assertNotNull(d2.getObjEntity(oe1.getName()));
+    }
+
+    public void testSerializabilityWithHessian() throws Exception {
+        DataMap m1 = new DataMap("abc");
+        DataMap d1 = (DataMap) HessianConnector.cloneViaHessianSerialization(m1);
+        assertEquals(m1.getName(), d1.getName());
+
+        ObjEntity oe1 = new ObjEntity("oe1");
+        m1.addObjEntity(oe1);
+
+        DataMap d2 = (DataMap) Util.cloneViaSerialization(m1);
+        assertNotNull(d2.getObjEntity(oe1.getName()));
+    }
 
     public void testInitWithProperties() {
         Map properties = new HashMap();

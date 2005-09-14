@@ -56,12 +56,14 @@
 package org.objectstyle.cayenne.map;
 
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
@@ -75,7 +77,6 @@ import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.util.CayenneMap;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
@@ -89,8 +90,8 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * @author Andrei Adamchik
  * @author Craig Miskell
  */
-public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListener,
-        DbAttributeListener, DbRelationshipListener, ObjEntityListener,
+public class DataMap implements Serializable, XMLSerializable, MappingNamespace,
+        DbEntityListener, DbAttributeListener, DbRelationshipListener, ObjEntityListener,
         ObjAttributeListener, ObjRelationshipListener {
 
     /**
@@ -147,10 +148,10 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
     protected boolean clientSupported;
     protected String defaultClientPackage;
 
-    private CayenneMap objEntityMap = new CayenneMap(this);
-    private CayenneMap dbEntityMap = new CayenneMap(this);
-    private CayenneMap procedureMap = new CayenneMap(this);
-    private CayenneMap queryMap = new CayenneMap(this);
+    private SortedMap objEntityMap;
+    private SortedMap dbEntityMap;
+    private SortedMap procedureMap;
+    private SortedMap queryMap;
 
     /**
      * Creates a new unnamed DataMap.
@@ -167,6 +168,11 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
     }
 
     public DataMap(String mapName, Map properties) {
+        objEntityMap = new TreeMap();
+        dbEntityMap = new TreeMap();
+        procedureMap = new TreeMap();
+        queryMap = new TreeMap();
+
         setName(mapName);
         initWithProperties(properties);
     }
@@ -422,6 +428,19 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
             throw new NullPointerException("Query name can't be null.");
         }
 
+        // TODO: change method signature to return replaced procedure and make sure the
+        // Modeler handles it...
+        Object existingQuery = queryMap.get(query.getName());
+        if (existingQuery != null) {
+            if (existingQuery == query) {
+                return;
+            }
+            else {
+                throw new IllegalArgumentException("An attempt to override entity '"
+                        + query.getName());
+            }
+        }
+
         queryMap.put(query.getName(), query);
     }
 
@@ -447,21 +466,21 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
     public void clearObjEntities() {
         objEntityMap.clear();
     }
-    
+
     /**
      * @since 1.2
      */
     public void clearDbEntities() {
         dbEntityMap.clear();
     }
-    
+
     /**
      * @since 1.2
      */
     public void clearProcedures() {
         procedureMap.clear();
     }
-    
+
     /**
      * @since 1.1
      */
@@ -481,23 +500,51 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
     /**
      * Adds a new ObjEntity to this DataMap.
      */
-    public void addObjEntity(ObjEntity objEntity) {
-        if (objEntity.getName() == null) {
+    public void addObjEntity(ObjEntity entity) {
+        if (entity.getName() == null) {
             throw new NullPointerException("Attempt to add ObjEntity with no name.");
         }
 
-        objEntityMap.put(objEntity.getName(), objEntity);
+        // TODO: change method signature to return replaced entity and make sure the
+        // Modeler handles it...
+        Object existingEntity = objEntityMap.get(entity.getName());
+        if (existingEntity != null) {
+            if (existingEntity == entity) {
+                return;
+            }
+            else {
+                throw new IllegalArgumentException("An attempt to override entity '"
+                        + entity.getName());
+            }
+        }
+
+        objEntityMap.put(entity.getName(), entity);
+        entity.setDataMap(this);
     }
 
     /**
      * Adds a new DbEntity to this DataMap.
      */
-    public void addDbEntity(DbEntity dbEntity) {
-        if (dbEntity.getName() == null) {
+    public void addDbEntity(DbEntity entity) {
+        if (entity.getName() == null) {
             throw new NullPointerException("Attempt to add DbEntity with no name.");
         }
 
-        dbEntityMap.put(dbEntity.getName(), dbEntity);
+        // TODO: change method signature to return replaced entity and make sure the
+        // Modeler handles it...
+        Object existingEntity = dbEntityMap.get(entity.getName());
+        if (existingEntity != null) {
+            if (existingEntity == entity) {
+                return;
+            }
+            else {
+                throw new IllegalArgumentException("An attempt to override entity '"
+                        + entity.getName());
+            }
+        }
+
+        dbEntityMap.put(entity.getName(), entity);
+        entity.setDataMap(this);
     }
 
     /**
@@ -721,7 +768,21 @@ public class DataMap implements XMLSerializable, MappingNamespace, DbEntityListe
             throw new NullPointerException("Attempt to add procedure with no name.");
         }
 
+        // TODO: change method signature to return replaced procedure and make sure the
+        // Modeler handles it...
+        Object existingProcedure = procedureMap.get(procedure.getName());
+        if (existingProcedure != null) {
+            if (existingProcedure == procedure) {
+                return;
+            }
+            else {
+                throw new IllegalArgumentException("An attempt to override procedure '"
+                        + procedure.getName());
+            }
+        }
+
         procedureMap.put(procedure.getName(), procedure);
+        procedure.setDataMap(this);
     }
 
     public void removeProcedure(String name) {
