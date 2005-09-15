@@ -76,6 +76,44 @@ public class DataDomainTst extends CayenneTestCase {
         assertEquals("tst_name", domain.getName());
     }
 
+    public void testDataContextFactory() throws Exception {
+        DataDomain domain = new DataDomain("dom1");
+        DataContextFactory dataContextFactory = new DataContextFactory() {
+			public DataContext createDataContext(QueryEngine parent,
+					ObjectStore objectStore) {
+				return null;
+			}
+		};
+		domain.setDataContextFactory(null);
+        assertNull(domain.getDataContextFactory());
+        domain.setDataContextFactory(dataContextFactory);
+        assertSame(dataContextFactory, domain.getDataContextFactory());
+    }
+
+    public void testCreateDataContextWithDefaultDataContextFactory() throws Exception {
+        DataDomain domain = new DataDomain("dom1");
+        assertNotNull(domain.createDataContext());
+    }
+
+    public void testCreateDataContextWithNullDataContextFactory() throws Exception {
+        DataDomain domain = new DataDomain("dom1");
+        domain.setDataContextFactory(null);
+        assertNotNull(domain.createDataContext());
+    }
+
+    public void testCreateDataContextWithCustomDataContextFactory() throws Exception {
+        DataDomain domain = new DataDomain("dom1");
+        final DataContext dataContext = new DataContext();
+        DataContextFactory dataContextFactory = new DataContextFactory() {
+			public DataContext createDataContext(QueryEngine parent,
+					ObjectStore objectStore) {
+				return dataContext;
+			}
+		};
+        domain.setDataContextFactory(dataContextFactory);
+        assertEquals(dataContext, domain.createDataContext());
+    }
+
     public void testNodes() throws java.lang.Exception {
         DataDomain domain = new DataDomain("dom1");
         assertEquals(0, domain.getDataNodes().size());

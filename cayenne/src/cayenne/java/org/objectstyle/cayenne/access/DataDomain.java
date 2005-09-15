@@ -117,6 +117,7 @@ public class DataDomain implements QueryEngine, PersistenceContext {
     protected PrimaryKeyHelper primaryKeyHelper;
     protected DataRowStore sharedSnapshotCache;
     protected TransactionDelegate transactionDelegate;
+    protected DataContextFactory dataContextFactory;
     protected String name;
 
     // these are initializable from properties...
@@ -319,7 +320,14 @@ public class DataDomain implements QueryEngine, PersistenceContext {
         }
     }
 
-    /** Registers new DataMap with this domain. */
+	public DataContextFactory getDataContextFactory() {
+		return dataContextFactory;
+	}
+	public void setDataContextFactory(DataContextFactory dataContextFactory) {
+		this.dataContextFactory = dataContextFactory;
+	}
+
+	/** Registers new DataMap with this domain. */
     public void addMap(DataMap map) {
         getEntityResolver().addDataMap(map);
     }
@@ -451,7 +459,13 @@ public class DataDomain implements QueryEngine, PersistenceContext {
                 ? getSharedSnapshotCache()
                 : new DataRowStore(name, properties);
 
-        DataContext context = new DataContext(this, new ObjectStore(snapshotCache));
+        DataContext context;
+        if (null == dataContextFactory) {
+            context = new DataContext(this, new ObjectStore(snapshotCache));
+        }
+        else {
+        	context = dataContextFactory.createDataContext(this, new ObjectStore(snapshotCache));
+        }
         context.setValidatingObjectsOnCommit(isValidatingObjectsOnCommit());
         return context;
     }
