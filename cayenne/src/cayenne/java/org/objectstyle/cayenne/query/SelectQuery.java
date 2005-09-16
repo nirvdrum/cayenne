@@ -368,17 +368,19 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         // This way the query clone can take advantage of caching.  Fixes
         // problem reported in CAY-360.
 
-        Iterator        keyValuePairs  = parameters.entrySet().iterator();
-        HashCodeBuilder parametersHash = new HashCodeBuilder();
-
-        while (keyValuePairs.hasNext()) {
-          Map.Entry entry = (Map.Entry) keyValuePairs.next();
-
-          parametersHash.append(entry.getKey());
-          parametersHash.append(entry.getValue());
+        if (name != null && name.equals("") == false) {
+            Iterator        keyValuePairs  = parameters.entrySet().iterator();
+            HashCodeBuilder parametersHash = new HashCodeBuilder();
+    
+            while (keyValuePairs.hasNext()) {
+                Map.Entry entry = (Map.Entry) keyValuePairs.next();
+      
+                parametersHash.append(entry.getKey());
+                parametersHash.append(entry.getValue());
+            }
+    
+            query.setName("__CayenneInternalQuery__" + name + "__" + parametersHash.toHashCode());
         }
-
-        query.setName("__CayenneInternalQuery__" + name + "__" + parametersHash.toHashCode());
 
         if (prefetches != null) {
             query.addPrefetches(prefetches);
