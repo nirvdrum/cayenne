@@ -74,7 +74,6 @@ public class RelationshipQueryTst extends TestCase {
         RelationshipQuery query = new RelationshipQuery(oid, "relX");
         assertSame(oid, query.getObjectID());
         assertNull(query.getGlobalID());
-        assertNull(query.getRoot());
         assertSame("relX", query.getRelationshipName());
     }
 
@@ -84,7 +83,6 @@ public class RelationshipQueryTst extends TestCase {
         RelationshipQuery query = new RelationshipQuery(oid, "relX");
         assertSame(oid, query.getGlobalID());
         assertNull(query.getObjectID());
-        assertNull(query.getRoot());
         assertSame("relX", query.getRelationshipName());
     }
 

@@ -95,6 +95,7 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ParameterizedQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
@@ -163,9 +164,7 @@ public class DataContext implements QueryEngine, Serializable {
     public static final EventSubject DID_ROLLBACK = EventSubject.getSubject(
             DataContext.class,
             "DataContextDidRollback");
-    
 
-    
     /**
      * A holder of a DataContext bound to the current thread.
      * 
@@ -187,7 +186,7 @@ public class DataContext implements QueryEngine, Serializable {
     protected ObjectStore objectStore;
 
     protected transient QueryEngine parent;
-    
+
     /**
      * Stores user defined properties associated with this DataContext.
      * 
@@ -213,7 +212,7 @@ public class DataContext implements QueryEngine, Serializable {
                 .loadClass(className)
                 .newInstance();
     }
-    
+
     /**
      * Returns the DataContext bound to the current thread.
      * 
@@ -231,11 +230,11 @@ public class DataContext implements QueryEngine, Serializable {
 
         return dc;
     }
-    
+
     /**
-     * Binds a DataContext to the current thread. DataContext can later be retrieved by 
-     * users in the same thread by calling {@link DataContext#getThreadDataContext}. Using
-     * null parameter will unbind currently bound DataContext. 
+     * Binds a DataContext to the current thread. DataContext can later be retrieved by
+     * users in the same thread by calling {@link DataContext#getThreadDataContext}.
+     * Using null parameter will unbind currently bound DataContext.
      * 
      * @since 1.1
      */
@@ -246,8 +245,9 @@ public class DataContext implements QueryEngine, Serializable {
     /**
      * Factory method that creates and returns a new instance of DataContext based on
      * default domain. If more than one domain exists in the current configuration,
-     * {@link DataContext#createDataContext(String)} must be used instead. ObjectStore associated
-     * with created DataContext will have a cache stack configured using parent domain settings.
+     * {@link DataContext#createDataContext(String)} must be used instead. ObjectStore
+     * associated with created DataContext will have a cache stack configured using parent
+     * domain settings.
      */
     public static DataContext createDataContext() {
         return Configuration.getSharedConfiguration().getDomain().createDataContext();
@@ -257,8 +257,8 @@ public class DataContext implements QueryEngine, Serializable {
      * Factory method that creates and returns a new instance of DataContext based on
      * default domain. If more than one domain exists in the current configuration,
      * {@link DataContext#createDataContext(String, boolean)} must be used instead.
-     * ObjectStore associated with newly created DataContext will have a cache 
-     * stack configured according to the specified policy, overriding a parent domain setting.
+     * ObjectStore associated with newly created DataContext will have a cache stack
+     * configured according to the specified policy, overriding a parent domain setting.
      * 
      * @since 1.1
      */
@@ -282,9 +282,8 @@ public class DataContext implements QueryEngine, Serializable {
 
     /**
      * Creates and returns new DataContext that will use a named DataDomain as its parent.
-     * ObjectStore associated with newly created DataContext will have a cache 
-     * stack configured according to the specified policy, overriding a parent domain 
-     * setting.
+     * ObjectStore associated with newly created DataContext will have a cache stack
+     * configured according to the specified policy, overriding a parent domain setting.
      * 
      * @since 1.1
      */
@@ -339,7 +338,7 @@ public class DataContext implements QueryEngine, Serializable {
             }
         }
     }
-    
+
     /**
      * Returns a map of user-defined properties associated with this DataContext.
      * 
@@ -355,7 +354,7 @@ public class DataContext implements QueryEngine, Serializable {
 
         return userProperties;
     }
-    
+
     /**
      * Returns a user-defined property previously set via 'setUserProperty'. Note that it
      * is a caller responsibility to synchronize access to properties.
@@ -375,7 +374,6 @@ public class DataContext implements QueryEngine, Serializable {
     public void setUserProperty(String key, Object value) {
         getUserProperties().put(key, value);
     }
-    
 
     /**
      * Returns parent QueryEngine object. In most cases returned object is an instance of
@@ -486,7 +484,8 @@ public class DataContext implements QueryEngine, Serializable {
             DataObject obj = objectStore.getObject(oid);
             if (obj == null) {
                 try {
-                    // TODO: shouldn't we replace this with oid.getObjectClass().newInstance()
+                    // TODO: shouldn't we replace this with
+                    // oid.getObjectClass().newInstance()
                     obj = DataContext.newDataObject(oid.getObjectClass().getName());
                 }
                 catch (Exception ex) {
@@ -574,7 +573,7 @@ public class DataContext implements QueryEngine, Serializable {
                 continue;
             }
 
-            // target is resolved and we have an FK->PK to it, 
+            // target is resolved and we have an FK->PK to it,
             // so extract it from target...
             DataObject target = (DataObject) targetObject;
             Map idParts = target.getObjectId().getIdSnapshot();
@@ -595,7 +594,7 @@ public class DataContext implements QueryEngine, Serializable {
         // set above when db relationships where processed.
         Map thisIdParts = anObject.getObjectId().getIdSnapshot();
         if (thisIdParts != null) {
-            
+
             // put only those that do not exist in the map
             Iterator idIterator = thisIdParts.entrySet().iterator();
             while (idIterator.hasNext()) {
@@ -606,7 +605,7 @@ public class DataContext implements QueryEngine, Serializable {
                 }
             }
         }
-        
+
         return snapshot;
     }
 
@@ -655,7 +654,7 @@ public class DataContext implements QueryEngine, Serializable {
             List dataRows,
             boolean refresh,
             boolean resolveInheritanceHierarchy) {
-        
+
         return new DataContextObjectFactory(this, refresh, resolveInheritanceHierarchy)
                 .objectsFromDataRows(entity, dataRows);
     }
@@ -696,7 +695,6 @@ public class DataContext implements QueryEngine, Serializable {
                 true);
         return (DataObject) list.get(0);
     }
-
 
     /**
      * Instantiates new object and registers it with itself. Object class is determined
@@ -757,7 +755,6 @@ public class DataContext implements QueryEngine, Serializable {
         registerNewObjectWithEntity(dataObject, entity);
         return dataObject;
     }
-
 
     /**
      * Registers a new object (that is not yet persistent) with itself.
@@ -850,24 +847,25 @@ public class DataContext implements QueryEngine, Serializable {
         if (objects.isEmpty()) {
             return;
         }
-        
+
         // clone object list... this maybe a relationship collection with nullify delete
-        // rule, so modifying 
+        // rule, so modifying
         Iterator it = new ArrayList(objects).iterator();
         while (it.hasNext()) {
             DataObject object = (DataObject) it.next();
             deleteObject(object);
         }
     }
-    
+
     /**
      * Schedules an object for deletion on the next commit of this DataContext. Object's
-     * persistence state is changed to PersistenceState.DELETED; objects related to this object 
-     * are processed according to delete rules, i.e. relationships can be unset ("nullify" rule), 
-     * deletion operation is cascaded (cascade rule).
+     * persistence state is changed to PersistenceState.DELETED; objects related to this
+     * object are processed according to delete rules, i.e. relationships can be unset
+     * ("nullify" rule), deletion operation is cascaded (cascade rule).
      * 
      * @param object data object that we want to delete.
-     * @throws DeleteDenyException if a DENY delete rule is applicable for object deletion.
+     * @throws DeleteDenyException if a DENY delete rule is applicable for object
+     *             deletion.
      * @throws NullPointerException if object is null.
      */
     public void deleteObject(DataObject object) throws DeleteDenyException {
@@ -1166,6 +1164,26 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
+     * Runs selecting QueryExecutionPlan.
+     * 
+     * @since 1.2
+     */
+    public List performSelectQuery(QueryExecutionPlan queryPlan) {
+
+        // TODO (Andrus, 09/17/2005) - copy implementation from ObjectDataContext once
+        // DataContext becomes a real ObjectContext
+
+        Query query = queryPlan.resolve(getEntityResolver());
+        if (!(query instanceof GenericSelectQuery)) {
+            throw new CayenneRuntimeException(
+                    "Only QueryExecutionPlans that resolve to GenericSelectQueries "
+                            + "can be used in this method with current implementation of DataContext. Bad query: "
+                            + queryPlan);
+        }
+        return performQuery((GenericSelectQuery) query);
+    }
+
+    /**
      * Performs a single selecting query. If if query is a SelectQuery that require
      * prefetching relationships, will create additional queries to perform necessary
      * prefetching. Various query setting control the behavior of this method and the
@@ -1255,11 +1273,11 @@ public class DataContext implements QueryEngine, Serializable {
                     + query);
         }
 
-        return new DataContextSelectAction(this).performQuery((GenericSelectQuery) query, query
-                .getName(), refresh);
+        return new DataContextSelectAction(this).performQuery(
+                (GenericSelectQuery) query,
+                query.getName(),
+                refresh);
     }
-
-
 
     // serialization support
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -1289,7 +1307,7 @@ public class DataContext implements QueryEngine, Serializable {
         }
     }
 
-    //serialization support
+    // serialization support
     private void readObject(ObjectInputStream in) throws IOException,
             ClassNotFoundException {
 

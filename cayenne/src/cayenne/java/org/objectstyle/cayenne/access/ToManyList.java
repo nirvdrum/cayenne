@@ -304,7 +304,7 @@ public class ToManyList implements List, Serializable {
                                 source.getObjectId(),
                                 relationship);
 
-                        localList = source.getDataContext().performQuery(query);
+                        localList = source.getDataContext().performSelectQuery(query);
                     }
 
                     mergeLocalChanges(localList);

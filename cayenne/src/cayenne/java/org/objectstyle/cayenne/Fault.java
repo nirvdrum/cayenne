@@ -138,7 +138,7 @@ public abstract class Fault implements Serializable {
 
                 RelationshipQuery query = new RelationshipQuery(sourceObject
                         .getObjectId(), relationship.getName());
-                List objects = context.performQuery(query);
+                List objects = context.performSelectQuery(query);
 
                 if (objects.isEmpty()) {
                     return null;

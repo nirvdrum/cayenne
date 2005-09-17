@@ -55,9 +55,6 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.apache.commons.lang.StringUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
@@ -79,7 +76,7 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  */
 // TODO: no need to inherit from AbstractQuery once DataContext starts supporting
 // QueryExecutionPlan.
-public class RelationshipQuery extends AbstractQuery implements GenericSelectQuery {
+public class RelationshipQuery implements QueryExecutionPlan {
 
     protected GlobalID globalID;
     protected ObjectId objectID;
@@ -136,34 +133,6 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
         return relationshipName;
     }
 
-    public String getCachePolicy() {
-        return GenericSelectQuery.NO_CACHE;
-    }
-
-    public boolean isFetchingDataRows() {
-        return false;
-    }
-
-    public boolean isRefreshingObjects() {
-        return true;
-    }
-
-    public boolean isResolvingInherited() {
-        return true;
-    }
-
-    public int getPageSize() {
-        return 0;
-    }
-
-    public int getFetchLimit() {
-        return 0;
-    }
-
-    public Collection getJointPrefetches() {
-        return Collections.EMPTY_SET;
-    }
-
     /**
      * Substitutes this query with a SelectQuery and routes it down the stack.
      */
@@ -213,18 +182,7 @@ public class RelationshipQuery extends AbstractQuery implements GenericSelectQue
         Expression qualifier = ExpressionFactory.matchDbExp(relationship
                 .getReverseDbRelationshipPath(), id);
 
-        SelectQuery select = new SelectQuery(
-                (ObjEntity) relationship.getTargetEntity(),
-                qualifier);
-
-        // set runtime properties
-        select.setRefreshingObjects(isRefreshingObjects());
-        select.setResolvingInherited(isResolvingInherited());
-        select.setPageSize(getPageSize());
-        select.setFetchLimit(getFetchLimit());
-        select.setFetchingDataRows(isFetchingDataRows());
-
-        return select;
+        return new SelectQuery((ObjEntity) relationship.getTargetEntity(), qualifier);
     }
 
     /**
