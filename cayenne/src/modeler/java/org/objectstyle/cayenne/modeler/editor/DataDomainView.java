@@ -82,7 +82,8 @@ import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
 
-import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**
@@ -140,31 +141,41 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
 
         this.sharedCache = new JCheckBox();
         this.remoteUpdates = new JCheckBox();
-        this.configRemoteUpdates = new JButton("Configure");
+        this.configRemoteUpdates = new JButton("Configure...");
         configRemoteUpdates.setEnabled(false);
 
         // assemble
-
+        CellConstraints cc = new CellConstraints();
         FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, left:max(20dlu;pref), 3dlu, left:150",
-                "");
-        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+                "right:100dlu, 3dlu, fill:50dlu, 3dlu, fill:47dlu, 3dlu, fill:100",
+                "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p");
+
+        PanelBuilder builder = new PanelBuilder(layout);
         builder.setDefaultDialogBorder();
 
-        builder.appendSeparator("DataDomain Configuration");
-        builder.append("DataDomain Name:", name.getComponent(), 3);
-        builder.append("DataContext Factory:", dataContextFactory.getComponent(), 3);
-        builder.append("Child DataContexts Validate Objects:", objectValidation, 3);
-        builder.append("Container-Managed Transactions:", externalTransactions, 3);
+        builder.addSeparator("DataDomain Configuration", cc.xywh(1, 1, 7, 1));
+        builder.addLabel("DataDomain Name:", cc.xy(1, 3));
+        builder.add(name.getComponent(), cc.xywh(3, 3, 5, 1));
 
-        builder.appendSeparator("Cache Configuration");
-        builder.append("Max. Number of Objects:", cacheSize.getComponent(), 3);
-        builder.append("Use Shared Cache:", sharedCache, 3);
-        builder
-                .append(
-                        "Remote Change Notifications:",
-                        remoteUpdates,
-                        configRemoteUpdates);
+        builder.addLabel("DataContext Factory:", cc.xy(1, 5));
+        builder.add(dataContextFactory.getComponent(), cc.xywh(3, 5, 5, 1));
+
+        builder.addLabel("Object Validation:", cc.xy(1, 7));
+        builder.add(objectValidation, cc.xy(3, 7));
+
+        builder.addLabel("Container-Managed Transactions:", cc.xy(1, 9));
+        builder.add(externalTransactions, cc.xy(3, 9));
+        
+        builder.addSeparator("Cache Configuration", cc.xywh(1, 11, 7, 1));
+        builder.addLabel("Max. Number of Objects:", cc.xy(1, 13));
+        builder.add(cacheSize.getComponent(), cc.xy(3, 13));
+
+        builder.addLabel("Use Shared Cache:", cc.xy(1, 15));
+        builder.add(sharedCache, cc.xy(3, 15));
+
+        builder.addLabel("Remote Change Notifications:", cc.xy(1, 17));
+        builder.add(remoteUpdates, cc.xy(3, 17));
+        builder.add(configRemoteUpdates, cc.xy(7, 17));
 
         this.setLayout(new BorderLayout());
         this.add(builder.getPanel(), BorderLayout.CENTER);
