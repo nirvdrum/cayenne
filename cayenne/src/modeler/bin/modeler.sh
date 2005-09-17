@@ -7,6 +7,8 @@
 
 MAIN_CLASS=org.objectstyle.cayenne.modeler.Main
 
+CLASSPATH=
+
 # OS specific support.
 cygwin=false
 case "`uname`" in

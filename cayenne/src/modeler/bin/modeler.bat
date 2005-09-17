@@ -22,6 +22,7 @@ rem -------------------------------------------------------------------
 
 set MAIN_CLASS=org.objectstyle.cayenne.modeler.Main
 
+set CLASSPATH=
 
 if not "%JAVA_HOME%" == "" goto check_cayenne_home
 echo Please define JAVA_HOME to point to your JSDK installation.
