@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;
 import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.graph.OperationRecorder;
@@ -202,9 +203,9 @@ public class ClientObjectContext implements ObjectContext {
 
     public void rollback() {
         if (!changeRecorder.isEmpty()) {
-            changeRecorder.getDiffs().undo(graphManager);
 
-            stateRecorder.processCommit(graphManager);
+            changeRecorder.getDiffs().undo(new NullChangeHandler());
+            stateRecorder.processRollback(graphManager);
             changeRecorder.clear();
         }
     }
@@ -366,5 +367,27 @@ public class ClientObjectContext implements ObjectContext {
         ObjEntity entity = getEntityResolver().lookupEntity(
                 object.getGlobalID().getEntityName());
         return entity.getClassDescriptor();
+    }
+    
+    class NullChangeHandler implements GraphChangeHandler {
+
+        public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
+        }
+
+        public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
+        }
+
+        public void nodeCreated(Object nodeId) {
+        }
+
+        public void nodeIdChanged(Object nodeId, Object newId) {
+        }
+
+        public void nodePropertyChanged(Object nodeId, String property, Object oldValue, Object newValue) {
+        }
+
+        public void nodeRemoved(Object nodeId) {
+        }
+        
     }
 }

@@ -110,6 +110,27 @@ class ClientStateRecorder implements GraphChangeHandler {
 
         clear();
     }
+    
+    void processRollback(GraphMap graphMap) {
+        Iterator it = dirtyIds.iterator();
+        while (it.hasNext()) {
+            Object node = graphMap.getNode(it.next());
+            if (node instanceof Persistent) {
+                Persistent persistentNode = (Persistent) node;
+                switch (persistentNode.getPersistenceState()) {
+                    case PersistenceState.MODIFIED:
+                    case PersistenceState.DELETED:
+                        persistentNode.setPersistenceState(PersistenceState.COMMITTED);
+                        break;
+                    case PersistenceState.NEW:
+                        persistentNode.setPersistenceState(PersistenceState.TRANSIENT);
+                        break;
+                }
+            }
+        }
+
+        clear();
+    }
 
     boolean hasChanges() {
         return !dirtyIds.isEmpty();
