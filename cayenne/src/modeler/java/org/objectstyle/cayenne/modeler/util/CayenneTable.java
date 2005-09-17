@@ -56,9 +56,6 @@
 package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.Component;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.util.EventObject;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JTable;
@@ -87,16 +84,7 @@ public class CayenneTable extends JTable {
         
         JTextField textField = CayenneWidgetFactory.createTextField(0);
         final DefaultCellEditor textEditor = new DefaultCellEditor(textField);
-        
-        // this takes care of cases like handling of "delete" button clicks
-        // that delete a row being currently edited....
-        textField.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent e) {
-                if (!e.isTemporary()) {
-                    textEditor.cancelCellEditing();
-                }
-            }
-        });
+        textEditor.setClickCountToStart(1);
 
         setDefaultEditor(Object.class, textEditor);
         setDefaultEditor(String.class, textEditor);
@@ -141,24 +129,6 @@ public class CayenneTable extends JTable {
         }
     }
 
-    /**
-     * @see javax.swing.event.CellEditorListener#editingStopped(ChangeEvent)
-     */
-    public void editingStopped(ChangeEvent e) {
-        super.editingStopped(e);
-
-        // only go down one row if we are editing text
-        int row = getSelectedRow();
-        if (row >= 0 && this.getRowCount() > 0 && getSelectedTextComponent() != null) {
-            row++;
-
-            if (row >= this.getRowCount()) {
-                row = 0;
-            }
-            select(row);
-        }
-    }
-
     public JTextComponent getSelectedTextComponent() {
         int row = getSelectedRow();
         int column = getSelectedColumn();
@@ -174,24 +144,5 @@ public class CayenneTable extends JTable {
             }
         }
         return null;
-    }
-
-    /**
-     * @see javax.swing.JTable#editCellAt(int, int, EventObject)
-     */
-    public boolean editCellAt(int row, int column, EventObject e) {
-        boolean edit = super.editCellAt(row, column, e);
-
-        if (edit) {
-            JTextComponent t = getSelectedTextComponent();
-            if (t != null) {
-                if (!t.isFocusOwner()) {
-                    t.requestFocus();
-                }
-
-                t.setCaretPosition(t.getDocument().getLength());
-            }
-        }
-        return edit;
     }
 }
