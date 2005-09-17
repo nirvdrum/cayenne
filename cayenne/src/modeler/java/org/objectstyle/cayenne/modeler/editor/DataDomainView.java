@@ -96,6 +96,7 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
     protected TextAdapter cacheSize;
     protected JCheckBox objectValidation;
     protected JCheckBox externalTransactions;
+    protected TextAdapter dataContextFactory;
     protected JCheckBox sharedCache;
     protected JCheckBox remoteUpdates;
     protected JButton configRemoteUpdates;
@@ -127,6 +128,13 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
             }
         };
 
+        this.dataContextFactory = new TextAdapter(new JTextField()) {
+
+            protected void updateModel(String text) {
+                setDomainProperty(DataDomain.DATA_CONTEXT_FACTORY_PROPERTY, text, null);
+            }
+        };
+
         this.objectValidation = new JCheckBox();
         this.externalTransactions = new JCheckBox();
 
@@ -145,6 +153,7 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
 
         builder.appendSeparator("DataDomain Configuration");
         builder.append("DataDomain Name:", name.getComponent(), 3);
+        builder.append("DataContext Factory:", dataContextFactory.getComponent(), 3);
         builder.append("Child DataContexts Validate Objects:", objectValidation, 3);
         builder.append("Container-Managed Transactions:", externalTransactions, 3);
 
@@ -302,6 +311,9 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
         externalTransactions.setSelected(getDomainBooleanProperty(
                 DataDomain.USING_EXTERNAL_TRANSACTIONS_PROPERTY,
                 Boolean.toString(DataDomain.USING_EXTERNAL_TRANSACTIONS_DEFAULT)));
+        dataContextFactory.setText(getDomainProperty(
+                DataDomain.DATA_CONTEXT_FACTORY_PROPERTY,
+                null));
 
         sharedCache.setSelected(getDomainBooleanProperty(
                 DataDomain.SHARED_CACHE_ENABLED_PROPERTY,

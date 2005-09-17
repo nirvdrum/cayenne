@@ -56,8 +56,11 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.objectstyle.cayenne.ConfigurationException;
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.conf.FileConfiguration;
@@ -66,7 +69,7 @@ import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
  * Subclass of FileConfiguration used in the project model.
- *
+ * 
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
@@ -74,6 +77,7 @@ public class ProjectConfiguration extends FileConfiguration {
 
     /**
      * Override parent implementation to ignore loading failures.
+     * 
      * @see FileConfiguration#FileConfiguration(File)
      */
     public ProjectConfiguration(File projectFile) {
@@ -94,8 +98,8 @@ public class ProjectConfiguration extends FileConfiguration {
     }
 
     /**
-     * Override parent implementation to prevent loading of
-     * nonexisting files.
+     * Override parent implementation to prevent loading of nonexisting files.
+     * 
      * @see FileConfiguration#canInitialize()
      */
     public boolean canInitialize() {
@@ -104,6 +108,7 @@ public class ProjectConfiguration extends FileConfiguration {
 
     /**
      * Override parent implementation to allow for null files.
+     * 
      * @see FileConfiguration#setProjectFile(File)
      */
     protected void setProjectFile(File projectFile) {
@@ -134,21 +139,47 @@ public class ProjectConfiguration extends FileConfiguration {
 
         public ProjectLoader() {
             super(
-                ProjectConfiguration.this,
-                ProjectConfiguration.this.getLoadStatus(),
-                ProjectConfiguration.getLoggingLevel());
+                    ProjectConfiguration.this,
+                    ProjectConfiguration.this.getLoadStatus(),
+                    ProjectConfiguration.getLoggingLevel());
         }
 
         public void shouldLoadDataDomain(String domainName) {
             super.shouldLoadDataDomain(domainName);
 
             try {
-                // disable class indexing 
+                // disable class indexing
                 findDomain(domainName).getEntityResolver().setIndexedByClass(false);
             }
             catch (Exception ex) {
                 throw new ConfigurationException("Domain is not loaded: " + domainName);
             }
         }
+
+        public void shouldLoadDataDomainProperties(String domainName, Map properties) {
+
+            // remove factory property to avoid instatiation attempts for unknown/invalid
+            // classes
+
+            Map propertiesClone = new HashMap(properties);
+            Object dataContextFactory = propertiesClone
+                    .remove(DataDomain.DATA_CONTEXT_FACTORY_PROPERTY);
+
+            super.shouldLoadDataDomainProperties(domainName, propertiesClone);
+
+            // stick property back in...
+            if (dataContextFactory != null) {
+                try {
+                    findDomain(domainName).getProperties().put(
+                            DataDomain.DATA_CONTEXT_FACTORY_PROPERTY,
+                            dataContextFactory);
+                }
+                catch (Exception ex) {
+                    throw new ConfigurationException("Domain is not loaded: "
+                            + domainName);
+                }
+            }
+        }
     }
+
 }

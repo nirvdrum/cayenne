@@ -76,6 +76,7 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryChain;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.query.QueryRouter;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * DataDomain performs query routing functions in Cayenne. DataDomain creates single data
@@ -91,7 +92,7 @@ import org.objectstyle.cayenne.query.QueryRouter;
  */
 public class DataDomain implements QueryEngine, PersistenceContext {
 
-    private static Logger logObj = Logger.getLogger(DataDomain.class);
+    private static final Logger logObj = Logger.getLogger(DataDomain.class);
 
     public static final String SHARED_CACHE_ENABLED_PROPERTY = "cayenne.DataDomain.sharedCache";
     public static final boolean SHARED_CACHE_ENABLED_DEFAULT = true;
@@ -101,6 +102,13 @@ public class DataDomain implements QueryEngine, PersistenceContext {
 
     public static final String USING_EXTERNAL_TRANSACTIONS_PROPERTY = "cayenne.DataDomain.usingExternalTransactions";
     public static final boolean USING_EXTERNAL_TRANSACTIONS_DEFAULT = false;
+
+    /**
+     * Defines a property name for storing an optional DataContextFactory.
+     * 
+     * @since 1.2
+     */
+    public static final String DATA_CONTEXT_FACTORY_PROPERTY = "cayenne.DataDomain.dataContextFactory";
 
     /** Stores mapping of data nodes to DataNode name keys. */
     protected Map nodes = Collections.synchronizedMap(new TreeMap());
@@ -156,6 +164,7 @@ public class DataDomain implements QueryEngine, PersistenceContext {
         sharedCacheEnabled = SHARED_CACHE_ENABLED_DEFAULT;
         validatingObjectsOnCommit = VALIDATING_OBJECTS_ON_COMMIT_DEFAULT;
         usingExternalTransactions = USING_EXTERNAL_TRANSACTIONS_DEFAULT;
+        dataContextFactory = null;
     }
 
     /**
@@ -178,6 +187,8 @@ public class DataDomain implements QueryEngine, PersistenceContext {
         Object usingExternalTransactions = localMap
                 .get(USING_EXTERNAL_TRANSACTIONS_PROPERTY);
 
+        Object dataContextFactory = localMap.get(DATA_CONTEXT_FACTORY_PROPERTY);
+
         if (logObj.isDebugEnabled()) {
             logObj.debug("DataDomain property "
                     + SHARED_CACHE_ENABLED_PROPERTY
@@ -191,6 +202,10 @@ public class DataDomain implements QueryEngine, PersistenceContext {
                     + USING_EXTERNAL_TRANSACTIONS_PROPERTY
                     + " = "
                     + usingExternalTransactions);
+            logObj.debug("DataDomain property "
+                    + DATA_CONTEXT_FACTORY_PROPERTY
+                    + " = "
+                    + dataContextFactory);
         }
 
         // init ivars from properties
@@ -203,14 +218,45 @@ public class DataDomain implements QueryEngine, PersistenceContext {
         this.usingExternalTransactions = (usingExternalTransactions != null)
                 ? "true".equalsIgnoreCase(usingExternalTransactions.toString())
                 : USING_EXTERNAL_TRANSACTIONS_DEFAULT;
+
+        if (dataContextFactory != null
+                && !Util.isEmptyString(dataContextFactory.toString())) {
+            try {
+                Class factoryClass = Class.forName(
+                        dataContextFactory.toString(),
+                        true,
+                        Thread.currentThread().getContextClassLoader());
+
+                if (!DataContextFactory.class.isAssignableFrom(factoryClass)) {
+                    throw new CayenneRuntimeException(
+                            "Error loading DataContextFactory - factory class does not implement 'DataContextFactory': "
+                                    + factoryClass.getName());
+                }
+                this.dataContextFactory = (DataContextFactory) factoryClass.newInstance();
+            }
+            catch (CayenneRuntimeException e) {
+                throw e;
+            }
+            catch (Exception e) {
+                throw new CayenneRuntimeException("Error loading DataContextFactory: "
+                        + dataContextFactory, e);
+            }
+        }
+        else {
+            this.dataContextFactory = null;
+        }
     }
 
-    /** Returns "name" property value. */
+    /**
+     * Returns "name" property value.
+     */
     public String getName() {
         return name;
     }
 
-    /** Sets "name" property to a new value. */
+    /**
+     * Sets "name" property to a new value.
+     */
     public synchronized void setName(String name) {
         this.name = name;
         if (sharedSnapshotCache != null) {
@@ -320,14 +366,15 @@ public class DataDomain implements QueryEngine, PersistenceContext {
         }
     }
 
-	public DataContextFactory getDataContextFactory() {
-		return dataContextFactory;
-	}
-	public void setDataContextFactory(DataContextFactory dataContextFactory) {
-		this.dataContextFactory = dataContextFactory;
-	}
+    public DataContextFactory getDataContextFactory() {
+        return dataContextFactory;
+    }
 
-	/** Registers new DataMap with this domain. */
+    public void setDataContextFactory(DataContextFactory dataContextFactory) {
+        this.dataContextFactory = dataContextFactory;
+    }
+
+    /** Registers new DataMap with this domain. */
     public void addMap(DataMap map) {
         getEntityResolver().addDataMap(map);
     }
@@ -464,7 +511,8 @@ public class DataDomain implements QueryEngine, PersistenceContext {
             context = new DataContext(this, new ObjectStore(snapshotCache));
         }
         else {
-        	context = dataContextFactory.createDataContext(this, new ObjectStore(snapshotCache));
+            context = dataContextFactory.createDataContext(this, new ObjectStore(
+                    snapshotCache));
         }
         context.setValidatingObjectsOnCommit(isValidatingObjectsOnCommit());
         return context;
@@ -631,7 +679,9 @@ public class DataDomain implements QueryEngine, PersistenceContext {
      * 
      * @since 1.2
      */
-    public void commitChangesInContext(ObjectContext context, GraphChangeHandler commitChangeCallback) {
+    public void commitChangesInContext(
+            ObjectContext context,
+            GraphChangeHandler commitChangeCallback) {
         new DataDomainCommitAction(this).commit(context, commitChangeCallback);
     }
 
