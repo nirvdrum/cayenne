@@ -130,6 +130,11 @@ public interface ObjectContext extends Serializable {
      *         includes things like generated ids, etc.
      */
     GraphDiff commit();
+    
+    /**
+     * Resets changes made to the objects in the ObjectContext.
+     */
+    void rollback();
 
     /**
      * Executes a selecting query, returning a list of persistent objects or data rows.

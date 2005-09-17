@@ -72,6 +72,9 @@ public class MockObjectContext extends MockPersistenceContext implements ObjectC
     public MockObjectContext() {
         super();
     }
+    
+    public void rollback() {
+    }
 
     public Collection newObjects() {
         return null;

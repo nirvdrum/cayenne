@@ -189,6 +189,10 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
 
     // ==== END: DataContext compatibility code... need to merge to DataContext
     // --------------------------------------------------------------------------
+    
+    public void rollback() {
+        rollbackChanges();
+    }
 
     DataObject createAndRegisterNewObject(ObjectId id) {
         if (id.getObjectClass() == null) {

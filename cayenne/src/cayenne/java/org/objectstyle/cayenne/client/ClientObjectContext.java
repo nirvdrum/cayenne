@@ -200,6 +200,15 @@ public class ClientObjectContext implements ObjectContext {
         }
     }
 
+    public void rollback() {
+        if (!changeRecorder.isEmpty()) {
+            changeRecorder.getDiffs().undo(graphManager);
+
+            stateRecorder.processCommit(graphManager);
+            changeRecorder.clear();
+        }
+    }
+
     /**
      * Deletes an object locally, scheduling it for future deletion from the external data
      * store.
