@@ -62,57 +62,58 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.util.EntityMergeSupport;
 
 /**
- * Action that synchronizes a given ObjEntity with the current state of the
- * underlying DbEntity.
+ * Action that synchronizes a given ObjEntity with the current state of the underlying
+ * DbEntity.
  * 
  * @author Andrei Adamchik
  */
 public class ObjEntitySyncAction extends CayenneAction {
 
-	public static String getActionName() {
-		return "Sync ObjEntity with DbEntity";
-	}
+    public static String getActionName() {
+        return "Sync ObjEntity with DbEntity";
+    }
 
-	public ObjEntitySyncAction(Application application) {
-		super(getActionName(), application);
-	}
-	
-	public String getIconName() {
+    public ObjEntitySyncAction(Application application) {
+        super(getActionName(), application);
+    }
+
+    public String getIconName() {
         return "icon-sync.gif";
     }
 
-	/**
+    /**
      * @see org.objectstyle.cayenne.modeler.util.CayenneAction#performAction(ActionEvent)
      */
-	public void performAction(ActionEvent e) {
-		synchObjEntity();
-	}
+    public void performAction(ActionEvent e) {
+        synchObjEntity();
+    }
 
-	protected void synchObjEntity() {
-		ProjectController mediator = getProjectController();
-		DataMap map = mediator.getCurrentDataMap();
-		ObjEntity ent = mediator.getCurrentObjEntity();
+    protected void synchObjEntity() {
+        ProjectController mediator = getProjectController();
+        DataMap map = mediator.getCurrentDataMap();
+        ObjEntity entity = mediator.getCurrentObjEntity();
 
-		if (map != null && ent != null) {
-			EntityMergeSupport merger = new EntityMergeSupport(map);
-			merger.synchronizeWithDbEntity(ent);
+        if (map != null && entity != null) {
+            EntityMergeSupport merger = new EntityMergeSupport(map);
+            merger.synchronizeWithDbEntity(entity);
 
-			// fire a chain of "remove/add" events for entity
-			// this seems to be the only way to refresh the view
-			mediator.fireObjEntityEvent(
-				new EntityEvent(this, ent, EntityEvent.REMOVE));
+            mediator
+                    .fireObjEntityEvent(new EntityEvent(this, entity, EntityEvent.CHANGE));
+            mediator.fireObjEntityDisplayEvent(new EntityDisplayEvent(
+                    this,
+                    entity,
+                    map,
+                    mediator.getCurrentDataDomain()));
+        }
+    }
 
-			mediator.fireObjEntityEvent(
-				new EntityEvent(this, ent, EntityEvent.ADD));
-		}
-	}
-	
-	/**
+    /**
      * Returns <code>true</code> if path contains a ObjEntity object.
      */
     public boolean enableForPath(ProjectPath path) {
