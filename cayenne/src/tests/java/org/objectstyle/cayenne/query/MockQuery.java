@@ -80,10 +80,16 @@ public class MockQuery implements Query {
         this.name = name;
     }
 
+    /**
+     * @deprecated since 1.2
+     */
     public Level getLoggingLevel() {
         return null;
     }
 
+    /**
+     * @deprecated since 1.2
+     */
     public void setLoggingLevel(Level level) {
 
     }

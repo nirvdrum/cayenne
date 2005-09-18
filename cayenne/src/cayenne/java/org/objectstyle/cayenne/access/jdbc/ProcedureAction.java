@@ -109,8 +109,7 @@ public class ProcedureAction extends BaseSQLAction {
         transl.setEntityResolver(getEntityResolver());
         transl.setConnection(connection);
 
-        CallableStatement statement = (CallableStatement) transl.createStatement(query
-                .getLoggingLevel());
+        CallableStatement statement = (CallableStatement) transl.createStatement();
 
         try {
             // stored procedure may contain a mixture of update counts and result sets,
@@ -145,7 +144,7 @@ public class ProcedureAction extends BaseSQLAction {
                     if (updateCount == -1) {
                         break;
                     }
-                    QueryLogger.logUpdateCount(query.getLoggingLevel(), updateCount);
+                    QueryLogger.logUpdateCount(updateCount);
                     observer.nextCount(query, updateCount);
                 }
             }
@@ -231,9 +230,7 @@ public class ProcedureAction extends BaseSQLAction {
 
         if (result != null && !result.isEmpty()) {
             // treat out parameters as a separate data row set
-            QueryLogger.logSelectCount(query.getLoggingLevel(), 1, System
-                    .currentTimeMillis()
-                    - t1);
+            QueryLogger.logSelectCount(1, System.currentTimeMillis() - t1);
             delegate.nextDataRows(query, Collections.singletonList(result));
         }
     }

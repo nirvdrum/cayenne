@@ -73,24 +73,24 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbKeyGenerator;
 
 /**
- * Sequence-based primary key generator implementation for Oracle.
- * Uses Oracle sequences to generate primary key values. This approach is
- * at least 50% faster when tested with Oracle compared to the lookup table
- * approach.
- *
- * <p>When using Cayenne key caching mechanism, make sure that sequences in
- * the database have "INCREMENT BY" greater or equal to OraclePkGenerator
- * "pkCacheSize" property value. If this is not the case, you will need to
- * adjust PkGenerator value accordingly. For example when sequence is
- * incremented by 1 each time, use the following code:</p>
- *
+ * Sequence-based primary key generator implementation for Oracle. Uses Oracle sequences
+ * to generate primary key values. This approach is at least 50% faster when tested with
+ * Oracle compared to the lookup table approach.
+ * <p>
+ * When using Cayenne key caching mechanism, make sure that sequences in the database have
+ * "INCREMENT BY" greater or equal to OraclePkGenerator "pkCacheSize" property value. If
+ * this is not the case, you will need to adjust PkGenerator value accordingly. For
+ * example when sequence is incremented by 1 each time, use the following code:
+ * </p>
+ * 
  * <pre>
  * dataNode.getAdapter().getPkGenerator().setPkCacheSize(1);
  * </pre>
- *
+ * 
  * @author Andrei Adamchik
  */
 public class OraclePkGenerator extends JdbcPkGenerator {
+
     private static final String _SEQUENCE_PREFIX = "pk_";
 
     public void createAutoPk(DataNode node, List dbEntities) throws Exception {
@@ -144,17 +144,17 @@ public class OraclePkGenerator extends JdbcPkGenerator {
     protected String createSequenceString(DbEntity ent) {
         StringBuffer buf = new StringBuffer();
         buf
-            .append("CREATE SEQUENCE ")
-            .append(sequenceName(ent))
-            .append(" START WITH 200")
-            .append(" INCREMENT BY ")
-            .append(pkCacheSize(ent));
+                .append("CREATE SEQUENCE ")
+                .append(sequenceName(ent))
+                .append(" START WITH 200")
+                .append(" INCREMENT BY ")
+                .append(pkCacheSize(ent));
         return buf.toString();
     }
 
     /**
-     * Returns a SQL string needed to drop any database objects associated
-     * with automatic primary key generation process for a specific DbEntity.
+     * Returns a SQL string needed to drop any database objects associated with automatic
+     * primary key generation process for a specific DbEntity.
      */
     protected String dropSequenceString(DbEntity ent) {
         StringBuffer buf = new StringBuffer();
@@ -165,9 +165,9 @@ public class OraclePkGenerator extends JdbcPkGenerator {
     /**
      * Generates primary key by calling Oracle sequence corresponding to the
      * <code>dbEntity</code>. Executed SQL looks like this:
-     *
+     * 
      * <pre>
-     * SELECT pk_table_name.nextval FROM DUAL
+     *   SELECT pk_table_name.nextval FROM DUAL
      * </pre>
      */
     protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
@@ -175,8 +175,8 @@ public class OraclePkGenerator extends JdbcPkGenerator {
         DbKeyGenerator pkGenerator = ent.getPrimaryKeyGenerator();
         String pkGeneratingSequenceName;
         if (pkGenerator != null
-            && DbKeyGenerator.ORACLE_TYPE.equals(pkGenerator.getGeneratorType())
-            && pkGenerator.getGeneratorName() != null)
+                && DbKeyGenerator.ORACLE_TYPE.equals(pkGenerator.getGeneratorType())
+                && pkGenerator.getGeneratorName() != null)
             pkGeneratingSequenceName = pkGenerator.getGeneratorName();
         else
             pkGeneratingSequenceName = sequenceName(ent);
@@ -186,16 +186,13 @@ public class OraclePkGenerator extends JdbcPkGenerator {
             Statement st = con.createStatement();
             try {
                 String sql = "SELECT " + pkGeneratingSequenceName + ".nextval FROM DUAL";
-                QueryLogger.logQuery(
-                    QueryLogger.DEFAULT_LOG_LEVEL,
-                    sql,
-                    Collections.EMPTY_LIST);
+                QueryLogger.logQuery(sql, Collections.EMPTY_LIST);
                 ResultSet rs = st.executeQuery(sql);
                 try {
-                    //Object pk = null;
+                    // Object pk = null;
                     if (!rs.next()) {
                         throw new CayenneRuntimeException(
-                            "Error generating pk for DbEntity " + ent.getName());
+                                "Error generating pk for DbEntity " + ent.getName());
                     }
                     return rs.getInt(1);
                 }
@@ -216,13 +213,12 @@ public class OraclePkGenerator extends JdbcPkGenerator {
         // use custom generator if possible
         DbKeyGenerator keyGenerator = entity.getPrimaryKeyGenerator();
         if (keyGenerator != null
-            && DbKeyGenerator.ORACLE_TYPE.equals(keyGenerator.getGeneratorType())
-            && keyGenerator.getGeneratorName() != null) {
+                && DbKeyGenerator.ORACLE_TYPE.equals(keyGenerator.getGeneratorType())
+                && keyGenerator.getGeneratorName() != null) {
 
             Integer size = keyGenerator.getKeyCacheSize();
-            return (size != null && size.intValue() >= 1)
-                ? size.intValue()
-                : super.getPkCacheSize();
+            return (size != null && size.intValue() >= 1) ? size.intValue() : super
+                    .getPkCacheSize();
         }
         else {
             return super.getPkCacheSize();
@@ -235,8 +231,8 @@ public class OraclePkGenerator extends JdbcPkGenerator {
         // use custom generator if possible
         DbKeyGenerator keyGenerator = entity.getPrimaryKeyGenerator();
         if (keyGenerator != null
-            && DbKeyGenerator.ORACLE_TYPE.equals(keyGenerator.getGeneratorType())
-            && keyGenerator.getGeneratorName() != null) {
+                && DbKeyGenerator.ORACLE_TYPE.equals(keyGenerator.getGeneratorType())
+                && keyGenerator.getGeneratorName() != null) {
 
             return keyGenerator.getGeneratorName().toLowerCase();
         }
@@ -257,8 +253,7 @@ public class OraclePkGenerator extends JdbcPkGenerator {
     }
 
     /**
-     * Fetches a list of existing sequences that might match Cayenne
-     * generated ones.
+     * Fetches a list of existing sequences that might match Cayenne generated ones.
      */
     protected List getExistingSequences(DataNode node) throws SQLException {
 
@@ -269,10 +264,7 @@ public class OraclePkGenerator extends JdbcPkGenerator {
             Statement sel = con.createStatement();
             try {
                 String sql = "SELECT LOWER(SEQUENCE_NAME) FROM ALL_SEQUENCES";
-                QueryLogger.logQuery(
-                    QueryLogger.DEFAULT_LOG_LEVEL,
-                    sql,
-                    Collections.EMPTY_LIST);
+                QueryLogger.logQuery(sql, Collections.EMPTY_LIST);
                 ResultSet rs = sel.executeQuery(sql);
                 try {
                     List sequenceList = new ArrayList();

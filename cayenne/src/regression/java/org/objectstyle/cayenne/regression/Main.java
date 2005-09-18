@@ -61,41 +61,40 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Random;
 
-import org.apache.log4j.Level;
 import org.objectstyle.ashwood.dbutil.RandomSchema;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.FileConfiguration;
 
 /**
  * Main configures and runs regression tests defined in RandomDomainBuilder and
  * DataModificationRobot. It is responsible for performance metering as well.
- *
+ * 
  * @author Andriy Shapochka
  */
 
 public class Main {
+
     protected Preferences prefs;
 
     public static void main(String[] args) {
-        QueryLogger.setLoggingLevel(Level.ALL);
-        QueryLogger.setLoggingLevel(null);
-        System.out.println(
-            "max memory, MB: "
-                + Runtime.getRuntime().maxMemory() / (1024 * 1024));
-        System.out.println(
-            "total memory, MB: "
-                + Runtime.getRuntime().totalMemory() / (1024 * 1024));
-        System.out.println(
-            "free memory, MB: "
-                + Runtime.getRuntime().freeMemory() / (1024 * 1024));
+
+        System.out.println("max memory, MB: "
+                + Runtime.getRuntime().maxMemory()
+                / (1024 * 1024));
+        System.out.println("total memory, MB: "
+                + Runtime.getRuntime().totalMemory()
+                / (1024 * 1024));
+        System.out.println("free memory, MB: "
+                + Runtime.getRuntime().freeMemory()
+                / (1024 * 1024));
 
         Preferences prefs;
         try {
             prefs = new Preferences(args);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             System.out.println("Fatal Error: " + ex.getMessage());
             System.exit(1);
             return;
@@ -119,9 +118,7 @@ public class Main {
         return conf.getDomain();
     }
 
-    protected RandomDomainBuilder createDomainBuilder(
-        DataDomain domain,
-        Random randomizer) {
+    protected RandomDomainBuilder createDomainBuilder(DataDomain domain, Random randomizer) {
 
         RandomDomainBuilder domainBuilder = new RandomDomainBuilder(domain);
         RandomSchema rndSchema = domainBuilder.getRandomSchema();
@@ -141,8 +138,7 @@ public class Main {
         PrintWriter out = null;
         PrintWriter console = new PrintWriter(System.out, true);
         try {
-            if (prefs.getOutFile() != null
-                && !prefs.getOutFile().isDirectory()) {
+            if (prefs.getOutFile() != null && !prefs.getOutFile().isDirectory()) {
                 fileOut = new FileWriter(prefs.getOutFile());
                 out = new PrintWriter(fileOut);
             }
@@ -155,17 +151,14 @@ public class Main {
 
             DataDomain domain = createDomain();
             Random randomizer = new Random(prefs.getSeed());
-            RandomDomainBuilder domainBuilder =
-                createDomainBuilder(domain, randomizer);
+            RandomDomainBuilder domainBuilder = createDomainBuilder(domain, randomizer);
 
             File workDir = prefs.getWorkDirectory();
             String dirPrefix = prefs.getSchemaDirPrefix() + "-";
             for (int i = 1; i <= prefs.getSchemaCount(); i++) {
                 try {
-                    File schemaDir =
-                        new File(
-                            workDir,
-                            dirPrefix + System.currentTimeMillis());
+                    File schemaDir = new File(workDir, dirPrefix
+                            + System.currentTimeMillis());
                     schemaDir.mkdirs();
                     printSchemaStart(console, i, schemaDir);
                     if (out != null)
@@ -177,21 +170,21 @@ public class Main {
                         if (out != null)
                             printCommitStart(out, j);
                         long freeMem = Runtime.getRuntime().freeMemory();
-                        console.println(
-                            "free memory before gc, MB: "
-                                + freeMem / (1024 * 1024));
-                        do System.gc();
+                        console.println("free memory before gc, MB: "
+                                + freeMem
+                                / (1024 * 1024));
+                        do
+                            System.gc();
                         while (freeMem > Runtime.getRuntime().freeMemory());
                         freeMem = Runtime.getRuntime().freeMemory();
-                        console.println(
-                            "free memory after gc, MB: "
-                                + freeMem / (1024 * 1024));
+                        console.println("free memory after gc, MB: "
+                                + freeMem
+                                / (1024 * 1024));
                         if (freeMem / (1024 * 1024) < 5) {
                             console.println("Out of memory!");
                             return true;
                         }
-                        DataModificationRobot robot =
-                            new DataModificationRobot(
+                        DataModificationRobot robot = new DataModificationRobot(
                                 ctxt,
                                 randomizer,
                                 prefs.getNewObjectPerTableCount(),
@@ -204,7 +197,8 @@ public class Main {
                             printCommitSuccess(console, j, end - start);
                             if (out != null)
                                 printCommitSuccess(out, j, end - start);
-                        } catch (Exception ex) {
+                        }
+                        catch (Exception ex) {
                             hasFailures = true;
                             printCommitFailure(console, j, ex);
                             if (out != null)
@@ -214,32 +208,38 @@ public class Main {
                     printSchemaSuccess(console, i);
                     if (out != null)
                         printSchemaSuccess(out, i);
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     hasFailures = true;
                     printSchemaFailure(console, i, ex);
                     if (out != null)
                         printSchemaFailure(out, i, ex);
-                } finally {
+                }
+                finally {
                     domainBuilder.drop();
                 }
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             hasFailures = true;
             printFailure(console, ex);
             if (out != null)
                 printFailure(out, ex);
-        } finally {
+        }
+        finally {
             printFooter(console);
             if (out != null)
                 printFooter(out);
             console.flush();
             try {
                 out.close();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
             }
             try {
                 fileOut.close();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
             }
         }
 
@@ -260,10 +260,7 @@ public class Main {
         prefs.print(out);
     }
 
-    protected void printSchemaStart(
-        PrintWriter out,
-        int schemaIndex,
-        File schemaDir) {
+    protected void printSchemaStart(PrintWriter out, int schemaIndex, File schemaDir) {
         out.println();
         out.println("Schema " + schemaIndex + " generating.");
         out.println("schema recording in " + schemaDir);
@@ -273,18 +270,11 @@ public class Main {
         out.println("  Commit " + commitIndex + " starting.");
     }
 
-    protected void printCommitSuccess(
-        PrintWriter out,
-        int commitIndex,
-        long ms) {
-        out.println(
-            "  Commit " + commitIndex + " succeeded. Time=" + ms + " ms");
+    protected void printCommitSuccess(PrintWriter out, int commitIndex, long ms) {
+        out.println("  Commit " + commitIndex + " succeeded. Time=" + ms + " ms");
     }
 
-    protected void printCommitFailure(
-        PrintWriter out,
-        int commitIndex,
-        Exception e) {
+    protected void printCommitFailure(PrintWriter out, int commitIndex, Exception e) {
         out.println("  Commit " + commitIndex + " failed.");
         e.printStackTrace(out);
         out.println();
@@ -294,10 +284,7 @@ public class Main {
         out.println("Schema " + schemaIndex + " succeeded.");
     }
 
-    protected void printSchemaFailure(
-        PrintWriter out,
-        int schemaIndex,
-        Exception e) {
+    protected void printSchemaFailure(PrintWriter out, int schemaIndex, Exception e) {
         out.println("Schema " + schemaIndex + " failed.");
         e.printStackTrace(out);
         out.println();

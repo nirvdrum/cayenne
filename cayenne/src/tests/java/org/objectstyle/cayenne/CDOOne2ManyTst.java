@@ -57,7 +57,6 @@ package org.objectstyle.cayenne;
 
 import java.util.List;
 
-import org.apache.log4j.Level;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
 import org.objectstyle.art.Exhibit;
@@ -70,32 +69,31 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class CDOOne2ManyTst extends CayenneDOTestBase {
 
     public void testSelectWithToManyDBQualifier() throws Exception {
-         // setup test, intentionally add more than 1 painting to artist
-         // since this reduces a chance that painting and artist primary keys
-         // would accidentally match, resulting in success when it should fail
-         Artist a1 = newArtist();
-         Painting p1 = newPainting();
-         Painting p2 = newPainting();
-         Painting p3 = newPainting();
-         a1.addToPaintingArray(p1);
-         a1.addToPaintingArray(p2);
-         a1.addToPaintingArray(p3);
-         ctxt.commitChanges();
+        // setup test, intentionally add more than 1 painting to artist
+        // since this reduces a chance that painting and artist primary keys
+        // would accidentally match, resulting in success when it should fail
+        Artist a1 = newArtist();
+        Painting p1 = newPainting();
+        Painting p2 = newPainting();
+        Painting p3 = newPainting();
+        a1.addToPaintingArray(p1);
+        a1.addToPaintingArray(p2);
+        a1.addToPaintingArray(p3);
+        ctxt.commitChanges();
 
-         // do select
-         Expression e = ExpressionFactory.matchDbExp("paintingArray", p2);
-         SelectQuery q = new SelectQuery(Artist.class, e);
-         q.setLoggingLevel(Level.WARN);
+        // do select
+        Expression e = ExpressionFactory.matchDbExp("paintingArray", p2);
+        SelectQuery q = new SelectQuery(Artist.class, e);
 
-         // *** TESTING THIS ***
-         List artists = ctxt.performQuery(q);
-         assertEquals(1, artists.size());
-         assertSame(a1, artists.get(0));
-     }
-     
+        // *** TESTING THIS ***
+        List artists = ctxt.performQuery(q);
+        assertEquals(1, artists.size());
+        assertSame(a1, artists.get(0));
+    }
+
     public void testSelectWithToManyQualifier() throws Exception {
         // setup test, intentionally add more than 1 painting to artist
-        // since this reduces a chance that painting and artist primary keys 
+        // since this reduces a chance that painting and artist primary keys
         // would accidentally match, resulting in success when it should fail
         Artist a1 = newArtist();
         Painting p1 = newPainting();
@@ -110,7 +108,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
         Expression e = ExpressionFactory.matchExp("paintingArray", p2);
         SelectQuery q = new SelectQuery(Artist.class, e);
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         List artists = ctxt.performQuery(q);
         assertEquals(1, artists.size());
         assertSame(a1, artists.get(0));
@@ -120,7 +118,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
         Artist a1 = newArtist();
         Painting p1 = newPainting();
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         a1.addToPaintingArray(p1);
 
         // test before save
@@ -129,14 +127,13 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-		ctxt = createDataContext();
+        ctxt = createDataContext();
 
         // test database data
         Artist a2 = fetchArtist();
         assertEquals(1, a2.getPaintingArray().size());
-        assertEquals(
-            paintingName,
-            ((Painting) a2.getPaintingArray().get(0)).getPaintingTitle());
+        assertEquals(paintingName, ((Painting) a2.getPaintingArray().get(0))
+                .getPaintingTitle());
     }
 
     public void testNewAddMultiples() throws Exception {
@@ -144,7 +141,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
         Painting p11 = newPainting();
         Painting p12 = newPainting();
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         a1.addToPaintingArray(p11);
         a1.addToPaintingArray(p12);
 
@@ -155,7 +152,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-		ctxt = createDataContext();
+        ctxt = createDataContext();
 
         // test database data
         Artist a2 = fetchArtist();
@@ -169,13 +166,13 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-		ctxt = createDataContext();
+        ctxt = createDataContext();
 
         // test database data
         Gallery g2 = fetchGallery();
         Painting p2 = (Painting) g2.getPaintingArray().get(0);
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         g2.removeFromPaintingArray(p2);
 
         // test before save
@@ -184,7 +181,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
 
         // do save II
         ctxt.commitChanges();
-		ctxt = createDataContext();
+        ctxt = createDataContext();
 
         Painting p3 = fetchPainting();
         assertNull(p3.getToGallery());
@@ -200,14 +197,14 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-		ctxt = createDataContext();
+        ctxt = createDataContext();
 
         // test database data
         Gallery g2 = fetchGallery();
         assertEquals(2, g2.getPaintingArray().size());
         Painting p2 = (Painting) g2.getPaintingArray().get(0);
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         g2.removeFromPaintingArray(p2);
 
         // test before save
@@ -216,7 +213,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
 
         // do save II
         ctxt.commitChanges();
-		ctxt = createDataContext();
+        ctxt = createDataContext();
 
         Gallery g3 = fetchGallery();
         assertEquals(1, g3.getPaintingArray().size());
@@ -230,8 +227,8 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
         ctxt.commitChanges();
 
         // *** TESTING THIS ***
-        ArtistExhibit ae1 =
-            (ArtistExhibit) ctxt.createAndRegisterNewObject("ArtistExhibit");
+        ArtistExhibit ae1 = (ArtistExhibit) ctxt
+                .createAndRegisterNewObject("ArtistExhibit");
         e1.addToArtistExhibitArray(ae1);
         a1.addToArtistExhibitArray(ae1);
 

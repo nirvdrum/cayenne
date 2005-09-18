@@ -81,18 +81,12 @@ public abstract class AbstractQuery implements Query {
     protected Object root;
     protected String name;
 
-    /**
-     * @deprecated Unused since 1.2
-     */
-    protected transient Level logLevel = Level.INFO;
-
     private void readObject(java.io.ObjectInputStream in) throws IOException,
             ClassNotFoundException {
 
         // addressing the fact that logLevel is not serializable
 
         in.defaultReadObject();
-        logLevel = Level.INFO;
     }
 
     /**
@@ -116,16 +110,20 @@ public abstract class AbstractQuery implements Query {
     /**
      * Returns the <code>logLevel</code> property of this query. Log level is a hint to
      * QueryEngine that performs this query to log execution with a certain priority.
+     * 
+     * @deprecated since 1.2
      */
     public Level getLoggingLevel() {
-        return logLevel;
+        return Level.INFO;
     }
 
     /**
      * Sets the <code>logLevel</code> property.
+     * 
+     * @deprecated since 1.2
      */
     public void setLoggingLevel(Level logLevel) {
-        this.logLevel = logLevel;
+        // noop
     }
 
     /**

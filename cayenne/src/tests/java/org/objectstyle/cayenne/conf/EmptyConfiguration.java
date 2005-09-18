@@ -71,11 +71,7 @@ public class EmptyConfiguration extends DefaultConfiguration {
 
         // ignore any loading failures
         this.setIgnoringLoadFailures(true);
-        this.setLoaderDelegate(
-            new RuntimeLoadDelegate(
-                this,
-                this.getLoadStatus(),
-                Configuration.getLoggingLevel()));
+        this.setLoaderDelegate(new RuntimeLoadDelegate(this, this.getLoadStatus()));
     }
 
     public void addDomain(DataDomain domain) {

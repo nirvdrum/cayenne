@@ -358,7 +358,14 @@ public class HSQLEmbeddedPreferenceService extends CayennePreferenceService {
             return false;
         }
 
+        /**
+         * @deprecated since 1.2
+         */
         public DataSource getDataSource(String location, Level logLevel) throws Exception {
+            return getDataSource(location);
+        }
+
+        public DataSource getDataSource(String location) throws Exception {
             try {
                 prepareDB();
 
@@ -369,18 +376,14 @@ public class HSQLEmbeddedPreferenceService extends CayennePreferenceService {
                         1,
                         "sa",
                         null,
-                        new ConnectionEventLogger(logLevel));
+                        new ConnectionEventLogger());
 
                 return pm;
             }
             catch (Throwable th) {
-                QueryLogger.logConnectFailure(logLevel, th);
+                QueryLogger.logConnectFailure(th);
                 throw new PreferenceException("Error connecting to DB", th);
             }
-        }
-
-        public DataSource getDataSource(String location) throws Exception {
-            return getDataSource(location, Level.INFO);
         }
 
         public void initializeWithParentConfiguration(Configuration conf) {

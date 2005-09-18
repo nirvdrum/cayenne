@@ -59,32 +59,33 @@ import java.io.File;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.ConfigurationException;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 
-/** 
- * Factory of DataSource objects used by the project model. 
- * Always tries to locate file with direct connection info.
+/**
+ * Factory of DataSource objects used by the project model. Always tries to locate file
+ * with direct connection info.
  * 
  * @author Andrei Adamchik
  */
 public class ProjectDataSourceFactory extends DriverDataSourceFactory {
+
     private static Logger logObj = Logger.getLogger(ProjectDataSourceFactory.class);
 
     protected File projectDir;
 
     public ProjectDataSourceFactory(File projectDir) throws Exception {
-    	super();
+        super();
         this.projectDir = projectDir;
     }
 
-    public DataSource getDataSource(String location, Level logLevel) throws Exception {
+    public DataSource getDataSource(String location) throws Exception {
         try {
             this.load(location);
-        } catch (ConfigurationException e) {
+        }
+        catch (ConfigurationException e) {
             logObj.info("No data source at '" + location + "', ignoring.");
         }
 

@@ -36,7 +36,6 @@ package org.objectstyle.cayenne.query;
 
 import junit.framework.TestCase;
 
-import org.apache.log4j.Level;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.map.ObjEntity;
 
@@ -75,17 +74,4 @@ public class AbstractQueryTst extends TestCase {
         catch (IllegalArgumentException e) {
         }
     }
-
-    /**
-     * @deprecated logging level is unused since 1.2
-     */
-    public void testLoggingLevel() throws Exception {
-        AbstractQuery query = new MockAbstractQuery();
-
-        assertEquals(Query.DEFAULT_LOG_LEVEL, query.getLoggingLevel());
-
-        query.setLoggingLevel(Level.ERROR);
-        assertSame(Level.ERROR, query.getLoggingLevel());
-    }
-
 }

@@ -292,10 +292,7 @@ public abstract class AbstractAccessStack {
             Iterator it = tableCreateQueries(node, map);
             while (it.hasNext()) {
                 String query = (String) it.next();
-                QueryLogger.logQuery(
-                        QueryLogger.DEFAULT_LOG_LEVEL,
-                        query,
-                        Collections.EMPTY_LIST);
+                QueryLogger.logQuery(query, Collections.EMPTY_LIST);
                 stmt.execute(query);
             }
             getAdapter(node).createdTables(conn, map);

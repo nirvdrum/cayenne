@@ -293,6 +293,9 @@ public class ObjectContextQueryUtils {
                     "Not intended for execution. Should've been replaced by a SQLTemaplte during routing.");
         }
 
+        /**
+         * @deprecated since 1.2
+         */
         public Level getLoggingLevel() {
             throw new CayenneRuntimeException("getLoggingLevel is not implemented");
         }
@@ -305,6 +308,9 @@ public class ObjectContextQueryUtils {
             throw new CayenneRuntimeException("getRoot is obsolete and is not supported");
         }
 
+        /**
+         * @deprecated since 1.2
+         */
         public void setLoggingLevel(Level level) {
             throw new CayenneRuntimeException("setLoggingLevel is not implemented");
         }

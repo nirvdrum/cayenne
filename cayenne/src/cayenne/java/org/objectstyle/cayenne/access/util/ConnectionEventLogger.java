@@ -60,27 +60,37 @@ import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.conn.ConnectionEventLoggingDelegate;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 
+/**
+ * A default implementation of ConnectionEvenLoggingDelegate.
+ * 
+ * @author Andrus Adamchik
+ */
 public class ConnectionEventLogger implements ConnectionEventLoggingDelegate {
-    protected Level logLevel;
 
+    public ConnectionEventLogger() {
+    }
+
+    /**
+     * @deprecated since 1.2
+     */
     public ConnectionEventLogger(Level logLevel) {
-        this.logLevel = logLevel;
+        // noop
     }
 
     public void logConnect(String url, String userName, String password) {
-        QueryLogger.logConnect(logLevel, url, userName, password);
+        QueryLogger.logConnect(url, userName, password);
     }
 
     public void logConnectFailure(Throwable th) {
-        QueryLogger.logConnectFailure(logLevel, th);
+        QueryLogger.logConnectFailure(th);
     }
 
     public void logConnectSuccess() {
-        QueryLogger.logConnectSuccess(logLevel);
+        QueryLogger.logConnectSuccess();
     }
 
     public void logPoolCreated(DataSourceInfo info) {
-        QueryLogger.logPoolCreated(logLevel, info);
+        QueryLogger.logPoolCreated(info);
     }
 
 }

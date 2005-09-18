@@ -77,54 +77,53 @@ public class JNDIDataSourceFactory implements DataSourceFactory {
 
     protected Configuration parentConfig;
 
+    public void initializeWithParentConfiguration(Configuration conf) {
+        this.parentConfig = conf;
+    }
+
     /**
      * Returns DataSource object corresponding to <code>location</code>. Location is
      * expected to be a path mapped in JNDI InitialContext.
+     * 
+     * @deprecated since 1.2
      */
-    public DataSource getDataSource(String location) throws Exception {
-        return getDataSource(location, Level.DEBUG);
-    }
-
-    public void initializeWithParentConfiguration(Configuration conf) {
-        this.parentConfig = conf;
+    public DataSource getDataSource(String location, Level logLevel) throws Exception {
+        return getDataSource(location);
     }
 
     /**
      * Attempts to load DataSource using JNDI. In case of failure tries to get the
      * DataSource with the same name from CayenneModeler preferences.
      */
-    public DataSource getDataSource(String location, Level logLevel) throws Exception {
-        if (logLevel == null) {
-            logLevel = Level.DEBUG;
-        }
+    public DataSource getDataSource(String location) throws Exception {
 
         try {
-            return loadViaJNDI(location, logLevel);
+            return loadViaJNDI(location);
         }
         catch (Exception ex) {
 
-            logObj
-                    .debug("failed JNDI lookup, attempt to load from local preferences. Location key:"
-                            + location);
+            logObj.info("failed JNDI lookup, attempt to load "
+                    + "from local preferences. Location key:"
+                    + location);
 
             // failover to preferences loader to allow local development
             try {
-                return loadFromPreferences(location, logLevel);
+                return loadFromPreferences(location);
             }
             catch (Exception preferencesException) {
 
-                logObj.debug("failed loading from local preferences", Util
+                logObj.info("failed loading from local preferences", Util
                         .unwindException(preferencesException));
 
                 // giving up ... rethrow original exception...
-                QueryLogger.logConnectFailure(logLevel, ex);
+                QueryLogger.logConnectFailure(ex);
                 throw ex;
             }
         }
     }
 
-    DataSource loadViaJNDI(String location, Level logLevel) throws NamingException {
-        QueryLogger.logConnect(logLevel, location);
+    DataSource loadViaJNDI(String location) throws NamingException {
+        QueryLogger.logConnect(location);
 
         Context initCtx = new InitialContext();
         DataSource ds;
@@ -137,11 +136,11 @@ public class JNDIDataSourceFactory implements DataSourceFactory {
             ds = (DataSource) initCtx.lookup(location);
         }
 
-        QueryLogger.logConnectSuccess(logLevel);
+        QueryLogger.logConnectSuccess();
         return ds;
     }
 
-    DataSource loadFromPreferences(String location, Level logLevel) throws Exception {
+    DataSource loadFromPreferences(String location) throws Exception {
         // as we don't want compile dependencies on the Modeler, instantiate factory via
         // reflection ...
 
@@ -151,6 +150,6 @@ public class JNDIDataSourceFactory implements DataSourceFactory {
                 .newInstance();
 
         prefsFactory.initializeWithParentConfiguration(parentConfig);
-        return prefsFactory.getDataSource(location, logLevel);
+        return prefsFactory.getDataSource(location);
     }
 }

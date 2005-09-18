@@ -124,12 +124,12 @@ public class UpdateAction extends BaseSQLAction {
 
         QueryTranslator translator = createTranslator(connection);
 
-        PreparedStatement statement = translator.createStatement(query.getLoggingLevel());
+        PreparedStatement statement = translator.createStatement();
 
         try {
             // execute update
             int count = statement.executeUpdate();
-            QueryLogger.logUpdateCount(query.getLoggingLevel(), count);
+            QueryLogger.logUpdateCount(count);
 
             // send results back to consumer
             observer.nextCount(query, count);

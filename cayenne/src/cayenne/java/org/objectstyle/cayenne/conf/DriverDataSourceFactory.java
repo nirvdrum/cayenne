@@ -90,7 +90,6 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 
     protected XMLReader parser;
     protected DataSourceInfo driverInfo;
-    protected Level logLevel = Level.DEBUG;
     protected Configuration parentConfiguration;
 
     /**
@@ -107,15 +106,17 @@ public class DriverDataSourceFactory implements DataSourceFactory {
         this.parentConfiguration = parentConfiguration;
     }
 
-    public DataSource getDataSource(String location) throws Exception {
-        return this.getDataSource(location, Level.DEBUG);
+    /**
+     * @deprecated since 1.2
+     */
+    public DataSource getDataSource(String location, Level logLevel) throws Exception {
+        return this.getDataSource(location);
     }
 
-    public DataSource getDataSource(String location, Level logLevel) throws Exception {
-        this.logLevel = logLevel;
+    public DataSource getDataSource(String location) throws Exception {
         this.load(location);
 
-        ConnectionEventLogger logger = new ConnectionEventLogger(Level.INFO);
+        ConnectionEventLogger logger = new ConnectionEventLogger();
 
         try {
             return new PoolManager(driverInfo.getJdbcDriver(), driverInfo
@@ -124,7 +125,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
                     .getPassword(), logger);
         }
         catch (Exception ex) {
-            QueryLogger.logConnectFailure(logLevel, ex);
+            QueryLogger.logConnectFailure(ex);
             throw ex;
         }
     }
@@ -150,11 +151,11 @@ public class DriverDataSourceFactory implements DataSourceFactory {
      * internally from "getDataSource"
      */
     protected void load(String location) throws Exception {
-        logObj.log(logLevel, "loading driver information from '" + location + "'.");
+        logObj.info("loading driver information from '" + location + "'.");
 
         InputStream in = this.getInputStream(location);
         if (in == null) {
-            logObj.log(logLevel, "Error: location '" + location + "' not found.");
+            logObj.info("Error: location '" + location + "' not found.");
             throw new ConfigurationException(
                     "Can't find DataSource configuration file at " + location);
         }
@@ -185,7 +186,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
                 new DriverHandler(parser, this).init(localName, atts);
             }
             else {
-                logObj.log(logLevel, "<driver> must be the root element. <"
+                logObj.info( "<driver> must be the root element. <"
                         + localName
                         + "> is unexpected.");
                 throw new SAXException("Config file is not of expected XML type. '"
@@ -204,7 +205,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 
         public void init(String name, Attributes attrs) {
             String className = attrs.getValue("", "class");
-            logObj.log(logLevel, "loading driver " + className);
+            logObj.info( "loading driver " + className);
             driverInfo = new DataSourceInfo();
             driverInfo.setJdbcDriver(className);
         }
@@ -231,7 +232,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
                         .init(localName, atts, driverInfo);
             }
             else {
-                logObj.log(logLevel, "<login, url, connectionPool> are valid. <"
+                logObj.info( "<login, url, connectionPool> are valid. <"
                         + localName
                         + "> is unexpected.");
                 throw new SAXException("Config file is not of expected XML type");
@@ -256,7 +257,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
                 throws SAXException {
             driverInfo.setDataSourceUrl(atts.getValue("value"));
             if (driverInfo.getDataSourceUrl() == null) {
-                logObj.log(logLevel, "error: <url> has no 'value'.");
+                logObj.info( "error: <url> has no 'value'.");
                 throw new SAXException("'<url value=' attribute is required.");
             }
         }
@@ -275,7 +276,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
         }
 
         public void init(String name, Attributes atts, DataSourceInfo driverInfo) {
-            logObj.log(logLevel, "loading user name and password.");
+            logObj.info("loading user name and password.");
             driverInfo.setUserName(atts.getValue("userName"));
             driverInfo.setPassword(atts.getValue("password"));
         }
@@ -305,7 +306,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
                     driverInfo.setMaxConnections(Integer.parseInt(max));
             }
             catch (NumberFormatException nfex) {
-                logObj.log(logLevel, "Error loading numeric attribute", nfex);
+                logObj.info( "Error loading numeric attribute", nfex);
                 throw new SAXException("Error reading numeric attribute.", nfex);
             }
         }

@@ -101,7 +101,7 @@ public class SelectAction extends BaseSQLAction {
         long t1 = System.currentTimeMillis();
 
         SelectTranslator translator = createTranslator(connection);
-        PreparedStatement prepStmt = translator.createStatement(query.getLoggingLevel());
+        PreparedStatement prepStmt = translator.createStatement();
         ResultSet rs = prepStmt.executeQuery();
 
         RowDescriptor descriptor = new RowDescriptor(
@@ -128,9 +128,8 @@ public class SelectAction extends BaseSQLAction {
             // note that we don't need to close ResultIterator
             // since "dataRows" will do it internally
             List resultRows = it.dataRows(true);
-            QueryLogger.logSelectCount(query.getLoggingLevel(), resultRows.size(), System
-                    .currentTimeMillis()
-                    - t1);
+            QueryLogger
+                    .logSelectCount(resultRows.size(), System.currentTimeMillis() - t1);
 
             observer.nextDataRows(query, resultRows);
         }

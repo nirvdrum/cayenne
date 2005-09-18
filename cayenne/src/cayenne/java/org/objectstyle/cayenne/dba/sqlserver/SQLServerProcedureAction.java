@@ -102,8 +102,7 @@ public class SQLServerProcedureAction extends ProcedureAction {
         transl.setEntityResolver(this.getEntityResolver());
         transl.setConnection(connection);
 
-        CallableStatement statement = (CallableStatement) transl.createStatement(query
-                .getLoggingLevel());
+        CallableStatement statement = (CallableStatement) transl.createStatement();
 
         try {
             // stored procedure may contain a mixture of update counts and result sets,
@@ -140,7 +139,7 @@ public class SQLServerProcedureAction extends ProcedureAction {
                     if (updateCount == -1) {
                         break;
                     }
-                    QueryLogger.logUpdateCount(query.getLoggingLevel(), updateCount);
+                    QueryLogger.logUpdateCount(updateCount);
                     localObserver.nextCount(query, updateCount);
                 }
 
@@ -148,7 +147,8 @@ public class SQLServerProcedureAction extends ProcedureAction {
             }
 
             // read out parameters to the main observer ... AFTER the main result set
-            // TODO: I hope SQLServer does not support ResultSets as OUT parameters, otherwise 
+            // TODO: I hope SQLServer does not support ResultSets as OUT parameters,
+            // otherwise
             // the order of custom result descriptors will be messed up
             readProcedureOutParameters(statement, observer);
 

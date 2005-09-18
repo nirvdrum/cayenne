@@ -70,7 +70,6 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
@@ -82,7 +81,6 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.AdapterMapping;
 import org.objectstyle.cayenne.modeler.Application;
@@ -96,6 +94,7 @@ import org.objectstyle.cayenne.modeler.util.FileFilters;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.wocompat.EOModelProcessor;
 
 /**
@@ -163,7 +162,7 @@ public class ImportEOModelAction extends CayenneAction {
 
             }
             catch (Exception ex) {
-                logObj.log(Level.INFO, "EOModel Loading Exception", ex);
+                logObj.info("EOModel Loading Exception", ex);
                 ErrorDebugDialog.guiException(ex);
             }
 

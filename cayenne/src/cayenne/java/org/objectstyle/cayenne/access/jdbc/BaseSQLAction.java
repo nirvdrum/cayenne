@@ -110,9 +110,8 @@ public abstract class BaseSQLAction implements SQLAction {
 
         if (!delegate.isIteratedResult()) {
             List resultRows = resultReader.dataRows(false);
-            QueryLogger.logSelectCount(query.getLoggingLevel(), resultRows.size(), System
-                    .currentTimeMillis()
-                    - t1);
+            QueryLogger
+                    .logSelectCount(resultRows.size(), System.currentTimeMillis() - t1);
 
             delegate.nextDataRows(query, resultRows);
         }
@@ -129,7 +128,7 @@ public abstract class BaseSQLAction implements SQLAction {
                 catch (CayenneException cex) {
                     // ignore...
                 }
-                
+
                 throw ex;
             }
         }

@@ -62,7 +62,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Level;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.map.Procedure;
@@ -133,7 +132,7 @@ public class ProcedureTranslator extends QueryTranslator {
         return buf.toString();
     }
 
-    public PreparedStatement createStatement(Level logLevel) throws Exception {
+    public PreparedStatement createStatement() throws Exception {
         long t1 = System.currentTimeMillis();
 
         this.callParams = getProcedure().getCallParameters();
@@ -142,7 +141,7 @@ public class ProcedureTranslator extends QueryTranslator {
         initValues();
         String sqlStr = createSqlString();
 
-        if (QueryLogger.isLoggable(logLevel)) {
+        if (QueryLogger.isLoggable()) {
             // need to convert OUT/VOID parameters to loggable strings
             long time = System.currentTimeMillis() - t1;
 
@@ -156,7 +155,7 @@ public class ProcedureTranslator extends QueryTranslator {
                 loggableParameters.add(val);
             }
 
-            QueryLogger.logQuery(logLevel, sqlStr, loggableParameters, time);
+            QueryLogger.logQuery(sqlStr, loggableParameters, time);
         }
         CallableStatement stmt = connection.prepareCall(sqlStr);
         initStatement(stmt);

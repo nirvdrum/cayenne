@@ -60,7 +60,6 @@ import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
@@ -126,9 +125,9 @@ public class OracleSelectTranslator extends SelectTranslator {
      * Translates internal query into PreparedStatement, applying Oracle optimizations if
      * possible.
      */
-    public PreparedStatement createStatement(Level logLevel) throws Exception {
+    public PreparedStatement createStatement() throws Exception {
         String sqlStr = createSqlString();
-        QueryLogger.logQuery(logLevel, sqlStr, values);
+        QueryLogger.logQuery(sqlStr, values);
         PreparedStatement stmt = connection.prepareStatement(sqlStr);
 
         initStatement(stmt);

@@ -94,7 +94,7 @@ public class PostgresPkGenerator extends OraclePkGenerator {
      * <code>dbEntity</code>. Executed SQL looks like this:
      * 
      * <pre>
-     *   SELECT nextval(pk_table_name)
+     *     SELECT nextval(pk_table_name)
      * </pre>
      */
     protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
@@ -113,12 +113,10 @@ public class PostgresPkGenerator extends OraclePkGenerator {
             Statement st = con.createStatement();
             try {
                 String sql = "SELECT nextval('" + pkGeneratingSequenceName + "')";
-                QueryLogger.logQuery(QueryLogger.DEFAULT_LOG_LEVEL,
-                        sql,
-                        Collections.EMPTY_LIST);
+                QueryLogger.logQuery(sql, Collections.EMPTY_LIST);
                 ResultSet rs = st.executeQuery(sql);
                 try {
-                    //Object pk = null;
+                    // Object pk = null;
                     if (!rs.next()) {
                         throw new CayenneRuntimeException(
                                 "Error generating pk for DbEntity " + ent.getName());
@@ -150,9 +148,7 @@ public class PostgresPkGenerator extends OraclePkGenerator {
             Statement sel = con.createStatement();
             try {
                 String sql = "SELECT relname FROM pg_class WHERE relkind='S'";
-                QueryLogger.logQuery(QueryLogger.DEFAULT_LOG_LEVEL,
-                        sql,
-                        Collections.EMPTY_LIST);
+                QueryLogger.logQuery(sql, Collections.EMPTY_LIST);
                 ResultSet rs = sel.executeQuery(sql);
                 try {
                     List sequenceList = new ArrayList();

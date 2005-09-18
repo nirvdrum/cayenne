@@ -64,7 +64,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Level;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.DataRow;
@@ -121,7 +120,7 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         // check that price have doubled
         SelectQuery select = new SelectQuery(Artist.class);
         select.addPrefetch("paintingArray");
-        select.setLoggingLevel(Level.WARN);
+
         List artists = ctxt.performQuery(select);
         assertEquals(1, artists.size());
 

@@ -64,7 +64,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Level;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.Exhibit;
@@ -323,7 +322,7 @@ public class DataContextTst extends DataContextTestBase {
         SelectQuery q = new SelectQuery("ArtistAssets");
         q.setQualifier(
             ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
-        q.setLoggingLevel(Level.INFO);
+   
 
         ArtistAssets a1 = (ArtistAssets) context.performQuery(q).get(0);
         assertEquals(1, a1.getPaintingsCount().intValue());
@@ -347,7 +346,6 @@ public class DataContextTst extends DataContextTestBase {
             ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
         q.andParentQualifier(
             ExpressionFactory.matchExp("toArtist.artistName", "artist1"));
-        q.setLoggingLevel(Level.INFO);
 
         ArtistAssets a1 = (ArtistAssets) context.performQuery(q).get(0);
         assertEquals(1, a1.getPaintingsCount().intValue());
@@ -433,7 +431,7 @@ public class DataContextTst extends DataContextTestBase {
             new SelectQuery(
                 "Artist",
                 ExpressionFactory.joinExp(Expression.OR, expressions));
-        query.setLoggingLevel(Level.ERROR);
+     
         List objects = context.performQuery(query);
 
         assertNotNull(objects);

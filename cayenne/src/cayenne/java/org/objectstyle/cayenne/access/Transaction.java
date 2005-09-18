@@ -75,9 +75,11 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
  * @since 1.1
  */
 public abstract class Transaction {
+
     private static final Logger logObj = Logger.getLogger(Transaction.class);
-    
+
     private static final Transaction NO_TRANSACTION = new Transaction() {
+
         public void begin() {
 
         }
@@ -106,84 +108,86 @@ public abstract class Transaction {
     protected List connections;
     protected int status;
     protected TransactionDelegate delegate;
+
+    /**
+     * @deprecated since 1.2
+     */
     protected Level logLevel;
 
     static String decodeStatus(int status) {
         switch (status) {
-            case STATUS_ACTIVE :
+            case STATUS_ACTIVE:
                 return "STATUS_ACTIVE";
-            case STATUS_COMMITTING :
+            case STATUS_COMMITTING:
                 return "STATUS_COMMITTING";
-            case STATUS_COMMITTED :
+            case STATUS_COMMITTED:
                 return "STATUS_COMMITTED";
-            case STATUS_ROLLEDBACK :
+            case STATUS_ROLLEDBACK:
                 return "STATUS_ROLLEDBACK";
-            case STATUS_ROLLING_BACK :
+            case STATUS_ROLLING_BACK:
                 return "STATUS_ROLLING_BACK";
-            case STATUS_NO_TRANSACTION :
+            case STATUS_NO_TRANSACTION:
                 return "STATUS_NO_TRANSACTION";
-            case STATUS_MARKED_ROLLEDBACK :
+            case STATUS_MARKED_ROLLEDBACK:
                 return "STATUS_MARKED_ROLLEDBACK";
-            default :
+            default:
                 return "Unknown Status - " + status;
         }
     }
 
     /**
-     * Factory method returning a new transaction instance that would
-     * propagate commit/rollback to participating connections. Connections
-     * will be closed when commit or rollback is called.
+     * Factory method returning a new transaction instance that would propagate
+     * commit/rollback to participating connections. Connections will be closed when
+     * commit or rollback is called.
      */
     public static Transaction internalTransaction(TransactionDelegate delegate) {
         return new InternalTransaction(delegate);
     }
 
     /**
-     * Factory method returning a new transaction instance that would NOT
-     * propagate commit/rollback to participating connections. Connections
-     * will still be closed when commit or rollback is called.
+     * Factory method returning a new transaction instance that would NOT propagate
+     * commit/rollback to participating connections. Connections will still be closed when
+     * commit or rollback is called.
      */
     public static Transaction externalTransaction(TransactionDelegate delegate) {
         return new ExternalTransaction(delegate);
     }
 
     /**
-     * Factory method returning a transaction instance that does not alter the
-     * state of participating connections in any way. Commit and rollback methods 
-     * do not do anything.
+     * Factory method returning a transaction instance that does not alter the state of
+     * participating connections in any way. Commit and rollback methods do not do
+     * anything.
      */
     public static Transaction noTransaction() {
         return NO_TRANSACTION;
     }
 
     /**
-      * Creates new inactive transaction.
-      */
+     * Creates new inactive transaction.
+     */
     protected Transaction() {
         status = STATUS_NO_TRANSACTION;
     }
 
     /**
-     * Helper method that wraps a number of queries in this transaction,
-     * runs them, and commits or rolls back depending on
-     * the outcome. This method allows users to define their own custom 
-     * Transactions and easily wrap Cayenne queries in them. 
+     * Helper method that wraps a number of queries in this transaction, runs them, and
+     * commits or rolls back depending on the outcome. This method allows users to define
+     * their own custom Transactions and easily wrap Cayenne queries in them.
      */
     public void performQueries(
-        QueryEngine engine,
-        Collection queries,
-        OperationObserver observer)
-        throws CayenneRuntimeException {
+            QueryEngine engine,
+            Collection queries,
+            OperationObserver observer) throws CayenneRuntimeException {
 
         try {
             // implicit begin..
             engine.performQueries(queries, observer, this);
 
             // don't commit iterated queries - leave it up to the caller
-            // at the same time rollbacks of iterated queries must be processed here, 
+            // at the same time rollbacks of iterated queries must be processed here,
             // since caller will no longer be processing stuff on exception
             if (!observer.isIteratedResult()
-                && (getStatus() == Transaction.STATUS_ACTIVE)) {
+                    && (getStatus() == Transaction.STATUS_ACTIVE)) {
                 commit();
             }
         }
@@ -208,7 +212,6 @@ public abstract class Transaction {
             }
         }
     }
-    
 
     /**
      * Helper method that runs a query, wrapping it in this transaction, and then commits
@@ -220,8 +223,7 @@ public abstract class Transaction {
     public void performQuery(
             PersistenceContext context,
             QueryExecutionPlan query,
-            OperationObserver observer)
-            throws CayenneRuntimeException {
+            OperationObserver observer) throws CayenneRuntimeException {
 
         try {
             // implicit begin..
@@ -257,10 +259,16 @@ public abstract class Transaction {
         }
     }
 
+    /**
+     * @deprecated since 1.2 unused
+     */
     public Level getLogLevel() {
-        return logLevel != null ? logLevel : QueryLogger.DEFAULT_LOG_LEVEL;
+        return logLevel != null ? logLevel : Level.INFO;
     }
 
+    /**
+     * @deprecated since 1.2 unused
+     */
     public void setLogLevel(Level logLevel) {
         this.logLevel = logLevel;
     }
@@ -283,8 +291,8 @@ public abstract class Transaction {
 
     public synchronized void setStatus(int status) {
         if (delegate != null
-            && status == STATUS_MARKED_ROLLEDBACK
-            && !delegate.willMarkAsRollbackOnly(this)) {
+                && status == STATUS_MARKED_ROLLEDBACK
+                && !delegate.willMarkAsRollbackOnly(this)) {
             return;
         }
 
@@ -292,24 +300,25 @@ public abstract class Transaction {
     }
 
     /**
-     * Starts a Transaction. If Transaction is not started explicitly, 
-     * it will be started when the first connection is added.
+     * Starts a Transaction. If Transaction is not started explicitly, it will be started
+     * when the first connection is added.
      */
     public abstract void begin();
 
     public abstract void addConnection(Connection connection)
-        throws IllegalStateException, SQLException, CayenneException;
+            throws IllegalStateException, SQLException, CayenneException;
 
-    public abstract void commit()
-        throws IllegalStateException, SQLException, CayenneException;
+    public abstract void commit() throws IllegalStateException, SQLException,
+            CayenneException;
 
-    public abstract void rollback()
-        throws IllegalStateException, SQLException, CayenneException;
+    public abstract void rollback() throws IllegalStateException, SQLException,
+            CayenneException;
 
     // transaction managed by container, or no transaction at all.
     // this implementation will simply close the connections on commit
     // or rollback, and notify the delegate
     static class ExternalTransaction extends Transaction {
+
         ExternalTransaction() {
         }
 
@@ -320,19 +329,19 @@ public abstract class Transaction {
         public synchronized void begin() {
             if (status != STATUS_NO_TRANSACTION) {
                 throw new IllegalStateException(
-                    "Transaction must have 'STATUS_NO_TRANSACTION' to begin. "
-                        + "Current status: "
-                        + decodeStatus(status));
+                        "Transaction must have 'STATUS_NO_TRANSACTION' to begin. "
+                                + "Current status: "
+                                + decodeStatus(status));
             }
 
             status = STATUS_ACTIVE;
-            // most Cayenne apps are single datanode, 
+            // most Cayenne apps are single datanode,
             // there will be few that have more than 2, esp. in a single tran
             connections = new ArrayList(2);
         }
 
         public synchronized void addConnection(Connection connection)
-            throws IllegalStateException, SQLException, CayenneException {
+                throws IllegalStateException, SQLException, CayenneException {
 
             // implicitly begin transaction
             if (status == STATUS_NO_TRANSACTION) {
@@ -345,9 +354,9 @@ public abstract class Transaction {
 
             if (status != STATUS_ACTIVE) {
                 throw new IllegalStateException(
-                    "Transaction must have 'STATUS_ACTIVE' to add a connection. "
-                        + "Current status: "
-                        + decodeStatus(status));
+                        "Transaction must have 'STATUS_ACTIVE' to add a connection. "
+                                + "Current status: "
+                                + decodeStatus(status));
             }
 
             if (!connections.contains(connection)) {
@@ -357,8 +366,7 @@ public abstract class Transaction {
             }
         }
 
-        public void commit()
-            throws IllegalStateException, SQLException, CayenneException {
+        public void commit() throws IllegalStateException, SQLException, CayenneException {
 
             if (status == STATUS_NO_TRANSACTION) {
                 return;
@@ -371,9 +379,9 @@ public abstract class Transaction {
             try {
                 if (status != STATUS_ACTIVE) {
                     throw new IllegalStateException(
-                        "Transaction must have 'STATUS_ACTIVE' to be committed. "
-                            + "Current status: "
-                            + decodeStatus(status));
+                            "Transaction must have 'STATUS_ACTIVE' to be committed. "
+                                    + "Current status: "
+                                    + decodeStatus(status));
                 }
 
                 processCommit();
@@ -388,12 +396,12 @@ public abstract class Transaction {
             }
         }
 
-        public void rollback()
-            throws IllegalStateException, SQLException, CayenneException {
+        public void rollback() throws IllegalStateException, SQLException,
+                CayenneException {
 
             if (status == STATUS_NO_TRANSACTION
-                || status == STATUS_ROLLEDBACK
-                || status == STATUS_ROLLING_BACK) {
+                    || status == STATUS_ROLLEDBACK
+                    || status == STATUS_ROLLING_BACK) {
                 return;
             }
 
@@ -404,9 +412,9 @@ public abstract class Transaction {
             try {
                 if (status != STATUS_ACTIVE) {
                     throw new IllegalStateException(
-                        "Transaction must have 'STATUS_ACTIVE' to be rolled back. "
-                            + "Current status: "
-                            + decodeStatus(status));
+                            "Transaction must have 'STATUS_ACTIVE' to be rolled back. "
+                                    + "Current status: "
+                                    + decodeStatus(status));
                 }
 
                 processRollback();
@@ -426,15 +434,13 @@ public abstract class Transaction {
         }
 
         protected void processCommit() throws SQLException, CayenneException {
-            QueryLogger.logCommitTransaction(
-                getLogLevel(),
-                "no commit - transaction controlled externally.");
+            QueryLogger
+                    .logCommitTransaction("no commit - transaction controlled externally.");
         }
 
         protected void processRollback() throws SQLException, CayenneException {
-            QueryLogger.logRollbackTransaction(
-                getLogLevel(),
-                "no rollback - transaction controlled externally.");
+            QueryLogger
+                    .logRollbackTransaction("no rollback - transaction controlled externally.");
         }
 
         /**
@@ -468,21 +474,23 @@ public abstract class Transaction {
 
         public void begin() {
             super.begin();
-            QueryLogger.logBeginTransaction(getLogLevel(), "transaction started.");
+            QueryLogger.logBeginTransaction("transaction started.");
         }
 
         protected void fixConnectionState(Connection connection) throws SQLException {
             if (connection.getAutoCommit()) {
                 // some DBs are very particular about that, (e.g. Informix SE 7.0 per
                 // CAY-179), so do a try-catch and ignore exception
-                
+
                 // TODO: maybe allow adapter to provide transaction instance?
 
                 try {
                     connection.setAutoCommit(false);
                 }
                 catch (SQLException cay179Ex) {
-                    logObj.info("Can't set connection autocommit to false, ignoring. Message: " + cay179Ex.getMessage());
+                    logObj
+                            .info("Can't set connection autocommit to false, ignoring. Message: "
+                                    + cay179Ex.getMessage());
                 }
             }
         }
@@ -501,14 +509,16 @@ public abstract class Transaction {
                             connection.commit();
                         }
                         else {
-                            // we must do a partial rollback if only to cleanup uncommitted 
+                            // we must do a partial rollback if only to cleanup
+                            // uncommitted
                             // connections.
                             connection.rollback();
                         }
 
                     }
                     catch (Throwable th) {
-                        // there is no such thing as "partial" rollback in real transactions,
+                        // there is no such thing as "partial" rollback in real
+                        // transactions,
                         // so we can't set any meaningful status.
                         // status = ?;
                         setRollbackOnly();
@@ -520,9 +530,7 @@ public abstract class Transaction {
                 }
 
                 if (deferredException != null) {
-                    QueryLogger.logRollbackTransaction(
-                        getLogLevel(),
-                        "transaction rolledback.");
+                    QueryLogger.logRollbackTransaction("transaction rolledback.");
                     if (deferredException instanceof SQLException) {
                         throw (SQLException) deferredException;
                     }
@@ -531,9 +539,7 @@ public abstract class Transaction {
                     }
                 }
                 else {
-                    QueryLogger.logCommitTransaction(
-                        getLogLevel(),
-                        "transaction committed.");
+                    QueryLogger.logCommitTransaction("transaction committed.");
                 }
             }
         }

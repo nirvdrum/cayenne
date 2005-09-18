@@ -251,12 +251,11 @@ public class DataNode implements QueryEngine {
             OperationObserver resultConsumer,
             Transaction transaction) {
 
-  
         int listSize = queries.size();
         if (listSize == 0) {
             return;
         }
-        QueryLogger.logQueryStart(QueryLogger.getLoggingLevel(), listSize);
+        QueryLogger.logQueryStart(listSize);
 
         // since 1.1 Transaction object is required
         if (transaction == null) {
@@ -280,7 +279,7 @@ public class DataNode implements QueryEngine {
         }
         // catch stuff like connection allocation errors, etc...
         catch (Exception globalEx) {
-            QueryLogger.logQueryError(QueryLogger.getLoggingLevel(), globalEx);
+            QueryLogger.logQueryError(globalEx);
 
             if (connection != null) {
                 // rollback failed transaction
@@ -301,7 +300,7 @@ public class DataNode implements QueryEngine {
                 queryRunner.runQuery(connection, nextQuery);
             }
             catch (Exception queryEx) {
-                QueryLogger.logQueryError(QueryLogger.getLoggingLevel(), queryEx);
+                QueryLogger.logQueryError(queryEx);
 
                 // notify consumer of the exception,
                 // stop running further queries
@@ -336,7 +335,8 @@ public class DataNode implements QueryEngine {
     protected void runUpdate(Connection con, Query query, OperationObserver delegate)
             throws SQLException, Exception {
 
-        new UpdateAction(query, getAdapter(), getEntityResolver()).performAction(con,
+        new UpdateAction(query, getAdapter(), getEntityResolver()).performAction(
+                con,
                 delegate);
     }
 
@@ -413,8 +413,9 @@ public class DataNode implements QueryEngine {
             OperationObserver delegate) throws SQLException, Exception {
 
         // method is deprecated, so keep this ugly piece here as a placeholder
-        new TempProcedureAction((ProcedureQuery) query)
-                .readProcedureOutParameters(statement, delegate);
+        new TempProcedureAction((ProcedureQuery) query).readProcedureOutParameters(
+                statement,
+                delegate);
     }
 
     /**
@@ -431,7 +432,8 @@ public class DataNode implements QueryEngine {
         // method is deprecated, so keep this ugly piece here as a placeholder
         RowDescriptor rowDescriptor = new RowDescriptor(resultSet, getAdapter()
                 .getExtendedTypes());
-        new TempProcedureAction((ProcedureQuery) query).readResultSet(resultSet,
+        new TempProcedureAction((ProcedureQuery) query).readResultSet(
+                resultSet,
                 rowDescriptor,
                 query,
                 delegate);
@@ -462,7 +464,7 @@ public class DataNode implements QueryEngine {
     public EntitySorter getEntitySorter() {
         return entitySorter;
     }
-    
+
     /**
      * Sets an EntitySorter that is used to order objects on commit.
      * 

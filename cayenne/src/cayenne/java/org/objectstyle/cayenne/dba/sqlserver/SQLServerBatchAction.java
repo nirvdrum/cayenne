@@ -114,7 +114,7 @@ public class SQLServerBatchAction extends BatchAction {
                 + query.getDbEntity().getFullyQualifiedName()
                 + flag;
 
-        QueryLogger.logQuery(query.getLoggingLevel(), configSQL, Collections.EMPTY_LIST);
+        QueryLogger.logQuery(configSQL, Collections.EMPTY_LIST);
 
         Statement statement = connection.createStatement();
         try {

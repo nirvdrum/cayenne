@@ -64,7 +64,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.OptimisticLockException;
@@ -140,11 +139,10 @@ public class BatchAction extends BaseSQLAction {
             OperationObserver delegate) throws SQLException, Exception {
 
         String queryStr = queryBuilder.createSqlString(query);
-        Level logLevel = query.getLoggingLevel();
-        boolean isLoggable = QueryLogger.isLoggable(logLevel);
+        boolean isLoggable = QueryLogger.isLoggable();
 
         // log batch SQL execution
-        QueryLogger.logQuery(logLevel, queryStr, Collections.EMPTY_LIST);
+        QueryLogger.logQuery(queryStr, Collections.EMPTY_LIST);
 
         // run batch
         query.reset();
@@ -154,7 +152,7 @@ public class BatchAction extends BaseSQLAction {
             while (query.next()) {
 
                 if (isLoggable) {
-                    QueryLogger.logQueryParameters(logLevel, "batch bind", queryBuilder
+                    QueryLogger.logQueryParameters("batch bind", queryBuilder
                             .getParameterValues(query));
                 }
 
@@ -167,7 +165,7 @@ public class BatchAction extends BaseSQLAction {
             delegate.nextBatchCount(query, results);
 
             if (isLoggable) {
-                QueryLogger.logUpdateCount(logLevel, statement.getUpdateCount());
+                QueryLogger.logUpdateCount(statement.getUpdateCount());
             }
         }
         finally {
@@ -188,25 +186,24 @@ public class BatchAction extends BaseSQLAction {
             OperationObserver delegate,
             boolean generatesKeys) throws SQLException, Exception {
 
-        Level logLevel = query.getLoggingLevel();
-        boolean isLoggable = QueryLogger.isLoggable(logLevel);
+        boolean isLoggable = QueryLogger.isLoggable();
         boolean useOptimisticLock = query.isUsingOptimisticLocking();
 
         String queryStr = queryBuilder.createSqlString(query);
 
         // log batch SQL execution
-        QueryLogger.logQuery(logLevel, queryStr, Collections.EMPTY_LIST);
+        QueryLogger.logQuery(queryStr, Collections.EMPTY_LIST);
 
         // run batch queries one by one
         query.reset();
 
-        PreparedStatement statement = (generatesKeys) ? connection
-                .prepareStatement(queryStr, Statement.RETURN_GENERATED_KEYS) : connection
-                .prepareStatement(queryStr);
+        PreparedStatement statement = (generatesKeys) ? connection.prepareStatement(
+                queryStr,
+                Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(queryStr);
         try {
             while (query.next()) {
                 if (isLoggable) {
-                    QueryLogger.logQueryParameters(logLevel, "bind", queryBuilder
+                    QueryLogger.logQueryParameters("bind", queryBuilder
                             .getParameterValues(query));
                 }
 
@@ -236,7 +233,7 @@ public class BatchAction extends BaseSQLAction {
                 }
 
                 if (isLoggable) {
-                    QueryLogger.logUpdateCount(logLevel, updated);
+                    QueryLogger.logUpdateCount(updated);
                 }
             }
         }

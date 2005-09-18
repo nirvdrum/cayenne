@@ -181,7 +181,7 @@ public class DB2PkGenerator extends JdbcPkGenerator {
 		  	String pkQueryString = "SELECT NEXTVAL FOR "
 		  							+ seq_name
 		  							+ " FROM SYSIBM.SYSDUMMY1";
-			QueryLogger.logQuery(QueryLogger.DEFAULT_LOG_LEVEL, pkQueryString, Collections.EMPTY_LIST);
+			QueryLogger.logQuery(pkQueryString, Collections.EMPTY_LIST);
 			ResultSet rs = st.executeQuery(pkQueryString);
 			try {
 			  if (!rs.next()) {

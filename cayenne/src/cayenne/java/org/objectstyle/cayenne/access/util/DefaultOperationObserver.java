@@ -94,11 +94,6 @@ public class DefaultOperationObserver implements OperationObserver {
 
     protected List globalExceptions = new ArrayList();
     protected Map queryExceptions = new HashMap();
-    
-    /**
-     * @deprecated Unused since 1.2
-     */
-    protected Level loggingLevel = DEFAULT_LOG_LEVEL;
 
     /**
      * Prints the information about query and global exceptions.
@@ -155,18 +150,22 @@ public class DefaultOperationObserver implements OperationObserver {
 
     /**
      * Returns a log level level that should be used when logging query execution.
+     * 
+     * @deprecated since 1.2
      */
     public Level getLoggingLevel() {
-        return loggingLevel;
+        return Level.INFO;
     }
 
     /**
      * Sets log level that should be used for queries. If <code>level</code> argument is
      * null, level is set to DEFAULT_LOG_LEVEL. If <code>level</code> is equal or higher
      * than log level configured for QueryLogger, query SQL statements will be logged.
+     * 
+     * @deprecated since 1.2
      */
     public void setLoggingLevel(Level level) {
-        this.loggingLevel = (level == null) ? DEFAULT_LOG_LEVEL : level;
+        // noop
     }
 
     public void nextCount(Query query, int resultCount) {

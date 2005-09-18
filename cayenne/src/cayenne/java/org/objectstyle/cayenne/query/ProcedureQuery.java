@@ -305,7 +305,6 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
             query.setRoot(root);
         }
 
-        query.setLoggingLevel(logLevel);
         query.setResultClassName(resultClassName);
 
         selectProperties.copyToProperties(query.selectProperties);

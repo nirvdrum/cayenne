@@ -68,7 +68,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 class QueryChainQuery extends QueryChain implements Query {
 
     String name;
-    Level loggingLevel;
 
     QueryChainQuery(String name, Collection queries) {
         this.name = name;
@@ -83,16 +82,18 @@ class QueryChainQuery extends QueryChain implements Query {
         this.name = name;
     }
 
+    /**
+     * @deprecated since 1.2
+     */
     public Level getLoggingLevel() {
-        return loggingLevel;
+        return Level.INFO;
     }
 
     /**
-     * Logging level of the QueryChanin can be set, but will be ignored. Keeping for
-     * compatibility with Query interface.
+     * @deprecated since 1.2
      */
     public void setLoggingLevel(Level loggingLevel) {
-        this.loggingLevel = loggingLevel;
+        // noop
     }
 
     /**

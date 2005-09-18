@@ -108,7 +108,14 @@ public abstract class QueryTranslator {
      * parameter is supplied to allow
      * control of logging of produced SQL. 
      */
-    public abstract PreparedStatement createStatement(Level logLevel) throws Exception;
+    public abstract PreparedStatement createStatement() throws Exception;
+    
+    /**
+     * @deprecated since 1.2
+     */
+    public final PreparedStatement createStatement(Level logLevel) throws Exception {
+        return createStatement();
+    }
 
     /** Returns query object being processed. */
     public Query getQuery() {

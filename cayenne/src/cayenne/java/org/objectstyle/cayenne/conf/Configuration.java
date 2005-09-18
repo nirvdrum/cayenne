@@ -134,7 +134,7 @@ public abstract class Configuration {
     protected ConfigurationShutdownHook configurationShutdownHook = new ConfigurationShutdownHook();
     protected Map dataViewLocations = new HashMap();
     protected String projectVersion;
-    
+
     /**
      * Stores instance ClassLoader.
      * 
@@ -262,6 +262,8 @@ public abstract class Configuration {
     /**
      * Returns default log level for loading configuration. Log level is made static so
      * that applications can set it before shared Configuration object is instantiated.
+     * 
+     * @deprecated since 1.2 unused
      */
     public static Level getLoggingLevel() {
         Level l = logObj.getLevel();
@@ -270,6 +272,8 @@ public abstract class Configuration {
 
     /**
      * Sets the default log level for loading a configuration.
+     * 
+     * @deprecated since 1.2 unused.
      */
     public static void setLoggingLevel(Level logLevel) {
         logObj.setLevel(logLevel);
@@ -643,7 +647,7 @@ public abstract class Configuration {
     public void uninstallConfigurationShutdownHook() {
         Runtime.getRuntime().removeShutdownHook(configurationShutdownHook);
     }
-    
+
     /**
      * Returns ClassLoader set for this instance if it is not null. Otherwise returns
      * static ClassLoader by calling "Configuration.getResourceLoader()".
@@ -653,7 +657,7 @@ public abstract class Configuration {
     public ClassLoader getClassLoader() {
         return classLoader != null ? classLoader : Configuration.getResourceLoader();
     }
-    
+
     /**
      * @since 1.2
      */

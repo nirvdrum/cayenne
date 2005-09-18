@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectFactory;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataContextObjectFactory;
-import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
@@ -98,9 +97,12 @@ public class SelectObserver extends DefaultOperationObserver {
     protected int selectCount;
 
     public SelectObserver() {
-        this(QueryLogger.DEFAULT_LOG_LEVEL);
+
     }
 
+    /**
+     * @deprecated since 1.2
+     */
     public SelectObserver(Level logLevel) {
         super.setLoggingLevel(logLevel);
     }
@@ -219,7 +221,8 @@ public class SelectObserver extends DefaultOperationObserver {
 
             FlatPrefetchResolver flatPrefetchResolver = new FlatPrefetchResolver(factory);
 
-            List objects = flatPrefetchResolver.resolveObjectTree(flatPrefetchTree,
+            List objects = flatPrefetchResolver.resolveObjectTree(
+                    flatPrefetchTree,
                     getResults(rootQuery));
 
             // attach normal prefetches to the list of main objects that is already

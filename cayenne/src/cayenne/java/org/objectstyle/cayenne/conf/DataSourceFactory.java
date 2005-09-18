@@ -59,29 +59,25 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
 
-
 /**
  * A pluggable factory for javax.sql.DataSource instances used by Cayenne runtime.
  */
 public interface DataSourceFactory {
-    
+
     /**
      * Initializes factory with the parent configuration object.
      */
     public void initializeWithParentConfiguration(Configuration conf);
-    
-    /** 
-     * Returns DataSource object corresponding to <code>location</code>.
-     * Concrete implementations may treat location differently - as a
-     * file path, JNDI location, etc.
+
+    /**
+     * Returns DataSource object corresponding to <code>location</code>. Concrete
+     * implementations may treat location differently - as a file path, JNDI location,
+     * etc.
      */
     public DataSource getDataSource(String location) throws Exception;
-    
+
     /**
-     * Returns DataSource object corresponding to <code>location</code>.
-     * Uses <code>logLevel</code> level of verbosity during data source loading.
-     * Concrete implementations may treat location differently - as a
-     * file path, JNDI location, etc.
+     * @deprecated since 1.2 use and implement "getDataSource(String)" instead.
      */
     public DataSource getDataSource(String location, Level logLevel) throws Exception;
 }

@@ -71,7 +71,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
@@ -97,7 +96,7 @@ import org.objectstyle.cayenne.validation.ValidationResult;
 public class DbGenerator {
 
     private Logger logObj = Logger.getLogger(DbGenerator.class);
-    
+
     protected DbAdapter adapter;
     protected DataMap map;
 
@@ -338,7 +337,7 @@ public class DbGenerator {
                     }
                 }
             }
-            
+
             // drop PK
             if (shouldDropPKSupport) {
                 List dropAutoPKSQL = getAdapter().getPkGenerator().dropAutoPkStatements(
@@ -375,7 +374,7 @@ public class DbGenerator {
         Statement statement = connection.createStatement();
 
         try {
-            QueryLogger.logQuery(Level.INFO, sql, null);
+            QueryLogger.logQuery(sql, null);
             statement.execute(sql);
             return true;
         }
@@ -385,7 +384,7 @@ public class DbGenerator {
             }
 
             failures.addFailure(new SimpleValidationFailure(sql, ex.getMessage()));
-            QueryLogger.logQueryError(Level.INFO, ex);
+            QueryLogger.logQueryError(ex);
             return false;
         }
         finally {

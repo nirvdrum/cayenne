@@ -116,16 +116,18 @@ public class PreferencesDataSourceFactory implements DataSourceFactory {
         // noop
     }
 
-    public DataSource getDataSource(String location) throws Exception {
-        return getDataSource(location, Level.INFO);
+    /**
+     * @deprecated since 1.2
+     */
+    public DataSource getDataSource(String location, Level logLevel) throws Exception {
+        return getDataSource(location);
     }
 
     /**
      * Attempts to read named DataSource info from preferences and create a DataSource out
      * of it. If no matching DataSource is found, throws CayenneRuntimeException.
      */
-    public DataSource getDataSource(final String location, Level logLevel)
-            throws Exception {
+    public DataSource getDataSource(final String location) throws Exception {
         if (location == null) {
             throw new NullPointerException("Null location");
         }

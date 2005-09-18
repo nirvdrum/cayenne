@@ -149,7 +149,7 @@ class DataContextSelectAction {
         }
 
         // must fetch...
-        SelectObserver observer = new SelectObserver(query.getLoggingLevel());
+        SelectObserver observer = new SelectObserver();
         context.performQueries(Collections.singletonList(query), observer);
 
         List results;

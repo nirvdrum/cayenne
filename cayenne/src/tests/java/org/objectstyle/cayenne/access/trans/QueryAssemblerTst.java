@@ -33,7 +33,6 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import org.apache.log4j.Level;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -71,7 +70,7 @@ public class QueryAssemblerTst extends CayenneTestCase {
 
     public void testCreateStatement() throws Exception {
         try {
-            assertNotNull(qa.createStatement(Level.INFO));
+            assertNotNull(qa.createStatement());
         }
         finally {
             qa.dispose();

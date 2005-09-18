@@ -60,17 +60,17 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Level;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
- * Helper class to extract the information from BatchQueries, essential for
- * LOB columns processing.
+ * Helper class to extract the information from BatchQueries, essential for LOB columns
+ * processing.
  * 
  * @author Andrei Adamchik
  */
 public class LOBBatchQueryWrapper {
+
     protected BatchQuery query;
 
     protected List dbAttributes;
@@ -105,8 +105,8 @@ public class LOBBatchQueryWrapper {
     }
 
     /**
-      * Indexes attributes 
-      */
+     * Indexes attributes
+     */
     protected void indexQualifierAttributes() {
         int len = this.dbAttributes.size();
         for (int i = 0; i < len; i++) {
@@ -118,7 +118,7 @@ public class LOBBatchQueryWrapper {
     }
 
     /**
-     * Indexes attributes 
+     * Indexes attributes
      */
     protected void indexLOBAttributes() {
         int len = updatedLOBAttributes.length;
@@ -171,8 +171,8 @@ public class LOBBatchQueryWrapper {
     }
 
     /**
-     * Returns a list of DbAttributes used in the qualifier of the query 
-     * that selects a LOB row for LOB update.
+     * Returns a list of DbAttributes used in the qualifier of the query that selects a
+     * LOB row for LOB update.
      */
     public List getDbAttributesForLOBSelectQualifier() {
 
@@ -188,9 +188,9 @@ public class LOBBatchQueryWrapper {
     }
 
     /**
-     * Returns a list of DbAttributes that correspond to 
-     * the LOB columns updated in the current row in the batch query. 
-     * The list will not include LOB attributes that are null or empty.
+     * Returns a list of DbAttributes that correspond to the LOB columns updated in the
+     * current row in the batch query. The list will not include LOB attributes that are
+     * null or empty.
      */
     public List getDbAttributesForUpdatedLOBColumns() {
         if (!hasNext) {
@@ -220,34 +220,30 @@ public class LOBBatchQueryWrapper {
                 values.add(query.getValue(i));
             }
         }
-        
+
         return values;
     }
-    
-	public List getValuesForUpdatedLOBColumns() {
-		if (!hasNext) {
-			throw new IllegalStateException("No more rows in the BatchQuery.");
-		}
 
-		int len = this.updatedLOBAttributes.length;
-		List values = new ArrayList(len);
-		for (int i = 0; i < len; i++) {
-			if (this.updatedLOBAttributes[i] != null) {
-				values.add(this.updatedLOBAttributes[i]);
-			}
-		}
-        
-		return values;
-	}
+    public List getValuesForUpdatedLOBColumns() {
+        if (!hasNext) {
+            throw new IllegalStateException("No more rows in the BatchQuery.");
+        }
+
+        int len = this.updatedLOBAttributes.length;
+        List values = new ArrayList(len);
+        for (int i = 0; i < len; i++) {
+            if (this.updatedLOBAttributes[i] != null) {
+                values.add(this.updatedLOBAttributes[i]);
+            }
+        }
+
+        return values;
+    }
 
     /**
      * Returns wrapped BatchQuery.
      */
     public BatchQuery getQuery() {
         return query;
-    }
-    
-    public Level getLoggingLevel() {
-    	return this.query.getLoggingLevel();
     }
 }

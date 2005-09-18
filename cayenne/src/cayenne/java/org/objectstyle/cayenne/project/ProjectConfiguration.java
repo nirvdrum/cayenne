@@ -138,10 +138,7 @@ public class ProjectConfiguration extends FileConfiguration {
     final class ProjectLoader extends RuntimeLoadDelegate {
 
         public ProjectLoader() {
-            super(
-                    ProjectConfiguration.this,
-                    ProjectConfiguration.this.getLoadStatus(),
-                    ProjectConfiguration.getLoggingLevel());
+            super(ProjectConfiguration.this, ProjectConfiguration.this.getLoadStatus());
         }
 
         public void shouldLoadDataDomain(String domainName) {

@@ -265,15 +265,10 @@ public class DBCPDataSourceFactory implements DataSourceFactory {
     }
 
     /**
-     * Returns a <code>DataSource</code> which is an instance of DBCP's <code>
-     * PoolingDataSource</code>
-     * class
-     * 
-     * @return <code>DataSource</code>
-     * @throws Exception
+     * @deprecated since 1.2
      */
-    public DataSource getDataSource(String location) throws Exception {
-        return getDataSource(location, Level.DEBUG);
+    public DataSource getDataSource(String location, Level logLevel) throws Exception {
+        return getDataSource(location);
     }
 
     /**
@@ -283,18 +278,18 @@ public class DBCPDataSourceFactory implements DataSourceFactory {
      *         <code>PoolingDataSource</code>
      * @throws Exception
      */
-    public DataSource getDataSource(String location, Level logLevel) throws Exception {
+    public DataSource getDataSource(String location) throws Exception {
 
         if (!location.endsWith(SUFFIX)) {
             location = location.concat(SUFFIX);
         }
 
-        logger.log(logLevel, "Loading DBCP properties from " + location);
+        logger.info("Loading DBCP properties from " + location);
 
         Properties properties = loadProperties(location);
-        logger.log(logLevel, "Loaded DBCP properties: " + properties);
+        logger.info("Loaded DBCP properties: " + properties);
 
-        loadDriverClass(properties, logLevel);
+        loadDriverClass(properties);
 
         // build and assemble parts of DBCP DataSource...
         ConnectionFactory factory = createConnectionFactory(properties);
@@ -343,9 +338,9 @@ public class DBCPDataSourceFactory implements DataSourceFactory {
     /**
      * Loads driver class into driver manager.
      */
-    void loadDriverClass(Properties properties, Level level) throws Exception {
+    void loadDriverClass(Properties properties) throws Exception {
         String driver = stringProperty(properties, "driverClassName");
-        logger.log(level, "loading JDBC driver class: " + driver);
+        logger.info("loading JDBC driver class: " + driver);
 
         if (driver == null) {
             throw new NullPointerException("No value for required property: "

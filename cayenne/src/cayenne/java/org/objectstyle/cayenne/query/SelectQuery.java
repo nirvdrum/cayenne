@@ -358,28 +358,30 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
 
         this.selectProperties.copyToProperties(query.selectProperties);
 
-        query.setLoggingLevel(logLevel);
         query.setParentObjEntityName(parentObjEntityName);
         query.setParentQualifier(parentQualifier);
         query.setRoot(root);
 
         // The following algorithm is for building the new query name based
         // on the original query name and a hashcode of the map of parameters.
-        // This way the query clone can take advantage of caching.  Fixes
+        // This way the query clone can take advantage of caching. Fixes
         // problem reported in CAY-360.
 
         if (name != null && name.equals("") == false) {
-            Iterator        keyValuePairs  = parameters.entrySet().iterator();
+            Iterator keyValuePairs = parameters.entrySet().iterator();
             HashCodeBuilder parametersHash = new HashCodeBuilder();
-    
+
             while (keyValuePairs.hasNext()) {
                 Map.Entry entry = (Map.Entry) keyValuePairs.next();
-      
+
                 parametersHash.append(entry.getKey());
                 parametersHash.append(entry.getValue());
             }
-    
-            query.setName("__CayenneInternalQuery__" + name + "__" + parametersHash.toHashCode());
+
+            query.setName("__CayenneInternalQuery__"
+                    + name
+                    + "__"
+                    + parametersHash.toHashCode());
         }
 
         if (prefetches != null) {

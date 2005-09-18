@@ -111,7 +111,7 @@ public class SQLTemplateAction implements SQLAction {
                     + getAdapter().getClass().getName());
         }
 
-        boolean loggable = QueryLogger.isLoggable(query.getLoggingLevel());
+        boolean loggable = QueryLogger.isLoggable();
         int size = query.parametersSize();
 
         SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
@@ -124,12 +124,13 @@ public class SQLTemplateAction implements SQLAction {
         for (int i = 0; i < counts.length; i++) {
             Map nextParameters = (Map) it.next();
 
-            SQLStatement compiled = templateProcessor.processTemplate(template,
+            SQLStatement compiled = templateProcessor.processTemplate(
+                    template,
                     nextParameters);
 
             if (loggable) {
-                QueryLogger.logQuery(query.getLoggingLevel(), compiled.getSql(), Arrays
-                        .asList(compiled.getBindings()));
+                QueryLogger.logQuery(compiled.getSql(), Arrays.asList(compiled
+                        .getBindings()));
             }
 
             // TODO: we may cache prep statements for this loop, using merged string as a
@@ -139,7 +140,7 @@ public class SQLTemplateAction implements SQLAction {
             try {
                 bind(statement, compiled.getBindings());
                 counts[i] = statement.executeUpdate();
-                QueryLogger.logUpdateCount(query.getLoggingLevel(), counts[i]);
+                QueryLogger.logUpdateCount(counts[i]);
             }
             finally {
                 statement.close();
@@ -169,7 +170,8 @@ public class SQLTemplateAction implements SQLAction {
         if (bindings.length > 0) {
             int len = bindings.length;
             for (int i = 0; i < len; i++) {
-                adapter.bindParameter(preparedStatement,
+                adapter.bindParameter(
+                        preparedStatement,
                         bindings[i].getValue(),
                         i + 1,
                         bindings[i].getJdbcType(),

@@ -92,7 +92,7 @@ public class SQLTemplateSelectAction extends SQLTemplateAction {
 
         SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
         String template = extractTemplateString();
-        boolean loggable = QueryLogger.isLoggable(query.getLoggingLevel());
+        boolean loggable = QueryLogger.isLoggable();
 
         int size = query.parametersSize();
 
@@ -103,12 +103,13 @@ public class SQLTemplateSelectAction extends SQLTemplateAction {
         while (it.hasNext()) {
             Map nextParameters = (Map) it.next();
 
-            SQLSelectStatement compiled = templateProcessor
-                    .processSelectTemplate(template, nextParameters);
+            SQLSelectStatement compiled = templateProcessor.processSelectTemplate(
+                    template,
+                    nextParameters);
 
             if (loggable) {
-                QueryLogger.logQuery(query.getLoggingLevel(), compiled.getSql(), Arrays
-                        .asList(compiled.getBindings()));
+                QueryLogger.logQuery(compiled.getSql(), Arrays.asList(compiled
+                        .getBindings()));
             }
 
             long t1 = System.currentTimeMillis();
@@ -138,9 +139,8 @@ public class SQLTemplateSelectAction extends SQLTemplateAction {
                 // note that we don't need to close ResultIterator
                 // since "dataRows" will do it internally
                 List resultRows = result.dataRows(true);
-                QueryLogger.logSelectCount(query.getLoggingLevel(),
-                        resultRows.size(),
-                        System.currentTimeMillis() - t1);
+                QueryLogger.logSelectCount(resultRows.size(), System.currentTimeMillis()
+                        - t1);
 
                 observer.nextDataRows(query, resultRows);
             }
