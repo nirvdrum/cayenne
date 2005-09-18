@@ -112,17 +112,17 @@ public class EntityResolverTst extends CayenneTestCase {
         // make sure that client entities got translated properly...
 
         try {
-            assertNotNull(clientResolver.lookupEntity("MtTable1"));
+            assertNotNull(clientResolver.entityForName("MtTable1"));
         }
         catch (CayenneClientException e) {
             fail("'MtTable1' entity is not mapped. All entities: "
                     + clientResolver.getEntityNames());
         }
 
-        assertNotNull(clientResolver.lookupEntity(ClientMtTable1.class));
+        assertNotNull(clientResolver.entityForClass(ClientMtTable1.class));
 
         try {
-            clientResolver.lookupEntity(MtTable1.class);
+            clientResolver.entityForClass(MtTable1.class);
             fail("Expected to fail - server class shouldn't be available on the client");
         }
         catch (CayenneClientException e) {

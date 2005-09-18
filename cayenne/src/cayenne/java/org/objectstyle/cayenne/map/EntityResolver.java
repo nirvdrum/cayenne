@@ -92,12 +92,12 @@ public class EntityResolver implements MappingNamespace {
     private static final Logger logObj = Logger.getLogger(EntityResolver.class);
 
     protected boolean indexedByClass;
+
     protected Map queryCache;
     protected Map dbEntityCache;
     protected Map objEntityCache;
     protected Map procedureCache;
     protected List maps;
-    protected List mapsRef;
     protected Map entityInheritanceCache;
     protected ClientEntityResolver clientEntityResolver;
 
@@ -107,7 +107,6 @@ public class EntityResolver implements MappingNamespace {
     public EntityResolver() {
         this.indexedByClass = true;
         this.maps = new ArrayList();
-        this.mapsRef = Collections.unmodifiableList(maps);
         this.queryCache = new HashMap();
         this.dbEntityCache = new HashMap();
         this.objEntityCache = new HashMap();
@@ -165,8 +164,8 @@ public class EntityResolver implements MappingNamespace {
     }
 
     /**
-     * Returns ClientEntityResolver with mapping information that should be accessible to
-     * the client.
+     * Returns ClientEntityResolver with mapping information that only includes entities
+     * available on CWS Client Tier.
      * 
      * @since 1.2
      */
@@ -433,7 +432,7 @@ public class EntityResolver implements MappingNamespace {
      * Returns an unmodifiable collection of DataMaps.
      */
     public Collection getDataMaps() {
-        return mapsRef;
+        return Collections.unmodifiableList(maps);
     }
 
     /**

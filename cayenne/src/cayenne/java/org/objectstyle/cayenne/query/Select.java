@@ -65,8 +65,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -312,19 +314,7 @@ public class Select implements QueryExecutionPlan {
             query = new SelectQuery(entityName, qualifier);
         }
         else {
-            // TODO (Andrus, 09/17/2005) How to tell the difference between client and
-            // server class? We should make sure we set a server class here...
-            Class rootClass;
-            try {
-                rootClass = Class.forName(objectClass, true, Thread
-                        .currentThread()
-                        .getContextClassLoader());
-            }
-            catch (ClassNotFoundException e) {
-                throw new CayenneRuntimeException("Unknown root class: " + objectClass, e);
-            }
-
-            query = new SelectQuery(rootClass, qualifier);
+            query = new SelectQuery(queryEntityForObjectClass(resolver), qualifier);
         }
 
         if (orderings != null) {
@@ -336,6 +326,38 @@ public class Select implements QueryExecutionPlan {
         }
 
         return query;
+    }
+
+    String queryEntityForObjectClass(EntityResolver resolver) {
+
+        Class rootClass;
+        try {
+            rootClass = Class.forName(objectClass, true, Thread
+                    .currentThread()
+                    .getContextClassLoader());
+        }
+        catch (ClassNotFoundException e) {
+            // this maybe a client class that is not accessible here...
+            return queryEntityForClientObjectClass(resolver);
+        }
+
+        // this maybe a client class not mapped in EntityResolver
+        ObjEntity entity = resolver.lookupObjEntity(rootClass);
+        return (entity != null)
+                ? entity.getName()
+                : queryEntityForClientObjectClass(resolver);
+    }
+
+    String queryEntityForClientObjectClass(EntityResolver resolver) {
+        try {
+            return resolver
+                    .getClientEntityResolver()
+                    .entityForClassName(objectClass)
+                    .getName();
+        }
+        catch (CayenneClientException e) {
+            throw new CayenneRuntimeException("Invalid Select class: " + objectClass);
+        }
     }
 
     /**

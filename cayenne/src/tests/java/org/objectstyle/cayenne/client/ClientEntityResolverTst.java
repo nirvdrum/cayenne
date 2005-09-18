@@ -73,7 +73,7 @@ public class ClientEntityResolverTst extends TestCase {
 
         ClientEntityResolver resolver = new ClientEntityResolver(entities);
 
-        assertSame(entity, resolver.lookupEntity(entity.getName()));
+        assertSame(entity, resolver.entityForName(entity.getName()));
 
         Collection names = resolver.getEntityNames();
         assertEquals(1, names.size());

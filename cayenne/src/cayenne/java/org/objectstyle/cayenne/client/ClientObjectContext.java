@@ -244,7 +244,7 @@ public class ClientObjectContext implements ObjectContext {
             throw new NullPointerException("Persistent class can't be null.");
         }
 
-        ObjEntity entity = getEntityResolver().lookupEntity(persistentClass);
+        ObjEntity entity = getEntityResolver().entityForClass(persistentClass);
         ClassDescriptor descriptor = entity.getClassDescriptor();
 
         Persistent object = (Persistent) descriptor.createObject();
@@ -364,7 +364,7 @@ public class ClientObjectContext implements ObjectContext {
     }
 
     protected ClassDescriptor getClassDescriptor(Persistent object) {
-        ObjEntity entity = getEntityResolver().lookupEntity(
+        ObjEntity entity = getEntityResolver().entityForName(
                 object.getGlobalID().getEntityName());
         return entity.getClassDescriptor();
     }

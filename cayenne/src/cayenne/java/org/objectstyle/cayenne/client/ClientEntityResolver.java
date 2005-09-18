@@ -138,7 +138,7 @@ public class ClientEntityResolver implements Serializable {
      * 
      * @throws CayenneClientException if a class is not mapped.
      */
-    public ObjEntity lookupEntity(String entityName) throws CayenneClientException {
+    public ObjEntity entityForName(String entityName) throws CayenneClientException {
         if (entityName == null) {
             throw new CayenneClientException("Null entityName.");
         }
@@ -159,7 +159,7 @@ public class ClientEntityResolver implements Serializable {
      * 
      * @throws CayenneClientException if a class is not mapped.
      */
-    public ObjEntity lookupEntity(Class objectClass) throws CayenneClientException {
+    public ObjEntity entityForClass(Class objectClass) throws CayenneClientException {
         if (objectClass == null) {
             throw new CayenneClientException("Null object class.");
         }
@@ -169,6 +169,27 @@ public class ClientEntityResolver implements Serializable {
         if (entity == null) {
             throw new CayenneClientException("Unmapped class hierarchy: " + objectClass);
         }
+        return entity;
+    }
+
+    /**
+     * Returns entity for the mapped class name.
+     */
+    // TODO: (Andrus, 09/18/2005) Inconsistency - lookup by class would search superclass
+    // names as well...
+    public ObjEntity entityForClassName(String objectClassName)
+            throws CayenneClientException {
+
+        if (objectClassName == null) {
+            throw new CayenneClientException("Null object class.");
+        }
+
+        ObjEntity entity = (ObjEntity) entitiesByClassName.get(objectClassName);
+
+        if (entity == null) {
+            throw new CayenneClientException("Unmapped class: " + objectClassName);
+        }
+
         return entity;
     }
 
