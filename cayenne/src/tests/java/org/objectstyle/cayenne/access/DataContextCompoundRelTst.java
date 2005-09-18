@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.access;
 
 import java.util.List;
 
-import org.apache.log4j.Level;
 import org.objectstyle.art.CompoundFkTest;
 import org.objectstyle.art.CompoundPkTest;
 import org.objectstyle.cayenne.exp.Expression;
@@ -80,7 +79,7 @@ public class DataContextCompoundRelTst extends CayenneTestCase {
         ctxt = createDataContext();
     }
 
-    public void testInsert() throws Exception {
+    public void testInsert()  {
         CompoundPkTest master =
             (CompoundPkTest) ctxt.createAndRegisterNewObject("CompoundPkTest");
         CompoundFkTest detail =
@@ -91,7 +90,7 @@ public class DataContextCompoundRelTst extends CayenneTestCase {
         master.setKey2("key21");
         detail.setName("d1");
 
-        ctxt.commitChanges(Level.WARN);
+        ctxt.commitChanges();
 
         // reset context
         ctxt = createDataContext();
@@ -110,7 +109,7 @@ public class DataContextCompoundRelTst extends CayenneTestCase {
         assertEquals("d1", detail.getName());
     }
 
-    public void testFetchQualifyingToOne() throws Exception {
+    public void testFetchQualifyingToOne() {
         CompoundPkTest master =
             (CompoundPkTest) ctxt.createAndRegisterNewObject("CompoundPkTest");
         CompoundPkTest master1 =
@@ -134,7 +133,7 @@ public class DataContextCompoundRelTst extends CayenneTestCase {
 
         detail1.setName("d2");
 
-        ctxt.commitChanges(Level.WARN);
+        ctxt.commitChanges();
 
         // reset context
         ctxt = createDataContext();
@@ -172,7 +171,7 @@ public class DataContextCompoundRelTst extends CayenneTestCase {
 
 		   detail1.setName("d2");
 
-		   ctxt.commitChanges(Level.WARN);
+		   ctxt.commitChanges();
 
 		   // reset context
 		   ctxt = createDataContext();

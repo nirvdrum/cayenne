@@ -67,7 +67,7 @@ import org.apache.log4j.Level;
 public interface OperationHints {
 
     /**
-     * Returns a log level that should be used when logging query execution.
+     * @deprecated Unused since 1.2
      */
     public Level getLoggingLevel();
 

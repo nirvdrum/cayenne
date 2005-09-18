@@ -937,24 +937,20 @@ public class DataContext implements QueryEngine, Serializable {
     public void rollbackChanges() {
         getObjectStore().objectsRolledBack();
     }
+    
+    /**
+     * @deprecated Since 1.2, use "commitChnages()" instead.
+     */
+    public void commitChanges(Level logLevel) throws CayenneRuntimeException {
+        commitChanges();
+    }
 
     /**
      * Synchronizes object graph with the database. Executes needed insert, update and
      * delete queries (generated internally).
      */
     public void commitChanges() throws CayenneRuntimeException {
-        commitChanges(null);
-    }
-
-    /**
-     * Synchronizes object graph with the database. Executes needed insert, update and
-     * delete queries (generated internally).
-     * 
-     * @param logLevel if logLevel is higher or equals to the level set for QueryLogger,
-     *            statements execution will be logged.
-     */
-    public void commitChanges(Level logLevel) throws CayenneRuntimeException {
-
+   
         if (this.getParent() == null) {
             throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
         }
@@ -973,7 +969,7 @@ public class DataContext implements QueryEngine, Serializable {
             DataContextCommitAction worker = new DataContextCommitAction(this);
 
             try {
-                worker.commit(logLevel);
+                worker.commit();
             }
             catch (CayenneException ex) {
                 Throwable unwound = Util.unwindException(ex);
@@ -1055,7 +1051,6 @@ public class DataContext implements QueryEngine, Serializable {
             throws CayenneException {
 
         IteratedSelectObserver observer = new IteratedSelectObserver();
-        observer.setLoggingLevel(query.getLoggingLevel());
         performQueries(Collections.singletonList(query), observer);
         return observer.getResultIterator();
     }

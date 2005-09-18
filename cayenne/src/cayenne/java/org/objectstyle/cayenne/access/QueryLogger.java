@@ -62,7 +62,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.jdbc.ParameterBinding;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
 /** 
@@ -84,7 +83,7 @@ import org.objectstyle.cayenne.util.Util;
 public class QueryLogger {
     private static final Logger logObj = Logger.getLogger(QueryLogger.class);
 
-    public static final Level DEFAULT_LOG_LEVEL = Query.DEFAULT_LOG_LEVEL;
+    public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
     public static final int TRIM_VALUES_THRESHOLD = 300;
 
     /** 

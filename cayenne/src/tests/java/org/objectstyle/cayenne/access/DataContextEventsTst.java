@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.access;
 
 import java.sql.Date;
 
-import org.apache.log4j.Level;
 import org.objectstyle.art.oneway.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.mysql.MySQLAdapter;
@@ -95,7 +94,7 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
         artist.setDateOfBirth(new Date(System.currentTimeMillis()));
 
         // commit the pending changes
-        context.commitChanges(Level.WARN);
+        context.commitChanges();
 
         assertTrue(artist.receivedWillCommit());
         assertTrue(artist.receivedDidCommit());
@@ -124,7 +123,7 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
 
         try {
             // commit the pending changes
-            context.commitChanges(Level.WARN);
+            context.commitChanges();
             fail("No exception on saving invalid data.");
         }
         catch (CayenneRuntimeException ex) {
@@ -142,7 +141,7 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
         assertFalse(artist.receivedDidCommit());
 
         // commit without any pending changes
-        context.commitChanges(Level.WARN);
+        context.commitChanges();
 
         assertFalse(artist.receivedDidCommit());
         assertFalse(artist.receivedWillCommit());

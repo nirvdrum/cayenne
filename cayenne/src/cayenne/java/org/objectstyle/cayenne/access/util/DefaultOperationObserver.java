@@ -87,10 +87,17 @@ public class DefaultOperationObserver implements OperationObserver {
 
     private static Logger logObj = Logger.getLogger(DefaultOperationObserver.class);
 
-    public static final Level DEFAULT_LOG_LEVEL = Query.DEFAULT_LOG_LEVEL;
+    /**
+     * @deprecated Unused since 1.2
+     */
+    public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
 
     protected List globalExceptions = new ArrayList();
     protected Map queryExceptions = new HashMap();
+    
+    /**
+     * @deprecated Unused since 1.2
+     */
     protected Level loggingLevel = DEFAULT_LOG_LEVEL;
 
     /**

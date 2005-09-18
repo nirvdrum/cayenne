@@ -81,7 +81,10 @@ public abstract class AbstractQuery implements Query {
     protected Object root;
     protected String name;
 
-    protected transient Level logLevel = DEFAULT_LOG_LEVEL;
+    /**
+     * @deprecated Unused since 1.2
+     */
+    protected transient Level logLevel = Level.INFO;
 
     private void readObject(java.io.ObjectInputStream in) throws IOException,
             ClassNotFoundException {
@@ -89,7 +92,7 @@ public abstract class AbstractQuery implements Query {
         // addressing the fact that logLevel is not serializable
 
         in.defaultReadObject();
-        logLevel = DEFAULT_LOG_LEVEL;
+        logLevel = Level.INFO;
     }
 
     /**

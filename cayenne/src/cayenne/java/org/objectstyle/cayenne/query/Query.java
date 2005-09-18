@@ -64,6 +64,9 @@ import org.apache.log4j.Level;
  */
 public interface Query extends QueryExecutionPlan {
 
+    /**
+     * @deprecated Unused since 1.2
+     */
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
 
     /**
@@ -81,11 +84,13 @@ public interface Query extends QueryExecutionPlan {
     void setName(String name);
 
     /**
-     * Returns the <code>logLevel</code> property of this query. Log level is a hint to
-     * QueryEngine that performs this query to log execution with a certain priority.
+     * @deprecated Unused since 1.2
      */
     Level getLoggingLevel();
 
+    /**
+     * @deprecated Unused since 1.2
+     */
     void setLoggingLevel(Level level);
 
     /**

@@ -76,6 +76,9 @@ public class AbstractQueryTst extends TestCase {
         }
     }
 
+    /**
+     * @deprecated logging level is unused since 1.2
+     */
     public void testLoggingLevel() throws Exception {
         AbstractQuery query = new MockAbstractQuery();
 

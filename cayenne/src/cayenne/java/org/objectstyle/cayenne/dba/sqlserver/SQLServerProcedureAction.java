@@ -235,6 +235,9 @@ public class SQLServerProcedureAction extends ProcedureAction {
             observer.nextQueryException(query, ex);
         }
 
+        /**
+         * @deprecated Unused since 1.2
+         */
         public Level getLoggingLevel() {
             return observer.getLoggingLevel();
         }

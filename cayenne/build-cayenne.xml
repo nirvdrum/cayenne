@@ -70,7 +70,7 @@
 	<!-- ========================================== -->
     <!-- Build "lean" JAR file without dependencies.-->
     <!-- ========================================== -->
-    <target name="jar-nodeps" depends="compile,prepare-properties">
+    <target name="jar-nodeps" depends="compile,prepare-deps,prepare-properties">
 		
 		<!-- server JAR -->
         <jar jarfile="${dist}/lib/cayenne-nodeps.jar">
@@ -89,6 +89,12 @@
 				<include name=".cayenne/**"/>
             	<include name="dotemplates/**"/>
 			</fileset>
+			
+			<!-- 
+				include one little dependency - org.apache.log4j.Level 
+				TODO: remove this once deprecated log levels are removed from the code
+			-->
+			<fileset dir="${core.build.deps}" includes="org/apache/log4j/Level.class"/>
             
             <metainf dir="doc/licenses" includes="LICENSE"/>
             <manifest>
@@ -122,6 +128,12 @@
 				<exclude name="org/objectstyle/cayenne/tools/**"/>
 				<exclude name="org/objectstyle/cayenne/wocompat/**"/>
 			</fileset>
+			
+			<!-- 
+				include one little dependency - org.apache.log4j.Level 
+				TODO: remove this once deprecated log levels are removed from the code
+			-->
+			<fileset dir="${core.build.deps}" includes="org/apache/log4j/Level.class"/>
 			
 			<fileset dir="${core.build.properties}">
 				<include name="**/*.properties"/>

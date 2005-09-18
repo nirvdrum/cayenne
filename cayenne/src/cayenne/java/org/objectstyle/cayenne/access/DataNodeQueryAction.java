@@ -123,6 +123,9 @@ class DataNodeQueryAction implements OperationObserver {
         observer.nextQueryException(currentQuery, ex);
     }
 
+    /**
+     * @deprecated Unused since 1.2
+     */
     public Level getLoggingLevel() {
         return observer.getLoggingLevel();
     }

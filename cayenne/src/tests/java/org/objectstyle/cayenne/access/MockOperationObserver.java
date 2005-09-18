@@ -61,7 +61,6 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -112,8 +111,11 @@ public class MockOperationObserver implements OperationObserver {
     public void nextGeneratedDataRows(Query query, ResultIterator keysIterator) {
     }
 
+    /**
+     * @deprecated since 1.2
+     */
     public Level getLoggingLevel() {
-        return DefaultOperationObserver.DEFAULT_LOG_LEVEL;
+        return null;
     }
 
     public boolean isIteratedResult() {

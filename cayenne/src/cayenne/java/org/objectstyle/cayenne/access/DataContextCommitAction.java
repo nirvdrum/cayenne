@@ -68,7 +68,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.map.LinkedMap;
-import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
@@ -98,11 +97,9 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
  * @author Andriy Shapochka, Andrei Adamchik
  * @since 1.2
  */
-// Renamed from ContextCommit in 1.1
 class DataContextCommitAction {
 
     private DataContext context;
-    private Level logLevel;
     private Map newObjectsByObjEntity;
     private Map objectsToDeleteByObjEntity;
     private Map objectsToUpdateByObjEntity;
@@ -121,12 +118,9 @@ class DataContextCommitAction {
     /**
      * Commits changes in the enclosed DataContext.
      */
-    void commit(Level logLevel) throws CayenneException {
-        if (logLevel == null) {
-            logLevel = QueryLogger.DEFAULT_LOG_LEVEL;
-        }
-
-        this.logLevel = logLevel;
+    void commit() throws CayenneException {
+     
+    
 
         // synchronize on both object store and underlying DataRowStore
         synchronized (context.getObjectStore()) {
@@ -161,7 +155,7 @@ class DataContextCommitAction {
                         updObjects,
                         delObjects);
 
-                observer.setLoggingLevel(logLevel);
+          
 
                 if (context.isTransactionEventsEnabled()) {
                     observer.registerForDataContextEvents();
@@ -243,7 +237,6 @@ class DataContextCommitAction {
             List objEntitiesForDbEntity = (List) objEntitiesByDbEntity.get(dbEntity);
 
             InsertBatchQuery batch = new InsertBatchQuery(dbEntity, 27);
-            batch.setLoggingLevel(logLevel);
 
             for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {
                 ObjEntity entity = (ObjEntity) j.next();
@@ -377,7 +370,6 @@ class DataContextCommitAction {
                                 qualifierAttributes,
                                 nullQualifierNames,
                                 27);
-                        batch.setLoggingLevel(logLevel);
                         batch.setUsingOptimisticLocking(optimisticLocking);
                         batches.put(batchKey, batch);
                     }
@@ -490,7 +482,7 @@ class DataContextCommitAction {
                                 updatedAttributes(dbEntity, snapshot),
                                 nullQualifierNames,
                                 10);
-                        batch.setLoggingLevel(logLevel);
+
                         batch.setUsingOptimisticLocking(optimisticLocking);
                         batches.put(batchKey, batch);
                     }
@@ -759,7 +751,6 @@ class DataContextCommitAction {
 
             if (relationInsertQuery == null) {
                 relationInsertQuery = new InsertBatchQuery(flattenedEntity, 50);
-                relationInsertQuery.setLoggingLevel(logLevel);
                 batchesByDbEntity.put(flattenedEntity, relationInsertQuery);
             }
 
@@ -797,7 +788,6 @@ class DataContextCommitAction {
                 boolean optimisticLocking = false;
                 relationDeleteQuery = new DeleteBatchQuery(flattenedEntity, 50);
                 relationDeleteQuery.setUsingOptimisticLocking(optimisticLocking);
-                relationDeleteQuery.setLoggingLevel(logLevel);
                 batchesByDbEntity.put(flattenedEntity, relationDeleteQuery);
             }
 

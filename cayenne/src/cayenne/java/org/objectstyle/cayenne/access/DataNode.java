@@ -68,7 +68,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.jdbc.BatchAction;
@@ -252,13 +251,12 @@ public class DataNode implements QueryEngine {
             OperationObserver resultConsumer,
             Transaction transaction) {
 
-        Level logLevel = resultConsumer.getLoggingLevel();
-
+  
         int listSize = queries.size();
         if (listSize == 0) {
             return;
         }
-        QueryLogger.logQueryStart(logLevel, listSize);
+        QueryLogger.logQueryStart(QueryLogger.getLoggingLevel(), listSize);
 
         // since 1.1 Transaction object is required
         if (transaction == null) {
@@ -282,7 +280,7 @@ public class DataNode implements QueryEngine {
         }
         // catch stuff like connection allocation errors, etc...
         catch (Exception globalEx) {
-            QueryLogger.logQueryError(logLevel, globalEx);
+            QueryLogger.logQueryError(QueryLogger.getLoggingLevel(), globalEx);
 
             if (connection != null) {
                 // rollback failed transaction
@@ -303,7 +301,7 @@ public class DataNode implements QueryEngine {
                 queryRunner.runQuery(connection, nextQuery);
             }
             catch (Exception queryEx) {
-                QueryLogger.logQueryError(logLevel, queryEx);
+                QueryLogger.logQueryError(QueryLogger.getLoggingLevel(), queryEx);
 
                 // notify consumer of the exception,
                 // stop running further queries
