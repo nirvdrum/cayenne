@@ -65,38 +65,40 @@ import java.util.List;
 import org.apache.commons.collections.ComparatorUtils;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.util.ConversionUtil;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
-/** 
- * Defines a Comparator for Java Beans. Ordering can be used either
- * to define ORDER BY clause of a query in terms of object properties,
- * or as a Comparator for in-memory Java Beans sorting.
+/**
+ * Defines a Comparator for Java Beans. Ordering can be used either to define ORDER BY
+ * clause of a query in terms of object properties, or as a Comparator for in-memory Java
+ * Beans sorting.
  * 
  * @author Andrei Adamchik
  * @author Craig Miskell
  */
 public class Ordering implements Comparator, Serializable, XMLSerializable {
 
-    /** 
-     * Symbolic representation of ascending ordering criterion. 
+    /**
+     * Symbolic representation of ascending ordering criterion.
      */
     public static final boolean ASC = true;
 
-    /** 
-     * Symbolic representation of descending ordering criterion. 
+    /**
+     * Symbolic representation of descending ordering criterion.
      */
     public static final boolean DESC = false;
 
-    protected Expression sortSpec;
+    protected String sortSpecString;
+    protected transient Expression sortSpec;
     protected boolean ascending;
     protected boolean caseInsensitive;
 
     /**
-     * Orders a given list of objects, using a List of Orderings
-     * applied according the default iteration order of the Orderings list. 
-     * I.e. each Ordering with lower index is more significant than any other
-     * Ordering with higer index. List being ordered is modified in place.
+     * Orders a given list of objects, using a List of Orderings applied according the
+     * default iteration order of the Orderings list. I.e. each Ordering with lower index
+     * is more significant than any other Ordering with higer index. List being ordered is
+     * modified in place.
      */
     public static void orderList(List objects, List orderings) {
         Collections.sort(objects, ComparatorUtils.chainedComparator(orderings));
@@ -119,32 +121,31 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
         this(sortExpression, ascending, false);
     }
 
-    public Ordering(
-        Expression sortExpression,
-        boolean ascending,
-        boolean caseInsensitive) {
+    public Ordering(Expression sortExpression, boolean ascending, boolean caseInsensitive) {
         setSortSpec(sortExpression);
         this.ascending = ascending;
         this.caseInsensitive = caseInsensitive;
     }
 
-    /** 
+    /**
      * Sets sortSpec to be an expression represented by string argument.
      * 
      * @since 1.1
      */
     public void setSortSpecString(String sortSpecString) {
-        this.sortSpec =
-            (sortSpecString != null) ? Expression.fromString(sortSpecString) : null;
+        if (!Util.nullSafeEquals(this.sortSpecString, sortSpecString)) {
+            this.sortSpecString = sortSpecString;
+            this.sortSpec = null;
+        }
     }
 
-    /** 
+    /**
      * Returns sortSpec string representation.
      * 
      * @since 1.1
      */
     public String getSortSpecString() {
-        return (sortSpec != null) ? sortSpec.toString() : null;
+        return sortSpecString;
     }
 
     /** Returns true if sorting is done in ascending order. */
@@ -171,6 +172,15 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
      * Returns the expression defining a ordering Java Bean property.
      */
     public Expression getSortSpec() {
+        if (sortSpecString == null) {
+            return null;
+        }
+
+        // compile on demand
+        if (sortSpec == null) {
+            sortSpec = Expression.fromString(sortSpecString);
+        }
+
         return sortSpec;
     }
 
@@ -179,11 +189,12 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
      */
     public void setSortSpec(Expression sortSpec) {
         this.sortSpec = sortSpec;
+        this.sortSpecString = (sortSpec != null) ? sortSpec.toString() : null;
     }
 
     /**
-     * Orders the given list of objects according to the ordering that this 
-     * object specifies. List is modified in-place.
+     * Orders the given list of objects according to the ordering that this object
+     * specifies. List is modified in-place.
      * 
      * @param objects a List of objects to be sorted
      */
@@ -192,12 +203,13 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
     }
 
     /**
-     * Comparable interface implementation. Can compare two
-     * Java Beans based on the stored expression.
+     * Comparable interface implementation. Can compare two Java Beans based on the stored
+     * expression.
      */
     public int compare(Object o1, Object o2) {
-        Object value1 = sortSpec.evaluate(o1);
-        Object value2 = sortSpec.evaluate(o2);
+        Expression exp = getSortSpec();
+        Object value1 = exp.evaluate(o1);
+        Object value2 = exp.evaluate(o2);
 
         // nulls first policy... maybe make this configurable as some DB do
         if (value1 == null) {
@@ -208,13 +220,13 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
         }
 
         if (this.caseInsensitive) {
-            // TODO: to upper case should probably be defined as a separate expression type
+            // TODO: to upper case should probably be defined as a separate expression
+            // type
             value1 = ConversionUtil.toUpperCase(value1);
             value2 = ConversionUtil.toUpperCase(value2);
         }
 
-        int compareResult =
-            ConversionUtil.toComparable(value1).compareTo(
+        int compareResult = ConversionUtil.toComparable(value1).compareTo(
                 ConversionUtil.toComparable(value2));
         return (ascending) ? compareResult : -compareResult;
     }
@@ -236,8 +248,8 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
         }
 
         encoder.print(">");
-        if (sortSpec != null) {
-            sortSpec.encodeAsXML(encoder);
+        if (getSortSpec() != null) {
+            getSortSpec().encodeAsXML(encoder);
         }
         encoder.println("</ordering>");
     }
