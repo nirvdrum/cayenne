@@ -59,10 +59,14 @@ import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * A "local" connector used mainly to enable testing of all parts of a distributed
- * application in a single Java virtual machine. To better reproduce test conditions, it
- * can optionally serialize all messages passed through it, and then pass a deserialized
- * version to the handler.
+ * A connector used to connect CWS Client Tier ObjectContexts to Cayenne ORM tier running
+ * in the same VM. LocalConnector emulates Cayenne Web Service without actually deploying
+ * one. It is useful for testing and rapid development cycle, but also for cases when CWS
+ * Client Tier would require direct database access.
+ * <p>
+ * When used for testing, LocalConnector can be configured to use one of the few optional
+ * serialization policies to better emulate a remote connector.
+ * </p>
  * 
  * @since 1.2
  * @author Andrus Adamchik
