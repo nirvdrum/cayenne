@@ -57,8 +57,8 @@
 package org.objectstyle.cayenne.query;
 
 /**
- * A query "visitor" interface that defines methods for creating various SQLActions from
- * queries.
+ * A query "visitor" interface that defines methods for creating SQLActions from
+ * "executable" queries.
  * 
  * @since 1.2
  * @author Andrei Adamchik
