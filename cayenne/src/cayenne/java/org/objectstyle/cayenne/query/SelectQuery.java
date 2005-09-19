@@ -65,6 +65,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -76,11 +78,9 @@ import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
- * SelectQuery is a Query object describing what rows to retrieve from the database and
- * how to convert them to objects. SelectQuery is defined in terms of object mapping.
- * During execution Cayenne translates it to SQL PreparedStatements using a SQL dialect of
- * the target database. SelectQuery defines a set of parameters for the fetch. Most
- * important parameters are the "root", "qualifier", and "ordering".
+ * A query that selects persistent objects of a certain type or "raw data" (aka DataRows).
+ * Supports expression qualifier, multiple orderings and a number of other parameters that
+ * serve as runtime hints to Cayenne on how to optimize the fetch and result processing.
  * 
  * @author Andrei Adamchik
  */
@@ -182,6 +182,41 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     private void init(Object root, Expression qualifier) {
         this.setRoot(root);
         this.setQualifier(qualifier);
+    }
+
+    /**
+     * If query root is a client class, creates a clone of self with resolved server
+     * class, otherwise returns this object unchanged.
+     * 
+     * @since 1.2
+     */
+    public Query resolve(EntityResolver resolver) {
+        Object root = getRoot();
+
+        if (root instanceof Class) {
+            Class rootClass = (Class) root;
+
+            // TODO: (Andrus 09/18/2005) this will be SLOOOOOOW for client queries as no
+            // results force EntityResolver to reindex itself.
+            if (resolver.lookupObjEntity(rootClass) == null) {
+
+                String entityName;
+                try {
+                    entityName = resolver.getClientEntityResolver().entityForClass(
+                            rootClass).getName();
+                }
+                catch (CayenneClientException e) {
+                    throw new CayenneRuntimeException("Invalid SelectQuery root class: "
+                            + rootClass);
+                }
+
+                SelectQuery replacement = queryWithParameters(Collections.EMPTY_MAP, true);
+                replacement.setRoot(entityName);
+                return replacement;
+            }
+        }
+
+        return this;
     }
 
     /**

@@ -69,8 +69,8 @@ import org.objectstyle.cayenne.access.DataContextObjectFactory;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.QualifiedQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -210,8 +210,8 @@ public class SelectObserver extends DefaultOperationObserver {
             // might need to disable some prefetched to-many arrays from being
             // resolved. This is somewhat of a hack in search of a better solution.
             Expression qualifier = null;
-            if (rootQuery instanceof QualifiedQuery) {
-                qualifier = ((QualifiedQuery) rootQuery).getQualifier();
+            if (rootQuery instanceof SelectQuery) {
+                qualifier = ((SelectQuery) rootQuery).getQualifier();
             }
 
             FlatPrefetchTreeNode flatPrefetchTree = new FlatPrefetchTreeNode(
