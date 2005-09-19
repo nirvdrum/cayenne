@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -96,12 +97,14 @@ class ClientServerUtils {
                     .getObjectId()));
         }
 
-        // TODO: implement attribute filtering for client..
         // copy client properties
-
         Iterator it = entity.getAttributeMap().keySet().iterator();
         while (it.hasNext()) {
             String key = (String) it.next();
+
+            // TODO (Andrus 09/18/2005): Use ClassDescriptor instead of PropertyUtils.
+            // This is more consistent with the overall design, besides this would only
+            // copy properties allowed on the client
             PropertyUtils.setProperty(clientObject, key, object.readProperty(key));
         }
 
@@ -111,8 +114,11 @@ class ClientServerUtils {
     /**
      * Converts a list of server-side objects to their client counterparts.
      */
-    static List toClientObjects(EntityResolver resolver, List dataObjects)
-            throws Exception {
+    static List toClientObjects(
+            EntityResolver resolver,
+            List dataObjects,
+            Collection prefetches) throws Exception {
+
         List clientObjects = new ArrayList(dataObjects.size());
 
         Iterator it = dataObjects.iterator();
@@ -124,9 +130,13 @@ class ClientServerUtils {
 
             clientObjects.add(toClientObject(resolver, serverObject));
         }
+        
+        // TODO: (Andrus 09/18/2005) handle passed prefetches
 
         return clientObjects;
     }
+
+ 
 
     private ClientServerUtils() {
 

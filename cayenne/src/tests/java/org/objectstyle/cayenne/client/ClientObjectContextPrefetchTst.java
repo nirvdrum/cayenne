@@ -57,12 +57,16 @@ package org.objectstyle.cayenne.client;
 
 import java.util.List;
 
+import org.objectstyle.cayenne.PersistentObjectHolder;
+import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.distribution.ClientMessageHandler;
 import org.objectstyle.cayenne.distribution.LocalConnector;
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.service.ServerObjectContext;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
 import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
@@ -73,6 +77,16 @@ public class ClientObjectContextPrefetchTst extends CayenneTestCase {
         return CayenneTestResources
                 .getResources()
                 .getAccessStack(MULTI_TIER_ACCESS_STACK);
+    }
+
+    public void testNamedQuery() throws Exception {
+        createTestData("prepare");
+
+        NamedQuery q = new NamedQuery("AllMtTable1");
+        List results = buildContext().performSelectQuery(q);
+
+        assertEquals(2, results.size());
+        assertTrue(results.get(0) instanceof ClientMtTable1);
     }
 
     public void testSelectQueryEntityNameRoot() throws Exception {
@@ -93,7 +107,6 @@ public class ClientObjectContextPrefetchTst extends CayenneTestCase {
         List results = buildContext().performSelectQuery(q);
 
         assertEquals(2, results.size());
-
         assertTrue(results.get(0) instanceof ClientMtTable1);
     }
 
@@ -108,7 +121,7 @@ public class ClientObjectContextPrefetchTst extends CayenneTestCase {
 
         assertTrue(results.get(0) instanceof ClientMtTable1);
     }
-    
+
     public void testSelectQueryToManyRelationshipQualifier() throws Exception {
         createTestData("prepare");
 
@@ -120,6 +133,51 @@ public class ClientObjectContextPrefetchTst extends CayenneTestCase {
         assertTrue(results.get(0) instanceof ClientMtTable1);
     }
 
+    public void testSelectQueryOrdering() throws Exception {
+        createTestData("prepare");
+
+        SelectQuery q = new SelectQuery("MtTable1");
+        q.addOrdering(ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY, true);
+        List results = buildContext().performSelectQuery(q);
+
+        assertEquals(2, results.size());
+
+        ClientMtTable1 o1 = (ClientMtTable1) results.get(0);
+        ClientMtTable1 o2 = (ClientMtTable1) results.get(1);
+        assertTrue(o1.getGlobalAttribute1().compareTo(o2.getGlobalAttribute1()) < 0);
+
+        // now run the same query with reverse ordering to check that the first ordering
+        // result wasn't coincidental.
+
+        q.clearOrderings();
+        q.addOrdering(ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY, false);
+        List results1 = buildContext().performSelectQuery(q);
+
+        assertEquals(2, results1.size());
+
+        ClientMtTable1 o3 = (ClientMtTable1) results1.get(0);
+        ClientMtTable1 o4 = (ClientMtTable1) results1.get(1);
+        assertTrue(o3.getGlobalAttribute1().compareTo(o4.getGlobalAttribute1()) > 0);
+    }
+
+//    public void testSelectQueryPrefetchToOne() throws Exception {
+//        createTestData("prepare");
+//
+//        SelectQuery q = new SelectQuery(ClientMtTable2.class, Expression
+//                .fromString("globalAttribute = 'g1'"));
+//        q.addPrefetch(ClientMtTable2.TABLE1_PROPERTY);
+//        List results = buildContext().performSelectQuery(q);
+//
+//        assertEquals(1, results.size());
+//
+//        ClientMtTable2 result = (ClientMtTable2) results.get(0);
+//
+//        ValueHolder holder = result.getTable1Direct();
+//        assertNotNull(holder);
+//        assertTrue(holder instanceof PersistentObjectHolder);
+//        PersistentObjectHolder objectHolder = (PersistentObjectHolder) holder;
+//        assertFalse(objectHolder.isFault());
+//    }
 
     /**
      * Prepares ClientObjectContext that would access regular Cayenne stack over local

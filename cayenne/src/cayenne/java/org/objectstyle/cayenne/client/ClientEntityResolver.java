@@ -77,9 +77,11 @@ public class ClientEntityResolver implements Serializable {
 
     // TODO: (andrus, 09/13/2005) keeping a data map here (and much worse - injecting it
     // into ObjEntities) is needed to build descriptors with the right inheritance
-    // structure. We should make a decision and probably stop passing ObjENtities to the
-    // client alltogether ... then ClientEntityResolver will only contain descriptors and
-    // won't need this cludge.
+    // structure. Maybe we should allow initializing ClientEntityResolver with a DataMap
+    // Collection instead of entity collection?
+    //
+    // Another idea of substituting entities with ClassDescriptors is probably a bad one
+    // as it would prevent using client resolver on the server that has no client classes.
     DataMap entityNamespace;
 
     /**

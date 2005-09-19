@@ -42,4 +42,6 @@
 	</db-relationship>
 	<obj-relationship name="table2Array" source="MtTable1" target="MtTable2" db-relationship-path="table2Array"/>
 	<obj-relationship name="table1" source="MtTable2" target="MtTable1" db-relationship-path="table1"/>
+	<query name="AllMtTable1" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="MtTable1">
+	</query>
 </data-map>

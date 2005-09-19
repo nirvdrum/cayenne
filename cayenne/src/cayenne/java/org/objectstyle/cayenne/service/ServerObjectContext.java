@@ -56,6 +56,8 @@
 package org.objectstyle.cayenne.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -72,6 +74,7 @@ import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * A server-side peer of a ClientDataContext. Client messages are processed via callback
@@ -124,8 +127,20 @@ public class ServerObjectContext extends ObjectDataContext implements
             return new ArrayList(0);
         }
 
+        // detect prefetches... any way to do that without "instanceof"?
+        Collection prefetches;
+        if (message.getQueryPlan() instanceof SelectQuery) {
+            prefetches = ((SelectQuery) message.getQueryPlan()).getPrefetches();
+        }
+        else {
+            prefetches = Collections.EMPTY_LIST;
+        }
+
         try {
-            return ClientServerUtils.toClientObjects(getEntityResolver(), objects);
+            return ClientServerUtils.toClientObjects(
+                    getEntityResolver(),
+                    objects,
+                    prefetches);
         }
         catch (Exception e) {
             throw new CayenneRuntimeException("Error converting to client objects: "
