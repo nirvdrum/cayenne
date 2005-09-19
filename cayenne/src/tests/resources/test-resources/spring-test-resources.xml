@@ -135,6 +135,7 @@
 				<ref bean="PeopleMap"/>
 				<ref bean="LockingMap"/>
 				<ref bean="RelationshipMap"/>
+				<ref bean="MultiTierMap"/>
 			</list>
 		</constructor-arg>
 	</bean>
