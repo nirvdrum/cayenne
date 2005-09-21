@@ -64,6 +64,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.objectstyle.cayenne.util.Util;
+
 /**
  * Methods for mangling strings.
  * 
@@ -74,8 +76,18 @@ public class ImportUtils {
     public static final String importOrdering[] = new String[] {
         "java.", "javax.", "org.", "com." };
 
-//    public static final String primitiveTypes[] = new String[] {
-//        "long", "double", "byte", "boolean", "float", "short", "int" };
+    static final String primitives[] = new String[] {
+            "long", "double", "byte", "boolean", "float", "short", "int"
+    };
+    
+    static final String primitiveClasses[] = new String[] {
+            Long.class.getName(), Double.class.getName(), Byte.class.getName(),
+            Boolean.class.getName(), Float.class.getName(), Short.class.getName(),
+            Integer.class.getName()
+    };
+    
+    static Map classesForPrimitives = Util.toMap(primitives, primitiveClasses);
+    static Map primitivesForClasses = Util.toMap(primitiveClasses, primitives);
 
     protected Map importTypesMap = new HashMap();
     protected Map reservedImportTypesMap = new HashMap();  // Types forced to be FQN
@@ -147,6 +159,25 @@ public class ImportUtils {
     public void setPackage(String packageName)
     {
         this.packageName = packageName;
+    }
+    
+    /**
+     * Performs processing similar to <code>formatJavaType(String)</code>, with special
+     * handling of primitive types and their Java class counterparts. This method allows
+     * users to make a decision whether to use primitives or not, regardless of how type
+     * is mapped.
+     */
+    public String formatJavaType(String typeName, boolean usePrimitives) {
+        if (usePrimitives) {
+            String primitive = (String) primitivesForClasses.get(typeName);
+            return (primitive != null) ? primitive : formatJavaType(typeName);
+        }
+        else {
+            String primitiveClass = (String) classesForPrimitives.get(typeName);
+            return (primitiveClass != null)
+                    ? formatJavaType(primitiveClass)
+                    : formatJavaType(typeName);
+        }
     }
     
     /**
