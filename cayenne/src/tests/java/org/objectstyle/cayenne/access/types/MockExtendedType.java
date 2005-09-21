@@ -55,53 +55,52 @@
  */
 package org.objectstyle.cayenne.access.types;
 
-import junit.framework.TestCase;
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
-public class ExtendedTypeMapTst extends TestCase {
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
-    public void testRegisterType() throws Exception {
-        ExtendedTypeMap map = new ExtendedTypeMap();
-        ExtendedType tstType = new MockExtendedType();
+public class MockExtendedType implements ExtendedType {
 
-        assertSame(map.getDefaultType(), map.getRegisteredType(tstType.getClassName()));
+    protected Class objectClass;
 
-        map.registerType(tstType);
-        assertSame(tstType, map.getRegisteredType(tstType.getClassName()));
-
-        map.unregisterType(tstType.getClassName());
-        assertSame(map.getDefaultType(), map.getRegisteredType(tstType.getClassName()));
+    public MockExtendedType() {
+        this(Object.class);
     }
 
-    public void testRegisterArrayType() throws Exception {
-        ExtendedTypeMap map = new ExtendedTypeMap();
-        ByteArrayType tstType = new ByteArrayType(false, true);
-
-        map.registerType(tstType);
-        assertSame(tstType, map.getRegisteredType(tstType.getClassName()));
-        assertSame(tstType, map.getRegisteredType(byte[].class));
-
-        map.unregisterType(tstType.getClassName());
-        assertSame(map.getDefaultType(), map.getRegisteredType(tstType.getClassName()));
+    public MockExtendedType(Class objectClass) {
+        this.objectClass = objectClass;
     }
 
-    public void testRegisteredTypeName() throws Exception {
-        ExtendedTypeMap map = new TstTypeMap();
-        ExtendedType tstType = new MockExtendedType();
-
-        assertNotNull(map.getRegisteredTypeNames());
-        assertEquals(0, map.getRegisteredTypeNames().length);
-
-        map.registerType(tstType);
-
-        assertNotNull(map.getRegisteredTypeNames());
-        assertEquals(1, map.getRegisteredTypeNames().length);
-        assertEquals(tstType.getClassName(), map.getRegisteredTypeNames()[0]);
+    public String getClassName() {
+        return objectClass.getName();
     }
 
-    class TstTypeMap extends ExtendedTypeMap {
+    public boolean validateProperty(
+            Object source,
+            String property,
+            Object value,
+            DbAttribute dbAttribute,
+            ValidationResult validationResult) {
+        return true;
+    }
 
-        protected void initDefaultTypes() {
-            // noop to avoid any default types
-        }
+    public void setJdbcObject(
+            PreparedStatement statement,
+            Object value,
+            int pos,
+            int type,
+            int precision) throws Exception {
+    }
+
+    public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
+        return objectClass.newInstance();
+    }
+
+    public Object materializeObject(CallableStatement rs, int index, int type)
+            throws Exception {
+        return objectClass.newInstance();
     }
 }
