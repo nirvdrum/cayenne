@@ -62,9 +62,38 @@ import java.util.Collections;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.distribution.HessianConnector;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 public class ClientEntityResolverTst extends TestCase {
+
+    public void testSerializabilityWithHessian() throws Exception {
+        ObjEntity entity = new ObjEntity("test_entity");
+        entity.setClassName("java.lang.String");
+        ClientEntityResolver resolver = new ClientEntityResolver(Collections
+                .singleton(entity));
+
+        // simple case
+        Object c1 = HessianConnector.cloneViaHessianSerialization(resolver);
+
+        assertNotNull(c1);
+        assertTrue(c1 instanceof ClientEntityResolver);
+        ClientEntityResolver cr1 = (ClientEntityResolver) c1;
+
+        assertNotSame(resolver, cr1);
+        assertEquals(1, cr1.getEntityNames().size());
+        assertTrue(cr1.getEntityNames().contains(entity.getName()));
+
+        // with descriptors resolved...
+        assertNotNull(entity.getClassDescriptor());
+
+        ClientEntityResolver cr2 = (ClientEntityResolver) HessianConnector
+                .cloneViaHessianSerialization(resolver);
+        assertNotNull(cr2);
+        assertEquals(1, cr2.getEntityNames().size());
+        assertTrue(cr2.getEntityNames().contains(entity.getName()));
+        assertNotNull(cr2.entityForName(entity.getName()).getClassDescriptor());
+    }
 
     public void testConstructor() {
         ObjEntity entity = new ObjEntity("test_entity");

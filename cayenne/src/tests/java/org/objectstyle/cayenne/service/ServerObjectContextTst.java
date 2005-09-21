@@ -66,6 +66,8 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.MockDataRowStore;
 import org.objectstyle.cayenne.access.MockPersistenceContext;
 import org.objectstyle.cayenne.access.PersistenceContext;
+import org.objectstyle.cayenne.client.ClientEntityResolver;
+import org.objectstyle.cayenne.distribution.BootstrapMessage;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GenericQueryMessage;
 import org.objectstyle.cayenne.distribution.GlobalID;
@@ -106,6 +108,13 @@ public class ServerObjectContextTst extends CayenneTestCase {
                 resolver,
                 new MockDataRowStore());
         assertSame(resolver, context.getEntityResolver());
+    }
+
+    public void testOnBootstrap() throws Exception {
+        ServerObjectContext context = new ServerObjectContext(getDomain());
+        ClientEntityResolver resolver = context.onBootstrap(new BootstrapMessage());
+        assertNotNull(resolver);
+        assertNotNull(resolver.entityForClass(ClientMtTable1.class));
     }
 
     public void testParentContext() {

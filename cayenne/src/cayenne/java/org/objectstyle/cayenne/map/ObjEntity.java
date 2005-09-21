@@ -104,7 +104,10 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
     protected String clientClassName;
     protected String clientSuperClassName;
 
-    protected ClassDescriptor classDescriptor;
+    // must be transient - it is desirable to rebuild descriptor when passing entity
+    // between VMs; also Hessian serialization chokes on attempt to deserialize
+    // descriptor.
+    protected transient ClassDescriptor classDescriptor;
 
     public ObjEntity() {
         this(null);
@@ -133,7 +136,7 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
         if (isServerOnly()) {
             encoder.print("\" serverOnly=\"true");
         }
-        
+
         if (getClassName() != null) {
             encoder.print("\" className=\"");
             encoder.print(getClassName());
