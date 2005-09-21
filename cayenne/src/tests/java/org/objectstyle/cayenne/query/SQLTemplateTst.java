@@ -60,19 +60,20 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.objectstyle.cayenne.unit.BasicTestCase;
+import junit.framework.TestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class SQLTemplateTst extends BasicTestCase {
-    public void testGetDefaultTemplate() throws Exception {
+public class SQLTemplateTst extends TestCase {
+
+    public void testGetDefaultTemplate() {
         SQLTemplate query = new SQLTemplate(false);
         query.setDefaultTemplate("AAA # BBB");
         assertEquals("AAA # BBB", query.getDefaultTemplate());
     }
 
-    public void testGetTemplate() throws Exception {
+    public void testGetTemplate() {
         SQLTemplate query = new SQLTemplate(false);
 
         // no template for key, no default template... must be null
@@ -86,7 +87,7 @@ public class SQLTemplateTst extends BasicTestCase {
         query.setTemplate("key1", "XYZ");
         assertEquals("XYZ", query.getTemplate("key1"));
 
-        // add another template.. still must find 
+        // add another template.. still must find
         query.setTemplate("key2", "123");
         assertEquals("XYZ", query.getTemplate("key1"));
         assertEquals("123", query.getTemplate("key2"));
@@ -127,7 +128,9 @@ public class SQLTemplateTst extends BasicTestCase {
         Map params2 = new HashMap();
         params2.put("1", "2");
 
-        query.setParameters(new Map[] { params1, params2, null });
+        query.setParameters(new Map[] {
+                params1, params2, null
+        });
         assertEquals(params1, query.getParameters());
         Iterator it = query.parametersIterator();
         assertTrue(it.hasNext());
