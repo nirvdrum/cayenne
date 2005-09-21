@@ -88,13 +88,6 @@ public class FieldPropertyTst extends TestCase {
                 "aaa");
         assertEquals("aaa", object.stringField);
 
-        // primitive int
-        new FieldProperty(TestFields.class, "intField", Integer.TYPE).writeValue(
-                object,
-                null,
-                new Integer(6));
-        assertEquals(6, object.intField);
-
         // primitive array
         byte[] bytes = new byte[] {
                 1, 2, 3
@@ -109,11 +102,30 @@ public class FieldPropertyTst extends TestCase {
         String[] strings = new String[] {
                 "a", "b"
         };
-        new FieldProperty(TestFields.class, "stringArrayField", String[].class).writeValue(
+        new FieldProperty(TestFields.class, "stringArrayField", String[].class)
+                .writeValue(object, null, strings);
+        assertSame(strings, object.stringArrayField);
+    }
+
+    public void testWriteValuePrimitive() {
+
+        TestFields object = new TestFields();
+
+        // primitive int .. write non-null
+        new FieldProperty(TestFields.class, "intField", Integer.TYPE).writeValue(
                 object,
                 null,
-                strings);
-        assertSame(strings, object.stringArrayField);
+                new Integer(6));
+        assertEquals(6, object.intField);
+
+        // primitive int .. write null
+        object.intField = 55;
+        new FieldProperty(TestFields.class, "intField", Integer.TYPE).writeValue(
+                object,
+                null,
+                null);
+
+        assertEquals(0, object.intField);
     }
 
     public void testCopy() {

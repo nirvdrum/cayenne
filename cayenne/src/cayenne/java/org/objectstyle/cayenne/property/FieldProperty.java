@@ -72,6 +72,11 @@ public class FieldProperty implements Property {
     protected String propertyName;
     protected Field field;
 
+    /**
+     * A default value used when a null is passed for the primitive field.
+     */
+    protected Object nullValue;
+
     public FieldProperty(Class beanClass, String propertyName) {
         this(beanClass, propertyName, null);
     }
@@ -91,6 +96,7 @@ public class FieldProperty implements Property {
 
         this.propertyName = propertyName;
         this.field = prepareField(beanClass, propertyName, propertyType);
+        this.nullValue = defaultNullValueForType(field.getType());
     }
 
     public String getPropertyName() {
@@ -99,6 +105,15 @@ public class FieldProperty implements Property {
 
     public Class getPropertyType() {
         return field.getType();
+    }
+
+    /**
+     * Returns a value that is used to set the property when the caller passed null
+     * argument. By default this value is "null" for all object types and default (zero or
+     * false) for primitive types.
+     */
+    public Object getNullValue() {
+        return nullValue;
     }
 
     /**
@@ -136,6 +151,12 @@ public class FieldProperty implements Property {
 
     protected void writeField(Object object, Object newValue)
             throws PropertyAccessException {
+
+        // this would take care of primitives.
+        if (newValue == null) {
+            newValue = this.nullValue;
+        }
+
         try {
             field.set(object, newValue);
         }
@@ -177,8 +198,9 @@ public class FieldProperty implements Property {
             field.setAccessible(true);
         }
 
-        // check that the field is of expected class...
         if (propertyType != null) {
+
+            // check that the field is of expected class...
             if (!propertyType.isAssignableFrom(field.getType())) {
 
                 // allow primitive to object conversions...
@@ -253,5 +275,39 @@ public class FieldProperty implements Property {
         }
 
         return type;
+    }
+
+    /**
+     * Returns default value that should be used for nulls. For non-primitive types, null
+     * is returned. For primitive types a default such as zero or false is returned.
+     */
+    Object defaultNullValueForType(Class type) {
+        if (type.isPrimitive()) {
+
+            String className = type.getName();
+            if ("byte".equals(className)) {
+                return new Byte((byte) 0);
+            }
+            else if ("int".equals(className)) {
+                return new Integer(0);
+            }
+            else if ("short".equals(className)) {
+                return new Short((short) 0);
+            }
+            else if ("char".equals(className)) {
+                return new Character((char) 0);
+            }
+            else if ("double".equals(className)) {
+                return new Double(0d);
+            }
+            else if ("float".equals(className)) {
+                return new Float(0f);
+            }
+            else if ("boolean".equals(className)) {
+                return Boolean.FALSE;
+            }
+        }
+
+        return null;
     }
 }
