@@ -180,14 +180,19 @@ public class FieldProperty implements Property {
         // check that the field is of expected class...
         if (propertyType != null) {
             if (!propertyType.isAssignableFrom(field.getType())) {
-                throw new CayenneRuntimeException("Expected property type '"
-                        + propertyType.getName()
-                        + "', got '"
-                        + field.getType().getName()
-                        + "'. Property: "
-                        + beanClass.getName()
-                        + "."
-                        + propertyName);
+
+                // allow primitive to object conversions...
+                if (!normalizeType(propertyType).isAssignableFrom(
+                        normalizeType(field.getType()))) {
+                    throw new CayenneRuntimeException("Expected property type '"
+                            + propertyType.getName()
+                            + "', got '"
+                            + field.getType().getName()
+                            + "'. Property: "
+                            + beanClass.getName()
+                            + "."
+                            + propertyName);
+                }
             }
         }
 
@@ -215,5 +220,38 @@ public class FieldProperty implements Property {
 
             return lookupFieldInHierarchy(superClass, fieldName);
         }
+    }
+
+    /**
+     * "Normalizes" passed type, converting primitive types to their object counterparts.
+     */
+    Class normalizeType(Class type) {
+        if (type.isPrimitive()) {
+
+            String className = type.getName();
+            if ("byte".equals(className)) {
+                return Byte.class;
+            }
+            else if ("int".equals(className)) {
+                return Integer.class;
+            }
+            else if ("short".equals(className)) {
+                return Short.class;
+            }
+            else if ("char".equals(className)) {
+                return Character.class;
+            }
+            else if ("double".equals(className)) {
+                return Double.class;
+            }
+            else if ("float".equals(className)) {
+                return Float.class;
+            }
+            else if ("boolean".equals(className)) {
+                return Boolean.class;
+            }
+        }
+
+        return type;
     }
 }
