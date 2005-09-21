@@ -197,7 +197,9 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
             Class rootClass = (Class) root;
 
             // TODO: (Andrus 09/18/2005) this will be SLOOOOOOW for client queries as no
-            // results force EntityResolver to reindex itself.
+            // results force EntityResolver to reindex itself. In fact unit tests timing
+            // shows that for small result sets using client class as root makes query 3x
+            // as slow!!!
             if (resolver.lookupObjEntity(rootClass) == null) {
 
                 String entityName;

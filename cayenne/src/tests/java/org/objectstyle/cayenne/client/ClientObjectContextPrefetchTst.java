@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.client;
 import java.util.List;
 
 import org.objectstyle.cayenne.PersistentObjectHolder;
+import org.objectstyle.cayenne.PersistentObjectList;
 import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.distribution.ClientMessageHandler;
 import org.objectstyle.cayenne.distribution.LocalConnector;
@@ -160,24 +161,48 @@ public class ClientObjectContextPrefetchTst extends CayenneTestCase {
         assertTrue(o3.getGlobalAttribute1().compareTo(o4.getGlobalAttribute1()) > 0);
     }
 
-//    public void testSelectQueryPrefetchToOne() throws Exception {
-//        createTestData("prepare");
-//
-//        SelectQuery q = new SelectQuery(ClientMtTable2.class, Expression
-//                .fromString("globalAttribute = 'g1'"));
-//        q.addPrefetch(ClientMtTable2.TABLE1_PROPERTY);
-//        List results = buildContext().performSelectQuery(q);
-//
-//        assertEquals(1, results.size());
-//
-//        ClientMtTable2 result = (ClientMtTable2) results.get(0);
-//
-//        ValueHolder holder = result.getTable1Direct();
-//        assertNotNull(holder);
-//        assertTrue(holder instanceof PersistentObjectHolder);
-//        PersistentObjectHolder objectHolder = (PersistentObjectHolder) holder;
-//        assertFalse(objectHolder.isFault());
-//    }
+    public void testSelectQueryPrefetchToOne() throws Exception {
+        createTestData("prepare");
+
+        SelectQuery q = new SelectQuery(ClientMtTable2.class, Expression
+                .fromString("globalAttribute = 'g1'"));
+        q.addPrefetch(ClientMtTable2.TABLE1_PROPERTY);
+        List results = buildContext().performSelectQuery(q);
+
+        assertEquals(1, results.size());
+
+        ClientMtTable2 result = (ClientMtTable2) results.get(0);
+
+        ValueHolder holder = result.getTable1Direct();
+        assertNotNull(holder);
+        assertTrue(holder instanceof PersistentObjectHolder);
+        PersistentObjectHolder objectHolder = (PersistentObjectHolder) holder;
+        assertFalse(objectHolder.isFault());
+
+        ClientMtTable1 target = (ClientMtTable1) objectHolder
+                .getValue(ClientMtTable1.class);
+        assertNotNull(target);
+    }
+
+    public void testSelectQueryPrefetchToMany() throws Exception {
+        createTestData("prepare");
+
+        SelectQuery q = new SelectQuery(ClientMtTable1.class, Expression
+                .fromString("globalAttribute1 = 'g1'"));
+        q.addPrefetch(ClientMtTable1.TABLE2ARRAY_PROPERTY);
+        List results = buildContext().performSelectQuery(q);
+
+        assertEquals(1, results.size());
+
+        ClientMtTable1 result = (ClientMtTable1) results.get(0);
+
+        List holder = result.getTable2ArrayDirect();
+        assertNotNull(holder);
+        assertTrue(holder instanceof PersistentObjectList);
+        PersistentObjectList objectHolder = (PersistentObjectList) holder;
+        assertFalse(objectHolder.isFault());
+        assertEquals(2, objectHolder.size());
+    }
 
     /**
      * Prepares ClientObjectContext that would access regular Cayenne stack over local

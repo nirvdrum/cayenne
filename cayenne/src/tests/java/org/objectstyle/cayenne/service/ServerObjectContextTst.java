@@ -166,19 +166,13 @@ public class ServerObjectContextTst extends CayenneTestCase {
 
     public void testOnSelectQueryGlobalIDInjection() {
 
-        final ObjEntity entity = getDomain().getEntityResolver().lookupObjEntity(
-                MtTable1.class);
-        final ObjectId oid = new ObjectId(MtTable1.class, "key", 1);
-        MtTable1 serverObject = new MtTable1() {
-
-            public ObjEntity getObjEntity() {
-                return entity;
-            }
-
-            public ObjectId getObjectId() {
-                return oid;
-            }
-        };
+        ObjEntity entity = getDomain()
+                .getEntityResolver()
+                .lookupObjEntity(MtTable1.class);
+        ObjectId oid = new ObjectId(MtTable1.class, "key", 1);
+        MtTable1 serverObject = new MtTable1();
+        serverObject.setObjectId(oid);
+        serverObject.setObjEntity(entity);
 
         MockPersistenceContext parent = new MockPersistenceContext(getDomain()
                 .getEntityResolver(), Collections.singletonList(serverObject));
@@ -205,19 +199,13 @@ public class ServerObjectContextTst extends CayenneTestCase {
 
     public void testOnSelectQueryValuePropagation() {
 
-        final ObjEntity entity = getDomain().getEntityResolver().lookupObjEntity(
-                MtTable3.class);
+        ObjEntity entity = getDomain()
+                .getEntityResolver()
+                .lookupObjEntity(MtTable3.class);
 
-        MtTable3 serverObject = new MtTable3() {
-
-            public ObjEntity getObjEntity() {
-                return entity;
-            }
-
-            public ObjectId getObjectId() {
-                return new ObjectId(MtTable3.class, "key", 1);
-            }
-        };
+        MtTable3 serverObject = new MtTable3();
+        serverObject.setObjectId(new ObjectId(MtTable3.class, "key", 1));
+        serverObject.setObjEntity(entity);
 
         serverObject.setBinaryColumn(new byte[] {
                 1, 2, 3
@@ -253,16 +241,9 @@ public class ServerObjectContextTst extends CayenneTestCase {
         final ObjEntity entity = getDomain().getEntityResolver().lookupObjEntity(
                 MtTable1Subclass.class);
 
-        MtTable1Subclass serverObject = new MtTable1Subclass() {
-
-            public ObjEntity getObjEntity() {
-                return entity;
-            }
-
-            public ObjectId getObjectId() {
-                return new ObjectId(MtTable1Subclass.class, "key", 1);
-            }
-        };
+        MtTable1Subclass serverObject = new MtTable1Subclass();
+        serverObject.setObjectId(new ObjectId(MtTable1Subclass.class, "key", 1));
+        serverObject.setObjEntity(entity);
 
         serverObject.setGlobalAttribute1("abc");
 
@@ -279,10 +260,13 @@ public class ServerObjectContextTst extends CayenneTestCase {
         assertEquals(1, results.size());
 
         Object result = results.get(0);
-        assertTrue("Result is of wrong type: " + result, result instanceof ClientMtTable1Subclass);
+        assertTrue(
+                "Result is of wrong type: " + result,
+                result instanceof ClientMtTable1Subclass);
         ClientMtTable1Subclass clientObject = (ClientMtTable1Subclass) result;
 
-        assertEquals(serverObject.getGlobalAttribute1(), clientObject.getGlobalAttribute1());
+        assertEquals(serverObject.getGlobalAttribute1(), clientObject
+                .getGlobalAttribute1());
     }
 
     public void testOnGenericQuery() {

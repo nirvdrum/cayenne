@@ -137,10 +137,12 @@ public class ServerObjectContext extends ObjectDataContext implements
         }
 
         try {
-            return ClientServerUtils.toClientObjects(
-                    getEntityResolver(),
+            Class serverClass = objects.get(0).getClass();
+            return new ServerToClientObjectConverter(
                     objects,
-                    prefetches);
+                    getEntityResolver(),
+                    serverClass,
+                    prefetches).getConverted();
         }
         catch (Exception e) {
             throw new CayenneRuntimeException("Error converting to client objects: "
