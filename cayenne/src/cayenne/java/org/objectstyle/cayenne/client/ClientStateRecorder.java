@@ -78,9 +78,11 @@ import org.objectstyle.cayenne.graph.GraphMap;
 class ClientStateRecorder implements GraphChangeHandler {
 
     Set dirtyIds;
+    GraphMap graphMap;
 
-    ClientStateRecorder() {
+    ClientStateRecorder(GraphMap graphMap) {
         this.dirtyIds = new HashSet();
+        this.graphMap = graphMap;
     }
 
     void clear() {
@@ -90,7 +92,7 @@ class ClientStateRecorder implements GraphChangeHandler {
     /**
      * Updates dirty objects state and clears dirty ids map.
      */
-    void processCommit(GraphMap graphMap) {
+    public void graphCommitted() {
         Iterator it = dirtyIds.iterator();
         while (it.hasNext()) {
             Object node = graphMap.getNode(it.next());
@@ -110,8 +112,8 @@ class ClientStateRecorder implements GraphChangeHandler {
 
         clear();
     }
-    
-    void processRollback(GraphMap graphMap) {
+
+    public void graphRolledback() {
         Iterator it = dirtyIds.iterator();
         while (it.hasNext()) {
             Object node = graphMap.getNode(it.next());
@@ -136,7 +138,7 @@ class ClientStateRecorder implements GraphChangeHandler {
         return !dirtyIds.isEmpty();
     }
 
-    Collection dirtyNodes(GraphMap graphMap) {
+    Collection dirtyNodes() {
         if (dirtyIds.isEmpty()) {
             return Collections.EMPTY_SET;
         }
@@ -150,7 +152,7 @@ class ClientStateRecorder implements GraphChangeHandler {
         return objects;
     }
 
-    Collection dirtyNodes(GraphMap graphMap, int state) {
+    Collection dirtyNodes(int state) {
         if (dirtyIds.isEmpty()) {
             return Collections.EMPTY_SET;
         }

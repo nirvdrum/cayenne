@@ -80,6 +80,18 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
         this.context = context;
     }
 
+    /**
+     * Does nothing.
+     */
+    public void graphCommitted() {
+    }
+
+    /**
+     * Does nothing.
+     */
+    public void graphRolledback() {
+    }
+
     public void nodeIdChanged(Object nodeId, Object newId) {
         throw new CayenneRuntimeException(
                 "Not supported - client is not allowed to change Global ID of server objects.");

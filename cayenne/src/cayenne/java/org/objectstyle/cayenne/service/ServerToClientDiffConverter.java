@@ -87,6 +87,18 @@ class ServerToClientDiffConverter implements GraphChangeHandler {
         return clientDiff;
     }
 
+    /**
+     * Does nothing.
+     */
+    public void graphCommitted() {
+    }
+
+    /**
+     * Does nothing.
+     */
+    public void graphRolledback() {
+    }
+
     public void nodeIdChanged(Object nodeId, Object newId) {
         GlobalID nodeGlobalID = toGlobalID(nodeId);
         GlobalID newGlobalID = toGlobalID(newId);

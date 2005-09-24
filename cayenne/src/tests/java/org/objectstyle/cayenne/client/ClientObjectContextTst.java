@@ -249,9 +249,9 @@ public class ClientObjectContextTst extends TestCase {
         assertTrue(object instanceof MockPersistentObject);
         assertEquals(PersistenceState.NEW, object.getPersistenceState());
         assertSame(context, object.getObjectContext());
-        assertTrue(context.stateRecorder.dirtyNodes(
-                context.graphManager,
-                PersistenceState.NEW).contains(object));
+        assertTrue(context.stateRecorder
+                .dirtyNodes(PersistenceState.NEW)
+                .contains(object));
         assertNotNull(object.getGlobalID());
         assertTrue(object.getGlobalID() instanceof GlobalID);
         assertTrue(((GlobalID) object.getGlobalID()).isTemporary());
@@ -277,8 +277,7 @@ public class ClientObjectContextTst extends TestCase {
         Persistent newObject = context.newObject(MockPersistentObject.class);
         context.deleteObject(newObject);
         assertEquals(PersistenceState.TRANSIENT, newObject.getPersistenceState());
-        assertFalse(context.stateRecorder.dirtyNodes(context.graphManager).contains(
-                newObject));
+        assertFalse(context.stateRecorder.dirtyNodes().contains(newObject));
 
         // COMMITTED
         Persistent committed = new MockPersistentObject();

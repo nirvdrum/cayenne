@@ -159,8 +159,26 @@ public class GraphManager implements GraphMap, GraphChangeHandler {
         return nodes.remove(nodeId);
     }
 
-    // *** methods for tracking local changes decclared in GraphChangeTracker interface
+    // *** methods for tracking local changes declared in GraphChangeHandler interface
 
+    public void graphCommitted() {
+        if (recordingLocalChanges && localChangeHandlers != null) {
+            Iterator it = localChangeHandlers.iterator();
+            while (it.hasNext()) {
+                ((GraphChangeHandler) it.next()).graphCommitted();
+            }
+        }
+    }
+    
+    public void graphRolledback() {
+        if (recordingLocalChanges && localChangeHandlers != null) {
+            Iterator it = localChangeHandlers.iterator();
+            while (it.hasNext()) {
+                ((GraphChangeHandler) it.next()).graphRolledback();
+            }
+        }
+    }
+    
     public synchronized void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
         if (recordingLocalChanges && localChangeHandlers != null) {
             Iterator it = localChangeHandlers.iterator();

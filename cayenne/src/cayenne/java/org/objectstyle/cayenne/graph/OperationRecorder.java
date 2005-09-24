@@ -82,16 +82,33 @@ public class OperationRecorder implements GraphChangeHandler {
         return new CompoundDiff(Collections.unmodifiableList(diffs));
     }
 
+    /**
+     * "Forgets" all stored operations.
+     */
     public void clear() {
         this.diffs = new ArrayList();
     }
-    
+
     public int size() {
         return diffs.size();
     }
 
     public boolean isEmpty() {
         return diffs.isEmpty();
+    }
+
+    /**
+     * Calls "clear()", removing all memorized changes.
+     */
+    public void graphCommitted() {
+        clear();
+    }
+
+    /**
+     * Calls "clear()", removing all memorized changes.
+     */
+    public void graphRolledback() {
+        clear();
     }
 
     public void nodeCreated(Object nodeId) {

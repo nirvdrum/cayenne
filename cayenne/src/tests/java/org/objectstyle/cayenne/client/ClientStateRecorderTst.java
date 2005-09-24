@@ -71,22 +71,22 @@ public class ClientStateRecorderTst extends TestCase {
     public void testDirtyNodesInState() {
 
         GraphMap map = new MockGraphMap();
-        ClientStateRecorder recorder = new ClientStateRecorder();
+        ClientStateRecorder recorder = new ClientStateRecorder(map);
 
         // check for null collections
-        assertNotNull(recorder.dirtyNodes(map, PersistenceState.MODIFIED));
-        assertNotNull(recorder.dirtyNodes(map, PersistenceState.COMMITTED));
-        assertNotNull(recorder.dirtyNodes(map, PersistenceState.DELETED));
-        assertNotNull(recorder.dirtyNodes(map, PersistenceState.NEW));
-        assertNotNull(recorder.dirtyNodes(map, PersistenceState.TRANSIENT));
-        assertNotNull(recorder.dirtyNodes(map, PersistenceState.HOLLOW));
+        assertNotNull(recorder.dirtyNodes(PersistenceState.MODIFIED));
+        assertNotNull(recorder.dirtyNodes(PersistenceState.COMMITTED));
+        assertNotNull(recorder.dirtyNodes(PersistenceState.DELETED));
+        assertNotNull(recorder.dirtyNodes(PersistenceState.NEW));
+        assertNotNull(recorder.dirtyNodes(PersistenceState.TRANSIENT));
+        assertNotNull(recorder.dirtyNodes(PersistenceState.HOLLOW));
 
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.MODIFIED).isEmpty());
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.COMMITTED).isEmpty());
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.DELETED).isEmpty());
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.NEW).isEmpty());
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.TRANSIENT).isEmpty());
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.HOLLOW).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.MODIFIED).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.COMMITTED).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.DELETED).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.NEW).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.TRANSIENT).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.HOLLOW).isEmpty());
 
         MockPersistentObject modified = new MockPersistentObject();
         modified.setGlobalID(new GlobalID("MockPersistentObject", "key", "value1"));
@@ -94,12 +94,12 @@ public class ClientStateRecorderTst extends TestCase {
         map.registerNode(modified.getGlobalID(), modified);
         recorder.nodePropertyChanged(modified.getGlobalID(), "a", "b", "c");
 
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.MODIFIED).contains(modified));
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.COMMITTED).isEmpty());
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.DELETED).isEmpty());
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.NEW).isEmpty());
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.TRANSIENT).isEmpty());
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.HOLLOW).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.MODIFIED).contains(modified));
+        assertTrue(recorder.dirtyNodes(PersistenceState.COMMITTED).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.DELETED).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.NEW).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.TRANSIENT).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.HOLLOW).isEmpty());
 
         MockPersistentObject deleted = new MockPersistentObject();
         deleted.setGlobalID(new GlobalID("MockPersistentObject", "key", "value2"));
@@ -107,20 +107,20 @@ public class ClientStateRecorderTst extends TestCase {
         map.registerNode(deleted.getGlobalID(), deleted);
         recorder.nodeRemoved(deleted.getGlobalID());
 
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.MODIFIED).contains(modified));
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.COMMITTED).isEmpty());
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.DELETED).contains(deleted));
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.NEW).isEmpty());
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.TRANSIENT).isEmpty());
-        assertTrue(recorder.dirtyNodes(map, PersistenceState.HOLLOW).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.MODIFIED).contains(modified));
+        assertTrue(recorder.dirtyNodes(PersistenceState.COMMITTED).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.DELETED).contains(deleted));
+        assertTrue(recorder.dirtyNodes(PersistenceState.NEW).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.TRANSIENT).isEmpty());
+        assertTrue(recorder.dirtyNodes(PersistenceState.HOLLOW).isEmpty());
     }
 
     public void testDirtyNodes() {
         GraphMap map = new MockGraphMap();
-        ClientStateRecorder recorder = new ClientStateRecorder();
+        ClientStateRecorder recorder = new ClientStateRecorder(map);
 
-        assertNotNull(recorder.dirtyNodes(map));
-        assertTrue(recorder.dirtyNodes(map).isEmpty());
+        assertNotNull(recorder.dirtyNodes());
+        assertTrue(recorder.dirtyNodes().isEmpty());
 
         // introduce a fake dirty object
         MockPersistentObject object = new MockPersistentObject();
@@ -129,17 +129,17 @@ public class ClientStateRecorderTst extends TestCase {
         map.registerNode(object.getGlobalID(), object);
         recorder.nodePropertyChanged(object.getGlobalID(), "a", "b", "c");
 
-        assertTrue(recorder.dirtyNodes(map).contains(object));
+        assertTrue(recorder.dirtyNodes().contains(object));
 
         // must go away on clear...
         recorder.clear();
-        assertNotNull(recorder.dirtyNodes(map));
-        assertTrue(recorder.dirtyNodes(map).isEmpty());
+        assertNotNull(recorder.dirtyNodes());
+        assertTrue(recorder.dirtyNodes().isEmpty());
     }
 
     public void testHasChanges() {
 
-        ClientStateRecorder recorder = new ClientStateRecorder();
+        ClientStateRecorder recorder = new ClientStateRecorder(new MockGraphMap());
         assertFalse(recorder.hasChanges());
 
         // introduce a fake dirty object

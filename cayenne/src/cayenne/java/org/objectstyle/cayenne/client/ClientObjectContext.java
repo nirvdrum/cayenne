@@ -124,7 +124,7 @@ public class ClientObjectContext implements ObjectContext {
         this.graphManager = new GraphManager();
 
         this.changeRecorder = new OperationRecorder();
-        this.stateRecorder = new ClientStateRecorder();
+        this.stateRecorder = new ClientStateRecorder(graphManager);
 
         graphManager.addLocalChangeHandler(changeRecorder);
         graphManager.addLocalChangeHandler(stateRecorder);
@@ -191,8 +191,7 @@ public class ClientObjectContext implements ObjectContext {
                     .sendCommit(connector);
 
             graphManager.mergeRemoteChange(commitDiff);
-            stateRecorder.processCommit(graphManager);
-            changeRecorder.clear();
+            graphManager.graphCommitted();
 
             return commitDiff;
         }
@@ -203,10 +202,8 @@ public class ClientObjectContext implements ObjectContext {
 
     public void rollback() {
         if (!changeRecorder.isEmpty()) {
-
             changeRecorder.getDiffs().undo(new NullChangeHandler());
-            stateRecorder.processRollback(graphManager);
-            changeRecorder.clear();
+            graphManager.graphRolledback();
         }
     }
 
@@ -336,22 +333,22 @@ public class ClientObjectContext implements ObjectContext {
 
     public Collection uncommittedObjects() {
         // TODO: sync on graphManager?
-        return stateRecorder.dirtyNodes(graphManager);
+        return stateRecorder.dirtyNodes();
     }
 
     public Collection deletedObjects() {
         // TODO: sync on graphManager?
-        return stateRecorder.dirtyNodes(graphManager, PersistenceState.DELETED);
+        return stateRecorder.dirtyNodes(PersistenceState.DELETED);
     }
 
     public Collection modifiedObjects() {
         // TODO: sync on graphManager?
-        return stateRecorder.dirtyNodes(graphManager, PersistenceState.MODIFIED);
+        return stateRecorder.dirtyNodes(PersistenceState.MODIFIED);
     }
 
     public Collection newObjects() {
         // TODO: sync on graphManager?
-        return stateRecorder.dirtyNodes(graphManager, PersistenceState.NEW);
+        return stateRecorder.dirtyNodes(PersistenceState.NEW);
     }
 
     /**
@@ -368,7 +365,7 @@ public class ClientObjectContext implements ObjectContext {
                 object.getGlobalID().getEntityName());
         return entity.getClassDescriptor();
     }
-    
+
     class NullChangeHandler implements GraphChangeHandler {
 
         public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
@@ -383,11 +380,20 @@ public class ClientObjectContext implements ObjectContext {
         public void nodeIdChanged(Object nodeId, Object newId) {
         }
 
-        public void nodePropertyChanged(Object nodeId, String property, Object oldValue, Object newValue) {
+        public void nodePropertyChanged(
+                Object nodeId,
+                String property,
+                Object oldValue,
+                Object newValue) {
         }
 
         public void nodeRemoved(Object nodeId) {
         }
-        
+
+        public void graphCommitted() {
+        }
+
+        public void graphRolledback() {
+        }
     }
 }

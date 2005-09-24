@@ -55,21 +55,32 @@
  */
 package org.objectstyle.cayenne.graph;
 
-
 /**
  * Defines callback API that can be used by object graph nodes to notify of their state
  * changes. Graph nodes can be any objects as long as each node supports a notion of a
  * unique id within the graph and each directional arc has a unique identifier within its
  * source node.
  * <p>
- * GraphChangeHandlers can be either "injected" directly into the graph nodes or wrapped in
- * some event mechanism to collect graph changes.
+ * GraphChangeHandlers can be either "injected" directly into the graph nodes or wrapped
+ * in some event mechanism to collect graph changes.
  * </p>
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
 public interface GraphChangeHandler {
+
+    /**
+     * Notifies implementing object that all graph chages made since last commit or
+     * rollback were committed to some persistent storage.
+     */
+    void graphCommitted();
+
+    /**
+     * Notifies implementing object that all graph changes made since last commit or
+     * rollback were reverted.
+     */
+    void graphRolledback();
 
     /**
      * Notifies implementing object that a node was assigned a new id.

@@ -83,6 +83,18 @@ public class BeanMergeHandler implements GraphChangeHandler {
         return graphMap;
     }
 
+    /**
+     * Does nothing.
+     */
+    public void graphCommitted() {
+    }
+
+    /**
+     * Does nothing.
+     */
+    public void graphRolledback() {
+    }
+
     public void nodeIdChanged(Object nodeId, Object newId) {
         Object node = graphMap.unregisterNode(nodeId);
 
