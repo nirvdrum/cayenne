@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.io.Serializable;
-
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
@@ -69,7 +67,7 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface PersistenceContext extends Serializable {
+public interface PersistenceContext {
 
     /**
      * Merges changes from the ObjectContext parameter. This method is used by child
