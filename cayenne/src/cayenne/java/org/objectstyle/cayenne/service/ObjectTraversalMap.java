@@ -11,8 +11,8 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 
 public class ObjectTraversalMap {
 
-    Map children;
-    ObjEntity entity;
+    private Map children;
+    private ObjEntity entity;
     ObjRelationship incoming;
 
     ObjectTraversalMap(ObjEntity rootEntity, Collection pathSpecs) {

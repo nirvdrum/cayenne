@@ -11,6 +11,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.client.ClientEntityResolver;
+import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.property.ArcProperty;
@@ -22,29 +23,35 @@ class ServerToClientObjectConverter {
     Map clientObjectsByOID;
     List converted;
     EntityResolver resolver;
+    ClientEntityResolver clientResolver;
 
-    ServerToClientObjectConverter(Collection serverObjects, EntityResolver resolver,
-            Class serverObjectClass, Collection prefetchPaths) {
+    ServerToClientObjectConverter(List serverObjects, EntityResolver resolver,
+            Collection prefetchPaths) {
 
         this.clientObjectsByOID = new HashMap();
         this.converted = new ArrayList(serverObjects.size());
         this.resolver = resolver;
+        this.clientResolver = resolver.getClientEntityResolver();
 
         if (!serverObjects.isEmpty()) {
-            ObjEntity serverEntity = resolver.lookupObjEntity(serverObjectClass);
-            if (serverEntity == null) {
-                String className = (serverObjectClass != null) ? serverObjectClass
+
+            // note that 'someServerEntity' is an entity located in some unpredictable
+            // place of object inheritance hierarchy, so it is simply used to resolve
+            // prefetches. IT CAN NOT BE USED TO OBTAIN CLASS DESCRIPTORS - THIS HAS TO BE
+            // DONE INDIVIDUALLY FOR EACH OBJECT.
+            ObjEntity someServerEntity = resolver.lookupObjEntity(serverObjects
+                    .get(0)
+                    .getClass());
+            if (someServerEntity == null) {
+                String className = (someServerEntity != null) ? someServerEntity
                         .getName() : "<null>";
                 throw new CayenneRuntimeException("Can't find entity for server class: "
                         + className);
             }
 
-            ClientEntityResolver clientResolver = resolver.getClientEntityResolver();
-
             // create traversal map using the client entity
-            new ObjectTraversalMap(
-                    clientResolver.entityForName(serverEntity.getName()),
-                    prefetchPaths).traverse(serverObjects, this);
+            new ObjectTraversalMap(clientResolver.entityForName(someServerEntity
+                    .getName()), prefetchPaths).traverse(serverObjects, this);
         }
     }
 
@@ -59,9 +66,21 @@ class ServerToClientObjectConverter {
                 .getObjectId());
 
         if (clientObject == null) {
-            ClassDescriptor descriptor = node.entity.getClassDescriptor();
+
+            GlobalID id = resolver.convertToGlobalID(object.getObjectId());
+
+            // DO NOT USE NODE'S ENTITY TO LOOKUP DESCRIPTOR, as inheritance may be
+            // involved and different objects may be of different class.
+
+            // TODO: Andrus, 09/24/2005: maybe analyze inheritance tree upfront and build
+            // a smaller lookup map ... and combine with "convertToGlobalID"; can save a
+            // few CPU cycles on big lists
+
+            ClassDescriptor descriptor = clientResolver
+                    .entityForName(id.getEntityName())
+                    .getClassDescriptor();
             clientObject = (Persistent) descriptor.createObject();
-            clientObject.setGlobalID(resolver.convertToGlobalID(object.getObjectId()));
+            clientObject.setGlobalID(id);
 
             // copy attributes properties
             Iterator it = descriptor.getPropertyNames().iterator();
@@ -75,6 +94,7 @@ class ServerToClientObjectConverter {
             clientObjectsByOID.put(object.getObjectId(), clientObject);
         }
 
+        // ... connect to parent ...
         // if parent is null, this is one of the converted objects...
         if (parent == null) {
             converted.add(clientObject);

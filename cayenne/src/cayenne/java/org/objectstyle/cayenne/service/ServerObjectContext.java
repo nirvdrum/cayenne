@@ -137,11 +137,9 @@ public class ServerObjectContext extends ObjectDataContext implements
         }
 
         try {
-            Class serverClass = objects.get(0).getClass();
             return new ServerToClientObjectConverter(
                     objects,
                     getEntityResolver(),
-                    serverClass,
                     prefetches).getConverted();
         }
         catch (Exception e) {
