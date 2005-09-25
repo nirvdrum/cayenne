@@ -270,9 +270,6 @@ public class ClientObjectContext implements ObjectContext {
 
         // postprocess fetched objects...
 
-        // assume all objects are of the same type...
-        ClassDescriptor descriptor = getClassDescriptor((Persistent) objects.get(0));
-
         ListIterator it = objects.listIterator();
         while (it.hasNext()) {
 
@@ -294,6 +291,10 @@ public class ClientObjectContext implements ObjectContext {
 
                     // refresh existing object...
 
+                    // lookup descriptor on the spot - we can be dealing with a mix of
+                    // different objects in the inheritance hierarchy...
+                    ClassDescriptor descriptor = getClassDescriptor(cachedObject);
+
                     if (cachedObject.getPersistenceState() == PersistenceState.HOLLOW) {
                         cachedObject.setPersistenceState(PersistenceState.COMMITTED);
                         descriptor.prepareForAccess(cachedObject);
@@ -304,6 +305,11 @@ public class ClientObjectContext implements ObjectContext {
                 }
             }
             else {
+
+                // lookup descriptor on the spot - we can deal with a mix of different
+                // objects in the hierarchy...
+                ClassDescriptor descriptor = getClassDescriptor(fetchedObject);
+
                 fetchedObject.setPersistenceState(PersistenceState.COMMITTED);
                 fetchedObject.setObjectContext(this);
                 descriptor.prepareForAccess(fetchedObject);
