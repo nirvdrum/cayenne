@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
+import org.objectstyle.cayenne.testdo.mt.MtTable1Subclass;
 import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
@@ -96,6 +97,30 @@ public class EntityResolverTst extends CayenneTestCase {
         assertNotNull(permOID);
         assertFalse(permOID.isTemporary());
         assertEquals(MtTable1.class.getName(), permOID.getObjectClass().getName());
+        assertEquals(new Integer(2), permOID
+                .getValueForAttribute(MtTable1.TABLE1_ID_PK_COLUMN));
+    }
+    
+    public void testConvertToObjectIdInheritance() {
+        AccessStack stack = CayenneTestResources.getResources().getAccessStack(
+                MULTI_TIER_ACCESS_STACK);
+
+        EntityResolver resolver = new EntityResolver(stack.getDataDomain().getDataMaps());
+
+        GlobalID temp = new GlobalID("MtTable1Subclass");
+        ObjectId tempOID = resolver.convertToObjectID(temp);
+        assertNotNull(tempOID);
+        assertTrue(tempOID.isTemporary());
+        assertEquals(MtTable1Subclass.class.getName(), tempOID.getObjectClass().getName());
+
+        GlobalID perm = new GlobalID(
+                "MtTable1Subclass",
+                MtTable1.TABLE1_ID_PK_COLUMN,
+                new Integer(2));
+        ObjectId permOID = resolver.convertToObjectID(perm);
+        assertNotNull(permOID);
+        assertFalse(permOID.isTemporary());
+        assertEquals(MtTable1Subclass.class.getName(), permOID.getObjectClass().getName());
         assertEquals(new Integer(2), permOID
                 .getValueForAttribute(MtTable1.TABLE1_ID_PK_COLUMN));
     }

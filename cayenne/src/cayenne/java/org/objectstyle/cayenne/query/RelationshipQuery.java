@@ -175,7 +175,9 @@ public class RelationshipQuery implements QueryExecutionPlan {
             throw new CayenneRuntimeException("No relationship named "
                     + relationshipName
                     + " found in entity "
-                    + entity);
+                    + entity.getName()
+                    + "; object id: "
+                    + id);
         }
 
         // build executable select...
