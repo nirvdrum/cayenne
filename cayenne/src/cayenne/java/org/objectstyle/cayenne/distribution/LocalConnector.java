@@ -60,13 +60,9 @@ import org.objectstyle.cayenne.util.Util;
 
 /**
  * A connector used to connect CWS Client Tier ObjectContexts to Cayenne ORM tier running
- * in the same VM. LocalConnector emulates Cayenne Web Service without actually deploying
- * one. It is useful for testing and rapid development cycle, but also for cases when CWS
- * Client Tier would require direct database access.
- * <p>
- * When used for testing, LocalConnector can be configured to use one of the few optional
- * serialization policies to better emulate a remote connector.
- * </p>
+ * in the same VM. LocalConnector emulates Cayenne Web Service (including emulating
+ * serialization/deserialization of objects) without actually deploying one. It is useful
+ * for testing and speeding up development cycle.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -77,7 +73,7 @@ public class LocalConnector extends BaseConnector {
     public static final int JAVA_SERIALIZATION = 1;
     public static final int HESSIAN_SERIALIZATION = 2;
 
-    protected OPPChannel handler;
+    protected OPPChannel channel;
     protected int serializationPolicy;
 
     /**
@@ -92,7 +88,7 @@ public class LocalConnector extends BaseConnector {
      * policies are defined as final static int field in this class.
      */
     public LocalConnector(OPPChannel handler, int serializationPolicy) {
-        this.handler = handler;
+        this.channel = handler;
 
         // convert invalid policy to NO_SER..
         this.serializationPolicy = serializationPolicy == JAVA_SERIALIZATION
@@ -106,8 +102,8 @@ public class LocalConnector extends BaseConnector {
                 || serializationPolicy == HESSIAN_SERIALIZATION;
     }
 
-    public OPPChannel getHandler() {
-        return handler;
+    public OPPChannel getChannel() {
+        return channel;
     }
 
     /**
@@ -132,15 +128,14 @@ public class LocalConnector extends BaseConnector {
                     break;
 
                 case JAVA_SERIALIZATION:
-                    processedMessage = (OPPMessage) Util
-                            .cloneViaSerialization(message);
+                    processedMessage = (OPPMessage) Util.cloneViaSerialization(message);
                     break;
 
                 default:
                     processedMessage = message;
             }
 
-            return processedMessage.onReceive(handler);
+            return processedMessage.onReceive(channel);
         }
         catch (Exception ex) {
             throw new CayenneClientException("Error sending message", ex);

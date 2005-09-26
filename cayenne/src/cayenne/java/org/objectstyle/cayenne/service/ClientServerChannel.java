@@ -62,6 +62,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.distribution.BootstrapMessage;
 import org.objectstyle.cayenne.distribution.CommitMessage;
@@ -79,12 +80,14 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @since 1.2
  * @author Andrus Adamchik
  */
-// TODO, Andrus, 09/25/2005: this class can be made public once we remove DataContext
-// dependency and make it work with generic ObjectContext.
-class ClientServerChannel implements OPPChannel {
+public class ClientServerChannel implements OPPChannel {
 
     protected ObjectDataContext serverContext;
 
+    public ClientServerChannel(DataDomain domain) {
+        this(new ObjectDataContext(domain));
+    }
+    
     ClientServerChannel(ObjectDataContext serverContext) {
         this.serverContext = serverContext;
     }

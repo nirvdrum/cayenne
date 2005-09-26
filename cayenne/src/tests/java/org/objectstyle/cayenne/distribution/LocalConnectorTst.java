@@ -66,14 +66,14 @@ public class LocalConnectorTst extends TestCase {
         OPPChannel handler1 = new MockOPPChannel();
         LocalConnector connector1 = new LocalConnector(handler1);
         assertFalse(connector1.isSerializingMessages());
-        assertSame(handler1, connector1.getHandler());
+        assertSame(handler1, connector1.getChannel());
 
         OPPChannel handler2 = new MockOPPChannel();
         LocalConnector connector2 = new LocalConnector(
                 handler2,
                 LocalConnector.JAVA_SERIALIZATION);
         assertTrue(connector2.isSerializingMessages());
-        assertSame(handler2, connector2.getHandler());
+        assertSame(handler2, connector2.getChannel());
     }
 
     public void testSendMessage() {
