@@ -55,21 +55,19 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import org.objectstyle.cayenne.client.ClientEntityResolver;
-
 /**
  * A message sent by the client to "bootstrap" to Cayenne server.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class BootstrapMessage extends AbstractMessage {
+public class BootstrapMessage implements OPPMessage {
 
-    public Object onReceive(ClientMessageHandler handler) {
+    public Object onReceive(OPPChannel handler) {
         return handler.onBootstrap(this);
     }
 
-    public ClientEntityResolver sendBootstrap(CayenneConnector connector) {
-        return (ClientEntityResolver) send(connector, ClientEntityResolver.class);
+    public String toString() {
+        return "Bootstrap";
     }
 }

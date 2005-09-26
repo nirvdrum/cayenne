@@ -64,10 +64,10 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.distribution.BootstrapMessage;
-import org.objectstyle.cayenne.distribution.CayenneConnector;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GenericQueryMessage;
 import org.objectstyle.cayenne.distribution.GlobalID;
+import org.objectstyle.cayenne.distribution.OPPChannel;
 import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;
 import org.objectstyle.cayenne.graph.CompoundDiff;
@@ -90,9 +90,9 @@ import org.objectstyle.cayenne.query.SingleObjectQuery;
  */
 public class ClientObjectContext implements ObjectContext {
 
-    // if we are to pass ClientObjectContext around, connector should be left alone and
+    // if we are to pass ClientObjectContext around, channel should be left alone and
     // reinjected later if needed
-    protected transient CayenneConnector connector;
+    protected transient OPPChannel channel;
 
     protected ClientEntityResolver entityResolver;
     protected GraphManager graphManager;
@@ -117,8 +117,8 @@ public class ClientObjectContext implements ObjectContext {
      * Creates a new ClientObjectContext, initializaing it with a connector instance that
      * should be used to connect to a remote Cayenne service.
      */
-    public ClientObjectContext(CayenneConnector connector) {
-        this.connector = connector;
+    public ClientObjectContext(OPPChannel channel) {
+        this.channel = channel;
 
         // assemble objects that track graph changes
         this.graphManager = new GraphManager();
@@ -135,6 +135,14 @@ public class ClientObjectContext implements ObjectContext {
         graphAction = new ClientObjectContextGraphAction(this);
     }
 
+    public OPPChannel getChannel() {
+        return channel;
+    }
+
+    public void setChannel(OPPChannel channel) {
+        this.channel = channel;
+    }
+
     /**
      * Returns a ClientEntityResolver that provides limited mapping information needed for
      * ClientObjectContext operation. If ClientEntityResolver is not set, this method
@@ -145,7 +153,7 @@ public class ClientObjectContext implements ObjectContext {
         if (entityResolver == null) {
             synchronized (this) {
                 if (entityResolver == null) {
-                    setEntityResolver(new BootstrapMessage().sendBootstrap(connector));
+                    setEntityResolver(channel.onBootstrap(new BootstrapMessage()));
                 }
             }
         }
@@ -166,20 +174,6 @@ public class ClientObjectContext implements ObjectContext {
     }
 
     /**
-     * Returns connector used to access remote Cayenne service.
-     */
-    public CayenneConnector getConnector() {
-        return connector;
-    }
-
-    /**
-     * Sets CayenneConnector used to access Cayenne web service.
-     */
-    public void setConnector(CayenneConnector connector) {
-        this.connector = connector;
-    }
-
-    /**
      * Commits changes to uncommitted objects. First checks if there are changes in this
      * context and if any changes are detected, sends a commit message to remote Cayenne
      * service via an internal instance of CayenneConnector.
@@ -187,8 +181,8 @@ public class ClientObjectContext implements ObjectContext {
     public GraphDiff commit() {
 
         if (!changeRecorder.isEmpty()) {
-            GraphDiff commitDiff = new CommitMessage(changeRecorder.getDiffs())
-                    .sendCommit(connector);
+            GraphDiff commitDiff = channel.onCommit(new CommitMessage(changeRecorder
+                    .getDiffs()));
 
             graphManager.mergeRemoteChange(commitDiff);
             graphManager.graphCommitted();
@@ -258,12 +252,12 @@ public class ClientObjectContext implements ObjectContext {
     }
 
     public int[] performUpdateQuery(QueryExecutionPlan query) {
-        return new UpdateMessage(query).send(connector);
+        return channel.onUpdateQuery(new UpdateMessage(query));
     }
 
     // TODO: maybe change the api to be "performSelectQuery(Class, QueryExecutionPlan)"?
     public List performSelectQuery(QueryExecutionPlan query) {
-        List objects = new SelectMessage(query).send(connector);
+        List objects = channel.onSelectQuery(new SelectMessage(query));
         if (objects.isEmpty()) {
             return objects;
         }
@@ -321,7 +315,7 @@ public class ClientObjectContext implements ObjectContext {
     }
 
     public QueryResponse performGenericQuery(QueryExecutionPlan query) {
-        return new GenericQueryMessage(query).send(connector);
+        return channel.onGenericQuery(new GenericQueryMessage(query));
     }
 
     public void prepareForAccess(Persistent object, String property) {

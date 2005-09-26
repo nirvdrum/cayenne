@@ -65,10 +65,11 @@ import junit.framework.TestCase;
 import org.objectstyle.cayenne.MockPersistentObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.distribution.ClientMessage;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GlobalID;
-import org.objectstyle.cayenne.distribution.MockCayenneConnector;
+import org.objectstyle.cayenne.distribution.MockOPPChannel;
+import org.objectstyle.cayenne.distribution.OPPMessage;
+import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.OperationRecorder;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -85,46 +86,43 @@ public class ClientObjectContextTst extends TestCase {
 
         // test default property parameters
         assertNotNull(context.getGraphManager());
-        assertNull(context.getConnector());
+        assertNull(context.getChannel());
 
-        MockCayenneConnector connector = new MockCayenneConnector();
-        context.setConnector(connector);
-        assertSame(connector, context.getConnector());
+        MockOPPChannel channel = new MockOPPChannel();
+        context.setChannel(channel);
+        assertSame(channel, context.getChannel());
     }
 
-    public void testConnector() {
-        MockCayenneConnector connector = new MockCayenneConnector();
-        ClientObjectContext context = new ClientObjectContext(connector);
+    public void testChannel() {
+        MockOPPChannel channel = new MockOPPChannel();
+        ClientObjectContext context = new ClientObjectContext(channel);
 
-        assertSame(connector, context.getConnector());
+        assertSame(channel, context.getChannel());
     }
 
     public void testCommitUnchanged() {
 
-        MockCayenneConnector connector = new MockCayenneConnector();
-        ClientObjectContext context = new ClientObjectContext(connector);
+        MockOPPChannel channel = new MockOPPChannel();
+        ClientObjectContext context = new ClientObjectContext(channel);
 
         // no context changes so no connector access is expected
         context.commit();
-        assertTrue(connector.getCommands().isEmpty());
+        assertTrue(channel.getMessages().isEmpty());
     }
 
     public void testCommitCommandExecuted() {
 
-        MockCayenneConnector connector = new MockCayenneConnector(new MockGraphDiff());
-        ClientObjectContext context = new ClientObjectContext(connector);
+        MockOPPChannel channel = new MockOPPChannel(new MockGraphDiff());
+        ClientObjectContext context = new ClientObjectContext(channel);
 
         // test that a command is being sent via connector on commit...
 
         context.changeRecorder.nodePropertyChanged(new Object(), "x", "y", "z");
         context.commit();
-        assertEquals(1, connector.getCommands().size());
+        assertEquals(1, channel.getMessages().size());
 
         // expect a sync/commit chain
-        ClientMessage mainMessage = (ClientMessage) connector
-                .getCommands()
-                .iterator()
-                .next();
+        OPPMessage mainMessage = (OPPMessage) channel.getMessages().iterator().next();
         assertTrue(mainMessage instanceof CommitMessage);
     }
 
@@ -134,15 +132,14 @@ public class ClientObjectContextTst extends TestCase {
 
         // test that ids that are passed back are actually propagated to the right
         // objects...
-        MockCayenneConnector connector = new MockCayenneConnector() {
+        MockOPPChannel channel = new MockOPPChannel() {
 
-            public Object sendMessage(ClientMessage message)
-                    throws CayenneClientException {
+            public GraphDiff onCommit(CommitMessage message) {
                 return recorder.getDiffs();
             }
         };
 
-        ClientObjectContext context = new ClientObjectContext(connector);
+        ClientObjectContext context = new ClientObjectContext(channel);
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
 
@@ -165,17 +162,11 @@ public class ClientObjectContextTst extends TestCase {
         GlobalID oid1 = new GlobalID("test_entity");
         o1.setGlobalID(oid1);
 
-        MockCayenneConnector connector = new MockCayenneConnector() {
+        MockOPPChannel channel = new MockOPPChannel(Arrays.asList(new Object[] {
+            o1
+        }));
 
-            public Object sendMessage(ClientMessage message)
-                    throws CayenneClientException {
-                return Arrays.asList(new Object[] {
-                    o1
-                });
-            }
-        };
-
-        ClientObjectContext context = new ClientObjectContext(connector);
+        ClientObjectContext context = new ClientObjectContext(channel);
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
 
@@ -209,12 +200,11 @@ public class ClientObjectContextTst extends TestCase {
         // another object with the same GID ... we must merge it with cached and return
         // cached object instead of the one fetched
         MockPersistentObject o2 = new MockPersistentObject(oid);
-        MockCayenneConnector connector = new MockCayenneConnector(Arrays
-                .asList(new Object[] {
-                    o2
-                }));
+        MockOPPChannel channel = new MockOPPChannel(Arrays.asList(new Object[] {
+            o2
+        }));
 
-        context.setConnector(connector);
+        context.setChannel(channel);
         List list = context.performSelectQuery(new NamedQuery("dummy"));
         assertNotNull(list);
         assertEquals(1, list.size());
@@ -224,8 +214,7 @@ public class ClientObjectContextTst extends TestCase {
 
     public void testNewObject() {
 
-        MockCayenneConnector connector = new MockCayenneConnector();
-        ClientObjectContext context = new ClientObjectContext(connector);
+        ClientObjectContext context = new ClientObjectContext(new MockOPPChannel());
 
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
@@ -259,8 +248,7 @@ public class ClientObjectContextTst extends TestCase {
 
     public void testDeleteObject() {
 
-        MockCayenneConnector connector = new MockCayenneConnector();
-        ClientObjectContext context = new ClientObjectContext(connector);
+        ClientObjectContext context = new ClientObjectContext(new MockOPPChannel());
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
 

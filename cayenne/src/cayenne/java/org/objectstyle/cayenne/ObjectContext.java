@@ -130,7 +130,7 @@ public interface ObjectContext extends Serializable {
      *         includes things like generated ids, etc.
      */
     GraphDiff commit();
-    
+
     /**
      * Resets changes made to the objects in the ObjectContext.
      */

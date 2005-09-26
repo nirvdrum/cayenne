@@ -74,10 +74,10 @@ import org.objectstyle.cayenne.map.Relationship;
 // TODO: (Andrus, 09/2005) Server-side ClassDescriptor is needed to handle all that...
 class ClientToServerDiffConverter implements GraphChangeHandler {
 
-    ObjectDataContext context;
+    ObjectDataContext serverContext;
 
-    ClientToServerDiffConverter(ObjectDataContext context) {
-        this.context = context;
+    ClientToServerDiffConverter(ObjectDataContext serverContext) {
+        this.serverContext = serverContext;
     }
 
     /**
@@ -99,12 +99,12 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
 
     public void nodeCreated(Object nodeId) {
         ObjectId id = toObjectId(nodeId);
-        context.createAndRegisterNewObject(id);
+        serverContext.createAndRegisterNewObject(id);
     }
 
     public void nodeRemoved(Object nodeId) {
         Persistent object = findObject(nodeId);
-        context.deleteObject(object);
+        serverContext.deleteObject(object);
     }
 
     public void nodePropertyChanged(
@@ -130,7 +130,9 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
         DataObject source = findObject(nodeId);
 
         // find whether this is to-one or to-many
-        ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
+        ObjEntity sourceEntity = serverContext
+                .getEntityResolver()
+                .lookupObjEntity(source);
         Relationship relationship = sourceEntity.getRelationship(arcId.toString());
 
         DataObject target = findObject(targetNodeId);
@@ -146,7 +148,9 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
         DataObject source = findObject(nodeId);
 
         // find whether this is to-one or to-many
-        ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
+        ObjEntity sourceEntity = serverContext
+                .getEntityResolver()
+                .lookupObjEntity(source);
         Relationship relationship = sourceEntity.getRelationship(arcId.toString());
 
         DataObject target = findObject(targetNodeId);
@@ -160,12 +164,12 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
 
     DataObject findObject(Object nodeId) {
         ObjectId id = toObjectId(nodeId);
-        return context.getObjectStore().getObject(id);
+        return serverContext.getObjectStore().getObject(id);
     }
 
     ObjectId toObjectId(Object nodeId) {
         if (nodeId instanceof GlobalID) {
-            return context.getEntityResolver().convertToObjectID((GlobalID) nodeId);
+            return serverContext.getEntityResolver().convertToObjectID((GlobalID) nodeId);
         }
         else if (nodeId instanceof ObjectId) {
             return (ObjectId) nodeId;

@@ -153,7 +153,7 @@ public class HessianConnector extends BaseConnector {
     /**
      * Establishes server session if needed.
      */
-    protected void beforeSendMessage(ClientMessage message) throws CayenneClientException {
+    protected void beforeSendMessage(OPPMessage message) throws CayenneClientException {
         // for now only support session-based communications...
         if (sessionId == null) {
             connect();
@@ -163,7 +163,7 @@ public class HessianConnector extends BaseConnector {
     /**
      * Sends a message to remote Cayenne Hessian service.
      */
-    protected Object doSendMessage(ClientMessage message) throws CayenneClientException {
+    protected Object doSendMessage(OPPMessage message) throws CayenneClientException {
         try {
             return service.processMessage(sessionId, message);
         }

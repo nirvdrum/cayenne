@@ -77,13 +77,13 @@ public class LocalConnector extends BaseConnector {
     public static final int JAVA_SERIALIZATION = 1;
     public static final int HESSIAN_SERIALIZATION = 2;
 
-    protected ClientMessageHandler handler;
+    protected OPPChannel handler;
     protected int serializationPolicy;
 
     /**
      * Creates LocalConnector with specified handler and no serialization.
      */
-    public LocalConnector(ClientMessageHandler handler) {
+    public LocalConnector(OPPChannel handler) {
         this(handler, NO_SERIALIZATION);
     }
 
@@ -91,7 +91,7 @@ public class LocalConnector extends BaseConnector {
      * Creates a LocalConnector with specified handler and serialization policy. Valid
      * policies are defined as final static int field in this class.
      */
-    public LocalConnector(ClientMessageHandler handler, int serializationPolicy) {
+    public LocalConnector(OPPChannel handler, int serializationPolicy) {
         this.handler = handler;
 
         // convert invalid policy to NO_SER..
@@ -106,33 +106,33 @@ public class LocalConnector extends BaseConnector {
                 || serializationPolicy == HESSIAN_SERIALIZATION;
     }
 
-    public ClientMessageHandler getHandler() {
+    public OPPChannel getHandler() {
         return handler;
     }
 
     /**
      * Does nothing.
      */
-    protected void beforeSendMessage(ClientMessage message) {
+    protected void beforeSendMessage(OPPMessage message) {
         // noop
     }
 
     /**
      * Dispatches a message to an internal handler.
      */
-    protected Object doSendMessage(ClientMessage message) throws CayenneClientException {
+    protected Object doSendMessage(OPPMessage message) throws CayenneClientException {
 
-        ClientMessage processedMessage;
+        OPPMessage processedMessage;
 
         try {
             switch (serializationPolicy) {
                 case HESSIAN_SERIALIZATION:
-                    processedMessage = (ClientMessage) HessianConnector
+                    processedMessage = (OPPMessage) HessianConnector
                             .cloneViaHessianSerialization(message);
                     break;
 
                 case JAVA_SERIALIZATION:
-                    processedMessage = (ClientMessage) Util
+                    processedMessage = (OPPMessage) Util
                             .cloneViaSerialization(message);
                     break;
 

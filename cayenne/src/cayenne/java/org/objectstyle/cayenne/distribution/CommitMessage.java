@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.graph.GraphDiff;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class CommitMessage extends AbstractMessage {
+public class CommitMessage implements OPPMessage {
 
     protected GraphDiff senderChanges;
 
@@ -78,11 +78,11 @@ public class CommitMessage extends AbstractMessage {
         return senderChanges;
     }
 
-    public Object onReceive(ClientMessageHandler handler) {
+    public Object onReceive(OPPChannel handler) {
         return handler.onCommit(this);
     }
-
-    public GraphDiff sendCommit(CayenneConnector connector) {
-        return (GraphDiff) send(connector, GraphDiff.class);
+    
+    public String toString() {
+        return "Commit";
     }
 }

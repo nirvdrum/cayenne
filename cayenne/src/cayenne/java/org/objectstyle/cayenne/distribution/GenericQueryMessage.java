@@ -55,14 +55,13 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class GenericQueryMessage extends AbstractMessage {
+public class GenericQueryMessage implements OPPMessage {
 
     protected QueryExecutionPlan queryPlan;
 
@@ -77,14 +76,11 @@ public class GenericQueryMessage extends AbstractMessage {
     /**
      * Invoked by message receiver to dispatch message.
      */
-    public Object onReceive(ClientMessageHandler handler) {
+    public Object onReceive(OPPChannel handler) {
         return handler.onGenericQuery(this);
     }
 
-    /**
-     * Invoked by the message sender to perform a remote selecting query.
-     */
-    public QueryResponse send(CayenneConnector connector) {
-        return (QueryResponse) send(connector, QueryResponse.class);
+    public String toString() {
+        return "GenericQuery";
     }
 }

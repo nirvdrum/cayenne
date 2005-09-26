@@ -55,48 +55,22 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.client.ClientEntityResolver;
-import org.objectstyle.cayenne.graph.GraphDiff;
+import java.io.Serializable;
 
 /**
- * Stores all messages passed via this handler.
+ * Represents a two-way message sent by an OPP client.
  * 
+ * @since 1.2
  * @author Andrus Adamchik
+ * @see org.objectstyle.cayenne.distribution.OPPChannel
  */
-public class MockClientMessageHandler implements ClientMessageHandler {
+public interface OPPMessage extends Serializable {
 
-    protected List messages = new ArrayList();
-
-    public List getMessages() {
-        return messages;
-    }
-
-    public GraphDiff onCommit(CommitMessage message) {
-        messages.add(message);
-        return null;
-    }
-
-    public QueryResponse onGenericQuery(GenericQueryMessage message) {
-        messages.add(message);
-        return null;
-    }
-
-    public List onSelectQuery(SelectMessage message) {
-        messages.add(message);
-        return null;
-    }
-
-    public int[] onUpdateQuery(UpdateMessage message) {
-        messages.add(message);
-        return null;
-    }
-
-    public ClientEntityResolver onBootstrap(BootstrapMessage message) {
-        messages.add(message);
-        return null;
-    }
+    /**
+     * A dispatch method that calls an appropriate method on the OPPChannel. This method
+     * exists to simplify remote message dispathcing. In most cases message creators have
+     * direct access to OPPChannel and invoke an appropriate OPPChannel method themselves,
+     * so "onReceive" IS NOT INVOKED.
+     */
+    Object onReceive(OPPChannel channel);
 }

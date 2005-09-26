@@ -55,47 +55,62 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.objectstyle.cayenne.client.CayenneClientException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.client.ClientEntityResolver;
+import org.objectstyle.cayenne.graph.GraphDiff;
 
 /**
- * A convenience common superclass of client messages.
+ * Stores all messages passed via this handler.
  * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-public abstract class AbstractMessage implements ClientMessage {
+public class MockOPPChannel implements OPPChannel {
 
-    public abstract Object onReceive(ClientMessageHandler handler);
+    protected List messages = new ArrayList();
+    protected GraphDiff commitResponse;
+    protected List selectResponse;
 
-    /**
-     * Convenience method to send this message over CayenneConnector and get a result of a
-     * specific class. Use by subclasses to implement safe casting of result.
-     * 
-     * @throws org.objectstyle.cayenne.client.CayenneClientException if an underlying
-     *             connector exception occured, or a result is not of expected type.
-     */
-    protected Object send(CayenneConnector connector, Class resultClass) {
-        Object result = connector.sendMessage(this);
+    public MockOPPChannel() {
 
-        if (result != null && !resultClass.isInstance(result)) {
-            String resultString = new ToStringBuilder(result).toString();
-            throw new CayenneClientException("Expected result type: "
-                    + resultClass.getName()
-                    + ", actual: "
-                    + resultString);
-        }
-
-        return result;
     }
 
-    /**
-     * Overrides toString() outputting short name of the message derived from the long
-     * class name.
-     */
-    public String toString() {
-        String messageClass = StringUtils.substringAfterLast(getClass().getName(), ".");
-        return StringUtils.substringBeforeLast(messageClass, "Message");
+    public MockOPPChannel(GraphDiff commitResponse) {
+        this.commitResponse = commitResponse;
+    }
+    
+    public MockOPPChannel(List selectResponse) {
+        this.selectResponse = selectResponse;
+    }
+
+    public List getMessages() {
+        return messages;
+    }
+
+    public GraphDiff onCommit(CommitMessage message) {
+        messages.add(message);
+        return commitResponse;
+    }
+
+    public QueryResponse onGenericQuery(GenericQueryMessage message) {
+        messages.add(message);
+        return null;
+    }
+
+    public List onSelectQuery(SelectMessage message) {
+        messages.add(message);
+        return selectResponse;
+    }
+
+    public int[] onUpdateQuery(UpdateMessage message) {
+        messages.add(message);
+        return null;
+    }
+
+    public ClientEntityResolver onBootstrap(BootstrapMessage message) {
+        messages.add(message);
+        return null;
     }
 }

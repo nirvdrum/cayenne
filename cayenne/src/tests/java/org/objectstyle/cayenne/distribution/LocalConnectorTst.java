@@ -63,12 +63,12 @@ import junit.framework.TestCase;
 public class LocalConnectorTst extends TestCase {
 
     public void testConstructors() {
-        ClientMessageHandler handler1 = new MockClientMessageHandler();
+        OPPChannel handler1 = new MockOPPChannel();
         LocalConnector connector1 = new LocalConnector(handler1);
         assertFalse(connector1.isSerializingMessages());
         assertSame(handler1, connector1.getHandler());
 
-        ClientMessageHandler handler2 = new MockClientMessageHandler();
+        OPPChannel handler2 = new MockOPPChannel();
         LocalConnector connector2 = new LocalConnector(
                 handler2,
                 LocalConnector.JAVA_SERIALIZATION);
@@ -77,24 +77,24 @@ public class LocalConnectorTst extends TestCase {
     }
 
     public void testSendMessage() {
-        ClientMessageHandler handler = new MockClientMessageHandler();
+        OPPChannel handler = new MockOPPChannel();
 
         // create connector without serialization support...
         LocalConnector connector = new LocalConnector(handler);
 
         // test that messages are being dispatched...
 
-        MockAbstractMessage message1 = new MockAbstractMessage();
+        MockOPPMessage message1 = new MockOPPMessage();
         connector.sendMessage(message1);
-        assertSame(handler, message1.getLastHandler());
+        assertSame(handler, message1.getLastChannel());
 
-        MockAbstractMessage message2 = new MockAbstractMessage();
+        MockOPPMessage message2 = new MockOPPMessage();
         connector.sendMessage(message2);
-        assertSame(handler, message2.getLastHandler());
+        assertSame(handler, message2.getLastChannel());
     }
 
     public void testSendMessageSerialized() {
-        ClientMessageHandler handler = new MockClientMessageHandler();
+        OPPChannel handler = new MockOPPChannel();
 
         // create connector without serialization support...
         LocalConnector connector = new LocalConnector(
@@ -105,8 +105,8 @@ public class LocalConnectorTst extends TestCase {
         // a better test would involve some serialization tricks with
         // MockAbstractMessage....
 
-        MockAbstractMessage message1 = new MockAbstractMessage();
+        MockOPPMessage message1 = new MockOPPMessage();
         connector.sendMessage(message1);
-        assertNull(message1.getLastHandler());
+        assertNull(message1.getLastChannel());
     }
 }

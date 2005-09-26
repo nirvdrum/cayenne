@@ -67,9 +67,9 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
-import org.objectstyle.cayenne.distribution.ClientMessage;
-import org.objectstyle.cayenne.distribution.ClientMessageHandler;
 import org.objectstyle.cayenne.distribution.HessianService;
+import org.objectstyle.cayenne.distribution.OPPChannel;
+import org.objectstyle.cayenne.distribution.OPPMessage;
 import org.objectstyle.cayenne.util.IDUtil;
 import org.objectstyle.cayenne.util.Util;
 
@@ -128,22 +128,23 @@ public class HessianServiceHandler implements HessianService, Service {
         logObj.debug("CayenneHessianService - session requested by client");
         String id = makeId();
 
+        ObjectDataContext context = new ObjectDataContext(domain);
+
         synchronized (commandHandlers) {
-            commandHandlers.put(id, new ServerObjectContext(domain));
+            commandHandlers.put(id, new ClientServerChannel(context));
         }
 
         logObj.debug("CayenneHessianService - established client session: " + id);
         return id;
     }
 
-    public Object processMessage(String sessionId, ClientMessage command)
-            throws Throwable {
+    public Object processMessage(String sessionId, OPPMessage command) throws Throwable {
 
         logObj.debug("processMessage, sessionId: " + sessionId);
 
-        ClientMessageHandler handler;
+        OPPChannel handler;
         synchronized (commandHandlers) {
-            handler = (ClientMessageHandler) commandHandlers.get(sessionId);
+            handler = (OPPChannel) commandHandlers.get(sessionId);
         }
 
         // TODO: expire sessions...
@@ -157,7 +158,7 @@ public class HessianServiceHandler implements HessianService, Service {
         }
         catch (Throwable th) {
             th = Util.unwindException(th);
-            logObj.debug("error processing message", th);
+            logObj.info("error processing message", th);
             throw th;
         }
     }

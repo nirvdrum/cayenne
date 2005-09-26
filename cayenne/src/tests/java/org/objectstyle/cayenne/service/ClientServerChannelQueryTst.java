@@ -53,26 +53,27 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.client;
+package org.objectstyle.cayenne.service;
 
 import java.util.List;
 
 import org.objectstyle.cayenne.PersistentObjectHolder;
 import org.objectstyle.cayenne.PersistentObjectList;
 import org.objectstyle.cayenne.ValueHolder;
-import org.objectstyle.cayenne.distribution.ClientMessageHandler;
+import org.objectstyle.cayenne.client.ClientObjectContext;
+import org.objectstyle.cayenne.distribution.CayenneConnectorChannel;
 import org.objectstyle.cayenne.distribution.LocalConnector;
+import org.objectstyle.cayenne.distribution.OPPChannel;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.service.ServerObjectContext;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
 import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
 
-public class ClientObjectContextPrefetchTst extends CayenneTestCase {
+public class ClientServerChannelQueryTst extends CayenneTestCase {
 
     protected AccessStack buildAccessStack() {
         return CayenneTestResources
@@ -209,11 +210,11 @@ public class ClientObjectContextPrefetchTst extends CayenneTestCase {
      * adapter with Hessian serialization.
      */
     protected ClientObjectContext buildContext() {
-        ClientMessageHandler handler = new ServerObjectContext(getDomain());
+        OPPChannel handler = new ClientServerChannel(new ObjectDataContext(getDomain()));
         LocalConnector connector = new LocalConnector(
                 handler,
                 LocalConnector.HESSIAN_SERIALIZATION);
 
-        return new ClientObjectContext(connector);
+        return new ClientObjectContext(new CayenneConnectorChannel(connector));
     }
 }

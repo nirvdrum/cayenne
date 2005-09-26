@@ -61,7 +61,7 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class UpdateMessage extends AbstractMessage {
+public class UpdateMessage implements OPPMessage {
 
     protected QueryExecutionPlan queryPlan;
 
@@ -76,20 +76,13 @@ public class UpdateMessage extends AbstractMessage {
     /**
      * Invoked by message receiver to dispatch message.
      */
-    public Object onReceive(ClientMessageHandler handler) {
+    public Object onReceive(OPPChannel handler) {
         return handler.onUpdateQuery(this);
     }
 
-    /**
-     * Invoked by the message sender to perform a remote selecting query.
-     */
-    public int[] send(CayenneConnector connector) {
-        return (int[]) send(connector, int[].class);
-    }
-
     public String toString() {
-        StringBuffer buffer = new StringBuffer(super.toString());
-        buffer.append("[").append(queryPlan).append("]");
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("Update[").append(queryPlan).append("]");
         return buffer.toString();
     }
 }

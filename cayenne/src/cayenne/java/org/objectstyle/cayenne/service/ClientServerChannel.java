@@ -62,45 +62,38 @@ import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataRowStore;
-import org.objectstyle.cayenne.access.PersistenceContext;
 import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.distribution.BootstrapMessage;
-import org.objectstyle.cayenne.distribution.ClientMessageHandler;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GenericQueryMessage;
+import org.objectstyle.cayenne.distribution.OPPChannel;
 import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;
 import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * A server-side peer of a ClientDataContext. Client messages are processed via callback
- * methods defined in ClientMessageHandler interface.
+ * An OPPChannel adapter that connects client ObjectContext children to a server
+ * ObjectContext.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ServerObjectContext extends ObjectDataContext implements
-        ClientMessageHandler {
+// TODO, Andrus, 09/25/2005: this class can be made public once we remove DataContext
+// dependency and make it work with generic ObjectContext.
+class ClientServerChannel implements OPPChannel {
 
-    public ServerObjectContext(DataDomain parentDomain) {
-        super(parentDomain);
-    }
+    protected ObjectDataContext serverContext;
 
-    public ServerObjectContext(PersistenceContext parent, EntityResolver entityResolver,
-            DataRowStore cache) {
-
-        super(parent, entityResolver, cache);
+    ClientServerChannel(ObjectDataContext serverContext) {
+        this.serverContext = serverContext;
     }
 
     public GraphDiff onCommit(CommitMessage message) {
         // sync client changes
-        message.getSenderChanges().apply(new ClientToServerDiffConverter(this));
+        message.getSenderChanges().apply(new ClientToServerDiffConverter(serverContext));
 
-        GraphDiff diff = commit();
+        GraphDiff diff = serverContext.commit();
 
         if (diff.isNoop()) {
             return diff;
@@ -108,18 +101,18 @@ public class ServerObjectContext extends ObjectDataContext implements
         else {
             // create client diff
             ServerToClientDiffConverter clientConverter = new ServerToClientDiffConverter(
-                    getEntityResolver());
+                    serverContext.getEntityResolver());
             diff.apply(clientConverter);
             return clientConverter.getClientDiff();
         }
     }
 
     public QueryResponse onGenericQuery(GenericQueryMessage message) {
-        return performGenericQuery(message.getQueryPlan());
+        return serverContext.performGenericQuery(message.getQueryPlan());
     }
 
     public List onSelectQuery(SelectMessage message) {
-        List objects = performSelectQuery(message.getQueryPlan());
+        List objects = serverContext.performSelectQuery(message.getQueryPlan());
 
         // create client objects for a list of server object
 
@@ -137,10 +130,8 @@ public class ServerObjectContext extends ObjectDataContext implements
         }
 
         try {
-            return new ServerToClientObjectConverter(
-                    objects,
-                    getEntityResolver(),
-                    prefetches).getConverted();
+            return new ServerToClientObjectConverter(objects, serverContext
+                    .getEntityResolver(), prefetches).getConverted();
         }
         catch (Exception e) {
             throw new CayenneRuntimeException("Error converting to client objects: "
@@ -149,10 +140,10 @@ public class ServerObjectContext extends ObjectDataContext implements
     }
 
     public int[] onUpdateQuery(UpdateMessage message) {
-        return performUpdateQuery(message.getQueryPlan());
+        return serverContext.performUpdateQuery(message.getQueryPlan());
     }
 
     public ClientEntityResolver onBootstrap(BootstrapMessage message) {
-        return entityResolver.getClientEntityResolver();
+        return serverContext.getEntityResolver().getClientEntityResolver();
     }
 }

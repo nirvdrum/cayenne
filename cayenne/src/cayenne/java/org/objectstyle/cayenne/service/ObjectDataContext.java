@@ -65,6 +65,7 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
@@ -72,7 +73,6 @@ import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataRowStore;
-import org.objectstyle.cayenne.access.HierarchicalObjectContext;
 import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.PersistenceContext;
@@ -94,7 +94,7 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
  * @author Andrus Adamchik
  */
 // TODO: merge into DataContext
-class ObjectDataContext extends DataContext implements HierarchicalObjectContext {
+class ObjectDataContext extends DataContext implements ObjectContext {
 
     PersistenceContext parentContext;
     EntityResolver entityResolver;
@@ -189,7 +189,7 @@ class ObjectDataContext extends DataContext implements HierarchicalObjectContext
 
     // ==== END: DataContext compatibility code... need to merge to DataContext
     // --------------------------------------------------------------------------
-    
+
     public void rollback() {
         rollbackChanges();
     }

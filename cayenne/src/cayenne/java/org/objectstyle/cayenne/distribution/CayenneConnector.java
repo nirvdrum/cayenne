@@ -70,5 +70,5 @@ public interface CayenneConnector {
     /**
      * Sends a message to the server, returning a reply.
      */
-    Object sendMessage(ClientMessage message) throws CayenneClientException;
+    Object sendMessage(OPPMessage message) throws CayenneClientException;
 }

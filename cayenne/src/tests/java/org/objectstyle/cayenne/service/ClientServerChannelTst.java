@@ -65,7 +65,6 @@ import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.MockDataRowStore;
 import org.objectstyle.cayenne.access.MockPersistenceContext;
-import org.objectstyle.cayenne.access.PersistenceContext;
 import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.distribution.BootstrapMessage;
 import org.objectstyle.cayenne.distribution.CommitMessage;
@@ -93,7 +92,7 @@ import org.objectstyle.cayenne.unit.CayenneTestResources;
 /**
  * @author Andrus Adamchik
  */
-public class ServerObjectContextTst extends CayenneTestCase {
+public class ClientServerChannelTst extends CayenneTestCase {
 
     protected AccessStack buildAccessStack() {
         return CayenneTestResources
@@ -101,29 +100,12 @@ public class ServerObjectContextTst extends CayenneTestCase {
                 .getAccessStack(MULTI_TIER_ACCESS_STACK);
     }
 
-    public void testEntityResolver() {
-        EntityResolver resolver = new EntityResolver();
-        ServerObjectContext context = new ServerObjectContext(
-                new MockPersistenceContext(),
-                resolver,
-                new MockDataRowStore());
-        assertSame(resolver, context.getEntityResolver());
-    }
-
     public void testOnBootstrap() throws Exception {
-        ServerObjectContext context = new ServerObjectContext(getDomain());
-        ClientEntityResolver resolver = context.onBootstrap(new BootstrapMessage());
+        ObjectDataContext context = new ObjectDataContext(getDomain());
+        ClientEntityResolver resolver = new ClientServerChannel(context)
+                .onBootstrap(new BootstrapMessage());
         assertNotNull(resolver);
         assertNotNull(resolver.entityForClass(ClientMtTable1.class));
-    }
-
-    public void testParentContext() {
-        PersistenceContext parent = new MockPersistenceContext();
-        ServerObjectContext context = new ServerObjectContext(
-                parent,
-                new EntityResolver(),
-                new MockDataRowStore());
-        assertSame(parent, context.getParentContext());
     }
 
     public void testOnCommit() {
@@ -143,10 +125,11 @@ public class ServerObjectContextTst extends CayenneTestCase {
                 }
             }
         };
-        ServerObjectContext context = new ServerObjectContext(parent, getDomain()
+        ObjectDataContext context = new ObjectDataContext(parent, getDomain()
                 .getEntityResolver(), new MockDataRowStore());
 
-        context.onCommit(new CommitMessage(new MockGraphDiff()));
+        ClientServerChannel channel = new ClientServerChannel(context);
+        channel.onCommit(new CommitMessage(new MockGraphDiff()));
 
         // no changes in context, so no commit should be executed
         assertFalse(parent.isCommitChangesInContext());
@@ -157,19 +140,19 @@ public class ServerObjectContextTst extends CayenneTestCase {
         OperationRecorder recorder = new OperationRecorder();
         recorder.nodeCreated(new GlobalID("MtTable1"));
 
-        context.onCommit(new CommitMessage(recorder.getDiffs()));
+        channel.onCommit(new CommitMessage(recorder.getDiffs()));
         assertTrue(parent.isCommitChangesInContext());
     }
 
     public void testOnUpdateQuery() {
         MockPersistenceContext parent = new MockPersistenceContext();
-        ServerObjectContext context = new ServerObjectContext(
+        ObjectDataContext context = new ObjectDataContext(
                 parent,
                 new EntityResolver(),
                 new MockDataRowStore());
 
         UpdateMessage message = new UpdateMessage(new MockQuery());
-        context.onUpdateQuery(message);
+        new ClientServerChannel(context).onUpdateQuery(message);
         assertTrue(parent.isPerformQuery());
     }
 
@@ -186,11 +169,11 @@ public class ServerObjectContextTst extends CayenneTestCase {
         MockPersistenceContext parent = new MockPersistenceContext(getDomain()
                 .getEntityResolver(), Collections.singletonList(serverObject));
 
-        ServerObjectContext context = new ServerObjectContext(parent, getDomain()
+        ObjectDataContext context = new ObjectDataContext(parent, getDomain()
                 .getEntityResolver(), new MockDataRowStore());
 
         SelectMessage message = new SelectMessage(new MockGenericSelectQuery(true));
-        List results = context.onSelectQuery(message);
+        List results = new ClientServerChannel(context).onSelectQuery(message);
         assertTrue(parent.isPerformQuery());
 
         assertNotNull(results);
@@ -225,11 +208,11 @@ public class ServerObjectContextTst extends CayenneTestCase {
         MockPersistenceContext parent = new MockPersistenceContext(getDomain()
                 .getEntityResolver(), Collections.singletonList(serverObject));
 
-        ServerObjectContext context = new ServerObjectContext(parent, getDomain()
+        ObjectDataContext context = new ObjectDataContext(parent, getDomain()
                 .getEntityResolver(), new MockDataRowStore());
 
         SelectMessage message = new SelectMessage(new MockGenericSelectQuery(true));
-        List results = context.onSelectQuery(message);
+        List results = new ClientServerChannel(context).onSelectQuery(message);
 
         assertNotNull(results);
         assertEquals(1, results.size());
@@ -259,11 +242,11 @@ public class ServerObjectContextTst extends CayenneTestCase {
         MockPersistenceContext parent = new MockPersistenceContext(getDomain()
                 .getEntityResolver(), Collections.singletonList(serverObject));
 
-        ServerObjectContext context = new ServerObjectContext(parent, getDomain()
+        ObjectDataContext context = new ObjectDataContext(parent, getDomain()
                 .getEntityResolver(), new MockDataRowStore());
 
         SelectMessage message = new SelectMessage(new MockGenericSelectQuery(true));
-        List results = context.onSelectQuery(message);
+        List results = new ClientServerChannel(context).onSelectQuery(message);
 
         assertNotNull(results);
         assertEquals(1, results.size());
@@ -280,13 +263,14 @@ public class ServerObjectContextTst extends CayenneTestCase {
 
     public void testOnGenericQuery() {
         MockPersistenceContext parent = new MockPersistenceContext();
-        ServerObjectContext context = new ServerObjectContext(
+        ObjectDataContext context = new ObjectDataContext(
                 parent,
                 new EntityResolver(),
                 new MockDataRowStore());
 
         GenericQueryMessage message = new GenericQueryMessage(new MockQuery());
-        context.onGenericQuery(message);
+        new ClientServerChannel(context).onGenericQuery(message);
         assertTrue(parent.isPerformQuery());
     }
+
 }

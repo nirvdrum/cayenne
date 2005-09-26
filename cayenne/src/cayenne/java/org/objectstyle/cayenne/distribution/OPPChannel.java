@@ -55,19 +55,45 @@
  */
 package org.objectstyle.cayenne.distribution;
 
+import java.util.List;
+
+import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.client.ClientEntityResolver;
+import org.objectstyle.cayenne.graph.GraphDiff;
+
 /**
+ * A handler of OPP (Object Persistence Protocol) messages.
+ * 
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class MockAbstractMessage extends AbstractMessage {
+public interface OPPChannel {
 
-    ClientMessageHandler handler;
+    /**
+     * Processes SelectMessage returning a result as list.
+     */
+    List onSelectQuery(SelectMessage message);
 
-    public ClientMessageHandler getLastHandler() {
-        return handler;
-    }
+    /**
+     * Processes an UpdateMessage returning update counts.
+     */
+    int[] onUpdateQuery(UpdateMessage message);
 
-    public Object onReceive(ClientMessageHandler handler) {
-        this.handler = handler;
-        return null;
-    }
+    /**
+     * Processes a generic query message that can contain both updates and selects.
+     */
+    QueryResponse onGenericQuery(GenericQueryMessage message);
+
+    /**
+     * Processes CommitMessage returning a GraphDiff that describes changes to objects
+     * made by the handler as a result of commit operation. Such changes can include
+     * generated ObjectIds, any server-side commit logic, etc.
+     */
+    GraphDiff onCommit(CommitMessage message);
+
+    /**
+     * Processes BootstrapMessage returning ClientEntityResolver with limited ORM
+     * information.
+     */
+    ClientEntityResolver onBootstrap(BootstrapMessage message);
 }

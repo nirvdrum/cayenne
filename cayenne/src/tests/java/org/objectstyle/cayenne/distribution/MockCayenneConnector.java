@@ -95,7 +95,7 @@ public class MockCayenneConnector implements CayenneConnector {
 
  
 
-    public Object sendMessage(ClientMessage command) throws CayenneClientException {
+    public Object sendMessage(OPPMessage command) throws CayenneClientException {
         commands.add(command);
         return fakeResponse;
     }

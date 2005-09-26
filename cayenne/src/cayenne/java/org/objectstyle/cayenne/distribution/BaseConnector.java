@@ -82,7 +82,7 @@ public abstract class BaseConnector implements CayenneConnector {
      * logging functionality. Do not override this method unless absolutely necessary.
      * Override 'beforeSendMessage' and 'doSendMessage' instead.
      */
-    public Object sendMessage(ClientMessage message) throws CayenneClientException {
+    public Object sendMessage(OPPMessage message) throws CayenneClientException {
         if (message == null) {
             throw new NullPointerException("Null message");
         }
@@ -139,12 +139,12 @@ public abstract class BaseConnector implements CayenneConnector {
     /**
      * Called before logging the beginning of message processing.
      */
-    protected abstract void beforeSendMessage(ClientMessage message)
+    protected abstract void beforeSendMessage(OPPMessage message)
             throws CayenneClientException;
 
     /**
      * The worker method invoked to process message.
      */
-    protected abstract Object doSendMessage(ClientMessage message)
+    protected abstract Object doSendMessage(OPPMessage message)
             throws CayenneClientException;
 }

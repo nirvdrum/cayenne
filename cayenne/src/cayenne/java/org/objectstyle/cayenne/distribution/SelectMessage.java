@@ -55,15 +55,13 @@
  */
 package org.objectstyle.cayenne.distribution;
 
-import java.util.List;
-
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class SelectMessage extends AbstractMessage {
+public class SelectMessage implements OPPMessage {
 
     protected QueryExecutionPlan queryPlan;
 
@@ -78,20 +76,13 @@ public class SelectMessage extends AbstractMessage {
     /**
      * Invoked by message receiver to dispatch message.
      */
-    public Object onReceive(ClientMessageHandler handler) {
+    public Object onReceive(OPPChannel handler) {
         return handler.onSelectQuery(this);
     }
 
-    /**
-     * Invoked by the message sender to perform a remote selecting query.
-     */
-    public List send(CayenneConnector connector) {
-        return (List) send(connector, List.class);
-    }
-
     public String toString() {
-        StringBuffer buffer = new StringBuffer(super.toString());
-        buffer.append("[").append(queryPlan).append("]");
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("Select[").append(queryPlan).append("]");
         return buffer.toString();
     }
 }

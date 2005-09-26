@@ -55,16 +55,11 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Level;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.HierarchicalObjectContext;
-import org.objectstyle.cayenne.access.QueryResult;
-import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -133,17 +128,6 @@ public class ObjectContextQueryUtils {
     }
 
     /**
-     * Runs a query and returns a result in a form of QueryResult. This is a useful
-     * shortcut for mixed queries that combine updates with selects (e.g. stored
-     * procedures).
-     */
-    public static QueryResult runMixedQuery(HierarchicalObjectContext context, Query query) {
-        QueryResult result = new QueryResult();
-        context.getParentContext().performQuery(query, result);
-        return result;
-    }
-
-    /**
      * Executes a selecting query that is expected to return a single DataRow or a single
      * DataObject. If no results are found, null is returned to the caller, if result
      * consists of more than one object, CayenneRuntimeException is thrown.
@@ -164,42 +148,44 @@ public class ObjectContextQueryUtils {
                 + results.size());
     }
 
-    /**
-     * Returns a list of data rows for a given SQL string. As a DataContext can
-     * potentially map to more than one database, a second argument (dataMapName) is used
-     * to determine which database to use. SQL string can use velocity syntax understood
-     * by SQLTemplate.
-     */
-    public static List dataRowsWithSQL(
-            HierarchicalObjectContext context,
-            String dataMapName,
-            String sql) {
-        return dataRowsWithSQL(context, dataMapName, sql, null, null);
-    }
-
-    /**
-     * Same as {@link #dataRowsWithSQL(DataContext, String, String)}, however allows
-     * template parameters.
-     */
-    public static List dataRowsWithSQL(
-            HierarchicalObjectContext context,
-            String dataMapName,
-            String sql,
-            String[] parameterNames,
-            Object[] parameterValues) {
-
-        Map parameters = (parameterNames != null)
-                ? toMap(parameterNames, parameterValues)
-                : Collections.EMPTY_MAP;
-
-        Query query = new SQLTemplateSelectWrapper(dataMapName, sql, parameters, true);
-        QueryResult result = new QueryResult();
-        context.getParentContext().performQuery(
-                query,
-                result,
-                Transaction.internalTransaction(null));
-        return result.getFirstRows(query);
-    }
+    // TODO: andrus, 09/25/2005 - uncomment and fix once ObjectContext.getChannel() works
+    // /**
+    // * Returns a list of data rows for a given SQL string. As a DataContext can
+    // * potentially map to more than one database, a second argument (dataMapName) is
+    // used
+    // * to determine which database to use. SQL string can use velocity syntax understood
+    // * by SQLTemplate.
+    // */
+    // public static List dataRowsWithSQL(
+    // HierarchicalObjectContext context,
+    // String dataMapName,
+    // String sql) {
+    // return dataRowsWithSQL(context, dataMapName, sql, null, null);
+    // }
+    //
+    // /**
+    // * Same as {@link #dataRowsWithSQL(DataContext, String, String)}, however allows
+    // * template parameters.
+    // */
+    // public static List dataRowsWithSQL(
+    // HierarchicalObjectContext context,
+    // String dataMapName,
+    // String sql,
+    // String[] parameterNames,
+    // Object[] parameterValues) {
+    //
+    // Map parameters = (parameterNames != null)
+    // ? toMap(parameterNames, parameterValues)
+    // : Collections.EMPTY_MAP;
+    //
+    // Query query = new SQLTemplateSelectWrapper(dataMapName, sql, parameters, true);
+    // QueryResult result = new QueryResult();
+    // context.getParentContext().performQuery(
+    // query,
+    // result,
+    // Transaction.internalTransaction(null));
+    // return result.getFirstRows(query);
+    // }
 
     /**
      * Returns a list of DataObjects for a given SQL string. SQL string can use velocity

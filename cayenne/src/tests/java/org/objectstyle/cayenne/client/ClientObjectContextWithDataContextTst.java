@@ -61,9 +61,8 @@ import java.util.List;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.PersistentObjectHolder;
 import org.objectstyle.cayenne.PersistentObjectList;
-import org.objectstyle.cayenne.distribution.ClientMessage;
 import org.objectstyle.cayenne.distribution.GlobalID;
-import org.objectstyle.cayenne.distribution.MockCayenneConnector;
+import org.objectstyle.cayenne.distribution.MockOPPChannel;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
@@ -87,15 +86,9 @@ public class ClientObjectContextWithDataContextTst extends CayenneTestCase {
         inflated.setGlobalID(gid);
         inflated.setGlobalAttribute1("abc");
 
-        MockCayenneConnector connector = new MockCayenneConnector() {
-
-            public Object sendMessage(ClientMessage message)
-                    throws CayenneClientException {
-                return Arrays.asList(new Object[] {
-                    inflated
-                });
-            }
-        };
+        MockOPPChannel channel = new MockOPPChannel(Arrays.asList(new Object[] {
+            inflated
+        }));
 
         // check that a HOLLOW object is infalted on "beforePropertyRead"
         ClientMtTable1 hollow = new ClientMtTable1();
@@ -103,7 +96,7 @@ public class ClientObjectContextWithDataContextTst extends CayenneTestCase {
         hollow.setGlobalID(gid);
 
         final boolean[] selectExecuted = new boolean[1];
-        ClientObjectContext context = new ClientObjectContext(connector) {
+        ClientObjectContext context = new ClientObjectContext(channel) {
 
             public List performSelectQuery(QueryExecutionPlan query) {
                 selectExecuted[0] = true;
@@ -127,7 +120,7 @@ public class ClientObjectContextWithDataContextTst extends CayenneTestCase {
 
     public void testNewObjectShouldInflateHolders() {
 
-        ClientObjectContext context = new ClientObjectContext(new MockCayenneConnector());
+        ClientObjectContext context = new ClientObjectContext(new MockOPPChannel());
         context.setEntityResolver(getDomain()
                 .getEntityResolver()
                 .getClientEntityResolver());
