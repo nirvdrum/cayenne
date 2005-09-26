@@ -55,9 +55,18 @@
  */
 package org.objectstyle.cayenne;
 
+import org.objectstyle.cayenne.util.Util;
+
 import junit.framework.TestCase;
 
 public class TempObjectIdTst extends TestCase {
+    
+    public void testEqualsDeserialized() throws Exception {
+        TempObjectId oid1 = new TempObjectId(Object.class);
+        Object oid2 = Util.cloneViaSerialization(oid1);
+        assertNotSame(oid1, oid2);
+        assertEquals(oid1, oid2);
+    }
 
     public void testEqualsSame() {
         Class class1 = Number.class;

@@ -60,6 +60,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.objectstyle.cayenne.util.IDUtil;
 
 /**
  * An ObjectId for new objects that hasn't been committed to the external data store. On
@@ -77,7 +78,7 @@ public class TempObjectId extends ObjectId {
      * once a corresponding object is committed.
      */
     public TempObjectId(Class objectClass) {
-        super(objectClass, null);
+        this(objectClass, IDUtil.pseudoUniqueByteSequence16());
     }
 
     /**
