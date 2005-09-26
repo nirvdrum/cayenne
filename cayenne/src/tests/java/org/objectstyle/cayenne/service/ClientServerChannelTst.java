@@ -61,6 +61,7 @@ import java.util.List;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.MockDataRowStore;
@@ -69,7 +70,6 @@ import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.distribution.BootstrapMessage;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GenericQueryMessage;
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;

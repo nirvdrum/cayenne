@@ -57,9 +57,9 @@ package org.objectstyle.cayenne.query;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.MockDataObject;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.distribution.GlobalID;
 
 public class SingleObjectQueryTst extends TestCase {
 

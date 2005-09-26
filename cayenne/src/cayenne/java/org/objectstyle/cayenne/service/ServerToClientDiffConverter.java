@@ -56,8 +56,8 @@
 package org.objectstyle.cayenne.service;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;

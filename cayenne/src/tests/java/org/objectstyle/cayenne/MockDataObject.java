@@ -58,7 +58,6 @@ package org.objectstyle.cayenne;
 import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**

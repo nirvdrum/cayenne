@@ -53,10 +53,11 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.distribution.HessianConnector;
 import org.objectstyle.cayenne.util.Util;
 
 public class GlobalIDTst extends TestCase {

@@ -58,10 +58,10 @@ package org.objectstyle.cayenne.client;
 import java.util.Arrays;
 import java.util.List;
 
+import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.PersistentObjectHolder;
 import org.objectstyle.cayenne.PersistentObjectList;
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.distribution.MockOPPChannel;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;

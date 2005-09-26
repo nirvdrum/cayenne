@@ -57,9 +57,9 @@ package org.objectstyle.cayenne.client;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.MockPersistentObject;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.graph.GraphMap;
 import org.objectstyle.cayenne.graph.MockGraphMap;
 

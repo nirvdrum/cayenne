@@ -62,11 +62,11 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.MockPersistentObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.distribution.CommitMessage;
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.distribution.MockOPPChannel;
 import org.objectstyle.cayenne.distribution.OPPMessage;
 import org.objectstyle.cayenne.graph.GraphDiff;

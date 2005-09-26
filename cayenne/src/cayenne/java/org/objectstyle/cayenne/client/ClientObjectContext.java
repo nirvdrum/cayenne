@@ -59,6 +59,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
@@ -66,7 +67,6 @@ import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.distribution.BootstrapMessage;
 import org.objectstyle.cayenne.distribution.CommitMessage;
 import org.objectstyle.cayenne.distribution.GenericQueryMessage;
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.distribution.OPPChannel;
 import org.objectstyle.cayenne.distribution.SelectMessage;
 import org.objectstyle.cayenne.distribution.UpdateMessage;

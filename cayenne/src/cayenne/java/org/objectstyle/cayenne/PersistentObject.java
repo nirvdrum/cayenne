@@ -58,7 +58,6 @@ package org.objectstyle.cayenne;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-import org.objectstyle.cayenne.distribution.GlobalID;
 
 /**
  * A convenience base superclass for concrete Persistent objects. It provides properties

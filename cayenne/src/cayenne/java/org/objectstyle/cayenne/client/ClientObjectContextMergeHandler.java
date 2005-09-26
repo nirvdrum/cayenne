@@ -55,8 +55,8 @@
  */
 package org.objectstyle.cayenne.client;
 
+import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.graph.BeanMergeHandler;
 import org.objectstyle.cayenne.graph.GraphMap;
 

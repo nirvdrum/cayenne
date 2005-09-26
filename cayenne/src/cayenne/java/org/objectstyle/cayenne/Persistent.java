@@ -57,7 +57,6 @@ package org.objectstyle.cayenne;
 
 import java.io.Serializable;
 
-import org.objectstyle.cayenne.distribution.GlobalID;
 
 /**
  * Defines minimum API of an object that can be persisted via Cayenne.

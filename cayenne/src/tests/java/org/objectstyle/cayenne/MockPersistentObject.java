@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne;
 
-import org.objectstyle.cayenne.distribution.GlobalID;
 
 /**
  * Concrete ClientDataObject used for unit testing.

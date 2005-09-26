@@ -63,8 +63,8 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.util.Util;
 

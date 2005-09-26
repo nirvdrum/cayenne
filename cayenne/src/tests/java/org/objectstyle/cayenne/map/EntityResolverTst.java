@@ -62,10 +62,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.client.ClientEntityResolver;
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;

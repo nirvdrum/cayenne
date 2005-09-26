@@ -69,7 +69,6 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;

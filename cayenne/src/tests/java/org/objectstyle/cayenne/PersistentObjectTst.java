@@ -57,7 +57,6 @@ package org.objectstyle.cayenne;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.distribution.GlobalID;
 
 /**
  * @author Andrus Adamchik

@@ -67,11 +67,11 @@ import org.apache.commons.collections.collection.CompositeCollection;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 

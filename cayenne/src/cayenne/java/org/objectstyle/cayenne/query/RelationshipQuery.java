@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.query;
 
 import org.apache.commons.lang.StringUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.distribution.GlobalID;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.EntityResolver;
