@@ -91,10 +91,10 @@
 			</fileset>
 			
 			<!-- 
-				include one little dependency - org.apache.log4j.Level 
+				include a single dependency - org.apache.log4j.Level and Priority
 				TODO: remove this once deprecated log levels are removed from the code
 			-->
-			<fileset dir="${core.build.deps}" includes="org/apache/log4j/Level.class"/>
+			<fileset dir="${core.build.deps}" includes="org/apache/log4j/Level.class,org/apache/log4j/Priority.class"/>
             
             <metainf dir="doc/licenses" includes="LICENSE"/>
             <manifest>
@@ -130,10 +130,10 @@
 			</fileset>
 			
 			<!-- 
-				include one little dependency - org.apache.log4j.Level 
+				include a single dependency - org.apache.log4j.Level and Priority
 				TODO: remove this once deprecated log levels are removed from the code
 			-->
-			<fileset dir="${core.build.deps}" includes="org/apache/log4j/Level.class"/>
+			<fileset dir="${core.build.deps}" includes="org/apache/log4j/Level.class,org/apache/log4j/Priority.class"/>
 			
 			<fileset dir="${core.build.properties}">
 				<include name="**/*.properties"/>
