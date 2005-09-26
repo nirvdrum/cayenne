@@ -77,7 +77,9 @@ public class DataSourceCreatorView extends JDialog {
     protected JButton okButton;
     protected JButton cancelButton;
 
-    public DataSourceCreatorView() {
+    public DataSourceCreatorView(JDialog owner) {
+        super(owner);
+        
         this.dataSourceName = new JTextField();
         this.adapters = new JComboBox();
         this.okButton = new JButton("Create");

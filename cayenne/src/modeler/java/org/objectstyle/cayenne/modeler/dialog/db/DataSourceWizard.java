@@ -212,8 +212,6 @@ public class DataSourceWizard extends CayenneController {
     public void dataSourceConfigAction() {
         PreferenceDialog prefs = new PreferenceDialog(this);
         prefs.showDataSourceEditorAction(dataSourceKey);
-        prefs.startupAction();
-
         refreshDataSources();
     }
 

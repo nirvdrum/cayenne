@@ -306,8 +306,6 @@ public class DataNodeEditor extends CayenneController {
     public void dataSourceConfigAction() {
         PreferenceDialog prefs = new PreferenceDialog(this);
         prefs.showDataSourceEditorAction(view.getLocalDataSources().getSelectedItem());
-        prefs.startupAction();
-
         refreshLocalDataSources();
     }
 

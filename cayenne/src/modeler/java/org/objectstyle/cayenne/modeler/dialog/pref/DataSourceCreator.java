@@ -59,7 +59,9 @@ import java.awt.Component;
 import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import org.objectstyle.cayenne.modeler.AdapterMapping;
 import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
@@ -84,7 +86,8 @@ public class DataSourceCreator extends CayenneController {
 
     public DataSourceCreator(DataSourcePreferences parent) {
         super(parent);
-        this.view = new DataSourceCreatorView();
+        this.view = new DataSourceCreatorView((JDialog) SwingUtilities
+                .getWindowAncestor(parent.getView()));
         this.editor = parent.getEditor();
         this.domain = parent.getDataSourceDomain();
         this.dataSources = parent.getDataSources();

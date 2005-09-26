@@ -147,20 +147,27 @@ public class PreferenceDialog extends CayenneController {
      * specified name.
      */
     public void showDataSourceEditorAction(Object dataSourceKey) {
+        configure();
+
         // this will install needed controller
         view.getDetailLayout().show(view.getDetailPanel(), DATA_SOURCES_KEY);
 
         DataSourcePreferences controller = (DataSourcePreferences) detailControllers
                 .get(DATA_SOURCES_KEY);
         controller.editDataSourceAction(dataSourceKey);
+        view.setVisible(true);
     }
 
     public void startupAction() {
+        configure();
+        view.setVisible(true);
+    }
 
+    protected void configure() {
         // init known panels
-        regsiterPanel(GENERAL_KEY, new GeneralPreferences(this));
-        regsiterPanel(DATA_SOURCES_KEY, new DataSourcePreferences(this));
-        regsiterPanel(CLASS_PATH_KEY, new ClasspathPreferences(this));
+        registerPanel(GENERAL_KEY, new GeneralPreferences(this));
+        registerPanel(DATA_SOURCES_KEY, new DataSourcePreferences(this));
+        registerPanel(CLASS_PATH_KEY, new ClasspathPreferences(this));
         view.getDetailLayout().show(view.getDetailPanel(), GENERAL_KEY);
         view.getSplit().setDividerLocation(150);
         view.pack();
@@ -171,10 +178,9 @@ public class PreferenceDialog extends CayenneController {
 
         view.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         view.setModal(true);
-        view.setVisible(true);
     }
 
-    protected void regsiterPanel(String name, CayenneController panelController) {
+    protected void registerPanel(String name, CayenneController panelController) {
         detailControllers.put(name, panelController);
         view.getDetailPanel().add(panelController.getView(), name);
     }
