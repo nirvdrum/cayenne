@@ -280,8 +280,8 @@ public class ClientObjectContext implements ObjectContext {
 
             if (cachedObject != null) {
 
+                // TODO: implement smart merge for modified objects...
                 if (cachedObject.getPersistenceState() != PersistenceState.MODIFIED) {
-                    // TODO: implement smart merge for modified objects...
 
                     // refresh existing object...
 
@@ -295,8 +295,9 @@ public class ClientObjectContext implements ObjectContext {
                     }
 
                     descriptor.copyProperties(fetchedObject, cachedObject);
-                    it.set(cachedObject);
                 }
+
+                it.set(cachedObject);
             }
             else {
 
