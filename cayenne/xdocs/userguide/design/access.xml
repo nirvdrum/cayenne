@@ -39,7 +39,7 @@
             <ul>
                 <li>Combines physical datasources (DataNodes) into a logical
                 datasource. For example, when an application fetches data from
-                more then 1 database, programmer need not to be concerned with the
+                more than 1 database, programmer need not to be concerned with the
                 details of connection management. DataDomain will route all queries
                 to appropriate DataNode for execution.</li>
 

@@ -4,7 +4,7 @@
 	<body>
 		<section name="4. Design">
 			<subsection name="4.6 Cross-Database Issues">
-				<p>JDBC specification was created by Sun to provide a uniform 
+				<p>The JDBC specification was created by Sun to provide a uniform 
 					way of connecting to relational databases from the Java 
 					code. In theory this should allow Java developer to create 
 					database-aware code that is portable across RDBMS vendors. 
@@ -33,7 +33,7 @@
 					for each supported database engine. </p>
 				<subsection name="4.6.1 DbAdapter Design Overview">
 					<p>Each DataNode (as mentioned before, DataNode models a 
-						physical datasource) has an assocaited instance of <a 
+						physical datasource) has an associated instance of <a 
 						href= 
 						"../../api/cayenne/org/objectstyle/cayenne/dba/DbAdapter.html">DbAdapter</a>. 
 						DbAdapter is delegated certain tasks. Here is a 

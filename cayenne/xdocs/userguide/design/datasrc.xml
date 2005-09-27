@@ -5,7 +5,7 @@
     <section name="4. Design">
         <subsection name="4.5 Cayenne DataSource">
         
-        	<p>Default implementation of DataNode accesses persistent storage via JDBC.
+        	<p>The default implementation of DataNode accesses persistent storage via JDBC.
         	Database connections are obtained via <code>javax.sql.DataSource</code>. If an
         	application is deployed in a J2EE container, DataSource is normally provided by container via JNDI.
         	For standalone applications Cayenne includes a full implementation of 
