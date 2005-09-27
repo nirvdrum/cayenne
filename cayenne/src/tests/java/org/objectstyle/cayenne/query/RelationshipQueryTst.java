@@ -60,7 +60,7 @@ import junit.framework.TestCase;
 import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.MockDataObject;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.distribution.HessianConnector;
+import org.objectstyle.cayenne.opp.HessianConnector;
 import org.objectstyle.cayenne.util.Util;
 
 /**

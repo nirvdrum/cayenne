@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.map;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.distribution.HessianConnector;
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.opp.HessianConnector;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.util.Util;
 

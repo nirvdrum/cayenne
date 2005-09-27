@@ -1,4 +1,7 @@
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
+
+import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.opp.OPPMessage;
 
 public class MockOPPMessage implements OPPMessage {
 
@@ -8,7 +11,7 @@ public class MockOPPMessage implements OPPMessage {
 
     }
 
-    public Object onReceive(OPPChannel channel) {
+    public Object dispatch(OPPChannel channel) {
         this.lastChannel = channel;
         return null;
     }

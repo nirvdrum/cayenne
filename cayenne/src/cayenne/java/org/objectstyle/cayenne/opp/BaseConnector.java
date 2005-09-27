@@ -53,93 +53,110 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.objectstyle.cayenne.client.CayenneClientException;
-import org.objectstyle.cayenne.util.Util;
 
 /**
- * A connector used to connect CWS Client Tier ObjectContexts to Cayenne ORM tier running
- * in the same VM. LocalConnector emulates Cayenne Web Service (including emulating
- * serialization/deserialization of objects) without actually deploying one. It is useful
- * for testing and speeding up development cycle.
+ * A convenience superlcass of client connectors that provides common message logging
+ * functionality.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class LocalConnector extends BaseConnector {
+public abstract class BaseConnector implements OPPConnector {
 
-    public static final int NO_SERIALIZATION = 0;
-    public static final int JAVA_SERIALIZATION = 1;
-    public static final int HESSIAN_SERIALIZATION = 2;
-
-    protected OPPChannel channel;
-    protected int serializationPolicy;
+    protected Log logger;
+    protected long messageId;
 
     /**
-     * Creates LocalConnector with specified handler and no serialization.
+     * Default constructor that initializes logging.
      */
-    public LocalConnector(OPPChannel handler) {
-        this(handler, NO_SERIALIZATION);
+    protected BaseConnector() {
+        this.logger = LogFactory.getLog(getClass());
     }
 
     /**
-     * Creates a LocalConnector with specified handler and serialization policy. Valid
-     * policies are defined as final static int field in this class.
+     * Invokes 'beforeSendMessage' on self, then invokes 'doSendMessage'. Implements basic
+     * logging functionality. Do not override this method unless absolutely necessary.
+     * Override 'beforeSendMessage' and 'doSendMessage' instead.
      */
-    public LocalConnector(OPPChannel handler, int serializationPolicy) {
-        this.channel = handler;
+    public Object sendMessage(OPPMessage message) throws CayenneClientException {
+        if (message == null) {
+            throw new NullPointerException("Null message");
+        }
 
-        // convert invalid policy to NO_SER..
-        this.serializationPolicy = serializationPolicy == JAVA_SERIALIZATION
-                || serializationPolicy == HESSIAN_SERIALIZATION
-                ? serializationPolicy
-                : NO_SERIALIZATION;
-    }
+        beforeSendMessage(message);
 
-    public boolean isSerializingMessages() {
-        return serializationPolicy == JAVA_SERIALIZATION
-                || serializationPolicy == HESSIAN_SERIALIZATION;
-    }
+        // log start...
+        long t0 = 0;
+        String messageLabel = "";
 
-    public OPPChannel getChannel() {
-        return channel;
-    }
+        // using sequential number for message id ... it can be useful for some basic
+        // connector stats.
+        long messageId = this.messageId++;
 
-    /**
-     * Does nothing.
-     */
-    protected void beforeSendMessage(OPPMessage message) {
-        // noop
-    }
+        if (logger.isInfoEnabled()) {
+            t0 = System.currentTimeMillis();
+            messageLabel = message.toString();
+            logger.info("Sent message " + messageId + ": " + messageLabel);
+        }
 
-    /**
-     * Dispatches a message to an internal handler.
-     */
-    protected Object doSendMessage(OPPMessage message) throws CayenneClientException {
-
-        OPPMessage processedMessage;
-
+        Object response;
         try {
-            switch (serializationPolicy) {
-                case HESSIAN_SERIALIZATION:
-                    processedMessage = (OPPMessage) HessianConnector
-                            .cloneViaHessianSerialization(message);
-                    break;
+            response = doSendMessage(message);
+        }
+        catch (CayenneClientException e) {
 
-                case JAVA_SERIALIZATION:
-                    processedMessage = (OPPMessage) Util.cloneViaSerialization(message);
-                    break;
-
-                default:
-                    processedMessage = message;
+            // log error
+            if (logger.isInfoEnabled()) {
+                long time = System.currentTimeMillis() - t0;
+                logger.info("*** Message error for "
+                        + messageId
+                        + ": "
+                        + messageLabel
+                        + " - took "
+                        + time
+                        + " ms.");
             }
 
-            return processedMessage.onReceive(channel);
-        }
-        catch (Exception ex) {
-            throw new CayenneClientException("Error sending message", ex);
+            throw e;
         }
 
+        // log success...
+        if (logger.isInfoEnabled()) {
+            long time = System.currentTimeMillis() - t0;
+            logger.info("=== Processed message "
+                    + messageId
+                    + ": "
+                    + messageLabel
+                    + " - took "
+                    + time
+                    + " ms.");
+        }
+
+        return response;
     }
+
+    /**
+     * Returns a count of processed messages since the beginning of life of this
+     * connector.
+     */
+    public long getProcessedMessagesCount() {
+        return messageId + 1;
+    }
+
+    /**
+     * Called before logging the beginning of message processing.
+     */
+    protected abstract void beforeSendMessage(OPPMessage message)
+            throws CayenneClientException;
+
+    /**
+     * The worker method invoked to process message.
+     */
+    protected abstract Object doSendMessage(OPPMessage message)
+            throws CayenneClientException;
 }

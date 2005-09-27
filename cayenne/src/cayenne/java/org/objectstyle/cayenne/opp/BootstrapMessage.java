@@ -53,47 +53,21 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
-
-import java.util.List;
-
-import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.client.ClientEntityResolver;
-import org.objectstyle.cayenne.graph.GraphDiff;
+package org.objectstyle.cayenne.opp;
 
 /**
- * A handler of OPP (Object Persistence Protocol) messages.
+ * A message sent by the client to "bootstrap" to Cayenne server.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface OPPChannel {
+public class BootstrapMessage implements OPPMessage {
 
-    /**
-     * Processes SelectMessage returning a result as list.
-     */
-    List onSelectQuery(SelectMessage message);
+    public Object dispatch(OPPChannel handler) {
+        return handler.onBootstrap(this);
+    }
 
-    /**
-     * Processes an UpdateMessage returning update counts.
-     */
-    int[] onUpdateQuery(UpdateMessage message);
-
-    /**
-     * Processes a generic query message that can contain both updates and selects.
-     */
-    QueryResponse onGenericQuery(GenericQueryMessage message);
-
-    /**
-     * Processes CommitMessage returning a GraphDiff that describes changes to objects
-     * made by the handler as a result of commit operation. Such changes can include
-     * generated ObjectIds, any server-side commit logic, etc.
-     */
-    GraphDiff onCommit(CommitMessage message);
-
-    /**
-     * Processes BootstrapMessage returning ClientEntityResolver with limited ORM
-     * information.
-     */
-    ClientEntityResolver onBootstrap(BootstrapMessage message);
+    public String toString() {
+        return "Bootstrap";
+    }
 }

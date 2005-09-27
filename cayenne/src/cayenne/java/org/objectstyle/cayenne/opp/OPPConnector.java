@@ -53,19 +53,17 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
 
 import org.objectstyle.cayenne.client.CayenneClientException;
 
 /**
- * An interface of a client connector to Cayenne service. Usually one connector per client
- * session is needed. Connector encapsulates all server communications, such as session
- * tracking, wire protocol, etc.
+ * Encapsulates a transport for sending OPPMessages to a (possibly remote) OPPChannel.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface CayenneConnector {
+public interface OPPConnector {
 
     /**
      * Sends a message to the server, returning a reply.

@@ -64,13 +64,13 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.client.ClientEntityResolver;
-import org.objectstyle.cayenne.distribution.BootstrapMessage;
-import org.objectstyle.cayenne.distribution.CommitMessage;
-import org.objectstyle.cayenne.distribution.GenericQueryMessage;
-import org.objectstyle.cayenne.distribution.OPPChannel;
-import org.objectstyle.cayenne.distribution.SelectMessage;
-import org.objectstyle.cayenne.distribution.UpdateMessage;
 import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.opp.BootstrapMessage;
+import org.objectstyle.cayenne.opp.CommitMessage;
+import org.objectstyle.cayenne.opp.GenericQueryMessage;
+import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.opp.SelectMessage;
+import org.objectstyle.cayenne.opp.UpdateMessage;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**

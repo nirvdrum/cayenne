@@ -53,34 +53,25 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
 
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.opp.HessianConnector;
 
-/**
- * @since 1.2
- * @author Andrus Adamchik
- */
-public class GenericQueryMessage implements OPPMessage {
+import junit.framework.TestCase;
 
-    protected QueryExecutionPlan queryPlan;
+public class HessianConnectorTst extends TestCase {
 
-    public GenericQueryMessage(QueryExecutionPlan queryPlan) {
-        this.queryPlan = queryPlan;
+    public void testConstructor1Arg() {
+        HessianConnector c = new HessianConnector("a");
+        assertEquals("a", c.getUrl());
+        assertNull(c.getUserName());
+        assertNull(c.getPassword());
     }
-
-    public QueryExecutionPlan getQueryPlan() {
-        return queryPlan;
-    }
-
-    /**
-     * Invoked by message receiver to dispatch message.
-     */
-    public Object onReceive(OPPChannel handler) {
-        return handler.onGenericQuery(this);
-    }
-
-    public String toString() {
-        return "GenericQuery";
+    
+    public void testConstructor3Arg() {
+        HessianConnector c = new HessianConnector("a", "b", "c");
+        assertEquals("a", c.getUrl());
+        assertEquals("b", c.getUserName());
+        assertEquals("c", c.getPassword());
     }
 }

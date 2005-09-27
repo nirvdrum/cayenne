@@ -58,9 +58,9 @@ package org.objectstyle.cayenne.map;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.objectstyle.cayenne.distribution.HessianConnector;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.opp.HessianConnector;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.util.Util;
 

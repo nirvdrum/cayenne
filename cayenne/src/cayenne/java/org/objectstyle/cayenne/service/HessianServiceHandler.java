@@ -67,9 +67,9 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
-import org.objectstyle.cayenne.distribution.HessianService;
-import org.objectstyle.cayenne.distribution.OPPChannel;
-import org.objectstyle.cayenne.distribution.OPPMessage;
+import org.objectstyle.cayenne.opp.HessianService;
+import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.opp.OPPMessage;
 import org.objectstyle.cayenne.util.IDUtil;
 import org.objectstyle.cayenne.util.Util;
 
@@ -78,7 +78,7 @@ import com.caucho.services.server.Service;
 /**
  * A default implementation of HessianService service protocol. Supports client sessions.
  * For more info on Hessian see http://www.caucho.com/resin-3.0/protocols/hessian.xtp. See
- * {@link org.objectstyle.cayenne.distribution.HessianService}for deployment
+ * {@link org.objectstyle.cayenne.opp.HessianService}for deployment
  * configuration examples.
  * 
  * @since 1.2
@@ -154,7 +154,7 @@ public class HessianServiceHandler implements HessianService, Service {
 
         // intercept and log exceptions
         try {
-            return command.onReceive(handler);
+            return command.dispatch(handler);
         }
         catch (Throwable th) {
             th = Util.unwindException(th);

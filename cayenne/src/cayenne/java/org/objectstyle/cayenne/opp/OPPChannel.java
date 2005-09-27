@@ -53,60 +53,47 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
 
-import junit.framework.TestCase;
+import java.util.List;
+
+import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.client.ClientEntityResolver;
+import org.objectstyle.cayenne.graph.GraphDiff;
 
 /**
+ * A handler of OPP (Object Persistence Protocol) messages.
+ * 
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class LocalConnectorTst extends TestCase {
+public interface OPPChannel {
 
-    public void testConstructors() {
-        OPPChannel handler1 = new MockOPPChannel();
-        LocalConnector connector1 = new LocalConnector(handler1);
-        assertFalse(connector1.isSerializingMessages());
-        assertSame(handler1, connector1.getChannel());
+    /**
+     * Processes SelectMessage returning a result as list.
+     */
+    List onSelectQuery(SelectMessage message);
 
-        OPPChannel handler2 = new MockOPPChannel();
-        LocalConnector connector2 = new LocalConnector(
-                handler2,
-                LocalConnector.JAVA_SERIALIZATION);
-        assertTrue(connector2.isSerializingMessages());
-        assertSame(handler2, connector2.getChannel());
-    }
+    /**
+     * Processes an UpdateMessage returning update counts.
+     */
+    int[] onUpdateQuery(UpdateMessage message);
 
-    public void testSendMessage() {
-        OPPChannel handler = new MockOPPChannel();
+    /**
+     * Processes a generic query message that can contain both updates and selects.
+     */
+    QueryResponse onGenericQuery(GenericQueryMessage message);
 
-        // create connector without serialization support...
-        LocalConnector connector = new LocalConnector(handler);
+    /**
+     * Processes CommitMessage returning a GraphDiff that describes changes to objects
+     * made by the handler as a result of commit operation. Such changes can include
+     * generated ObjectIds, any server-side commit logic, etc.
+     */
+    GraphDiff onCommit(CommitMessage message);
 
-        // test that messages are being dispatched...
-
-        MockOPPMessage message1 = new MockOPPMessage();
-        connector.sendMessage(message1);
-        assertSame(handler, message1.getLastChannel());
-
-        MockOPPMessage message2 = new MockOPPMessage();
-        connector.sendMessage(message2);
-        assertSame(handler, message2.getLastChannel());
-    }
-
-    public void testSendMessageSerialized() {
-        OPPChannel handler = new MockOPPChannel();
-
-        // create connector without serialization support...
-        LocalConnector connector = new LocalConnector(
-                handler,
-                LocalConnector.HESSIAN_SERIALIZATION);
-
-        // indirectly test that a dispatch was done on a different message
-        // a better test would involve some serialization tricks with
-        // MockAbstractMessage....
-
-        MockOPPMessage message1 = new MockOPPMessage();
-        connector.sendMessage(message1);
-        assertNull(message1.getLastChannel());
-    }
+    /**
+     * Processes BootstrapMessage returning ClientEntityResolver with limited ORM
+     * information.
+     */
+    ClientEntityResolver onBootstrap(BootstrapMessage message);
 }

@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
 
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
@@ -76,7 +76,7 @@ public class SelectMessage implements OPPMessage {
     /**
      * Invoked by message receiver to dispatch message.
      */
-    public Object onReceive(OPPChannel handler) {
+    public Object dispatch(OPPChannel handler) {
         return handler.onSelectQuery(this);
     }
 

@@ -61,7 +61,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.distribution.HessianConnector;
+import org.objectstyle.cayenne.opp.HessianConnector;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;

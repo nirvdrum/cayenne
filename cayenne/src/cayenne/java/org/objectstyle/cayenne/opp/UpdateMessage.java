@@ -53,50 +53,36 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.objectstyle.cayenne.client.CayenneClientException;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
- * A noop CayenneConnector used for unit testing. Accumulates commands sent via this
- * connector without doing anything with them.
- * 
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class MockCayenneConnector implements CayenneConnector {
+public class UpdateMessage implements OPPMessage {
 
-    protected Collection commands;
-    protected Object fakeResponse;
+    protected QueryExecutionPlan queryPlan;
 
-    public MockCayenneConnector() {
-        this(null);
+    public UpdateMessage(QueryExecutionPlan queryPlan) {
+        this.queryPlan = queryPlan;
     }
 
-    public MockCayenneConnector(Object defaultResponse) {
-        this.commands = new ArrayList();
-        this.fakeResponse = defaultResponse;
+    public QueryExecutionPlan getQueryPlan() {
+        return queryPlan;
     }
 
-    public void reset() {
-        commands.clear();
-        fakeResponse = null;
+    /**
+     * Invoked by message receiver to dispatch message.
+     */
+    public Object dispatch(OPPChannel handler) {
+        return handler.onUpdateQuery(this);
     }
 
-    public void setResponse(Object fakeResponse) {
-        this.fakeResponse = fakeResponse;
-    }
-
-    public Collection getCommands() {
-        return commands;
-    }
-
- 
-
-    public Object sendMessage(OPPMessage command) throws CayenneClientException {
-        commands.add(command);
-        return fakeResponse;
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("Update[").append(queryPlan).append("]");
+        return buffer.toString();
     }
 }

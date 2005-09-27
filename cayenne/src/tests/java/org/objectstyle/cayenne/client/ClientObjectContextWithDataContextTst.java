@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.PersistentObjectHolder;
 import org.objectstyle.cayenne.PersistentObjectList;
-import org.objectstyle.cayenne.distribution.MockOPPChannel;
+import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;

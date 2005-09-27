@@ -62,8 +62,8 @@ import java.util.Collections;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.distribution.HessianConnector;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.opp.HessianConnector;
 
 public class ClientEntityResolverTst extends TestCase {
 

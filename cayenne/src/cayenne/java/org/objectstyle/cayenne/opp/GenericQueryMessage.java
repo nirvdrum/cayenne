@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
 
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
@@ -61,11 +61,11 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class UpdateMessage implements OPPMessage {
+public class GenericQueryMessage implements OPPMessage {
 
     protected QueryExecutionPlan queryPlan;
 
-    public UpdateMessage(QueryExecutionPlan queryPlan) {
+    public GenericQueryMessage(QueryExecutionPlan queryPlan) {
         this.queryPlan = queryPlan;
     }
 
@@ -76,13 +76,11 @@ public class UpdateMessage implements OPPMessage {
     /**
      * Invoked by message receiver to dispatch message.
      */
-    public Object onReceive(OPPChannel handler) {
-        return handler.onUpdateQuery(this);
+    public Object dispatch(OPPChannel handler) {
+        return handler.onGenericQuery(this);
     }
 
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("Update[").append(queryPlan).append("]");
-        return buffer.toString();
+        return "GenericQuery";
     }
 }

@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
 
 import java.util.List;
 
@@ -16,9 +16,9 @@ import org.objectstyle.cayenne.graph.GraphDiff;
  */
 public class CayenneConnectorChannel implements OPPChannel {
 
-    protected CayenneConnector connector;
+    protected OPPConnector connector;
 
-    public CayenneConnectorChannel(CayenneConnector connector) {
+    public CayenneConnectorChannel(OPPConnector connector) {
         this.connector = connector;
     }
 

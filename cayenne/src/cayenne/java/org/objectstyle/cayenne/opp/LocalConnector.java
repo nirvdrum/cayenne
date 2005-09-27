@@ -53,45 +53,92 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
+
+import org.objectstyle.cayenne.client.CayenneClientException;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * Service interface needed for server-side deployment with HessianConnector. A mapping in
- * web.xml may look like this:
- * 
- * <pre>
- *      &lt;servlet&gt;
- *        &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *        &lt;servlet-class&gt;com.caucho.hessian.server.HessianServlet&lt;/servlet-class&gt;
- *        &lt;!-- Cayenne service API --&gt;
- *        &lt;init-param&gt;
- *          &lt;param-name&gt;api-class&lt;/param-name&gt;
- *          &lt;param-value&gt;org.objectstyle.cayenne.distribution.HessianService&lt;/param-value&gt;
- *        &lt;/init-param&gt;
- *        &lt;!-- Cayenne service implementation --&gt;
- *        &lt;init-param&gt;
- *          &lt;param-name&gt;service-class&lt;/param-name&gt;
- *          &lt;param-value&gt;org.objectstyle.cayenne.service.HessianServiceHandler&lt;/param-value&gt;
- *        &lt;/init-param&gt;
- *      &lt;/servlet&gt;
- *      &lt;servlet-mapping&gt;
- *        &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *        &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
- *      &lt;/servlet-mapping&gt;
- * </pre>
+ * An OPPConnector that emulates a remote connector, while running in the same VM as
+ * OPPChannel it connects to. Emulation includes serialization/deserialization of objects.
+ * It is useful for testing and speeding up development cycle.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface HessianService {
+public class LocalConnector extends BaseConnector {
+
+    public static final int NO_SERIALIZATION = 0;
+    public static final int JAVA_SERIALIZATION = 1;
+    public static final int HESSIAN_SERIALIZATION = 2;
+
+    protected OPPChannel channel;
+    protected int serializationPolicy;
 
     /**
-     * Establishes a session with CayenneService.
+     * Creates LocalConnector with specified handler and no serialization.
      */
-    String establishSession();
+    public LocalConnector(OPPChannel handler) {
+        this(handler, NO_SERIALIZATION);
+    }
 
     /**
-     * Processes message on a remote server, returning the result of such processing.
+     * Creates a LocalConnector with specified handler and serialization policy. Valid
+     * policies are defined as final static int field in this class.
      */
-    Object processMessage(String sessionId, OPPMessage message) throws Throwable;
+    public LocalConnector(OPPChannel handler, int serializationPolicy) {
+        this.channel = handler;
+
+        // convert invalid policy to NO_SER..
+        this.serializationPolicy = serializationPolicy == JAVA_SERIALIZATION
+                || serializationPolicy == HESSIAN_SERIALIZATION
+                ? serializationPolicy
+                : NO_SERIALIZATION;
+    }
+
+    public boolean isSerializingMessages() {
+        return serializationPolicy == JAVA_SERIALIZATION
+                || serializationPolicy == HESSIAN_SERIALIZATION;
+    }
+
+    public OPPChannel getChannel() {
+        return channel;
+    }
+
+    /**
+     * Does nothing.
+     */
+    protected void beforeSendMessage(OPPMessage message) {
+        // noop
+    }
+
+    /**
+     * Dispatches a message to an internal handler.
+     */
+    protected Object doSendMessage(OPPMessage message) throws CayenneClientException {
+
+        OPPMessage processedMessage;
+
+        try {
+            switch (serializationPolicy) {
+                case HESSIAN_SERIALIZATION:
+                    processedMessage = (OPPMessage) HessianConnector
+                            .cloneViaHessianSerialization(message);
+                    break;
+
+                case JAVA_SERIALIZATION:
+                    processedMessage = (OPPMessage) Util.cloneViaSerialization(message);
+                    break;
+
+                default:
+                    processedMessage = message;
+            }
+
+            return processedMessage.dispatch(channel);
+        }
+        catch (Exception ex) {
+            throw new CayenneClientException("Error sending message", ex);
+        }
+
+    }
 }

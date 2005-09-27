@@ -53,23 +53,24 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
 
-import junit.framework.TestCase;
+import java.io.Serializable;
 
-public class HessianConnectorTst extends TestCase {
+/**
+ * Represents a two-way message sent by an OPP client.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ * @see org.objectstyle.cayenne.opp.OPPChannel
+ */
+public interface OPPMessage extends Serializable {
 
-    public void testConstructor1Arg() {
-        HessianConnector c = new HessianConnector("a");
-        assertEquals("a", c.getUrl());
-        assertNull(c.getUserName());
-        assertNull(c.getPassword());
-    }
-    
-    public void testConstructor3Arg() {
-        HessianConnector c = new HessianConnector("a", "b", "c");
-        assertEquals("a", c.getUrl());
-        assertEquals("b", c.getUserName());
-        assertEquals("c", c.getPassword());
-    }
+    /**
+     * A dispatch method that should call an appropriate method on the OPPChannel. This
+     * method exists for the benefit of OPPConnector implementors to simplify message
+     * dispatch on the receiving end. It is not invoked when OPPChannel is accessed
+     * directly.
+     */
+    Object dispatch(OPPChannel channel);
 }

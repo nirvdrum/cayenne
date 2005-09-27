@@ -53,21 +53,36 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
+
+import org.objectstyle.cayenne.graph.GraphDiff;
 
 /**
- * A message sent by the client to "bootstrap" to Cayenne server.
+ * A commands that instructs the receiver to commit all uncommitted objects. Returns an
+ * array of client object ids modified or generated during commit. It passes client
+ * ObjectContext to the server, so it is a responsibility of the ObjectContext implementor
+ * to make its serialized size as small as possible.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class BootstrapMessage implements OPPMessage {
+public class CommitMessage implements OPPMessage {
 
-    public Object onReceive(OPPChannel handler) {
-        return handler.onBootstrap(this);
+    protected GraphDiff senderChanges;
+
+    public CommitMessage(GraphDiff senderChanges) {
+        this.senderChanges = senderChanges;
     }
 
+    public GraphDiff getSenderChanges() {
+        return senderChanges;
+    }
+
+    public Object dispatch(OPPChannel handler) {
+        return handler.onCommit(this);
+    }
+    
     public String toString() {
-        return "Bootstrap";
+        return "Commit";
     }
 }

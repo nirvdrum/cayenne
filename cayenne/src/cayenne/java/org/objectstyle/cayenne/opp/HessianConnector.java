@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -69,9 +69,10 @@ import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.HessianProtocolException;
 
 /**
- * A CayenneConnector that establishes connection to a remotely deployed HessianService.
- * It supports HTTP BASIC authentication. HessianConnector uses Hessian binary web service
- * protocol working over HTTP. For more info on Hessian see Cauch site at <a
+ * An OPPConnector that passes messages to a remotely deployed HessianService. It supports
+ * HTTP BASIC authentication. HessianConnector serializes messages and responses using
+ * Hessian binary web service protocol over HTTP. For more info on Hessian see Caucho site
+ * at <a
  * href="http://www.caucho.com/resin-3.0/protocols/hessian.xtp">http://www.caucho.com/resin-3.0/protocols/hessian.xtp</a>.
  * HessianConnector supports logging of message traffic via Jakarta commons-logging API.
  * 

@@ -66,13 +66,13 @@ import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.MockPersistentObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.distribution.CommitMessage;
-import org.objectstyle.cayenne.distribution.MockOPPChannel;
-import org.objectstyle.cayenne.distribution.OPPMessage;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.OperationRecorder;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.opp.CommitMessage;
+import org.objectstyle.cayenne.opp.MockOPPChannel;
+import org.objectstyle.cayenne.opp.OPPMessage;
 import org.objectstyle.cayenne.query.NamedQuery;
 
 /**

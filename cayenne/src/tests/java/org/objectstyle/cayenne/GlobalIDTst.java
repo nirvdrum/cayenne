@@ -57,7 +57,7 @@ package org.objectstyle.cayenne;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.distribution.HessianConnector;
+import org.objectstyle.cayenne.opp.HessianConnector;
 import org.objectstyle.cayenne.util.Util;
 
 public class GlobalIDTst extends TestCase {

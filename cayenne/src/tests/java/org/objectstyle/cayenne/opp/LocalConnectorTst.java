@@ -53,24 +53,63 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
 
-import java.io.Serializable;
+import org.objectstyle.cayenne.opp.LocalConnector;
+import org.objectstyle.cayenne.opp.OPPChannel;
+
+import junit.framework.TestCase;
 
 /**
- * Represents a two-way message sent by an OPP client.
- * 
- * @since 1.2
  * @author Andrus Adamchik
- * @see org.objectstyle.cayenne.distribution.OPPChannel
  */
-public interface OPPMessage extends Serializable {
+public class LocalConnectorTst extends TestCase {
 
-    /**
-     * A dispatch method that calls an appropriate method on the OPPChannel. This method
-     * exists to simplify remote message dispathcing. In most cases message creators have
-     * direct access to OPPChannel and invoke an appropriate OPPChannel method themselves,
-     * so "onReceive" IS NOT INVOKED.
-     */
-    Object onReceive(OPPChannel channel);
+    public void testConstructors() {
+        OPPChannel handler1 = new MockOPPChannel();
+        LocalConnector connector1 = new LocalConnector(handler1);
+        assertFalse(connector1.isSerializingMessages());
+        assertSame(handler1, connector1.getChannel());
+
+        OPPChannel handler2 = new MockOPPChannel();
+        LocalConnector connector2 = new LocalConnector(
+                handler2,
+                LocalConnector.JAVA_SERIALIZATION);
+        assertTrue(connector2.isSerializingMessages());
+        assertSame(handler2, connector2.getChannel());
+    }
+
+    public void testSendMessage() {
+        OPPChannel handler = new MockOPPChannel();
+
+        // create connector without serialization support...
+        LocalConnector connector = new LocalConnector(handler);
+
+        // test that messages are being dispatched...
+
+        MockOPPMessage message1 = new MockOPPMessage();
+        connector.sendMessage(message1);
+        assertSame(handler, message1.getLastChannel());
+
+        MockOPPMessage message2 = new MockOPPMessage();
+        connector.sendMessage(message2);
+        assertSame(handler, message2.getLastChannel());
+    }
+
+    public void testSendMessageSerialized() {
+        OPPChannel handler = new MockOPPChannel();
+
+        // create connector without serialization support...
+        LocalConnector connector = new LocalConnector(
+                handler,
+                LocalConnector.HESSIAN_SERIALIZATION);
+
+        // indirectly test that a dispatch was done on a different message
+        // a better test would involve some serialization tricks with
+        // MockAbstractMessage....
+
+        MockOPPMessage message1 = new MockOPPMessage();
+        connector.sendMessage(message1);
+        assertNull(message1.getLastChannel());
+    }
 }

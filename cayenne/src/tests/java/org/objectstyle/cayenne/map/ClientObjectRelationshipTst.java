@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.distribution.HessianConnector;
+import org.objectstyle.cayenne.opp.HessianConnector;
 import org.objectstyle.cayenne.util.Util;
 
 import junit.framework.TestCase;

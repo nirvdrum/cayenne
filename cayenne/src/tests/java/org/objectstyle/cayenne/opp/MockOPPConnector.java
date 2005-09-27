@@ -53,98 +53,52 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.objectstyle.cayenne.client.CayenneClientException;
+import org.objectstyle.cayenne.opp.OPPConnector;
+import org.objectstyle.cayenne.opp.OPPMessage;
 
 /**
- * A convenience superlcass of client connectors that provides common logging
- * functionality.
+ * A noop CayenneConnector used for unit testing. Accumulates commands sent via this
+ * connector without doing anything with them.
  * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-public abstract class BaseConnector implements CayenneConnector {
+public class MockOPPConnector implements OPPConnector {
 
-    protected Log logger;
+    protected Collection commands;
+    protected Object fakeResponse;
 
-    /**
-     * Default constructor that initializes logging.
-     */
-    protected BaseConnector() {
-        this.logger = LogFactory.getLog(getClass());
+    public MockOPPConnector() {
+        this(null);
     }
 
-    /**
-     * Invokes 'beforeSendMessage' on self, then invokes 'doSendMessage'. Implements basic
-     * logging functionality. Do not override this method unless absolutely necessary.
-     * Override 'beforeSendMessage' and 'doSendMessage' instead.
-     */
-    public Object sendMessage(OPPMessage message) throws CayenneClientException {
-        if (message == null) {
-            throw new NullPointerException("Null message");
-        }
-
-        beforeSendMessage(message);
-
-        // log start...
-        long t0 = 0;
-        String messageLabel = "";
-        int messageId = 0;
-        if (logger.isInfoEnabled()) {
-            t0 = System.currentTimeMillis();
-            messageLabel = message.toString();
-            messageId = System.identityHashCode(message);
-            logger.info("Sending message " + messageId + ": " + messageLabel);
-        }
-
-        Object response;
-        try {
-            response = doSendMessage(message);
-        }
-        catch (CayenneClientException e) {
-
-            // log error
-            if (logger.isInfoEnabled()) {
-                long time = System.currentTimeMillis() - t0;
-                logger.info("*** Message error for "
-                        + messageId
-                        + ": "
-                        + messageLabel
-                        + " - took "
-                        + time
-                        + " ms.");
-            }
-
-            throw e;
-        }
-
-        // log success...
-        if (logger.isInfoEnabled()) {
-            long time = System.currentTimeMillis() - t0;
-            logger.info("=== Message processed "
-                    + messageId
-                    + ": "
-                    + messageLabel
-                    + " - took "
-                    + time
-                    + " ms.");
-        }
-
-        return response;
+    public MockOPPConnector(Object defaultResponse) {
+        this.commands = new ArrayList();
+        this.fakeResponse = defaultResponse;
     }
 
-    /**
-     * Called before logging the beginning of message processing.
-     */
-    protected abstract void beforeSendMessage(OPPMessage message)
-            throws CayenneClientException;
+    public void reset() {
+        commands.clear();
+        fakeResponse = null;
+    }
 
-    /**
-     * The worker method invoked to process message.
-     */
-    protected abstract Object doSendMessage(OPPMessage message)
-            throws CayenneClientException;
+    public void setResponse(Object fakeResponse) {
+        this.fakeResponse = fakeResponse;
+    }
+
+    public Collection getCommands() {
+        return commands;
+    }
+
+ 
+
+    public Object sendMessage(OPPMessage command) throws CayenneClientException {
+        commands.add(command);
+        return fakeResponse;
+    }
 }

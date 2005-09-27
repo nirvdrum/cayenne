@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.distribution;
+package org.objectstyle.cayenne.opp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +61,12 @@ import java.util.List;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.opp.BootstrapMessage;
+import org.objectstyle.cayenne.opp.CommitMessage;
+import org.objectstyle.cayenne.opp.GenericQueryMessage;
+import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.opp.SelectMessage;
+import org.objectstyle.cayenne.opp.UpdateMessage;
 
 /**
  * Stores all messages passed via this handler.
