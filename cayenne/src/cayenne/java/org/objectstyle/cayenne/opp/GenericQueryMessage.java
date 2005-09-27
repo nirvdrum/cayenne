@@ -58,6 +58,9 @@ package org.objectstyle.cayenne.opp;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
+ * A message passed to an OPPChannel to request a query execution with result returned as
+ * QueryResponse.
+ * 
  * @since 1.2
  * @author Andrus Adamchik
  */

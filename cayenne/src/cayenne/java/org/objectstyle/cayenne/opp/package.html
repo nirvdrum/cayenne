@@ -1,7 +1,14 @@
 <html>
-<body>
-Contains classes an interfaces related to Cayenne Object Persistence Protocol (OPP). 
-OPP defines a number of messages used to communicate requests to a persistent store, 
-save and synchronize object graphs. OPPChannel encapsulates such store. 
-</body>
+	<body> Contains classes an interfaces related to Cayenne Object Persistence Protocol
+		(OPP). Object Persistence Protocol defines a set of messages to request objects from
+		a persistence store and to synchronize object graph state with such store. OPPChannel
+		is an encapsulation of such store.
+		
+		<p>Another component of OPP is message transport interface - OPPConnector. It is an
+			optional part of the package used to pass messages to a remote OPPChannel.</p>
+		
+		<p>In Cayenne OPP is used to establish communication between ObjectContext and its
+			parent persistence store. Such store can be another ObjectContext, DataDomain
+			or Cayenne Web Service.</p>
+	</body>
 </html>

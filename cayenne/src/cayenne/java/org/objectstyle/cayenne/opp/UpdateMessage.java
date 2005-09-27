@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.opp;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
+ * A message sent to the OPPChannel to request an update execution.
+ * 
  * @since 1.2
  * @author Andrus Adamchik
  */

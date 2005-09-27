@@ -58,10 +58,8 @@ package org.objectstyle.cayenne.opp;
 import org.objectstyle.cayenne.graph.GraphDiff;
 
 /**
- * A commands that instructs the receiver to commit all uncommitted objects. Returns an
- * array of client object ids modified or generated during commit. It passes client
- * ObjectContext to the server, so it is a responsibility of the ObjectContext implementor
- * to make its serialized size as small as possible.
+ * A message that instructs the receiving OPPChannel to commit all uncommitted objects.
+ * Returns an array of object ids modified or generated during commit.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -81,7 +79,7 @@ public class CommitMessage implements OPPMessage {
     public Object dispatch(OPPChannel handler) {
         return handler.onCommit(this);
     }
-    
+
     public String toString() {
         return "Commit";
     }
