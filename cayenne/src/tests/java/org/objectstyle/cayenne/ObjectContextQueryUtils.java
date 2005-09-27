@@ -63,8 +63,8 @@ import org.apache.log4j.Level;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.query.QueryRouter;
 import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.query.SQLActionVisitor;
@@ -132,7 +132,9 @@ public class ObjectContextQueryUtils {
      * DataObject. If no results are found, null is returned to the caller, if result
      * consists of more than one object, CayenneRuntimeException is thrown.
      */
-    public Object singleObjectOrDataRow(ObjectContext context, GenericSelectQuery query) {
+    public static Object singleObjectOrDataRow(
+            ObjectContext context,
+            QueryExecutionPlan query) {
         List results = context.performSelectQuery(query);
         if (results.isEmpty()) {
             return null;

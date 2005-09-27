@@ -56,8 +56,14 @@
 package org.objectstyle.cayenne;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.cayenne.client.ClientEntityResolver;
+import org.objectstyle.cayenne.client.ClientObjectContext;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.property.Property;
 import org.objectstyle.cayenne.query.RelationshipQuery;
 
 /**
@@ -116,7 +122,38 @@ public abstract class RelationshipFault {
             return new ArrayList();
         }
 
-        return relationshipOwner.getObjectContext().performSelectQuery(
+        List resolved = relationshipOwner.getObjectContext().performSelectQuery(
                 new RelationshipQuery(relationshipOwner.getGlobalID(), relationshipName));
+
+        if (resolved.isEmpty()) {
+            return resolved;
+        }
+
+        // see if reverse relationship is to-one and we can connect source to results....
+
+        // TODO: Andrus, 09/26/2005 - API for entity resolver detection should become a
+        // part of ObjectContext, so ClientObjectContext cast will become unnecessary.
+        ClientEntityResolver resolver = ((ClientObjectContext) relationshipOwner
+                .getObjectContext()).getEntityResolver();
+        ObjEntity sourceEntity = resolver.entityForName(relationshipOwner
+                .getGlobalID()
+                .getEntityName());
+
+        ObjRelationship relationship = (ObjRelationship) sourceEntity
+                .getRelationship(relationshipName);
+        ObjRelationship reverse = relationship.getReverseRelationship();
+
+        if (reverse != null && !reverse.isToMany()) {
+            Property property = ((ObjEntity) reverse.getSourceEntity())
+                    .getClassDescriptor()
+                    .getProperty(reverse.getName());
+
+            Iterator it = resolved.iterator();
+            while (it.hasNext()) {
+                property.writeValue(it.next(), null, relationshipOwner);
+            }
+        }
+
+        return resolved;
     }
 }

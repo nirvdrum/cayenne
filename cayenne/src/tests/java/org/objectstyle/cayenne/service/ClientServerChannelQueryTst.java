@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.PersistentObjectList;
 import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.client.ClientObjectContext;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.opp.CayenneConnectorChannel;
+import org.objectstyle.cayenne.opp.OPPConnectorChannel;
 import org.objectstyle.cayenne.opp.LocalConnector;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.NamedQuery;
@@ -215,6 +215,6 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
                 handler,
                 LocalConnector.HESSIAN_SERIALIZATION);
 
-        return new ClientObjectContext(new CayenneConnectorChannel(connector));
+        return new ClientObjectContext(new OPPConnectorChannel(connector));
     }
 }

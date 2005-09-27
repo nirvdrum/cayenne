@@ -55,108 +55,65 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.List;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.client.CayenneClientException;
+import org.objectstyle.cayenne.client.ClientEntityResolver;
+import org.objectstyle.cayenne.graph.GraphDiff;
 
 /**
- * A convenience superlcass of client connectors that provides common message logging
- * functionality.
+ * An OPPChannel adapter that forwards messages via a CayenneConnector.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public abstract class BaseConnector implements OPPConnector {
+public class OPPConnectorChannel implements OPPChannel {
 
-    protected Log logger;
-    protected long messageId;
+    protected OPPConnector connector;
 
-    /**
-     * Default constructor that initializes logging.
-     */
-    protected BaseConnector() {
-        this.logger = LogFactory.getLog(getClass());
+    public OPPConnectorChannel(OPPConnector connector) {
+        this.connector = connector;
+    }
+
+    public List onSelectQuery(SelectMessage message) {
+        return (List) send(message, List.class);
+    }
+
+    public int[] onUpdateQuery(UpdateMessage message) {
+        return (int[]) send(message, int[].class);
+    }
+
+    public QueryResponse onGenericQuery(GenericQueryMessage message) {
+        return (QueryResponse) send(message, QueryResponse.class);
+    }
+
+    public GraphDiff onCommit(CommitMessage message) {
+        return (GraphDiff) send(message, GraphDiff.class);
+    }
+
+    public ClientEntityResolver onBootstrap(BootstrapMessage message) {
+        return (ClientEntityResolver) send(message, ClientEntityResolver.class);
     }
 
     /**
-     * Invokes 'beforeSendMessage' on self, then invokes 'doSendMessage'. Implements basic
-     * logging functionality. Do not override this method unless absolutely necessary.
-     * Override 'beforeSendMessage' and 'doSendMessage' instead.
+     * Sends a message via connector, getting a result as an instance of a specific class.
+     * 
+     * @throws org.objectstyle.cayenne.client.CayenneClientException if an underlying
+     *             connector exception occured, or a result is not of expected type.
      */
-    public Object sendMessage(OPPMessage message) throws CayenneClientException {
-        if (message == null) {
-            throw new NullPointerException("Null message");
+    protected Object send(OPPMessage message, Class resultClass) {
+        Object result = connector.sendMessage(message);
+
+        if (result != null && !resultClass.isInstance(result)) {
+            String resultString = new ToStringBuilder(result).toString();
+            throw new CayenneClientException("Expected result type: "
+                    + resultClass.getName()
+                    + ", actual: "
+                    + resultString);
         }
 
-        beforeSendMessage(message);
-
-        // log start...
-        long t0 = 0;
-        String messageLabel = "";
-
-        // using sequential number for message id ... it can be useful for some basic
-        // connector stats.
-        long messageId = this.messageId++;
-
-        if (logger.isInfoEnabled()) {
-            t0 = System.currentTimeMillis();
-            messageLabel = message.toString();
-            logger.info("--- Message " + messageId + ": " + messageLabel);
-        }
-
-        Object response;
-        try {
-            response = doSendMessage(message);
-        }
-        catch (CayenneClientException e) {
-
-            // log error
-            if (logger.isInfoEnabled()) {
-                long time = System.currentTimeMillis() - t0;
-                logger.info("*** Message error for "
-                        + messageId
-                        + ": "
-                        + messageLabel
-                        + " - took "
-                        + time
-                        + " ms.");
-            }
-
-            throw e;
-        }
-
-        // log success...
-        if (logger.isInfoEnabled()) {
-            long time = System.currentTimeMillis() - t0;
-            logger.info("=== Message "
-                    + messageId
-                    + ": "
-                    + messageLabel
-                    + " done - took "
-                    + time
-                    + " ms.");
-        }
-
-        return response;
+        return result;
     }
-
-    /**
-     * Returns a count of processed messages since the beginning of life of this
-     * connector.
-     */
-    public long getProcessedMessagesCount() {
-        return messageId + 1;
-    }
-
-    /**
-     * Called before logging the beginning of message processing.
-     */
-    protected abstract void beforeSendMessage(OPPMessage message)
-            throws CayenneClientException;
-
-    /**
-     * The worker method invoked to process message.
-     */
-    protected abstract Object doSendMessage(OPPMessage message)
-            throws CayenneClientException;
 }

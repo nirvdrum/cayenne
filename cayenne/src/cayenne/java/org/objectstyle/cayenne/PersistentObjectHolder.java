@@ -66,27 +66,24 @@ import java.util.List;
  */
 public class PersistentObjectHolder extends RelationshipFault implements ValueHolder {
 
-    protected boolean resolved;
+    protected boolean fault;
     protected Object value;
 
     // exists for the benefit of manual serialization schemes such as the one in Hessian.
     private PersistentObjectHolder() {
-
+        fault = true;
     }
 
     public PersistentObjectHolder(Persistent relationshipOwner, String relationshipName) {
         super(relationshipOwner, relationshipName);
-
-        if (isTransientParent()) {
-            resolved = true;
-        }
+        fault = !isTransientParent();
     }
 
     /**
      * Returns true if this holder is not resolved, meaning its object is not yet known.
      */
     public boolean isFault() {
-        return !resolved;
+        return fault;
     }
 
     /**
@@ -95,7 +92,7 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
     public Object getValue(Class valueClass) throws CayenneRuntimeException {
         typeSafetyCheck(valueClass, value);
 
-        if (!resolved) {
+        if (fault) {
             resolve();
         }
 
@@ -110,7 +107,7 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
 
         typeSafetyCheck(valueClass, value);
 
-        if (!resolved) {
+        if (fault) {
             resolve();
         }
 
@@ -128,6 +125,19 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
                         value);
             }
         }
+
+        return oldValue;
+    }
+
+    public Object setInitialValue(Class valueClass, Object value)
+            throws CayenneRuntimeException {
+
+        typeSafetyCheck(valueClass, value);
+
+        Object oldValue = this.value;
+
+        this.value = value;
+        this.fault = false;
 
         return oldValue;
     }
@@ -150,7 +160,7 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
      * Reads an object from the database.
      */
     protected synchronized void resolve() {
-        if (resolved) {
+        if (!fault) {
             return;
         }
 
@@ -172,6 +182,6 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
                             + " objects.");
         }
 
-        resolved = true;
+        fault = false;
     }
 }

@@ -110,7 +110,7 @@ public class ValueHolderProperty extends FieldProperty implements ArcProperty,
             throws PropertyAccessException {
 
         ensureValueHolderSet(object);
-        ((ValueHolder) readValueHolder(object)).setValue(null, newValue);
+        ((ValueHolder) readValueHolder(object)).setInitialValue(null, newValue);
     }
 
     /**

@@ -55,56 +55,59 @@
  */
 package org.objectstyle.cayenne;
 
-import java.io.Serializable;
+import java.util.Iterator;
+import java.util.List;
 
-/**
- * Provides a level of indirection for property value access, most often used for deferred
- * faulting of to-one relationships. A ValueHolder abstracts how a property value is
- * obtained (fetched from DB, etc.), thus simplifying design of an object that uses it.
- * <p>
- * Here is an example of a bean property implemented using ValueHolder:
- * </p>
- * 
- * <pre>
- * protected ValueHolder someProperty;
- * 
- * public SomeClass getSomeProperty() {
- *     return (SomeClass) somePropertyHolder.getValue(SomeClass.class);
- * }
- * 
- * public void setSomeProperty(SomeClass newValue) {
- *     somePropertyHolder.setValue(SomeClass.class, newValue);
- * }
- * </pre>
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public interface ValueHolder extends Serializable {
+import org.objectstyle.cayenne.client.ClientObjectContext;
+import org.objectstyle.cayenne.opp.OPPConnectorChannel;
+import org.objectstyle.cayenne.opp.LocalConnector;
+import org.objectstyle.cayenne.opp.OPPConnector;
+import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.service.ClientServerChannel;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
+import org.objectstyle.cayenne.testdo.mt.MtTable1;
+import org.objectstyle.cayenne.unit.AccessStack;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestResources;
 
-    /**
-     * Returns an object stored by this ValueHolder.
-     * 
-     * @param valueClass A class expected for the returned value. A value must be of the
-     *            specified class or its sublcass or implement specified interface.
-     *            Otherwise CayenneRuntimeException is thrown.
-     */
-    Object getValue(Class valueClass) throws CayenneRuntimeException;
+public class PersistentObjectInContextTst extends CayenneTestCase {
 
-    /**
-     * Sets an object stored by this ValueHolder.
-     * 
-     * @param valueClass A class expected for the set value. A value must be of the
-     *            specified class or its sublcass or implement specified interface.
-     *            Otherwise CayenneRuntimeException is thrown.
-     * @param value a new value of the ValueHolder.
-     * @return a previous value saved in the ValueHolder.
-     */
-    Object setValue(Class valueClass, Object value) throws CayenneRuntimeException;
+    protected AccessStack buildAccessStack() {
+        return CayenneTestResources
+                .getResources()
+                .getAccessStack(MULTI_TIER_ACCESS_STACK);
+    }
 
-    /**
-     * Initializes ValueHolder with some value. Unlike setValue, this method shouldn't
-     * trigger fault resolution.
-     */
-    Object setInitialValue(Class valueClass, Object value) throws CayenneRuntimeException;
+    protected ObjectContext createObjectContext() {
+        // wrap ClientServerChannel in LocalConnector to enable logging...
+        OPPConnector connector = new LocalConnector(new ClientServerChannel(getDomain()));
+        return new ClientObjectContext(new OPPConnectorChannel(connector));
+    }
+
+    public void testResolveToManyReverseResolved() throws Exception {
+        createTestData("prepare");
+
+        ObjectContext context = createObjectContext();
+
+        GlobalID gid = new GlobalID(
+                "MtTable1",
+                MtTable1.TABLE1_ID_PK_COLUMN,
+                new Integer(1));
+        ClientMtTable1 t1 = (ClientMtTable1) ObjectContextQueryUtils
+                .singleObjectOrDataRow(context, new SingleObjectQuery(gid));
+
+        assertNotNull(t1);
+
+        List t2s = t1.getTable2Array();
+        assertEquals(2, t2s.size());
+        Iterator it = t2s.iterator();
+        while (it.hasNext()) {
+            ClientMtTable2 t2 = (ClientMtTable2) it.next();
+
+            PersistentObjectHolder holder = (PersistentObjectHolder) t2.getTable1Direct();
+            assertFalse(holder.isFault());
+            assertSame(t1, holder.getValue(ClientMtTable1.class));
+        }
+    }
 }
