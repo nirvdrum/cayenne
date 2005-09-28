@@ -225,24 +225,44 @@ public class PropertyListSerialization {
 	}
 
     /**
-     * Returns a quoted String, with all the escapes preprocessed.
-     * May return an unquoted String if it contains on special
-     * characters, such as spaces, doublequotes and braces.
+     * Returns a quoted String, with all the escapes preprocessed. May return an unquoted
+     * String if it contains no special characters. The rule for a non-special character
+     * is the following:
+     * 
+     * <pre>
+     *      c &gt;= 'a' &amp;&amp; c &lt;= 'z'
+     *      c &gt;= 'A' &amp;&amp; c &lt;= 'Z'
+     *      c &gt;= '0' &amp;&amp; c &lt;= '9'
+     *      c == '_'
+     *      c == '$'
+     *      c == ':'
+     *      c == '.'
+     *      c == '/'
+     * </pre>
      */
 	protected static String quoteString(String str) {
 		boolean shouldQuote = false;
 		
 		// scan string for special chars, 
         // if we have them, string must be quoted
-		String special = " \\\"{}();,-+\'";
+        
+		String noQuoteExtras = "_$:./";
 		char[] chars = str.toCharArray();
 		int len = chars.length;
 		for (int i = 0; i < len; i++) {
-			if (special.indexOf(chars[i]) >= 0) {
-				shouldQuote = true;
-				break;
-			}
-		}
+            char c = chars[i];
+            
+            if ((c >= 'a' && c <= 'z')
+                    || (c >= 'A' && c <= 'Z')
+                    || (c >= '0' && c <= '9')
+                    || noQuoteExtras.indexOf(c) >= 0) {
+                continue;
+            }
+            else {
+                shouldQuote = true;
+                break;
+            }
+        }
 
 		str = escapeString(str);
 		return (shouldQuote) ? '\"' + str + '\"' : str;
