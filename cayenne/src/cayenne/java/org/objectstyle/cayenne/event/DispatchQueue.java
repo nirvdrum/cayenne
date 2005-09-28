@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.event;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -175,15 +176,18 @@ class DispatchQueue {
             return;
         }
 
-        Iterator it = invocations.iterator();
+        // iterate over copy of the collection as there is a chance a caller would want to
+        // (un)register another listener during event processing
+        Iterator it = new ArrayList(invocations).iterator();
         while (it.hasNext()) {
             Invocation invocation = (Invocation) it.next();
 
-            // fire invocation, detect if anything went wrong (e.g. GC'ed invocation targets)
+            // fire invocation, detect if anything went wrong (e.g. GC'ed invocation
+            // targets)
             if (!dispatch.fire(invocation)) {
-                it.remove();
-                logObj.debug(
-                    "Failed invocation, removing: " + invocation.getMethod().getName());
+                invocations.remove(invocation);
+                logObj.debug("Failed invocation, removing: "
+                        + invocation.getMethod().getName());
             }
         }
     }

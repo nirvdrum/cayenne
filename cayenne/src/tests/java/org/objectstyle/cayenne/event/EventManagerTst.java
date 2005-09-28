@@ -60,12 +60,12 @@ import java.util.EventListener;
 import java.util.EventObject;
 
 import junit.framework.Assert;
+import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.util.ThreadedTestHelper;
 
-public class EventManagerTst extends CayenneTestCase implements EventListener {
+public class EventManagerTst extends TestCase implements EventListener {
 
     private static final Logger log = Logger.getLogger(EventManagerTst.class);
 
@@ -78,13 +78,63 @@ public class EventManagerTst extends CayenneTestCase implements EventListener {
     // the event manager used for testing
     private EventManager _eventManager;
 
-    public void setUp() throws Exception {
+    public void setUp() {
         _eventManager = new EventManager();
         _numberOfReceivedEvents = 0;
         _numberOfReceivedEventsForClass = 0;
     }
 
-    public void testNullListener() throws Exception {
+    public void testSubjectListenerWouldRegisterListener() {
+
+        MockListener listener = new MockListener(_eventManager);
+        _eventManager.addListener(
+                listener,
+                "processEvent",
+                EventObject.class,
+                MockListener.mockSubject);
+
+        // test concurrent modification of the queue ... on event listener would attempt
+        // adding another listener
+
+        // add more than one listener to see that dispatch can proceed after one of the
+        // listeners recats to event
+
+        _eventManager.addListener(
+                new MockListener(_eventManager),
+                "processEvent",
+                EventObject.class,
+                MockListener.mockSubject);
+
+        _eventManager.postEvent(new EventObject(this), MockListener.mockSubject);
+    }
+
+    public void testObjectListenerWouldRegisterListener()  {
+
+        MockListener listener = new MockListener(_eventManager, this);
+        _eventManager.addListener(
+                listener,
+                "processEvent",
+                EventObject.class,
+                MockListener.mockSubject,
+                this);
+
+        // test concurrent modification of the queue ... on event listener would attempt
+        // adding another listener
+
+        // add more than one listener to see that dispatch can proceed after one of the
+        // listeners recats to event
+
+        _eventManager.addListener(
+                new MockListener(_eventManager, this),
+                "processEvent",
+                EventObject.class,
+                MockListener.mockSubject,
+                this);
+
+        _eventManager.postEvent(new EventObject(this), MockListener.mockSubject);
+    }
+
+    public void testNullListener() {
         try {
             EventSubject subject = EventSubject.getSubject(this.getClass(), "hansi");
             _eventManager.addListener(null, null, null, subject);
@@ -96,7 +146,7 @@ public class EventManagerTst extends CayenneTestCase implements EventListener {
         }
     }
 
-    public void testNullNotification() throws Exception {
+    public void testNullNotification() {
         // null notification
         try {
             _eventManager.addListener(this, "testNullObserver", CayenneEvent.class, null);
@@ -410,6 +460,7 @@ public class EventManagerTst extends CayenneTestCase implements EventListener {
         };
         helper.assertWithTimeout(5000);
     }
+
 }
 
 // dummy class to test for incompatible events
