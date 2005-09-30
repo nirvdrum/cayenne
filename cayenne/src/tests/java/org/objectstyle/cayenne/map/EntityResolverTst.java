@@ -62,9 +62,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
@@ -138,7 +138,7 @@ public class EntityResolverTst extends CayenneTestCase {
         try {
             assertNotNull(clientResolver.lookupObjEntity("MtTable1"));
         }
-        catch (CayenneClientException e) {
+        catch (CayenneRuntimeException e) {
             fail("'MtTable1' entity is not mapped. All entities: "
                     + clientResolver.getObjEntities());
         }

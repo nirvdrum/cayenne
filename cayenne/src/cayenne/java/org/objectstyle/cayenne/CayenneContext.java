@@ -59,7 +59,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
@@ -234,7 +233,7 @@ public class CayenneContext implements ObjectContext {
 
         ObjEntity entity = getEntityResolver().lookupObjEntity(persistentClass);
         if (entity == null) {
-            throw new CayenneClientException("No entity mapped for class: "
+            throw new CayenneRuntimeException("No entity mapped for class: "
                     + persistentClass);
         }
 
@@ -273,7 +272,7 @@ public class CayenneContext implements ObjectContext {
 
             // sanity check
             if (fetchedObject.getGlobalID() == null) {
-                throw new CayenneClientException(
+                throw new CayenneRuntimeException(
                         "Server returned an object without an id: " + fetchedObject);
             }
 

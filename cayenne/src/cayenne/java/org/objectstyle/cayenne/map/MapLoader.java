@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.exp.Expression;
@@ -137,7 +138,8 @@ public class MapLoader extends DefaultHandler {
     /**
      * Loads a DataMap from XML input source.
      */
-    public synchronized DataMap loadDataMap(InputSource src) throws DataMapException {
+    public synchronized DataMap loadDataMap(InputSource src)
+            throws CayenneRuntimeException {
         if (src == null) {
             throw new NullPointerException("Null InputSource.");
         }
@@ -153,13 +155,15 @@ public class MapLoader extends DefaultHandler {
         }
         catch (SAXException e) {
             dataMap = null;
-            throw new DataMapException("Wrong DataMap format, last processed tag: <"
-                    + currentTag, Util.unwindException(e));
+            throw new CayenneRuntimeException(
+                    "Wrong DataMap format, last processed tag: <" + currentTag,
+                    Util.unwindException(e));
         }
         catch (Exception e) {
             dataMap = null;
-            throw new DataMapException("Error loading DataMap, last processed tag: <"
-                    + currentTag, Util.unwindException(e));
+            throw new CayenneRuntimeException(
+                    "Error loading DataMap, last processed tag: <" + currentTag,
+                    Util.unwindException(e));
         }
         return dataMap;
     }
@@ -167,14 +171,14 @@ public class MapLoader extends DefaultHandler {
     /**
      * Loads DataMap from file specified by <code>uri</code> parameter.
      * 
-     * @throws DataMapException if source URI does not resolve to a valid map files
+     * @throws CayenneRuntimeException if source URI does not resolve to a valid map files
      */
-    public DataMap loadDataMap(String uri) throws DataMapException {
+    public DataMap loadDataMap(String uri) throws CayenneRuntimeException {
         // configure resource locator
         ResourceLocator locator = configLocator();
         InputStream in = locator.findResourceStream(uri);
         if (in == null) {
-            throw new DataMapException("Can't find data map " + uri);
+            throw new CayenneRuntimeException("Can't find data map " + uri);
         }
 
         try {
@@ -520,7 +524,7 @@ public class MapLoader extends DefaultHandler {
 
         String readOnly = atts.getValue("", "readOnly");
         objEntity.setReadOnly(TRUE.equalsIgnoreCase(readOnly));
-        
+
         String serverOnly = atts.getValue("", "serverOnly");
         objEntity.setServerOnly(TRUE.equalsIgnoreCase(serverOnly));
 

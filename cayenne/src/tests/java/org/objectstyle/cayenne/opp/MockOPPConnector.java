@@ -58,10 +58,6 @@ package org.objectstyle.cayenne.opp;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.objectstyle.cayenne.client.CayenneClientException;
-import org.objectstyle.cayenne.opp.OPPConnector;
-import org.objectstyle.cayenne.opp.OPPMessage;
-
 /**
  * A noop CayenneConnector used for unit testing. Accumulates commands sent via this
  * connector without doing anything with them.
@@ -95,9 +91,7 @@ public class MockOPPConnector implements OPPConnector {
         return commands;
     }
 
- 
-
-    public Object sendMessage(OPPMessage command) throws CayenneClientException {
+    public Object sendMessage(OPPMessage command) {
         commands.add(command);
         return fakeResponse;
     }

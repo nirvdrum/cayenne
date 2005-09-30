@@ -70,7 +70,6 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DataMapException;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.xml.sax.InputSource;
 
@@ -252,7 +251,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             domain.addMap(map);
             return map;
         }
-        catch (DataMapException dmex) {
+        catch (Exception dmex) {
             logObj.info("Warning: map loading failed.", dmex);
             getStatus().addFailedMap(
                     mapName,

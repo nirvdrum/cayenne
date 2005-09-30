@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
- 
+
 package org.objectstyle.cayenne.project;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -63,7 +63,8 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  * 
  * @author Andrei Adamchik
  */
-public class ProjectException extends CayenneRuntimeException {    
+public class ProjectException extends CayenneRuntimeException {
+
     /**
      * Constructor for ProjectException.
      */
@@ -71,32 +72,24 @@ public class ProjectException extends CayenneRuntimeException {
         super();
     }
 
-
     /**
      * Constructor for ProjectException.
-     * @param msg
      */
     public ProjectException(String msg) {
         super(msg);
     }
 
-
     /**
      * Constructor for ProjectException.
-     * @param th
      */
     public ProjectException(Throwable th) {
         super(th);
     }
 
-
     /**
      * Constructor for ProjectException.
-     * @param msg
-     * @param th
      */
     public ProjectException(String msg, Throwable th) {
         super(msg, th);
     }
 }
-

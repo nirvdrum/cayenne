@@ -52,32 +52,31 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne.map;
 
 import org.objectstyle.cayenne.CayenneException;
 
 /**
- * A DataMapException is thrown to indicate 
- * problemes with DataMap loading.
+ * A DataMapException is thrown to indicate problemes with DataMap loading.
  * 
  * @author Michael Misha Shengaout
  * @author Andrei Adamchik
+ * @deprecated since 1.2 unused - CayenneRuntimeException is thrown in cases where this
+ *             checked exception was used.
  */
-
 public class DataMapException extends CayenneException {
 
     public DataMapException() {
     }
 
-	public DataMapException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public DataMapException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	public DataMapException(Throwable cause) {
-		super(cause);
-	}
-
+    public DataMapException(Throwable cause) {
+        super(cause);
+    }
 
     public DataMapException(String msg) {
         super(msg);

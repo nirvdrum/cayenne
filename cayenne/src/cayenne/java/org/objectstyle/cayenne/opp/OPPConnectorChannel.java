@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.opp;
 import java.util.List;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 
@@ -108,7 +108,7 @@ public class OPPConnectorChannel implements OPPChannel {
 
         if (result != null && !resultClass.isInstance(result)) {
             String resultString = new ToStringBuilder(result).toString();
-            throw new CayenneClientException("Expected result type: "
+            throw new CayenneRuntimeException("Expected result type: "
                     + resultClass.getName()
                     + ", actual: "
                     + resultString);

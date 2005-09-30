@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import org.objectstyle.cayenne.client.CayenneClientException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
  * Encapsulates a transport for sending OPPMessages to a (possibly remote) OPPChannel.
@@ -68,5 +68,5 @@ public interface OPPConnector {
     /**
      * Sends a message to the server, returning a reply.
      */
-    Object sendMessage(OPPMessage message) throws CayenneClientException;
+    Object sendMessage(OPPMessage message) throws CayenneRuntimeException;
 }

@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import org.objectstyle.cayenne.client.CayenneClientException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -115,7 +115,7 @@ public class LocalConnector extends BaseConnector {
     /**
      * Dispatches a message to an internal handler.
      */
-    protected Object doSendMessage(OPPMessage message) throws CayenneClientException {
+    protected Object doSendMessage(OPPMessage message) throws CayenneRuntimeException {
 
         OPPMessage processedMessage;
 
@@ -137,7 +137,7 @@ public class LocalConnector extends BaseConnector {
             return processedMessage.dispatch(channel);
         }
         catch (Exception ex) {
-            throw new CayenneClientException("Error sending message", ex);
+            throw new CayenneRuntimeException("Error sending message", ex);
         }
 
     }

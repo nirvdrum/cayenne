@@ -65,7 +65,6 @@ import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DataMapException;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.pref.FSPath;
@@ -131,7 +130,7 @@ public class ImportDataMapAction extends CayenneAction {
 
             getProjectController().addDataMap(this, newMap);
         }
-        catch (DataMapException ex) {
+        catch (Exception ex) {
             logObj.info("Error importing DataMap.", ex);
             JOptionPane.showMessageDialog(
                     Application.getFrame(),

@@ -73,21 +73,21 @@ public class ConfigurationException extends CayenneRuntimeException {
      * Constructs an <code>ConfigurationException</code> with the specified detail
      * message.
      * 
-     * @param msg the detail message.
+     * @param message the detail message.
      */
-    public ConfigurationException(String msg) {
-        super(msg);
+    public ConfigurationException(String message) {
+        super(message);
     }
 
     /**
      * Constructs an <code>ConfigurationException</code> that wraps
      * <code>exception</code> thrown elsewhere.
      */
-    public ConfigurationException(Throwable th) {
-        super(th);
+    public ConfigurationException(Throwable cause) {
+        super(cause);
     }
 
-    public ConfigurationException(String msg, Throwable th) {
-        super(msg, th);
+    public ConfigurationException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

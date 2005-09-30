@@ -59,9 +59,7 @@ import org.objectstyle.cayenne.util.LocalizedStringsHandler;
 
 /**
  * A generic checked exception that may be thrown by Cayenne framework. All checked
- * exceptions in Cayenne inherit from this class. CayenneException s compatible with JDK
- * 1.3 and at the same time implements chained exceptions similar to the ones supported in
- * Java since JDK 1.4.
+ * exceptions in Cayenne inherit from this class.
  * 
  * @author Andrus Adamchik
  */
@@ -85,8 +83,6 @@ public class CayenneException extends Exception {
         return exceptionLabel;
     }
 
-    private Throwable _cause;
-
     /**
      * Creates new <code>CayenneException</code> without detail message.
      */
@@ -96,30 +92,22 @@ public class CayenneException extends Exception {
     /**
      * Constructs an <code>CayenneException</code> with the specified detail message.
      * 
-     * @param msg the detail message.
+     * @param message the detail message.
      */
-    public CayenneException(String msg) {
-        super(msg);
+    public CayenneException(String message) {
+        super(message);
     }
 
     /**
-     * Constructs an <code>CayenneException</code> that wraps <code>exception</code>
+     * Constructs an <code>CayenneException</code> that wraps a <code>cause</code>
      * thrown elsewhere.
      */
-    public CayenneException(Throwable th) {
-        this(th == null ? (String) null : th.toString(), th);
+    public CayenneException(Throwable cause) {
+        super(cause);
     }
 
-    public CayenneException(String msg, Throwable th) {
-        super(msg);
-        this._cause = th;
-    }
-
-    /**
-     * @see java.lang.Throwable#getCause()
-     */
-    public Throwable getCause() {
-        return _cause;
+    public CayenneException(String message, Throwable cause) {
+        super(message, cause);
     }
 
     /**

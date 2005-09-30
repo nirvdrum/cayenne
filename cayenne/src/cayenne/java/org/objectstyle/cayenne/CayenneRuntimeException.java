@@ -57,15 +57,11 @@ package org.objectstyle.cayenne;
 
 /**
  * A generic unchecked exception that may be thrown by Cayenne framework. All runtime
- * exceptions in Cayenne inherit from this class. CayenneRuntimeException is compatible
- * with JDK 1.3 and at the same time implements chained exceptions similar to the ones
- * supported in Java since JDK 1.4.
+ * exceptions in Cayenne inherit from this class.
  * 
  * @author Andrei Adamchik
  */
 public class CayenneRuntimeException extends RuntimeException {
-
-    private Throwable _cause;
 
     /**
      * Creates new CayenneRuntimeException without detail message.
@@ -77,30 +73,22 @@ public class CayenneRuntimeException extends RuntimeException {
      * Constructs an <code>CayenneRuntimeException</code> with the specified detail
      * message.
      * 
-     * @param msg the detail message.
+     * @param message the detail message.
      */
-    public CayenneRuntimeException(String msg) {
-        super(msg);
+    public CayenneRuntimeException(String message) {
+        super(message);
     }
 
     /**
      * Constructs an <code>CayenneRuntimeException</code> that wraps
      * <code>exception</code> thrown elsewhere.
      */
-    public CayenneRuntimeException(Throwable th) {
-        this(th == null ? (String) null : th.toString(), th);
+    public CayenneRuntimeException(Throwable cause) {
+        super(cause);
     }
 
-    public CayenneRuntimeException(String msg, Throwable th) {
-        super(msg);
-        this._cause = th;
-    }
-
-    /**
-     * Returns an exception that was the underlying cause of this exception.
-     */
-    public Throwable getCause() {
-        return _cause;
+    public CayenneRuntimeException(String message, Throwable cause) {
+        super(message, cause);
     }
 
     /**

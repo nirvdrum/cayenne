@@ -59,7 +59,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 
-import org.objectstyle.cayenne.client.CayenneClientException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.util.Util;
 
 import com.caucho.hessian.client.HessianProxyFactory;
@@ -154,7 +154,7 @@ public class HessianConnector extends BaseConnector {
     /**
      * Establishes server session if needed.
      */
-    protected void beforeSendMessage(OPPMessage message) throws CayenneClientException {
+    protected void beforeSendMessage(OPPMessage message) throws CayenneRuntimeException {
         // for now only support session-based communications...
         if (sessionId == null) {
             connect();
@@ -164,21 +164,21 @@ public class HessianConnector extends BaseConnector {
     /**
      * Sends a message to remote Cayenne Hessian service.
      */
-    protected Object doSendMessage(OPPMessage message) throws CayenneClientException {
+    protected Object doSendMessage(OPPMessage message) throws CayenneRuntimeException {
         try {
             return service.processMessage(sessionId, message);
         }
         catch (Throwable th) {
             th = unwindThrowable(th);
             String errorMessage = buildExceptionMessage("Remote error", th);
-            throw new CayenneClientException(errorMessage, th);
+            throw new CayenneRuntimeException(errorMessage, th);
         }
     }
 
     /**
      * Establishes a session with remote service.
      */
-    protected synchronized void connect() throws CayenneClientException {
+    protected synchronized void connect() throws CayenneRuntimeException {
         if (this.sessionId != null) {
             return;
         }
@@ -212,7 +212,7 @@ public class HessianConnector extends BaseConnector {
         catch (Throwable th) {
             th = unwindThrowable(th);
             String message = buildExceptionMessage("URL error", th);
-            throw new CayenneClientException(message, th);
+            throw new CayenneRuntimeException(message, th);
         }
 
         // create server session...
@@ -233,7 +233,7 @@ public class HessianConnector extends BaseConnector {
             String message = buildExceptionMessage(
                     "Error establishing remote session",
                     th);
-            throw new CayenneClientException(message, th);
+            throw new CayenneRuntimeException(message, th);
         }
     }
 

@@ -62,7 +62,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.OperationRecorder;
@@ -268,7 +267,7 @@ public class CayenneContextTst extends TestCase {
             context.newObject(Object.class);
             fail("ClientObjectContext created an object that is not persistent.");
         }
-        catch (CayenneClientException e) {
+        catch (CayenneRuntimeException e) {
             // expected
         }
 

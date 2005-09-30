@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.opp;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.objectstyle.cayenne.client.CayenneClientException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
  * A convenience superlcass of client connectors that provides common message logging
@@ -83,7 +83,7 @@ public abstract class BaseConnector implements OPPConnector {
      * logging functionality. Do not override this method unless absolutely necessary.
      * Override 'beforeSendMessage' and 'doSendMessage' instead.
      */
-    public Object sendMessage(OPPMessage message) throws CayenneClientException {
+    public Object sendMessage(OPPMessage message) throws CayenneRuntimeException {
         if (message == null) {
             throw new NullPointerException("Null message");
         }
@@ -108,7 +108,7 @@ public abstract class BaseConnector implements OPPConnector {
         try {
             response = doSendMessage(message);
         }
-        catch (CayenneClientException e) {
+        catch (CayenneRuntimeException e) {
 
             // log error
             if (logger.isInfoEnabled()) {
@@ -152,11 +152,11 @@ public abstract class BaseConnector implements OPPConnector {
      * Called before logging the beginning of message processing.
      */
     protected abstract void beforeSendMessage(OPPMessage message)
-            throws CayenneClientException;
+            throws CayenneRuntimeException;
 
     /**
      * The worker method invoked to process message.
      */
     protected abstract Object doSendMessage(OPPMessage message)
-            throws CayenneClientException;
+            throws CayenneRuntimeException;
 }

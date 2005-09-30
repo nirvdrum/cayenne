@@ -65,8 +65,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -203,14 +201,11 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
             if (resolver.lookupObjEntity(rootClass) == null) {
 
                 String entityName;
-                try {
-                    entityName = resolver.getClientEntityResolver().lookupObjEntity(
-                            rootClass).getName();
-                }
-                catch (CayenneClientException e) {
-                    throw new CayenneRuntimeException("Invalid SelectQuery root class: "
-                            + rootClass);
-                }
+
+                entityName = resolver
+                        .getClientEntityResolver()
+                        .lookupObjEntity(rootClass)
+                        .getName();
 
                 SelectQuery replacement = queryWithParameters(Collections.EMPTY_MAP, true);
                 replacement.setRoot(entityName);
