@@ -58,12 +58,12 @@ package org.objectstyle.cayenne.access.util;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.Factory;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.collections.map.LinkedMap;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectFactory;
@@ -171,7 +171,7 @@ class PrefetchResolver {
         PrefetchResolver child = null;
 
         if (children == null) {
-            children = new LinkedMap();
+            children = new LinkedHashMap();
         }
         else {
             child = (PrefetchResolver) children.get(outgoing.getName());

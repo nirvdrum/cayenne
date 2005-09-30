@@ -60,9 +60,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.apache.commons.collections.map.LinkedMap;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
@@ -78,12 +78,8 @@ import org.objectstyle.cayenne.util.Util;
  */
 public class QueryResult extends DefaultOperationObserver implements QueryResponse {
 
-    // LinkedMap guarantees that iterating over 
-    // its keys is done in the original insertion order-
-    // something that is needed to return executed queries in 
-    // the right order. (Java 1.4 adds LinkedHashMap that has
-    // the same functionality, but we have to stay 1.3 comatible)
-    protected LinkedMap queries = new LinkedMap();
+    
+    protected LinkedHashMap queries = new LinkedHashMap();
 
     /** Clears any previously collected information. */
     public void clear() {
@@ -94,7 +90,7 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
      * Returns an iterator over all executed queries in the order they were executed.
      */
     public Iterator getQueries() {
-        return queries.asList().iterator();
+        return queries.keySet().iterator();
     }
     
     /**

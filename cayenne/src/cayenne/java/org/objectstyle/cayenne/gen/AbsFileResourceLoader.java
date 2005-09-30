@@ -66,55 +66,54 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.resource.loader.FileResourceLoader;
 
 /**
- * Special resource loader that allows loading files
- * using absolute path and current directory.
+ * Special Velocity resource loader that allows loading files using absolute path and
+ * current directory.
  * 
  * @author Andrei Adamchik
  */
 public class AbsFileResourceLoader extends FileResourceLoader {
 
-	/**
-	 * Constructor for AbsFileResourceLoader.
-	 */
-	public AbsFileResourceLoader() {
-		super();
-	}
+    /**
+     * Constructor for AbsFileResourceLoader.
+     */
+    public AbsFileResourceLoader() {
+        super();
+    }
 
-	/**
-	 * Returns resource as InputStream.
-	 * First calls super implementation. If resource wasn't found, 
-	 * it attempts to load it from current directory or as an absolute path.
-	 * 
-	 * @see org.apache.velocity.runtime.resource.loader.ResourceLoader#getResourceStream(String)
-	 */
-	public synchronized InputStream getResourceStream(String name)
-		throws ResourceNotFoundException {
+    /**
+     * Returns resource as InputStream. First calls super implementation. If resource
+     * wasn't found, it attempts to load it from current directory or as an absolute path.
+     * 
+     * @see org.apache.velocity.runtime.resource.loader.ResourceLoader#getResourceStream(String)
+     */
+    public synchronized InputStream getResourceStream(String name)
+            throws ResourceNotFoundException {
 
-		// attempt to load using default configuration
-		try {
-			return super.getResourceStream(name);
-		} catch (ResourceNotFoundException rnfex) {
-			// attempt to load from current directory or as an absolute path
-			try {
-				File file = new File(name);
-				return (file.canRead())
-					? new BufferedInputStream(
-						new FileInputStream(file.getAbsolutePath()))
-					: null;
+        // attempt to load using default configuration
+        try {
+            return super.getResourceStream(name);
+        }
+        catch (ResourceNotFoundException rnfex) {
+            // attempt to load from current directory or as an absolute path
+            try {
+                File file = new File(name);
+                return (file.canRead()) ? new BufferedInputStream(new FileInputStream(
+                        file.getAbsolutePath())) : null;
 
-			} catch (FileNotFoundException fnfe) {
-				throw new ResourceNotFoundException(
-					"AbsFileResourceLoader Error: cannot find resource " + name);
-			}
-		}
-	}
+            }
+            catch (FileNotFoundException fnfe) {
+                throw new ResourceNotFoundException(
+                        "AbsFileResourceLoader Error: cannot find resource " + name);
+            }
+        }
+    }
 
-	/**
-	 * @see org.apache.velocity.runtime.resource.loader.ResourceLoader#init(ExtendedProperties)
-	 */
-	public void init(ExtendedProperties arg0) {
-		rsvc.info("AbsFileResourceLoader : initialization starting.");
-		super.init(arg0);
-	}
+    /**
+     * @see org.apache.velocity.runtime.resource.loader.ResourceLoader#init(ExtendedProperties)
+     */
+    public void init(ExtendedProperties arg0) {
+        rsvc.info("AbsFileResourceLoader : initialization starting.");
+        super.init(arg0);
+    }
 
 }

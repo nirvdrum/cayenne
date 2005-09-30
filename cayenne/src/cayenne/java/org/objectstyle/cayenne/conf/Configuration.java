@@ -66,7 +66,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
-import org.apache.commons.lang.Validate;
 import org.apache.commons.collections.Predicate;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -591,7 +590,9 @@ public abstract class Configuration {
     public boolean loadDataView(DataView dataView, Predicate dataViewNameFilter)
             throws IOException {
 
-        Validate.notNull(dataView, "DataView cannot be null.");
+        if(dataView == null) {
+            throw new IllegalArgumentException("DataView cannot be null.");
+        }
 
         if (dataViewLocations.size() == 0 || dataViewLocations.size() > 512) {
             return false;

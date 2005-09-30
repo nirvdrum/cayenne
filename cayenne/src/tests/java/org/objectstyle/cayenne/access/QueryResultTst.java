@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -62,6 +63,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.query.DeleteQuery;
+import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
@@ -83,7 +85,7 @@ public class QueryResultTst extends TestCase {
         };
     }
 
-    public void testQueries() throws Exception {
+    public void testQueries() {
 
         for (int i = 0; i < queries.length; i++) {
             result.nextCount(queries[i], i);
@@ -98,6 +100,37 @@ public class QueryResultTst extends TestCase {
         }
 
         assertEquals(queries.length, ind);
+    }
+
+    public void testQueriesIterationOrder() {
+
+        Query q1 = new MockQuery();
+        Query q2 = new MockQuery();
+        Query q3 = new MockQuery();
+        Query q4 = new MockQuery();
+        Query q5 = new MockQuery();
+        Query q6 = new MockQuery();
+
+        QueryResult result = new QueryResult();
+
+        result.nextCount(q1, 1);
+        result.nextCount(q2, 1);
+        result.nextBatchCount(q3, new int[] {1});
+        result.nextDataRows(q4, new ArrayList());
+        result.nextCount(q5, 1);
+        result.nextCount(q6, 1);
+
+        Query[] orderedArray = new Query[] {
+                q1, q2, q3, q4, q5, q6
+        };
+
+        Iterator it = result.getQueries();
+        for (int i = 0; i < orderedArray.length; i++) {
+            assertTrue(it.hasNext());
+            assertSame("Unexpected query at index " + i, orderedArray[i], it.next());
+        }
+
+        assertFalse(it.hasNext());
     }
 
     public void testResults() throws Exception {
