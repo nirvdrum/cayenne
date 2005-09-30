@@ -65,7 +65,6 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.client.CayenneClientException;
-import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
@@ -131,28 +130,21 @@ public class EntityResolverTst extends CayenneTestCase {
                 MULTI_TIER_ACCESS_STACK);
 
         EntityResolver resolver = new EntityResolver(stack.getDataDomain().getDataMaps());
-        ClientEntityResolver clientResolver = resolver.getClientEntityResolver();
+        EntityResolver clientResolver = resolver.getClientEntityResolver();
         assertNotNull(clientResolver);
 
         // make sure that client entities got translated properly...
 
         try {
-            assertNotNull(clientResolver.entityForName("MtTable1"));
+            assertNotNull(clientResolver.lookupObjEntity("MtTable1"));
         }
         catch (CayenneClientException e) {
             fail("'MtTable1' entity is not mapped. All entities: "
-                    + clientResolver.getEntityNames());
+                    + clientResolver.getObjEntities());
         }
 
-        assertNotNull(clientResolver.entityForClass(ClientMtTable1.class));
-
-        try {
-            clientResolver.entityForClass(MtTable1.class);
-            fail("Expected to fail - server class shouldn't be available on the client");
-        }
-        catch (CayenneClientException e) {
-            // expected...
-        }
+        assertNotNull(clientResolver.lookupObjEntity(ClientMtTable1.class));
+        assertNull(clientResolver.lookupObjEntity(MtTable1.class));
     }
 
     // //Test DbEntitylookups

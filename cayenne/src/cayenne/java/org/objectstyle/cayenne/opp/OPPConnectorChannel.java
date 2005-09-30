@@ -60,8 +60,8 @@ import java.util.List;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.client.CayenneClientException;
-import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
  * An OPPChannel adapter that forwards messages via a CayenneConnector.
@@ -93,8 +93,8 @@ public class OPPConnectorChannel implements OPPChannel {
         return (GraphDiff) send(message, GraphDiff.class);
     }
 
-    public ClientEntityResolver onBootstrap(BootstrapMessage message) {
-        return (ClientEntityResolver) send(message, ClientEntityResolver.class);
+    public EntityResolver onBootstrap(BootstrapMessage message) {
+        return (EntityResolver) send(message, EntityResolver.class);
     }
 
     /**

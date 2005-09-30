@@ -210,6 +210,31 @@ public class DataMap implements Serializable, XMLSerializable, MappingNamespace,
     }
 
     /**
+     * Returns a DataMap stripped of any server-side information, such as DbEntity
+     * mapping, or ObjEntities that are not allowed in the client tier. Returns null if
+     * this DataMap as a whole does not support client tier persistence.
+     * 
+     * @since 1.2
+     */
+    public DataMap getClientDataMap() {
+        if (!isClientSupported()) {
+            return null;
+        }
+
+        DataMap clientMap = new DataMap(getName());
+
+        Iterator it = getObjEntities().iterator();
+        while (it.hasNext()) {
+            ObjEntity entity = (ObjEntity) it.next();
+            if (entity.isClientAllowed()) {
+                clientMap.addObjEntity(entity.getClientEntity());
+            }
+        }
+
+        return clientMap;
+    }
+
+    /**
      * Prints itself as a well-formed complete XML document. In comparison,
      * {@link #encodeAsXML(XMLEncoder)}stores DataMap assuming it is a part of a bigger
      * document.

@@ -63,8 +63,8 @@ import java.util.List;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
 import org.objectstyle.cayenne.opp.CommitMessage;
 import org.objectstyle.cayenne.opp.GenericQueryMessage;
@@ -146,7 +146,7 @@ public class ClientServerChannel implements OPPChannel {
         return serverContext.performUpdateQuery(message.getQueryPlan());
     }
 
-    public ClientEntityResolver onBootstrap(BootstrapMessage message) {
+    public EntityResolver onBootstrap(BootstrapMessage message) {
         return serverContext.getEntityResolver().getClientEntityResolver();
     }
 }

@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.MockDataRowStore;
 import org.objectstyle.cayenne.access.MockPersistenceContext;
-import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.OperationRecorder;
@@ -102,10 +101,10 @@ public class ClientServerChannelTst extends CayenneTestCase {
 
     public void testOnBootstrap() throws Exception {
         ObjectDataContext context = new ObjectDataContext(getDomain());
-        ClientEntityResolver resolver = new ClientServerChannel(context)
+        EntityResolver resolver = new ClientServerChannel(context)
                 .onBootstrap(new BootstrapMessage());
         assertNotNull(resolver);
-        assertNotNull(resolver.entityForClass(ClientMtTable1.class));
+        assertNotNull(resolver.lookupObjEntity(ClientMtTable1.class));
     }
 
     public void testOnCommit() {

@@ -59,14 +59,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.CommitMessage;
-import org.objectstyle.cayenne.opp.GenericQueryMessage;
-import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SelectMessage;
-import org.objectstyle.cayenne.opp.UpdateMessage;
+import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
  * Stores all messages passed via this handler.
@@ -115,7 +109,7 @@ public class MockOPPChannel implements OPPChannel {
         return null;
     }
 
-    public ClientEntityResolver onBootstrap(BootstrapMessage message) {
+    public EntityResolver onBootstrap(BootstrapMessage message) {
         messages.add(message);
         return null;
     }

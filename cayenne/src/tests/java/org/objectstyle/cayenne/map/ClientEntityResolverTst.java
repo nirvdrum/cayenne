@@ -53,16 +53,14 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.client;
+package org.objectstyle.cayenne.map;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.HessianConnector;
 
 public class ClientEntityResolverTst extends TestCase {
@@ -70,53 +68,44 @@ public class ClientEntityResolverTst extends TestCase {
     public void testSerializabilityWithHessian() throws Exception {
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName("java.lang.String");
-        ClientEntityResolver resolver = new ClientEntityResolver(Collections
-                .singleton(entity));
+
+        DataMap dataMap = new DataMap("test");
+        dataMap.addObjEntity(entity);
+        Collection entities = Collections.singleton(dataMap);
+        EntityResolver resolver = new EntityResolver(entities);
 
         // simple case
         Object c1 = HessianConnector.cloneViaHessianSerialization(resolver);
 
         assertNotNull(c1);
-        assertTrue(c1 instanceof ClientEntityResolver);
-        ClientEntityResolver cr1 = (ClientEntityResolver) c1;
+        assertTrue(c1 instanceof EntityResolver);
+        EntityResolver cr1 = (EntityResolver) c1;
 
         assertNotSame(resolver, cr1);
-        assertEquals(1, cr1.getEntityNames().size());
-        assertTrue(cr1.getEntityNames().contains(entity.getName()));
+        assertEquals(1, cr1.getObjEntities().size());
+        assertNotNull(cr1.getObjEntity(entity.getName()));
 
         // with descriptors resolved...
         assertNotNull(entity.getClassDescriptor());
 
-        ClientEntityResolver cr2 = (ClientEntityResolver) HessianConnector
+        EntityResolver cr2 = (EntityResolver) HessianConnector
                 .cloneViaHessianSerialization(resolver);
         assertNotNull(cr2);
-        assertEquals(1, cr2.getEntityNames().size());
-        assertTrue(cr2.getEntityNames().contains(entity.getName()));
-        assertNotNull(cr2.entityForName(entity.getName()).getClassDescriptor());
+        assertEquals(1, cr2.getObjEntities().size());
+        assertNotNull(cr2.getObjEntity(entity.getName()));
+        assertNotNull(cr2.getObjEntity(entity.getName()).getClassDescriptor());
     }
 
     public void testConstructor() {
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName("java.lang.String");
-        Collection entities = Collections.singleton(entity);
+        DataMap dataMap = new DataMap("test");
+        dataMap.addObjEntity(entity);
+        Collection entities = Collections.singleton(dataMap);
+        EntityResolver resolver = new EntityResolver(entities);
 
-        ClientEntityResolver resolver = new ClientEntityResolver(entities);
-
-        assertSame(entity, resolver.entityForName(entity.getName()));
-
-        Collection names = resolver.getEntityNames();
-        assertEquals(1, names.size());
-        assertTrue(names.contains(entity.getName()));
-    }
-
-    public void testDataMapInjection() {
-        ObjEntity entity = new ObjEntity("test_entity");
-        entity.setClassName("java.lang.String");
-        Collection entities = Collections.singleton(entity);
-
-        assertNull(entity.getDataMap());
-        new ClientEntityResolver(entities);
-        assertNotNull(entity.getDataMap());
+        assertSame(entity, resolver.lookupObjEntity(entity.getName()));
+        assertNotNull(resolver.lookupObjEntity(entity.getName()));
     }
 
     public void testInheritance() {
@@ -136,9 +125,11 @@ public class ClientEntityResolverTst extends TestCase {
             // expected
         }
 
-        new ClientEntityResolver(Arrays.asList(new Object[] {
-                superEntity, subEntity
-        }));
+        DataMap dataMap = new DataMap("test");
+        dataMap.addObjEntity(superEntity);
+        dataMap.addObjEntity(subEntity);
+        Collection entities = Collections.singleton(dataMap);
+        new EntityResolver(entities);
 
         // after registration with resolver super entity should resolve just fine
         assertSame(superEntity, subEntity.getSuperEntity());

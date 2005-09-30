@@ -11,7 +11,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.property.ArcProperty;
@@ -23,7 +22,7 @@ class ServerToClientObjectConverter {
     Map clientObjectsByOID;
     List converted;
     EntityResolver resolver;
-    ClientEntityResolver clientResolver;
+    EntityResolver clientResolver;
 
     ServerToClientObjectConverter(List serverObjects, EntityResolver resolver,
             Collection prefetchPaths) {
@@ -50,7 +49,7 @@ class ServerToClientObjectConverter {
             }
 
             // create traversal map using the client entity
-            new ObjectTraversalMap(clientResolver.entityForName(someServerEntity
+            new ObjectTraversalMap(clientResolver.lookupObjEntity(someServerEntity
                     .getName()), prefetchPaths).traverse(serverObjects, this);
         }
     }
@@ -76,9 +75,12 @@ class ServerToClientObjectConverter {
             // a smaller lookup map ... and combine with "convertToGlobalID"; can save a
             // few CPU cycles on big lists
 
-            ClassDescriptor descriptor = clientResolver
-                    .entityForName(id.getEntityName())
-                    .getClassDescriptor();
+            ObjEntity entity = clientResolver.lookupObjEntity(id.getEntityName());
+            if (entity == null) {
+                throw new CayenneRuntimeException("No client entity mapped for name: " + id.getEntityName());
+            }
+
+            ClassDescriptor descriptor = entity.getClassDescriptor();
             clientObject = (Persistent) descriptor.createObject();
             clientObject.setGlobalID(id);
 

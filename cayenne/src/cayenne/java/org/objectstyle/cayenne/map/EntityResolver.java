@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -70,7 +71,6 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.TempObjectId;
-import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -87,7 +87,12 @@ import org.objectstyle.cayenne.query.Query;
  * @since 1.1 In 1.1 EntityResolver was moved from the access package.
  * @author Andrei Adamchik
  */
-public class EntityResolver implements MappingNamespace {
+// TODO: Andrus, 09/29/2005: we need to change current behavior of reindexing entity
+// resolver when entity lookup fails - now that we have a mix of server and client
+// mappings this no longer seems smart. Maybe just throw an
+// exception instead of returning null or doing multiple lookups - this will allow to
+// discover mapping inconsistencies early...
+public class EntityResolver implements MappingNamespace, Serializable {
 
     private static final Logger logObj = Logger.getLogger(EntityResolver.class);
 
@@ -99,7 +104,7 @@ public class EntityResolver implements MappingNamespace {
     protected Map procedureCache;
     protected List maps;
     protected Map entityInheritanceCache;
-    protected ClientEntityResolver clientEntityResolver;
+    protected EntityResolver clientEntityResolver;
 
     /**
      * Creates new EntityResolver.
@@ -169,7 +174,7 @@ public class EntityResolver implements MappingNamespace {
      * 
      * @since 1.2
      */
-    public ClientEntityResolver getClientEntityResolver() {
+    public EntityResolver getClientEntityResolver() {
 
         if (clientEntityResolver == null) {
 
@@ -177,16 +182,20 @@ public class EntityResolver implements MappingNamespace {
 
                 if (clientEntityResolver == null) {
 
-                    // translate to client entities
-                    Collection serverEntities = getObjEntities();
-                    Collection clientEntities = new ArrayList(serverEntities.size());
-                    Iterator it = serverEntities.iterator();
+                    EntityResolver resolver = new EntityResolver();
+
+                    // translate to client DataMaps
+                    Iterator it = getDataMaps().iterator();
                     while (it.hasNext()) {
-                        ObjEntity serverEntity = (ObjEntity) it.next();
-                        clientEntities.add(serverEntity.getClientEntity());
+                        DataMap map = (DataMap) it.next();
+                        DataMap clientMap = map.getClientDataMap();
+
+                        if (clientMap != null) {
+                            resolver.addDataMap(clientMap);
+                        }
                     }
 
-                    clientEntityResolver = new ClientEntityResolver(clientEntities);
+                    clientEntityResolver = resolver;
                 }
             }
         }

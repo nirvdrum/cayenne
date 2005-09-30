@@ -204,7 +204,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
 
                 String entityName;
                 try {
-                    entityName = resolver.getClientEntityResolver().entityForClass(
+                    entityName = resolver.getClientEntityResolver().lookupObjEntity(
                             rootClass).getName();
                 }
                 catch (CayenneClientException e) {

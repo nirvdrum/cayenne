@@ -69,6 +69,8 @@ import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.OperationRecorder;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.CommitMessage;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
@@ -143,8 +145,10 @@ public class ClientObjectContextTst extends TestCase {
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
 
-        Collection entities = Collections.singleton(entity);
-        context.setEntityResolver(new ClientEntityResolver(entities));
+        DataMap dataMap = new DataMap("test");
+        dataMap.addObjEntity(entity);
+        Collection entities = Collections.singleton(dataMap);
+        context.setEntityResolver(new EntityResolver(entities));
         Persistent object = context.newObject(MockPersistentObject.class);
 
         // record change here to make it available to the anonymous connector method..
@@ -170,8 +174,10 @@ public class ClientObjectContextTst extends TestCase {
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
 
-        Collection entities = Collections.singleton(entity);
-        context.setEntityResolver(new ClientEntityResolver(entities));
+        DataMap dataMap = new DataMap("test");
+        dataMap.addObjEntity(entity);
+        Collection entities = Collections.singleton(dataMap);
+        context.setEntityResolver(new EntityResolver(entities));
 
         List list = context.performSelectQuery(new NamedQuery("dummy"));
         assertNotNull(list);
@@ -186,8 +192,12 @@ public class ClientObjectContextTst extends TestCase {
     public void testPerformSelectQueryOverrideCached() {
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
-        Collection entities = Collections.singleton(entity);
-        ClientEntityResolver resolver = new ClientEntityResolver(entities);
+        
+        DataMap dataMap = new DataMap("test");
+        dataMap.addObjEntity(entity);
+        Collection entities = Collections.singleton(dataMap);
+        EntityResolver resolver = new EntityResolver(entities);
+        
         ClientObjectContext context = new ClientObjectContext();
         context.setEntityResolver(resolver);
 
@@ -215,8 +225,10 @@ public class ClientObjectContextTst extends TestCase {
     public void testPerformSelectQueryOverrideModifiedCached() {
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
-        Collection entities = Collections.singleton(entity);
-        ClientEntityResolver resolver = new ClientEntityResolver(entities);
+        DataMap dataMap = new DataMap("test");
+        dataMap.addObjEntity(entity);
+        Collection entities = Collections.singleton(dataMap);
+        EntityResolver resolver = new EntityResolver(entities);
         ClientObjectContext context = new ClientObjectContext();
         context.setEntityResolver(resolver);
 
@@ -249,8 +261,10 @@ public class ClientObjectContextTst extends TestCase {
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
 
-        Collection entities = Collections.singleton(entity);
-        context.setEntityResolver(new ClientEntityResolver(entities));
+        DataMap dataMap = new DataMap("test");
+        dataMap.addObjEntity(entity);
+        Collection entities = Collections.singleton(dataMap);
+        context.setEntityResolver(new EntityResolver(entities));
 
         // an invalid class should blow
         try {
@@ -282,8 +296,10 @@ public class ClientObjectContextTst extends TestCase {
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
 
-        Collection entities = Collections.singleton(entity);
-        context.setEntityResolver(new ClientEntityResolver(entities));
+        DataMap dataMap = new DataMap("test");
+        dataMap.addObjEntity(entity);
+        Collection entities = Collections.singleton(dataMap);
+        context.setEntityResolver(new EntityResolver(entities));
 
         // TRANSIENT ... should quietly ignore it
         Persistent transientObject = new MockPersistentObject();

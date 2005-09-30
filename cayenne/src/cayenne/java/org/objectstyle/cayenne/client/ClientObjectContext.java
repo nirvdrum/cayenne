@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.graph.OperationRecorder;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
 import org.objectstyle.cayenne.opp.CommitMessage;
@@ -94,7 +95,7 @@ public class ClientObjectContext implements ObjectContext {
     // reinjected later if needed
     protected transient OPPChannel channel;
 
-    protected ClientEntityResolver entityResolver;
+    protected EntityResolver entityResolver;
     protected GraphManager graphManager;
     protected OperationRecorder changeRecorder;
     protected ClientStateRecorder stateRecorder;
@@ -148,7 +149,7 @@ public class ClientObjectContext implements ObjectContext {
      * ClientObjectContext operation. If ClientEntityResolver is not set, this method
      * would obtain one from the server on demand by sending BootstrapMessage.
      */
-    public ClientEntityResolver getEntityResolver() {
+    public EntityResolver getEntityResolver() {
         // load entity resolver on demand
         if (entityResolver == null) {
             synchronized (this) {
@@ -161,7 +162,7 @@ public class ClientObjectContext implements ObjectContext {
         return entityResolver;
     }
 
-    public void setEntityResolver(ClientEntityResolver entityResolver) {
+    public void setEntityResolver(EntityResolver entityResolver) {
         this.entityResolver = entityResolver;
     }
 
@@ -235,7 +236,12 @@ public class ClientObjectContext implements ObjectContext {
             throw new NullPointerException("Persistent class can't be null.");
         }
 
-        ObjEntity entity = getEntityResolver().entityForClass(persistentClass);
+        ObjEntity entity = getEntityResolver().lookupObjEntity(persistentClass);
+        if (entity == null) {
+            throw new CayenneClientException("No entity mapped for class: "
+                    + persistentClass);
+        }
+
         ClassDescriptor descriptor = entity.getClassDescriptor();
 
         Persistent object = (Persistent) descriptor.createObject();
@@ -362,7 +368,7 @@ public class ClientObjectContext implements ObjectContext {
     }
 
     protected ClassDescriptor getClassDescriptor(Persistent object) {
-        ObjEntity entity = getEntityResolver().entityForName(
+        ObjEntity entity = getEntityResolver().lookupObjEntity(
                 object.getGlobalID().getEntityName());
         return entity.getClassDescriptor();
     }

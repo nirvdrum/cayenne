@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.opp;
 import java.util.List;
 
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.client.ClientEntityResolver;
 import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
  * A handler of OPP (Object Persistence Protocol) messages.
@@ -92,8 +92,7 @@ public interface OPPChannel {
     GraphDiff onCommit(CommitMessage message);
 
     /**
-     * Processes BootstrapMessage returning ClientEntityResolver with limited ORM
-     * information.
+     * Processes BootstrapMessage returning EntityResolver with client ORM information.
      */
-    ClientEntityResolver onBootstrap(BootstrapMessage message);
+    EntityResolver onBootstrap(BootstrapMessage message);
 }

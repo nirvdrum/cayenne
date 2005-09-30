@@ -1,5 +1,6 @@
 package org.objectstyle.cayenne.client;
 
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
 import org.objectstyle.cayenne.unit.AccessStack;
@@ -16,7 +17,7 @@ public class GeneratedMethodsInClientObjectContextTst extends CayenneTestCase {
 
     public void testAddToList() throws Exception {
 
-        ClientEntityResolver resolver = getDomain()
+        EntityResolver resolver = getDomain()
                 .getEntityResolver()
                 .getClientEntityResolver();
 
@@ -41,7 +42,7 @@ public class GeneratedMethodsInClientObjectContextTst extends CayenneTestCase {
 
     public void testSetValueHolder() throws Exception {
 
-        ClientEntityResolver resolver = getDomain()
+        EntityResolver resolver = getDomain()
                 .getEntityResolver()
                 .getClientEntityResolver();
 
