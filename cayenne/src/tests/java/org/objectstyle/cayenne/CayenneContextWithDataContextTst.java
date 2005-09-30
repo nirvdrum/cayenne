@@ -53,11 +53,12 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.client;
+package org.objectstyle.cayenne;
 
 import java.util.Arrays;
 import java.util.List;
 
+import org.objectstyle.cayenne.CayenneContext;
 import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.PersistentObjectHolder;
@@ -70,7 +71,7 @@ import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
 
-public class ClientObjectContextWithDataContextTst extends CayenneTestCase {
+public class CayenneContextWithDataContextTst extends CayenneTestCase {
 
     protected AccessStack buildAccessStack() {
         return CayenneTestResources
@@ -96,7 +97,7 @@ public class ClientObjectContextWithDataContextTst extends CayenneTestCase {
         hollow.setGlobalID(gid);
 
         final boolean[] selectExecuted = new boolean[1];
-        ClientObjectContext context = new ClientObjectContext(channel) {
+        CayenneContext context = new CayenneContext(channel) {
 
             public List performSelectQuery(QueryExecutionPlan query) {
                 selectExecuted[0] = true;
@@ -120,7 +121,7 @@ public class ClientObjectContextWithDataContextTst extends CayenneTestCase {
 
     public void testNewObjectShouldInflateHolders() {
 
-        ClientObjectContext context = new ClientObjectContext(new MockOPPChannel());
+        CayenneContext context = new CayenneContext(new MockOPPChannel());
         context.setEntityResolver(getDomain()
                 .getEntityResolver()
                 .getClientEntityResolver());

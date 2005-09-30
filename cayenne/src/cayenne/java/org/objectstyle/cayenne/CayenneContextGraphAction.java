@@ -1,7 +1,5 @@
-package org.objectstyle.cayenne.client;
+package org.objectstyle.cayenne;
 
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.property.ArcProperty;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.property.Property;
@@ -13,12 +11,12 @@ import org.objectstyle.cayenne.property.Property;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ClientObjectContextGraphAction {
+class CayenneContextGraphAction {
 
-    ClientObjectContext context;
+    CayenneContext context;
     ThreadLocal arcChangeInProcess;
 
-    ClientObjectContextGraphAction(ClientObjectContext context) {
+    CayenneContextGraphAction(CayenneContext context) {
         this.context = context;
         this.arcChangeInProcess = new ThreadLocal();
     }

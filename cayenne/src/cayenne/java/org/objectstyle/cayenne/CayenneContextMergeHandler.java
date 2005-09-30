@@ -53,10 +53,8 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.client;
+package org.objectstyle.cayenne;
 
-import org.objectstyle.cayenne.GlobalID;
-import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.graph.BeanMergeHandler;
 import org.objectstyle.cayenne.graph.GraphMap;
 
@@ -66,11 +64,11 @@ import org.objectstyle.cayenne.graph.GraphMap;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ClientObjectContextMergeHandler extends BeanMergeHandler {
+class CayenneContextMergeHandler extends BeanMergeHandler {
 
-    ClientStateRecorder stateRecorder;
+    ContextStateRecorder stateRecorder;
 
-    ClientObjectContextMergeHandler(ClientStateRecorder stateRecorder, GraphMap graphMap) {
+    CayenneContextMergeHandler(ContextStateRecorder stateRecorder, GraphMap graphMap) {
         super(graphMap);
 
         this.stateRecorder = stateRecorder;

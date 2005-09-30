@@ -53,17 +53,13 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.client;
+package org.objectstyle.cayenne;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.objectstyle.cayenne.GlobalID;
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.client.CayenneClientException;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
@@ -82,14 +78,14 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
 
 /**
- * An client tier ObjectContext implementation in a 3+ tier Cayenne application. Instead
- * of using regular Cayenne stack for database updates ClientObjectContext uses a
- * connector object to communicate with server-side peer.
+ * A default generic implementation of ObjectContext suitable for accessing Cayenne from
+ * either an ORM or a client tiers. Communicates with Cayenne persistence stack by sending
+ * OPP messages via a parent OPPChannel.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ClientObjectContext implements ObjectContext {
+public class CayenneContext implements ObjectContext {
 
     // if we are to pass ClientObjectContext around, channel should be left alone and
     // reinjected later if needed
@@ -98,19 +94,19 @@ public class ClientObjectContext implements ObjectContext {
     protected EntityResolver entityResolver;
     protected GraphManager graphManager;
     protected OperationRecorder changeRecorder;
-    protected ClientStateRecorder stateRecorder;
+    protected ContextStateRecorder stateRecorder;
 
     // note that it is important to reuse the same action within the property change
     // thread to avoid a loop of "propertyChange" calls on handling reverse relationships.
     // Here we go further and make action a thread-safe ivar that tracks its own thread
     // state.
-    ClientObjectContextGraphAction graphAction;
+    CayenneContextGraphAction graphAction;
 
     /**
      * Creates a new ClientObjectContext. Note that it is not fully functional until its
      * "connector" property is set.
      */
-    public ClientObjectContext() {
+    public CayenneContext() {
         this(null);
     }
 
@@ -118,22 +114,22 @@ public class ClientObjectContext implements ObjectContext {
      * Creates a new ClientObjectContext, initializaing it with a connector instance that
      * should be used to connect to a remote Cayenne service.
      */
-    public ClientObjectContext(OPPChannel channel) {
+    public CayenneContext(OPPChannel channel) {
         this.channel = channel;
 
         // assemble objects that track graph changes
         this.graphManager = new GraphManager();
 
         this.changeRecorder = new OperationRecorder();
-        this.stateRecorder = new ClientStateRecorder(graphManager);
+        this.stateRecorder = new ContextStateRecorder(graphManager);
 
         graphManager.addLocalChangeHandler(changeRecorder);
         graphManager.addLocalChangeHandler(stateRecorder);
-        graphManager.setRemoteChangeHandler(new ClientObjectContextMergeHandler(
+        graphManager.setRemoteChangeHandler(new CayenneContextMergeHandler(
                 stateRecorder,
                 graphManager));
 
-        graphAction = new ClientObjectContextGraphAction(this);
+        graphAction = new CayenneContextGraphAction(this);
     }
 
     public OPPChannel getChannel() {

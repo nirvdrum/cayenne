@@ -57,10 +57,10 @@ package org.objectstyle.cayenne.service;
 
 import java.util.List;
 
+import org.objectstyle.cayenne.CayenneContext;
 import org.objectstyle.cayenne.PersistentObjectHolder;
 import org.objectstyle.cayenne.PersistentObjectList;
 import org.objectstyle.cayenne.ValueHolder;
-import org.objectstyle.cayenne.client.ClientObjectContext;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.opp.OPPConnectorChannel;
 import org.objectstyle.cayenne.opp.LocalConnector;
@@ -209,12 +209,12 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
      * Prepares ClientObjectContext that would access regular Cayenne stack over local
      * adapter with Hessian serialization.
      */
-    protected ClientObjectContext buildContext() {
+    protected CayenneContext buildContext() {
         OPPChannel handler = new ClientServerChannel(new ObjectDataContext(getDomain()));
         LocalConnector connector = new LocalConnector(
                 handler,
                 LocalConnector.HESSIAN_SERIALIZATION);
 
-        return new ClientObjectContext(new OPPConnectorChannel(connector));
+        return new CayenneContext(new OPPConnectorChannel(connector));
     }
 }

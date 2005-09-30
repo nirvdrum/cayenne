@@ -54,7 +54,7 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.client;
+package org.objectstyle.cayenne;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,8 +64,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphMap;
 
@@ -75,12 +73,12 @@ import org.objectstyle.cayenne.graph.GraphMap;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ClientStateRecorder implements GraphChangeHandler {
+class ContextStateRecorder implements GraphChangeHandler {
 
     Set dirtyIds;
     GraphMap graphMap;
 
-    ClientStateRecorder(GraphMap graphMap) {
+    ContextStateRecorder(GraphMap graphMap) {
         this.dirtyIds = new HashSet();
         this.graphMap = graphMap;
     }

@@ -58,7 +58,6 @@ package org.objectstyle.cayenne;
 import java.util.Iterator;
 import java.util.List;
 
-import org.objectstyle.cayenne.client.ClientObjectContext;
 import org.objectstyle.cayenne.opp.OPPConnectorChannel;
 import org.objectstyle.cayenne.opp.LocalConnector;
 import org.objectstyle.cayenne.opp.OPPConnector;
@@ -82,7 +81,7 @@ public class PersistentObjectInContextTst extends CayenneTestCase {
     protected ObjectContext createObjectContext() {
         // wrap ClientServerChannel in LocalConnector to enable logging...
         OPPConnector connector = new LocalConnector(new ClientServerChannel(getDomain()));
-        return new ClientObjectContext(new OPPConnectorChannel(connector));
+        return new CayenneContext(new OPPConnectorChannel(connector));
     }
 
     public void testResolveToManyReverseResolved() throws Exception {

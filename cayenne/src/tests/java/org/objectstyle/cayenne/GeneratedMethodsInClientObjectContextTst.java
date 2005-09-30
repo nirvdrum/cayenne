@@ -1,5 +1,6 @@
-package org.objectstyle.cayenne.client;
+package org.objectstyle.cayenne;
 
+import org.objectstyle.cayenne.CayenneContext;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
@@ -21,7 +22,7 @@ public class GeneratedMethodsInClientObjectContextTst extends CayenneTestCase {
                 .getEntityResolver()
                 .getClientEntityResolver();
 
-        ClientObjectContext context = new ClientObjectContext();
+        CayenneContext context = new CayenneContext();
         context.setEntityResolver(resolver);
 
         ClientMtTable1 t1 = (ClientMtTable1) context.newObject(ClientMtTable1.class);
@@ -46,7 +47,7 @@ public class GeneratedMethodsInClientObjectContextTst extends CayenneTestCase {
                 .getEntityResolver()
                 .getClientEntityResolver();
 
-        ClientObjectContext context = new ClientObjectContext();
+        CayenneContext context = new CayenneContext();
         context.setEntityResolver(resolver);
 
         ClientMtTable1 t1 = (ClientMtTable1) context.newObject(ClientMtTable1.class);

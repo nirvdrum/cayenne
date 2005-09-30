@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.objectstyle.cayenne.client.ClientObjectContext;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -133,7 +132,7 @@ public abstract class RelationshipFault {
 
         // TODO: Andrus, 09/26/2005 - API for entity resolver detection should become a
         // part of ObjectContext, so ClientObjectContext cast will become unnecessary.
-        EntityResolver resolver = ((ClientObjectContext) relationshipOwner
+        EntityResolver resolver = ((CayenneContext) relationshipOwner
                 .getObjectContext()).getEntityResolver();
         ObjEntity sourceEntity = resolver.lookupObjEntity(relationshipOwner
                 .getGlobalID()

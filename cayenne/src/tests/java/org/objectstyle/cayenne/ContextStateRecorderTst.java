@@ -53,12 +53,12 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.client;
+package org.objectstyle.cayenne;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.ContextStateRecorder;
 import org.objectstyle.cayenne.GlobalID;
-import org.objectstyle.cayenne.MockPersistentObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.graph.GraphMap;
 import org.objectstyle.cayenne.graph.MockGraphMap;
@@ -66,12 +66,12 @@ import org.objectstyle.cayenne.graph.MockGraphMap;
 /**
  * @author Andrus Adamchik
  */
-public class ClientStateRecorderTst extends TestCase {
+public class ContextStateRecorderTst extends TestCase {
 
     public void testDirtyNodesInState() {
 
         GraphMap map = new MockGraphMap();
-        ClientStateRecorder recorder = new ClientStateRecorder(map);
+        ContextStateRecorder recorder = new ContextStateRecorder(map);
 
         // check for null collections
         assertNotNull(recorder.dirtyNodes(PersistenceState.MODIFIED));
@@ -117,7 +117,7 @@ public class ClientStateRecorderTst extends TestCase {
 
     public void testDirtyNodes() {
         GraphMap map = new MockGraphMap();
-        ClientStateRecorder recorder = new ClientStateRecorder(map);
+        ContextStateRecorder recorder = new ContextStateRecorder(map);
 
         assertNotNull(recorder.dirtyNodes());
         assertTrue(recorder.dirtyNodes().isEmpty());
@@ -139,7 +139,7 @@ public class ClientStateRecorderTst extends TestCase {
 
     public void testHasChanges() {
 
-        ClientStateRecorder recorder = new ClientStateRecorder(new MockGraphMap());
+        ContextStateRecorder recorder = new ContextStateRecorder(new MockGraphMap());
         assertFalse(recorder.hasChanges());
 
         // introduce a fake dirty object
