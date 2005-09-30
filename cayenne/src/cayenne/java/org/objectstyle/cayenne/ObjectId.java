@@ -64,6 +64,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.objectstyle.cayenne.util.IDUtil;
 
 /**
  * An ObjectId is a globally unique identifier of DataObjects.
@@ -82,6 +83,7 @@ public class ObjectId implements Serializable {
     // Values: database values of the corresponding attribute
     protected Map objectIdKeys;
     protected Class objectClass;
+    protected byte[] key;
 
     /**
      * @since 1.2
@@ -90,9 +92,28 @@ public class ObjectId implements Serializable {
 
     // TODO: caching hash code may cause issues on deserilaization in a different VM...
     // need custom readObject/writeObject
-    
+
     // cache hashCode, since ObjectId is immutable
     int hashCode = Integer.MIN_VALUE;
+
+    /**
+     * Creates a TEMPORARY ObjectId that should be replaced by a permanent id once a
+     * corresponding object is committed.
+     */
+    public ObjectId(Class objectClass) {
+        this(objectClass, IDUtil.pseudoUniqueByteSequence16());
+    }
+
+    /**
+     * Create a TEMPORARY ObjectId with a binary unique key. This id is "portable" in that
+     * it can be used across virtual machines to identify the same object.
+     * 
+     * @since 1.2
+     */
+    public ObjectId(Class objectClass, byte[] key) {
+        this.objectClass = objectClass;
+        this.key = key;
+    }
 
     /**
      * Convenience constructor for entities that have a single Integer as their id.
@@ -122,6 +143,15 @@ public class ObjectId implements Serializable {
         }
     }
 
+    /**
+     * Returns a binary unique key for this id.
+     * 
+     * @since 1.2
+     */
+    public byte[] getKey() {
+        return key;
+    }
+
     protected void setIdKeys(Map idKeys) {
         this.objectIdKeys = idKeys;
     }
@@ -136,6 +166,12 @@ public class ObjectId implements Serializable {
         }
 
         ObjectId id = (ObjectId) object;
+
+        if (isTemporary()) {
+            return new EqualsBuilder().append(
+                    objectClass.getName(),
+                    id.objectClass.getName()).append(key, id.key).isEquals();
+        }
 
         // use the class name because two Objectid's should be equal
         // even if their objClass'es were loaded by different class loaders.
@@ -184,6 +220,10 @@ public class ObjectId implements Serializable {
      * database values of corresponding columns.
      */
     public Map getIdSnapshot() {
+        if (isTemporary()) {
+            return (replacementIdMap == null) ? Collections.EMPTY_MAP : replacementIdMap;
+        }
+
         return objectIdKeys;
     }
 
@@ -195,16 +235,18 @@ public class ObjectId implements Serializable {
     }
 
     /**
-     * Always returns <code>false</code>.
+     * Returns whether this is a temporary id.
      */
     public boolean isTemporary() {
-        return false;
+        return key != null;
     }
 
     public String toString() {
         StringBuffer buf = new StringBuffer(objectClass.getName());
-        if (isTemporary())
+        if (isTemporary()) {
             buf.append(" (temp)");
+        }
+
         buf.append(": ");
         if (objectIdKeys != null) {
             Iterator it = objectIdKeys.keySet().iterator();
@@ -229,6 +271,10 @@ public class ObjectId implements Serializable {
             // use the class name because two Objectid's should be equal
             // even if their objClass'es were loaded by different class loaders.
             builder.append(objectClass.getName().hashCode());
+
+            if (key != null) {
+                builder.append(key);
+            }
 
             if (objectIdKeys != null) {
                 int len = objectIdKeys.size();
@@ -294,7 +340,7 @@ public class ObjectId implements Serializable {
      * @deprecated Since 1.2 replacement id is built by appending to replacementIdMap.
      */
     public void setReplacementId(ObjectId replacementId) {
-        if(replacementId == null) {
+        if (replacementId == null) {
             replacementIdMap = null;
         }
         else {

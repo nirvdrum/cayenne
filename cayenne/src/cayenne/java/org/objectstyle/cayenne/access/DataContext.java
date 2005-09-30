@@ -76,7 +76,6 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.access.util.PrefetchHelper;
@@ -794,7 +793,7 @@ public class DataContext implements QueryEngine, Serializable {
         // performed by the caller depending on the invocation context
 
         if (dataObject.getObjectId() == null) {
-            dataObject.setObjectId(new TempObjectId(dataObject.getClass()));
+            dataObject.setObjectId(new ObjectId(dataObject.getClass()));
         }
 
         // initialize to-many relationships with a fault

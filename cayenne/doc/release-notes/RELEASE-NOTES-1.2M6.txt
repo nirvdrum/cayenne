@@ -20,6 +20,7 @@ Changes/New Features:
 * Fixed UI bugs in query ordering and prefetch panels.
 * Deprecated explicit log levels in Query, OperantionHints and DataContext.
 * DataContext can be subclassed via DataContextFactory.
+* TempObjectId is deprecated. Superclass is used instead. See TempObjectId javadocs for migration hints.
 
 * Multi Tier Progress:
  - relationships are done

@@ -3,7 +3,6 @@ package org.objectstyle.cayenne.access;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
@@ -16,7 +15,7 @@ public class DataContextRefetchTst extends CayenneTestCase {
         MockDataDomain domain = new MockDataDomain(engine);
 
         DataContext context = domain.createDataContext();
-        ObjectId tempID = new TempObjectId(Artist.class);
+        ObjectId tempID = new ObjectId(Artist.class);
 
         try {
             context.refetchObject(tempID);

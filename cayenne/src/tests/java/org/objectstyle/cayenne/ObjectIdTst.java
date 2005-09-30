@@ -62,26 +62,34 @@ import junit.framework.TestCase;
 
 import org.apache.commons.collections.map.LinkedMap;
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.util.Util;
 
 public class ObjectIdTst extends TestCase {
 
-    public void testObjEntityName() {
+    public void testEqualsTempDeserialized() throws Exception {
+        ObjectId oid1 = new ObjectId(Object.class);
+        Object oid2 = Util.cloneViaSerialization(oid1);
+        assertNotSame(oid1, oid2);
+        assertEquals(oid1, oid2);
+    }
+
+    public void testObjectClass() {
         Class class1 = Number.class;
-        ObjectId oid = new ObjectId(class1, null);
+        ObjectId oid = new ObjectId(class1);
         assertEquals(class1, oid.getObjectClass());
     }
 
     public void testEquals0() {
         Class class1 = Number.class;
-        ObjectId oid1 = new ObjectId(class1, null);
+        ObjectId oid1 = new ObjectId(class1);
         assertEquals(oid1, oid1);
         assertEquals(oid1.hashCode(), oid1.hashCode());
     }
 
     public void testEquals1() {
         Class class1 = Number.class;
-        ObjectId oid1 = new ObjectId(class1, null);
-        ObjectId oid2 = new ObjectId(class1, null);
+        ObjectId oid1 = new ObjectId(class1, "a", "b");
+        ObjectId oid2 = new ObjectId(class1, "a", "b");
         assertEquals(oid1, oid2);
         assertEquals(oid1.hashCode(), oid2.hashCode());
     }
@@ -235,8 +243,8 @@ public class ObjectIdTst extends TestCase {
         Class class1 = Number.class;
         Class class2 = Boolean.class;
 
-        ObjectId oid1 = new ObjectId(class1, null);
-        ObjectId oid2 = new ObjectId(class2, null);
+        ObjectId oid1 = new ObjectId(class1);
+        ObjectId oid2 = new ObjectId(class2);
         assertFalse(oid1.equals(oid2));
     }
 

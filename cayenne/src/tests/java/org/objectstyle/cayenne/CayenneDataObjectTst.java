@@ -64,7 +64,7 @@ public class CayenneDataObjectTst extends TestCase {
     
     public void testSetObjectId() throws Exception {
         CayenneDataObject obj = new CayenneDataObject();
-        ObjectId oid = new ObjectId(String.class, null); //class is irrelevant
+        ObjectId oid = new ObjectId(String.class); //class is irrelevant
         
         assertNull(obj.getObjectId());
         

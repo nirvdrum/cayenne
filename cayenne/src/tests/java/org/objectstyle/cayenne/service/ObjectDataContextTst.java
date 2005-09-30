@@ -64,7 +64,6 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.MockDataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.MockDataRowStore;
 import org.objectstyle.cayenne.access.MockPersistenceContext;
 import org.objectstyle.cayenne.access.PersistenceContext;
@@ -165,7 +164,7 @@ public class ObjectDataContextTst extends TestCase {
                 new EntityResolver(),
                 new MockDataRowStore());
 
-        DataObject newObject = new MockDataObject(context, new TempObjectId(
+        DataObject newObject = new MockDataObject(context, new ObjectId(
                 MockDataObject.class), PersistenceState.NEW);
         context.getObjectStore().addObject(newObject);
         Collection uncommitted1 = context.uncommittedObjects();
@@ -173,7 +172,7 @@ public class ObjectDataContextTst extends TestCase {
         assertEquals(1, uncommitted1.size());
         assertTrue(uncommitted1.contains(newObject));
 
-        DataObject modifiedObject = new MockDataObject(context, new TempObjectId(
+        DataObject modifiedObject = new MockDataObject(context, new ObjectId(
                 MockDataObject.class), PersistenceState.MODIFIED);
         context.getObjectStore().addObject(modifiedObject);
         Collection uncommitted2 = context.uncommittedObjects();
@@ -182,7 +181,7 @@ public class ObjectDataContextTst extends TestCase {
         assertTrue(uncommitted2.contains(newObject));
         assertTrue(uncommitted2.contains(modifiedObject));
 
-        DataObject deletedObject = new MockDataObject(context, new TempObjectId(
+        DataObject deletedObject = new MockDataObject(context, new ObjectId(
                 MockDataObject.class), PersistenceState.DELETED);
         context.getObjectStore().addObject(deletedObject);
         Collection uncommitted3 = context.uncommittedObjects();
@@ -192,7 +191,7 @@ public class ObjectDataContextTst extends TestCase {
         assertTrue(uncommitted3.contains(modifiedObject));
         assertTrue(uncommitted3.contains(deletedObject));
 
-        DataObject committedObject = new MockDataObject(context, new TempObjectId(
+        DataObject committedObject = new MockDataObject(context, new ObjectId(
                 MockDataObject.class), PersistenceState.COMMITTED);
         context.getObjectStore().addObject(committedObject);
         Collection uncommitted4 = context.uncommittedObjects();

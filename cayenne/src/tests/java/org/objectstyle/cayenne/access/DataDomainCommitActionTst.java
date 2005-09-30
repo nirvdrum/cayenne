@@ -60,8 +60,8 @@ import java.util.Collections;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.MockObjectContext;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.graph.OperationRecorder;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -75,7 +75,7 @@ public class DataDomainCommitActionTst extends CayenneTestCase {
     public void testCommitResult() {
         final Artist artist = new Artist();
         artist.setArtistName("test");
-        artist.setObjectId(new TempObjectId(Artist.class));
+        artist.setObjectId(new ObjectId(Artist.class));
         artist.setPersistenceState(PersistenceState.NEW);
 
         MockObjectContext context = new MockObjectContext() {

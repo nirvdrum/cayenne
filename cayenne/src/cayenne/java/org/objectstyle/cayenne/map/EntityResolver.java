@@ -70,7 +70,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -140,8 +139,8 @@ public class EntityResolver implements MappingNamespace, Serializable {
                     + id.getObjectClass().getName());
         }
 
-        if (id instanceof TempObjectId) {
-            return new GlobalID(entity.getName(), ((TempObjectId) id).getKey());
+        if (id.isTemporary()) {
+            return new GlobalID(entity.getName(), id.getKey());
         }
         else {
             return new GlobalID(entity.getName(), id.getIdSnapshot());
@@ -164,7 +163,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
                 .currentThread()
                 .getContextClassLoader());
         return (id.isTemporary())
-                ? new TempObjectId(objectClass, id.getKey())
+                ? new ObjectId(objectClass, id.getKey())
                 : new ObjectId(objectClass, id.getObjectIdKeys());
     }
 

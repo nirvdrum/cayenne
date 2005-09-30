@@ -150,7 +150,7 @@ public class GlobalID implements Serializable {
 
         if (isTemporary()) {
             return new EqualsBuilder()
-                    .append(entityName, entityName)
+                    .append(entityName, id.entityName)
                     .append(key, id.key)
                     .isEquals();
         }

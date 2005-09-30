@@ -59,6 +59,10 @@ import org.objectstyle.cayenne.util.Util;
 
 import junit.framework.TestCase;
 
+/**
+ * @deprecated since 1.2
+ * @author Andrus Adamchik
+ */
 public class TempObjectIdTst extends TestCase {
     
     public void testEqualsDeserialized() throws Exception {

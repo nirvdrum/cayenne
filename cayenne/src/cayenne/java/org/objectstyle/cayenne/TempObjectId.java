@@ -66,19 +66,24 @@ import org.objectstyle.cayenne.util.IDUtil;
  * An ObjectId for new objects that hasn't been committed to the external data store. On
  * commit, a TempObjectId is replaced with a permanent ObjectId tied to a primary key of
  * an object in the external data store.
+ * <h3>Upgrade Note:</h3>
+ * <p>
+ * If you were referencing TempObjectId explicitly in your code (e.g. if(id instanceof
+ * TempObjectId)...), you will need to modify the code and use "isTemporary()" superclass
+ * method.
+ * </p>
  * 
  * @author Andrei Adamchik
+ * @deprecated since 1.2 superclass can represent both permanent and temporary id.
  */
 public class TempObjectId extends ObjectId {
-
-    protected byte[] key;
 
     /**
      * Creates a non-portable temporary ObjectId that should be replaced by a permanent id
      * once a corresponding object is committed.
      */
     public TempObjectId(Class objectClass) {
-        this(objectClass, IDUtil.pseudoUniqueByteSequence16());
+        super(objectClass, IDUtil.pseudoUniqueByteSequence16());
     }
 
     /**
@@ -88,17 +93,7 @@ public class TempObjectId extends ObjectId {
      * @since 1.2
      */
     public TempObjectId(Class objectClass, byte[] key) {
-        super(objectClass, null);
-        this.key = key;
-    }
-    
-    /**
-     * Returns a binary unique key for this id.
-     * 
-     * @since 1.2
-     */
-    public byte[] getKey() {
-        return key;
+        super(objectClass, key);
     }
 
     /**
@@ -116,17 +111,17 @@ public class TempObjectId extends ObjectId {
             return true;
         }
 
-        if (!(object instanceof TempObjectId)) {
+        if (!(object instanceof ObjectId)) {
             return false;
         }
 
-        TempObjectId id = (TempObjectId) object;
+        ObjectId id = (ObjectId) object;
         return new EqualsBuilder()
                 .append(objectClass.getName(), id.objectClass.getName())
                 .append(key, id.key)
                 .isEquals();
     }
-    
+
     public int hashCode() {
         if (this.hashCode == Integer.MIN_VALUE) {
             // build and cache hashCode
