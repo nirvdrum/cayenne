@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.graph;
 
 import java.util.Collection;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.property.PropertyUtils;
 
 /**
  * GraphChangeHandler that works on top of a GraphMap, with callback methods implemented
@@ -126,7 +126,7 @@ public class BeanMergeHandler implements GraphChangeHandler {
         Object node = graphMap.getNode(nodeId);
         if (node != null) {
             try {
-                PropertyUtils.setSimpleProperty(node, property, newValue);
+                PropertyUtils.setProperty(node, property, newValue);
             }
             catch (Exception e) {
                 throw new CayenneRuntimeException("Error setting property " + property, e);
@@ -144,7 +144,7 @@ public class BeanMergeHandler implements GraphChangeHandler {
             // collection ... if it is add to collection, otherwise set directly
             try {
 
-                Object property = PropertyUtils.getSimpleProperty(node, arcId.toString());
+                Object property = PropertyUtils.getProperty(node, arcId.toString());
                 if (property instanceof Collection) {
 
                     Collection collection = (Collection) property;
@@ -153,7 +153,7 @@ public class BeanMergeHandler implements GraphChangeHandler {
                     }
                 }
                 else {
-                    PropertyUtils.setSimpleProperty(node, arcId.toString(), nodeTarget);
+                    PropertyUtils.setProperty(node, arcId.toString(), nodeTarget);
                 }
             }
             catch (Exception e) {
@@ -172,7 +172,7 @@ public class BeanMergeHandler implements GraphChangeHandler {
             // collection ... if it is remove from collection, otherwise set to null
             try {
 
-                Object property = PropertyUtils.getSimpleProperty(node, arcId.toString());
+                Object property = PropertyUtils.getProperty(node, arcId.toString());
                 if (property instanceof Collection) {
 
                     Collection collection = (Collection) property;
@@ -181,7 +181,7 @@ public class BeanMergeHandler implements GraphChangeHandler {
                     }
                 }
                 else {
-                    PropertyUtils.setSimpleProperty(node, arcId.toString(), null);
+                    PropertyUtils.setProperty(node, arcId.toString(), null);
                 }
             }
             catch (Exception e) {

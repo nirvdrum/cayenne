@@ -64,9 +64,9 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.pref.PreferenceException;
+import org.objectstyle.cayenne.property.PropertyUtils;
 
 public class ComponentGeometry extends _ComponentGeometry {
 

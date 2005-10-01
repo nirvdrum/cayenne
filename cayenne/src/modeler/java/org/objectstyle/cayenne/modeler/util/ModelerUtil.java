@@ -65,7 +65,6 @@ import java.util.Set;
 
 import javax.swing.ImageIcon;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
@@ -73,6 +72,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.modeler.ModelerConstants;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.property.PropertyUtils;
 import org.objectstyle.cayenne.util.CayenneMapEntry;
 
 /**
@@ -100,7 +100,7 @@ public final class ModelerUtil {
         else {
             try {
                 // use reflection
-                return (String) PropertyUtils.getSimpleProperty(object, "name");
+                return (String) PropertyUtils.getProperty(object, "name");
             }
             catch (Exception ex) {
                 return null;

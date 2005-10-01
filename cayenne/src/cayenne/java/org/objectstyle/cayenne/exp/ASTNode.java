@@ -58,10 +58,10 @@ package org.objectstyle.cayenne.exp;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.property.PropertyUtils;
 import org.objectstyle.cayenne.util.Util;
 
 /**

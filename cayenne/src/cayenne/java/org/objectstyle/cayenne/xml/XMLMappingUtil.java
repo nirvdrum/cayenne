@@ -65,12 +65,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.PropertyUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.property.PropertyUtils;
 
 /**
  * A convenience class for dealing with the mapping file. This can encode and decode
@@ -181,7 +180,7 @@ final class XMLMappingUtil {
             String xmlTag = property.getAttributeValue("xmlTag");
             String propertyName = property.getAttributeValue("name");
 
-            Object propertyValue = getProperty(object, propertyName);
+            Object propertyValue =  PropertyUtils.getProperty(object, propertyName);
 
             // If the child refers to an entity, skip over it, since when that entity
             // is processed, it will
@@ -317,7 +316,7 @@ final class XMLMappingUtil {
 
                     // use it to determine the actual property to be setting in the
                     // object.
-                    setProperty(object, e.getAttributeValue("name"), encProperty
+                    PropertyUtils.setProperty(object, e.getAttributeValue("name"), encProperty
                             .getText());
                 }
             }
@@ -339,14 +338,14 @@ final class XMLMappingUtil {
 
             // Set the property in the main object that corresponds to the newly
             // created object.
-            Object property = getProperty(object, getEntityRef(entity, xmlTag));
+            Object property = PropertyUtils.getProperty(object, getEntityRef(entity, xmlTag));
 
             if (property instanceof Collection) {
                 Collection c = (Collection) property;
                 c.add(o);
             }
             else {
-                setProperty(object, getEntityRef(entity, xmlTag), o);
+                PropertyUtils.setProperty(object, getEntityRef(entity, xmlTag), o);
             }
         }
     }
@@ -378,43 +377,8 @@ final class XMLMappingUtil {
         return ret;
     }
 
-    /**
-     * Sets object property, wrapping any exceptions in CayenneRuntimeException.
-     * 
-     * @param object The object to set the property value on.
-     * @param property The name of the property to set.
-     * @param value The value of the property.
-     * @throws CayenneRuntimeException
-     */
-    private void setProperty(Object object, String property, Object value)
-            throws CayenneRuntimeException {
-        try {
-            BeanUtils.setProperty(object, property, value);
-        }
-        catch (Exception ex) {
-            throw new CayenneRuntimeException("Error setting property " + property, ex);
-        }
-    }
-
-    /**
-     * Returns the value for an object's property.
-     * 
-     * @param object The object whose property value to retrieve.
-     * @param property The property whose value to retrieve.
-     * @return The retrieved property value.
-     * @throws CayenneRuntimeException
-     */
-    private Object getProperty(Object object, String property)
-            throws CayenneRuntimeException {
-        try {
-            return PropertyUtils.getNestedProperty(object, property);
-        }
-        catch (Exception ex) {
-            throw new CayenneRuntimeException("Error reading property '"
-                    + property
-                    + "'.", ex);
-        }
-    }
+   
+  
 
     /**
      * Instantiates a new object for class name, wrapping any exceptions in

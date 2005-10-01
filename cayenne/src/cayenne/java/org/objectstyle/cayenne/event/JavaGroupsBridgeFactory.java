@@ -58,9 +58,9 @@ package org.objectstyle.cayenne.event;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.property.PropertyUtils;
 
 /**
  * Factory to create JavaGroupsBridge instances. If JavaGroups library is not installed this
@@ -134,12 +134,12 @@ public class JavaGroupsBridgeFactory implements EventBridgeFactory {
             String multicastPort = (String) properties.get(MCAST_PORT_PROPERTY);
             String configURL = (String) properties.get(JGROUPS_CONFIG_URL_PROPERTY);
 
-            BeanUtils.setProperty(bridge, "configURL", configURL);
-            BeanUtils.setProperty(
+            PropertyUtils.setProperty(bridge, "configURL", configURL);
+            PropertyUtils.setProperty(
                 bridge,
                 "multicastAddress",
                 multicastAddress != null ? multicastAddress : MCAST_ADDRESS_DEFAULT);
-            BeanUtils.setProperty(
+            PropertyUtils.setProperty(
                 bridge,
                 "multicastPort",
                 multicastPort != null ? multicastPort : MCAST_PORT_DEFAULT);

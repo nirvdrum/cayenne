@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.query;
 
-import org.apache.commons.beanutils.PropertyUtils;
+import org.objectstyle.cayenne.property.PropertyUtils;
 import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**

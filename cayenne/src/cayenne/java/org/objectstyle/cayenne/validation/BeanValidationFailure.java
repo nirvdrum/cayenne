@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.validation;
 
 import java.util.Collection;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.property.PropertyUtils;
 
 /**
  * ValidationFailure implementation that described a failure of a single

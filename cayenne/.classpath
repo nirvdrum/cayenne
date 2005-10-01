@@ -16,7 +16,6 @@
 	<classpathentry exported="true" kind="lib" path="otherlib/ant-1.6.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/ashwood-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/bcel-5.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="otherlib/commons-beanutils-1.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/commons-collections-3.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/commons-dbcp-1.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/commons-lang-2.1.jar"/>

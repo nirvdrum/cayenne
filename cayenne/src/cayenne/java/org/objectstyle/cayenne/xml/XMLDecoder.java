@@ -57,6 +57,7 @@
 package org.objectstyle.cayenne.xml;
 
 import java.io.Reader;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -64,14 +65,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.beanutils.ConstructorUtils;
-import org.apache.commons.beanutils.PropertyUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.property.PropertyUtils;
 
 /**
  * XMLDecoder is used to decode XML into objects.
@@ -234,14 +234,18 @@ public class XMLDecoder {
         }
 
         try {
-            // This crazy conditional checks if we're decoding a collection.  There are two ways
+            // This crazy conditional checks if we're decoding a collection. There are two
+            // ways
             // to enter into this body:
-            // 1) If there are two elements at the same level with the same name, then they should
+            // 1) If there are two elements at the same level with the same name, then
+            // they should
             // part of a collection.
-            // 2) If a single occurring element has the "forceList" attribute set to "YES", then it
+            // 2) If a single occurring element has the "forceList" attribute set to
+            // "YES", then it
             // too should be treated as a collection.
             // 
-            // The final part checks that we have not previously attempted to decode this collection,
+            // The final part checks that we have not previously attempted to decode this
+            // collection,
             // which is necessary to prevent infinite loops .
             if ((((null != child.getParentElement()) && (child
                     .getParentElement()
@@ -255,32 +259,25 @@ public class XMLDecoder {
 
             // If the object implements XMLSerializable, delegate decoding to the class's
             // implementation of decodeFromXML().
-            else if (XMLSerializable.class.isAssignableFrom(objectClass)) {
+            if (XMLSerializable.class.isAssignableFrom(objectClass)) {
                 XMLSerializable ret = (XMLSerializable) objectClass.newInstance();
                 ret.decodeFromXML(this);
 
                 return ret;
             }
 
-            // If we hit here, then we should be encoding "simple" properties, which are basically
+            // If we hit here, then we should be encoding "simple" properties, which are
+            // basically
             // objects that take a single arg String constructor.
-            else if (ConstructorUtils.getAccessibleConstructor(objectClass, String.class) != null) {
+            Constructor c = objectClass.getConstructor(new Class[] {String.class});
+            if (c != null) {
                 // Create a new object of the type supplied as the "type" attribute
                 // in the XML element that
                 // represents the XML element's text value.
                 // E.g., for <count type="java.lang.Integer">13</count>, this is
                 // equivalent to new Integer("13");
-                return ConstructorUtils.invokeConstructor(objectClass, child.getText());
-            }
-
-            // If we hit here, then we're trying to decode something we're not equipped to handle.
-            // E.g., a complex object that does not implement XMLSerializable.
-            else {
-                throw new CayenneRuntimeException(
-                        "Error decoding tag '"
-                                + child.getName()
-                                + "': "
-                                + "specified class does not have a constructor taking either a String or an XMLDecoder");
+                
+                return c.newInstance(new Object[] {child.getText()});
             }
         }
         catch (Exception e) {
@@ -288,6 +285,16 @@ public class XMLDecoder {
                     + child.getName()
                     + "'", e);
         }
+
+        // If we hit here, then we're trying to decode something we're not equipped to
+        // handle.
+        // E.g., a complex object that does not implement XMLSerializable.
+
+        throw new CayenneRuntimeException(
+                "Error decoding tag '"
+                        + child.getName()
+                        + "': "
+                        + "specified class does not have a constructor taking either a String or an XMLDecoder");
     }
 
     /**
@@ -394,7 +401,7 @@ public class XMLDecoder {
         try {
             String parentClass = xml.getParentElement().getAttributeValue("type");
             Object property = Class.forName(parentClass).newInstance();
-            Collection c = (Collection) PropertyUtils.getNestedProperty(property, xml
+            Collection c = (Collection) PropertyUtils.getProperty(property, xml
                     .getName());
 
             ret = (Collection) c.getClass().newInstance();

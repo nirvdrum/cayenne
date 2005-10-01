@@ -58,10 +58,10 @@ package org.objectstyle.cayenne.exp.parser;
 
 import java.io.PrintWriter;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.property.PropertyUtils;
 
 public class ASTObjPath extends ASTPath {
 
