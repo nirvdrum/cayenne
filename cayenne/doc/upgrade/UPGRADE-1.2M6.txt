@@ -22,6 +22,10 @@ GENERAL UPGRADE NOTES:
    
 UPGRADE NOTES:
 
+*  1.2 REQUIRES JDK 1.4 or higher for both tools and runtime. It won't work on JDK 1.3. 
+   If you are still on 1.3, upgrade your JDK if you can. If you can not, consider staying on 
+   Cayenne 1.1. 
+
 *  In 1.2 PostgreSQLAdapter uses DB sequences for primary key generation instead of 
     AUTO_PK_TABLE. To port an existing application, you will need to create those 
     sequences (e.g. using the Modeler) and assign correct current values to them 

@@ -56,32 +56,30 @@
 package org.objectstyle.cayenne.exp;
 
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
-import org.apache.oro.text.perl.Perl5Util;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * A node of the Abstract Syntax Tree (AST) for a compiled Cayenne expression. 
- * ASTNode is implemented as a linked list holding a reference to the next node 
- * in the chain. This way, a chain of AST nodes can be evaluated by calling 
- * a method on the starting node. ASTNodes also has abstract API for various 
- * optimizations based on conditional execution. 
- * 
- * <p>Also serves as a factory for specialized nodes handling various operations.</p>
+ * A node of the Abstract Syntax Tree (AST) for a compiled Cayenne expression. ASTNode is
+ * implemented as a linked list holding a reference to the next node in the chain. This
+ * way, a chain of AST nodes can be evaluated by calling a method on the starting node.
+ * ASTNodes also has abstract API for various optimizations based on conditional
+ * execution.
+ * <p>
+ * Also serves as a factory for specialized nodes handling various operations.
+ * </p>
  * 
  * @since 1.0.6
  * @author Andrei Adamchik
  */
 abstract class ASTNode {
-    private static Logger logObj = Logger.getLogger(ASTNode.class);
 
-    // used by all regex processing nodes
-    // note that according to the docs it is synchronized
-    private static final Perl5Util regexUtil = new Perl5Util();
+    private static Logger logObj = Logger.getLogger(ASTNode.class);
 
     protected ASTNode nextNode;
 
@@ -94,67 +92,66 @@ abstract class ASTNode {
         ASTNode node;
 
         switch (expression.getType()) {
-            case Expression.OBJ_PATH :
-            case Expression.DB_PATH :
+            case Expression.OBJ_PATH:
+            case Expression.DB_PATH:
                 node = new PropertyNode(expression);
                 break;
-            case Expression.EQUAL_TO :
+            case Expression.EQUAL_TO:
                 node = new EqualsNode();
                 break;
-            case Expression.OR :
+            case Expression.OR:
                 node = new OrNode();
                 break;
-            case Expression.AND :
+            case Expression.AND:
                 node = new AndNode();
                 break;
-            case Expression.NOT :
+            case Expression.NOT:
                 node = new NotNode();
                 break;
-            case Expression.LIST :
+            case Expression.LIST:
                 node = new ListNode(expression.getOperand(0));
                 break;
-            case Expression.NOT_EQUAL_TO :
+            case Expression.NOT_EQUAL_TO:
                 node = new NotEqualsNode();
                 break;
-            case Expression.LESS_THAN :
+            case Expression.LESS_THAN:
                 node = new LessThanNode();
                 break;
-            case Expression.LESS_THAN_EQUAL_TO :
+            case Expression.LESS_THAN_EQUAL_TO:
                 node = new LessThanEqualsToNode();
                 break;
-            case Expression.GREATER_THAN :
+            case Expression.GREATER_THAN:
                 node = new GreaterThanNode();
                 break;
-            case Expression.GREATER_THAN_EQUAL_TO :
+            case Expression.GREATER_THAN_EQUAL_TO:
                 node = new GreaterThanEqualsToNode();
                 break;
-            case Expression.BETWEEN :
+            case Expression.BETWEEN:
                 node = new BetweenNode(false);
                 break;
-            case Expression.NOT_BETWEEN :
+            case Expression.NOT_BETWEEN:
                 node = new BetweenNode(true);
                 break;
-            case Expression.IN :
+            case Expression.IN:
                 node = new InNode(false);
                 break;
-            case Expression.NOT_IN :
+            case Expression.NOT_IN:
                 node = new InNode(true);
                 break;
-            case Expression.LIKE :
+            case Expression.LIKE:
                 node = new LikeNode((String) expression.getOperand(1), false, false);
                 break;
-            case Expression.NOT_LIKE :
+            case Expression.NOT_LIKE:
                 node = new LikeNode((String) expression.getOperand(1), true, false);
                 break;
-            case Expression.LIKE_IGNORE_CASE :
+            case Expression.LIKE_IGNORE_CASE:
                 node = new LikeNode((String) expression.getOperand(1), false, true);
                 break;
-            case Expression.NOT_LIKE_IGNORE_CASE :
+            case Expression.NOT_LIKE_IGNORE_CASE:
                 node = new LikeNode((String) expression.getOperand(1), true, true);
                 break;
-            default :
-                throw new ExpressionException(
-                    "Unsupported expression type: "
+            default:
+                throw new ExpressionException("Unsupported expression type: "
                         + expression.getType()
                         + " ("
                         + expression.expName()
@@ -177,8 +174,8 @@ abstract class ASTNode {
     }
 
     /**
-     * Optionally can wrap a child node with a reference wrapper.
-     * Default implementation simply returns childNode unchanged.
+     * Optionally can wrap a child node with a reference wrapper. Default implementation
+     * simply returns childNode unchanged.
      */
     ASTNode wrapChildNode(ASTNode childNode) {
         return childNode;
@@ -195,17 +192,17 @@ abstract class ASTNode {
     abstract void appendString(StringBuffer buffer);
 
     /**
-     * Evaluates a chain of ASTNodes, starting from this node, in the context
-     * of a JavaBean object that will provide property values for the path nodes. 
-     * The result is converted to boolean.
+     * Evaluates a chain of ASTNodes, starting from this node, in the context of a
+     * JavaBean object that will provide property values for the path nodes. The result is
+     * converted to boolean.
      */
     boolean evaluateBooleanASTChain(Object bean) throws ExpressionException {
         return ASTStack.booleanFromObject(evaluateASTChain(bean));
     }
 
     /**
-     * Evaluates a chain of ASTNodes, starting from this node, in the context
-     * of a JavaBean object that will provide property values for the path nodes.
+     * Evaluates a chain of ASTNodes, starting from this node, in the context of a
+     * JavaBean object that will provide property values for the path nodes.
      */
     Object evaluateASTChain(Object bean) throws ExpressionException {
         ASTNode currentNode = this;
@@ -224,18 +221,16 @@ abstract class ASTNode {
                 throw (ExpressionException) th;
             }
             else {
-                throw new ExpressionException(
-                    "Error evaluating expression.",
-                    this.toString(),
-                    Util.unwindException(th));
+                throw new ExpressionException("Error evaluating expression.", this
+                        .toString(), Util.unwindException(th));
             }
         }
     }
 
     /**
-     * Evaluates expression using stack for the current values and
-     * an object parameter as a context for evaluation. Returns the next 
-     * ASTNode to evaluate or null if evaluation is complete.
+     * Evaluates expression using stack for the current values and an object parameter as
+     * a context for evaluation. Returns the next ASTNode to evaluate or null if
+     * evaluation is complete.
      */
     abstract ASTNode evaluateWithObject(ASTStack stack, Object bean);
 
@@ -253,6 +248,7 @@ abstract class ASTNode {
     // ***************** concrete subclasses
 
     final static class PushNode extends ASTNode {
+
         Object value;
 
         PushNode(Object value) {
@@ -270,6 +266,7 @@ abstract class ASTNode {
     }
 
     final static class ListNode extends ASTNode {
+
         Object[] value;
 
         ListNode(Object object) {
@@ -284,7 +281,9 @@ abstract class ASTNode {
             else {
                 // object is really not a collection... I guess it would make
                 // sense to wrap it in a list
-                value = new Object[] { object };
+                value = new Object[] {
+                    object
+                };
             }
         }
 
@@ -299,6 +298,7 @@ abstract class ASTNode {
     }
 
     final static class PropertyNode extends ASTNode {
+
         Expression pathExp;
         String propertyPath;
 
@@ -310,21 +310,22 @@ abstract class ASTNode {
         ASTNode evaluateWithObject(ASTStack stack, Object bean) {
             // push property value on stack
             try {
-                // for DataObjects it should be faster to read property via 
+                // for DataObjects it should be faster to read property via
                 // dataObject methods instead of reflection
-                // for entities the whole meaning is different - we should return 
+                // for entities the whole meaning is different - we should return
                 // an iterator over attributes/relationships...
-                stack.push(
-                    (bean instanceof DataObject)
-                        ? ((DataObject) bean).readNestedProperty(propertyPath)
-                        : (bean instanceof Entity)
+                stack.push((bean instanceof DataObject) ? ((DataObject) bean)
+                        .readNestedProperty(propertyPath) : (bean instanceof Entity)
                         ? ((Entity) bean).resolvePathComponents(pathExp)
                         : PropertyUtils.getProperty(bean, propertyPath));
             }
             catch (Exception ex) {
                 String beanClass = (bean != null) ? bean.getClass().getName() : "<null>";
-                String msg =
-                    "Error reading property '" + beanClass + "." + propertyPath + "'.";
+                String msg = "Error reading property '"
+                        + beanClass
+                        + "."
+                        + propertyPath
+                        + "'.";
                 logObj.warn(msg, ex);
                 throw new ExpressionException(msg, ex);
             }
@@ -337,6 +338,7 @@ abstract class ASTNode {
     }
 
     final static class EqualsNode extends ASTNode {
+
         ASTNode evaluateWithObject(ASTStack stack, Object bean) {
             // expects at least two values on the stack
             stack.push(Util.nullSafeEquals(stack.pop(), stack.pop()));
@@ -349,6 +351,7 @@ abstract class ASTNode {
     }
 
     final static class AndNode extends ASTNode {
+
         ASTNode evaluateWithObject(ASTStack stack, Object bean) {
             // expects two booleans on the stack
             stack.push(stack.popBoolean() && stack.popBoolean());
@@ -365,6 +368,7 @@ abstract class ASTNode {
     }
 
     final static class OrNode extends ASTNode {
+
         ASTNode evaluateWithObject(ASTStack stack, Object bean) {
             // expects two booleans on the stack
             stack.push(stack.popBoolean() || stack.popBoolean());
@@ -381,6 +385,7 @@ abstract class ASTNode {
     }
 
     final static class NotNode extends ASTNode {
+
         ASTNode evaluateWithObject(ASTStack stack, Object bean) {
             // expects one boolean on the stack
             stack.push(!stack.popBoolean());
@@ -393,6 +398,7 @@ abstract class ASTNode {
     }
 
     final static class NotEqualsNode extends ASTNode {
+
         ASTNode evaluateWithObject(ASTStack stack, Object bean) {
             // expects at least two values on the stack
             stack.push(!Util.nullSafeEquals(stack.pop(), stack.pop()));
@@ -405,6 +411,7 @@ abstract class ASTNode {
     }
 
     final static class LessThanNode extends ASTNode {
+
         ASTNode evaluateWithObject(ASTStack stack, Object bean) {
             // expects at least two values on the stack
             boolean result = false;
@@ -414,7 +421,7 @@ abstract class ASTNode {
 
             // can't compare nulls...be consistent with SQL
             if (c1 != null && c2 != null) {
-                // values are popped in reverse order of insertion, 
+                // values are popped in reverse order of insertion,
                 // so compare the one popped last...
                 result = c2.compareTo(c1) < 0;
             }
@@ -429,6 +436,7 @@ abstract class ASTNode {
     }
 
     final static class LessThanEqualsToNode extends ASTNode {
+
         ASTNode evaluateWithObject(ASTStack stack, Object bean) {
             // expects at least two values on the stack
             boolean result = false;
@@ -438,7 +446,7 @@ abstract class ASTNode {
 
             // can't compare nulls...be consistent with SQL
             if (c1 != null && c2 != null) {
-                // values are popped in reverse order of insertion, 
+                // values are popped in reverse order of insertion,
                 // so compare the one popped last...
                 result = c2.compareTo(c1) <= 0;
             }
@@ -453,6 +461,7 @@ abstract class ASTNode {
     }
 
     final static class GreaterThanNode extends ASTNode {
+
         ASTNode evaluateWithObject(ASTStack stack, Object bean) {
             // expects at least two values on the stack
             boolean result = false;
@@ -462,7 +471,7 @@ abstract class ASTNode {
 
             // can't compare nulls...be consistent with SQL
             if (c1 != null && c2 != null) {
-                // values are popped in reverse order of insertion, 
+                // values are popped in reverse order of insertion,
                 // so compare the one popped last...
                 result = c2.compareTo(c1) > 0;
             }
@@ -477,6 +486,7 @@ abstract class ASTNode {
     }
 
     final static class GreaterThanEqualsToNode extends ASTNode {
+
         ASTNode evaluateWithObject(ASTStack stack, Object bean) {
             // expects at least two values on the stack
             boolean result = false;
@@ -486,7 +496,7 @@ abstract class ASTNode {
 
             // can't compare nulls...be consistent with SQL
             if (c1 != null && c2 != null) {
-                // values are popped in reverse order of insertion, 
+                // values are popped in reverse order of insertion,
                 // so compare the one popped last...
                 result = c2.compareTo(c1) >= 0;
             }
@@ -501,6 +511,7 @@ abstract class ASTNode {
     }
 
     final static class BetweenNode extends ASTNode {
+
         boolean negate;
 
         BetweenNode(boolean negate) {
@@ -518,7 +529,7 @@ abstract class ASTNode {
 
             // can't compare nulls...be consistent with SQL
             if (c1 != null && c2 != null && c3 != null) {
-                // values are popped in reverse order of insertion, 
+                // values are popped in reverse order of insertion,
                 // so compare the one popped last...
                 result = c2.compareTo(c3) <= 0 && c1.compareTo(c3) >= 0;
             }
@@ -536,6 +547,7 @@ abstract class ASTNode {
     }
 
     final static class InNode extends ASTNode {
+
         boolean negate;
 
         InNode(boolean negate) {
@@ -562,11 +574,12 @@ abstract class ASTNode {
     }
 
     final static class LikeNode extends ASTNode {
-        String regex;
+
+        Pattern regex;
         boolean negate;
 
         LikeNode(String pattern, boolean negate, boolean ignoreCase) {
-            this.regex = Util.sqlPatternToRegex(pattern, ignoreCase);
+            this.regex = Util.sqlPatternToPattern(pattern, ignoreCase);
             this.negate = negate;
         }
 
@@ -575,7 +588,7 @@ abstract class ASTNode {
             Object o = stack.pop();
             String string = (o != null) ? o.toString() : null;
 
-            boolean match = regexUtil.match(regex, string);
+            boolean match = regex.matcher(string).find();
             stack.push((negate) ? !match : match);
             return nextNode;
         }
@@ -589,14 +602,14 @@ abstract class ASTNode {
         }
     }
 
-    //  ***************** wrappers and other helpers
+    // ***************** wrappers and other helpers
 
     /**
-     * A wrapper for an ASTNode that allows to skip further peer
-     * nodes evaluation on a certain outcome. Useful for optimizing 
-     * AND, OR operations, etc.
+     * A wrapper for an ASTNode that allows to skip further peer nodes evaluation on a
+     * certain outcome. Useful for optimizing AND, OR operations, etc.
      */
     abstract static class ConditionalJumpNode extends ASTNode {
+
         ASTNode wrappedNode;
         ASTNode altNode;
 
@@ -610,9 +623,9 @@ abstract class ASTNode {
 
             // pick on stack state and decide whether to continue
             // with the normal flow, or jump to alternative node
-            return jumpPastAltNode(stack)
-                ? ((altNode != null) ? altNode.getNextNode() : null)
-                : next;
+            return jumpPastAltNode(stack) ? ((altNode != null)
+                    ? altNode.getNextNode()
+                    : null) : next;
         }
 
         ASTNode getNextNode() {
@@ -640,6 +653,7 @@ abstract class ASTNode {
     }
 
     final static class AndOperandWrapper extends ConditionalJumpNode {
+
         AndOperandWrapper(ASTNode wrappedNode, ASTNode altNode) {
             super(wrappedNode, altNode);
         }
@@ -650,6 +664,7 @@ abstract class ASTNode {
     }
 
     final static class OrOperandWrapper extends ConditionalJumpNode {
+
         OrOperandWrapper(ASTNode wrappedNode, ASTNode altNode) {
             super(wrappedNode, altNode);
         }

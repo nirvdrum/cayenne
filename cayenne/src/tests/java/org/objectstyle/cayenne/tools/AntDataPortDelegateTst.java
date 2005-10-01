@@ -53,67 +53,33 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.exp.parser;
+package org.objectstyle.cayenne.tools;
 
 import java.util.regex.Pattern;
 
-import org.objectstyle.cayenne.util.Util;
+import junit.framework.TestCase;
 
-/**
- * Superclass of pattern matching nodes. Assumes that subclass is a binary expression with
- * the second operand being a pattern.
- * 
- * @since 1.1
- * @author Andrei Adamchik
- */
-public abstract class PatternMatchNode extends ConditionNode {
+import org.objectstyle.cayenne.map.DataMap;
 
-    protected Pattern pattern;
-    protected boolean patternCompiled;
-    protected boolean ignoringCase;
+public class AntDataPortDelegateTst extends TestCase {
 
-    PatternMatchNode(int i, boolean ignoringCase) {
-        super(i);
-        this.ignoringCase = ignoringCase;
-    }
+    public void testPassedDataMapFilter() {
+        AntDataPortDelegate delegate = new AntDataPortDelegate();
 
-    protected boolean matchPattern(String string) {
-        return (string != null) ? getPattern().matcher(string).find() : false;
-    }
+        // filtering should be done based on map name
 
-    protected Pattern getPattern() {
-        // compile pattern on demand
-        if (!patternCompiled) {
-            pattern = null;
-            patternCompiled = true;
+        DataMap map = new DataMap();
+        assertTrue(delegate.passedDataMapFilter(map));
 
-            if (jjtGetNumChildren() < 2) {
-                return null;
-            }
+        map.setName("A");
+        assertTrue(delegate.passedDataMapFilter(map));
 
-            // precompile pattern
-            ASTScalar patternNode = (ASTScalar) jjtGetChild(1);
-            if (patternNode == null) {
-                return null;
-            }
+        delegate.mapFilters = new Pattern[] {
+            Pattern.compile("B")
+        };
+        assertFalse(delegate.passedDataMapFilter(map));
 
-            String srcPattern = (String) patternNode.getValue();
-            if (srcPattern == null) {
-                return null;
-            }
-
-            pattern = Util.sqlPatternToPattern(srcPattern, ignoringCase);
-        }
-
-        return pattern;
-    }
-
-    public void jjtAddChild(Node n, int i) {
-        // reset pattern if the node is modified
-        if (i == 1) {
-            patternCompiled = false;
-        }
-
-        super.jjtAddChild(n, i);
+        map.setName("BBBB");
+        assertTrue(delegate.passedDataMapFilter(map));
     }
 }

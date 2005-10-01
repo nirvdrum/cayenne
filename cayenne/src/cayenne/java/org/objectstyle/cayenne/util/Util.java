@@ -83,6 +83,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -574,10 +575,20 @@ public class Util {
      * <p>
      * <code>"user?"</code> will become <code>/^user.?$/</code>
      * 
-     * @since 1.0.6
+     * @deprecated since 1.2 use "sqlPatternToPattern".
      */
     public static String sqlPatternToRegex(String pattern, boolean ignoreCase) {
-        return RegexUtil.sqlPatternToRegex(pattern, ignoreCase);
+        return RegexUtil.sqlPatternToRegex(pattern);
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public static Pattern sqlPatternToPattern(String pattern, boolean ignoreCase) {
+        String preprocessed = RegexUtil.sqlPatternToRegex(pattern);
+        
+        int flag = (ignoreCase) ? Pattern.CASE_INSENSITIVE : 0;
+        return Pattern.compile(preprocessed, flag);
     }
 
     /**

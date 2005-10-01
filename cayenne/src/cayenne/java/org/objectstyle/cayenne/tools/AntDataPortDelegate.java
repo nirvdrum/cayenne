@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.tools;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
-import org.apache.oro.text.perl.Perl5Util;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.objectstyle.cayenne.access.DataPort;
@@ -77,24 +77,30 @@ import org.objectstyle.cayenne.query.Query;
  */
 class AntDataPortDelegate implements DataPortDelegate {
 
-    private static final Perl5Util regexUtil = new Perl5Util();
-
     protected Task parentTask;
-    
-    protected String[] mapFilters;
+
+    protected Pattern[] mapFilters;
 
     protected long timestamp;
     protected DbEntity lastEntity;
 
     protected NamePatternMatcher namePatternMatcher;
-    
-    public AntDataPortDelegate(Task parentTask, String mapsPattern,
+
+    // exists for testing and such
+    AntDataPortDelegate() {
+        mapFilters = new Pattern[] {};
+    }
+
+    AntDataPortDelegate(Task parentTask, String mapsPattern,
             String includeEntitiesPattern, String excludeEntitiesPattern) {
         this.parentTask = parentTask;
 
-        this.namePatternMatcher = new NamePatternMatcher(parentTask, includeEntitiesPattern, excludeEntitiesPattern);
+        this.namePatternMatcher = new NamePatternMatcher(
+                parentTask,
+                includeEntitiesPattern,
+                excludeEntitiesPattern);
 
-        this.mapFilters = namePatternMatcher.tokenizePattern(mapsPattern);
+        this.mapFilters = namePatternMatcher.createPatterns(mapsPattern);
     }
 
     /**
@@ -114,34 +120,33 @@ class AntDataPortDelegate implements DataPortDelegate {
         while (it.hasNext()) {
             DbEntity entity = (DbEntity) it.next();
 
-            if (!passedDataMapFilter(entity)) {
+            if (!passedDataMapFilter(entity.getDataMap())) {
                 it.remove();
                 continue;
             }
         }
 
         namePatternMatcher.filter(entities);
-        
+
         return entities;
     }
 
     /**
-     * Returns true if the entity passes a set of DataMap filters or if there is no
+     * Returns true if the DataMap passes a set of DataMap filters or if there is no
      * DataMap filters.
      */
-    protected boolean passedDataMapFilter(DbEntity entity) {
+    protected boolean passedDataMapFilter(DataMap map) {
         if (mapFilters.length == 0) {
             return true;
         }
 
-        DataMap map = entity.getDataMap();
         if (map == null) {
             return true;
         }
 
         String mapName = map.getName();
         for (int i = 0; i < mapFilters.length; i++) {
-            if (regexUtil.match(mapFilters[i], mapName)) {
+            if (mapFilters[i].matcher(mapName).find()) {
                 return true;
             }
         }
@@ -179,11 +184,9 @@ class AntDataPortDelegate implements DataPortDelegate {
 
         String label = (rowCount == 1) ? "1 row transferred" : rowCount
                 + " rows transferred";
-        parentTask.log("Done porting "
-                + entity.getName()
-                + ", "
-                + label
-                + timestampLabel, Project.MSG_VERBOSE);
+        parentTask.log(
+                "Done porting " + entity.getName() + ", " + label + timestampLabel,
+                Project.MSG_VERBOSE);
     }
 
     public List willCleanData(DataPort portTool, List entities) {

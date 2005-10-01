@@ -56,34 +56,27 @@
 package org.objectstyle.cayenne.exp;
 
 import java.math.BigDecimal;
-import java.util.Iterator;
+
+import junit.framework.TestCase;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.util.TestBean;
 
 /**
- * Test case for in memory expression evaluation by ASTNode produced from
- * an expression. To reduce the number of fixtures, negated expressions are
- * tested within the same test method as the expressions they negate.
+ * Test case for in memory expression evaluation by ASTNode produced from an expression.
+ * To reduce the number of fixtures, negated expressions are tested within the same test
+ * method as the expressions they negate.
  * 
- * @since 1.0.6
  * @deprecated Old expression API is deprecated.
  * @author Andrei Adamchik
  */
-public class ASTNodeInMemoryTst extends CayenneTestCase {
+public class ASTNodeInMemoryTst extends TestCase {
+
     public void testEvaluateOBJ_PATH_DataObject() throws Exception {
-        ASTNode node =
-            ASTCompiler.compile(
-                ExpressionFactory.unaryExp(Expression.OBJ_PATH, "artistName"));
+        ASTNode node = ASTCompiler.compile(ExpressionFactory.unaryExp(
+                Expression.OBJ_PATH,
+                "artistName"));
 
         Artist a1 = new Artist();
         a1.setArtistName("abc");
@@ -95,9 +88,9 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateOBJ_PATH_JavaBean() throws Exception {
-        ASTNode node =
-            ASTCompiler.compile(
-                ExpressionFactory.unaryExp(Expression.OBJ_PATH, "property2"));
+        ASTNode node = ASTCompiler.compile(ExpressionFactory.unaryExp(
+                Expression.OBJ_PATH,
+                "property2"));
 
         TestBean b1 = new TestBean();
         b1.setProperty2(1);
@@ -108,51 +101,14 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
         assertEquals(new Integer(-3), node.evaluateASTChain(b2));
     }
 
-    public void testEvaluateOBJ_PATH_ObjEntity() throws Exception {
-        ASTNode node =
-            ASTCompiler.compile(Expression.fromString("paintingArray.paintingTitle"));
-
-        ObjEntity ae = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
-
-        Object target = node.evaluateASTChain(ae);
-        assertTrue(target instanceof Iterator);
-
-        Iterator it = (Iterator) target;
-        assertTrue(it.next() instanceof ObjRelationship);
-        assertTrue(it.next() instanceof ObjAttribute);
-        assertFalse(it.hasNext());
-    }
-
-    public void testEvaluateDB_PATH_DbEntity() throws Exception {
-        ASTNode node =
-            ASTCompiler.compile(Expression.fromString("db:paintingArray.PAINTING_TITLE"));
-
-        ObjEntity ae = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
-        DbEntity ade = ae.getDbEntity();
-
-        Object objTarget = node.evaluateASTChain(ae);
-        assertTrue(objTarget instanceof Iterator);
-
-        Iterator it = (Iterator) objTarget;
-        assertTrue(it.next() instanceof DbRelationship);
-        assertTrue(it.next() instanceof DbAttribute);
-        assertFalse(it.hasNext());
-
-        Object dbTarget = node.evaluateASTChain(ade);
-        assertTrue(dbTarget instanceof Iterator);
-
-        it = (Iterator) dbTarget;
-        assertTrue(it.next() instanceof DbRelationship);
-        assertTrue(it.next() instanceof DbAttribute);
-        assertFalse(it.hasNext());
-    }
-
     public void testEvaluateEQUAL_TO() throws Exception {
-        ASTNode equalTo =
-            ASTCompiler.compile(ExpressionFactory.matchExp("artistName", "abc"));
+        ASTNode equalTo = ASTCompiler.compile(ExpressionFactory.matchExp(
+                "artistName",
+                "abc"));
 
-        ASTNode notEqualTo =
-            ASTCompiler.compile(ExpressionFactory.noMatchExp("artistName", "abc"));
+        ASTNode notEqualTo = ASTCompiler.compile(ExpressionFactory.noMatchExp(
+                "artistName",
+                "abc"));
 
         Artist match = new Artist();
         match.setArtistName("abc");
@@ -163,24 +119,6 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
         noMatch.setArtistName("123");
         assertFalse("Failed: " + equalTo, equalTo.evaluateBooleanASTChain(noMatch));
         assertTrue("Failed: " + notEqualTo, notEqualTo.evaluateBooleanASTChain(noMatch));
-    }
-
-    public void testEvaluateEQUAL_TODataObject() throws Exception {
-        DataContext context = createDataContext();
-        Artist a1 = (Artist) context.createAndRegisterNewObject("Artist");
-        Artist a2 = (Artist) context.createAndRegisterNewObject("Artist");
-        Painting p1 = (Painting) context.createAndRegisterNewObject("Painting");
-        Painting p2 = (Painting) context.createAndRegisterNewObject("Painting");
-        Painting p3 = (Painting) context.createAndRegisterNewObject("Painting");
-
-        p1.setToArtist(a1);
-        p2.setToArtist(a2);
-
-        ASTNode node = ASTCompiler.compile(ExpressionFactory.matchExp("toArtist", a1));
-
-        assertTrue(node.evaluateBooleanASTChain(p1));
-        assertFalse(node.evaluateBooleanASTChain(p2));
-        assertFalse(node.evaluateBooleanASTChain(p3));
     }
 
     public void testEvaluateAND() throws Exception {
@@ -216,8 +154,9 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateNOT() throws Exception {
-        ASTNode node =
-            ASTCompiler.compile(ExpressionFactory.matchExp("artistName", "abc").notExp());
+        ASTNode node = ASTCompiler.compile(ExpressionFactory
+                .matchExp("artistName", "abc")
+                .notExp());
 
         Artist noMatch = new Artist();
         noMatch.setArtistName("abc");
@@ -229,9 +168,9 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateLESS_THAN() throws Exception {
-        ASTNode node =
-            ASTCompiler.compile(
-                ExpressionFactory.lessExp("estimatedPrice", new BigDecimal(10000)));
+        ASTNode node = ASTCompiler.compile(ExpressionFactory.lessExp(
+                "estimatedPrice",
+                new BigDecimal(10000)));
 
         Painting noMatch = new Painting();
         noMatch.setEstimatedPrice(new BigDecimal(10001));
@@ -247,11 +186,9 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateLESS_THAN_EQUAL_TO() throws Exception {
-        ASTNode node =
-            ASTCompiler.compile(
-                ExpressionFactory.lessOrEqualExp(
-                    "estimatedPrice",
-                    new BigDecimal(10000)));
+        ASTNode node = ASTCompiler.compile(ExpressionFactory.lessOrEqualExp(
+                "estimatedPrice",
+                new BigDecimal(10000)));
 
         Painting noMatch = new Painting();
         noMatch.setEstimatedPrice(new BigDecimal(10001));
@@ -267,9 +204,9 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateGREATER_THAN() throws Exception {
-        ASTNode node =
-            ASTCompiler.compile(
-                ExpressionFactory.greaterExp("estimatedPrice", new BigDecimal(10000)));
+        ASTNode node = ASTCompiler.compile(ExpressionFactory.greaterExp(
+                "estimatedPrice",
+                new BigDecimal(10000)));
 
         Painting noMatch = new Painting();
         noMatch.setEstimatedPrice(new BigDecimal(9999));
@@ -285,11 +222,9 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateGREATER_THAN_EQUAL_TO() throws Exception {
-        ASTNode node =
-            ASTCompiler.compile(
-                ExpressionFactory.greaterOrEqualExp(
-                    "estimatedPrice",
-                    new BigDecimal(10000)));
+        ASTNode node = ASTCompiler.compile(ExpressionFactory.greaterOrEqualExp(
+                "estimatedPrice",
+                new BigDecimal(10000)));
 
         Painting noMatch = new Painting();
         noMatch.setEstimatedPrice(new BigDecimal(9999));
@@ -306,19 +241,15 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
 
     public void testEvaluateBETWEEN() throws Exception {
         // evaluate both BETWEEN and NOT_BETWEEN
-        ASTNode between =
-            ASTCompiler.compile(
-                ExpressionFactory.betweenExp(
-                    "estimatedPrice",
-                    new BigDecimal(10),
-                    new BigDecimal(20)));
+        ASTNode between = ASTCompiler.compile(ExpressionFactory.betweenExp(
+                "estimatedPrice",
+                new BigDecimal(10),
+                new BigDecimal(20)));
 
-        ASTNode notBetween =
-            ASTCompiler.compile(
-                ExpressionFactory.notBetweenExp(
-                    "estimatedPrice",
-                    new BigDecimal(10),
-                    new BigDecimal(20)));
+        ASTNode notBetween = ASTCompiler.compile(ExpressionFactory.notBetweenExp(
+                "estimatedPrice",
+                new BigDecimal(10),
+                new BigDecimal(20)));
 
         Painting noMatch = new Painting();
         noMatch.setEstimatedPrice(new BigDecimal(21));
@@ -342,16 +273,16 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateIN() throws Exception {
-        ASTNode in =
-            ASTCompiler.compile(
-                ExpressionFactory.inExp(
-                    "estimatedPrice",
-                    new Object[] { new BigDecimal(10), new BigDecimal(20)}));
-        ASTNode notIn =
-            ASTCompiler.compile(
-                ExpressionFactory.notInExp(
-                    "estimatedPrice",
-                    new Object[] { new BigDecimal(10), new BigDecimal(20)}));
+        ASTNode in = ASTCompiler.compile(ExpressionFactory.inExp(
+                "estimatedPrice",
+                new Object[] {
+                        new BigDecimal(10), new BigDecimal(20)
+                }));
+        ASTNode notIn = ASTCompiler.compile(ExpressionFactory.notInExp(
+                "estimatedPrice",
+                new Object[] {
+                        new BigDecimal(10), new BigDecimal(20)
+                }));
 
         Painting noMatch1 = new Painting();
         noMatch1.setEstimatedPrice(new BigDecimal(21));
@@ -375,10 +306,12 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateLIKE1() throws Exception {
-        ASTNode like =
-            ASTCompiler.compile(ExpressionFactory.likeExp("artistName", "abc%d"));
-        ASTNode notLike =
-            ASTCompiler.compile(ExpressionFactory.notLikeExp("artistName", "abc%d"));
+        ASTNode like = ASTCompiler.compile(ExpressionFactory.likeExp(
+                "artistName",
+                "abc%d"));
+        ASTNode notLike = ASTCompiler.compile(ExpressionFactory.notLikeExp(
+                "artistName",
+                "abc%d"));
 
         Artist noMatch = new Artist();
         noMatch.setArtistName("dabc");
@@ -397,10 +330,12 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateLIKE2() throws Exception {
-        ASTNode like =
-            ASTCompiler.compile(ExpressionFactory.likeExp("artistName", "abc?d"));
-        ASTNode notLike =
-            ASTCompiler.compile(ExpressionFactory.notLikeExp("artistName", "abc?d"));
+        ASTNode like = ASTCompiler.compile(ExpressionFactory.likeExp(
+                "artistName",
+                "abc?d"));
+        ASTNode notLike = ASTCompiler.compile(ExpressionFactory.notLikeExp(
+                "artistName",
+                "abc?d"));
 
         Artist noMatch1 = new Artist();
         noMatch1.setArtistName("dabc");
@@ -420,8 +355,8 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
 
     public void testEvaluateLIKE3() throws Exception {
         // test special chars
-        ASTNode like =
-            ASTCompiler.compile(ExpressionFactory.likeExp("artistName", "/./"));
+        ASTNode like = ASTCompiler
+                .compile(ExpressionFactory.likeExp("artistName", "/./"));
 
         Artist noMatch1 = new Artist();
         noMatch1.setArtistName("/a/");
@@ -433,12 +368,12 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateLIKE_IGNORE_CASE() throws Exception {
-        ASTNode like =
-            ASTCompiler.compile(
-                ExpressionFactory.likeIgnoreCaseExp("artistName", "aBcD"));
-        ASTNode notLike =
-            ASTCompiler.compile(
-                ExpressionFactory.notLikeIgnoreCaseExp("artistName", "aBcD"));
+        ASTNode like = ASTCompiler.compile(ExpressionFactory.likeIgnoreCaseExp(
+                "artistName",
+                "aBcD"));
+        ASTNode notLike = ASTCompiler.compile(ExpressionFactory.notLikeIgnoreCaseExp(
+                "artistName",
+                "aBcD"));
 
         Artist noMatch1 = new Artist();
         noMatch1.setArtistName("dabc");

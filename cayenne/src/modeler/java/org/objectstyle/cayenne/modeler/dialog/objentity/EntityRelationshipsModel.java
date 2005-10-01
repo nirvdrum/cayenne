@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.modeler.dialog.objentity;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
-import org.apache.oro.text.perl.Perl5Util;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.Relationship;
@@ -69,17 +69,18 @@ import org.scopemvc.core.Selector;
 import org.scopemvc.model.basic.BasicModel;
 
 /**
- * A model representing an Entity with a set of Relationships, with zero or one
- * selected Relationship.
- *  
+ * A model representing an Entity with a set of Relationships, with zero or one selected
+ * Relationship.
+ * 
  * @since 1.1
  * @author Andrei Adamchik
  */
 public class EntityRelationshipsModel extends BasicModel {
-    private static final Perl5Util regexUtil = new Perl5Util();
 
-    public static final Selector RELATIONSHIP_DISPLAY_NAME_SELECTOR =
-        Selector.fromString("relationshipDisplayName");
+    static final Pattern NAME_PATTERN = Pattern.compile("\\s\\[.*\\]$");
+
+    public static final Selector RELATIONSHIP_DISPLAY_NAME_SELECTOR = Selector
+            .fromString("relationshipDisplayName");
 
     protected Entity sourceEntity;
     protected String relationshipDisplayName;
@@ -91,9 +92,7 @@ public class EntityRelationshipsModel extends BasicModel {
             return null;
         }
 
-        return regexUtil.match("/\\s\\[.+\\]$/", displayName)
-            ? regexUtil.substitute("s/\\s\\[.+\\]$//g", displayName)
-            : displayName;
+        return NAME_PATTERN.matcher(displayName).replaceAll("");
     }
 
     static String displayName(Relationship relationship) {
@@ -101,9 +100,9 @@ public class EntityRelationshipsModel extends BasicModel {
             return null;
         }
         return displayName(
-            relationship.getName(),
-            relationship.getSourceEntity(),
-            relationship.getTargetEntity());
+                relationship.getName(),
+                relationship.getSourceEntity(),
+                relationship.getTargetEntity());
     }
 
     static String displayName(String name, Entity source, Entity target) {
@@ -120,8 +119,7 @@ public class EntityRelationshipsModel extends BasicModel {
     }
 
     /**
-     * Creates EntityRelationshipsModel over the relationship connecting
-     * two Entities.
+     * Creates EntityRelationshipsModel over the relationship connecting two Entities.
      */
     public EntityRelationshipsModel(Relationship relationship) {
         this.sourceEntity = relationship.getSourceEntity();
@@ -150,6 +148,7 @@ public class EntityRelationshipsModel extends BasicModel {
 
     /**
      * Returns a root entity of this model.
+     * 
      * @return
      */
     public Entity getSourceEntity() {
@@ -164,19 +163,18 @@ public class EntityRelationshipsModel extends BasicModel {
     }
 
     public void setRelationshipDisplayName(String relationshipDisplayName) {
-        if (!Util
-            .nullSafeEquals(relationshipDisplayName, this.relationshipDisplayName)) {
+        if (!Util.nullSafeEquals(relationshipDisplayName, this.relationshipDisplayName)) {
             this.relationshipDisplayName = relationshipDisplayName;
             relationshipNames = null;
             fireModelChange(
-                ModelChangeEvent.VALUE_CHANGED,
-                RELATIONSHIP_DISPLAY_NAME_SELECTOR);
+                    ModelChangeEvent.VALUE_CHANGED,
+                    RELATIONSHIP_DISPLAY_NAME_SELECTOR);
         }
     }
 
     public void setRelationshipName(String relationshipName) {
-        setRelationshipDisplayName(
-            displayName(sourceEntity.getRelationship(relationshipName)));
+        setRelationshipDisplayName(displayName(sourceEntity
+                .getRelationship(relationshipName)));
     }
 
     public Relationship getSelectedRelationship() {

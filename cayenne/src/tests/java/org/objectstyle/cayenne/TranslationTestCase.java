@@ -55,24 +55,22 @@
  */
 package org.objectstyle.cayenne;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import junit.framework.Assert;
 
 import org.apache.log4j.Logger;
-import org.apache.oro.text.perl.Perl5Util;
 
 public class TranslationTestCase {
-    private static Logger logObj = Logger.getLogger(TranslationTestCase.class);
 
-    public static final Perl5Util regexUtil = new Perl5Util();
+    private static Logger logObj = Logger.getLogger(TranslationTestCase.class);
 
     protected Object tstObject;
     protected String sqlExp;
     protected String rootEntity;
 
-    public TranslationTestCase(
-        String rootEntity,
-        Object tstObject,
-        String sqlExp) {
+    public TranslationTestCase(String rootEntity, Object tstObject, String sqlExp) {
         this.tstObject = tstObject;
         this.rootEntity = rootEntity;
         this.sqlExp = trim("\\b\\w+\\.", sqlExp);
@@ -83,9 +81,8 @@ public class TranslationTestCase {
     }
 
     protected String trim(String pattern, String str, String subst) {
-        return (regexUtil.match("/" + pattern + "/", str))
-            ? regexUtil.substitute("s/" + pattern + "/" + subst + "/", str)
-            : str;
+        Matcher matcher = Pattern.compile(pattern).matcher(str);
+        return (matcher.find()) ? matcher.replaceFirst(subst) : str;
     }
 
     public String toString() {
@@ -106,9 +103,9 @@ public class TranslationTestCase {
         String aliasSubstituted = trim("\\b\\w+\\.", translated);
         logObj.warn(translated + " -> " + aliasSubstituted);
         Assert.assertEquals(
-            "Unexpected translation: " + translated + "....",
-            sqlExp,
-            aliasSubstituted);
+                "Unexpected translation: " + translated + "....",
+                sqlExp,
+                aliasSubstituted);
     }
 
     public String getRootEntity() {

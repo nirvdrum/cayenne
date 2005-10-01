@@ -53,67 +53,35 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.exp.parser;
+package org.objectstyle.cayenne.util;
 
-import java.util.regex.Pattern;
+import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.util.Util;
+public class RegexUtilTst extends TestCase {
 
-/**
- * Superclass of pattern matching nodes. Assumes that subclass is a binary expression with
- * the second operand being a pattern.
- * 
- * @since 1.1
- * @author Andrei Adamchik
- */
-public abstract class PatternMatchNode extends ConditionNode {
+    public void testSubstBackslashes() {
+        assertTrue(RegexUtil.BACKSLASH.matcher("\\").find());
+        assertTrue(RegexUtil.BACKSLASH.matcher("abc\\").find());
 
-    protected Pattern pattern;
-    protected boolean patternCompiled;
-    protected boolean ignoringCase;
+        assertNull(RegexUtil.substBackslashes(null));
+        assertEquals("abc", RegexUtil.substBackslashes("abc"));
+        assertEquals("ab/c", RegexUtil.substBackslashes("ab/c"));
 
-    PatternMatchNode(int i, boolean ignoringCase) {
-        super(i);
-        this.ignoringCase = ignoringCase;
+        assertEquals("ab/c", RegexUtil.substBackslashes("ab\\c"));
+        assertEquals("ab//c", RegexUtil.substBackslashes("ab\\\\c"));
+        assertEquals("ab//c", RegexUtil.substBackslashes("ab\\/c"));
+        assertEquals("/ab/c", RegexUtil.substBackslashes("\\ab\\c"));
     }
 
-    protected boolean matchPattern(String string) {
-        return (string != null) ? getPattern().matcher(string).find() : false;
+    public void testGetPackagePath() {
+        assertTrue(RegexUtil.DOT.matcher(".").find());
+        assertTrue(RegexUtil.DOT.matcher("abc.aa.aa").find());
+
+        assertEquals("", RegexUtil.getPackagePath(null));
+        assertEquals("", RegexUtil.getPackagePath(""));
+        assertEquals("", RegexUtil.getPackagePath("b"));
+        assertEquals("a", RegexUtil.getPackagePath("a.b"));
+        assertEquals("a/c", RegexUtil.getPackagePath("a.c.b"));
     }
 
-    protected Pattern getPattern() {
-        // compile pattern on demand
-        if (!patternCompiled) {
-            pattern = null;
-            patternCompiled = true;
-
-            if (jjtGetNumChildren() < 2) {
-                return null;
-            }
-
-            // precompile pattern
-            ASTScalar patternNode = (ASTScalar) jjtGetChild(1);
-            if (patternNode == null) {
-                return null;
-            }
-
-            String srcPattern = (String) patternNode.getValue();
-            if (srcPattern == null) {
-                return null;
-            }
-
-            pattern = Util.sqlPatternToPattern(srcPattern, ignoringCase);
-        }
-
-        return pattern;
-    }
-
-    public void jjtAddChild(Node n, int i) {
-        // reset pattern if the node is modified
-        if (i == 1) {
-            patternCompiled = false;
-        }
-
-        super.jjtAddChild(n, i);
-    }
 }

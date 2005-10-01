@@ -53,67 +53,15 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.exp.parser;
+package org.objectstyle.cayenne.modeler.dialog.objentity;
 
-import java.util.regex.Pattern;
+import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.util.Util;
+public class EntityRelationshipModelTst extends TestCase {
 
-/**
- * Superclass of pattern matching nodes. Assumes that subclass is a binary expression with
- * the second operand being a pattern.
- * 
- * @since 1.1
- * @author Andrei Adamchik
- */
-public abstract class PatternMatchNode extends ConditionNode {
-
-    protected Pattern pattern;
-    protected boolean patternCompiled;
-    protected boolean ignoringCase;
-
-    PatternMatchNode(int i, boolean ignoringCase) {
-        super(i);
-        this.ignoringCase = ignoringCase;
-    }
-
-    protected boolean matchPattern(String string) {
-        return (string != null) ? getPattern().matcher(string).find() : false;
-    }
-
-    protected Pattern getPattern() {
-        // compile pattern on demand
-        if (!patternCompiled) {
-            pattern = null;
-            patternCompiled = true;
-
-            if (jjtGetNumChildren() < 2) {
-                return null;
-            }
-
-            // precompile pattern
-            ASTScalar patternNode = (ASTScalar) jjtGetChild(1);
-            if (patternNode == null) {
-                return null;
-            }
-
-            String srcPattern = (String) patternNode.getValue();
-            if (srcPattern == null) {
-                return null;
-            }
-
-            pattern = Util.sqlPatternToPattern(srcPattern, ignoringCase);
-        }
-
-        return pattern;
-    }
-
-    public void jjtAddChild(Node n, int i) {
-        // reset pattern if the node is modified
-        if (i == 1) {
-            patternCompiled = false;
-        }
-
-        super.jjtAddChild(n, i);
+    public void testNameForDisplayName() {
+        assertEquals("abcD1", EntityRelationshipsModel.nameFromDisplayName("abcD1"));
+        assertEquals("abcD1", EntityRelationshipsModel.nameFromDisplayName("abcD1 []"));
+        assertEquals("abcD1", EntityRelationshipsModel.nameFromDisplayName("abcD1 [aaaa ]"));
     }
 }

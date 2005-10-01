@@ -59,8 +59,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
-import org.apache.oro.text.perl.Perl5Util;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.objectstyle.cayenne.util.CayenneMapEntry;
@@ -74,28 +75,59 @@ import org.objectstyle.cayenne.util.CayenneMapEntry;
 public class NamePatternMatcher {
 
     protected Task parentTask;
-    private static final Perl5Util regexUtil = new Perl5Util();
-    private static final String[] emptyArray = new String[0];
 
-    protected String[] itemIncludeFilters;
-    protected String[] itemExcludeFilters;
+    protected Pattern[] itemIncludeFilters;
+    protected Pattern[] itemExcludeFilters;
 
     public NamePatternMatcher(Task parentTask, String includePattern,
             String excludePattern) {
         this.parentTask = parentTask;
-        this.itemIncludeFilters = tokenizePattern(includePattern);
-        this.itemExcludeFilters = tokenizePattern(excludePattern);
+        this.itemIncludeFilters = createPatterns(includePattern);
+        this.itemExcludeFilters = createPatterns(excludePattern);
     }
 
     /**
-     * Returns an array of valid Jakarta ORO regular expressions. Takes a
-     * comma-separated list of patterns, attempting to convert them to the ORO
-     * syntax. E.g.
+     * Returns an array of Patterns. Takes a comma-separated list of patterns, attempting
+     * to convert them to the java.util.regex.Pattern syntax. E.g.
      * <p>
-     * <code>"billing_*,user?"</code> will become a set of two expressions:
+     * <code>"billing_*,user?"</code> will become an array of two expressions:
      * <p>
-     * <code>/billing_.* /</code><br>
-     * <code>/user.?/</code><br>
+     * <code>^billing_.*$</code><br>
+     * <code>^user.?$</code><br>
+     */
+    public Pattern[] createPatterns(String patternString) {
+        String[] patternStrings = tokenizePattern(patternString);
+        List patterns = new ArrayList(patternStrings.length);
+
+        for (int i = 0; i < patternStrings.length; i++) {
+
+            // test the pattern
+            try {
+                patterns.add(Pattern.compile(patternStrings[i]));
+            }
+            catch (PatternSyntaxException e) {
+
+                if (parentTask != null) {
+                    parentTask.log("Ignoring invalid pattern ["
+                            + patternStrings[i]
+                            + "], reason: "
+                            + e.getMessage(), Project.MSG_WARN);
+                }
+                continue;
+            }
+        }
+
+        return (Pattern[]) patterns.toArray(new Pattern[patterns.size()]);
+    }
+
+    /**
+     * Returns an array of valid regular expressions. Takes a comma-separated list of
+     * patterns, attempting to convert them to the java.util.regex.Pattern syntax. E.g.
+     * <p>
+     * <code>"billing_*,user?"</code> will become an array of two expressions:
+     * <p>
+     * <code>^billing_.*$</code><br>
+     * <code>^user.?$</code><br>
      */
     public String[] tokenizePattern(String pattern) {
         if (pattern != null && pattern.length() > 0) {
@@ -103,7 +135,7 @@ public class NamePatternMatcher {
 
             int len = toks.countTokens();
             if (len == 0) {
-                return emptyArray;
+                return new String[0];
             }
 
             List patterns = new ArrayList(len);
@@ -112,9 +144,9 @@ public class NamePatternMatcher {
                 StringBuffer buffer = new StringBuffer();
 
                 // convert * into regex syntax
-                // e.g. abc*x becomes /^abc.*x$/
-                // or abc?x becomes /^abc.?x$/
-                buffer.append("/^");
+                // e.g. abc*x becomes ^abc.*x$
+                // or abc?x becomes ^abc.?x$
+                buffer.append("^");
                 for (int j = 0; j < nextPattern.length(); j++) {
                     char nextChar = nextPattern.charAt(j);
                     if (nextChar == '*' || nextChar == '?') {
@@ -122,35 +154,20 @@ public class NamePatternMatcher {
                     }
                     buffer.append(nextChar);
                 }
-                buffer.append("$/");
-
-                String finalPattern = buffer.toString();
-
-                // test the pattern
-                try {
-                    regexUtil.match(finalPattern, "abc_123");
-                }
-                catch (Exception e) {
-                    parentTask.log("Ignoring invalid pattern ["
-                            + nextPattern
-                            + "], reason: "
-                            + e.getMessage(), Project.MSG_WARN);
-                    continue;
-                }
-
-                patterns.add(finalPattern);
+                buffer.append("$");
+                patterns.add(buffer.toString());
             }
 
             return (String[]) patterns.toArray(new String[patterns.size()]);
         }
         else {
-            return emptyArray;
+            return new String[0];
         }
     }
 
     /**
-     * Applies preconfigured list of filters to the list, removing entities that
-     * do not pass the filter.
+     * Applies preconfigured list of filters to the list, removing entities that do not
+     * pass the filter.
      */
     protected List filter(List items) {
         if (items == null || items.isEmpty()) {
@@ -180,8 +197,8 @@ public class NamePatternMatcher {
     }
 
     /**
-     * Returns true if the entity matches any one of the "include" patterns, or
-     * if there is no "include" patterns defined.
+     * Returns true if the entity matches any one of the "include" patterns, or if there
+     * is no "include" patterns defined.
      */
     protected boolean passedIncludeFilter(CayenneMapEntry item) {
         if (itemIncludeFilters.length == 0) {
@@ -190,7 +207,7 @@ public class NamePatternMatcher {
 
         String itemName = item.getName();
         for (int i = 0; i < itemIncludeFilters.length; i++) {
-            if (regexUtil.match(itemIncludeFilters[i], itemName)) {
+            if (itemIncludeFilters[i].matcher(itemName).find()) {
                 return true;
             }
         }
@@ -199,8 +216,8 @@ public class NamePatternMatcher {
     }
 
     /**
-     * Returns true if the entity does not match any one of the "exclude"
-     * patterns, or if there is no "exclude" patterns defined.
+     * Returns true if the entity does not match any one of the "exclude" patterns, or if
+     * there is no "exclude" patterns defined.
      */
     protected boolean passedExcludeFilter(CayenneMapEntry item) {
         if (itemExcludeFilters.length == 0) {
@@ -209,7 +226,7 @@ public class NamePatternMatcher {
 
         String itemName = item.getName();
         for (int i = 0; i < itemExcludeFilters.length; i++) {
-            if (regexUtil.match(itemExcludeFilters[i], itemName)) {
+            if (itemExcludeFilters[i].matcher(itemName).find()) {
                 return false;
             }
         }
