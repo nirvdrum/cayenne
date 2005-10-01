@@ -62,13 +62,15 @@ import java.util.Comparator;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
- * Comparator that can compare Java beans based on a 
- * value of a property. Bean property must be readable
- * and its type must be an instance of Comparable. 
+ * Comparator that can compare Java beans based on a value of a property. Bean property
+ * must be readable and its type must be an instance of Comparable.
  * 
+ * @deprecated unused since 1.2. You may want to check PropertyUtils for quick property
+ *             access methods.
  * @author Andrei Adamchik
  */
 public class PropertyComparator implements Comparator {
+
     protected Method getter;
     protected boolean ascending;
 
@@ -102,10 +104,11 @@ public class PropertyComparator implements Comparator {
     }
 
     /**
-     * Method to read a simple one-step property of a JavaBean. 
+     * Method to read a simple one-step property of a JavaBean.
      */
     public static Object readProperty(String propertyName, Object bean)
-        throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+            throws NoSuchMethodException, IllegalAccessException,
+            InvocationTargetException {
         if (bean == null) {
             throw new NullPointerException("Null bean. Property: " + propertyName);
         }
@@ -113,8 +116,7 @@ public class PropertyComparator implements Comparator {
         Method getter = findReadMethod(propertyName, bean.getClass());
 
         if (getter == null) {
-            throw new NoSuchMethodException(
-                "No such property '"
+            throw new NoSuchMethodException("No such property '"
                     + propertyName
                     + "' in class "
                     + bean.getClass().getName());

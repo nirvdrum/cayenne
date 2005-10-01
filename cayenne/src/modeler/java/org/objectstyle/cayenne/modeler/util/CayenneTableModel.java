@@ -55,12 +55,19 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.util.PropertyComparator;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -69,17 +76,16 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public abstract class CayenneTableModel extends AbstractTableModel {
+
     protected ProjectController mediator;
     protected Object eventSource;
-    protected java.util.List objectList;
+    protected List objectList;
 
     /**
      * Constructor for CayenneTableModel.
      */
-    public CayenneTableModel(
-        ProjectController mediator,
-        Object eventSource,
-        java.util.List objectList) {
+    public CayenneTableModel(ProjectController mediator, Object eventSource,
+            java.util.List objectList) {
         super();
         this.eventSource = eventSource;
         this.mediator = mediator;
@@ -95,21 +101,21 @@ public abstract class CayenneTableModel extends AbstractTableModel {
     }
 
     /**
-     * Sets a new value after it is already checked by the superclass 
-     * and it is determined that the value has changed.
+     * Sets a new value after it is already checked by the superclass and it is determined
+     * that the value has changed.
      */
     public abstract void setUpdatedValueAt(Object newVal, int row, int col);
 
     /**
-     * Orders internal object list. Key returned by 
-     * <code>getOrderingKey</code> is used for comparison.
+     * Orders internal object list. Key returned by <code>getOrderingKey</code> is used
+     * for comparison.
      */
     protected void orderList() {
         String key = getOrderingKey();
         if (key != null) {
-            Collections.sort(
-                objectList,
-                new PropertyComparator(getOrderingKey(), getElementsClass()));
+            Collections.sort(objectList, new PropertyComparator(
+                    getOrderingKey(),
+                    getElementsClass()));
         }
     }
 
@@ -118,9 +124,9 @@ public abstract class CayenneTableModel extends AbstractTableModel {
      */
     public abstract Class getElementsClass();
 
-    /** 
-     * Returns the key by which to order elements
-     * in the object list. Default value is "name".
+    /**
+     * Returns the key by which to order elements in the object list. Default value is
+     * "name".
      */
     public String getOrderingKey() {
         return "name";
@@ -140,8 +146,8 @@ public abstract class CayenneTableModel extends AbstractTableModel {
         return eventSource;
     }
 
-    /** 
-     * Returns EventController object. 
+    /**
+     * Returns EventController object.
      */
     public ProjectController getMediator() {
         return mediator;
@@ -188,8 +194,8 @@ public abstract class CayenneTableModel extends AbstractTableModel {
     }
 
     /**
-      * Moves a row down, jumping up if row is already at the bottom.
-      */
+     * Moves a row down, jumping up if row is already at the bottom.
+     */
     public int moveRowDown(Object row) {
         int len = objectList.size();
         if (len < 2) {
@@ -211,5 +217,56 @@ public abstract class CayenneTableModel extends AbstractTableModel {
     protected void swapRows(int i, int j) {
         Collections.swap(objectList, i, j);
         fireTableDataChanged();
+    }
+
+    class PropertyComparator implements Comparator {
+
+        Method getter;
+
+        PropertyComparator(String propertyName, Class beanClass) {
+            try {
+                getter = findGetter(beanClass, propertyName);
+            }
+            catch (IntrospectionException e) {
+                throw new CayenneRuntimeException("Introspection error", e);
+            }
+        }
+
+        Method findGetter(Class beanClass, String propertyName)
+                throws IntrospectionException {
+            BeanInfo info = Introspector.getBeanInfo(beanClass);
+            PropertyDescriptor[] descriptors = info.getPropertyDescriptors();
+
+            for (int i = 0; i < descriptors.length; i++) {
+                if (propertyName.equals(descriptors[i].getName())) {
+                    return descriptors[i].getReadMethod();
+                }
+            }
+
+            throw new IntrospectionException("No getter found for " + propertyName);
+        }
+
+        public int compare(Object o1, Object o2) {
+
+            if ((o1 == null && o2 == null) || o1 == o2) {
+                return 0;
+            }
+            else if (o1 == null && o2 != null) {
+                return -1;
+            }
+            else if (o1 != null && o2 == null) {
+                return 1;
+            }
+
+            try {
+                Comparable p1 = (Comparable) getter.invoke(o1, null);
+                Comparable p2 = (Comparable) getter.invoke(o2, null);
+
+                return (p1 == null) ? -1 : p1.compareTo(p2);
+            }
+            catch (Exception ex) {
+                throw new CayenneRuntimeException("Error reading property.", ex);
+            }
+        }
     }
 }

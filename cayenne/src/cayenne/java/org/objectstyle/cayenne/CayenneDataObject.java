@@ -58,7 +58,6 @@ package org.objectstyle.cayenne;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -76,7 +75,7 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.util.PropertyComparator;
+import org.objectstyle.cayenne.property.PropertyUtils;
 import org.objectstyle.cayenne.validation.BeanValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationResult;
@@ -209,22 +208,7 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
         // if a null value is returned, there is still a chance to
         // find a non-persistent property via reflection
         if (object == null && !values.containsKey(property)) {
-            try {
-                object = PropertyComparator.readProperty(property, this);
-            }
-            catch (IllegalAccessException e) {
-                throw new CayenneRuntimeException("Error reading property '"
-                        + property
-                        + "'.", e);
-            }
-            catch (InvocationTargetException e) {
-                throw new CayenneRuntimeException("Error reading property '"
-                        + property
-                        + "'.", e);
-            }
-            catch (NoSuchMethodException e) {
-                // ignoring, no such property exists
-            }
+            object = PropertyUtils.getProperty(this, property);
         }
 
         return object;
