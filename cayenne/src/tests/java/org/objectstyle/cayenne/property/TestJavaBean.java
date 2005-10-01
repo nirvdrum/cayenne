@@ -55,11 +55,71 @@
  */
 package org.objectstyle.cayenne.property;
 
-public class TestFields {
+public class TestJavaBean extends Object {
 
     protected String stringField;
     protected int intField;
+    protected boolean booleanField;
+    protected Integer integerField;
+    protected Number numberField;
     protected byte[] byteArrayField;
-    protected String[] stringArrayField;
+    protected Object objectField;
 
+    public byte[] getByteArrayField() {
+        return byteArrayField;
+    }
+
+    public void setByteArrayField(byte[] byteArrayField) {
+        this.byteArrayField = byteArrayField;
+    }
+
+    public int getIntField() {
+        return intField;
+    }
+
+    public void setIntField(int intField) {
+        this.intField = intField;
+    }
+
+    public String getStringField() {
+        return stringField;
+    }
+
+    public void setStringField(String stringField) {
+        this.stringField = stringField;
+    }
+
+    public Integer getIntegerField() {
+        return integerField;
+    }
+
+    public void setIntegerField(Integer integerField) {
+        this.integerField = integerField;
+    }
+
+    public Number getNumberField() {
+        return numberField;
+    }
+
+    public void setNumberField(Number numberField) {
+        this.numberField = numberField;
+    }
+
+    public Object getObjectField() {
+        return objectField;
+    }
+
+    public void setObjectField(Object objectField) {
+        this.objectField = objectField;
+    }
+
+    
+    public boolean isBooleanField() {
+        return booleanField;
+    }
+
+    
+    public void setBooleanField(boolean booleanField) {
+        this.booleanField = booleanField;
+    }
 }

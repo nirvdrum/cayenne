@@ -68,7 +68,10 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * Utility methods to quickly get or set properties.
+ * Utility methods to quickly access object properties. This class supports simple and
+ * nested properties and also conversion of property values to match property type. No
+ * converter customization is provided yet, so only basic converters for Strings, Numbers
+ * and primitives are available.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -124,7 +127,9 @@ public class PropertyUtils {
 
     /**
      * Sets object property using JavaBean-compatible introspection with one addition - a
-     * property can be a dot-separated property name path.
+     * property can be a dot-separated property name path. Before setting a value attempts
+     * to convert it to a type compatible with the object property. Automatic conversion
+     * is supported between strings and basic types like numbers or primitives.
      */
     public static void setProperty(Object object, String nestedPropertyName, Object value)
             throws CayenneRuntimeException {
