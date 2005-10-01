@@ -123,10 +123,6 @@
     		<item name="15.3 DVModeler GUI Tool"  href="/userguide/dataview/dvmodeler.html"/>
     		<item name="15.4 DataViews in Action"  href="/userguide/dataview/dvinaction.html"/>
     	</item>
-    	
-    	<item name="16. Miscellaneous Information"  href="/userguide/misc.html">
-    		<item name="16.1 Cayenne and WebObjects"  href="/userguide/misc.html"/>
-    	</item>
     </toc-user-guide>
 
     
