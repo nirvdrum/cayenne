@@ -226,7 +226,7 @@ public class ImportUtils {
         Collections.sort(typesList, new Comparator() {
 
             public boolean equals(Object obj) {
-                return this.equals(obj);
+                return super.equals(obj);
             }
 
             public int compare(Object o1, Object o2) {
