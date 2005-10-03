@@ -859,11 +859,12 @@ public class IncrementalFaultList implements List {
                 Map map = (Map) object;
 
                 // id must be a subset of this map
-                Iterator it = id.keySet().iterator();
+                Iterator it = id.entrySet().iterator();
 
                 while (it.hasNext()) {
-                    Object key = it.next();
-                    Object value = id.get(key);
+                	Map.Entry entry = (Map.Entry) it.next();
+                    Object key = entry.getKey();
+                    Object value = entry.getValue();
                     if (!Util.nullSafeEquals(value, map.get(key))) {
                         return false;
                     }
@@ -884,11 +885,12 @@ public class IncrementalFaultList implements List {
 
             // id must be a subset of this map
             Map map = (Map) object;
-            Iterator it = id.keySet().iterator();
+            Iterator it = id.entrySet().iterator();
 
             while (it.hasNext()) {
-                Object key = it.next();
-                Object value = id.get(key);
+            	Map.Entry entry = (Map.Entry) it.next();
+                Object key = entry.getKey();
+                Object value = entry.getValue();
                 if (!Util.nullSafeEquals(value, map.get(key))) {
                     return false;
                 }

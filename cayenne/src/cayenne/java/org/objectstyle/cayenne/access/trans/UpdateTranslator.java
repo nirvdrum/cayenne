@@ -107,7 +107,7 @@ public class UpdateTranslator extends QueryAssembler {
     private void buildSetClause(StringBuffer queryBuf, UpdateQuery query) {
         Map updAttrs = query.getUpdAttributes();
         // set of keys.. each key is supposed to be ObjAttribute
-        Iterator attrIt = updAttrs.keySet().iterator();
+        Iterator attrIt = updAttrs.entrySet().iterator();
 
         if (!attrIt.hasNext())
             throw new CayenneRuntimeException("Nothing to update.");
@@ -120,8 +120,9 @@ public class UpdateTranslator extends QueryAssembler {
 
         // now process other attrs in the loop
         while (attrIt.hasNext()) {
-            String nextKey = (String) attrIt.next();
-            Object attrVal = updAttrs.get(nextKey);
+        	Map.Entry entry = (Map.Entry) attrIt.next();
+            String nextKey = (String) entry.getKey();
+            Object attrVal = entry.getValue();
 
             if (appendedSomething)
                 queryBuf.append(", ");

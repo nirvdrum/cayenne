@@ -165,10 +165,10 @@ public class CayenneMap extends FastTreeMap {
      * @see java.util.Map#putAll(Map)
      */
     public void putAll(Map t) {
-        Iterator it = t.keySet().iterator();
+        Iterator it = t.entrySet().iterator();
         while (it.hasNext()) {
-            Object key = it.next();
-            put(key, t.get(key));
+        	Map.Entry entry = (Map.Entry) it.next();
+            put(entry.getKey(), entry.getValue());
         }
     }
 

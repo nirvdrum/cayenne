@@ -275,11 +275,12 @@ public class BatchQueryUtils {
                         .targetPkSnapshotWithSrcSnapshot(thisIdParts);
             }
             // put only thise that do not exist in the map
-            Iterator itm = thisIdParts.keySet().iterator();
+            Iterator itm = thisIdParts.entrySet().iterator();
             while (itm.hasNext()) {
-                Object nextKey = itm.next();
+            	Map.Entry entry = (Map.Entry) itm.next();
+                Object nextKey = entry.getKey();
                 if (!map.containsKey(nextKey))
-                    map.put(nextKey, thisIdParts.get(nextKey));
+                    map.put(nextKey, entry.getValue());
             }
         }
         return map;

@@ -129,11 +129,12 @@ public class InsertTranslator extends QueryAssembler {
         Map id = (oid != null) ? oid.getIdSnapshot() : null;
 
         if (id != null) {
-            Iterator idIt = id.keySet().iterator();
+            Iterator idIt = id.entrySet().iterator();
             while (idIt.hasNext()) {
-                String attrName = (String) idIt.next();
+            	Map.Entry entry = (Map.Entry) idIt.next();
+                String attrName = (String) entry.getKey();
                 DbAttribute attr = (DbAttribute) dbE.getAttribute(attrName);
-                Object attrValue = id.get(attrName);
+                Object attrValue = entry.getValue();
                 columnList.add(attrName);
 
                 addToParamList(attr, attrValue);
@@ -141,16 +142,17 @@ public class InsertTranslator extends QueryAssembler {
         }
 
         Map snapshot = insertQuery().getObjectSnapshot();
-        Iterator columnsIt = snapshot.keySet().iterator();
+        Iterator columnsIt = snapshot.entrySet().iterator();
         while (columnsIt.hasNext()) {
-            String attrName = (String) columnsIt.next();
+        	Map.Entry entry = (Map.Entry) columnsIt.next();
+            String attrName = (String) entry.getKey();
 
             // values taken from ObjectId take precedence.
             if (id != null && id.get(attrName) != null)
                 continue;
 
             DbAttribute attr = (DbAttribute) dbE.getAttribute(attrName);
-            Object attrValue = snapshot.get(attrName);
+            Object attrValue = entry.getValue();
             columnList.add(attrName);
             addToParamList(attr, attrValue);
         }

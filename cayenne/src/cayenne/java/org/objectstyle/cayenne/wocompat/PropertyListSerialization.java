@@ -173,14 +173,15 @@ public class PropertyListSerialization {
 
 			String childOffset = offset + "    ";
 
-			Iterator it = map.keySet().iterator();
+			Iterator it = map.entrySet().iterator();
 			while (it.hasNext()) {
 				// Java collections can contain nulls, skip them
-				Object key = it.next();
+				Map.Entry entry = (Map.Entry) it.next();
+				Object key = entry.getKey();
 				if (key == null) {
 					continue;
 				}
-				Object obj = map.get(key);
+				Object obj = entry.getValue();
 				if (obj == null) {
 					continue;
 				}

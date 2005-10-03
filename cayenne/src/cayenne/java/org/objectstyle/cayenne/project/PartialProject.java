@@ -337,11 +337,12 @@ public class PartialProject extends Project {
             DomainMetaData domain = findDomain(domainName);
 
             // load DataMaps tree
-            Iterator it = locations.keySet().iterator();
+            Iterator it = locations.entrySet().iterator();
             while (it.hasNext()) {
-                String name = (String) it.next();
+            	Map.Entry entry = (Map.Entry) it.next();
+                String name = (String) entry.getKey();
                 MapMetaData map = new MapMetaData(name);
-                map.location = (String) locations.get(name);
+                map.location = (String) entry.getValue();
                 domain.maps.put(name, map);
             }
         }

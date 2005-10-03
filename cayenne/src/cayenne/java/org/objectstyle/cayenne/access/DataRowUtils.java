@@ -93,11 +93,12 @@ class DataRowUtils {
         boolean invalidateToManyRelationships) {
 
         Map attrMap = objEntity.getAttributeMap();
-        Iterator it = attrMap.keySet().iterator();
+        Iterator it = attrMap.entrySet().iterator();
         boolean isPartialSnapshot = false;
         while (it.hasNext()) {
-            String attrName = (String) it.next();
-            ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
+        	Map.Entry entry = (Map.Entry) it.next();
+            String attrName = (String) entry.getKey();
+            ObjAttribute attr = (ObjAttribute) entry.getValue();
             String dbAttrPath = attr.getDbAttributePath();
             object.writePropertyDirectly(attrName, snapshot.get(dbAttrPath));
             if (!snapshot.containsKey(dbAttrPath)) {
@@ -160,10 +161,12 @@ class DataRowUtils {
 
         // attributes
         Map attrMap = entity.getAttributeMap();
-        Iterator it = attrMap.keySet().iterator();
+        Iterator it = attrMap.entrySet().iterator();
         while (it.hasNext()) {
-            String attrName = (String) it.next();
-            ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
+        	Map.Entry entry = (Map.Entry)it.next();
+        	
+            String attrName = (String) entry.getKey();
+            ObjAttribute attr = (ObjAttribute) entry.getValue();
 
             //processing compound attributes correctly
             String dbAttrPath = attr.getDbAttributePath();
