@@ -61,23 +61,31 @@ import java.util.EventListener;
 import org.objectstyle.cayenne.util.IDUtil;
 
 /**
- * A bridge between Cayenne EventManager and other possible event sources.
- * Prime example of using EventBridge is for routing events dispatched locally by EventManager
- * to the remote JVMs via some transport mechanism (e.g. JMS). EventBridge maintains two 
- * event subjects. A "local" subject - to communicate with local EventManager, and a "remote"
- * subject - to work with an external events interface.
- * 
- * <p>If a subclass needs to prepare itself to receive incoming events it should
- * properly implement <code>startup(EventManager)</code> method.</p>
- * 
- * <p>This class is an example of the <a href="http://en.wikipedia.org/wiki/Bridge_pattern">"bridge"</a> 
- * design pattern, hence the name.
+ * An object that passes events between a local EventManager and some other event dispatch
+ * mechansim. The most common example is sending local events to remote JVMs and receiving
+ * remote events dispatched by those VMs. EventBridge makes possible to connect a network
+ * of regular EventManagers in a single "virtual" distributed EventManager.
+ * </p>
+ * <p>
+ * EventBridge encapsulates a transport agreed upon by all paries (such as JMS) and
+ * maintains two event subjects. A "local" subject - to communicate with local
+ * EventManager, and a "remote" subject - to use for "external" communications that are
+ * transport-specific.
+ * <p>
+ * Subclasses that require special setup to listen for external events should implement
+ * <code>startupExternal()</code> method accordingly.
+ * </p>
+ * <p>
+ * This class is an example of <a
+ * href="http://en.wikipedia.org/wiki/Bridge_pattern">"bridge" design pattern</a>, hence
+ * the name.
  * </p>
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  * @since 1.1
  */
 public abstract class EventBridge implements EventListener {
+
     public static final String VM_ID = new String(IDUtil.pseudoUniqueByteSequence16());
     public static final String VM_ID_PROPERRTY = "VM_ID";
 
@@ -91,9 +99,9 @@ public abstract class EventBridge implements EventListener {
     protected int mode;
 
     /**
-     * Performs consistent translation from EventSubjects to a String that can be used
-     * by external transport as subject for distributed communications. Substitutes all 
-     * chars that can be incorrectly interpreted by whoever (JNDI, ...?).
+     * Performs consistent translation from EventSubjects to a String that can be used by
+     * external transport as subject for distributed communications. Substitutes all chars
+     * that can be incorrectly interpreted by whoever (JNDI, ...?).
      */
     public static String convertToExternalSubject(EventSubject localSubject) {
         char[] chars = localSubject.getSubjectName().toCharArray();
@@ -134,15 +142,15 @@ public abstract class EventBridge implements EventListener {
     }
 
     /**
-     * Sets up this EventBridge to receive local events from the instance of
-     * EventManager. Internally calls "startupExternal".
+     * Sets up this EventBridge to receive local events from the instance of EventManager.
+     * Internally calls "startupExternal".
      */
     public void startup(EventManager eventManager, int mode) throws Exception {
         this.startup(eventManager, mode, null);
     }
 
     public void startup(EventManager eventManager, int mode, Object eventsSource)
-        throws Exception {
+            throws Exception {
         // uninstall old event manager
         if (this.eventManager != null) {
             // maybe leave external interface open?
@@ -162,23 +170,23 @@ public abstract class EventBridge implements EventListener {
             // by default set as a non-blocking listener
             // also, listen only for source events
             eventManager.addNonBlockingListener(
-                this,
-                "onLocalEvent",
-                CayenneEvent.class,
-                localSubject,
-                eventsSource);
+                    this,
+                    "onLocalEvent",
+                    CayenneEvent.class,
+                    localSubject,
+                    eventsSource);
         }
 
         startupExternal();
     }
 
     /**
-      * Starts the external interface of the EventBridge.
-      */
+     * Starts the external interface of the EventBridge.
+     */
     protected abstract void startupExternal() throws Exception;
 
     /**
-     * Stops receiving events on both local and external interfaces.
+     * Stops listening for events on both local and external interfaces.
      */
     public void shutdown() throws Exception {
         this.eventManager.removeListener(this);
@@ -188,8 +196,8 @@ public abstract class EventBridge implements EventListener {
     }
 
     /**
-     * Shuts down the external interface of the EventBridge, cleaning up
-     * and releasing any resources used to communicate external events.
+     * Shuts down the external interface of the EventBridge, cleaning up and releasing any
+     * resources used to communicate external events.
      */
     protected abstract void shutdownExternal() throws Exception;
 
@@ -219,8 +227,8 @@ public abstract class EventBridge implements EventListener {
     }
 
     /**
-     * Invoked by local EventManager when a local event of interest occurred.
-     * Internally delegates to "sendExternalEvent" abstract method.
+     * Invoked by local EventManager when a local event of interest occurred. Internally
+     * delegates to "sendExternalEvent" abstract method.
      */
     public void onLocalEvent(CayenneEvent event) throws Exception {
         if (event.getSource() != this) {
