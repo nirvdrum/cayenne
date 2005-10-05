@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.dba.postgres;
 
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Iterator;
 
@@ -83,13 +82,13 @@ import org.objectstyle.cayenne.query.SQLAction;
  * use with PostgreSQL are shown below:
  * 
  * <pre>
- * 
- *   test-postgresql.cayenne.adapter = org.objectstyle.cayenne.dba.postgres.PostgresAdapter
- *   test-postgresql.jdbc.username = test
- *   test-postgresql.jdbc.password = secret
- *   test-postgresql.jdbc.url = jdbc:postgresql://serverhostname/cayenne
- *   test-postgresql.jdbc.driver = org.postgresql.Driver
- *  
+ *   
+ *     test-postgresql.cayenne.adapter = org.objectstyle.cayenne.dba.postgres.PostgresAdapter
+ *     test-postgresql.jdbc.username = test
+ *     test-postgresql.jdbc.password = secret
+ *     test-postgresql.jdbc.url = jdbc:postgresql://serverhostname/cayenne
+ *     test-postgresql.jdbc.driver = org.postgresql.Driver
+ *    
  * </pre>
  * 
  * @author Dirk Olmes
@@ -104,8 +103,8 @@ public class PostgresAdapter extends JdbcAdapter {
      * @since 1.2
      */
     public SQLAction getAction(Query query, DataNode node) {
-        return query
-                .createSQLAction(new PostgresActionBuilder(this, node.getEntityResolver()));
+        return query.createSQLAction(new PostgresActionBuilder(this, node
+                .getEntityResolver()));
     }
 
     /**
@@ -113,13 +112,11 @@ public class PostgresAdapter extends JdbcAdapter {
      * and Java layers.
      */
     protected void configureExtendedTypes(ExtendedTypeMap map) {
+        
         super.configureExtendedTypes(map);
-
-        // create specially configured CharType handler
+        
         map.registerType(new CharType(true, false));
-
-        // create specially configured ByteArrayType handler
-        map.registerType(new PostgresByteArrayType(true, false));
+        map.registerType(new PostgresByteArrayType(true, true));
     }
 
     public DbAttribute buildAttribute(
@@ -135,6 +132,10 @@ public class PostgresAdapter extends JdbcAdapter {
         // And the winner is LONGVARBINARY
         if ("bytea".equalsIgnoreCase(typeName)) {
             type = Types.LONGVARBINARY;
+        }
+        // oid is returned as INTEGER, need to make it BLOB
+        else if("oid".equals(typeName)) {
+            type = Types.BLOB;
         }
         // somehow the driver reverse-engineers "text" as VARCHAR, must be CLOB
         else if ("text".equalsIgnoreCase(typeName)) {
@@ -317,26 +318,5 @@ public class PostgresAdapter extends JdbcAdapter {
 
             super.setJdbcObject(st, val, pos, type, precision);
         }
-    }
-
-    public void bindParameter(
-            PreparedStatement statement,
-            Object object,
-            int pos,
-            int sqlType,
-            int precision) throws SQLException, Exception {
-
-        // Andrus: this addresses a bug with 8.x driver 
-        // (I submitted a bug report #1780 to postgres, hopefully they'll resolve it.)
-        if (object == null) {
-            if (sqlType == Types.BLOB) {
-                sqlType = Types.VARBINARY;
-            }
-//            else if (sqlType == Types.CLOB) {
-//                sqlType = Types.VARCHAR;
-//            }
-        }
-
-        super.bindParameter(statement, object, pos, sqlType, precision);
     }
 }

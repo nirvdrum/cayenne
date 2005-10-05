@@ -10,8 +10,6 @@ Broken PostgreSQL types mapping.
        <db-type name="bigint"/>
    </jdbc-type>
    <jdbc-type name="BINARY">
-   <!-- this is an undocumented type with known JDBC issues
-    some testing needs to be done. -->
        <db-type name="bytea"/>
    </jdbc-type>
    <jdbc-type name="BIT">
@@ -19,7 +17,7 @@ Broken PostgreSQL types mapping.
        <db-type name="boolean"/>
    </jdbc-type>
    <jdbc-type name="BLOB">
-       <db-type name="bytea"/>
+       <db-type name="oid"/>
    </jdbc-type>
    <jdbc-type name="BOOLEAN">
        <db-type name="boolean"/>
