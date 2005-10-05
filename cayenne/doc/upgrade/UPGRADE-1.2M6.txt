@@ -33,6 +33,11 @@ UPGRADE NOTES:
     sequences (e.g. using the Modeler) and assign correct current values to them 
     (e.g. taken from the old AUTO_PK_TABLE). After that AUTO_PK_TABLE can be dropped.
     
+*  In 1.2 PostgreSQLAdapter's default "BLOB" mapping is changed from "bytea" to "oid". It
+   is still possible to use bytea, but watch for the Modeler-generated schema scripts -
+   they will contain "oid". The easiest way to migrate your mapping (if you don't want to
+   change the DB) is to remap all bytea columns as LONGVARBINARY DbAttributes instead of BLOB.
+    
 *  TempObjectId is deprecated and is no longer used by Cayenne internally. If you were 
    referencing TempObjectId explicitly in your code (e.g. if(id instanceof TempObjectId) ... ), 
    you will need to modify the code and use "isTemporary()" superclass method.

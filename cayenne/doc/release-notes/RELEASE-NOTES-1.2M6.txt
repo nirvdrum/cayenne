@@ -24,6 +24,7 @@ Changes/New Features:
 * Deprecated explicit log levels in Query, OperantionHints and DataContext.
 * DataContext can be subclassed via DataContextFactory.
 * TempObjectId is deprecated. Superclass is used instead. See TempObjectId javadocs for migration hints.
+* PostgreSQLAdapter's default "BLOB" mapping is changed from "bytea" to "oid". See UPGRADE notes for details.
 
 * Multi Tier Progress:
  - relationships are done
