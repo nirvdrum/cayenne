@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.util.ConnectionEventLogger;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.PoolManager;
-import org.objectstyle.cayenne.util.AbstractHandler;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;

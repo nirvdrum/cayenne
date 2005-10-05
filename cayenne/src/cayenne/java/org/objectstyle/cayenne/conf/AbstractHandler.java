@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.util;
+package org.objectstyle.cayenne.conf;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -67,19 +67,12 @@ import org.xml.sax.helpers.DefaultHandler;
  * handle. Each type of XML element (map, node, etc.) has a specific subclass. In the
  * constructor, this class takes over the handling of SAX events from the parent handler
  * and returns control back to the parent in the endElement method.
- * <p>
- * The idea to use nested handlers for XML document parsing (and code to implement it)
- * were taken from org.apache.tools.ant.ProjectHelper from Jakarta-Ant project (Copyright:
- * Apache Software Foundation). This may not be the best way to build objects from XML,
- * but it is rather consistent. For each nested element in the XML tree a dedicated
- * handler is created (subclass of this AbstractHandler). Once the element is parsed,
- * control is handled back to the parent handler.
  * </p>
  * 
- * @deprecated since 1.2 - this is moved to a non-public class in conf package.
+ * @since 1.2
  * @author Andrei Adamchik
  */
-public class AbstractHandler extends DefaultHandler {
+class AbstractHandler extends DefaultHandler {
 
     /** Current parser. */
     protected XMLReader parser;

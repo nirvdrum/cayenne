@@ -61,7 +61,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.objectstyle.cayenne.util.AbstractHandler;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
