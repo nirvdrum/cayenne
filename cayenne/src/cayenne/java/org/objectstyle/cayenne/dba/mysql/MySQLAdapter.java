@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.dba.mysql;
 import java.sql.Types;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -101,6 +102,7 @@ public class MySQLAdapter extends JdbcAdapter {
         // as empty strings... somehow this doesn't happen
         //  for BLOBs (ConnectorJ v. 3.0.9)
         map.registerType(new CharType(false, false));
+        map.registerType(new ByteArrayType(false, false));
     }
 
     public DbAttribute buildAttribute(
