@@ -15,6 +15,13 @@
 
         <section name="Project News">
 
+	<p><u><i>[October 6, 2005]</i></u> <strong>Cayenne 1.2M6 Released</strong></p>
+		<p>A new M6 milestone of Cayenne 1.2 is available. It features DataContextFactory, a first usable version 
+		of <a href="http://objectstyle.org/confluence/display/CAY/Multi+Tier">multi-tier Cayenne</a>, a number of bug fixes and 
+		more. Check out
+		<a href="http://objectstyle.org/confluence/display/CAY/2005/10/06/">full release announcement</a> on our blog.</p>
+
+
 	<p><u><i>[Sep 4, 2005]</i></u> <strong>More Cayenne Success Stories</strong></p>
 	<p>Recently two more big sites reported success using Cayenne. First one is 
 	US Government <a target="_new" href="http://www.glin.gov/">Global Legal 
@@ -23,10 +30,6 @@
 	Second one is <a target="_new" href="http://www.rossoalice.it/">RossoAlice</a> - 
 	an Italian media portal. For more details go <a href="poweredby.html">here</a>.</p>
 
-
-<p><u><i>[July 22, 2005]</i></u> <strong>Cayenne 1.2M5 Released</strong></p>
-		<p>A new M5 milestone release of Cayenne 1.2 is available. It features extended class generator Ant task (hint: you can generate much more than just DataObjects), stabilized XML encoder/decoder API, working preview of the multi-tier ObjectContext, and lots of bug fixes. Check out
-		<a href="http://objectstyle.org/confluence/display/CAY/2005/07/22/">full release announcement</a> on our blog.</p>
            
 
         <p><u><i>[Aug 30, 2004]</i></u> <strong>Cayenne on the Cover of JavaWorld Japan</strong></p>
