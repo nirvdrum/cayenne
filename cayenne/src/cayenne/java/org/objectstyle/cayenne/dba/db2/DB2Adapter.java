@@ -64,6 +64,7 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.types.BooleanType;
+import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -119,6 +120,8 @@ public class DB2Adapter extends JdbcAdapter {
 
         // configure boolean type to work with numeric columns
         map.registerType(new DB2BooleanType());
+        
+        map.registerType(new ByteArrayType(false, false));
     }
 
     /**
