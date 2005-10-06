@@ -86,7 +86,7 @@ import org.objectstyle.cayenne.query.SingleObjectQuery;
  */
 public class CayenneContext implements ObjectContext {
 
-    // if we are to pass ClientObjectContext around, channel should be left alone and
+    // if we are to pass CayenneContext around, channel should be left alone and
     // reinjected later if needed
     protected transient OPPChannel channel;
 
@@ -102,7 +102,7 @@ public class CayenneContext implements ObjectContext {
     CayenneContextGraphAction graphAction;
 
     /**
-     * Creates a new ClientObjectContext. Note that it is not fully functional until its
+     * Creates a new CayenneContext. Note that it is not fully functional until its
      * "connector" property is set.
      */
     public CayenneContext() {
@@ -110,7 +110,7 @@ public class CayenneContext implements ObjectContext {
     }
 
     /**
-     * Creates a new ClientObjectContext, initializaing it with a connector instance that
+     * Creates a new CayenneContext, initializaing it with a connector instance that
      * should be used to connect to a remote Cayenne service.
      */
     public CayenneContext(OPPChannel channel) {
@@ -140,9 +140,9 @@ public class CayenneContext implements ObjectContext {
     }
 
     /**
-     * Returns a ClientEntityResolver that provides limited mapping information needed for
-     * ClientObjectContext operation. If ClientEntityResolver is not set, this method
-     * would obtain one from the server on demand by sending BootstrapMessage.
+     * Returns an EntityResolver that provides mapping information needed for
+     * CayenneContext operation. If EntityResolver is not set, this method would obtain
+     * and cache one from the underlying OPPChannel by sending BootstrapMessage.
      */
     public EntityResolver getEntityResolver() {
         // load entity resolver on demand
