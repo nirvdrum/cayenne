@@ -430,27 +430,57 @@ public class XMLDecoder {
     }
 
     /**
-     * Decodes a list of objects. This intended to be used to decode a list of encdoded
-     * DataObjects.
+     * Decodes a list of DataObjects.
      * 
-     * @param xml The wrapped XML encoding of the list of objects.
-     * @return The list of decoded objects.
+     * @param xml The wrapped XML encoding of the list of DataObjects.
+     * @return The list of decoded DataObjects.
+     * @throws CayenneRuntimeException 
      */
-    public List decodeList(Reader xml) {
-        return decodeList(xml, null);
+    public static List decodeList(Reader xml) throws CayenneRuntimeException {
+        return decodeList(xml, null, null);
     }
 
     /**
-     * Decodes a list of objects using the specified mapping. This intended to be used to
-     * decode a list of encdoded DataObjects.
+     * Decodes a list of DataObjects, registering them the supplied
+     * DataContext.
+     * 
+     * @param xml The wrapped XML encoding of the list of DataObjects.
+     * @param dc The DataContext to register the decode DataObjects with.
+     * @return The list of decoded DataObjects.
+     * @throws CayenneRuntimeException 
+     */
+    public static List decodeList(Reader xml, DataContext dc) throws CayenneRuntimeException {
+        return decodeList(xml, null, dc);
+    }
+    
+    /**
+     * Decodes a list of DataObjects using the supplied mapping file to guide
+     * the decoding process.
+     * 
+     * @param xml The wrapped XML encoding of the list of DataObjects.
+     * @param mappingUrl Mapping file describing how the XML elements and object
+     *            properties correlate.
+     * @return The list of decoded DataObjects.
+     * @throws CayenneRuntimeException 
+     */
+    public static List decodeList(Reader xml, String mappingUrl) throws CayenneRuntimeException {
+        return decodeList(xml, mappingUrl, null);
+    }
+
+    /**
+     * Decodes a list of DataObjects using the supplied mapping file to guide
+     * the decoding process, registering them the supplied DataContext.
      * 
      * @param xml The wrapped XML encoding of the list of objects.
-     * @param mappingUrl The mapping file that defines how the list elements should be
-     *            decoded.
-     * @return The list of decoded objects.
+     * @param mappingUrl Mapping file describing how the XML elements and object
+     *            properties correlate.
+     * @param dc The DataContext to register the decode DataObjects with.
+     * @return The list of decoded DataObjects.
      * @throws CayenneRuntimeException
      */
-    public List decodeList(Reader xml, String mappingUrl) throws CayenneRuntimeException {
+    public static List decodeList(Reader xml, String mappingUrl, DataContext dc)
+            throws CayenneRuntimeException {
+        XMLDecoder decoder = new XMLDecoder(dc);
         Element listRoot = parse(xml).getRootElement();
 
         List ret;
@@ -475,20 +505,20 @@ public class XMLDecoder {
         for (Iterator it = listRoot.getChildren().iterator(); it.hasNext();) {
             // Decode the object.
             Element e = (Element) it.next();
-            decodedCollections.add(e);
+            decoder.decodedCollections.add(e);
             Object o;
 
             // Decode the item using the appropriate decoding method.
             if (null == mu) {
-                o = decodeElement(e);
+                o = decoder.decodeElement(e);
             }
             else {
                 o = mu.decode(e);
             }
 
             // Register the decoded object with the data context if necessary.
-            if ((null != dc) && (o instanceof DataObject)) {
-                dc.registerNewObject((DataObject) o);
+            if ((null != decoder.dc) && (o instanceof DataObject)) {
+                decoder.dc.registerNewObject((DataObject) o);
             }
 
             // Add it to the output list.
@@ -505,7 +535,7 @@ public class XMLDecoder {
      * @return JDOM Document wrapping the XML for use throughout the rest of the decoder.
      * @throws CayenneRuntimeException
      */
-    private Document parse(Reader in) throws CayenneRuntimeException {
+    private static Document parse(Reader in) throws CayenneRuntimeException {
 
         // Read in the XML file holding the data to be constructed into an
         // object.

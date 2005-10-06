@@ -199,7 +199,7 @@ public class XMLDecoderTst extends TestCase {
         dataObjects.add(new TestObject("Joe", 31, true));
 
         Reader xml = new FileReader(XML_DATA_DIR + "data-objects-encoded.xml");
-        final List decoded = decoder.decodeList(xml);
+        final List decoded = XMLDecoder.decodeList(xml);
 
         assertEquals(dataObjects, decoded);
     }
@@ -212,7 +212,7 @@ public class XMLDecoderTst extends TestCase {
         dataObjects.add(new TestObject("Joe", 31, true));
 
         Reader xml = new FileReader(XML_DATA_DIR + "data-objects-mapped.xml");
-        final List decoded = decoder.decodeList(xml, XML_DATA_DIR + "simple-mapping.xml");
+        final List decoded = XMLDecoder.decodeList(xml, XML_DATA_DIR + "simple-mapping.xml");
 
         assertEquals(dataObjects, decoded);
     }

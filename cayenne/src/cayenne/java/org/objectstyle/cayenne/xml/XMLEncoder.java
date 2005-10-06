@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.util.Util;
 public class XMLEncoder {
 
     /** The root of the XML document for the encoded object. */
-    protected Element root;
+    private Element root;
 
     /**
      * Encodes object using provided mapping file.
@@ -89,6 +89,7 @@ public class XMLEncoder {
             throws CayenneRuntimeException {
 
         this.root = new XMLMappingUtil(mappingFile).encode(object);
+        
         return getXml();
     }
 
@@ -117,7 +118,7 @@ public class XMLEncoder {
 
         return ret;
     }
-    
+
     // compensates for the lack of String.replace in JDK1.3
     private String stripDoubleLineBreaks(String string) {
         if (Util.isEmptyString(string)) {
@@ -157,7 +158,7 @@ public class XMLEncoder {
      * 
      * @return The root JDOM element.
      */
-    public Element getRoot() {
+    protected Element getRoot() {
         return root;
     }
 
@@ -168,6 +169,12 @@ public class XMLEncoder {
      * @param property The object's property value to encode.
      */
     public void encodeProperty(String xmlTag, Object property) {
+        
+        // If there's nothing to encode, simply return.
+        if (null == property) {
+            return;
+        }
+        
         Element temp;
 
         if (property instanceof XMLSerializable) {
@@ -183,10 +190,12 @@ public class XMLEncoder {
 
             // Store a copy of the encoded property, which is currently stored in the
             // root, since the encoder object was recycled.
-            // Also, change the element name to that which was provided as a parameter to
-            // the method.
             temp = root;
-            temp.setName(xmlTag);
+
+            // Only update the root tag for the encoded DataObject if the user provided a new name.
+            if (null != xmlTag) {
+                temp.setName(xmlTag);
+            }
 
             // Restore the old root.
             root = rootCopy;
@@ -221,7 +230,7 @@ public class XMLEncoder {
      * @param c The collection to encode.
      * @return A flat list of the encoded objects (i.e., there is no root node).
      */
-    protected List encodeCollection(String xmlTag, Collection c) {
+    private List encodeCollection(String xmlTag, Collection c) {
         // We need a root node to add content to, but we'll be tossing the root and return
         // only its children. Thus, it really doesn't matter what we pass to setRoot()
         // here.
@@ -252,17 +261,17 @@ public class XMLEncoder {
      * Encodes a collection of objects. This intended to be used to encode a list of
      * DataObjects returned from a query or relationship retrieval.
      * 
-     * @param xmlTag The name of the root XML element for the encoded collection.
-     * @param dataObjects The collection to encode.
+     * @param rootXmlTag The name of the root XML element for the encoded collection.
+     * @param dataObjects The List of DataObjects to encode.
      * @return An XML string representing the encoded collection.
      */
-    public String encodeList(String xmlTag, List dataObjects) {
+    public static String encodeList(String rootXmlTag, List dataObjects) {
         // It really doesn't matter what the root tag name is, but appending list
         // to the name to be used for the elements seems like a sensible solution.
         XMLEncoder encoder = new XMLEncoder();
-        encoder.setRoot(xmlTag + "List", dataObjects.getClass().getName());
+        encoder.setRoot(rootXmlTag, dataObjects.getClass().getName());
 
-        encoder.getRoot().addContent(encoder.encodeCollection(xmlTag, dataObjects));
+        encoder.getRoot().addContent(encoder.encodeCollection(null, dataObjects));
 
         return encoder.getXml();
     }
@@ -271,19 +280,19 @@ public class XMLEncoder {
      * Encodes a collection of objects. This intended to be used to encode a list of
      * DataObjects returned from a query or relationship retrieval.
      * 
-     * @param xmlTag The name of the root XML element for the encoded collection.
-     * @param dataObjects The collection to encode.
+     * @param rootXmlTag The name of the root XML element for the encoded collection.
+     * @param dataObjects The List of DataObjects to encode.
      * @param mappingUrl The mapping file that defines how the list elements should be
      *            encoded.
      * @return An XML string representing the encoded collection.
      */
-    public String encodeList(String xmlTag, List dataObjects, String mappingUrl) {
+    public static String encodeList(String rootXmlTag, List dataObjects, String mappingUrl) {
         // It really doesn't matter what the root tag name is, but appending list
         // to the name to be used for the elements seems like a sensible solution.
         XMLEncoder encoder = new XMLEncoder();
-        encoder.setRoot(xmlTag + "List", dataObjects.getClass().getName());
+        encoder.setRoot(rootXmlTag, dataObjects.getClass().getName());
 
-        final Element tempRoot = encoder.root;
+        Element tempRoot = encoder.root;
 
         // This is a bit funky, but basically we're encoding each element individually
         // using a new MappingUtils instance each time -- this may be a performance hit,

@@ -74,6 +74,18 @@ public class XMLEncoderTst extends TestCase {
         encoder = new XMLEncoder();
     }
 
+    public void testObjectWithNullProperties() throws Exception {
+        TestObject test = new TestObject();
+        test.setName(null);
+        
+        try {
+            test.encodeAsXML(encoder);
+        }
+        catch (NullPointerException e) {
+            fail("Threw a NullPointerException when it should not have.");
+        }
+    }
+    
     public void testEncodeSimpleCollection() throws Exception {
         TestObject test = new TestObject();
         test.addChild(new TestObject("Bill", 98, true));
@@ -129,7 +141,6 @@ public class XMLEncoderTst extends TestCase {
         while (in.ready()) {
             comp.append(in.readLine()).append("\n");
         }
-
         assertEquals(comp.toString(), encoder.getXml());
     }
 
@@ -151,9 +162,7 @@ public class XMLEncoderTst extends TestCase {
             comp.append(in.readLine()).append("\n");
         }
 
-        System.out.print(comp.toString());
-        System.out.print(encoder.getXml());
-
+        
         assertEquals(comp.toString(), encoder.getXml());
     }
 
@@ -164,7 +173,7 @@ public class XMLEncoderTst extends TestCase {
         dataObjects.add(new TestObject("Mary", 28, false));
         dataObjects.add(new TestObject("Joe", 31, true));
 
-        final String xml = encoder.encodeList("Test", dataObjects);
+        final String xml = XMLEncoder.encodeList("EncodedTestList", dataObjects);
 
         BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
                 + "data-objects-encoded.xml"));
@@ -183,7 +192,7 @@ public class XMLEncoderTst extends TestCase {
         dataObjects.add(new TestObject("Mary", 28, false));
         dataObjects.add(new TestObject("Joe", 31, true));
 
-        final String xml = encoder.encodeList("Test", dataObjects, XML_DATA_DIR
+        final String xml = XMLEncoder.encodeList("EncodedTestList", dataObjects, XML_DATA_DIR
                 + "simple-mapping.xml");
 
         BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR

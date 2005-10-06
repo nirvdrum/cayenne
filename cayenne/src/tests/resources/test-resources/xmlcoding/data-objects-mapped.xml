@@ -1,4 +1,4 @@
-<TestList type="java.util.ArrayList">
+<EncodedTestList type="java.util.ArrayList">
   <Test>
     <Name>George</Name>
     <Age>5</Age>
@@ -14,4 +14,4 @@
     <Age>31</Age>
     <IsOpen>true</IsOpen>
   </Test>
-</TestList>
+</EncodedTestList>

@@ -22,9 +22,23 @@ Changes/New Features:
   Expression.PRUNED_NODE to indicate that a node subtree has to be removed. 
 * Fixed UI bugs in query ordering and prefetch panels.
 * Deprecated explicit log levels in Query, OperantionHints and DataContext.
-* DataContext can be subclassed via DataContextFactory.
+* CAY-376 DataContext can be subclassed via DataContextFactory.
 * TempObjectId is deprecated. Superclass is used instead. See TempObjectId javadocs for migration hints.
 * PostgreSQLAdapter's default "BLOB" mapping is changed from "bytea" to "oid". See UPGRADE notes for details.
+* CAY-352	Pruning during expression transforms is done incorrectly when expression contains nulls.
+* CAY-360	Non-refreshed Named Queries in Modeler throw exception
+* CAY-386	ExtendType doesn't workd with null Blobs (Postgresql)
+* CAY-382	PropertyListSerialization string quoting - fix once and for all
+* CAY-385	[PATCH] Use entrysets when key and value are desired
+* CAY-381	Typos and grammar errors in the user guide
+* CAY-346	Selection moves to next entity on sync
+* CAY-364	Clicking on a non-selected cell takes two clicks
+* CAY-216	Need to exclude System Classpath on Modeler startup
+* CAY-384	Infinite Loop in equals method
+* CAY-373	add importUtils.reserveType() method to reserve this.class type
+* CAY-371	XML encoding / decoding API quirks
+* CAY-370	XML encoding throws NPE if property is null
+
 
 * Multi Tier Progress:
  - relationships are done

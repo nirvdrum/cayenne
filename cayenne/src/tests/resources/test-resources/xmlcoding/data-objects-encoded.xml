@@ -1,4 +1,4 @@
-<TestList type="java.util.ArrayList">
+<EncodedTestList type="java.util.ArrayList">
   <Test type="org.objectstyle.cayenne.xml.TestObject">
     <name type="java.lang.String">George</name>
     <age type="java.lang.Integer">5</age>
@@ -14,4 +14,4 @@
     <age type="java.lang.Integer">31</age>
     <open type="java.lang.Boolean">true</open>
   </Test>
-</TestList>
+</EncodedTestList>
