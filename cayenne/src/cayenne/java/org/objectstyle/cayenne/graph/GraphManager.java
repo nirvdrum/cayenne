@@ -62,10 +62,10 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * A convenience base implementation of a GraphMap. Performs basic GraphMap operations
- * (mapping of nodes to their ids) and also provides synchronized API for merging changes
- * coming via two "channels" - local and remote. GraphManager itself implements
- * GraphChangeTracker to intercept and preprocess local changes.
+ * A default implementation of a GraphMap. Performs GraphMap operations such as mapping of
+ * nodes to their ids. Provides synchronized API for merging changes coming via two
+ * "channels" - local and remote. GraphManager itself implements GraphChangeHandler to
+ * intercept and preprocess local changes.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -169,7 +169,7 @@ public class GraphManager implements GraphMap, GraphChangeHandler {
             }
         }
     }
-    
+
     public void graphRolledback() {
         if (recordingLocalChanges && localChangeHandlers != null) {
             Iterator it = localChangeHandlers.iterator();
@@ -178,7 +178,7 @@ public class GraphManager implements GraphMap, GraphChangeHandler {
             }
         }
     }
-    
+
     public synchronized void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
         if (recordingLocalChanges && localChangeHandlers != null) {
             Iterator it = localChangeHandlers.iterator();
