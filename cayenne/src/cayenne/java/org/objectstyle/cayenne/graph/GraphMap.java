@@ -64,8 +64,9 @@ import java.util.Map;
 /**
  * An implementation of a GraphManager that stores graph nodes keyed by their ids and
  * serves as a single event source for all graph changes (provided that graph nodes invoke
- * appropriate callback methods on their changes). External events not originating in this
- * Graphmap are delegated for processing by externalChangeHandler.
+ * appropriate callback methods on their changes). Processing of events received via
+ * GraphEventListener API and not originating in this GraphMap is delegated to
+ * externalChangeHandler.
  * 
  * @since 1.2
  * @author Andrus Adamchik
