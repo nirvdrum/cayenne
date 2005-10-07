@@ -60,6 +60,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
@@ -150,4 +151,9 @@ public interface ObjectContext extends Serializable {
      * Executes any kind of query providing the result in a form of QueryResponse.
      */
     QueryResponse performGenericQuery(QueryExecutionPlan queryPlan);
+
+    /**
+     * Returns GraphManager that manages object graph associated with this context.
+     */
+    public GraphManager getGraphManager();
 }

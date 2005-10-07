@@ -78,6 +78,7 @@ import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.PersistenceContext;
 import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
@@ -320,10 +321,14 @@ class ObjectDataContext extends DataContext implements ObjectContext {
 
     // *** Unfinished stuff
 
+    public GraphManager getGraphManager() {
+        // TODO: ObjectStore must implement GraphManager
+        throw new CayenneRuntimeException("'getGraphManager' is not implemented yet");
+    }
+
     public void prepareForAccess(Persistent object, String property) {
         // TODO: implement me
-        throw new CayenneRuntimeException(
-                "Persistent interface methods are not yet handled.");
+        throw new CayenneRuntimeException("'prepareForAccess' is not implemented yet.");
     }
 
     public void propertyChanged(

@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne;
 
 import org.objectstyle.cayenne.graph.BeanMergeHandler;
-import org.objectstyle.cayenne.graph.GraphMap;
+import org.objectstyle.cayenne.graph.GraphManager;
 
 /**
  * A GraphChangeHandler that injects external graph changes to an ObjectContext.
@@ -68,17 +68,18 @@ class CayenneContextMergeHandler extends BeanMergeHandler {
 
     ContextStateRecorder stateRecorder;
 
-    CayenneContextMergeHandler(ContextStateRecorder stateRecorder, GraphMap graphMap) {
-        super(graphMap);
+    CayenneContextMergeHandler(ContextStateRecorder stateRecorder,
+            GraphManager graphManager) {
+        super(graphManager);
 
         this.stateRecorder = stateRecorder;
     }
 
     public void nodeIdChanged(Object nodeId, Object newId) {
-        Object node = graphMap.unregisterNode(nodeId);
+        Object node = graphManager.unregisterNode(nodeId);
 
         if (node != null) {
-            graphMap.registerNode(newId, node);
+            graphManager.registerNode(newId, node);
 
             if (node instanceof Persistent) {
                 // inject new id

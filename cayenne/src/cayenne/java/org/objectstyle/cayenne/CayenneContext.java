@@ -62,7 +62,9 @@ import java.util.ListIterator;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.graph.GraphManager;
+import org.objectstyle.cayenne.graph.GraphMap;
 import org.objectstyle.cayenne.graph.OperationRecorder;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -117,17 +119,18 @@ public class CayenneContext implements ObjectContext {
         this.channel = channel;
 
         // assemble objects that track graph changes
-        this.graphManager = new GraphManager();
+        GraphMap graphMap = new GraphMap();
 
         this.changeRecorder = new OperationRecorder();
-        this.stateRecorder = new ContextStateRecorder(graphManager);
+        this.stateRecorder = new ContextStateRecorder(graphMap);
 
-        graphManager.addLocalChangeHandler(changeRecorder);
-        graphManager.addLocalChangeHandler(stateRecorder);
-        graphManager.setRemoteChangeHandler(new CayenneContextMergeHandler(
+        graphMap.addLocalChangeHandler(changeRecorder);
+        graphMap.addLocalChangeHandler(stateRecorder);
+        graphMap.setExternalChangeHandler(new CayenneContextMergeHandler(
                 stateRecorder,
-                graphManager));
+                graphMap));
 
+        this.graphManager = graphMap;
         graphAction = new CayenneContextGraphAction(this);
     }
 
@@ -180,7 +183,9 @@ public class CayenneContext implements ObjectContext {
             GraphDiff commitDiff = channel.onCommit(new CommitMessage(changeRecorder
                     .getDiffs()));
 
-            graphManager.mergeRemoteChange(commitDiff);
+            // TODO (Andrus, 10/08): instead of this cast we need OPPChannel API to
+            // register listeners...
+            ((GraphMap) graphManager).graphChanged(new GraphEvent(channel, commitDiff));
             graphManager.graphCommitted();
 
             return commitDiff;

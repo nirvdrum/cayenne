@@ -65,7 +65,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
-import org.objectstyle.cayenne.graph.GraphMap;
+import org.objectstyle.cayenne.graph.GraphManager;
 
 /**
  * Tracks dirty Persistent objects.
@@ -76,11 +76,11 @@ import org.objectstyle.cayenne.graph.GraphMap;
 class ContextStateRecorder implements GraphChangeHandler {
 
     Set dirtyIds;
-    GraphMap graphMap;
+    GraphManager graphManager;
 
-    ContextStateRecorder(GraphMap graphMap) {
+    ContextStateRecorder(GraphManager graphManager) {
         this.dirtyIds = new HashSet();
-        this.graphMap = graphMap;
+        this.graphManager = graphManager;
     }
 
     void clear() {
@@ -93,7 +93,7 @@ class ContextStateRecorder implements GraphChangeHandler {
     public void graphCommitted() {
         Iterator it = dirtyIds.iterator();
         while (it.hasNext()) {
-            Object node = graphMap.getNode(it.next());
+            Object node = graphManager.getNode(it.next());
             if (node instanceof Persistent) {
                 Persistent persistentNode = (Persistent) node;
                 switch (persistentNode.getPersistenceState()) {
@@ -114,7 +114,7 @@ class ContextStateRecorder implements GraphChangeHandler {
     public void graphRolledback() {
         Iterator it = dirtyIds.iterator();
         while (it.hasNext()) {
-            Object node = graphMap.getNode(it.next());
+            Object node = graphManager.getNode(it.next());
             if (node instanceof Persistent) {
                 Persistent persistentNode = (Persistent) node;
                 switch (persistentNode.getPersistenceState()) {
@@ -144,7 +144,7 @@ class ContextStateRecorder implements GraphChangeHandler {
         List objects = new ArrayList(dirtyIds.size());
         Iterator it = dirtyIds.iterator();
         while (it.hasNext()) {
-            objects.add(graphMap.getNode(it.next()));
+            objects.add(graphManager.getNode(it.next()));
         }
 
         return objects;
@@ -159,7 +159,7 @@ class ContextStateRecorder implements GraphChangeHandler {
         List objects = new ArrayList(size > 50 ? size / 2 : size);
         Iterator it = dirtyIds.iterator();
         while (it.hasNext()) {
-            Persistent o = (Persistent) graphMap.getNode(it.next());
+            Persistent o = (Persistent) graphManager.getNode(it.next());
 
             if (o.getPersistenceState() == state) {
                 objects.add(o);

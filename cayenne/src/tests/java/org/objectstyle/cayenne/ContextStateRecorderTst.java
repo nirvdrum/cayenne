@@ -57,11 +57,8 @@ package org.objectstyle.cayenne;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.ContextStateRecorder;
-import org.objectstyle.cayenne.GlobalID;
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.graph.GraphMap;
-import org.objectstyle.cayenne.graph.MockGraphMap;
+import org.objectstyle.cayenne.graph.GraphManager;
+import org.objectstyle.cayenne.graph.MockGraphManager;
 
 /**
  * @author Andrus Adamchik
@@ -70,7 +67,7 @@ public class ContextStateRecorderTst extends TestCase {
 
     public void testDirtyNodesInState() {
 
-        GraphMap map = new MockGraphMap();
+        GraphManager map = new MockGraphManager();
         ContextStateRecorder recorder = new ContextStateRecorder(map);
 
         // check for null collections
@@ -116,7 +113,7 @@ public class ContextStateRecorderTst extends TestCase {
     }
 
     public void testDirtyNodes() {
-        GraphMap map = new MockGraphMap();
+        GraphManager map = new MockGraphManager();
         ContextStateRecorder recorder = new ContextStateRecorder(map);
 
         assertNotNull(recorder.dirtyNodes());
@@ -139,7 +136,7 @@ public class ContextStateRecorderTst extends TestCase {
 
     public void testHasChanges() {
 
-        ContextStateRecorder recorder = new ContextStateRecorder(new MockGraphMap());
+        ContextStateRecorder recorder = new ContextStateRecorder(new MockGraphManager());
         assertFalse(recorder.hasChanges());
 
         // introduce a fake dirty object

@@ -58,11 +58,11 @@ package org.objectstyle.cayenne.graph;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MockGraphMap implements GraphMap {
+public class MockGraphManager implements GraphManager {
 
     protected Map map;
 
-    public MockGraphMap() {
+    public MockGraphManager() {
         this.map = new HashMap();
     }
 
@@ -76,6 +76,34 @@ public class MockGraphMap implements GraphMap {
 
     public Object unregisterNode(Object nodeId) {
         return map.remove(nodeId);
+    }
+
+    public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
+    }
+
+    public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
+    }
+
+    public void graphCommitted() {
+    }
+
+    public void graphRolledback() {
+    }
+
+    public void nodeCreated(Object nodeId) {
+    }
+
+    public void nodeIdChanged(Object nodeId, Object newId) {
+    }
+
+    public void nodePropertyChanged(
+            Object nodeId,
+            String property,
+            Object oldValue,
+            Object newValue) {
+    }
+
+    public void nodeRemoved(Object nodeId) {
     }
 
 }

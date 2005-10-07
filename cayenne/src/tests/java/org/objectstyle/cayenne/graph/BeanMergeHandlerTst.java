@@ -65,13 +65,13 @@ import org.objectstyle.cayenne.unit.util.TestBean;
 public class BeanMergeHandlerTst extends TestCase {
 
     public void testConstructor() {
-        GraphMap map = new MockGraphMap();
+        GraphManager map = new MockGraphManager();
         BeanMergeHandler handler = new BeanMergeHandler(map);
-        assertSame(map, handler.getGraphMap());
+        assertSame(map, handler.getGraphManager());
     }
 
     public void testNodeIdChanged() {
-        GraphMap map = new MockGraphMap();
+        GraphManager map = new MockGraphManager();
         Object id1 = new Object();
         Object id2 = new Object();
         Object node = new Object();
@@ -86,7 +86,7 @@ public class BeanMergeHandlerTst extends TestCase {
     }
 
     public void testPropertyChanged() {
-        GraphMap map = new MockGraphMap();
+        GraphManager map = new MockGraphManager();
         BeanMergeHandler handler = new BeanMergeHandler(map);
 
         Object id = new Object();
@@ -117,12 +117,12 @@ public class BeanMergeHandlerTst extends TestCase {
     }
 
     public void testInvalidPropertyChanged() {
-        GraphMap map = new MockGraphMap();
-        BeanMergeHandler handler = new BeanMergeHandler(map);
+        GraphManager manager = new MockGraphManager();
+        BeanMergeHandler handler = new BeanMergeHandler(manager);
 
         Object id = new Object();
         TestBean node = new TestBean();
-        map.registerNode(id, node);
+        manager.registerNode(id, node);
 
         // property class mismatch
         node.setInteger(new Integer(55));
@@ -137,7 +137,7 @@ public class BeanMergeHandlerTst extends TestCase {
     }
 
     public void testArcCreatedRemoved() {
-        GraphMap map = new MockGraphMap();
+        GraphManager map = new MockGraphManager();
         BeanMergeHandler handler = new BeanMergeHandler(map);
 
         Object id1 = new Object();

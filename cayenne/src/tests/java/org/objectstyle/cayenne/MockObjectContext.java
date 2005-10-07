@@ -60,6 +60,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.access.MockPersistenceContext;
 import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
@@ -72,7 +73,11 @@ public class MockObjectContext extends MockPersistenceContext implements ObjectC
     public MockObjectContext() {
         super();
     }
-    
+
+    public GraphManager getGraphManager() {
+        return null;
+    }
+
     public void rollback() {
     }
 

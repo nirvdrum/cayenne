@@ -70,17 +70,18 @@ import org.objectstyle.cayenne.property.PropertyUtils;
  */
 public class BeanMergeHandler implements GraphChangeHandler {
 
-    protected GraphMap graphMap;
+    protected GraphManager graphManager;
 
-    public BeanMergeHandler(GraphMap graphMap) {
-        this.graphMap = graphMap;
+    public BeanMergeHandler(GraphManager graphMap) {
+        this.graphManager = graphMap;
     }
 
     /**
-     * Returns GraphMap used by this object to lookup graph nodes that need to be updated.
+     * Returns GraphManager used by this object to lookup graph nodes that need to be
+     * updated.
      */
-    public GraphMap getGraphMap() {
-        return graphMap;
+    public GraphManager getGraphManager() {
+        return graphManager;
     }
 
     /**
@@ -96,10 +97,10 @@ public class BeanMergeHandler implements GraphChangeHandler {
     }
 
     public void nodeIdChanged(Object nodeId, Object newId) {
-        Object node = graphMap.unregisterNode(nodeId);
+        Object node = graphManager.unregisterNode(nodeId);
 
         if (node != null) {
-            graphMap.registerNode(newId, node);
+            graphManager.registerNode(newId, node);
         }
     }
 
@@ -123,7 +124,7 @@ public class BeanMergeHandler implements GraphChangeHandler {
             Object oldValue,
             Object newValue) {
 
-        Object node = graphMap.getNode(nodeId);
+        Object node = graphManager.getNode(nodeId);
         if (node != null) {
             try {
                 PropertyUtils.setProperty(node, property, newValue);
@@ -135,10 +136,10 @@ public class BeanMergeHandler implements GraphChangeHandler {
     }
 
     public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
-        Object node = graphMap.getNode(nodeId);
+        Object node = graphManager.getNode(nodeId);
         if (node != null) {
 
-            Object nodeTarget = graphMap.getNode(targetNodeId);
+            Object nodeTarget = graphManager.getNode(targetNodeId);
 
             // treat arc id as a relationship name, and see if the property is a
             // collection ... if it is add to collection, otherwise set directly
@@ -163,10 +164,10 @@ public class BeanMergeHandler implements GraphChangeHandler {
     }
 
     public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
-        Object node = graphMap.getNode(nodeId);
+        Object node = graphManager.getNode(nodeId);
         if (node != null) {
 
-            Object nodeTarget = graphMap.getNode(targetNodeId);
+            Object nodeTarget = graphManager.getNode(targetNodeId);
 
             // treat arc id as a relationship name, and see if the property is a
             // collection ... if it is remove from collection, otherwise set to null
