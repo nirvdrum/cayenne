@@ -109,35 +109,6 @@ public class CayenneContext implements ObjectContext {
     CayenneContextGraphAction graphAction;
 
     /**
-     * Utility method that sets up a GraphChangeListener to be notified when GraphEvents
-     * occur in any ObjectContext that uses EventManager passed to this method.
-     */
-    public static void addGraphListener(EventManager manager, GraphEventListener listener) {
-
-        manager.addListener(
-                listener,
-                "graphChanged",
-                GraphEvent.class,
-                ObjectContext.GRAPH_CHANGE_SUBJECT);
-    }
-
-    /**
-     * Utility method that sets up a GraphEventListener to listen for a given subject.
-     */
-    public static void addGraphListener(
-            EventManager manager,
-            GraphEventListener listener,
-            ObjectContext eventSource) {
-
-        manager.addListener(
-                listener,
-                "graphChanged",
-                GraphEvent.class,
-                ObjectContext.GRAPH_CHANGE_SUBJECT,
-                eventSource);
-    }
-
-    /**
      * Creates a new CayenneContext with no channel and disabled graph events.
      */
     public CayenneContext() {

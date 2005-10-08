@@ -91,7 +91,8 @@ public class CayenneContextEventsTst extends TestCase {
                 flags1[0] = true;
             }
         };
-        CayenneContext.addGraphListener(manager, listener1, contextWithEvents);
+
+        ObjectContextUtils.listenForContextEvents(channel, listener1);
 
         // dummy change...
         contextWithEvents.changeRecorder.nodePropertyChanged(new Object(), "x", "y", "z");
@@ -123,7 +124,7 @@ public class CayenneContextEventsTst extends TestCase {
                 flags2[0] = true;
             }
         };
-        CayenneContext.addGraphListener(manager, listener2, contextWithoutEvents);
+        ObjectContextUtils.listenForContextEvents(channel, listener2);
 
         // dummy change...
         contextWithoutEvents.changeRecorder.nodePropertyChanged(
