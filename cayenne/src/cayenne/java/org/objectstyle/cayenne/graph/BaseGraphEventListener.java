@@ -55,30 +55,47 @@
  */
 package org.objectstyle.cayenne.graph;
 
-import java.util.EventObject;
-
 /**
- * An event indicating a change in the object graph. A change is expressed as a GraphDiff,
- * so the easiest way to process the event is the following:
- * 
- * <pre>
- *         GraphChangeHandler handler = ..;
- *         event.getDiff().apply(handler);
- * </pre>
+ * A convenience superclass of custom GraphEventListeners. Subclasses should override
+ * GraphChangeHandler methods to react to specific events.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class GraphEvent extends EventObject {
+public class BaseGraphEventListener implements GraphEventListener, GraphChangeHandler {
 
-    protected GraphDiff diff;
-
-    public GraphEvent(Object source, GraphDiff diff) {
-        super(source);
-        this.diff = diff;
+    /**
+     * Applies GraphDiff of this event, using this object as a GraphChangeHandler.
+     */
+    public void graphChanged(GraphEvent event) {
+        event.getDiff().apply(this);
     }
 
-    public GraphDiff getDiff() {
-        return diff;
+    public void graphCommitted() {
+    }
+
+    public void graphRolledback() {
+    }
+
+    public void nodeIdChanged(Object nodeId, Object newId) {
+    }
+
+    public void nodeCreated(Object nodeId) {
+    }
+
+    public void nodeRemoved(Object nodeId) {
+    }
+
+    public void nodePropertyChanged(
+            Object nodeId,
+            String property,
+            Object oldValue,
+            Object newValue) {
+    }
+
+    public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
+    }
+
+    public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
     }
 }

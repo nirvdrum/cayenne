@@ -53,32 +53,85 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.graph;
+package org.objectstyle.cayenne;
 
-import java.util.EventObject;
+import junit.framework.TestCase;
 
-/**
- * An event indicating a change in the object graph. A change is expressed as a GraphDiff,
- * so the easiest way to process the event is the following:
- * 
- * <pre>
- *         GraphChangeHandler handler = ..;
- *         event.getDiff().apply(handler);
- * </pre>
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public class GraphEvent extends EventObject {
+import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.GraphEvent;
+import org.objectstyle.cayenne.graph.GraphEventListener;
+import org.objectstyle.cayenne.opp.CommitMessage;
+import org.objectstyle.cayenne.opp.MockOPPChannel;
+import org.objectstyle.cayenne.opp.OPPChannel;
 
-    protected GraphDiff diff;
+public class CayenneContextEventsTst extends TestCase {
 
-    public GraphEvent(Object source, GraphDiff diff) {
-        super(source);
-        this.diff = diff;
+    public void testDispatchEventsEnabled() {
+        final EventManager manager = new EventManager(0);
+        OPPChannel channel = new MockOPPChannel() {
+
+            public EventManager getEventManager() {
+                return manager;
+            }
+
+            public GraphDiff onCommit(CommitMessage message) {
+                return new CompoundDiff();
+            }
+        };
+
+        CayenneContext contextWithEvents = new CayenneContext(channel, true);
+        assertTrue(contextWithEvents.isGraphEventsEnabled());
+
+        final boolean[] flags1 = new boolean[1];
+        GraphEventListener listener1 = new GraphEventListener() {
+
+            public void graphChanged(GraphEvent event) {
+                flags1[0] = true;
+            }
+        };
+        CayenneContext.addGraphListener(manager, listener1, contextWithEvents);
+
+        // dummy change...
+        contextWithEvents.changeRecorder.nodePropertyChanged(new Object(), "x", "y", "z");
+        contextWithEvents.commit();
+        assertTrue(flags1[0]);
+
     }
 
-    public GraphDiff getDiff() {
-        return diff;
+    public void testDispatchEventsDisabled() {
+        final EventManager manager = new EventManager(0);
+        OPPChannel channel = new MockOPPChannel() {
+
+            public EventManager getEventManager() {
+                return manager;
+            }
+
+            public GraphDiff onCommit(CommitMessage message) {
+                return new CompoundDiff();
+            }
+        };
+
+        CayenneContext contextWithoutEvents = new CayenneContext(channel, false);
+        assertFalse(contextWithoutEvents.isGraphEventsEnabled());
+
+        final boolean[] flags2 = new boolean[1];
+        GraphEventListener listener2 = new GraphEventListener() {
+
+            public void graphChanged(GraphEvent event) {
+                flags2[0] = true;
+            }
+        };
+        CayenneContext.addGraphListener(manager, listener2, contextWithoutEvents);
+
+        // dummy change...
+        contextWithoutEvents.changeRecorder.nodePropertyChanged(
+                new Object(),
+                "x",
+                "y",
+                "z");
+        contextWithoutEvents.commit();
+        assertFalse(flags2[0]);
     }
 }

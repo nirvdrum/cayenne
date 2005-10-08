@@ -81,6 +81,7 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -321,6 +322,12 @@ class ObjectDataContext extends DataContext implements ObjectContext {
     }
 
     // *** Unfinished stuff
+    // --------------------------------------------------------------------------
+
+    public OPPChannel getChannel() {
+        // TODO: DataDomain must implement OPPChannel instead of PersistentContext
+        throw new CayenneRuntimeException("'getChannel' is not implemented yet");
+    }
 
     public GraphManager getGraphManager() {
         // TODO: ObjectStore must implement GraphManager

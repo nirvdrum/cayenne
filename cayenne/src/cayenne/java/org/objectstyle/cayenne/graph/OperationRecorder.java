@@ -103,7 +103,13 @@ public class OperationRecorder implements GraphChangeHandler {
             Object eventSource) {
 
         this();
+        initForEvents(eventManager, eventSubject, eventSource);
+    }
 
+    public void initForEvents(
+            EventManager eventManager,
+            EventSubject eventSubject,
+            Object eventSource) {
         // sanity check - make sure we can send events
         if (eventManager == null) {
             throw new IllegalArgumentException("Null eventManager");
@@ -147,6 +153,18 @@ public class OperationRecorder implements GraphChangeHandler {
         }
 
         this.eventsEnabled = eventsEnabled;
+    }
+
+    public EventManager getEventManager() {
+        return eventManager;
+    }
+
+    public Object getEventSource() {
+        return eventSource;
+    }
+
+    public EventSubject getEventSubject() {
+        return eventSubject;
     }
 
     /**

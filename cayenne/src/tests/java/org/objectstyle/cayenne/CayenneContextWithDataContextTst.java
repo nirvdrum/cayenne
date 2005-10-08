@@ -97,7 +97,7 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         hollow.setGlobalID(gid);
 
         final boolean[] selectExecuted = new boolean[1];
-        CayenneContext context = new CayenneContext(channel) {
+        CayenneContext context = new CayenneContext(channel, false) {
 
             public List performSelectQuery(QueryExecutionPlan query) {
                 selectExecuted[0] = true;
@@ -121,7 +121,7 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
 
     public void testNewObjectShouldInflateHolders() {
 
-        CayenneContext context = new CayenneContext(new MockOPPChannel());
+        CayenneContext context = new CayenneContext(new MockOPPChannel(), false);
         context.setEntityResolver(getDomain()
                 .getEntityResolver()
                 .getClientEntityResolver());

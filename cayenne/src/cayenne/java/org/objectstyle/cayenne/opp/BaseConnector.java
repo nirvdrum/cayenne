@@ -74,10 +74,13 @@ public abstract class BaseConnector implements OPPConnector {
     protected EventManager eventManager;
 
     /**
-     * Default constructor that initializes logging.
+     * Default constructor that initializes logging and a single threaded EventManager.
      */
     protected BaseConnector() {
         this.logger = LogFactory.getLog(getClass());
+
+        // by default use single-threaded EventManager...
+        this.eventManager = new EventManager(0);
     }
 
     /**

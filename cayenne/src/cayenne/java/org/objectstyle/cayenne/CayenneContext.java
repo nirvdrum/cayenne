@@ -59,6 +59,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
@@ -95,7 +96,9 @@ public class CayenneContext implements ObjectContext {
 
     protected EntityResolver entityResolver;
     protected GraphManager graphManager;
-    protected OperationRecorder changeRecorder;
+    protected boolean graphEventsEnabled;
+
+    OperationRecorder changeRecorder;
     ContextStateRecorder stateRecorder;
     GraphEventListener externalEventsHandler;
 
@@ -106,27 +109,65 @@ public class CayenneContext implements ObjectContext {
     CayenneContextGraphAction graphAction;
 
     /**
-     * Creates a new CayenneContext. Note that it is not fully functional until its
-     * "connector" property is set.
+     * Utility method that sets up a GraphChangeListener to be notified when GraphEvents
+     * occur in any ObjectContext that uses EventManager passed to this method.
      */
-    public CayenneContext() {
-        this(null);
+    public static void addGraphListener(EventManager manager, GraphEventListener listener) {
+
+        manager.addListener(
+                listener,
+                "graphChanged",
+                GraphEvent.class,
+                ObjectContext.GRAPH_CHANGE_SUBJECT);
     }
 
     /**
-     * Creates a new CayenneContext, initializaing it with a connector instance that
-     * should be used to connect to a remote Cayenne service.
+     * Utility method that sets up a GraphEventListener to listen for a given subject.
+     */
+    public static void addGraphListener(
+            EventManager manager,
+            GraphEventListener listener,
+            ObjectContext eventSource) {
+
+        manager.addListener(
+                listener,
+                "graphChanged",
+                GraphEvent.class,
+                ObjectContext.GRAPH_CHANGE_SUBJECT,
+                eventSource);
+    }
+
+    /**
+     * Creates a new CayenneContext with no channel and disabled graph events.
+     */
+    public CayenneContext() {
+        this(null, false);
+    }
+
+    /**
+     * Creates a new CayenneContext, initializaing it with a channel instance.
+     * CayenneContext created using this constructor WILL NOT broadcast graph change
+     * events.
      */
     public CayenneContext(OPPChannel channel) {
+        this(channel, false);
+    }
+
+    /**
+     * Creates a new CayenneContext, initializaing it with a channel. If
+     * <code>graphEventsEnabled</code> is true, this context will broadcast GraphEvents
+     * using ObjectContext.GRAPH_CHANGE_SUBJECT.
+     */
+    public CayenneContext(OPPChannel channel, boolean graphEventsEnabled) {
+        this.graphEventsEnabled = graphEventsEnabled;
+        this.graphAction = new CayenneContextGraphAction(this);
 
         // assemble objects that track graph changes
         GraphMap graphMap = new GraphMap();
 
-        this.changeRecorder = new OperationRecorder();
-        this.stateRecorder = new ContextStateRecorder(graphMap);
-
         this.graphManager = graphMap;
-        this.graphAction = new CayenneContextGraphAction(this);
+        this.changeRecorder = new OperationRecorder();
+        this.stateRecorder = new ContextStateRecorder(graphManager);
 
         graphMap.addChangeHandler(changeRecorder);
         graphMap.addChangeHandler(stateRecorder);
@@ -138,13 +179,21 @@ public class CayenneContext implements ObjectContext {
         return channel;
     }
 
+    /**
+     * Sets the context channel, setting up a listener for channel events.
+     */
     public void setChannel(OPPChannel channel) {
         if (channel != this.channel) {
+            EventManager oldManager = (this.channel != null) ? this.channel
+                    .getEventManager() : null;
+            EventManager newManager = (channel != null)
+                    ? channel.getEventManager()
+                    : null;
 
             // stop listening to old channel
             if (externalEventsHandler != null) {
-                if (this.channel != null && this.channel.getEventManager() != null) {
-                    this.channel.getEventManager().removeListener(
+                if (oldManager != null) {
+                    oldManager.removeListener(
                             this.externalEventsHandler,
                             OPPChannel.REMOTE_GRAPH_CHANGE_SUBJECT,
                             this.channel);
@@ -156,7 +205,7 @@ public class CayenneContext implements ObjectContext {
             this.channel = channel;
 
             // listen to new channel
-            if (channel != null && channel.getEventManager() != null) {
+            if (newManager != null) {
                 final GraphChangeHandler handler = new CayenneContextMergeHandler(
                         stateRecorder,
                         graphManager);
@@ -167,7 +216,7 @@ public class CayenneContext implements ObjectContext {
                         event.getDiff().apply(handler);
                     }
                 };
-                channel.getEventManager().addListener(
+                newManager.addListener(
                         listener,
                         "graphChanged",
                         GraphEvent.class,
@@ -176,7 +225,25 @@ public class CayenneContext implements ObjectContext {
 
                 this.externalEventsHandler = listener;
             }
+
+            // reset EventManager of the OperationRecorder
+            if (!graphEventsEnabled || newManager == null) {
+                changeRecorder.setEventsEnabled(false);
+            }
+            else {
+                changeRecorder.initForEvents(
+                        newManager,
+                        ObjectContext.GRAPH_CHANGE_SUBJECT,
+                        this);
+            }
         }
+    }
+
+    /**
+     * Returns true if this context posts events when its managed objects are modified.
+     */
+    public boolean isGraphEventsEnabled() {
+        return graphEventsEnabled;
     }
 
     /**

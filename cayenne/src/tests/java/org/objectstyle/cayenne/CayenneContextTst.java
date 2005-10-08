@@ -94,7 +94,7 @@ public class CayenneContextTst extends TestCase {
 
     public void testChannel() {
         MockOPPChannel channel = new MockOPPChannel();
-        CayenneContext context = new CayenneContext(channel);
+        CayenneContext context = new CayenneContext(channel, false);
 
         assertSame(channel, context.getChannel());
     }
@@ -102,7 +102,7 @@ public class CayenneContextTst extends TestCase {
     public void testCommitUnchanged() {
 
         MockOPPChannel channel = new MockOPPChannel();
-        CayenneContext context = new CayenneContext(channel);
+        CayenneContext context = new CayenneContext(channel, false);
 
         // no context changes so no connector access is expected
         context.commit();
@@ -112,7 +112,7 @@ public class CayenneContextTst extends TestCase {
     public void testCommitCommandExecuted() {
 
         MockOPPChannel channel = new MockOPPChannel(new MockGraphDiff());
-        CayenneContext context = new CayenneContext(channel);
+        CayenneContext context = new CayenneContext(channel, false);
 
         // test that a command is being sent via connector on commit...
 
@@ -145,7 +145,7 @@ public class CayenneContextTst extends TestCase {
             }
         };
 
-        CayenneContext context = new CayenneContext(channel);
+        CayenneContext context = new CayenneContext(channel, false);
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
 
@@ -174,7 +174,7 @@ public class CayenneContextTst extends TestCase {
             o1
         }));
 
-        CayenneContext context = new CayenneContext(channel);
+        CayenneContext context = new CayenneContext(channel, false);
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
 
@@ -260,7 +260,7 @@ public class CayenneContextTst extends TestCase {
 
     public void testNewObject() {
 
-        CayenneContext context = new CayenneContext(new MockOPPChannel());
+        CayenneContext context = new CayenneContext(new MockOPPChannel(), false);
 
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
@@ -296,7 +296,7 @@ public class CayenneContextTst extends TestCase {
 
     public void testDeleteObject() {
 
-        CayenneContext context = new CayenneContext(new MockOPPChannel());
+        CayenneContext context = new CayenneContext(new MockOPPChannel(), false);
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
 
