@@ -65,10 +65,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.util.Invocation;
-import org.objectstyle.cayenne.util.Util;
 
 /**
  * This class acts as bridge between an Object that wants to inform others about its
@@ -80,8 +78,6 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class EventManager extends Object {
-
-    private static Logger logObj = Logger.getLogger(EventManager.class);
 
     private static EventManager defaultManager;
 
@@ -224,13 +220,6 @@ public class EventManager extends Object {
         if (subject == null) {
             throw new IllegalArgumentException("Subject must not be null.");
         }
-
-        /*
-         * if (logObj.isDebugEnabled()) { String label = (blocking) ? "adding listener: " :
-         * "adding non-blocking listener: "; String object = new
-         * ToStringBuilder(listener).toString(); logObj.debug(label + object + "." +
-         * methodName); }
-         */
 
         try {
             Invocation invocation = (blocking) ? new Invocation(
@@ -495,8 +484,6 @@ public class EventManager extends Object {
                     }
                     catch (Throwable th) {
                         // ignoring exception
-                        logObj.debug("Event dispatch error, ignoring.", Util
-                                .unwindException(th));
                     }
                 }
             }
