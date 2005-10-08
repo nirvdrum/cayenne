@@ -106,12 +106,17 @@ public class EventManager extends Object {
         return defaultManager;
     }
 
+    /**
+     * Creates a multithreaded EventManager using default thread count.
+     */
     public EventManager() {
         this(DEFAULT_DISPATCH_THREAD_COUNT);
     }
 
     /**
-     * Default constructor for new EventManager instances, in case you need one.
+     * Creates an EventManager starting the specified number of threads for multithreaded
+     * dispatching. To create a single-threaded EventManager, use thread count of zero or
+     * less.
      */
     public EventManager(int dispatchThreadCount) {
         this.subjects = Collections.synchronizedMap(new WeakHashMap());
@@ -122,6 +127,17 @@ public class EventManager extends Object {
         for (int i = 0; i < dispatchThreadCount; i++) {
             new DispatchThread("EventDispatchThread-" + i).start();
         }
+    }
+
+    /**
+     * Returns true if this EventManager is single-threaded. If so it will throw an
+     * exception on any attempt to register an unblocking listener or dispatch a
+     * non-blocking event.
+     * 
+     * @since 1.2
+     */
+    public boolean isSingleThreaded() {
+        return singleThread;
     }
 
     /**
