@@ -111,7 +111,8 @@ class ObjectDataContext extends DataContext implements ObjectContext {
         DataRowStore cache = parentDomain.isSharedCacheEnabled() ? parentDomain
                 .getSharedSnapshotCache() : new DataRowStore(
                 parentDomain.getName(),
-                parentDomain.getProperties());
+                parentDomain.getProperties(),
+                parentDomain.getEventManager());
 
         super.objectStore = new ObjectStore(cache);
     }

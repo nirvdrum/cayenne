@@ -55,16 +55,16 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.commons.collections.Predicate;
 import org.apache.log4j.BasicConfigurator;
@@ -74,9 +74,10 @@ import org.apache.log4j.PropertyConfigurator;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ConfigurationException;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.dataview.DataView;
+import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.util.CayenneMap;
 import org.objectstyle.cayenne.util.ResourceLocator;
-import org.objectstyle.cayenne.dataview.DataView;
 
 /**
  * This class is an entry point to Cayenne. It loads all configuration files and
@@ -133,6 +134,11 @@ public abstract class Configuration {
     protected ConfigurationShutdownHook configurationShutdownHook = new ConfigurationShutdownHook();
     protected Map dataViewLocations = new HashMap();
     protected String projectVersion;
+
+    /**
+     * @since 1.2
+     */
+    protected EventManager eventManager;
 
     /**
      * Stores instance ClassLoader.
@@ -279,6 +285,24 @@ public abstract class Configuration {
     }
 
     /**
+     * Returns EventManager used by this configuration.
+     * 
+     * @since 1.2
+     */
+    public EventManager getEventManager() {
+        return eventManager;
+    }
+
+    /**
+     * Sets EventManager used by this configuration.
+     * 
+     * @since 1.2
+     */
+    public void setEventManager(EventManager eventManager) {
+        this.eventManager = eventManager;
+    }
+
+    /**
      * Creates and initializes shared Configuration object. By default
      * {@link DefaultConfiguration}will be instantiated and assigned to a singleton
      * instance of Configuration.
@@ -353,13 +377,14 @@ public abstract class Configuration {
      * name.
      */
     protected Configuration(String domainConfigurationName) {
-        super();
 
         // set up logging
         this.configureLogging();
 
         // set domain configuration name
         this.setDomainConfigurationName(domainConfigurationName);
+
+        this.eventManager = new EventManager();
     }
 
     /**
@@ -454,10 +479,17 @@ public abstract class Configuration {
     }
 
     /**
-     * Adds new DataDomain to the list of registered domains.
+     * Adds new DataDomain to the list of registered domains. Injects EventManager used by
+     * this configuration into the domain.
      */
     public void addDomain(DataDomain domain) {
         this.dataDomains.put(domain.getName(), domain);
+
+        // inject EventManager
+        if (domain != null) {
+            domain.setEventManager(getEventManager());
+        }
+
         logObj.debug("added domain: " + domain.getName());
     }
 
@@ -497,7 +529,12 @@ public abstract class Configuration {
      * caller to clean it up.
      */
     public void removeDomain(String name) {
-        this.dataDomains.remove(name);
+        DataDomain domain = (DataDomain) dataDomains.remove(name);
+
+        if (domain != null) {
+            domain.setEventManager(null);
+        }
+
         logObj.debug("removed domain: " + name);
     }
 
@@ -590,7 +627,7 @@ public abstract class Configuration {
     public boolean loadDataView(DataView dataView, Predicate dataViewNameFilter)
             throws IOException {
 
-        if(dataView == null) {
+        if (dataView == null) {
             throw new IllegalArgumentException("DataView cannot be null.");
         }
 

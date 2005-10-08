@@ -116,6 +116,7 @@ public class DataRowStore implements Serializable {
     protected LRUMap snapshotLists;
     protected boolean notifyingRemoteListeners;
 
+    protected transient EventManager eventManager;
     protected transient EventBridge remoteNotificationsHandler;
 
     // IMPORTANT: EventSubject must be an ivar to avoid its deallocation
@@ -139,12 +140,29 @@ public class DataRowStore implements Serializable {
      *            null.
      */
     public DataRowStore(String name, Map properties) {
+        this(name, properties, new EventManager());
+    }
+
+    /**
+     * Creates new DataRowStore with a specified name and a set of properties. If no
+     * properties are defined, default values are used.
+     * 
+     * @param name DataRowStore name. Used to idenitfy this DataRowStore in events, etc.
+     *            Can't be null.
+     * @param properties Properties map used to configure DataRowStore parameters. Can be
+     *            null.
+     * @param eventManager EventManager that should be used for posting and receiving
+     *            events.
+     * @since 1.2
+     */
+    public DataRowStore(String name, Map properties, EventManager eventManager) {
         if (name == null) {
             throw new IllegalArgumentException("DataRowStore name can't be null.");
         }
 
         this.name = name;
         this.eventSubject = createSubject();
+        this.eventManager = eventManager;
         initWithProperties(properties);
     }
 
@@ -207,32 +225,17 @@ public class DataRowStore implements Serializable {
         // init event bridge only if we are notifying remote listeners
         if (notifyingRemoteListeners) {
             try {
-                EventBridgeFactory factory = (EventBridgeFactory) Class
-                        .forName(eventBridgeFactory)
-                        .newInstance();
-                this.remoteNotificationsHandler = factory
-                        .createEventBridge(getSnapshotEventSubject(), properties);
-
-                // listen to EventBridge ... must add itself as non-blocking listener
-                // otherwise a deadlock can occur as "processRemoteEvent" will attempt to
-                // obtain a lock on this object when the dispatch queue is locked... And
-                // another commit thread may have this object locked and attempt to lock
-                // dispatch queue
-
-                EventManager.getDefaultManager().addNonBlockingListener(this,
-                        "processRemoteEvent",
-                        SnapshotEvent.class,
+                EventBridgeFactory factory = (EventBridgeFactory) Class.forName(
+                        eventBridgeFactory).newInstance();
+                this.remoteNotificationsHandler = factory.createEventBridge(
                         getSnapshotEventSubject(),
-                        remoteNotificationsHandler);
-
-                // start EventBridge - it will listen to all event sources for this
-                // subject
-                remoteNotificationsHandler.startup(EventManager.getDefaultManager(),
-                        EventBridge.RECEIVE_LOCAL_EXTERNAL);
+                        properties);
             }
             catch (Exception ex) {
                 throw new CayenneRuntimeException("Error initializing DataRowStore.", ex);
             }
+
+            startListeners();
         }
     }
 
@@ -254,29 +257,46 @@ public class DataRowStore implements Serializable {
      * Shuts down any remote notification connections, and clears internal cache.
      */
     public void shutdown() {
-        if (remoteNotificationsHandler != null) {
-            try {
-                remoteNotificationsHandler.shutdown();
-            }
-            catch (Exception ex) {
-                logObj.info("Exception shutting down EventBridge.", ex);
-            }
-            remoteNotificationsHandler = null;
-        }
-
+        stopListeners();
         clear();
     }
 
     /**
-     * Returns the name of this SnapshotCache. Name allows to create EventSubjects for
-     * event notifications addressed to or sent from this SnapshotCache.
+     * Returns the name of this DataRowStore. Name allows to create EventSubjects for
+     * event notifications addressed to or sent from this DataRowStore.
      */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets the name of this DataRowStore. Name allows to create EventSubjects for event
+     * notifications addressed to or sent from this DataRowStore.
+     */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Returns an EventManager associated with this DataRowStore.
+     * 
+     * @since 1.2
+     */
+    public EventManager getEventManager() {
+        return eventManager;
+    }
+
+    /**
+     * Sets an EventManager associated with this DataRowStore.
+     * 
+     * @since 1.2
+     */
+    public void setEventManager(EventManager eventManager) {
+        if (eventManager != this.eventManager) {
+            stopListeners();
+            this.eventManager = eventManager;
+            startListeners();
+        }
     }
 
     /**
@@ -305,7 +325,7 @@ public class DataRowStore implements Serializable {
         }
 
         // try getting it from database
-        
+
         // TODO: replace this with SingleObjectQuery...
         Query select = new SingleObjectQuery(oid).resolve(engine.getEntityResolver());
         SelectObserver observer = new SelectObserver();
@@ -318,9 +338,11 @@ public class DataRowStore implements Serializable {
                     + ". Fetch matched "
                     + results.size()
                     + " objects.");
-        } else if (results.size() == 0) {
+        }
+        else if (results.size() == 0) {
             return null;
-        } else {
+        }
+        else {
             DataRow snapshot = (DataRow) results.get(0);
             snapshots.put(oid, snapshot);
             return snapshot;
@@ -410,7 +432,8 @@ public class DataRowStore implements Serializable {
     /**
      * Processes changes made to snapshots. Modifies internal cache state, and then sends
      * the event to all listeners. Source of these changes is usually an ObjectStore.
-     * @deprecated 
+     * 
+     * @deprecated
      */
     public void processSnapshotChanges(
             Object source,
@@ -418,7 +441,12 @@ public class DataRowStore implements Serializable {
             Collection deletedSnapshotIds,
             Collection indirectlyModifiedIds) {
 
-        this.processSnapshotChanges(source, updatedSnapshots, deletedSnapshotIds, Collections.EMPTY_LIST, indirectlyModifiedIds);
+        this.processSnapshotChanges(
+                source,
+                updatedSnapshots,
+                deletedSnapshotIds,
+                Collections.EMPTY_LIST,
+                indirectlyModifiedIds);
     }
 
     /**
@@ -483,7 +511,7 @@ public class DataRowStore implements Serializable {
             Iterator it = updatedSnapshots.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
-                
+
                 ObjectId key = (ObjectId) entry.getKey();
                 DataRow newSnapshot = (DataRow) entry.getValue();
                 DataRow oldSnapshot = (DataRow) snapshots.put(key, newSnapshot);
@@ -495,16 +523,16 @@ public class DataRowStore implements Serializable {
 
                 // 1. There is no previously cached snapshot for a given id.
                 // 2. There was a previously cached snapshot for a given id,
-                //    but it expired from cache and was removed. Currently
-                //    handled as (1); what are the consequences of that?
+                // but it expired from cache and was removed. Currently
+                // handled as (1); what are the consequences of that?
                 // 3. There is a previously cached snapshot and it has the
-                //    *same version* as the "replacesVersion" property of the
-                //    new snapshot.
+                // *same version* as the "replacesVersion" property of the
+                // new snapshot.
                 // 4. There is a previously cached snapshot and it has a
-                //    *different version* from "replacesVersion" property of
-                //    the new snapshot. It means that we don't know how to merge
-                //    the two (we don't even know which one is newer due to
-                //    multithreading). Just throw out this snapshot....
+                // *different version* from "replacesVersion" property of
+                // the new snapshot. It means that we don't know how to merge
+                // the two (we don't even know which one is newer due to
+                // multithreading). Just throw out this snapshot....
 
                 if (oldSnapshot != null) {
                     // case 4 above... have to throw out the snapshot since
@@ -583,7 +611,7 @@ public class DataRowStore implements Serializable {
 
             // send synchronously, relying on listeners to
             // register as "non-blocking" if needed.
-            EventManager.getDefaultManager().postEvent(event, getSnapshotEventSubject());
+            eventManager.postEvent(event, getSnapshotEventSubject());
         }
     }
 
@@ -603,5 +631,46 @@ public class DataRowStore implements Serializable {
 
         // restore subjects
         this.eventSubject = createSubject();
+    }
+
+    void stopListeners() {
+        eventManager.removeListener(this);
+        if (remoteNotificationsHandler != null) {
+            try {
+                remoteNotificationsHandler.shutdown();
+            }
+            catch (Exception ex) {
+                logObj.info("Exception shutting down EventBridge.", ex);
+            }
+            remoteNotificationsHandler = null;
+        }
+    }
+
+    void startListeners() {
+        if (remoteNotificationsHandler != null) {
+            try {
+                // listen to EventBridge ... must add itself as non-blocking listener
+                // otherwise a deadlock can occur as "processRemoteEvent" will attempt to
+                // obtain a lock on this object when the dispatch queue is locked... And
+                // another commit thread may have this object locked and attempt to lock
+                // dispatch queue
+
+                eventManager.addNonBlockingListener(
+                        this,
+                        "processRemoteEvent",
+                        SnapshotEvent.class,
+                        getSnapshotEventSubject(),
+                        remoteNotificationsHandler);
+
+                // start EventBridge - it will listen to all event sources for this
+                // subject
+                remoteNotificationsHandler.startup(
+                        eventManager,
+                        EventBridge.RECEIVE_LOCAL_EXTERNAL);
+            }
+            catch (Exception ex) {
+                throw new CayenneRuntimeException("Error initializing DataRowStore.", ex);
+            }
+        }
     }
 }

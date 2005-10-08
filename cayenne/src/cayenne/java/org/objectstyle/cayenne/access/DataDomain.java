@@ -69,6 +69,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
+import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -132,6 +133,11 @@ public class DataDomain implements QueryEngine, PersistenceContext {
     protected boolean sharedCacheEnabled;
     protected boolean validatingObjectsOnCommit;
     protected boolean usingExternalTransactions;
+
+    /**
+     * @since 1.2
+     */
+    protected EventManager eventManager;
 
     /**
      * Creates a DataDomain and assigns it a name.
@@ -248,6 +254,28 @@ public class DataDomain implements QueryEngine, PersistenceContext {
     }
 
     /**
+     * Returns EventManager used by this DataDomain.
+     * 
+     * @since 1.2
+     */
+    public EventManager getEventManager() {
+        return eventManager;
+    }
+
+    /**
+     * Sets EventManager used by this DataDomain.
+     * 
+     * @since 1.2
+     */
+    public void setEventManager(EventManager eventManager) {
+        this.eventManager = eventManager;
+        
+        if (sharedSnapshotCache != null) {
+            sharedSnapshotCache.setEventManager(eventManager);
+        }
+    }
+
+    /**
      * Returns "name" property value.
      */
     public String getName() {
@@ -351,7 +379,7 @@ public class DataDomain implements QueryEngine, PersistenceContext {
      */
     public synchronized DataRowStore getSharedSnapshotCache() {
         if (sharedSnapshotCache == null) {
-            this.sharedSnapshotCache = new DataRowStore(name, properties);
+            this.sharedSnapshotCache = new DataRowStore(name, properties, eventManager);
         }
 
         return sharedSnapshotCache;
@@ -504,7 +532,7 @@ public class DataDomain implements QueryEngine, PersistenceContext {
         // it makes it easier to track the event subject
         DataRowStore snapshotCache = (useSharedCache)
                 ? getSharedSnapshotCache()
-                : new DataRowStore(name, properties);
+                : new DataRowStore(name, properties, eventManager);
 
         DataContext context;
         if (null == dataContextFactory) {

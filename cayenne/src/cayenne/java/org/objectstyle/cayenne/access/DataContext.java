@@ -81,7 +81,6 @@ import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.access.util.PrefetchHelper;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbJoin;
@@ -1412,27 +1411,30 @@ public class DataContext implements QueryEngine, Serializable {
     void fireWillCommit() {
         // post event: WILL_COMMIT
         if (this.transactionEventsEnabled) {
-            EventManager eventMgr = EventManager.getDefaultManager();
             DataContextEvent commitChangesEvent = new DataContextEvent(this);
-            eventMgr.postEvent(commitChangesEvent, DataContext.WILL_COMMIT);
+            getObjectStore().getEventManager().postEvent(
+                    commitChangesEvent,
+                    DataContext.WILL_COMMIT);
         }
     }
 
     void fireTransactionRolledback() {
         // post event: DID_ROLLBACK
         if ((this.transactionEventsEnabled)) {
-            EventManager eventMgr = EventManager.getDefaultManager();
             DataContextEvent commitChangesEvent = new DataContextEvent(this);
-            eventMgr.postEvent(commitChangesEvent, DataContext.DID_ROLLBACK);
+            getObjectStore().getEventManager().postEvent(
+                    commitChangesEvent,
+                    DataContext.DID_ROLLBACK);
         }
     }
 
     void fireTransactionCommitted() {
         // post event: DID_COMMIT
         if ((this.transactionEventsEnabled)) {
-            EventManager eventMgr = EventManager.getDefaultManager();
             DataContextEvent commitChangesEvent = new DataContextEvent(this);
-            eventMgr.postEvent(commitChangesEvent, DataContext.DID_COMMIT);
+            getObjectStore().getEventManager().postEvent(
+                    commitChangesEvent,
+                    DataContext.DID_COMMIT);
         }
     }
 }

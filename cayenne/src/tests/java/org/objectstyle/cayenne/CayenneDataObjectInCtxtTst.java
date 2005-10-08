@@ -295,7 +295,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
 
         // test versions assigned on fetch... clean up domain cache
         // before doing it
-        EventManager.getDefaultManager().removeAllListeners(
+        getDomain().getEventManager().removeAllListeners(
                 getDomain().getSharedSnapshotCache().getSnapshotEventSubject());
         getDomain().getSharedSnapshotCache().clear();
         context = getDomain().createDataContext();

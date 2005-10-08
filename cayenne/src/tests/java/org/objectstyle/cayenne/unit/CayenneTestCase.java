@@ -65,7 +65,6 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
-import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -150,16 +149,16 @@ public abstract class CayenneTestCase extends BasicTestCase {
      */
     protected DataContext createDataContextWithSharedCache() {
         // remove listeners for snapshot events
-        EventManager.getDefaultManager().removeAllListeners(
-            getDomain().getSharedSnapshotCache().getSnapshotEventSubject());
+        getDomain().getEventManager().removeAllListeners(
+                getDomain().getSharedSnapshotCache().getSnapshotEventSubject());
 
         // clear cache...
         getDomain().getSharedSnapshotCache().clear();
         DataContext context = getDomain().createDataContext(true);
 
-        assertSame(
-            getDomain().getSharedSnapshotCache(),
-            context.getObjectStore().getDataRowCache());
+        assertSame(getDomain().getSharedSnapshotCache(), context
+                .getObjectStore()
+                .getDataRowCache());
 
         return context;
     }

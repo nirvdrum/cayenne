@@ -137,29 +137,29 @@ public class ContextCommitObserver
     }
 
     public void registerForDataContextEvents() {
-        EventManager mgr = EventManager.getDefaultManager();
+        EventManager mgr = context.getObjectStore().getEventManager();
         mgr.addListener(
-            this,
-            "dataContextWillCommit",
-            DataContextEvent.class,
-            DataContext.WILL_COMMIT,
-            this.context);
+                this,
+                "dataContextWillCommit",
+                DataContextEvent.class,
+                DataContext.WILL_COMMIT,
+                this.context);
         mgr.addListener(
-            this,
-            "dataContextDidCommit",
-            DataContextEvent.class,
-            DataContext.DID_COMMIT,
-            this.context);
+                this,
+                "dataContextDidCommit",
+                DataContextEvent.class,
+                DataContext.DID_COMMIT,
+                this.context);
         mgr.addListener(
-            this,
-            "dataContextDidRollback",
-            DataContextEvent.class,
-            DataContext.DID_ROLLBACK,
-            this.context);
+                this,
+                "dataContextDidRollback",
+                DataContextEvent.class,
+                DataContext.DID_ROLLBACK,
+                this.context);
     }
 
     public void unregisterFromDataContextEvents() {
-        EventManager mgr = EventManager.getDefaultManager();
+        EventManager mgr = context.getObjectStore().getEventManager();
         mgr.removeListener(this, DataContext.WILL_COMMIT);
         mgr.removeListener(this, DataContext.DID_COMMIT);
         mgr.removeListener(this, DataContext.DID_ROLLBACK);

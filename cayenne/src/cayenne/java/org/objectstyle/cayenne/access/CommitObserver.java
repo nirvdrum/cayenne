@@ -130,7 +130,7 @@ class CommitObserver extends DefaultOperationObserver implements
     }
 
     void registerForDataContextEvents() {
-        EventManager mgr = EventManager.getDefaultManager();
+        EventManager mgr = context.getObjectStore().getEventManager();
         mgr.addListener(
                 this,
                 "dataContextWillCommit",
@@ -152,7 +152,7 @@ class CommitObserver extends DefaultOperationObserver implements
     }
 
     void unregisterFromDataContextEvents() {
-        EventManager mgr = EventManager.getDefaultManager();
+        EventManager mgr = context.getObjectStore().getEventManager();
         mgr.removeListener(this, DataContext.WILL_COMMIT);
         mgr.removeListener(this, DataContext.DID_COMMIT);
         mgr.removeListener(this, DataContext.DID_ROLLBACK);

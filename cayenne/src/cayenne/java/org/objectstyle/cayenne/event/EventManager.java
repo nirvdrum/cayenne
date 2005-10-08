@@ -71,18 +71,19 @@ import org.objectstyle.cayenne.util.Invocation;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * This class acts as bridge between an Object that wants to inform others about
- * its current state or a change thereof (Publisher) and a list of objects
- * interested in the Subject (Listeners).
+ * This class acts as bridge between an Object that wants to inform others about its
+ * current state or a change thereof (Publisher) and a list of objects interested in the
+ * Subject (Listeners).
  * 
  * @author Dirk Olmes
  * @author Holger Hoffstaette
  * @author Andrei Adamchik
  */
 public class EventManager extends Object {
+
     private static Logger logObj = Logger.getLogger(EventManager.class);
 
-    private static final EventManager defaultManager = new EventManager();
+    private static EventManager defaultManager;
 
     public static final int DEFAULT_DISPATCH_THREAD_COUNT = 5;
 
@@ -92,11 +93,20 @@ public class EventManager extends Object {
     protected boolean singleThread;
 
     /**
-     * This method will return the shared 'default' EventManager.
+     * Returns the shared EventManager. It is created on demand on the first call to this
+     * method. Cayenne internally doesn't use default EventManager. Instead Configuration
+     * EventManager is propagated to DataDomains and DataContexts.
      * 
      * @return EventManager the shared EventManager instance
      */
     public static EventManager getDefaultManager() {
+        if (defaultManager == null) {
+            synchronized (EventManager.class) {
+                if (defaultManager == null) {
+                    defaultManager = new EventManager(2);
+                }
+            }
+        }
         return defaultManager;
     }
 
@@ -108,7 +118,6 @@ public class EventManager extends Object {
      * Default constructor for new EventManager instances, in case you need one.
      */
     public EventManager(int dispatchThreadCount) {
-        super();
         this.subjects = Collections.synchronizedMap(new WeakHashMap());
         this.eventQueue = Collections.synchronizedList(new LinkedList());
         this.singleThread = dispatchThreadCount <= 0;
@@ -118,90 +127,91 @@ public class EventManager extends Object {
             new DispatchThread("EventDispatchThread-" + i).start();
         }
     }
-    
+
     /**
-     * Returns a list of currently queued events. Queue is returned by copy.
-     * This method is useful for inspecting the state of the event queue at
-     * any particular moment, but doesn't allow callers to alter the queue state.
+     * Returns a list of currently queued events. Queue is returned by copy. This method
+     * is useful for inspecting the state of the event queue at any particular moment, but
+     * doesn't allow callers to alter the queue state.
      * 
      * @since 1.1
      */
     public List getEventQueue() {
-        synchronized(eventQueue) {
+        synchronized (eventQueue) {
             return new ArrayList(eventQueue);
         }
     }
 
     /**
-     * Register	an <code>EventListener</code> for events sent by any sender.
+     * Register an <code>EventListener</code> for events sent by any sender.
      * 
      * @throws RuntimeException if <code>methodName</code> is not found
      * @see #addListener(Object, String, Class, EventSubject, Object)
      */
     public void addListener(
-        Object listener,
-        String methodName,
-        Class eventParameterClass,
-        EventSubject subject) {
+            Object listener,
+            String methodName,
+            Class eventParameterClass,
+            EventSubject subject) {
         this.addListener(listener, methodName, eventParameterClass, subject, null, true);
     }
 
     public void addNonBlockingListener(
-        Object listener,
-        String methodName,
-        Class eventParameterClass,
-        EventSubject subject) {
+            Object listener,
+            String methodName,
+            Class eventParameterClass,
+            EventSubject subject) {
 
         if (singleThread) {
-            throw new IllegalStateException("EventManager is configured to be single-threaded.");
+            throw new IllegalStateException(
+                    "EventManager is configured to be single-threaded.");
         }
 
         this.addListener(listener, methodName, eventParameterClass, subject, null, false);
     }
 
     /**
-     * Register	an <code>EventListener</code> for events sent by a specific
-     * sender.
+     * Register an <code>EventListener</code> for events sent by a specific sender.
      * 
      * @param listener the object to be notified about events
      * @param methodName the name of the listener method to be invoked
-     * @param eventParameterClass the class of the single event argument passed
-     * to <code>methodName</code>
+     * @param eventParameterClass the class of the single event argument passed to
+     *            <code>methodName</code>
      * @param subject the event subject that the listener is interested in
      * @param sender the object whose events the listener is interested in;
-     * <code>null</code> means 'any sender'.
+     *            <code>null</code> means 'any sender'.
      * @throws RuntimeException if <code>methodName</code> is not found
      */
     public void addListener(
-        Object listener,
-        String methodName,
-        Class eventParameterClass,
-        EventSubject subject,
-        Object sender) {
+            Object listener,
+            String methodName,
+            Class eventParameterClass,
+            EventSubject subject,
+            Object sender) {
         addListener(listener, methodName, eventParameterClass, subject, sender, true);
     }
 
     public void addNonBlockingListener(
-        Object listener,
-        String methodName,
-        Class eventParameterClass,
-        EventSubject subject,
-        Object sender) {
+            Object listener,
+            String methodName,
+            Class eventParameterClass,
+            EventSubject subject,
+            Object sender) {
 
         if (singleThread) {
-            throw new IllegalStateException("EventManager is configured to be single-threaded.");
+            throw new IllegalStateException(
+                    "EventManager is configured to be single-threaded.");
         }
 
         addListener(listener, methodName, eventParameterClass, subject, sender, false);
     }
 
     protected void addListener(
-        Object listener,
-        String methodName,
-        Class eventParameterClass,
-        EventSubject subject,
-        Object sender,
-        boolean blocking) {
+            Object listener,
+            String methodName,
+            Class eventParameterClass,
+            EventSubject subject,
+            Object sender,
+            boolean blocking) {
 
         if (listener == null) {
             throw new IllegalArgumentException("Listener must not be null.");
@@ -215,22 +225,26 @@ public class EventManager extends Object {
             throw new IllegalArgumentException("Subject must not be null.");
         }
 
-       /* if (logObj.isDebugEnabled()) {
-            String label =
-                (blocking) ? "adding listener: " : "adding non-blocking listener: ";
-            String object = new ToStringBuilder(listener).toString();
-            logObj.debug(label + object + "." + methodName);
-        } */
+        /*
+         * if (logObj.isDebugEnabled()) { String label = (blocking) ? "adding listener: " :
+         * "adding non-blocking listener: "; String object = new
+         * ToStringBuilder(listener).toString(); logObj.debug(label + object + "." +
+         * methodName); }
+         */
 
         try {
-            Invocation invocation =
-                (blocking)
-                    ? new Invocation(listener, methodName, eventParameterClass)
-                    : new NonBlockingInvocation(listener, methodName, eventParameterClass);
+            Invocation invocation = (blocking) ? new Invocation(
+                    listener,
+                    methodName,
+                    eventParameterClass) : new NonBlockingInvocation(
+                    listener,
+                    methodName,
+                    eventParameterClass);
             dispatchQueueForSubject(subject, true).addInvocation(invocation, sender);
         }
         catch (NoSuchMethodException nsm) {
-            throw new CayenneRuntimeException("Error adding listener, method name: " + methodName, nsm);
+            throw new CayenneRuntimeException("Error adding listener, method name: "
+                    + methodName, nsm);
         }
     }
 
@@ -239,8 +253,8 @@ public class EventManager extends Object {
      * <code>EventManager</code> instance.
      * 
      * @param listener the object to be unregistered
-     * @return <code>true</code> if <code>listener</code> could be removed for
-     * any existing subjects, else returns <code>false</code>.
+     * @return <code>true</code> if <code>listener</code> could be removed for any
+     *         existing subjects, else returns <code>false</code>.
      */
     public boolean removeListener(Object listener) {
         if (listener == null) {
@@ -253,8 +267,8 @@ public class EventManager extends Object {
             if (!subjects.isEmpty()) {
                 Iterator subjectIter = subjects.keySet().iterator();
                 while (subjectIter.hasNext()) {
-                    didRemove
-                        |= this.removeListener(listener, (EventSubject) subjectIter.next());
+                    didRemove |= this.removeListener(listener, (EventSubject) subjectIter
+                            .next());
                 }
             }
         }
@@ -280,23 +294,23 @@ public class EventManager extends Object {
      * 
      * @param listener the object to be unregistered
      * @param subject the subject from which the listener is to be unregistered
-     * @return <code>true</code> if <code>listener</code> could be removed for
-     * the given subject, else returns <code>false</code>.
+     * @return <code>true</code> if <code>listener</code> could be removed for the
+     *         given subject, else returns <code>false</code>.
      */
     public boolean removeListener(Object listener, EventSubject subject) {
         return this.removeListener(listener, subject, null);
     }
 
     /**
-     * Unregister the specified listener for the events about the given subject
-     * and the given sender.
+     * Unregister the specified listener for the events about the given subject and the
+     * given sender.
      * 
      * @param listener the object to be unregistered
      * @param subject the subject from which the listener is to be unregistered
      * @param sender the object whose events the listener was interested in;
-     * <code>null</code> means 'any sender'.
-     * @return <code>true</code> if <code>listener</code> could be removed for
-     * the given subject, else returns <code>false</code>.
+     *            <code>null</code> means 'any sender'.
+     * @return <code>true</code> if <code>listener</code> could be removed for the
+     *         given subject, else returns <code>false</code>.
      */
     public boolean removeListener(Object listener, EventSubject subject, Object sender) {
         if (listener == null || subject == null) {
@@ -312,9 +326,9 @@ public class EventManager extends Object {
     }
 
     /**
-     * Sends an event to all registered objects about a particular subject.
-     * Event is sent synchronously, so the sender thread is blocked until all
-     * the listeners finish processing the event.
+     * Sends an event to all registered objects about a particular subject. Event is sent
+     * synchronously, so the sender thread is blocked until all the listeners finish
+     * processing the event.
      * 
      * @param event the event to be posted to the observers
      * @param subject the subject about which observers will be notified
@@ -325,19 +339,19 @@ public class EventManager extends Object {
     }
 
     /**
-     * Sends an event to all registered objects about a particular subject.
-     * Event is queued by EventManager, releasing the sender thread, and is
-     * later dispatched in a separate thread.
+     * Sends an event to all registered objects about a particular subject. Event is
+     * queued by EventManager, releasing the sender thread, and is later dispatched in a
+     * separate thread.
      * 
      * @param event the event to be posted to the observers
      * @param subject the subject about which observers will be notified
-     * 
      * @throws IllegalArgumentException if event or subject are null
      * @since 1.1
      */
     public void postNonBlockingEvent(EventObject event, EventSubject subject) {
         if (singleThread) {
-            throw new IllegalStateException("EventManager is configured to be single-threaded.");
+            throw new IllegalStateException(
+                    "EventManager is configured to be single-threaded.");
         }
 
         // add dispatch to the queue and return
@@ -368,11 +382,14 @@ public class EventManager extends Object {
 
     // represents a posted event
     class Dispatch {
+
         EventObject[] eventArgument;
         EventSubject subject;
 
         Dispatch(EventObject event, EventSubject subject) {
-            this(new EventObject[] { event }, subject);
+            this(new EventObject[] {
+                event
+            }, subject);
         }
 
         Dispatch(EventObject[] eventArgument, EventSubject subject) {
@@ -398,8 +415,10 @@ public class EventManager extends Object {
 
                 // inject single invocation dispatch into the queue
                 synchronized (eventQueue) {
-                    eventQueue.add(
-                        new InvocationDispatch(eventArgument, subject, invocation));
+                    eventQueue.add(new InvocationDispatch(
+                            eventArgument,
+                            subject,
+                            invocation));
                     eventQueue.notifyAll();
                 }
 
@@ -413,12 +432,11 @@ public class EventManager extends Object {
 
     // represents a posted event that should be sent to a single known listener
     class InvocationDispatch extends Dispatch {
+
         Invocation target;
 
-        InvocationDispatch(
-            EventObject[] eventArgument,
-            EventSubject subject,
-            Invocation target) {
+        InvocationDispatch(EventObject[] eventArgument, EventSubject subject,
+                Invocation target) {
             super(eventArgument, subject);
             this.target = target;
         }
@@ -434,16 +452,14 @@ public class EventManager extends Object {
     // dispatched in a separate thread
     final class NonBlockingInvocation extends Invocation {
 
-        public NonBlockingInvocation(
-            Object target,
-            String methodName,
-            Class parameterType)
-            throws NoSuchMethodException {
+        public NonBlockingInvocation(Object target, String methodName, Class parameterType)
+                throws NoSuchMethodException {
             super(target, methodName, parameterType);
         }
     }
 
     final class DispatchThread extends Thread {
+
         DispatchThread(String name) {
             super(name);
             setDaemon(true);
@@ -479,9 +495,8 @@ public class EventManager extends Object {
                     }
                     catch (Throwable th) {
                         // ignoring exception
-                        logObj.debug(
-                            "Event dispatch error, ignoring.",
-                            Util.unwindException(th));
+                        logObj.debug("Event dispatch error, ignoring.", Util
+                                .unwindException(th));
                     }
                 }
             }

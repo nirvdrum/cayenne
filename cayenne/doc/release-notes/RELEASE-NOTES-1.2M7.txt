@@ -11,4 +11,6 @@ http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
 
 Changes/New Features:
 
-* GraphEvents  
+* GraphEvents
+* Cayenne stack events are no longer sent via a shared "default" EventManager. Instead
+  an EventManager instance is assigned to Configuration.

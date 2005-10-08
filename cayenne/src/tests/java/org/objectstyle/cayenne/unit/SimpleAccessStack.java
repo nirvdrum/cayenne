@@ -61,12 +61,12 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.QueryResult;
+import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Procedure;
 
 /**
- * Default implementation of the AccessStack that has a single DataNode
- * per DataMap.
+ * Default implementation of the AccessStack that has a single DataNode per DataMap.
  * 
  * @author Andrei Adamchik
  */
@@ -75,15 +75,13 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
     protected DataDomain domain;
     protected DataSetFactory dataSetFactory;
 
-    public SimpleAccessStack(
-        CayenneTestResources resources,
-        DataSetFactory dataSetFactory,
-        DataMap[] maps)
-        throws Exception {
+    public SimpleAccessStack(CayenneTestResources resources,
+            DataSetFactory dataSetFactory, DataMap[] maps) throws Exception {
 
         this.dataSetFactory = dataSetFactory;
         this.resources = resources;
         this.domain = new DataDomain("domain");
+        domain.setEventManager(new EventManager(2));
         for (int i = 0; i < maps.length; i++) {
             initNode(maps[i]);
         }
@@ -121,8 +119,8 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
         }
     }
 
-    /** 
-     * Deletes all data from the database tables mentioned in the DataMap. 
+    /**
+     * Deletes all data from the database tables mentioned in the DataMap.
      */
     public void deleteTestData() throws Exception {
         Iterator it = domain.getDataNodes().iterator();
@@ -158,11 +156,10 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
         }
     }
 
-    /** 
-     * Creates primary key support for all node DbEntities.
-     * Will use its facilities provided by DbAdapter to generate
-     * any necessary database objects and data for primary
-     * key support.
+    /**
+     * Creates primary key support for all node DbEntities. Will use its facilities
+     * provided by DbAdapter to generate any necessary database objects and data for
+     * primary key support.
      */
     public void createPKSupport() throws Exception {
         Iterator it = domain.getDataNodes().iterator();

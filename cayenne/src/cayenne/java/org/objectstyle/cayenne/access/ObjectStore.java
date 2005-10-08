@@ -130,7 +130,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         this();
         setDataRowCache(dataRowCache);
     }
-    
+
     /**
      * Returns a number of objects currently registered with this ObjectStore.
      * 
@@ -139,7 +139,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     public int registeredObjectsCount() {
         return objectMap.size();
     }
-    
+
     /**
      * Returns a number of query results cached by this object store. Note that each
      * result is a list and can possibly contain a large number of entries.
@@ -218,19 +218,19 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         // IMPORTANT: listen for all senders on a given EventSubject,
         // filtering of events will be done in the handler method.
 
-        if (this.dataRowCache != null) {
-            EventManager.getDefaultManager().removeListener(
+        if (this.dataRowCache != null && dataRowCache.getEventManager() != null) {
+            dataRowCache.getEventManager().removeListener(
                     this,
                     this.dataRowCache.getSnapshotEventSubject());
         }
 
         this.dataRowCache = dataRowCache;
 
-        if (dataRowCache != null) {
+        if (dataRowCache != null && dataRowCache.getEventManager() != null) {
             // setting itself as non-blocking listener,
             // since event sending thread will likely be locking sender's
             // ObjectStore and snapshot cache itself.
-            EventManager.getDefaultManager().addNonBlockingListener(
+            dataRowCache.getEventManager().addNonBlockingListener(
                     this,
                     "snapshotsChanged",
                     SnapshotEvent.class,
@@ -336,7 +336,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     object.setPersistenceState(PersistenceState.HOLLOW);
                     break;
                 default:
-                    //Transient, committed and hollow need no handling
+                    // Transient, committed and hollow need no handling
                     break;
             }
         }
@@ -493,16 +493,16 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
         while (entries.hasNext()) {
             Map.Entry entry = (Map.Entry) entries.next();
-            
+
             DataObject object = (DataObject) entry.getValue();
             int state = object.getPersistenceState();
             ObjectId id = object.getObjectId();
-            
+
             // OID may have been manually substituted instead of using replacement...
             // not good, but process it here anyway...
-            // [an alternative would be to throw an exception, but as commit is already 
+            // [an alternative would be to throw an exception, but as commit is already
             // done, this is not a sensible thing to do]
-            if(state == PersistenceState.NEW && !id.isReplacementIdAttached()) {
+            if (state == PersistenceState.NEW && !id.isReplacementIdAttached()) {
                 id = fixObjectId((ObjectId) entry.getKey(), object);
             }
 
@@ -626,13 +626,13 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         this.flattenedDeletes.clear();
         this.flattenedInserts.clear();
     }
-    
-    
+
     /**
      * A hack to fix manual ObjectId replacements that may have been done without regards
-     * to the fact that ObjectId is used as a key in ObjectStore. E.g. 
-     * http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0210.html. Still not sure 
-     * if this is a sensible thing to do, but we can't leave this condition unhandled either.
+     * to the fact that ObjectId is used as a key in ObjectStore. E.g.
+     * http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0210.html. Still not sure
+     * if this is a sensible thing to do, but we can't leave this condition unhandled
+     * either.
      * 
      * @since 1.2
      */
@@ -660,8 +660,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     /**
      * Starts tracking the registration of new objects from this ObjectStore. Used in
      * conjunction with unregisterNewObjects() to control garbage collection when an
-     * instance of ObjectStore is used over a longer time for batch processing.
-     * (TODO: this won't work with changeObjectKey()?)
+     * instance of ObjectStore is used over a longer time for batch processing. (TODO:
+     * this won't work with changeObjectKey()?)
      * 
      * @see org.objectstyle.cayenne.access.ObjectStore#unregisterNewObjects()
      */
@@ -674,16 +674,16 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     /**
      * Unregisters the newly registered DataObjects from this objectStore. Used in
      * conjunction with startTrackingNewObjects() to control garbage collection when an
-     * instance of ObjectStore is used over a longer time for batch processing.
-     *  (TODO: this won't work with changeObjectKey()?)
+     * instance of ObjectStore is used over a longer time for batch processing. (TODO:
+     * this won't work with changeObjectKey()?)
      * 
      * @see org.objectstyle.cayenne.access.ObjectStore#startTrackingNewObjects()
      */
     public synchronized void unregisterNewObjects() {
         // TODO: something like shared DataContext or nested DataContext
         // would hopefully obsolete this feature...
-        
-        if(newObjectMap == null) {
+
+        if (newObjectMap == null) {
             return;
         }
 
@@ -776,6 +776,15 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      */
     public synchronized Iterator getObjectIterator() {
         return objectMap.values().iterator();
+    }
+
+    /**
+     * Returns EventManager use by this ObjectStore.
+     * 
+     * @since 1.2
+     */
+    public EventManager getEventManager() {
+        return (getDataRowCache() != null) ? getDataRowCache().getEventManager() : null;
     }
 
     /**
@@ -1072,17 +1081,17 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                         break;
                     case PersistenceState.MODIFIED:
                         DataContext context = object.getDataContext();
-                    	DataRow diff = getSnapshot(oid, context);
-	                    // consult delegate if it exists
-                    	DataContextDelegate delegate = context.nonNullDelegate();
-	                    if (delegate.shouldMergeChanges(object, diff)) {
-	                        ObjEntity entity = context
-	                                .getEntityResolver()
-	                                .lookupObjEntity(object);
-	                        DataRowUtils.forceMergeWithSnapshot(entity, object, diff);
-	                        delegate.finishedMergeChanges(object);
-	                    }
-                    
+                        DataRow diff = getSnapshot(oid, context);
+                        // consult delegate if it exists
+                        DataContextDelegate delegate = context.nonNullDelegate();
+                        if (delegate.shouldMergeChanges(object, diff)) {
+                            ObjEntity entity = context
+                                    .getEntityResolver()
+                                    .lookupObjEntity(object);
+                            DataRowUtils.forceMergeWithSnapshot(entity, object, diff);
+                            delegate.finishedMergeChanges(object);
+                        }
+
                     case PersistenceState.HOLLOW:
                         // do nothing
                         break;
@@ -1167,9 +1176,17 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                             .getDataContext()
                             .nonNullDelegate();
                     if (delegate.shouldMergeChanges(object, diff)) {
-                        ObjEntity entity = object.getDataContext().getEntityResolver().lookupObjEntity(object);
-                        DataRow snapshot = getSnapshot(object.getObjectId(), object.getDataContext());
-                        DataRowUtils.refreshObjectWithSnapshot(entity, object, snapshot, true); 
+                        ObjEntity entity = object
+                                .getDataContext()
+                                .getEntityResolver()
+                                .lookupObjEntity(object);
+                        DataRow snapshot = getSnapshot(object.getObjectId(), object
+                                .getDataContext());
+                        DataRowUtils.refreshObjectWithSnapshot(
+                                entity,
+                                object,
+                                snapshot,
+                                true);
                         delegate.finishedMergeChanges(object);
                     }
                     continue;
