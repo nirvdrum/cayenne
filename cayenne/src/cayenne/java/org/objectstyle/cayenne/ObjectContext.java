@@ -155,5 +155,5 @@ public interface ObjectContext extends Serializable {
     /**
      * Returns GraphManager that manages object graph associated with this context.
      */
-    public GraphManager getGraphManager();
+    GraphManager getGraphManager();
 }
