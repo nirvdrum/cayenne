@@ -65,7 +65,15 @@ package org.objectstyle.cayenne.graph;
 public interface GraphEventListener {
 
     /**
-     * A method for processing graph events.
+     * A method for processing graph events. A common strategy to implement GraphEvent
+     * processing is to provide GraphChangeHandler to "vizit" Event's GraphDiff:
+     * 
+     * <pre>
+     *   public void graphChanged(GraphEvent event) {
+     *      GraphChangeHandler handler = ..;
+     *      event.getDiff().apply(handler);
+     *   }
+     * </pre>
      */
     void graphChanged(GraphEvent event);
 }

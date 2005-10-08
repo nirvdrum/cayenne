@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.opp;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.objectstyle.cayenne.event.EventManager;
+
 /**
  * A noop CayenneConnector used for unit testing. Accumulates commands sent via this
  * connector without doing anything with them.
@@ -81,6 +83,10 @@ public class MockOPPConnector implements OPPConnector {
     public void reset() {
         commands.clear();
         fakeResponse = null;
+    }
+
+    public EventManager getEventManager() {
+        return null;
     }
 
     public void setResponse(Object fakeResponse) {

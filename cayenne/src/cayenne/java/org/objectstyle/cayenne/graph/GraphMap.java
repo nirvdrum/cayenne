@@ -62,102 +62,56 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * An implementation of GraphManager that stores graph nodes keyed by their ids and serves
- * as a single event source for all graph changes (provided that graph nodes invoke
- * appropriate callback methods on their changes). Processing of events received via
- * GraphEventListener API and not originating in this GraphMap is delegated to
- * externalChangeHandler.
+ * An implementation of GraphManager that stores graph nodes keyed by their ids.
+ * <h3>Tracking Object Changes</h3>
+ * <p>
+ * Registered objects may choose to notify GraphMap of their changes by using callback
+ * methods defined in GraphChangeHandler interface. GraphMap itself does not send
+ * GraphEvents, instead it directly notifies registered change handlers. An example of an
+ * event mechanism built on top of GraphMap is OperationRecorder - it broadcasts events
+ * via EventManager if configured to do so.
+ * </p>
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class GraphMap implements GraphManager, GraphEventListener {
+public class GraphMap implements GraphManager {
 
     protected Map nodes;
-
-    protected Collection localChangeHandlers;
-    protected GraphChangeHandler externalChangeHandler;
-    protected boolean recordingLocalChanges;
+    protected Collection changeHandlers;
 
     /**
      * Creates a new GraphMap.
      */
     public GraphMap() {
         this.nodes = new HashMap();
-        this.recordingLocalChanges = true;
     }
 
-    /**
-     * A listener method that delegates graph events that did not originate in this
-     * GraphManager to an 'externalChangeHandler' object. Events sent by this GraphMap are
-     * discarded. One common use of the listener is to synchronize changes in multiple
-     * peer graphs.
-     */
-    public void graphChanged(GraphEvent event) {
-        if (event.getSource() == this) {
-            return;
-        }
-
-        if (externalChangeHandler == null) {
-            return;
-        }
-
-        // temporarily block recording of local changes...
-        setRecordingLocalChanges(false);
-
-        try {
-            event.getDiff().apply(externalChangeHandler);
-        }
-        finally {
-            setRecordingLocalChanges(true);
-        }
-    }
-
-    public boolean isRecordingLocalChanges() {
-        return recordingLocalChanges;
-    }
-
-    public void setRecordingLocalChanges(boolean active) {
-        this.recordingLocalChanges = active;
-    }
-
-    public synchronized void addLocalChangeHandler(GraphChangeHandler handler) {
+    public synchronized void addChangeHandler(GraphChangeHandler handler) {
         if (handler != null) {
-            if (localChangeHandlers == null) {
-                localChangeHandlers = new ArrayList();
+            if (changeHandlers == null) {
+                changeHandlers = new ArrayList();
             }
 
-            localChangeHandlers.add(handler);
+            changeHandlers.add(handler);
         }
     }
 
-    public synchronized void removeLocalChangeHandler(GraphChangeHandler handler) {
-        if (handler != null && localChangeHandlers != null) {
-            localChangeHandlers.remove(handler);
+    public synchronized void removeChangeHandler(GraphChangeHandler handler) {
+        if (handler != null && changeHandlers != null) {
+            changeHandlers.remove(handler);
 
-            if (localChangeHandlers.isEmpty()) {
-                localChangeHandlers = null;
+            if (changeHandlers.isEmpty()) {
+                changeHandlers = null;
             }
         }
     }
 
     /**
-     * Returns an object that is delegated handling of GraphEvents received by GraphMap.
+     * Returns a collection of registered change handlers.
      */
-    public GraphChangeHandler getExternalChangeHandler() {
-        return externalChangeHandler;
-    }
-
-    /**
-     * Sets an object that will be delegated handling of GraphEvents received by GraphMap.
-     * If set to null, GraphEvents are discarded.
-     */
-    public void setExternalChangeHandler(GraphChangeHandler handler) {
-        this.externalChangeHandler = handler;
-    }
-
-    protected Collection getLocalChangeHandlers() {
-        return localChangeHandlers;
+    protected Collection getChangeHandlers() {
+        return changeHandlers;
     }
 
     // *** GraphMap methods
@@ -177,8 +131,8 @@ public class GraphMap implements GraphManager, GraphEventListener {
     // *** methods for tracking local changes declared in GraphChangeHandler interface
 
     public void graphCommitted() {
-        if (recordingLocalChanges && localChangeHandlers != null) {
-            Iterator it = localChangeHandlers.iterator();
+        if (changeHandlers != null) {
+            Iterator it = changeHandlers.iterator();
             while (it.hasNext()) {
                 ((GraphChangeHandler) it.next()).graphCommitted();
             }
@@ -186,8 +140,8 @@ public class GraphMap implements GraphManager, GraphEventListener {
     }
 
     public void graphRolledback() {
-        if (recordingLocalChanges && localChangeHandlers != null) {
-            Iterator it = localChangeHandlers.iterator();
+        if (changeHandlers != null) {
+            Iterator it = changeHandlers.iterator();
             while (it.hasNext()) {
                 ((GraphChangeHandler) it.next()).graphRolledback();
             }
@@ -195,8 +149,8 @@ public class GraphMap implements GraphManager, GraphEventListener {
     }
 
     public synchronized void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
-        if (recordingLocalChanges && localChangeHandlers != null) {
-            Iterator it = localChangeHandlers.iterator();
+        if (changeHandlers != null) {
+            Iterator it = changeHandlers.iterator();
             while (it.hasNext()) {
                 ((GraphChangeHandler) it.next()).arcCreated(nodeId, targetNodeId, arcId);
             }
@@ -204,8 +158,8 @@ public class GraphMap implements GraphManager, GraphEventListener {
     }
 
     public synchronized void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
-        if (recordingLocalChanges && localChangeHandlers != null) {
-            Iterator it = localChangeHandlers.iterator();
+        if (changeHandlers != null) {
+            Iterator it = changeHandlers.iterator();
             while (it.hasNext()) {
                 ((GraphChangeHandler) it.next()).arcDeleted(nodeId, targetNodeId, arcId);
             }
@@ -213,8 +167,8 @@ public class GraphMap implements GraphManager, GraphEventListener {
     }
 
     public synchronized void nodeCreated(Object nodeId) {
-        if (recordingLocalChanges && localChangeHandlers != null) {
-            Iterator it = localChangeHandlers.iterator();
+        if (changeHandlers != null) {
+            Iterator it = changeHandlers.iterator();
             while (it.hasNext()) {
                 ((GraphChangeHandler) it.next()).nodeCreated(nodeId);
             }
@@ -222,8 +176,8 @@ public class GraphMap implements GraphManager, GraphEventListener {
     }
 
     public synchronized void nodeRemoved(Object nodeId) {
-        if (recordingLocalChanges && localChangeHandlers != null) {
-            Iterator it = localChangeHandlers.iterator();
+        if (changeHandlers != null) {
+            Iterator it = changeHandlers.iterator();
             while (it.hasNext()) {
                 ((GraphChangeHandler) it.next()).nodeRemoved(nodeId);
             }
@@ -231,8 +185,8 @@ public class GraphMap implements GraphManager, GraphEventListener {
     }
 
     public synchronized void nodeIdChanged(Object nodeId, Object newId) {
-        if (recordingLocalChanges && localChangeHandlers != null) {
-            Iterator it = localChangeHandlers.iterator();
+        if (changeHandlers != null) {
+            Iterator it = changeHandlers.iterator();
             while (it.hasNext()) {
                 ((GraphChangeHandler) it.next()).nodeIdChanged(nodeId, newId);
             }
@@ -244,8 +198,8 @@ public class GraphMap implements GraphManager, GraphEventListener {
             String property,
             Object oldValue,
             Object newValue) {
-        if (recordingLocalChanges && localChangeHandlers != null) {
-            Iterator it = localChangeHandlers.iterator();
+        if (changeHandlers != null) {
+            Iterator it = changeHandlers.iterator();
             while (it.hasNext()) {
                 ((GraphChangeHandler) it.next()).nodePropertyChanged(
                         nodeId,

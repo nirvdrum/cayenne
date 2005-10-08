@@ -53,74 +53,39 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
-
-import org.objectstyle.cayenne.graph.GraphChangeHandler;
-import org.objectstyle.cayenne.graph.GraphManager;
+package org.objectstyle.cayenne.graph;
 
 /**
- * A GraphChangeHandler that injects external graph changes to an ObjectContext.
- * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class CayenneContextMergeHandler implements GraphChangeHandler {
+class GraphStateChange implements GraphDiff {
 
-    ContextStateRecorder stateRecorder;
-    GraphManager graphManager;
+    static final int COMMIT = 1;
+    static final int ROLLBACK = 2;
 
-    CayenneContextMergeHandler(ContextStateRecorder stateRecorder,
-            GraphManager graphManager) {
+    int type;
 
-        this.graphManager = graphManager;
-        this.stateRecorder = stateRecorder;
+    GraphStateChange(int type) {
+        this.type = type;
     }
 
-    public void nodeIdChanged(Object nodeId, Object newId) {
-        Object node = graphManager.unregisterNode(nodeId);
+    public boolean isNoop() {
+        return false;
+    }
 
-        if (node != null) {
-            graphManager.registerNode(newId, node);
-
-            if (node instanceof Persistent) {
-                // inject new id
-                ((Persistent) node).setGlobalID((GlobalID) newId);
-            }
-
-            // notify state recorder
-            stateRecorder.nodeIdChanged(nodeId, newId);
+    public void apply(GraphChangeHandler tracker) {
+        switch (type) {
+            case COMMIT:
+                tracker.graphCommitted();
+                break;
+            case ROLLBACK:
+                tracker.graphRolledback();
+                break;
         }
     }
 
-    public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
-        throw new CayenneRuntimeException("Not implemented yet.");
-    }
-
-    public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
-        throw new CayenneRuntimeException("Not implemented yet.");
-    }
-
-    public void graphCommitted() {
-        throw new CayenneRuntimeException("Not implemented yet.");
-    }
-
-    public void graphRolledback() {
-        throw new CayenneRuntimeException("Not implemented yet.");
-    }
-
-    public void nodeCreated(Object nodeId) {
-        throw new CayenneRuntimeException("Not implemented yet.");
-    }
-
-    public void nodePropertyChanged(
-            Object nodeId,
-            String property,
-            Object oldValue,
-            Object newValue) {
-        throw new CayenneRuntimeException("Not implemented yet.");
-    }
-
-    public void nodeRemoved(Object nodeId) {
-        throw new CayenneRuntimeException("Not implemented yet.");
+    public void undo(GraphChangeHandler tracker) {
+        // noop
     }
 }

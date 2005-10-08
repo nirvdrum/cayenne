@@ -60,6 +60,7 @@ import java.util.List;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 
@@ -75,6 +76,10 @@ public class OPPConnectorChannel implements OPPChannel {
 
     public OPPConnectorChannel(OPPConnector connector) {
         this.connector = connector;
+    }
+
+    public EventManager getEventManager() {
+        return connector != null ? connector.getEventManager() : null;
     }
 
     public List onSelectQuery(SelectMessage message) {

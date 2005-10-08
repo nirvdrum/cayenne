@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.opp;
 import java.util.List;
 
 import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 
@@ -68,6 +70,19 @@ import org.objectstyle.cayenne.map.EntityResolver;
  * @author Andrus Adamchik
  */
 public interface OPPChannel {
+
+    /**
+     * An EventManager subject used by OPPChannel to notify listeners of the graph object
+     * changes on the remote end of the channel.
+     */
+    public static final EventSubject REMOTE_GRAPH_CHANGE_SUBJECT = EventSubject
+            .getSubject(OPPChannel.class, "remote-graph-change");
+
+    /**
+     * Returns an EventManager that associated with this channel. Channel may return null
+     * if EventManager is not available for any reason.
+     */
+    EventManager getEventManager();
 
     /**
      * Processes SelectMessage returning a result as list.

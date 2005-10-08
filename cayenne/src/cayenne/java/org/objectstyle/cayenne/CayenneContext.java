@@ -63,6 +63,7 @@ import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
+import org.objectstyle.cayenne.graph.GraphEventListener;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.graph.GraphMap;
 import org.objectstyle.cayenne.graph.OperationRecorder;
@@ -95,7 +96,8 @@ public class CayenneContext implements ObjectContext {
     protected EntityResolver entityResolver;
     protected GraphManager graphManager;
     protected OperationRecorder changeRecorder;
-    protected ContextStateRecorder stateRecorder;
+    ContextStateRecorder stateRecorder;
+    GraphEventListener externalEventsHandler;
 
     // note that it is important to reuse the same action within the property change
     // thread to avoid a loop of "propertyChange" calls on handling reverse relationships.
@@ -116,7 +118,6 @@ public class CayenneContext implements ObjectContext {
      * should be used to connect to a remote Cayenne service.
      */
     public CayenneContext(OPPChannel channel) {
-        this.channel = channel;
 
         // assemble objects that track graph changes
         GraphMap graphMap = new GraphMap();
@@ -124,14 +125,13 @@ public class CayenneContext implements ObjectContext {
         this.changeRecorder = new OperationRecorder();
         this.stateRecorder = new ContextStateRecorder(graphMap);
 
-        graphMap.addLocalChangeHandler(changeRecorder);
-        graphMap.addLocalChangeHandler(stateRecorder);
-        graphMap.setExternalChangeHandler(new CayenneContextMergeHandler(
-                stateRecorder,
-                graphMap));
-
         this.graphManager = graphMap;
-        graphAction = new CayenneContextGraphAction(this);
+        this.graphAction = new CayenneContextGraphAction(this);
+
+        graphMap.addChangeHandler(changeRecorder);
+        graphMap.addChangeHandler(stateRecorder);
+
+        setChannel(channel);
     }
 
     public OPPChannel getChannel() {
@@ -139,7 +139,44 @@ public class CayenneContext implements ObjectContext {
     }
 
     public void setChannel(OPPChannel channel) {
-        this.channel = channel;
+        if (channel != this.channel) {
+
+            // stop listening to old channel
+            if (externalEventsHandler != null) {
+                if (this.channel != null && this.channel.getEventManager() != null) {
+                    this.channel.getEventManager().removeListener(
+                            this.externalEventsHandler,
+                            OPPChannel.REMOTE_GRAPH_CHANGE_SUBJECT,
+                            this.channel);
+                }
+
+                this.externalEventsHandler = null;
+            }
+
+            this.channel = channel;
+
+            // listen to new channel
+            if (channel != null && channel.getEventManager() != null) {
+                final GraphChangeHandler handler = new CayenneContextMergeHandler(
+                        stateRecorder,
+                        graphManager);
+
+                GraphEventListener listener = new GraphEventListener() {
+
+                    public void graphChanged(GraphEvent event) {
+                        event.getDiff().apply(handler);
+                    }
+                };
+                channel.getEventManager().addListener(
+                        listener,
+                        "graphChanged",
+                        GraphEvent.class,
+                        OPPChannel.REMOTE_GRAPH_CHANGE_SUBJECT,
+                        channel);
+
+                this.externalEventsHandler = listener;
+            }
+        }
     }
 
     /**
@@ -183,9 +220,14 @@ public class CayenneContext implements ObjectContext {
             GraphDiff commitDiff = channel.onCommit(new CommitMessage(changeRecorder
                     .getDiffs()));
 
-            // TODO (Andrus, 10/08): instead of this cast we need OPPChannel API to
-            // register listeners...
-            ((GraphMap) graphManager).graphChanged(new GraphEvent(channel, commitDiff));
+            // TODO (Andrus, 10/08): shouldn't channel intercept this message and send
+            // event on its own?
+            if (channel != null && channel.getEventManager() != null) {
+                channel.getEventManager().postEvent(
+                        new GraphEvent(channel, commitDiff),
+                        OPPChannel.REMOTE_GRAPH_CHANGE_SUBJECT);
+            }
+
             graphManager.graphCommitted();
 
             return commitDiff;

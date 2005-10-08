@@ -62,6 +62,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.OperationRecorder;
@@ -127,13 +128,20 @@ public class CayenneContextTst extends TestCase {
     public void testCommitChangesNew() {
         final OperationRecorder recorder = new OperationRecorder();
         final Object newObjectId = new GlobalID("test", "key", "generated");
+        final EventManager eventManager = new EventManager(0);
 
         // test that ids that are passed back are actually propagated to the right
         // objects...
+
         MockOPPChannel channel = new MockOPPChannel() {
 
             public GraphDiff onCommit(CommitMessage message) {
                 return recorder.getDiffs();
+            }
+
+            // must provide a channel with working event manager
+            public EventManager getEventManager() {
+                return eventManager;
             }
         };
 
@@ -188,12 +196,12 @@ public class CayenneContextTst extends TestCase {
     public void testPerformSelectQueryOverrideCached() {
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
-        
+
         DataMap dataMap = new DataMap("test");
         dataMap.addObjEntity(entity);
         Collection entities = Collections.singleton(dataMap);
         EntityResolver resolver = new EntityResolver(entities);
-        
+
         CayenneContext context = new CayenneContext();
         context.setEntityResolver(resolver);
 

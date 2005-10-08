@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.graph;
 
+
 /**
  * Represents a generic "managed" graph with nodes mapped by their ids. Inherited
  * GraphChangeHandler methods are intended as callbacks for graph node objects to notify

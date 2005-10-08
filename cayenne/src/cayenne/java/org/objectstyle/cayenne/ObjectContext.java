@@ -59,6 +59,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
+import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
@@ -71,6 +72,14 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
  * @author Andrus Adamchik
  */
 public interface ObjectContext extends Serializable {
+
+    /**
+     * An EventManager subject used by ObjectContext's GraphManager to notify listeners of
+     * the graph object changes.
+     */
+    public static final EventSubject GRAPH_CHANGE_SUBJECT = EventSubject.getSubject(
+            ObjectContext.class,
+            "graph-change");
 
     /**
      * Returns a collection of objects that are registered with this ObjectContext and

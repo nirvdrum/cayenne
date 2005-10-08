@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.opp;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.event.EventManager;
 
 /**
  * Encapsulates a transport for sending OPPMessages to a (possibly remote) OPPChannel.
@@ -64,6 +65,11 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  * @author Andrus Adamchik
  */
 public interface OPPConnector {
+
+    /**
+     * Returns EventManager associated with this channel.
+     */
+    EventManager getEventManager();
 
     /**
      * Sends a message to the server, returning a reply.

@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 
@@ -80,9 +81,13 @@ public class MockOPPChannel implements OPPChannel {
     public MockOPPChannel(GraphDiff commitResponse) {
         this.commitResponse = commitResponse;
     }
-    
+
     public MockOPPChannel(List selectResponse) {
         this.selectResponse = selectResponse;
+    }
+
+    public EventManager getEventManager() {
+        return null;
     }
 
     public List getMessages() {

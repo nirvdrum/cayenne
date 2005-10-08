@@ -58,7 +58,13 @@ package org.objectstyle.cayenne.graph;
 import java.util.EventObject;
 
 /**
- * An event indicating a change in the object graph. A change is expressed as a GraphDiff.
+ * An event indicating a change in the object graph. A change is expressed as a GraphDiff,
+ * so the easiest way to process the event is the following:
+ * 
+ * <pre>
+ *   GraphChangeHandler handler = ..;
+ *   event.getDiff().apply(handler);
+ * </pre>
  * 
  * @since 1.2
  * @author Andrus Adamchik

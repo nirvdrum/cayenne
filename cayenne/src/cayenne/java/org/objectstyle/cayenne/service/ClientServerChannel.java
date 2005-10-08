@@ -63,6 +63,7 @@ import java.util.List;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
@@ -87,9 +88,15 @@ public class ClientServerChannel implements OPPChannel {
     public ClientServerChannel(DataDomain domain) {
         this(new ObjectDataContext(domain));
     }
-    
+
     ClientServerChannel(ObjectDataContext serverContext) {
         this.serverContext = serverContext;
+    }
+
+    public EventManager getEventManager() {
+        return serverContext != null
+                ? serverContext.getObjectStore().getEventManager()
+                : null;
     }
 
     public GraphDiff onCommit(CommitMessage message) {

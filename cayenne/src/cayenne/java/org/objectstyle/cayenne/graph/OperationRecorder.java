@@ -59,10 +59,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.event.EventSubject;
+
 /**
  * Stores individual graph changes as GraphDiff "operations" that can be replayed later.
- * Note that this implementation is not synchronized; synchronization must be provided by
- * the users.
+ * Optionally can broadcast GraphEvents via supplied event manager.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -71,8 +74,79 @@ public class OperationRecorder implements GraphChangeHandler {
 
     protected List diffs;
 
+    // event stuff
+    protected EventSubject eventSubject;
+    protected Object eventSource;
+    protected EventManager eventManager;
+
+    protected boolean eventsEnabled;
+
+    /**
+     * Creates an OperationRecorder that stores graph changes as GraphDiffs and DOES NOT
+     * broadcast GraphEvents.
+     */
     public OperationRecorder() {
         this.diffs = new ArrayList();
+        this.eventsEnabled = false;
+    }
+
+    /**
+     * Creates an OperationRecorder that stores graph changes as GraphDiffs and broadcasts
+     * GraphEvents.
+     * 
+     * @param eventManager required
+     * @param eventSubject required
+     * @param eventSource optional. OperationRecorder will use self as an event source if
+     *            this argument is null.
+     */
+    public OperationRecorder(EventManager eventManager, EventSubject eventSubject,
+            Object eventSource) {
+
+        this();
+
+        // sanity check - make sure we can send events
+        if (eventManager == null) {
+            throw new IllegalArgumentException("Null eventManager");
+        }
+
+        if (eventSubject == null) {
+            throw new IllegalArgumentException("Null eventSubject");
+        }
+
+        if (eventSource == null) {
+            eventSource = this;
+        }
+
+        this.eventManager = eventManager;
+        this.eventSource = eventSource;
+        this.eventSubject = eventSubject;
+        this.eventsEnabled = true;
+    }
+
+    public boolean isEventsSupported() {
+        return eventManager != null && eventSource != null && eventSubject != null;
+    }
+
+    /**
+     * Returns true if events broadcasting is explicitly enabled and EventManager is not
+     * null.
+     */
+    public boolean isEventsEnabled() {
+        return eventsEnabled;
+    }
+
+    /**
+     * Enables events. Throws an exception if an attempt is made to enable events when
+     * they are not supported.
+     */
+    public void setEventsEnabled(boolean eventsEnabled) {
+
+        if (eventsEnabled && !isEventsSupported()) {
+            throw new CayenneRuntimeException(
+                    "Can't enable events - OperationRecorder is not configured to send them.");
+        }
+
+        this.eventsEnabled = eventsEnabled;
     }
 
     /**
@@ -97,11 +171,19 @@ public class OperationRecorder implements GraphChangeHandler {
         return diffs.isEmpty();
     }
 
+    // ***** GraphChangeHandler methods ******
+
     /**
      * Calls "clear()", removing all memorized changes.
      */
     public void graphCommitted() {
         clear();
+
+        if (isEventsEnabled()) {
+            GraphEvent e = new GraphEvent(eventSource, new GraphStateChange(
+                    GraphStateChange.COMMIT));
+            eventManager.postEvent(e, eventSubject);
+        }
     }
 
     /**
@@ -109,18 +191,24 @@ public class OperationRecorder implements GraphChangeHandler {
      */
     public void graphRolledback() {
         clear();
+
+        if (isEventsEnabled()) {
+            GraphEvent e = new GraphEvent(eventSource, new GraphStateChange(
+                    GraphStateChange.ROLLBACK));
+            eventManager.postEvent(e, eventSubject);
+        }
     }
 
     public void nodeCreated(Object nodeId) {
-        diffs.add(new NodeCreateOperation(nodeId));
+        processOperation(new NodeCreateOperation(nodeId));
     }
 
     public void nodeIdChanged(Object nodeId, Object newId) {
-        diffs.add(new NodeIdChangeOperation(nodeId, newId));
+        processOperation(new NodeIdChangeOperation(nodeId, newId));
     }
 
     public void nodeRemoved(Object nodeId) {
-        diffs.add(new NodeDeleteOperation(nodeId));
+        processOperation(new NodeDeleteOperation(nodeId));
     }
 
     public void nodePropertyChanged(
@@ -128,14 +216,27 @@ public class OperationRecorder implements GraphChangeHandler {
             String property,
             Object oldValue,
             Object newValue) {
-        diffs.add(new NodePropertyChangeOperation(nodeId, property, oldValue, newValue));
+        processOperation(new NodePropertyChangeOperation(
+                nodeId,
+                property,
+                oldValue,
+                newValue));
     }
 
     public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
-        diffs.add(new ArcCreateOperation(nodeId, targetNodeId, arcId));
+        processOperation(new ArcCreateOperation(nodeId, targetNodeId, arcId));
     }
 
     public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
-        diffs.add(new ArcDeleteOperation(nodeId, targetNodeId, arcId));
+        processOperation(new ArcDeleteOperation(nodeId, targetNodeId, arcId));
+    }
+
+    void processOperation(GraphDiff operation) {
+        diffs.add(operation);
+
+        if (isEventsEnabled()) {
+            GraphEvent e = new GraphEvent(eventSource, operation);
+            eventManager.postEvent(e, eventSubject);
+        }
     }
 }
