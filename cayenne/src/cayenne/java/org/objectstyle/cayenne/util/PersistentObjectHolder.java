@@ -53,9 +53,14 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.util;
 
 import java.util.List;
+
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.FaultFailureException;
+import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.ValueHolder;
 
 /**
  * A ValueHolder implementation that holds a single Persistent object related to an object

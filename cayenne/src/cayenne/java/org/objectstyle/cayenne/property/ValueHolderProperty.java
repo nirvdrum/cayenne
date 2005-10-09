@@ -56,8 +56,8 @@
 package org.objectstyle.cayenne.property;
 
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.PersistentObjectHolder;
 import org.objectstyle.cayenne.ValueHolder;
+import org.objectstyle.cayenne.util.PersistentObjectHolder;
 
 /**
  * Provides access to a property implemented as a ValueHolder Field.

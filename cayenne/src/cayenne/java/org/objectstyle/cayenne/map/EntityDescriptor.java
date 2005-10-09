@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.property.BaseClassDescriptor;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.property.FieldProperty;
 import org.objectstyle.cayenne.property.ListProperty;
+import org.objectstyle.cayenne.property.Property;
 import org.objectstyle.cayenne.property.ValueHolderProperty;
 
 /**
@@ -94,6 +95,22 @@ public class EntityDescriptor extends BaseClassDescriptor {
      */
     public ObjEntity getEntity() {
         return entity;
+    }
+
+    /**
+     * Registers a property. This method is useful to customize default ClassDescriptor
+     * generated from ObjEntity by adding new properties or overriding the standard ones.
+     */
+    public void setDeclaredProperty(Property property) {
+        declaredProperties.put(property.getPropertyName(), property);
+    }
+
+    /**
+     * Removes declared property. This method can be used to customize default
+     * ClassDescriptor generated from ObjEntity.
+     */
+    public void removeDeclaredProperty(String propertyName) {
+        declaredProperties.remove(propertyName);
     }
 
     /**
@@ -183,5 +200,7 @@ public class EntityDescriptor extends BaseClassDescriptor {
 
         in.defaultReadObject();
         compile();
+
+        // TODO: it won't preserve customizations...
     }
 }

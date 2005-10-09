@@ -242,12 +242,12 @@ public class IndexPropertyList extends AbstractList {
         int size = size();
         for (int i = startIndex; i < size; i++) {
             Object object = get(i);
-            
+
             int indexValue = getIndexValue(object);
-            if(indexValue > afterIndexValue) {
+            if (indexValue > afterIndexValue) {
                 break;
             }
-            
+
             int newValue = calculateIndexValue(i);
             setIndexValue(object, newValue);
             afterIndexValue = newValue;
@@ -262,8 +262,19 @@ public class IndexPropertyList extends AbstractList {
             return;
         }
 
-        Collections.sort(list, getComparator());
+        // do not directly sort Cayenne lists, sort the underlying list instead to avoid a
+        // bunch of additions/removals
+        Collections.sort(unwrapList(), getComparator());
         dirty = false;
+    }
+
+    List unwrapList() {
+        if (list instanceof PersistentObjectList) {
+            return ((PersistentObjectList) list).resolvedObjectList();
+        }
+        else {
+            return list;
+        }
     }
 
     /**

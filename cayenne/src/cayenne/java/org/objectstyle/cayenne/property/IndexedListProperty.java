@@ -56,34 +56,32 @@
 package org.objectstyle.cayenne.property;
 
 import java.util.Collection;
+import java.util.List;
 
-import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.util.PersistentObjectList;
+import org.objectstyle.cayenne.util.IndexPropertyList;
 
 /**
- * Provides access to a property implemented as a List Field.
+ * A CollectionProperty that uses IndexPropertyList.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ListProperty extends CollectionProperty {
+public class IndexedListProperty extends ListProperty {
 
-    public ListProperty(Class beanClass, String propertyName, String reversePropertyName) {
+    protected String indexPropertyName;
+
+    public IndexedListProperty(Class beanClass, String propertyName,
+            String reversePropertyName, String indexPropertyName) {
+
         super(beanClass, propertyName, reversePropertyName);
+        this.indexPropertyName = indexPropertyName;
     }
 
     /**
-     * Creates a List for an object. Expects an object to be an instance of Persistent.
+     * Creates a List indexed on a specified property.
      */
     protected Collection createCollection(Object object) throws PropertyAccessException {
-        if (!(object instanceof Persistent)) {
-
-            throw new PropertyAccessException(
-                    "ValueHolders for non-persistent objects are not supported.",
-                    this,
-                    object);
-        }
-
-        return new PersistentObjectList((Persistent) object, getPropertyName());
+        List unordered = (List) super.createCollection(object);
+        return new IndexPropertyList(indexPropertyName, unordered, true);
     }
 }

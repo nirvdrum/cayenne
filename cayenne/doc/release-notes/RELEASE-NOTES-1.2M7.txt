@@ -11,6 +11,10 @@ http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
 
 Changes/New Features:
 
-* GraphEvents
+* ObjectContext graph events.
+* OPPChannel graph events.
+* Runtime-customizable ClassDescriptors.
+* Auto-sorted relationship list - org.objectstyle.cayenne.util.IndexPropertyList. 
+  Supported for ObjectContext only for now, but should be easy to extend to DataContext.
 * Cayenne stack events are no longer sent via a shared "default" EventManager. Instead
   an EventManager instance is assigned to Configuration.

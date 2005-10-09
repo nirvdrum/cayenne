@@ -53,13 +53,17 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.util;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.Persistent;
 
 /**
  * A list of persistent objects lazily resolved on the first access.

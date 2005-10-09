@@ -53,12 +53,15 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.cayenne.CayenneContext;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;

@@ -58,8 +58,6 @@ package org.objectstyle.cayenne.service;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneContext;
-import org.objectstyle.cayenne.PersistentObjectHolder;
-import org.objectstyle.cayenne.PersistentObjectList;
 import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.opp.OPPConnectorChannel;
@@ -72,6 +70,8 @@ import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
 import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
+import org.objectstyle.cayenne.util.PersistentObjectHolder;
+import org.objectstyle.cayenne.util.PersistentObjectList;
 
 public class ClientServerChannelQueryTst extends CayenneTestCase {
 
