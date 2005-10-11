@@ -60,7 +60,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.objectstyle.cayenne.event.EventSubject;
-import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
@@ -138,15 +137,14 @@ public interface ObjectContext extends Serializable {
      * @return GraphDiff that contains changes made to objects during commit. This
      *         includes things like generated ids, etc.
      */
-    //void commitChanges();
-    GraphDiff commit();
+    void commitChanges();
 
     /**
-     * Sends changes via the OPPChannel made to objects of this ObjectContext since the
-     * last sync with parent.
+     * Notifies parent ObjectContext about the changes made to objects of this
+     * ObjectContext since the last sync. No commit occurs as a result.
      */
-    //void flushChanges();
-
+    // void flushChanges();
+    
     /**
      * Resets all changes made to the objects in the ObjectContext, and recursively all
      * parent contexts on the other end of the OPPChannel.
@@ -162,9 +160,8 @@ public interface ObjectContext extends Serializable {
      * all look like they did after the last commit".
      * </p>
      */
-    //void rollbackChanges();
-     void rollback();
-     
+    void rollbackChanges();
+
     /**
      * Resets changes made to the objects in the ObjectContext since the last sync with
      * OPPChannel.
@@ -180,8 +177,8 @@ public interface ObjectContext extends Serializable {
      * all look like they did after the last commit".
      * </p>
      */
-    //void revertChanges();
-
+    // void revertChanges();
+    
     /**
      * Executes a selecting query, returning a list of persistent objects or data rows.
      */

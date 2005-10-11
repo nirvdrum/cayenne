@@ -105,7 +105,7 @@ public class CayenneContextTst extends TestCase {
         CayenneContext context = new CayenneContext(channel, false);
 
         // no context changes so no connector access is expected
-        context.commit();
+        context.commitChanges();
         assertTrue(channel.getMessages().isEmpty());
     }
 
@@ -117,7 +117,7 @@ public class CayenneContextTst extends TestCase {
         // test that a command is being sent via connector on commit...
 
         context.changeRecorder.nodePropertyChanged(new Object(), "x", "y", "z");
-        context.commit();
+        context.commitChanges();
         assertEquals(1, channel.getMessages().size());
 
         // expect a sync/commit chain
@@ -160,7 +160,7 @@ public class CayenneContextTst extends TestCase {
 
         // check that a generated object ID is assigned back to the object...
         assertNotSame(newObjectId, object.getGlobalID());
-        context.commit();
+        context.commitChanges();
         assertSame(newObjectId, object.getGlobalID());
         assertSame(object, context.graphManager.getNode(newObjectId));
     }

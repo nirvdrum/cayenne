@@ -186,16 +186,8 @@ class ObjectDataContext extends DataContext implements ObjectContext {
         return performSelectQuery(new NamedQuery(queryName));
     }
 
-    public void commitChanges() throws CayenneRuntimeException {
-        commit();
-    }
-
     // ==== END: DataContext compatibility code... need to merge to DataContext
     // --------------------------------------------------------------------------
-
-    public void rollback() {
-        rollbackChanges();
-    }
 
     DataObject createAndRegisterNewObject(ObjectId id) {
         if (id.getObjectClass() == null) {
@@ -221,7 +213,11 @@ class ObjectDataContext extends DataContext implements ObjectContext {
         return dataObject;
     }
 
-    public GraphDiff commit() throws CayenneRuntimeException {
+    public void commitChanges() throws CayenneRuntimeException {
+        doCommitChanges();
+    }
+    
+    GraphDiff doCommitChanges() {
         return new ObjectDataContextCommitAction().commit(this);
     }
 

@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.objectstyle.cayenne.event.EventManager;
-import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
@@ -252,7 +251,7 @@ public class CayenneContext implements ObjectContext {
      * context and if any changes are detected, sends a commit message to remote Cayenne
      * service via an internal instance of CayenneConnector.
      */
-    public GraphDiff commit() {
+    public void commitChanges() {
 
         if (!changeRecorder.isEmpty()) {
             GraphDiff commitDiff = channel.onCommit(new CommitMessage(changeRecorder
@@ -267,15 +266,10 @@ public class CayenneContext implements ObjectContext {
             }
 
             graphManager.graphCommitted();
-
-            return commitDiff;
-        }
-        else {
-            return new CompoundDiff();
         }
     }
 
-    public void rollback() {
+    public void rollbackChanges() {
         if (!changeRecorder.isEmpty()) {
             changeRecorder.getDiffs().undo(new NullChangeHandler());
             graphManager.graphRolledback();

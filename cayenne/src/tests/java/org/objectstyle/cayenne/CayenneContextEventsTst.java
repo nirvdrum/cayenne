@@ -96,7 +96,7 @@ public class CayenneContextEventsTst extends TestCase {
 
         // dummy change...
         contextWithEvents.changeRecorder.nodePropertyChanged(new Object(), "x", "y", "z");
-        contextWithEvents.commit();
+        contextWithEvents.commitChanges();
         assertTrue(flags1[0]);
 
     }
@@ -132,7 +132,7 @@ public class CayenneContextEventsTst extends TestCase {
                 "x",
                 "y",
                 "z");
-        contextWithoutEvents.commit();
+        contextWithoutEvents.commitChanges();
         assertFalse(flags2[0]);
     }
 }

@@ -103,7 +103,7 @@ public class ClientServerChannel implements OPPChannel {
         // sync client changes
         message.getSenderChanges().apply(new ClientToServerDiffConverter(serverContext));
 
-        GraphDiff diff = serverContext.commit();
+        GraphDiff diff = serverContext.doCommitChanges();
 
         if (diff.isNoop()) {
             return diff;
