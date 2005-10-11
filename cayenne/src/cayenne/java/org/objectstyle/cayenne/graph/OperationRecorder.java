@@ -190,17 +190,27 @@ public class OperationRecorder implements GraphChangeHandler {
     }
 
     // ***** GraphChangeHandler methods ******
-
+    // =======================================
     /**
-     * Calls "clear()", removing all memorized changes.
+     * Calls "clear()", removing all memorized changes. Posts an event with graph diff
+     * containing changes introduced since the last call to "graphCommitStarted".
      */
     public void graphCommitted() {
-        clear();
-
         if (isEventsEnabled()) {
+            List eventDiffs = commitStartMarker == diffs.size() ? null : Collections
+                    .unmodifiableList(diffs.subList(commitStartMarker, diffs.size()));
+
+            // note that "clear" creates a new list, so it is safe to use the original
+            // list to store event data
+            clear();
+
             GraphEvent e = new GraphEvent(eventSource, new GraphStateChange(
-                    GraphStateChange.COMMIT));
+                    GraphStateChange.COMMIT,
+                    eventDiffs));
             eventManager.postEvent(e, eventSubject);
+        }
+        else {
+            clear();
         }
     }
 
@@ -208,12 +218,21 @@ public class OperationRecorder implements GraphChangeHandler {
      * Calls "clear()", removing all memorized changes.
      */
     public void graphRolledback() {
-        clear();
 
         if (isEventsEnabled()) {
+            List eventDiffs = Collections.unmodifiableList(diffs);
+
+            // note that "clear" creates a new list, so it is safe to use the original
+            // list to store event data
+            clear();
+
             GraphEvent e = new GraphEvent(eventSource, new GraphStateChange(
-                    GraphStateChange.ROLLBACK));
+                    GraphStateChange.ROLLBACK,
+                    eventDiffs));
             eventManager.postEvent(e, eventSubject);
+        }
+        else {
+            clear();
         }
     }
 
