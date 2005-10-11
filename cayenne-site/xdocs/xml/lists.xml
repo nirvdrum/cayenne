@@ -8,14 +8,31 @@
 
     <body>        
     	<section name="Mailing Lists">
-    	    <p><strong>Cayenne mailing list rules.</strong> 
+
+
+    	   
+<subsection name="Lists Overview">
+	    <ul>
+    	    <li><a href="#cayenne-user">cayenne-user</a> - General discussion and support list.</li>
+    	    <li><a href="#cayenne-devel">cayenne-devel</a> - a list for those who contribute to Cayenne.</li>
+	    <li><a href="#cayenne-cvs">cayenne-cvs</a> - CVS notifications list.</li>
+	    <li>You can also <a 
+		href="http://freshmeat.net/subscribe/21223/?url=%2Fprojects%2Fcayenne%2F">subscribe to 
+		Cayenne release announcements</a> on <a href="http://freshmeat.net/projects/cayenne/">Freshmeat</a>.</li>
+    	    </ul>
+		</subsection>
+
+ 	  <subsection name="Lists Rules"> 
     	    <ul>
     	    <li>Avoid crossposting the same message to more than one list.</li>
-    	    <li>Post to the list that is the most appropriate for the topic of your message.</li>
+    	    <li>Post to the list most appropriate for the topic of your message.</li>
     	    </ul>
-        	</p>
+
+        	</subsection>
+
+</section>
         
-    	    <subsection name="cayenne-user">
+    	    <section name="cayenne-user" anchor="cayenne-user">
         	<p><strong>cayenne-user</strong> is a mailing list for Cayenne 
         	users. It is the primary source of free Cayenne support.
         	It is also a place for general discussion of Cayenne-related topics. 
@@ -54,9 +71,9 @@
             </tr>
             <list-arch name="cayenne-user"/>
             </table>
-        </subsection>
+        </section>
         
-        <subsection name="cayenne-devel">
+        <section name="cayenne-devel" anchor="cayenne-devel">
         	<p><strong>cayenne-devel</strong> is a mailing list where Cayenne design issues
         	are discussed. This includes current and future features, release schedules, and simply
         	developer discussion of various Cayenne-related topics. It is a good idea for all
@@ -98,9 +115,9 @@
             </tr>
             <list-arch name="cayenne-devel"/>
             </table>
-        </subsection>
+        </section>
 
-        <subsection name="cayenne-cvs">
+        <section name="cayenne-cvs" anchor="cayenne-cvs">
         	<p><strong>cayenne-cvs</strong> is a mailing list that receives all of the Cayenne CVS commit messages.
         	You can subscribe to this list to keep track of changes to the Cayenne CVS repository.
         	</p>
@@ -112,7 +129,6 @@
         	<p>To <strong>unsubscribe</strong> send empty email to
         	<a href="mailto:cayenne-cvs-unsubscribe@objectstyle.org">cayenne-cvs-unsubscribe@objectstyle.org</a>.
         	</p>
-        </subsection>
         </section>
-    </body>
+     </body>
 </document>
