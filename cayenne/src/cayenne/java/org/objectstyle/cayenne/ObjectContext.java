@@ -60,7 +60,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.objectstyle.cayenne.event.EventSubject;
-import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
@@ -133,19 +132,54 @@ public interface ObjectContext extends Serializable {
             Object newValue);
 
     /**
-     * Commits changes made to this ObjectContext persistent objects. If an ObjectContext
-     * is a part of an ObjectContext hierarchy, this method call triggers commit all the
-     * way to the external data store.
+     * Performs a cascading commit of changes made in this ObjectContext and its parents.
      * 
      * @return GraphDiff that contains changes made to objects during commit. This
      *         includes things like generated ids, etc.
      */
+    //void commitChanges();
     GraphDiff commit();
 
     /**
-     * Resets changes made to the objects in the ObjectContext.
+     * Sends changes via the OPPChannel made to objects of this ObjectContext since the
+     * last sync with parent.
      */
-    void rollback();
+    //void flushChanges();
+
+    /**
+     * Resets all changes made to the objects in the ObjectContext, and recursively all
+     * parent contexts on the other end of the OPPChannel.
+     * <h4>Difference Between "revertChanges" And "rollbackChanges"</h4>
+     * <p>
+     * Revert is an operation local to this ObjectContext, that doesn't affect parent
+     * contexts on the other end of the OPPChannel. "Revert" means "undo all changes made
+     * to this context to make the context look like its parent".
+     * </p>
+     * <p>
+     * "Rollback" on the other hand undoes changes in the whole stack of ObjectContexts.
+     * So "rollback" means "undo all changes in this context and its parents so that they
+     * all look like they did after the last commit".
+     * </p>
+     */
+    //void rollbackChanges();
+     void rollback();
+     
+    /**
+     * Resets changes made to the objects in the ObjectContext since the last sync with
+     * OPPChannel.
+     * <h4>Difference Between "revertChanges" And "rollbackChanges"</h4>
+     * <p>
+     * Revert is an operation local to this ObjectContext, that doesn't affect parent
+     * contexts on the other end of the OPPChannel. "Revert" means "undo all changes made
+     * to this context to make the context look like its parent".
+     * </p>
+     * <p>
+     * "Rollback" on the other hand undoes changes in the whole stack of ObjectContexts.
+     * So "rollback" means "undo all changes in this context and its parents so that they
+     * all look like they did after the last commit".
+     * </p>
+     */
+    //void revertChanges();
 
     /**
      * Executes a selecting query, returning a list of persistent objects or data rows.

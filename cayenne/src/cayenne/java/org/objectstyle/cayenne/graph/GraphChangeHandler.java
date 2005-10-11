@@ -71,10 +71,20 @@ package org.objectstyle.cayenne.graph;
 public interface GraphChangeHandler {
 
     /**
+     * Notifies implementing object that a graph is about to be committed.
+     */
+    //void graphCommitStarted();
+
+    /**
      * Notifies implementing object that all graph chages made since last commit or
      * rollback were committed to some persistent storage.
      */
     void graphCommitted();
+
+    /**
+     * Notifies implementing object previously started commit has been aborted.
+     */
+    //void graphCommitAborted();
 
     /**
      * Notifies implementing object that all graph changes made since last commit or

@@ -55,11 +55,13 @@
  */
 package org.objectstyle.cayenne.graph;
 
+import java.util.List;
+
 /**
  * @since 1.2
  * @author Andrus Adamchik
  */
-class GraphStateChange implements GraphDiff {
+class GraphStateChange extends CompoundDiff {
 
     static final int COMMIT = 1;
     static final int ROLLBACK = 2;
@@ -67,6 +69,11 @@ class GraphStateChange implements GraphDiff {
     int type;
 
     GraphStateChange(int type) {
+        this.type = type;
+    }
+
+    GraphStateChange(int type, List diffs) {
+        super(diffs);
         this.type = type;
     }
 
