@@ -197,8 +197,9 @@ public class OperationRecorder implements GraphChangeHandler {
      */
     public void graphCommitted() {
         if (isEventsEnabled()) {
-            List eventDiffs = commitStartMarker == diffs.size() ? null : Collections
-                    .unmodifiableList(diffs.subList(commitStartMarker, diffs.size()));
+            // List eventDiffs = commitStartMarker == diffs.size() ? null : Collections
+            // .unmodifiableList(diffs.subList(commitStartMarker, diffs.size()));
+            List eventDiffs = Collections.unmodifiableList(diffs);
 
             // note that "clear" creates a new list, so it is safe to use the original
             // list to store event data

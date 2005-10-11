@@ -60,6 +60,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.objectstyle.cayenne.event.EventSubject;
+import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
