@@ -73,12 +73,12 @@ public interface GraphDiff extends Serializable {
     boolean isNoop();
 
     /**
-     * Calls appropriate methods on the tracker to "replay" this change.
+     * Calls appropriate methods on the handler to "replay" this change.
      */
-    void apply(GraphChangeHandler tracker);
+    void apply(GraphChangeHandler handler);
 
     /**
-     * Calls appropriate methods on the tracker to revert this change.
+     * Calls appropriate methods on the handler to revert this change.
      */
-    void undo(GraphChangeHandler tracker);
+    void undo(GraphChangeHandler handler);
 }
