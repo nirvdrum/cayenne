@@ -8,6 +8,7 @@ package org.objectstyle.art.auto;
 public class _Painting extends org.objectstyle.art.ArtDataObject {
 
     public static final String ESTIMATED_PRICE_PROPERTY = "estimatedPrice";
+    public static final String PAINTING_DESCRIPTION_PROPERTY = "paintingDescription";
     public static final String PAINTING_TITLE_PROPERTY = "paintingTitle";
     public static final String TO_ARTIST_PROPERTY = "toArtist";
     public static final String TO_GALLERY_PROPERTY = "toGallery";
@@ -20,6 +21,14 @@ public class _Painting extends org.objectstyle.art.ArtDataObject {
     }
     public java.math.BigDecimal getEstimatedPrice() {
         return (java.math.BigDecimal)readProperty("estimatedPrice");
+    }
+    
+    
+    public void setPaintingDescription(String paintingDescription) {
+        writeProperty("paintingDescription", paintingDescription);
+    }
+    public String getPaintingDescription() {
+        return (String)readProperty("paintingDescription");
     }
     
     
