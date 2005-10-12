@@ -86,6 +86,14 @@ class ContextStateRecorder implements GraphChangeHandler {
     void clear() {
         dirtyIds = new HashSet();
     }
+    
+    public void graphCommitAborted() {
+        // noop
+    }
+    
+    public void graphCommitStarted() {
+        // noop
+    }
 
     /**
      * Updates dirty objects state and clears dirty ids map.

@@ -64,7 +64,9 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
- * A handler of OPP (Object Persistence Protocol) messages.
+ * A two-way "channel" for communication between some object persistence engine and its
+ * clients. OPPChannel abstraction allows ObjectContext to persist its objects without
+ * knowing much about the underlying access stack.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -83,6 +85,11 @@ public interface OPPChannel {
      * if EventManager is not available for any reason.
      */
     EventManager getEventManager();
+
+    /**
+     * Processes BootstrapMessage returning EntityResolver with client ORM information.
+     */
+    EntityResolver onBootstrap(BootstrapMessage message);
 
     /**
      * Processes SelectMessage returning a result as list.
@@ -105,9 +112,4 @@ public interface OPPChannel {
      * generated ObjectIds, any server-side commit logic, etc.
      */
     GraphDiff onCommit(CommitMessage message);
-
-    /**
-     * Processes BootstrapMessage returning EntityResolver with client ORM information.
-     */
-    EntityResolver onBootstrap(BootstrapMessage message);
 }

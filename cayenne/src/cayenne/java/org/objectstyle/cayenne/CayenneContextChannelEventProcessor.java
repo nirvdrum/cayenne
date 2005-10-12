@@ -59,17 +59,18 @@ import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphManager;
 
 /**
- * A GraphChangeHandler that injects external graph changes to an ObjectContext.
+ * A GraphChangeHandler that injects external graph changes to an ObjectContext. It would
+ * be normally setup as a listener of the parent OPPChannel GraphEvents.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class CayenneContextMergeHandler implements GraphChangeHandler {
+class CayenneContextChannelEventProcessor implements GraphChangeHandler {
 
     ContextStateRecorder stateRecorder;
     GraphManager graphManager;
 
-    CayenneContextMergeHandler(ContextStateRecorder stateRecorder,
+    CayenneContextChannelEventProcessor(ContextStateRecorder stateRecorder,
             GraphManager graphManager) {
 
         this.graphManager = graphManager;
@@ -97,6 +98,14 @@ class CayenneContextMergeHandler implements GraphChangeHandler {
     }
 
     public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
+        throw new CayenneRuntimeException("Not implemented yet.");
+    }
+
+    public void graphCommitAborted() {
+        throw new CayenneRuntimeException("Not implemented yet.");
+    }
+
+    public void graphCommitStarted() {
         throw new CayenneRuntimeException("Not implemented yet.");
     }
 

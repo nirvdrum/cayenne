@@ -63,8 +63,10 @@ import java.util.List;
  */
 class GraphStateChange extends CompoundDiff {
 
-    static final int COMMIT = 1;
-    static final int ROLLBACK = 2;
+    static final int COMMIT_STARTED = 1;
+    static final int COMMITTED = 2;
+    static final int COMMIT_ABORTED = 3;
+    static final int ROLLEDBACK = 4;
 
     int type;
 
@@ -83,10 +85,16 @@ class GraphStateChange extends CompoundDiff {
 
     public void apply(GraphChangeHandler tracker) {
         switch (type) {
-            case COMMIT:
+            case COMMIT_STARTED:
+                tracker.graphCommitStarted();
+                break;
+            case COMMITTED:
                 tracker.graphCommitted();
                 break;
-            case ROLLBACK:
+            case COMMIT_ABORTED:
+                tracker.graphCommitAborted();
+                break;
+            case ROLLEDBACK:
                 tracker.graphRolledback();
                 break;
         }

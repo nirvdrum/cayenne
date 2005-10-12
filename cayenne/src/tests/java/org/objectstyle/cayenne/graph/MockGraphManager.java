@@ -83,6 +83,12 @@ public class MockGraphManager implements GraphManager {
 
     public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
     }
+    
+    public void graphCommitAborted() {
+    }
+    
+    public void graphCommitStarted() {
+    }
 
     public void graphCommitted() {
     }

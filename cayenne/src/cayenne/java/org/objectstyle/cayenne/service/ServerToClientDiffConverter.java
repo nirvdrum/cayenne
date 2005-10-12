@@ -90,6 +90,18 @@ class ServerToClientDiffConverter implements GraphChangeHandler {
     /**
      * Does nothing.
      */
+    public void graphCommitAborted() {
+    }
+
+    /**
+     * Does nothing.
+     */
+    public void graphCommitStarted() {
+    }
+
+    /**
+     * Does nothing.
+     */
     public void graphCommitted() {
     }
 

@@ -176,7 +176,7 @@ public class CayenneContext implements ObjectContext {
 
             // listen to new channel
             if (newManager != null) {
-                final GraphChangeHandler handler = new CayenneContextMergeHandler(
+                final GraphChangeHandler handler = new CayenneContextChannelEventProcessor(
                         stateRecorder,
                         graphManager);
 
@@ -252,10 +252,32 @@ public class CayenneContext implements ObjectContext {
      * service via an internal instance of CayenneConnector.
      */
     public void commitChanges() {
+        doCommitChanges();
+    }
 
+    GraphDiff doCommitChanges() {
+
+        GraphDiff commitDiff = null;
         if (!changeRecorder.isEmpty()) {
-            GraphDiff commitDiff = channel.onCommit(new CommitMessage(changeRecorder
-                    .getDiffs()));
+
+            graphManager.graphCommitStarted();
+
+            try {
+                commitDiff = channel
+                        .onCommit(new CommitMessage(changeRecorder.getDiffs()));
+            }
+            catch (Throwable th) {
+                graphManager.graphCommitAborted();
+
+                if (th instanceof CayenneRuntimeException) {
+                    throw (CayenneRuntimeException) th;
+                }
+                else {
+                    throw new CayenneRuntimeException("Commit error", th);
+                }
+            }
+
+            graphManager.graphCommitted();
 
             // TODO (Andrus, 10/08): shouldn't channel intercept this message and send
             // event on its own?
@@ -264,9 +286,9 @@ public class CayenneContext implements ObjectContext {
                         new GraphEvent(channel, commitDiff),
                         OPPChannel.REMOTE_GRAPH_CHANGE_SUBJECT);
             }
-
-            graphManager.graphCommitted();
         }
+
+        return commitDiff;
     }
 
     public void rollbackChanges() {
@@ -469,6 +491,12 @@ public class CayenneContext implements ObjectContext {
         }
 
         public void nodeRemoved(Object nodeId) {
+        }
+
+        public void graphCommitAborted() {
+        }
+
+        public void graphCommitStarted() {
         }
 
         public void graphCommitted() {

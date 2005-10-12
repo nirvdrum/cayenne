@@ -130,6 +130,24 @@ public class GraphMap implements GraphManager {
 
     // *** methods for tracking local changes declared in GraphChangeHandler interface
 
+    public void graphCommitAborted() {
+        if (changeHandlers != null) {
+            Iterator it = changeHandlers.iterator();
+            while (it.hasNext()) {
+                ((GraphChangeHandler) it.next()).graphCommitAborted();
+            }
+        }
+    }
+
+    public void graphCommitStarted() {
+        if (changeHandlers != null) {
+            Iterator it = changeHandlers.iterator();
+            while (it.hasNext()) {
+                ((GraphChangeHandler) it.next()).graphCommitStarted();
+            }
+        }
+    }
+
     public void graphCommitted() {
         if (changeHandlers != null) {
             Iterator it = changeHandlers.iterator();

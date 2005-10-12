@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.graph;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -73,6 +74,7 @@ import org.objectstyle.cayenne.event.EventSubject;
 public class OperationRecorder implements GraphChangeHandler {
 
     protected List diffs;
+    protected int commitStartMarker;
 
     // event stuff
     protected EventSubject eventSubject;
@@ -86,8 +88,8 @@ public class OperationRecorder implements GraphChangeHandler {
      * broadcast GraphEvents.
      */
     public OperationRecorder() {
-        this.diffs = new ArrayList();
         this.eventsEnabled = false;
+        clear();
     }
 
     /**
@@ -171,14 +173,18 @@ public class OperationRecorder implements GraphChangeHandler {
      * Returns a combined GraphDiff for all recorded operations.
      */
     public GraphDiff getDiffs() {
-        return new CompoundDiff(Collections.unmodifiableList(diffs));
+        return new CompoundDiff(immutableList(0, diffs.size()));
     }
 
     /**
      * "Forgets" all stored operations.
      */
     public void clear() {
+        // must create a new list instead of clearing an existing one, as the original
+        // list may have been exposed via events or "getDiffs", and trimming it is
+        // undesirable.
         this.diffs = new ArrayList();
+        this.commitStartMarker = -1;
     }
 
     public int size() {
@@ -189,24 +195,60 @@ public class OperationRecorder implements GraphChangeHandler {
         return diffs.isEmpty();
     }
 
+    public boolean isCommitInProgress() {
+        return commitStartMarker >= 0;
+    }
+
     // ***** GraphChangeHandler methods ******
     // =======================================
+
+    /**
+     * Clears commit marker, but keeps all recorded operations.
+     */
+    public void graphCommitAborted() {
+        commitStartMarker = -1;
+
+        // TODO (Andrus 10/11/2005) send an event?
+    }
+
+    /**
+     * Calls "clear()", removing all memorized changes. Posts a GraphEvent with graph diff
+     * containing changes since the last commit or rollback.
+     */
+    public void graphCommitStarted() {
+        if (isCommitInProgress()) {
+            throw new CayenneRuntimeException(
+                    "Attempt to start commit while commit is in progress.");
+        }
+
+        commitStartMarker = diffs.size();
+
+        if (isEventsEnabled()) {
+            // include all diffs up to this point
+            GraphEvent e = new GraphEvent(eventSource, new GraphStateChange(
+                    GraphStateChange.COMMIT_STARTED,
+                    immutableList(0, diffs.size())));
+            eventManager.postEvent(e, eventSubject);
+        }
+    }
+
     /**
      * Calls "clear()", removing all memorized changes. Posts an event with graph diff
-     * containing changes introduced since the last call to "graphCommitStarted".
+     * containing changes introduced after the last call to "graphCommitStarted".
      */
     public void graphCommitted() {
         if (isEventsEnabled()) {
-            // List eventDiffs = commitStartMarker == diffs.size() ? null : Collections
-            // .unmodifiableList(diffs.subList(commitStartMarker, diffs.size()));
-            List eventDiffs = Collections.unmodifiableList(diffs);
+            List eventDiffs = commitStartMarker == diffs.size() ? null : immutableList(
+                    commitStartMarker,
+                    diffs.size());
 
             // note that "clear" creates a new list, so it is safe to use the original
             // list to store event data
             clear();
 
+            // include all diffs after the commit start marker.
             GraphEvent e = new GraphEvent(eventSource, new GraphStateChange(
-                    GraphStateChange.COMMIT,
+                    GraphStateChange.COMMITTED,
                     eventDiffs));
             eventManager.postEvent(e, eventSubject);
         }
@@ -221,14 +263,14 @@ public class OperationRecorder implements GraphChangeHandler {
     public void graphRolledback() {
 
         if (isEventsEnabled()) {
-            List eventDiffs = Collections.unmodifiableList(diffs);
+            List eventDiffs = immutableList(0, diffs.size());
 
             // note that "clear" creates a new list, so it is safe to use the original
             // list to store event data
             clear();
 
             GraphEvent e = new GraphEvent(eventSource, new GraphStateChange(
-                    GraphStateChange.ROLLBACK,
+                    GraphStateChange.ROLLEDBACK,
                     eventDiffs));
             eventManager.postEvent(e, eventSubject);
         }
@@ -275,6 +317,62 @@ public class OperationRecorder implements GraphChangeHandler {
         if (isEventsEnabled()) {
             GraphEvent e = new GraphEvent(eventSource, operation);
             eventManager.postEvent(e, eventSubject);
+        }
+    }
+
+    /**
+     * Returns a sublist of the diffs list that shouldn't change when OperationRecorder is
+     * cleared or new operations are added.
+     */
+    List immutableList(int fromIndex, int toIndex) {
+        if (toIndex - fromIndex == 0) {
+            return Collections.EMPTY_LIST;
+        }
+
+        // Assuming that internal diffs list can only grow and can never be trimmed,
+        // return sublist will never change - something that callers are expecting
+        return Collections.unmodifiableList(new SubList(diffs, fromIndex, toIndex));
+    }
+
+    // moded Sublist from JDK that doesn't check for co-modification, as the underlying
+    // list is guaranteed to only grow and never shrink or be replaced.
+    class SubList extends AbstractList {
+
+        private List list;
+        private int offset;
+        private int size;
+
+        SubList(List list, int fromIndex, int toIndex) {
+            if (fromIndex < 0)
+                throw new IndexOutOfBoundsException("fromIndex = " + fromIndex);
+            if (toIndex > list.size()) {
+                throw new IndexOutOfBoundsException("toIndex = " + toIndex);
+            }
+            if (fromIndex > toIndex) {
+                throw new IllegalArgumentException("fromIndex("
+                        + fromIndex
+                        + ") > toIndex("
+                        + toIndex
+                        + ")");
+            }
+            this.list = list;
+            offset = fromIndex;
+            size = toIndex - fromIndex;
+        }
+
+        public Object get(int index) {
+            rangeCheck(index);
+            return list.get(index + offset);
+        }
+
+        public int size() {
+            return size;
+        }
+
+        private void rangeCheck(int index) {
+            if (index < 0 || index >= size) {
+                throw new IndexOutOfBoundsException("Index: " + index + ",Size: " + size);
+            }
         }
     }
 }

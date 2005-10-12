@@ -79,6 +79,18 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
     ClientToServerDiffConverter(ObjectDataContext serverContext) {
         this.serverContext = serverContext;
     }
+    
+    /**
+     * Does nothing.
+     */
+    public void graphCommitAborted() {
+    }
+
+    /**
+     * Does nothing.
+     */
+    public void graphCommitStarted() {
+    }
 
     /**
      * Does nothing.

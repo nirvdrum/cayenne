@@ -73,7 +73,7 @@ public interface GraphChangeHandler {
     /**
      * Notifies implementing object that a graph is about to be committed.
      */
-    //void graphCommitStarted();
+    void graphCommitStarted();
 
     /**
      * Notifies implementing object that all graph chages made since last commit or
@@ -82,9 +82,9 @@ public interface GraphChangeHandler {
     void graphCommitted();
 
     /**
-     * Notifies implementing object previously started commit has been aborted.
+     * Notifies implementing object that previously started commit has been aborted.
      */
-    //void graphCommitAborted();
+    void graphCommitAborted();
 
     /**
      * Notifies implementing object that all graph changes made since last commit or

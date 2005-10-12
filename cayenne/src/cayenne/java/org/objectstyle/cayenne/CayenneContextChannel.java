@@ -53,47 +53,75 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.graph;
+package org.objectstyle.cayenne;
 
-import junit.framework.TestCase;
+import java.util.List;
 
-public class OperationRecorderTst extends TestCase {
+import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.graph.GraphChangeHandler;
+import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.opp.BootstrapMessage;
+import org.objectstyle.cayenne.opp.CommitMessage;
+import org.objectstyle.cayenne.opp.GenericQueryMessage;
+import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.opp.SelectMessage;
+import org.objectstyle.cayenne.opp.UpdateMessage;
 
-    public void testClear() {
-        OperationRecorder recorder = new OperationRecorder();
-        assertNotNull(recorder.getDiffs());
-        assertTrue(recorder.getDiffs().isNoop());
+/**
+ * An OPPChannel adapter for CayenneContext.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+public class CayenneContextChannel implements OPPChannel {
 
-        recorder.nodeCreated(new Object());
-        assertNotNull(recorder.getDiffs());
-        assertFalse(recorder.getDiffs().isNoop());
+    protected CayenneContext context;
 
-        recorder.clear();
-        assertNotNull(recorder.getDiffs());
-        assertTrue(recorder.getDiffs().isNoop());
+    public CayenneContextChannel(CayenneContext context) {
+        if (context == null) {
+            throw new IllegalArgumentException("Null context");
+        }
 
-        // now test that a diff stored before "clear" is not affected by 'clear'
-        recorder.nodeCreated(new Object());
-        GraphDiff diff = recorder.getDiffs();
-        assertFalse(diff.isNoop());
-
-        recorder.clear();
-        assertFalse(diff.isNoop());
+        this.context = context;
     }
 
-    public void testGetDiffs() {
-        // assert that after returning, the diffs array won't get modified by operation
-        // recorder
+    /**
+     * Returns an EventManager used by the underlying CayenneContext's channel.
+     */
+    public EventManager getEventManager() {
+        return (context.getChannel() != null)
+                ? context.getChannel().getEventManager()
+                : null;
+    }
 
-        OperationRecorder recorder = new OperationRecorder();
-        recorder.nodeCreated(new Object());
-        CompoundDiff diff = (CompoundDiff) recorder.getDiffs();
-        assertEquals(1, diff.getDiffs().size());
+    // TODO (Andrus, 10/11/2005) not sure if should skip the parent and go directly to its
+    // channel for most query messages.
 
-        recorder.nodeCreated(new Object());
-        assertEquals(1, diff.getDiffs().size());
+    public List onSelectQuery(SelectMessage message) {
+        return context.performSelectQuery(message.getQueryPlan());
+    }
 
-        CompoundDiff diff2 = (CompoundDiff) recorder.getDiffs();
-        assertEquals(2, diff2.getDiffs().size());
+    public int[] onUpdateQuery(UpdateMessage message) {
+        return context.performUpdateQuery(message.getQueryPlan());
+    }
+
+    public QueryResponse onGenericQuery(GenericQueryMessage message) {
+        return context.performGenericQuery(message.getQueryPlan());
+    }
+
+    public GraphDiff onCommit(CommitMessage message) {
+
+        // sync child changes with parent
+        GraphChangeHandler handler = new CayenneContextChannelEventProcessor(
+                context.stateRecorder,
+                context.getGraphManager());
+
+        message.getSenderChanges().apply(handler);
+        return context.doCommitChanges();
+    }
+
+    public EntityResolver onBootstrap(BootstrapMessage message) {
+        return context.getEntityResolver();
     }
 }
