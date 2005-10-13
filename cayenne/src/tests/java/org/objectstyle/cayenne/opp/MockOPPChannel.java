@@ -94,7 +94,7 @@ public class MockOPPChannel implements OPPChannel {
         return messages;
     }
 
-    public GraphDiff onCommit(CommitMessage message) {
+    public GraphDiff onSync(SyncMessage message) {
         messages.add(message);
         return commitResponse;
     }

@@ -64,10 +64,10 @@ import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.CommitMessage;
 import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SelectMessage;
+import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.opp.UpdateMessage;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
@@ -141,17 +141,21 @@ public class CayenneContext implements ObjectContext {
     }
 
     /**
-     * Returns true if this context posts events when its managed objects are modified.
+     * Returns true if this context posts individual object modification events. Subject
+     * used for these events is <code>ObjectContext.GRAPH_CHANGED_SUBJECT</code>.
      */
     public boolean isChangeEventsEnabled() {
         return graphManager.changeEventsEnabled;
     }
 
     /**
-     * Returns true if this context posts synchronization events.
+     * Returns true if this context posts lifecycle events. Subjects used for these events
+     * are
+     * <code>ObjectContext.GRAPH_COMMIT_STARTED_SUBJECT, ObjectContext.GRAPH_COMMITTED_SUBJECT,
+     * ObjectContext.GRAPH_COMMIT_ABORTED_SUBJECT, ObjectContext.GRAPH_ROLLEDBACK_SUBJECT.</code>.
      */
-    public boolean isSyncEventsEnabled() {
-        return graphManager.syncEventsEnabled;
+    public boolean isLifecycleEventsEnabled() {
+        return graphManager.lifecycleEventsEnabled;
     }
 
     /**
@@ -179,7 +183,7 @@ public class CayenneContext implements ObjectContext {
     public GraphManager getGraphManager() {
         return graphManager;
     }
-    
+
     ObjectContextGraphManager internalGraphManager() {
         return graphManager;
     }
@@ -201,7 +205,9 @@ public class CayenneContext implements ObjectContext {
             graphManager.graphCommitStarted();
 
             try {
-                commitDiff = channel.onCommit(new CommitMessage(graphManager.getDiffs()));
+                commitDiff = channel.onSync(new SyncMessage(
+                        SyncMessage.COMMIT_TYPE,
+                        graphManager.getDiffs()));
             }
             catch (Throwable th) {
                 graphManager.graphCommitAborted();
@@ -222,7 +228,25 @@ public class CayenneContext implements ObjectContext {
 
     public void rollbackChanges() {
         if (graphManager.hasChanges()) {
-            graphManager.graphRolledback();
+
+            GraphDiff diff = graphManager.getDiffs();
+            graphManager.graphReverted();
+
+            channel.onSync(new SyncMessage(SyncMessage.ROLLBACK_TYPE, diff));
+        }
+    }
+
+    public void flushChanges() {
+        if (graphManager.hasChangesSinceLastFlush()) {
+            GraphDiff diff = graphManager.getDiffsSinceLastFlush();
+            graphManager.graphFlushed();
+            channel.onSync(new SyncMessage(SyncMessage.FLUSH_TYPE, diff));
+        }
+    }
+
+    public void revertChanges() {
+        if (graphManager.hasChanges()) {
+            graphManager.graphReverted();
         }
     }
 

@@ -82,6 +82,12 @@ public class MockObjectContext extends MockPersistenceContext implements ObjectC
         return null;
     }
 
+    public void flushChanges() {
+    }
+
+    public void revertChanges() {
+    }
+
     public void rollbackChanges() {
     }
 
@@ -106,7 +112,7 @@ public class MockObjectContext extends MockPersistenceContext implements ObjectC
     }
 
     public void commitChanges() {
-      
+
     }
 
     public void deleteObject(Persistent object) {

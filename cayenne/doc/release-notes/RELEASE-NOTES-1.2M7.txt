@@ -13,7 +13,9 @@ Changes/New Features:
 
 * ObjectContext graph events.
 * OPPChannel graph events.
-* ObjectContext commit/rollback renamed to look like DataContext ones - commitChanges/rollbackChanges.
+* ObjectContext API changes:
+  - commit/rollback renamed to look like DataContext ones - commitChanges/rollbackChanges
+  - new revertChanges and flushChanges methods.
 * Runtime-customizable ClassDescriptors.
 * Auto-sorted relationship list - org.objectstyle.cayenne.util.IndexPropertyList. 
   Supported for ObjectContext only for now, but should be easy to extend to DataContext.

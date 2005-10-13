@@ -153,7 +153,8 @@ public interface ObjectContext extends Serializable {
      * Notifies parent ObjectContext about the changes made to objects of this
      * ObjectContext since the last sync. No commit occurs as a result.
      */
-    // void flushChanges();
+    void flushChanges();
+
     /**
      * Resets all changes made to the objects in the ObjectContext, and recursively all
      * parent contexts on the other end of the OPPChannel.
@@ -186,7 +187,8 @@ public interface ObjectContext extends Serializable {
      * all look like they did after the last commit".
      * </p>
      */
-    // void revertChanges();
+    void revertChanges();
+
     /**
      * Executes a selecting query, returning a list of persistent objects or data rows.
      */

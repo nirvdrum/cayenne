@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.graph.GraphEventListener;
 import org.objectstyle.cayenne.graph.MockGraphEventListener;
-import org.objectstyle.cayenne.opp.CommitMessage;
+import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.opp.OPPChannel;
 
@@ -77,14 +77,14 @@ public class CayenneContextEventsTst extends TestCase {
                 return manager;
             }
 
-            public GraphDiff onCommit(CommitMessage message) {
+            public GraphDiff onSync(SyncMessage message) {
                 return new CompoundDiff();
             }
         };
 
         CayenneContext contextWithEvents = new CayenneContext(channel, true, true);
         assertTrue(contextWithEvents.isChangeEventsEnabled());
-        assertTrue(contextWithEvents.isSyncEventsEnabled());
+        assertTrue(contextWithEvents.isLifecycleEventsEnabled());
 
         final boolean[] flags1 = new boolean[1];
         GraphEventListener listener1 = new MockGraphEventListener() {
@@ -114,14 +114,14 @@ public class CayenneContextEventsTst extends TestCase {
                 return manager;
             }
 
-            public GraphDiff onCommit(CommitMessage message) {
+            public GraphDiff onSync(SyncMessage message) {
                 return new CompoundDiff();
             }
         };
 
         CayenneContext contextWithoutEvents = new CayenneContext(channel, false, false);
         assertFalse(contextWithoutEvents.isChangeEventsEnabled());
-        assertFalse(contextWithoutEvents.isSyncEventsEnabled());
+        assertFalse(contextWithoutEvents.isLifecycleEventsEnabled());
 
         final boolean[] flags2 = new boolean[1];
         GraphEventListener listener2 = new MockGraphEventListener() {

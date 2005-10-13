@@ -55,32 +55,33 @@
  */
 package org.objectstyle.cayenne.opp;
 
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 
-/**
- * A message that instructs the receiving OPPChannel to commit all uncommitted objects.
- * Returns an array of object ids modified or generated during commit.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public class CommitMessage implements OPPMessage {
+import junit.framework.TestCase;
 
-    protected GraphDiff senderChanges;
+public class SyncMessageTst extends TestCase {
 
-    public CommitMessage(GraphDiff senderChanges) {
-        this.senderChanges = senderChanges;
+    public void testConstructor() {
+        GraphDiff diff = new CompoundDiff();
+        SyncMessage message = new SyncMessage(SyncMessage.FLUSH_TYPE, diff);
+
+        assertEquals(SyncMessage.FLUSH_TYPE, message.getType());
+        assertSame(diff, message.getSenderChanges());
     }
 
-    public GraphDiff getSenderChanges() {
-        return senderChanges;
-    }
+    public void testConstructorInvalid() {
+        new SyncMessage(SyncMessage.FLUSH_TYPE, new CompoundDiff());
+        new SyncMessage(SyncMessage.COMMIT_TYPE, new CompoundDiff());
+        new SyncMessage(SyncMessage.ROLLBACK_TYPE, new CompoundDiff());
 
-    public Object dispatch(OPPChannel handler) {
-        return handler.onCommit(this);
-    }
+        int bogusType = 45678;
+        try {
+            new SyncMessage(bogusType, new CompoundDiff());
+            fail("invalid type was allowed to go unnoticed...");
+        }
+        catch (IllegalArgumentException e) {
 
-    public String toString() {
-        return "Commit";
+        }
     }
 }

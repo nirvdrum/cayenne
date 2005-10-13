@@ -216,9 +216,17 @@ class ObjectDataContext extends DataContext implements ObjectContext {
     public void commitChanges() throws CayenneRuntimeException {
         doCommitChanges();
     }
-    
+
     GraphDiff doCommitChanges() {
         return new ObjectDataContextCommitAction().commit(this);
+    }
+
+    public void flushChanges() {
+        // noop ... for now...
+    }
+
+    public void revertChanges() {
+        rollbackChanges();
     }
 
     public PersistenceContext getParentContext() {

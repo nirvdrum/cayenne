@@ -58,7 +58,9 @@ package org.objectstyle.cayenne;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
@@ -70,18 +72,18 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 class ObjectContextOperationRecorder {
 
     List diffs;
-    int marker;
+    Map markers;
 
     ObjectContextOperationRecorder() {
         reset();
     }
 
-    void markCurrentPosition() {
-        marker = diffs.size();
+    void setMarker(String markerTag) {
+        markers.put(markerTag, new Integer(diffs.size()));
     }
 
-    void unmarkLastPosition() {
-        marker = -1;
+    void removeMarker(String markerTag) {
+        markers.remove(markerTag);
     }
 
     /**
@@ -91,12 +93,20 @@ class ObjectContextOperationRecorder {
         return new CompoundDiff(immutableList(0, diffs.size()));
     }
 
-    GraphDiff getDiffsAfterMarker() {
+    GraphDiff getDiffsAfterMarker(String markerTag) {
+        Integer pos = (Integer) markers.get(markerTag);
+        int marker = (pos == null) ? -1 : pos.intValue();
         if (marker < 0) {
-            throw new IllegalStateException("No marked position");
+            throw new IllegalStateException("No marked position for tag '"
+                    + markerTag
+                    + "'");
         }
 
         return new CompoundDiff(immutableList(marker, diffs.size()));
+    }
+
+    boolean hasMarker(String markerTag) {
+        return markers.containsKey(markerTag);
     }
 
     /**
@@ -107,15 +117,23 @@ class ObjectContextOperationRecorder {
         // list may have been exposed via events or "getDiffs", and trimming it is
         // undesirable.
         this.diffs = new ArrayList();
-        this.marker = -1;
+        this.markers = new HashMap();
     }
 
     int size() {
         return diffs.size();
     }
 
-    boolean isEmpty() {
-        return diffs.isEmpty();
+    int sizeAfterMarker(String markerTag) {
+        Integer pos = (Integer) markers.get(markerTag);
+        int marker = (pos == null) ? -1 : pos.intValue();
+        if (marker < 0) {
+            throw new IllegalStateException("No marked position for tag '"
+                    + markerTag
+                    + "'");
+        }
+
+        return diffs.size() - marker;
     }
 
     /**

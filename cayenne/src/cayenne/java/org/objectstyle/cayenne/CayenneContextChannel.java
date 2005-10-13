@@ -61,7 +61,7 @@ import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.CommitMessage;
+import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SelectMessage;
@@ -109,10 +109,14 @@ public class CayenneContextChannel implements OPPChannel {
         return context.performGenericQuery(message.getQueryPlan());
     }
 
-    public GraphDiff onCommit(CommitMessage message) {
-        context.internalGraphManager().processSyncWithChild(
-                message.getSenderChanges());
-        return context.doCommitChanges();
+    public GraphDiff onSync(SyncMessage message) {
+        // TODO (Andrus 10/12/2005) ObjectContext=to-ObjectContext channel is unfinished.
+        throw new CayenneRuntimeException("Not implemented yet.");
+
+        //        
+        // context.internalGraphManager().processSyncWithChild(
+        // message.getSenderChanges());
+        // return context.doCommitChanges();
     }
 
     public EntityResolver onBootstrap(BootstrapMessage message) {

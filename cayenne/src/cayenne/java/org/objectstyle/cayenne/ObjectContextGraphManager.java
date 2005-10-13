@@ -81,31 +81,45 @@ import org.objectstyle.cayenne.graph.NodePropertyChangeOperation;
  */
 final class ObjectContextGraphManager extends GraphMap {
 
+    static final String COMMIT_MARKER = "commit";
+    static final String FLUSH_MARKER = "flush";
+
     ObjectContext context;
     Collection deadIds;
     boolean changeEventsEnabled;
-    boolean syncEventsEnabled;
+    boolean lifecycleEventsEnabled;
 
     ObjectContextStateRecorder stateRecorder;
     ObjectContextOperationRecorder opRecorder;
 
     ObjectContextGraphManager(ObjectContext context, boolean changeEventsEnabled,
-            boolean syncEventsEnabled) {
+            boolean lifecycleEventsEnabled) {
 
         this.context = context;
         this.changeEventsEnabled = changeEventsEnabled;
-        this.syncEventsEnabled = syncEventsEnabled;
+        this.lifecycleEventsEnabled = lifecycleEventsEnabled;
 
         this.stateRecorder = new ObjectContextStateRecorder(this);
         this.opRecorder = new ObjectContextOperationRecorder();
     }
 
     boolean hasChanges() {
-        return stateRecorder.hasChanges();
+        return opRecorder.size() > 0;
+    }
+
+    boolean hasChangesSinceLastFlush() {
+        int size = opRecorder.hasMarker(FLUSH_MARKER) ? opRecorder
+                .sizeAfterMarker(FLUSH_MARKER) : opRecorder.size();
+        return size > 0;
     }
 
     GraphDiff getDiffs() {
         return opRecorder.getDiffs();
+    }
+
+    GraphDiff getDiffsSinceLastFlush() {
+        return opRecorder.hasMarker(FLUSH_MARKER) ? opRecorder
+                .getDiffsAfterMarker(FLUSH_MARKER) : opRecorder.getDiffs();
     }
 
     Collection dirtyNodes() {
@@ -125,32 +139,32 @@ final class ObjectContextGraphManager extends GraphMap {
      * Clears commit marker, but keeps all recorded operations.
      */
     void graphCommitAborted() {
-        opRecorder.unmarkLastPosition();
+        opRecorder.removeMarker(COMMIT_MARKER);
 
-        if (syncEventsEnabled) {
+        if (lifecycleEventsEnabled) {
             send(null, ObjectContext.GRAPH_COMMIT_ABORTED_SUBJECT);
         }
     }
 
     void graphCommitStarted() {
-        if (syncEventsEnabled) {
+        if (lifecycleEventsEnabled) {
 
             GraphDiff diff = opRecorder.getDiffs();
-            opRecorder.markCurrentPosition();
+            opRecorder.setMarker(COMMIT_MARKER);
 
             // include all diffs up to this point
             send(diff, ObjectContext.GRAPH_COMMIT_STARTED_SUBJECT);
         }
         else {
-            opRecorder.markCurrentPosition();
+            opRecorder.setMarker(COMMIT_MARKER);
         }
     }
 
     void graphCommitted(GraphDiff parentSyncDiff) {
         processParentSync(parentSyncDiff);
 
-        if (syncEventsEnabled) {
-            GraphDiff diff = opRecorder.getDiffsAfterMarker();
+        if (lifecycleEventsEnabled) {
+            GraphDiff diff = opRecorder.getDiffsAfterMarker(COMMIT_MARKER);
 
             stateRecorder.graphCommitted();
             opRecorder.reset();
@@ -165,15 +179,19 @@ final class ObjectContextGraphManager extends GraphMap {
         }
     }
 
-    void graphRolledback() {
+    void graphFlushed() {
+        opRecorder.setMarker(FLUSH_MARKER);
+    }
+
+    void graphReverted() {
         GraphDiff diff = opRecorder.getDiffs();
 
         diff.undo(new NullChangeHandler());
-        stateRecorder.graphRolledback();
+        stateRecorder.graphReverted();
         opRecorder.reset();
         reset();
 
-        if (syncEventsEnabled) {
+        if (lifecycleEventsEnabled) {
             send(diff, ObjectContext.GRAPH_ROLLEDBACK_SUBJECT);
         }
     }

@@ -92,13 +92,6 @@ public interface OPPChannel {
             "graphRolledback");
 
     /**
-     * An EventManager subject used by OPPChannel to notify listeners of the graph object
-     * changes on the remote end of the channel.
-     */
-    public static final EventSubject REMOTE_GRAPH_CHANGE_SUBJECT = EventSubject
-            .getSubject(OPPChannel.class, "remote-graph-change");
-
-    /**
      * Returns an EventManager that associated with this channel. Channel may return null
      * if EventManager is not available for any reason.
      */
@@ -125,9 +118,8 @@ public interface OPPChannel {
     QueryResponse onGenericQuery(GenericQueryMessage message);
 
     /**
-     * Processes CommitMessage returning a GraphDiff that describes changes to objects
-     * made by the handler as a result of commit operation. Such changes can include
-     * generated ObjectIds, any server-side commit logic, etc.
+     * Processes SyncMessage returning a GraphDiff that describes changes to objects made
+     * on the receiving end as a result of sync operation.
      */
-    GraphDiff onCommit(CommitMessage message);
+    GraphDiff onSync(SyncMessage message);
 }

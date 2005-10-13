@@ -67,10 +67,10 @@ import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.CommitMessage;
 import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SelectMessage;
+import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.opp.UpdateMessage;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -99,10 +99,39 @@ public class ClientServerChannel implements OPPChannel {
                 : null;
     }
 
-    public GraphDiff onCommit(CommitMessage message) {
-        // sync client changes
-        message.getSenderChanges().apply(new ClientToServerDiffConverter(serverContext));
+    public GraphDiff onSync(SyncMessage message) {
 
+        // sync client changes
+        switch (message.getType()) {
+            case SyncMessage.ROLLBACK_TYPE:
+                return onRollback(message.getSenderChanges());
+            case SyncMessage.FLUSH_TYPE:
+                return onFlush(message.getSenderChanges());
+            case SyncMessage.COMMIT_TYPE:
+                return onCommit(message.getSenderChanges());
+            default:
+                throw new CayenneRuntimeException("Unrecognized SyncMessage type: "
+                        + message.getType());
+        }
+    }
+
+    GraphDiff onRollback(GraphDiff childDiff) {
+        throw new CayenneRuntimeException("Unsupported yet");
+    }
+
+    /**
+     * Applies child diff, without returning anything back.
+     */
+    GraphDiff onFlush(GraphDiff childDiff) {
+        childDiff.apply(new ClientToServerDiffConverter(serverContext));
+        return null;
+    }
+
+    /**
+     * Applies child diff, and then commits.
+     */
+    GraphDiff onCommit(GraphDiff childDiff) {
+        childDiff.apply(new ClientToServerDiffConverter(serverContext));
         GraphDiff diff = serverContext.doCommitChanges();
 
         if (diff.isNoop()) {

@@ -111,7 +111,7 @@ class ObjectContextStateRecorder implements GraphChangeHandler {
         clear();
     }
 
-    void graphRolledback() {
+    void graphReverted() {
         Iterator it = dirtyIds.iterator();
         while (it.hasNext()) {
             Object node = graphManager.getNode(it.next());

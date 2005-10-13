@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.graph.NodeCreateOperation;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.CommitMessage;
+import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.SelectMessage;
 import org.objectstyle.cayenne.opp.UpdateMessage;
@@ -128,7 +128,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 .getEntityResolver(), new MockDataRowStore());
 
         ClientServerChannel channel = new ClientServerChannel(context);
-        channel.onCommit(new CommitMessage(new MockGraphDiff()));
+        channel.onSync(new SyncMessage(SyncMessage.COMMIT_TYPE, new MockGraphDiff()));
 
         // no changes in context, so no commit should be executed
         assertFalse(parent.isCommitChangesInContext());
@@ -136,8 +136,9 @@ public class ClientServerChannelTst extends CayenneTestCase {
         parent.reset();
 
         // introduce changes
-        channel.onCommit(new CommitMessage(new NodeCreateOperation(new GlobalID(
-                "MtTable1"))));
+        channel.onSync(new SyncMessage(
+                SyncMessage.COMMIT_TYPE,
+                new NodeCreateOperation(new GlobalID("MtTable1"))));
         assertTrue(parent.isCommitChangesInContext());
     }
 

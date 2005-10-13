@@ -55,70 +55,58 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import java.util.List;
-
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
- * An OPPChannel adapter that forwards messages via a CayenneConnector.
+ * A message used for synchronization of the child with parent. It defines a few types of
+ * synchronization: "flush" (when the child sends its changes without a commit), "commit"
+ * (cascading flush with ultimate commit to the database), and "rollback" - cascading
+ * reverting of all uncommitted changes.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class OPPConnectorChannel implements OPPChannel {
+public class SyncMessage implements OPPMessage {
 
-    protected OPPConnector connector;
+    public static final int FLUSH_TYPE = 1;
+    public static final int COMMIT_TYPE = 2;
+    public static final int ROLLBACK_TYPE = 3;
 
-    public OPPConnectorChannel(OPPConnector connector) {
-        this.connector = connector;
-    }
+    protected int type;
+    protected GraphDiff senderChanges;
 
-    public EventManager getEventManager() {
-        return connector != null ? connector.getEventManager() : null;
-    }
-
-    public List onSelectQuery(SelectMessage message) {
-        return (List) send(message, List.class);
-    }
-
-    public int[] onUpdateQuery(UpdateMessage message) {
-        return (int[]) send(message, int[].class);
-    }
-
-    public QueryResponse onGenericQuery(GenericQueryMessage message) {
-        return (QueryResponse) send(message, QueryResponse.class);
-    }
-
-    public GraphDiff onSync(SyncMessage message) {
-        return (GraphDiff) send(message, GraphDiff.class);
-    }
-
-    public EntityResolver onBootstrap(BootstrapMessage message) {
-        return (EntityResolver) send(message, EntityResolver.class);
-    }
-
-    /**
-     * Sends a message via connector, getting a result as an instance of a specific class.
-     * 
-     * @throws org.objectstyle.cayenne.client.CayenneClientException if an underlying
-     *             connector exception occured, or a result is not of expected type.
-     */
-    protected Object send(OPPMessage message, Class resultClass) {
-        Object result = connector.sendMessage(message);
-
-        if (result != null && !resultClass.isInstance(result)) {
-            String resultString = new ToStringBuilder(result).toString();
-            throw new CayenneRuntimeException("Expected result type: "
-                    + resultClass.getName()
-                    + ", actual: "
-                    + resultString);
+    public SyncMessage(int type, GraphDiff senderChanges) {
+        // validate type
+        if (type != FLUSH_TYPE && type != COMMIT_TYPE && type != ROLLBACK_TYPE) {
+            throw new IllegalArgumentException("'type' is invalid: " + type);
         }
 
-        return result;
+        this.type = type;
+        this.senderChanges = senderChanges;
+    }
+    
+    public int getType() {
+        return type;
+    }
+
+    public GraphDiff getSenderChanges() {
+        return senderChanges;
+    }
+
+    public Object dispatch(OPPChannel handler) {
+        return handler.onSync(this);
+    }
+
+    public String toString() {
+        switch (type) {
+            case FLUSH_TYPE:
+                return "Sync-flush";
+            case COMMIT_TYPE:
+                return "Sync-commit";
+            case ROLLBACK_TYPE:
+                return "Sync-rollback";
+            default:
+                return "Sync-unknown";
+        }
     }
 }
