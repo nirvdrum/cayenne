@@ -56,16 +56,16 @@
 package org.objectstyle.cayenne.graph;
 
 /**
- * A listener of GrpahEvents. GraphEvents are sent at various points of the graph
- * lifecyle. They often carry a GraphDiff attached that specifies the changes made to the
- * graph. An implementor of GraphEventListener might provide an GraphChangeHandler (or
- * implement it itself) to process the diff:
+ * A listener of GraphEvents. GraphEvents are sent at various points of the graph
+ * lifecyle. Changes related to this event are attached as a GraphDiff. If a listener
+ * needs to process these changes, the easiest way to do that is via GraphChangeHandler
+ * "visitor":
  * 
  * <pre>
- *      public void graphChanged(GraphEvent event) {
- *         GraphChangeHandler handler = ..;
- *         event.getDiff().apply(handler);
- *      }
+ *  public void graphChanged(GraphEvent event) {
+ *    GraphChangeHandler handler = ..;
+ *    event.getDiff().apply(handler);
+ *  }
  * </pre>
  * 
  * @since 1.2
@@ -74,7 +74,7 @@ package org.objectstyle.cayenne.graph;
 public interface GraphEventListener {
 
     /**
-     * Notifies implementing object that graph state has changed.
+     * Notifies implementing object that that one or more graph nodes have changed.
      */
     void graphChanged(GraphEvent event);
 
