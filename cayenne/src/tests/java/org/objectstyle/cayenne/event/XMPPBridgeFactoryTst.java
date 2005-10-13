@@ -55,34 +55,29 @@
  */
 package org.objectstyle.cayenne.event;
 
+import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Factory to create JMSBridge instances.
- * 
- * @since 1.1
- * @author Andrei Adamchik
- */
-public class JMSBridgeFactory implements EventBridgeFactory {
+import junit.framework.TestCase;
 
-    // this is an OpenJMS default for the factory name. Likely it won't work with
-    // anything else
-    public static final String TOPIC_CONNECTION_FACTORY_DEFAULT = "JmsTopicConnectionFactory";
+public class XMPPBridgeFactoryTst extends TestCase {
 
-    public static final String TOPIC_CONNECTION_FACTORY_PROPERTY = "cayenne.JMSBridge.topic.connection.factory";
+    public void testCreateEventBridge() {
+        XMPPBridgeFactory factory = new XMPPBridgeFactory();
 
-    public EventBridge createEventBridge(EventSubject localSubject, Map properties) {
-        JMSBridge bridge = new JMSBridge(localSubject, EventBridge
-                .convertToExternalSubject(localSubject));
+        EventSubject subject = EventSubject.getSubject(getClass(), "test");
+        Map properties = new HashMap();
+        properties.put(XMPPBridgeFactory.XMPP_HOST_PROPERTY, "somehost.com");
+        properties.put(XMPPBridgeFactory.XMPP_PORT_PROPERTY, "12345");
 
-        // configure properties
-        String topicConnectionFactory = (String) properties
-                .get(TOPIC_CONNECTION_FACTORY_PROPERTY);
+        EventBridge bridge = factory.createEventBridge(subject, properties);
 
-        bridge.setTopicConnectionFactoryName(topicConnectionFactory != null
-                ? topicConnectionFactory
-                : TOPIC_CONNECTION_FACTORY_DEFAULT);
+        assertTrue(bridge instanceof XMPPBridge);
 
-        return bridge;
+        XMPPBridge xmppBridge = (XMPPBridge) bridge;
+
+        assertSame(subject, xmppBridge.getLocalSubject());
+        assertEquals("somehost.com", xmppBridge.getXmppHost());
+        assertEquals(12345, xmppBridge.getXmppPort());
     }
 }

@@ -57,31 +57,54 @@ package org.objectstyle.cayenne.event;
 
 import java.util.Map;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
+
 /**
- * Factory to create JMSBridge instances.
+ * A factory of XMPPBridge. Note that to deploy an XMPPBridge, you need to have
+ * <em>smack.jar</em> library in the runtime.
  * 
- * @since 1.1
- * @author Andrei Adamchik
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public class JMSBridgeFactory implements EventBridgeFactory {
+public class XMPPBridgeFactory implements EventBridgeFactory {
 
-    // this is an OpenJMS default for the factory name. Likely it won't work with
-    // anything else
-    public static final String TOPIC_CONNECTION_FACTORY_DEFAULT = "JmsTopicConnectionFactory";
+    public static final String XMPP_HOST_PROPERTY = "cayenne.XMPPBridge.xmppHost";
 
-    public static final String TOPIC_CONNECTION_FACTORY_PROPERTY = "cayenne.JMSBridge.topic.connection.factory";
+    /**
+     * An optional property.
+     */
+    public static final String XMPP_PORT_PROPERTY = "cayenne.XMPPBridge.xmppPort";
+
+    // TODO Andrus, 10/13/2005 - secure connections and authentication...
+
+    // public static final String XMPP_SECURE_CONNECTION_PROPERTY =
+    // "cayenne.XMPPBridge.xmppSecure";
+
+    // public static final String XMPP_LOGIN_PROPERTY = "cayenne.XMPPBridge.xmppLogin";
+
+    // public static final String XMPP_PASSWORD_PROPERTY =
+    // "cayenne.XMPPBridge.xmppPassword";
 
     public EventBridge createEventBridge(EventSubject localSubject, Map properties) {
-        JMSBridge bridge = new JMSBridge(localSubject, EventBridge
+
+        String host = (String) properties.get(XMPP_HOST_PROPERTY);
+        String portString = (String) properties.get(XMPP_PORT_PROPERTY);
+        int port = -1;
+        if (portString != null) {
+
+            try {
+                port = Integer.parseInt(portString);
+            }
+            catch (NumberFormatException e) {
+                throw new CayenneRuntimeException("Invalid port: " + portString);
+            }
+        }
+
+        XMPPBridge bridge = new XMPPBridge(localSubject, EventBridge
                 .convertToExternalSubject(localSubject));
 
-        // configure properties
-        String topicConnectionFactory = (String) properties
-                .get(TOPIC_CONNECTION_FACTORY_PROPERTY);
-
-        bridge.setTopicConnectionFactoryName(topicConnectionFactory != null
-                ? topicConnectionFactory
-                : TOPIC_CONNECTION_FACTORY_DEFAULT);
+        bridge.setXmppHost(host);
+        bridge.setXmppPort(port);
 
         return bridge;
     }
