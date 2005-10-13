@@ -68,7 +68,7 @@ public class ContextStateRecorderTst extends TestCase {
     public void testDirtyNodesInState() {
 
         GraphManager map = new MockGraphManager();
-        ContextStateRecorder recorder = new ContextStateRecorder(map);
+        ObjectContextStateRecorder recorder = new ObjectContextStateRecorder(map);
 
         // check for null collections
         assertNotNull(recorder.dirtyNodes(PersistenceState.MODIFIED));
@@ -114,7 +114,7 @@ public class ContextStateRecorderTst extends TestCase {
 
     public void testDirtyNodes() {
         GraphManager map = new MockGraphManager();
-        ContextStateRecorder recorder = new ContextStateRecorder(map);
+        ObjectContextStateRecorder recorder = new ObjectContextStateRecorder(map);
 
         assertNotNull(recorder.dirtyNodes());
         assertTrue(recorder.dirtyNodes().isEmpty());
@@ -136,7 +136,7 @@ public class ContextStateRecorderTst extends TestCase {
 
     public void testHasChanges() {
 
-        ContextStateRecorder recorder = new ContextStateRecorder(new MockGraphManager());
+        ObjectContextStateRecorder recorder = new ObjectContextStateRecorder(new MockGraphManager());
         assertFalse(recorder.hasChanges());
 
         // introduce a fake dirty object

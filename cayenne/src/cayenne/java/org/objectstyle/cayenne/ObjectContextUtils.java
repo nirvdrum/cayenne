@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne;
 
 import org.objectstyle.cayenne.event.EventManager;
-import org.objectstyle.cayenne.graph.GraphChangeHandler;
+import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.graph.GraphEventListener;
 import org.objectstyle.cayenne.opp.OPPChannel;
@@ -69,68 +69,22 @@ import org.objectstyle.cayenne.opp.OPPChannel;
  */
 public class ObjectContextUtils {
 
-    /**
-     * Utility method that wraps a GraphChangeHandler into GraphEventListener, so that any
-     * GraphEvents posted by any ObjectContext that shares an OPPChannel, are channeled to
-     * this handler.
-     * <p>
-     * <b>WARNING: Cayenne event mechanism does not require explicit unregistering of
-     * listeners. It uses weak references and would remove the listeners once they go out
-     * of scope. This means that you must hold on to the returned listener (e.g. store it
-     * as an instance variable). Otherwise it may be removed prematurely.</b>
-     * </p>
-     * 
-     * @return null if an OPPChannel doesn't have an EventManager and therefore does not
-     *         support events, or an event listener that was created to pass events to the
-     *         GraphChangeHandler.
-     */
-    public static GraphEventListener listenForContextEvents(
-            OPPChannel channel,
-            final GraphChangeHandler handler) {
+    static final EventSubject[] CONTEXT_SUBJECTS = new EventSubject[] {
+            ObjectContext.GRAPH_CHANGED_SUBJECT,
+            ObjectContext.GRAPH_COMMIT_ABORTED_SUBJECT,
+            ObjectContext.GRAPH_COMMIT_STARTED_SUBJECT,
+            ObjectContext.GRAPH_COMMITTED_SUBJECT, ObjectContext.GRAPH_ROLLEDBACK_SUBJECT
+    };
 
-        GraphEventListener listener = new GraphEventListener() {
-
-            public void graphChanged(GraphEvent event) {
-                if (event.getDiff() != null) {
-                    event.getDiff().apply(handler);
-                }
-            }
-        };
-        return listenForContextEvents(channel, listener) ? listener : null;
-    }
-
-    /**
-     * Utility method that wraps a GraphChangeHandler into GraphEventListener, so that any
-     * GraphEvents posted by the specified ObjectContext are channeled to this handler.
-     * <p>
-     * <b>WARNING: Cayenne event mechanism does not require explicit unregistering of
-     * listeners. It uses weak references and would remove the listeners once they go out
-     * of scope. This means that you must hold on to the returned listener (e.g. store it
-     * as an instance variable). Otherwise it may be removed prematurely.</b>
-     * </p>
-     * 
-     * @return null if an ObjectContext doesn't have an EventManager or explicitly does
-     *         not support events, or an event listener that was created to pass events to
-     *         the GraphChangeHandler.
-     */
-    public static GraphEventListener listenForContextEvents(
-            ObjectContext context,
-            final GraphChangeHandler handler) {
-
-        GraphEventListener listener = new GraphEventListener() {
-
-            public void graphChanged(GraphEvent event) {
-                if (event.getDiff() != null) {
-                    event.getDiff().apply(handler);
-                }
-            }
-        };
-        return listenForContextEvents(context, listener) ? listener : null;
-    }
+    static final EventSubject[] CHANNEL_SUBJECTS = new EventSubject[] {
+            OPPChannel.GRAPH_CHANGED_SUBJECT, OPPChannel.GRAPH_COMMIT_ABORTED_SUBJECT,
+            OPPChannel.GRAPH_COMMIT_STARTED_SUBJECT, OPPChannel.GRAPH_COMMITTED_SUBJECT,
+            OPPChannel.GRAPH_ROLLEDBACK_SUBJECT
+    };
 
     /**
      * Utility method that sets up a GraphChangeListener to be notified when GraphEvents
-     * occur in any ObjectContext that shares a given OPPChannel.
+     * occur in any ObjectContext that shares a given OPPChannel and the channel itself.
      * 
      * @return false if an OPPChannel doesn't have an EventManager and therefore does not
      *         support events.
@@ -145,12 +99,7 @@ public class ObjectContextUtils {
             return false;
         }
 
-        manager.addListener(
-                listener,
-                "graphChanged",
-                GraphEvent.class,
-                ObjectContext.GRAPH_CHANGE_SUBJECT);
-
+        listenForSubjects(manager, listener, null, CONTEXT_SUBJECTS);
         return true;
     }
 
@@ -158,8 +107,7 @@ public class ObjectContextUtils {
      * Utility method that sets up a GraphEventListener to be notified when GraphEvents
      * occur in a specific ObjectContext.
      * 
-     * @return false if an ObjectContext doesn't have an EventManager or does not support
-     *         events explicitly.
+     * @return false if an ObjectContext doesn't have an EventManager.
      */
     public static boolean listenForContextEvents(
             ObjectContext context,
@@ -170,18 +118,11 @@ public class ObjectContextUtils {
             return false;
         }
 
-        if (context instanceof CayenneContext
-                && !((CayenneContext) context).isGraphEventsEnabled()) {
-            return false;
-        }
-
-        context.getChannel().getEventManager().addListener(
+        listenForSubjects(
+                context.getChannel().getEventManager(),
                 listener,
-                "graphChanged",
-                GraphEvent.class,
-                ObjectContext.GRAPH_CHANGE_SUBJECT,
-                context);
-
+                context,
+                CONTEXT_SUBJECTS);
         return true;
     }
 
@@ -202,43 +143,26 @@ public class ObjectContextUtils {
             return false;
         }
 
-        manager.addListener(
-                listener,
-                "graphChanged",
-                GraphEvent.class,
-                OPPChannel.REMOTE_GRAPH_CHANGE_SUBJECT,
-                channel);
-
+        listenForSubjects(manager, listener, channel, CHANNEL_SUBJECTS);
         return true;
     }
 
     /**
-     * Utility method that wraps a GraphChangeHandler into GraphEventListener, so that any
-     * GraphEvents posted by the OPPChannel re channeled to this handler.
-     * <p>
-     * <b>WARNING: Cayenne event mechanism does not require explicit unregistering of
-     * listeners. It uses weak references and would remove the listeners once they go out
-     * of scope. This means that you must hold on to the returned listener (e.g. store it
-     * as an instance variable). Otherwise it may be removed prematurely.</b>
-     * </p>
-     * 
-     * @return null if an OPPChannel doesn't have an EventManager and therefore does not
-     *         support events, or an event listener that was created to pass events to the
-     *         GraphChangeHandler.
+     * Registers GraphEventListener for multiple subjects at once.
      */
-    public static GraphEventListener listenForChannelEvents(
-            OPPChannel channel,
-            final GraphChangeHandler handler) {
+    static void listenForSubjects(
+            EventManager manager,
+            GraphEventListener listener,
+            Object sender,
+            EventSubject[] subjects) {
 
-        GraphEventListener listener = new GraphEventListener() {
+        for (int i = 0; i < subjects.length; i++) {
+            // assume that subject name and listener method name match
+            String fqSubject = subjects[i].getSubjectName();
+            String method = fqSubject.substring(fqSubject.lastIndexOf('/') + 1);
 
-            public void graphChanged(GraphEvent event) {
-                if (event.getDiff() != null) {
-                    event.getDiff().apply(handler);
-                }
-            }
-        };
-        return listenForChannelEvents(channel, listener) ? listener : null;
+            manager.addListener(listener, method, GraphEvent.class, subjects[i], sender);
+        }
     }
 
     // not for instantiation

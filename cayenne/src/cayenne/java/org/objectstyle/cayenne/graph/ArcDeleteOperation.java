@@ -59,10 +59,10 @@ package org.objectstyle.cayenne.graph;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ArcDeleteOperation extends NodeDiff {
+public class ArcDeleteOperation extends NodeDiff {
 
-    Object targetNodeId;
-    Object arcId;
+    protected Object targetNodeId;
+    protected Object arcId;
 
     public ArcDeleteOperation(Object nodeId, Object targetNodeId, Object arcId) {
         super(nodeId);

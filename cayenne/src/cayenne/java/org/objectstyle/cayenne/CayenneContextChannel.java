@@ -58,7 +58,6 @@ package org.objectstyle.cayenne;
 import java.util.List;
 
 import org.objectstyle.cayenne.event.EventManager;
-import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
@@ -111,13 +110,8 @@ public class CayenneContextChannel implements OPPChannel {
     }
 
     public GraphDiff onCommit(CommitMessage message) {
-
-        // sync child changes with parent
-        GraphChangeHandler handler = new CayenneContextChannelEventProcessor(
-                context.stateRecorder,
-                context.getGraphManager());
-
-        message.getSenderChanges().apply(handler);
+        context.internalGraphManager().processSyncWithChild(
+                message.getSenderChanges());
         return context.doCommitChanges();
     }
 

@@ -62,7 +62,7 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.MockObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.graph.OperationRecorder;
+import org.objectstyle.cayenne.graph.MockGraphChangeHandler;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class DataDomainCommitActionTst extends CayenneTestCase {
@@ -87,8 +87,8 @@ public class DataDomainCommitActionTst extends CayenneTestCase {
 
         DataDomainCommitAction action = new DataDomainCommitAction(getDomain());
 
-        OperationRecorder recorder = new OperationRecorder();
+        MockGraphChangeHandler recorder = new MockGraphChangeHandler();
         action.commit(context, recorder);
-        assertEquals(1, recorder.size());
+        assertEquals(1, recorder.getCallbackCount());
     }
 }

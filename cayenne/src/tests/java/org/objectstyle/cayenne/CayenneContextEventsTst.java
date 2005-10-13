@@ -62,6 +62,7 @@ import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.graph.GraphEventListener;
+import org.objectstyle.cayenne.graph.MockGraphEventListener;
 import org.objectstyle.cayenne.opp.CommitMessage;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.opp.OPPChannel;
@@ -81,11 +82,12 @@ public class CayenneContextEventsTst extends TestCase {
             }
         };
 
-        CayenneContext contextWithEvents = new CayenneContext(channel, true);
-        assertTrue(contextWithEvents.isGraphEventsEnabled());
+        CayenneContext contextWithEvents = new CayenneContext(channel, true, true);
+        assertTrue(contextWithEvents.isChangeEventsEnabled());
+        assertTrue(contextWithEvents.isSyncEventsEnabled());
 
         final boolean[] flags1 = new boolean[1];
-        GraphEventListener listener1 = new GraphEventListener() {
+        GraphEventListener listener1 = new MockGraphEventListener() {
 
             public void graphChanged(GraphEvent event) {
                 flags1[0] = true;
@@ -94,11 +96,14 @@ public class CayenneContextEventsTst extends TestCase {
 
         ObjectContextUtils.listenForContextEvents(channel, listener1);
 
-        // dummy change...
-        contextWithEvents.changeRecorder.nodePropertyChanged(new Object(), "x", "y", "z");
-        contextWithEvents.commitChanges();
-        assertTrue(flags1[0]);
+        // dummy change after commit started
+        contextWithEvents.internalGraphManager().nodePropertyChanged(
+                new Object(),
+                "x",
+                "y",
+                "z");
 
+        assertTrue(flags1[0]);
     }
 
     public void testDispatchEventsDisabled() {
@@ -114,11 +119,12 @@ public class CayenneContextEventsTst extends TestCase {
             }
         };
 
-        CayenneContext contextWithoutEvents = new CayenneContext(channel, false);
-        assertFalse(contextWithoutEvents.isGraphEventsEnabled());
+        CayenneContext contextWithoutEvents = new CayenneContext(channel, false, false);
+        assertFalse(contextWithoutEvents.isChangeEventsEnabled());
+        assertFalse(contextWithoutEvents.isSyncEventsEnabled());
 
         final boolean[] flags2 = new boolean[1];
-        GraphEventListener listener2 = new GraphEventListener() {
+        GraphEventListener listener2 = new MockGraphEventListener() {
 
             public void graphChanged(GraphEvent event) {
                 flags2[0] = true;
@@ -127,12 +133,12 @@ public class CayenneContextEventsTst extends TestCase {
         ObjectContextUtils.listenForContextEvents(channel, listener2);
 
         // dummy change...
-        contextWithoutEvents.changeRecorder.nodePropertyChanged(
+        contextWithoutEvents.internalGraphManager().nodePropertyChanged(
                 new Object(),
                 "x",
                 "y",
                 "z");
-        contextWithoutEvents.commitChanges();
+
         assertFalse(flags2[0]);
     }
 }

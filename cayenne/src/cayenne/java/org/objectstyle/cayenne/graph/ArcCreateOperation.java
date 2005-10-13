@@ -59,10 +59,10 @@ package org.objectstyle.cayenne.graph;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ArcCreateOperation extends NodeDiff {
+public class ArcCreateOperation extends NodeDiff {
 
-    Object targetNodeId;
-    Object arcId;
+    protected Object targetNodeId;
+    protected Object arcId;
 
     public ArcCreateOperation(Object nodeId, Object targetNodeId, Object arcId) {
         super(nodeId);

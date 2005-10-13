@@ -61,26 +61,26 @@ import java.util.Map;
 import org.apache.commons.collections.map.ReferenceMap;
 
 /**
- * This class encapsulates the String that is used to identify the <em>subject</em> 
- * that a listener is  interested in. Using plain Strings causes several severe
- * problems:
+ * This class encapsulates the String that is used to identify the <em>subject</em> that
+ * a listener is interested in. Using plain Strings causes several severe problems:
  * <ul>
- * <li>it's easy to misspell a subject, leading to undesired behaviour at
- * runtime that is hard to debug.</li>
- * <li>in systems with many different subjects there is no safeguard for
- * defining the same subject twice for different purposes. This is especially
- * true in a distributed setting.
+ * <li>it's easy to misspell a subject, leading to undesired behaviour at runtime that is
+ * hard to debug.</li>
+ * <li>in systems with many different subjects there is no safeguard for defining the
+ * same subject twice for different purposes. This is especially true in a distributed
+ * setting.
  * </ul>
  * 
  * @author Dirk Olmes
  * @author Holger Hoffstaette
  */
 
-public class EventSubject extends Object {
+public class EventSubject {
 
     // a Map that will allow the values to be GC'ed
-    private static Map _registeredSubjects =
-        new ReferenceMap(ReferenceMap.HARD, ReferenceMap.WEAK);
+    private static Map _registeredSubjects = new ReferenceMap(
+            ReferenceMap.HARD,
+            ReferenceMap.WEAK);
 
     // Subject identifier in the form "com.foo.bar/SubjectName"
     private String _fullyQualifiedSubjectName;
@@ -90,8 +90,8 @@ public class EventSubject extends Object {
      * 
      * @param subjectOwner the Class used for uniquely identifying this subject
      * @param subjectName a String used as name, e.g. "MyEventTopic"
-     * @throws IllegalArgumentException if subjectOwner/subjectName are
-     * <code>null</code> or subjectName is empty.
+     * @throws IllegalArgumentException if subjectOwner/subjectName are <code>null</code>
+     *             or subjectName is empty.
      */
     public static EventSubject getSubject(Class subjectOwner, String subjectName) {
         if (subjectOwner == null) {
@@ -124,14 +124,13 @@ public class EventSubject extends Object {
      * @param fullSubjectName the name of the new subject to be created
      */
     protected EventSubject(String fullSubjectName) {
-        super();
         _fullyQualifiedSubjectName = fullSubjectName;
     }
 
     public boolean equals(Object obj) {
         if (obj instanceof EventSubject) {
-            return _fullyQualifiedSubjectName.equals(
-                ((EventSubject) obj).getSubjectName());
+            return _fullyQualifiedSubjectName.equals(((EventSubject) obj)
+                    .getSubjectName());
         }
 
         return false;
@@ -146,9 +145,7 @@ public class EventSubject extends Object {
     }
 
     /**
-     * @return a String in the form
-     * <code>&lt;ClassName 0x123456&gt; SomeName</code>
-     * 
+     * @return a String in the form <code>&lt;ClassName 0x123456&gt; SomeName</code>
      * @see Object#toString()
      */
     public String toString() {
@@ -163,5 +160,4 @@ public class EventSubject extends Object {
 
         return buf.toString();
     }
-
 }

@@ -55,21 +55,16 @@
  */
 package org.objectstyle.cayenne.graph;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
- * An implementation of GraphManager that stores graph nodes keyed by their ids.
+ * A base implementation of GraphManager that stores graph nodes keyed by their ids.
  * <h3>Tracking Object Changes</h3>
  * <p>
  * Registered objects may choose to notify GraphMap of their changes by using callback
- * methods defined in GraphChangeHandler interface. GraphMap itself does not send
- * GraphEvents, instead it directly notifies registered change handlers. An example of an
- * event mechanism built on top of GraphMap is OperationRecorder - it broadcasts events
- * via EventManager if configured to do so.
+ * methods defined in GraphChangeHandler interface. GraphMap itself implements as noops,
+ * leaving it up to subclasses to handle object updates.
  * </p>
  * 
  * @since 1.2
@@ -78,40 +73,12 @@ import java.util.Map;
 public class GraphMap implements GraphManager {
 
     protected Map nodes;
-    protected Collection changeHandlers;
 
     /**
      * Creates a new GraphMap.
      */
     public GraphMap() {
         this.nodes = new HashMap();
-    }
-
-    public synchronized void addChangeHandler(GraphChangeHandler handler) {
-        if (handler != null) {
-            if (changeHandlers == null) {
-                changeHandlers = new ArrayList();
-            }
-
-            changeHandlers.add(handler);
-        }
-    }
-
-    public synchronized void removeChangeHandler(GraphChangeHandler handler) {
-        if (handler != null && changeHandlers != null) {
-            changeHandlers.remove(handler);
-
-            if (changeHandlers.isEmpty()) {
-                changeHandlers = null;
-            }
-        }
-    }
-
-    /**
-     * Returns a collection of registered change handlers.
-     */
-    protected Collection getChangeHandlers() {
-        return changeHandlers;
     }
 
     // *** GraphMap methods
@@ -130,101 +97,31 @@ public class GraphMap implements GraphManager {
 
     // *** methods for tracking local changes declared in GraphChangeHandler interface
 
-    public void graphCommitAborted() {
-        if (changeHandlers != null) {
-            Iterator it = changeHandlers.iterator();
-            while (it.hasNext()) {
-                ((GraphChangeHandler) it.next()).graphCommitAborted();
-            }
-        }
+    public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
+        // noop
     }
 
-    public void graphCommitStarted() {
-        if (changeHandlers != null) {
-            Iterator it = changeHandlers.iterator();
-            while (it.hasNext()) {
-                ((GraphChangeHandler) it.next()).graphCommitStarted();
-            }
-        }
+    public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
+        // noop
     }
 
-    public void graphCommitted() {
-        if (changeHandlers != null) {
-            Iterator it = changeHandlers.iterator();
-            while (it.hasNext()) {
-                ((GraphChangeHandler) it.next()).graphCommitted();
-            }
-        }
+    public void nodeCreated(Object nodeId) {
+        // noop
     }
 
-    public void graphRolledback() {
-        if (changeHandlers != null) {
-            Iterator it = changeHandlers.iterator();
-            while (it.hasNext()) {
-                ((GraphChangeHandler) it.next()).graphRolledback();
-            }
-        }
+    public void nodeRemoved(Object nodeId) {
+        // noop
     }
 
-    public synchronized void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
-        if (changeHandlers != null) {
-            Iterator it = changeHandlers.iterator();
-            while (it.hasNext()) {
-                ((GraphChangeHandler) it.next()).arcCreated(nodeId, targetNodeId, arcId);
-            }
-        }
+    public void nodeIdChanged(Object nodeId, Object newId) {
+        // noop
     }
 
-    public synchronized void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
-        if (changeHandlers != null) {
-            Iterator it = changeHandlers.iterator();
-            while (it.hasNext()) {
-                ((GraphChangeHandler) it.next()).arcDeleted(nodeId, targetNodeId, arcId);
-            }
-        }
-    }
-
-    public synchronized void nodeCreated(Object nodeId) {
-        if (changeHandlers != null) {
-            Iterator it = changeHandlers.iterator();
-            while (it.hasNext()) {
-                ((GraphChangeHandler) it.next()).nodeCreated(nodeId);
-            }
-        }
-    }
-
-    public synchronized void nodeRemoved(Object nodeId) {
-        if (changeHandlers != null) {
-            Iterator it = changeHandlers.iterator();
-            while (it.hasNext()) {
-                ((GraphChangeHandler) it.next()).nodeRemoved(nodeId);
-            }
-        }
-    }
-
-    public synchronized void nodeIdChanged(Object nodeId, Object newId) {
-        if (changeHandlers != null) {
-            Iterator it = changeHandlers.iterator();
-            while (it.hasNext()) {
-                ((GraphChangeHandler) it.next()).nodeIdChanged(nodeId, newId);
-            }
-        }
-    }
-
-    public synchronized void nodePropertyChanged(
+    public void nodePropertyChanged(
             Object nodeId,
             String property,
             Object oldValue,
             Object newValue) {
-        if (changeHandlers != null) {
-            Iterator it = changeHandlers.iterator();
-            while (it.hasNext()) {
-                ((GraphChangeHandler) it.next()).nodePropertyChanged(
-                        nodeId,
-                        property,
-                        oldValue,
-                        newValue);
-            }
-        }
+        // noop
     }
 }

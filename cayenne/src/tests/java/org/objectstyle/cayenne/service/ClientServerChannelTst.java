@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.access.MockDataRowStore;
 import org.objectstyle.cayenne.access.MockPersistenceContext;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
-import org.objectstyle.cayenne.graph.OperationRecorder;
+import org.objectstyle.cayenne.graph.NodeCreateOperation;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
@@ -136,10 +136,8 @@ public class ClientServerChannelTst extends CayenneTestCase {
         parent.reset();
 
         // introduce changes
-        OperationRecorder recorder = new OperationRecorder();
-        recorder.nodeCreated(new GlobalID("MtTable1"));
-
-        channel.onCommit(new CommitMessage(recorder.getDiffs()));
+        channel.onCommit(new CommitMessage(new NodeCreateOperation(new GlobalID(
+                "MtTable1"))));
         assertTrue(parent.isCommitChangesInContext());
     }
 

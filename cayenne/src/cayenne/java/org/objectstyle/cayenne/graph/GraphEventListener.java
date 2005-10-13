@@ -56,8 +56,17 @@
 package org.objectstyle.cayenne.graph;
 
 /**
- * A listener of GrpahEvents. Implementors are usually the objects that are interested in
- * object
+ * A listener of GrpahEvents. GraphEvents are sent at various points of the graph
+ * lifecyle. They often carry a GraphDiff attached that specifies the changes made to the
+ * graph. An implementor of GraphEventListener might provide an GraphChangeHandler (or
+ * implement it itself) to process the diff:
+ * 
+ * <pre>
+ *      public void graphChanged(GraphEvent event) {
+ *         GraphChangeHandler handler = ..;
+ *         event.getDiff().apply(handler);
+ *      }
+ * </pre>
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -65,15 +74,29 @@ package org.objectstyle.cayenne.graph;
 public interface GraphEventListener {
 
     /**
-     * A method for processing graph events. A common strategy to implement GraphEvent
-     * processing is to provide GraphChangeHandler to "vizit" Event's GraphDiff:
-     * 
-     * <pre>
-     *   public void graphChanged(GraphEvent event) {
-     *      GraphChangeHandler handler = ..;
-     *      event.getDiff().apply(handler);
-     *   }
-     * </pre>
+     * Notifies implementing object that graph state has changed.
      */
     void graphChanged(GraphEvent event);
+
+    /**
+     * Notifies implementing object that a graph is about to be committed.
+     */
+    void graphCommitStarted(GraphEvent event);
+
+    /**
+     * Notifies implementing object that all graph chages made since last commit or
+     * rollback were committed to some persistent storage.
+     */
+    void graphCommitted(GraphEvent event);
+
+    /**
+     * Notifies implementing object that previously started commit has been aborted.
+     */
+    void graphCommitAborted(GraphEvent event);
+
+    /**
+     * Notifies implementing object that all graph changes made since last commit or
+     * rollback were reverted.
+     */
+    void graphRolledback(GraphEvent event);
 }

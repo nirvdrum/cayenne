@@ -55,10 +55,19 @@
  */
 package org.objectstyle.cayenne.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.graph.ArcCreateOperation;
+import org.objectstyle.cayenne.graph.ArcDeleteOperation;
 import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.graph.OperationRecorder;
+import org.objectstyle.cayenne.graph.NodeCreateOperation;
+import org.objectstyle.cayenne.graph.NodeDeleteOperation;
+import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
+import org.objectstyle.cayenne.graph.NodePropertyChangeOperation;
 
 /**
  * An action that commits ObjectDataContext.
@@ -93,7 +102,45 @@ class ObjectDataContextCommitAction {
             // ids ... do this when we make ObjectStore a GraphMap
             context.getObjectStore().objectsCommitted();
 
-            return recorder.getDiffs();
+            return new CompoundDiff(recorder.diffs);
+        }
+    }
+
+    class OperationRecorder implements GraphChangeHandler {
+
+        List diffs = new ArrayList();
+
+        public void nodeIdChanged(Object nodeId, Object newId) {
+            diffs.add(new NodeIdChangeOperation(nodeId, newId));
+        }
+
+        public void nodeCreated(Object nodeId) {
+            diffs.add(new NodeIdChangeOperation(nodeId, new NodeCreateOperation(nodeId)));
+        }
+
+        public void nodeRemoved(Object nodeId) {
+            diffs.add(new NodeDeleteOperation(nodeId));
+        }
+
+        public void nodePropertyChanged(
+                Object nodeId,
+                String property,
+                Object oldValue,
+                Object newValue) {
+
+            diffs.add(new NodePropertyChangeOperation(
+                    nodeId,
+                    property,
+                    oldValue,
+                    newValue));
+        }
+
+        public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
+            diffs.add(new ArcCreateOperation(nodeId, targetNodeId, arcId));
+        }
+
+        public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
+            diffs.add(new ArcDeleteOperation(nodeId, targetNodeId, arcId));
         }
     }
 }

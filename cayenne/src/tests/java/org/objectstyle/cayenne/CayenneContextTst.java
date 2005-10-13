@@ -63,9 +63,10 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
-import org.objectstyle.cayenne.graph.OperationRecorder;
+import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -94,7 +95,7 @@ public class CayenneContextTst extends TestCase {
 
     public void testChannel() {
         MockOPPChannel channel = new MockOPPChannel();
-        CayenneContext context = new CayenneContext(channel, false);
+        CayenneContext context = new CayenneContext(channel);
 
         assertSame(channel, context.getChannel());
     }
@@ -102,7 +103,7 @@ public class CayenneContextTst extends TestCase {
     public void testCommitUnchanged() {
 
         MockOPPChannel channel = new MockOPPChannel();
-        CayenneContext context = new CayenneContext(channel, false);
+        CayenneContext context = new CayenneContext(channel);
 
         // no context changes so no connector access is expected
         context.commitChanges();
@@ -112,11 +113,16 @@ public class CayenneContextTst extends TestCase {
     public void testCommitCommandExecuted() {
 
         MockOPPChannel channel = new MockOPPChannel(new MockGraphDiff());
-        CayenneContext context = new CayenneContext(channel, false);
+        CayenneContext context = new CayenneContext(channel);
 
         // test that a command is being sent via connector on commit...
 
-        context.changeRecorder.nodePropertyChanged(new Object(), "x", "y", "z");
+        context.internalGraphManager().nodePropertyChanged(
+                new Object(),
+                "x",
+                "y",
+                "z");
+
         context.commitChanges();
         assertEquals(1, channel.getMessages().size());
 
@@ -126,7 +132,7 @@ public class CayenneContextTst extends TestCase {
     }
 
     public void testCommitChangesNew() {
-        final OperationRecorder recorder = new OperationRecorder();
+        final CompoundDiff diff = new CompoundDiff();
         final Object newObjectId = new GlobalID("test", "key", "generated");
         final EventManager eventManager = new EventManager(0);
 
@@ -136,7 +142,7 @@ public class CayenneContextTst extends TestCase {
         MockOPPChannel channel = new MockOPPChannel() {
 
             public GraphDiff onCommit(CommitMessage message) {
-                return recorder.getDiffs();
+                return diff;
             }
 
             // must provide a channel with working event manager
@@ -145,7 +151,7 @@ public class CayenneContextTst extends TestCase {
             }
         };
 
-        CayenneContext context = new CayenneContext(channel, false);
+        CayenneContext context = new CayenneContext(channel);
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
 
@@ -156,7 +162,7 @@ public class CayenneContextTst extends TestCase {
         Persistent object = context.newObject(MockPersistentObject.class);
 
         // record change here to make it available to the anonymous connector method..
-        recorder.nodeIdChanged(object.getGlobalID(), newObjectId);
+        diff.add(new NodeIdChangeOperation(object.getGlobalID(), newObjectId));
 
         // check that a generated object ID is assigned back to the object...
         assertNotSame(newObjectId, object.getGlobalID());
@@ -174,7 +180,7 @@ public class CayenneContextTst extends TestCase {
             o1
         }));
 
-        CayenneContext context = new CayenneContext(channel, false);
+        CayenneContext context = new CayenneContext(channel);
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
 
@@ -260,7 +266,7 @@ public class CayenneContextTst extends TestCase {
 
     public void testNewObject() {
 
-        CayenneContext context = new CayenneContext(new MockOPPChannel(), false);
+        CayenneContext context = new CayenneContext(new MockOPPChannel());
 
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
@@ -286,7 +292,8 @@ public class CayenneContextTst extends TestCase {
         assertTrue(object instanceof MockPersistentObject);
         assertEquals(PersistenceState.NEW, object.getPersistenceState());
         assertSame(context, object.getObjectContext());
-        assertTrue(context.stateRecorder
+        assertTrue(context
+                .internalGraphManager()
                 .dirtyNodes(PersistenceState.NEW)
                 .contains(object));
         assertNotNull(object.getGlobalID());
@@ -296,7 +303,7 @@ public class CayenneContextTst extends TestCase {
 
     public void testDeleteObject() {
 
-        CayenneContext context = new CayenneContext(new MockOPPChannel(), false);
+        CayenneContext context = new CayenneContext(new MockOPPChannel());
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
 
@@ -315,7 +322,8 @@ public class CayenneContextTst extends TestCase {
         Persistent newObject = context.newObject(MockPersistentObject.class);
         context.deleteObject(newObject);
         assertEquals(PersistenceState.TRANSIENT, newObject.getPersistenceState());
-        assertFalse(context.stateRecorder.dirtyNodes().contains(newObject));
+        assertFalse(context.internalGraphManager().dirtyNodes().contains(
+                newObject));
 
         // COMMITTED
         Persistent committed = new MockPersistentObject();

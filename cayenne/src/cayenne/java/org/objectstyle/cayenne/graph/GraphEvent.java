@@ -62,8 +62,8 @@ import java.util.EventObject;
  * so the easiest way to process the event is the following:
  * 
  * <pre>
- *         GraphChangeHandler handler = ..;
- *         event.getDiff().apply(handler);
+ *           GraphChangeHandler handler = ..;
+ *           event.getDiff().apply(handler);
  * </pre>
  * 
  * @since 1.2
@@ -71,6 +71,12 @@ import java.util.EventObject;
  */
 public class GraphEvent extends EventObject {
 
+    static final int COMMIT_STARTED = 1;
+    static final int COMMITTED = 2;
+    static final int COMMIT_ABORTED = 3;
+    static final int ROLLEDBACK = 4;
+
+    protected int type;
     protected GraphDiff diff;
 
     public GraphEvent(Object source, GraphDiff diff) {

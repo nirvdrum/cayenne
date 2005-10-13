@@ -53,44 +53,47 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.graph;
+package org.objectstyle.cayenne;
 
 import junit.framework.TestCase;
 
-public class OperationRecorderTst extends TestCase {
+import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.NodeCreateOperation;
 
-    public void testClear() {
-        OperationRecorder recorder = new OperationRecorder();
+public class ObjectContextOperationRecorderTst extends TestCase {
+
+    public void testReset() {
+        ObjectContextOperationRecorder recorder = new ObjectContextOperationRecorder();
         assertNotNull(recorder.getDiffs());
         assertTrue(recorder.getDiffs().isNoop());
 
-        recorder.nodeCreated(new Object());
+        recorder.addOperation(new NodeCreateOperation(new Object()));
         assertNotNull(recorder.getDiffs());
         assertFalse(recorder.getDiffs().isNoop());
 
-        recorder.clear();
+        recorder.reset();
         assertNotNull(recorder.getDiffs());
         assertTrue(recorder.getDiffs().isNoop());
 
         // now test that a diff stored before "clear" is not affected by 'clear'
-        recorder.nodeCreated(new Object());
+        recorder.addOperation(new NodeCreateOperation(new Object()));
         GraphDiff diff = recorder.getDiffs();
         assertFalse(diff.isNoop());
 
-        recorder.clear();
+        recorder.reset();
         assertFalse(diff.isNoop());
     }
 
     public void testGetDiffs() {
         // assert that after returning, the diffs array won't get modified by operation
         // recorder
-
-        OperationRecorder recorder = new OperationRecorder();
-        recorder.nodeCreated(new Object());
+        ObjectContextOperationRecorder recorder = new ObjectContextOperationRecorder();
+        recorder.addOperation(new NodeCreateOperation(new Object()));
         CompoundDiff diff = (CompoundDiff) recorder.getDiffs();
         assertEquals(1, diff.getDiffs().size());
 
-        recorder.nodeCreated(new Object());
+        recorder.addOperation(new NodeCreateOperation(new Object()));
         assertEquals(1, diff.getDiffs().size());
 
         CompoundDiff diff2 = (CompoundDiff) recorder.getDiffs();

@@ -59,9 +59,9 @@ package org.objectstyle.cayenne.graph;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class NodeDeleteOperation extends NodeDiff {
+public class NodeDeleteOperation extends NodeDiff {
 
-    NodeDeleteOperation(Object nodeId) {
+    public NodeDeleteOperation(Object nodeId) {
         super(nodeId);
     }
 

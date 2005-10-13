@@ -55,52 +55,20 @@
  */
 package org.objectstyle.cayenne.graph;
 
-import java.util.List;
+public class MockGraphEventListener implements GraphEventListener {
 
-/**
- * @since 1.2
- * @author Andrus Adamchik
- */
-class GraphStateChange extends CompoundDiff {
-
-    static final int COMMIT_STARTED = 1;
-    static final int COMMITTED = 2;
-    static final int COMMIT_ABORTED = 3;
-    static final int ROLLEDBACK = 4;
-
-    int type;
-
-    GraphStateChange(int type) {
-        this.type = type;
+    public void graphChanged(GraphEvent event) {
     }
 
-    GraphStateChange(int type, List diffs) {
-        super(diffs);
-        this.type = type;
+    public void graphCommitStarted(GraphEvent event) {
     }
 
-    public boolean isNoop() {
-        return false;
+    public void graphCommitted(GraphEvent event) {
     }
 
-    public void apply(GraphChangeHandler tracker) {
-        switch (type) {
-            case COMMIT_STARTED:
-                tracker.graphCommitStarted();
-                break;
-            case COMMITTED:
-                tracker.graphCommitted();
-                break;
-            case COMMIT_ABORTED:
-                tracker.graphCommitAborted();
-                break;
-            case ROLLEDBACK:
-                tracker.graphRolledback();
-                break;
-        }
+    public void graphCommitAborted(GraphEvent event) {
     }
 
-    public void undo(GraphChangeHandler tracker) {
-        // noop
+    public void graphRolledback(GraphEvent event) {
     }
 }

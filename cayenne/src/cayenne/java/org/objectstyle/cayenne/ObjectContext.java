@@ -73,13 +73,23 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
  */
 public interface ObjectContext extends Serializable {
 
-    /**
-     * An EventManager subject used by ObjectContext's GraphManager to notify listeners of
-     * the graph object changes.
-     */
-    public static final EventSubject GRAPH_CHANGE_SUBJECT = EventSubject.getSubject(
+    public static final EventSubject GRAPH_CHANGED_SUBJECT = EventSubject.getSubject(
             ObjectContext.class,
-            "graph-change");
+            "graphChanged");
+
+    public static final EventSubject GRAPH_COMMIT_STARTED_SUBJECT = EventSubject
+            .getSubject(ObjectContext.class, "graphCommitStarted");
+
+    public static final EventSubject GRAPH_COMMITTED_SUBJECT = EventSubject.getSubject(
+            ObjectContext.class,
+            "graphCommitted");
+
+    public static final EventSubject GRAPH_COMMIT_ABORTED_SUBJECT = EventSubject
+            .getSubject(ObjectContext.class, "graphCommitAborted");
+
+    public static final EventSubject GRAPH_ROLLEDBACK_SUBJECT = EventSubject.getSubject(
+            ObjectContext.class,
+            "graphRolledback");
 
     /**
      * Returns a collection of objects that are registered with this ObjectContext and
@@ -144,7 +154,6 @@ public interface ObjectContext extends Serializable {
      * ObjectContext since the last sync. No commit occurs as a result.
      */
     // void flushChanges();
-    
     /**
      * Resets all changes made to the objects in the ObjectContext, and recursively all
      * parent contexts on the other end of the OPPChannel.
@@ -178,7 +187,6 @@ public interface ObjectContext extends Serializable {
      * </p>
      */
     // void revertChanges();
-    
     /**
      * Executes a selecting query, returning a list of persistent objects or data rows.
      */

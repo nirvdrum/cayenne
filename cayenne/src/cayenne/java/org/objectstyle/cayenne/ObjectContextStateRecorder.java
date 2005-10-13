@@ -73,12 +73,12 @@ import org.objectstyle.cayenne.graph.GraphManager;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ContextStateRecorder implements GraphChangeHandler {
+class ObjectContextStateRecorder implements GraphChangeHandler {
 
     Set dirtyIds;
     GraphManager graphManager;
 
-    ContextStateRecorder(GraphManager graphManager) {
+    ObjectContextStateRecorder(GraphManager graphManager) {
         this.dirtyIds = new HashSet();
         this.graphManager = graphManager;
     }
@@ -86,19 +86,11 @@ class ContextStateRecorder implements GraphChangeHandler {
     void clear() {
         dirtyIds = new HashSet();
     }
-    
-    public void graphCommitAborted() {
-        // noop
-    }
-    
-    public void graphCommitStarted() {
-        // noop
-    }
 
     /**
      * Updates dirty objects state and clears dirty ids map.
      */
-    public void graphCommitted() {
+    void graphCommitted() {
         Iterator it = dirtyIds.iterator();
         while (it.hasNext()) {
             Object node = graphManager.getNode(it.next());
@@ -119,7 +111,7 @@ class ContextStateRecorder implements GraphChangeHandler {
         clear();
     }
 
-    public void graphRolledback() {
+    void graphRolledback() {
         Iterator it = dirtyIds.iterator();
         while (it.hasNext()) {
             Object node = graphManager.getNode(it.next());

@@ -59,14 +59,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.objectstyle.cayenne.event.EventManager;
-import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.graph.GraphEvent;
-import org.objectstyle.cayenne.graph.GraphEventListener;
 import org.objectstyle.cayenne.graph.GraphManager;
-import org.objectstyle.cayenne.graph.GraphMap;
-import org.objectstyle.cayenne.graph.OperationRecorder;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
@@ -92,14 +86,9 @@ public class CayenneContext implements ObjectContext {
     // if we are to pass CayenneContext around, channel should be left alone and
     // reinjected later if needed
     protected transient OPPChannel channel;
-
     protected EntityResolver entityResolver;
-    protected GraphManager graphManager;
-    protected boolean graphEventsEnabled;
 
-    OperationRecorder changeRecorder;
-    ContextStateRecorder stateRecorder;
-    GraphEventListener externalEventsHandler;
+    ObjectContextGraphManager graphManager;
 
     // note that it is important to reuse the same action within the property change
     // thread to avoid a loop of "propertyChange" calls on handling reverse relationships.
@@ -111,7 +100,7 @@ public class CayenneContext implements ObjectContext {
      * Creates a new CayenneContext with no channel and disabled graph events.
      */
     public CayenneContext() {
-        this(null, false);
+        this(null);
     }
 
     /**
@@ -120,7 +109,7 @@ public class CayenneContext implements ObjectContext {
      * events.
      */
     public CayenneContext(OPPChannel channel) {
-        this(channel, false);
+        this(channel, false, false);
     }
 
     /**
@@ -128,19 +117,14 @@ public class CayenneContext implements ObjectContext {
      * <code>graphEventsEnabled</code> is true, this context will broadcast GraphEvents
      * using ObjectContext.GRAPH_CHANGE_SUBJECT.
      */
-    public CayenneContext(OPPChannel channel, boolean graphEventsEnabled) {
-        this.graphEventsEnabled = graphEventsEnabled;
+    public CayenneContext(OPPChannel channel, boolean changeEventsEnabled,
+            boolean syncEventsEnabled) {
+
         this.graphAction = new CayenneContextGraphAction(this);
-
-        // assemble objects that track graph changes
-        GraphMap graphMap = new GraphMap();
-
-        this.graphManager = graphMap;
-        this.changeRecorder = new OperationRecorder();
-        this.stateRecorder = new ContextStateRecorder(graphManager);
-
-        graphMap.addChangeHandler(changeRecorder);
-        graphMap.addChangeHandler(stateRecorder);
+        this.graphManager = new ObjectContextGraphManager(
+                this,
+                changeEventsEnabled,
+                syncEventsEnabled);
 
         setChannel(channel);
     }
@@ -153,67 +137,21 @@ public class CayenneContext implements ObjectContext {
      * Sets the context channel, setting up a listener for channel events.
      */
     public void setChannel(OPPChannel channel) {
-        if (channel != this.channel) {
-            EventManager oldManager = (this.channel != null) ? this.channel
-                    .getEventManager() : null;
-            EventManager newManager = (channel != null)
-                    ? channel.getEventManager()
-                    : null;
-
-            // stop listening to old channel
-            if (externalEventsHandler != null) {
-                if (oldManager != null) {
-                    oldManager.removeListener(
-                            this.externalEventsHandler,
-                            OPPChannel.REMOTE_GRAPH_CHANGE_SUBJECT,
-                            this.channel);
-                }
-
-                this.externalEventsHandler = null;
-            }
-
-            this.channel = channel;
-
-            // listen to new channel
-            if (newManager != null) {
-                final GraphChangeHandler handler = new CayenneContextChannelEventProcessor(
-                        stateRecorder,
-                        graphManager);
-
-                GraphEventListener listener = new GraphEventListener() {
-
-                    public void graphChanged(GraphEvent event) {
-                        event.getDiff().apply(handler);
-                    }
-                };
-                newManager.addListener(
-                        listener,
-                        "graphChanged",
-                        GraphEvent.class,
-                        OPPChannel.REMOTE_GRAPH_CHANGE_SUBJECT,
-                        channel);
-
-                this.externalEventsHandler = listener;
-            }
-
-            // reset EventManager of the OperationRecorder
-            if (!graphEventsEnabled || newManager == null) {
-                changeRecorder.setEventsEnabled(false);
-            }
-            else {
-                changeRecorder.initForEvents(
-                        newManager,
-                        ObjectContext.GRAPH_CHANGE_SUBJECT,
-                        this);
-            }
-        }
+        this.channel = channel;
     }
 
     /**
      * Returns true if this context posts events when its managed objects are modified.
      */
-    public boolean isGraphEventsEnabled() {
-        return graphEventsEnabled;
+    public boolean isChangeEventsEnabled() {
+        return graphManager.changeEventsEnabled;
+    }
+
+    /**
+     * Returns true if this context posts synchronization events.
+     */
+    public boolean isSyncEventsEnabled() {
+        return graphManager.syncEventsEnabled;
     }
 
     /**
@@ -241,9 +179,9 @@ public class CayenneContext implements ObjectContext {
     public GraphManager getGraphManager() {
         return graphManager;
     }
-
-    public void setGraphManager(GraphManager graphManager) {
-        this.graphManager = graphManager;
+    
+    ObjectContextGraphManager internalGraphManager() {
+        return graphManager;
     }
 
     /**
@@ -258,13 +196,12 @@ public class CayenneContext implements ObjectContext {
     GraphDiff doCommitChanges() {
 
         GraphDiff commitDiff = null;
-        if (!changeRecorder.isEmpty()) {
+        if (graphManager.hasChanges()) {
 
             graphManager.graphCommitStarted();
 
             try {
-                commitDiff = channel
-                        .onCommit(new CommitMessage(changeRecorder.getDiffs()));
+                commitDiff = channel.onCommit(new CommitMessage(graphManager.getDiffs()));
             }
             catch (Throwable th) {
                 graphManager.graphCommitAborted();
@@ -277,23 +214,14 @@ public class CayenneContext implements ObjectContext {
                 }
             }
 
-            graphManager.graphCommitted();
-
-            // TODO (Andrus, 10/08): shouldn't channel intercept this message and send
-            // event on its own?
-            if (channel != null && channel.getEventManager() != null) {
-                channel.getEventManager().postEvent(
-                        new GraphEvent(channel, commitDiff),
-                        OPPChannel.REMOTE_GRAPH_CHANGE_SUBJECT);
-            }
+            graphManager.graphCommitted(commitDiff);
         }
 
         return commitDiff;
     }
 
     public void rollbackChanges() {
-        if (!changeRecorder.isEmpty()) {
-            changeRecorder.getDiffs().undo(new NullChangeHandler());
+        if (graphManager.hasChanges()) {
             graphManager.graphRolledback();
         }
     }
@@ -436,22 +364,22 @@ public class CayenneContext implements ObjectContext {
 
     public Collection uncommittedObjects() {
         // TODO: sync on graphManager?
-        return stateRecorder.dirtyNodes();
+        return graphManager.dirtyNodes();
     }
 
     public Collection deletedObjects() {
         // TODO: sync on graphManager?
-        return stateRecorder.dirtyNodes(PersistenceState.DELETED);
+        return graphManager.dirtyNodes(PersistenceState.DELETED);
     }
 
     public Collection modifiedObjects() {
         // TODO: sync on graphManager?
-        return stateRecorder.dirtyNodes(PersistenceState.MODIFIED);
+        return graphManager.dirtyNodes(PersistenceState.MODIFIED);
     }
 
     public Collection newObjects() {
         // TODO: sync on graphManager?
-        return stateRecorder.dirtyNodes(PersistenceState.NEW);
+        return graphManager.dirtyNodes(PersistenceState.NEW);
     }
 
     /**
@@ -467,42 +395,5 @@ public class CayenneContext implements ObjectContext {
         ObjEntity entity = getEntityResolver().lookupObjEntity(
                 object.getGlobalID().getEntityName());
         return entity.getClassDescriptor();
-    }
-
-    class NullChangeHandler implements GraphChangeHandler {
-
-        public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
-        }
-
-        public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
-        }
-
-        public void nodeCreated(Object nodeId) {
-        }
-
-        public void nodeIdChanged(Object nodeId, Object newId) {
-        }
-
-        public void nodePropertyChanged(
-                Object nodeId,
-                String property,
-                Object oldValue,
-                Object newValue) {
-        }
-
-        public void nodeRemoved(Object nodeId) {
-        }
-
-        public void graphCommitAborted() {
-        }
-
-        public void graphCommitStarted() {
-        }
-
-        public void graphCommitted() {
-        }
-
-        public void graphRolledback() {
-        }
     }
 }

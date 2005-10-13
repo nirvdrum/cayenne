@@ -61,13 +61,13 @@ import org.objectstyle.cayenne.util.Util;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class NodePropertyChangeOperation extends NodeDiff {
+public class NodePropertyChangeOperation extends NodeDiff {
 
-    String property;
-    Object oldValue;
-    Object newValue;
+    protected String property;
+    protected Object oldValue;
+    protected Object newValue;
 
-    NodePropertyChangeOperation(Object nodeId, String property, Object oldValue,
+    public NodePropertyChangeOperation(Object nodeId, String property, Object oldValue,
             Object newValue) {
 
         super(nodeId);

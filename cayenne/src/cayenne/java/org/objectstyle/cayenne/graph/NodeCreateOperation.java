@@ -59,9 +59,9 @@ package org.objectstyle.cayenne.graph;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class NodeCreateOperation extends NodeDiff {
+public class NodeCreateOperation extends NodeDiff {
 
-    NodeCreateOperation(Object nodeId) {
+    public NodeCreateOperation(Object nodeId) {
         super(nodeId);
     }
 

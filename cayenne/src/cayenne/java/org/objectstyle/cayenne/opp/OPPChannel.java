@@ -73,6 +73,24 @@ import org.objectstyle.cayenne.map.EntityResolver;
  */
 public interface OPPChannel {
 
+    public static final EventSubject GRAPH_CHANGED_SUBJECT = EventSubject.getSubject(
+            OPPChannel.class,
+            "graphChanged");
+
+    public static final EventSubject GRAPH_COMMIT_STARTED_SUBJECT = EventSubject
+            .getSubject(OPPChannel.class, "graphCommitStarted");
+
+    public static final EventSubject GRAPH_COMMITTED_SUBJECT = EventSubject.getSubject(
+            OPPChannel.class,
+            "graphCommitted");
+
+    public static final EventSubject GRAPH_COMMIT_ABORTED_SUBJECT = EventSubject
+            .getSubject(OPPChannel.class, "graphCommitAborted");
+
+    public static final EventSubject GRAPH_ROLLEDBACK_SUBJECT = EventSubject.getSubject(
+            OPPChannel.class,
+            "graphRolledback");
+
     /**
      * An EventManager subject used by OPPChannel to notify listeners of the graph object
      * changes on the remote end of the channel.
