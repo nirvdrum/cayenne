@@ -77,8 +77,7 @@ public class ObjectContextUtils {
     };
 
     static final EventSubject[] CHANNEL_SUBJECTS = new EventSubject[] {
-            OPPChannel.GRAPH_CHANGED_SUBJECT, OPPChannel.GRAPH_COMMIT_ABORTED_SUBJECT,
-            OPPChannel.GRAPH_COMMIT_STARTED_SUBJECT, OPPChannel.GRAPH_COMMITTED_SUBJECT,
+            OPPChannel.GRAPH_CHANGED_SUBJECT, OPPChannel.GRAPH_COMMITTED_SUBJECT,
             OPPChannel.GRAPH_ROLLEDBACK_SUBJECT
     };
 

@@ -64,7 +64,9 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
 import org.objectstyle.cayenne.opp.GenericQueryMessage;
@@ -84,13 +86,25 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class ClientServerChannel implements OPPChannel {
 
     protected ObjectDataContext serverContext;
+    protected boolean changeEventsEnabled;
+    protected boolean lifecycleEventsEnabled;
 
     public ClientServerChannel(DataDomain domain) {
-        this(new ObjectDataContext(domain));
+        this(domain, false, false);
     }
 
-    ClientServerChannel(ObjectDataContext serverContext) {
+    public ClientServerChannel(DataDomain domain, boolean changeEventsEnabled,
+            boolean lifecycleEventsEnabled) {
+
+        this(new ObjectDataContext(domain), changeEventsEnabled, lifecycleEventsEnabled);
+    }
+
+    ClientServerChannel(ObjectDataContext serverContext, boolean changeEventsEnabled,
+            boolean lifecycleEventsEnabled) {
+
         this.serverContext = serverContext;
+        this.changeEventsEnabled = changeEventsEnabled;
+        this.lifecycleEventsEnabled = lifecycleEventsEnabled;
     }
 
     public EventManager getEventManager() {
@@ -116,7 +130,21 @@ public class ClientServerChannel implements OPPChannel {
     }
 
     GraphDiff onRollback(GraphDiff childDiff) {
-        throw new CayenneRuntimeException("Unsupported yet");
+
+        if (serverContext.hasChanges()) {
+            serverContext.rollbackChanges();
+
+            if (lifecycleEventsEnabled) {
+                EventManager eventManager = getEventManager();
+                if (eventManager != null) {
+                    eventManager.postEvent(
+                            new GraphEvent(this, null),
+                            OPPChannel.GRAPH_ROLLEDBACK_SUBJECT);
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -124,6 +152,17 @@ public class ClientServerChannel implements OPPChannel {
      */
     GraphDiff onFlush(GraphDiff childDiff) {
         childDiff.apply(new ClientToServerDiffConverter(serverContext));
+
+        if (lifecycleEventsEnabled) {
+            EventManager eventManager = getEventManager();
+
+            if (eventManager != null) {
+                eventManager.postEvent(
+                        new GraphEvent(this, childDiff),
+                        OPPChannel.GRAPH_CHANGED_SUBJECT);
+            }
+        }
+
         return null;
     }
 
@@ -134,16 +173,34 @@ public class ClientServerChannel implements OPPChannel {
         childDiff.apply(new ClientToServerDiffConverter(serverContext));
         GraphDiff diff = serverContext.doCommitChanges();
 
+        GraphDiff returnClientDiff;
+
         if (diff.isNoop()) {
-            return diff;
+            returnClientDiff = diff;
         }
         else {
             // create client diff
             ServerToClientDiffConverter clientConverter = new ServerToClientDiffConverter(
                     serverContext.getEntityResolver());
             diff.apply(clientConverter);
-            return clientConverter.getClientDiff();
+            returnClientDiff = clientConverter.getClientDiff();
         }
+
+        if (lifecycleEventsEnabled) {
+            EventManager eventManager = getEventManager();
+
+            if (eventManager != null) {
+                CompoundDiff notification = new CompoundDiff();
+                notification.add(childDiff);
+                notification.add(returnClientDiff);
+
+                eventManager.postEvent(
+                        new GraphEvent(this, notification),
+                        OPPChannel.GRAPH_COMMITTED_SUBJECT);
+            }
+        }
+
+        return returnClientDiff;
     }
 
     public QueryResponse onGenericQuery(GenericQueryMessage message) {

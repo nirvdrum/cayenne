@@ -53,67 +53,86 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.opp;
+package org.objectstyle.cayenne.service;
 
-import java.util.List;
-
-import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.event.EventManager;
-import org.objectstyle.cayenne.event.EventSubject;
+import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.graph.GraphEvent;
+import org.objectstyle.cayenne.graph.NodeCreateOperation;
+import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.opp.SyncMessage;
+import org.objectstyle.cayenne.unit.AccessStack;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestResources;
 
-/**
- * A two-way communication channel connecting a parent persistence engine and its
- * "children". In other words OPPChannel is an abstraction of an access stack used by
- * ObjectContexts.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public interface OPPChannel {
+public class ClientServerChannelEventsTst extends CayenneTestCase {
 
-    public static final EventSubject GRAPH_CHANGED_SUBJECT = EventSubject.getSubject(
-            OPPChannel.class,
-            "graphChanged");
+    protected AccessStack buildAccessStack() {
+        return CayenneTestResources
+                .getResources()
+                .getAccessStack(MULTI_TIER_ACCESS_STACK);
+    }
 
-    public static final EventSubject GRAPH_COMMITTED_SUBJECT = EventSubject.getSubject(
-            OPPChannel.class,
-            "graphCommitted");
+    public void testCommitEventSubject() {
+        CommitListener listener = new CommitListener();
 
-    public static final EventSubject GRAPH_ROLLEDBACK_SUBJECT = EventSubject.getSubject(
-            OPPChannel.class,
-            "graphRolledback");
+        ClientServerChannel channel = new ClientServerChannel(getDomain(), true, true);
 
-    /**
-     * Returns an EventManager that associated with this channel. Channel may return null
-     * if EventManager is not available for any reason.
-     */
-    EventManager getEventManager();
+        channel.getEventManager().addListener(
+                listener,
+                "notificationPosted",
+                GraphEvent.class,
+                OPPChannel.GRAPH_COMMITTED_SUBJECT,
+                channel);
 
-    /**
-     * Processes BootstrapMessage returning EntityResolver with client ORM information.
-     */
-    EntityResolver onBootstrap(BootstrapMessage message);
+        GraphDiff diff = new NodeCreateOperation(new GlobalID("MtTable1"));
+        channel.onSync(new SyncMessage(SyncMessage.COMMIT_TYPE, diff));
 
-    /**
-     * Processes SelectMessage returning a result as list.
-     */
-    List onSelectQuery(SelectMessage message);
+        assertTrue(listener.notificationPosted);
+    }
 
-    /**
-     * Processes an UpdateMessage returning update counts.
-     */
-    int[] onUpdateQuery(UpdateMessage message);
+    public void testFlushEventSubject() {
+        CommitListener listener = new CommitListener();
 
-    /**
-     * Processes a generic query message that can contain both updates and selects.
-     */
-    QueryResponse onGenericQuery(GenericQueryMessage message);
+        ClientServerChannel channel = new ClientServerChannel(getDomain(), true, true);
 
-    /**
-     * Processes SyncMessage returning a GraphDiff that describes changes to objects made
-     * on the receiving end as a result of sync operation.
-     */
-    GraphDiff onSync(SyncMessage message);
+        channel.getEventManager().addListener(
+                listener,
+                "notificationPosted",
+                GraphEvent.class,
+                OPPChannel.GRAPH_CHANGED_SUBJECT,
+                channel);
+
+        GraphDiff diff = new NodeCreateOperation(new GlobalID("MtTable1"));
+        channel.onSync(new SyncMessage(SyncMessage.FLUSH_TYPE, diff));
+        assertTrue(listener.notificationPosted);
+    }
+
+    public void testRollbackEventSubject() {
+        CommitListener listener = new CommitListener();
+
+        ClientServerChannel channel = new ClientServerChannel(getDomain(), true, true);
+
+        GraphDiff diff = new NodeCreateOperation(new GlobalID("MtTable1"));
+        channel.onSync(new SyncMessage(SyncMessage.FLUSH_TYPE, diff));
+
+        channel.getEventManager().addListener(
+                listener,
+                "notificationPosted",
+                GraphEvent.class,
+                OPPChannel.GRAPH_ROLLEDBACK_SUBJECT,
+                channel);
+
+        channel.onSync(new SyncMessage(SyncMessage.ROLLBACK_TYPE, null));
+        assertTrue(listener.notificationPosted);
+    }
+
+    class CommitListener {
+
+        boolean notificationPosted;
+
+        void notificationPosted(GraphEvent e) {
+            notificationPosted = true;
+        }
+    }
 }

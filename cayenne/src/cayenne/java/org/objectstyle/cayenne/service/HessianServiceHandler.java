@@ -131,7 +131,7 @@ public class HessianServiceHandler implements HessianService, Service {
         ObjectDataContext context = new ObjectDataContext(domain);
 
         synchronized (commandHandlers) {
-            commandHandlers.put(id, new ClientServerChannel(context));
+            commandHandlers.put(id, new ClientServerChannel(context, false, false));
         }
 
         logObj.debug("CayenneHessianService - established client session: " + id);

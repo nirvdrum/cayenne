@@ -210,7 +210,7 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
      * adapter with Hessian serialization.
      */
     protected CayenneContext buildContext() {
-        OPPChannel handler = new ClientServerChannel(new ObjectDataContext(getDomain()));
+        OPPChannel handler = new ClientServerChannel(getDomain());
         LocalConnector connector = new LocalConnector(
                 handler,
                 LocalConnector.HESSIAN_SERIALIZATION);
