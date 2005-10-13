@@ -126,7 +126,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
         ObjectDataContext context = new ObjectDataContext(parent, getDomain()
                 .getEntityResolver(), new MockDataRowStore());
 
-        ClientServerChannel channel = new ClientServerChannel(context, false, false);
+        ClientServerChannel channel = new ClientServerChannel(context, false);
         channel.onSync(new SyncMessage(SyncMessage.COMMIT_TYPE, new MockGraphDiff()));
 
         // no changes in context, so no commit should be executed
@@ -148,7 +148,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 new MockDataRowStore());
 
         UpdateMessage message = new UpdateMessage(new MockQuery());
-        new ClientServerChannel(context, false, false).onUpdateQuery(message);
+        new ClientServerChannel(context, false).onUpdateQuery(message);
         assertTrue(parent.isPerformQuery());
     }
 
@@ -169,8 +169,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 .getEntityResolver(), new MockDataRowStore());
 
         SelectMessage message = new SelectMessage(new MockGenericSelectQuery(true));
-        List results = new ClientServerChannel(context, false, false)
-                .onSelectQuery(message);
+        List results = new ClientServerChannel(context, false).onSelectQuery(message);
         assertTrue(parent.isPerformQuery());
 
         assertNotNull(results);
@@ -209,8 +208,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 .getEntityResolver(), new MockDataRowStore());
 
         SelectMessage message = new SelectMessage(new MockGenericSelectQuery(true));
-        List results = new ClientServerChannel(context, false, false)
-                .onSelectQuery(message);
+        List results = new ClientServerChannel(context, false).onSelectQuery(message);
 
         assertNotNull(results);
         assertEquals(1, results.size());
@@ -244,8 +242,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 .getEntityResolver(), new MockDataRowStore());
 
         SelectMessage message = new SelectMessage(new MockGenericSelectQuery(true));
-        List results = new ClientServerChannel(context, false, false)
-                .onSelectQuery(message);
+        List results = new ClientServerChannel(context, false).onSelectQuery(message);
 
         assertNotNull(results);
         assertEquals(1, results.size());
@@ -268,8 +265,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 new MockDataRowStore());
 
         GenericQueryMessage message = new GenericQueryMessage(new MockQuery());
-        new ClientServerChannel(context, false, false).onGenericQuery(message);
+        new ClientServerChannel(context, false).onGenericQuery(message);
         assertTrue(parent.isPerformQuery());
     }
-
 }

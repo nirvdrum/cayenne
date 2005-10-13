@@ -86,24 +86,19 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class ClientServerChannel implements OPPChannel {
 
     protected ObjectDataContext serverContext;
-    protected boolean changeEventsEnabled;
     protected boolean lifecycleEventsEnabled;
 
     public ClientServerChannel(DataDomain domain) {
-        this(domain, false, false);
+        this(domain, false);
     }
 
-    public ClientServerChannel(DataDomain domain, boolean changeEventsEnabled,
-            boolean lifecycleEventsEnabled) {
-
-        this(new ObjectDataContext(domain), changeEventsEnabled, lifecycleEventsEnabled);
+    public ClientServerChannel(DataDomain domain, boolean lifecycleEventsEnabled) {
+        this(new ObjectDataContext(domain), lifecycleEventsEnabled);
     }
 
-    ClientServerChannel(ObjectDataContext serverContext, boolean changeEventsEnabled,
-            boolean lifecycleEventsEnabled) {
+    ClientServerChannel(ObjectDataContext serverContext, boolean lifecycleEventsEnabled) {
 
         this.serverContext = serverContext;
-        this.changeEventsEnabled = changeEventsEnabled;
         this.lifecycleEventsEnabled = lifecycleEventsEnabled;
     }
 
@@ -111,6 +106,14 @@ public class ClientServerChannel implements OPPChannel {
         return serverContext != null
                 ? serverContext.getObjectStore().getEventManager()
                 : null;
+    }
+
+    public boolean isLifecycleEventsEnabled() {
+        return lifecycleEventsEnabled;
+    }
+
+    public void setLifecycleEventsEnabled(boolean lifecycleEventsEnabled) {
+        this.lifecycleEventsEnabled = lifecycleEventsEnabled;
     }
 
     public GraphDiff onSync(SyncMessage message) {

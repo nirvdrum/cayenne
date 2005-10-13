@@ -76,7 +76,7 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
     public void testCommitEventSubject() {
         CommitListener listener = new CommitListener();
 
-        ClientServerChannel channel = new ClientServerChannel(getDomain(), true, true);
+        ClientServerChannel channel = new ClientServerChannel(getDomain(), true);
 
         channel.getEventManager().addListener(
                 listener,
@@ -94,7 +94,7 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
     public void testFlushEventSubject() {
         CommitListener listener = new CommitListener();
 
-        ClientServerChannel channel = new ClientServerChannel(getDomain(), true, true);
+        ClientServerChannel channel = new ClientServerChannel(getDomain(), true);
 
         channel.getEventManager().addListener(
                 listener,
@@ -111,7 +111,7 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
     public void testRollbackEventSubject() {
         CommitListener listener = new CommitListener();
 
-        ClientServerChannel channel = new ClientServerChannel(getDomain(), true, true);
+        ClientServerChannel channel = new ClientServerChannel(getDomain(), true);
 
         GraphDiff diff = new NodeCreateOperation(new GlobalID("MtTable1"));
         channel.onSync(new SyncMessage(SyncMessage.FLUSH_TYPE, diff));
