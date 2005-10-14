@@ -125,6 +125,7 @@
 
 	<target name="compile" depends="nosubproj,prepare">
 		<javac	srcdir="src/${subproj}/java" 
+			optimize="on"
 				destdir="build/${subproj}/classes" 
 				debug="on" 
 				source="1.4"
