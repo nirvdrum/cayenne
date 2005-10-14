@@ -59,7 +59,7 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 public class ClassGeneratorSingleTemplateTst extends ClassGeneratorTestBase {
 
     protected ClassGenerator createGenerator() throws Exception {
-        return new ClassGenerator(MapClassGenerator.SINGLE_CLASS_TEMPLATE, MapClassGenerator.DEFAULT_VERSION);
+        return new ClassGenerator(MapClassGenerator.SINGLE_CLASS_TEMPLATE, MapClassGenerator.DEFAULT_VERSION, (Class)null);
     }
 
     public void testNoImports() throws Exception {

@@ -121,7 +121,8 @@ public abstract class MapClassGenerator {
     protected VPPConfig vppConfig;
     protected String mode = MODE_ENTITY;
     protected boolean client;
-
+    protected Class classForClassLoader;
+    
     public MapClassGenerator() {}
 
     public MapClassGenerator(DataMap dataMap) {
@@ -254,8 +255,8 @@ public abstract class MapClassGenerator {
         String superPrefix)
         throws Exception {
 
-        ClassGenerator mainGenSetup = new ClassGenerator(classTemplate, versionString);
-        ClassGenerator superGenSetup = new ClassGenerator(superTemplate, versionString);
+        ClassGenerator mainGenSetup = new ClassGenerator(classTemplate, versionString, classForClassLoader);
+        ClassGenerator superGenSetup = new ClassGenerator(superTemplate, versionString, classForClassLoader);
 
         ClassGenerationInfo mainGen = mainGenSetup.getClassGenerationInfo();
         ClassGenerationInfo superGen = superGenSetup.getClassGenerationInfo();
@@ -318,11 +319,11 @@ public abstract class MapClassGenerator {
         ClassGenerator mainGenSetup = new ClassGenerator(
                 classTemplate,
                 ClassGenerator.VERSION_1_2,
-                vppConfig);
+                vppConfig, classForClassLoader);
         ClassGenerator superGenSetup = new ClassGenerator(
                 superTemplate,
                 ClassGenerator.VERSION_1_2,
-                vppConfig);
+                vppConfig, classForClassLoader);
 
         // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
@@ -405,11 +406,11 @@ public abstract class MapClassGenerator {
         ClassGenerator mainGenSetup = new ClassGenerator(
                 classTemplate,
                 versionString,
-                vppConfig);
+                vppConfig, classForClassLoader);
         ClassGenerator superGenSetup = new ClassGenerator(
                 superTemplate,
                 versionString,
-                vppConfig);
+                vppConfig, classForClassLoader);
 
         // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
@@ -481,7 +482,7 @@ public abstract class MapClassGenerator {
      * each ObjEntity in the map. 
      */
     private void generateSingleClasses_1_1(String classTemplate) throws Exception {
-        ClassGenerator gen = new ClassGenerator(classTemplate, versionString);
+        ClassGenerator gen = new ClassGenerator(classTemplate, versionString, classForClassLoader);
 
         // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
@@ -520,7 +521,7 @@ public abstract class MapClassGenerator {
      * each ObjEntity in the map. 
      */
     private void generateSingleClasses_1_2(String classTemplate, String superPrefix) throws Exception {
-        ClassGenerator gen = new ClassGenerator(classTemplate, versionString, vppConfig);
+        ClassGenerator gen = new ClassGenerator(classTemplate, versionString, vppConfig, classForClassLoader);
 
         // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
@@ -733,4 +734,12 @@ public abstract class MapClassGenerator {
         }
         this.mode = mode;
     }
+
+	/**
+	 * @param classForClassLoader to use when initializing VelocityEngine instance.  Can be null to use the ClassLoader of the ClassGenerator class.
+	 * @since 1.2
+	 */
+	public void setClassForClassLoader(Class classForClassLoader) {
+		this.classForClassLoader = classForClassLoader;
+	}
 }

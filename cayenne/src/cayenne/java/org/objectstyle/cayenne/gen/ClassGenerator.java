@@ -61,7 +61,7 @@ import java.util.Properties;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
+import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.log.NullLogSystem;
@@ -90,28 +90,97 @@ public class ClassGenerator {
     protected Context velCtxt;
     protected ClassGenerationInfo classGenerationInfo;  // only used for VERSION_1_1
     
-    private static boolean initDone;
-
     /**
-     * Configures ClassGenerationInfo to load class templates using ClassLoader of a
-     * specified class. It is a responsibility of a class caller to invoke this
-     * method before ClassGenerationInfo is used.
-     * 
-     * <p>
-     * This method affects Velocity configuration when called for the first
-     * time, since Velocity.init() is done only once. Subsequent calls have no
-     * effect on ClassLoader behavior.
-     * </p>
+     * @param cl
+     * @deprecated Since 1.2 use ClassGenerator constructor with classForClassLoader parameter
      */
+    private static boolean deprecatedInitDone;
+    private static Class deprecatedClassForClassLoader;
     public synchronized static final void bootstrapVelocity(Class cl) {
-        if (initDone) {
+        if (deprecatedInitDone) {
             return;
         }
+        deprecatedClassForClassLoader = cl;
+    }
+    /**
+     * Creates a new ClassGenerationInfo that uses a specified Velocity template.
+     * @deprecated Since 1.2 use ClassGenerator(String template, String versionString) instead.
+     */
+    public ClassGenerator(String template) throws Exception {
+        this(template, "1.1", (Class)null);
+    }
 
-        // TODO: use an internal RuntimeInstance like SQLTemplateProcessor does...
+    /**
+     * Creates a new ClassGenerationInfo that uses a specified Velocity template.
+	 * @since 1.2
+     * @param template to use
+     * @param versionString of cgen
+     * @param classForClassLoader for initializing VelocityEngine.  Can be null to use the ClassLoader of this class
+     * @throws Exception
+     */
+    public ClassGenerator(String template, String versionString, Class classForClassLoader) throws Exception {
+        this.versionString = versionString;
         
-        try {
-            String classLoaderUrl = ResourceLocator.classBaseUrl(cl);
+        if (false == VERSION_1_1.equals(versionString)) {
+            throw new IllegalStateException("Illegal Version in generateClass(Writer,ObjEntity): " + versionString);
+        }
+
+        velCtxt = new VelocityContext();
+        classGenerationInfo = new ClassGenerationInfo();
+        velCtxt.put("classGen", classGenerationInfo);
+
+        initializeClassTemplate(classForClassLoader, template);
+    }
+
+    /**
+     * Creates a new ClassGenerationInfo that uses a specified Velocity template.
+	 * @since 1.2
+     * @param template to use
+     * @param versionString of cgen
+     * @param vppConfig for configuring VelocityEngine and VelocityContext
+     * @param classForClassLoader for initializing VelocityEngine.  Can be null to use the ClassLoader of this class
+     * @throws Exception
+     */
+    public ClassGenerator(String template, String versionString, VPPConfig vppConfig, Class classForClassLoader)
+            throws Exception {
+        
+        this.versionString = versionString;
+
+        if (false == VERSION_1_2.equals(versionString)) {
+            throw new IllegalStateException(
+                    "Illegal Version in generateClass(Writer,ObjEntity): "
+                            + versionString);
+        }
+
+        if (vppConfig != null) {
+            velCtxt = vppConfig.getVelocityContext();
+        }
+        else {
+            velCtxt = new VelocityContext();
+        }
+
+        initializeClassTemplate(classForClassLoader, template);
+    }
+
+	/**
+	 * Sets up VelocityEngine properties, creates a VelocityEngine instance, and fetches a template using the VelocityEngine instance.
+	 * @since 1.2
+	 */
+	private void initializeClassTemplate(Class classForClassLoader, String template) throws CayenneRuntimeException {
+		VelocityEngine velocityEngine = new VelocityEngine();
+		try {
+			Class classForClassLoaderToUse = classForClassLoader;
+			if (null != deprecatedClassForClassLoader) {
+				classForClassLoaderToUse = deprecatedClassForClassLoader;
+			}
+			else if (null == classForClassLoader) {
+				classForClassLoaderToUse = this.getClass();
+			}
+			else {
+				classForClassLoaderToUse = classForClassLoader;
+			}
+				
+            String classLoaderUrl = ResourceLocator.classBaseUrl(classForClassLoaderToUse);
 
             // use ClasspathResourceLoader for velocity templates lookup
             // if Cayenne URL is not null, load resource from this URL
@@ -149,71 +218,16 @@ public class ClassGenerator {
             loaderProp = (loaderProp != null) ? loaderProp + ",class" : "class";
             props.put("resource.loader", loaderProp);
 
-            Velocity.init(props);
-        }
-        catch (Exception ex) {
+            velocityEngine.init(props);
+		} catch (Exception ex) {
             throw new CayenneRuntimeException("Can't initialize VTL", ex);
-        }
-        finally {
-            initDone = true;
-        }
-    }
-
-    /**
-     * Creates a new ClassGenerationInfo that uses a specified Velocity template.
-     * @deprecated Use ClassGenerator(String template, String versionString) instead.
-     */
-    public ClassGenerator(String template) throws Exception {
-        this(template, "1.1");
-    }
-
-    /**
-     * Creates a new ClassGenerationInfo that uses a specified Velocity template.
-     */
-    public ClassGenerator(String template, String versionString) throws Exception {
-        if (!initDone) {
-            bootstrapVelocity(this.getClass());
-        }
-        
-        this.versionString = versionString;
-        
-        if (false == VERSION_1_1.equals(versionString)) {
-            throw new IllegalStateException("Illegal Version in generateClass(Writer,ObjEntity): " + versionString);
-        }
-
-        velCtxt = new VelocityContext();
-        classGenerationInfo = new ClassGenerationInfo();
-        velCtxt.put("classGen", classGenerationInfo);
-        classTemplate = Velocity.getTemplate(template);
-    }
-
-    /**
-     * Creates a new ClassGenerationInfo that uses a specified Velocity template.
-     */
-    public ClassGenerator(String template, String versionString, VPPConfig vppConfig)
-            throws Exception {
-        
-        if (!initDone) {
-            bootstrapVelocity(this.getClass());
-        }
-
-        this.versionString = versionString;
-
-        if (false == VERSION_1_2.equals(versionString)) {
-            throw new IllegalStateException(
-                    "Illegal Version in generateClass(Writer,ObjEntity): "
-                            + versionString);
-        }
-
-        if (vppConfig != null) {
-            velCtxt = vppConfig.getVelocityContext();
-        }
-        else {
-            velCtxt = new VelocityContext();
-        }
-
-        classTemplate = Velocity.getTemplate(template);
-    }
+		}
+		try {
+			classTemplate = velocityEngine.getTemplate(template);
+		} catch (Exception ex) {
+            throw new CayenneRuntimeException("Can't create template", ex);
+		}
+	}
 
     /**
      * Generates Java code for the ObjEntity. Output is written to the provided
@@ -471,5 +485,5 @@ public class ClassGenerator {
     public String getSuperClassName()
     {
         return classGenerationInfo.getSuperClassName();
-    }    
+    }
 }

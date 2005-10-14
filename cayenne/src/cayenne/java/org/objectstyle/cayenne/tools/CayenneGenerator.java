@@ -90,8 +90,8 @@ public class CayenneGenerator extends CayenneTask {
     protected DefaultClassGenerator generator;
 
     public CayenneGenerator() {
-        bootstrapVelocity();
         generator = createGenerator();
+        generator.setClassForClassLoader(this.getClass());
     }
 
     /**
@@ -101,11 +101,6 @@ public class CayenneGenerator extends CayenneTask {
         AntClassGenerator gen = new AntClassGenerator();
         gen.setParentTask(this);
         return gen;
-    }
-
-    /** Initialize Velocity with class loader of the right class. */
-    protected void bootstrapVelocity() {
-        ClassGenerator.bootstrapVelocity(this.getClass());
     }
 
     /**
