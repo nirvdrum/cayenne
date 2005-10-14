@@ -61,13 +61,12 @@ import java.util.EventObject;
 import java.util.Map;
 
 /**
- * Common superclass for events passed from the EventManager to Listeners;
- * encapsulates optional event information.
+ * Common superclass for events passed from the EventManager to Listeners; encapsulates
+ * optional event information.
  * 
  * @author Dirk Olmes
  * @author Holger Hoffstaette
  */
-
 public class CayenneEvent extends EventObject {
 
     protected Map info;
@@ -82,16 +81,19 @@ public class CayenneEvent extends EventObject {
     }
 
     /**
+     * Creates CayenneEvent with possibly different event source and poster. This may be
+     * the case when an event is resent by listener.
+     * 
      * @since 1.1
      */
     public CayenneEvent(Object source, Object postedBy, Map info) {
         super(source);
         this.postedBy = postedBy;
-        this.info = (info != null ? info : Collections.EMPTY_MAP);
+        this.info = info;
     }
 
     public Map getInfo() {
-        return info;
+        return info != null ? info : Collections.EMPTY_MAP;
     }
 
     /**
@@ -100,10 +102,10 @@ public class CayenneEvent extends EventObject {
     void setSource(Object source) {
         super.source = source;
     }
-    
+
     /**
-     * Returns an object that posted this event. It may be different 
-     * from event source, if event is reposted multiple times.
+     * Returns an object that posted this event. It may be different from event source, if
+     * event is reposted multiple times.
      */
     public Object getPostedBy() {
         return postedBy;

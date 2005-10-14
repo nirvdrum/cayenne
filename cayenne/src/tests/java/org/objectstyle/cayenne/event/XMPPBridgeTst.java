@@ -53,38 +53,33 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.graph;
+package org.objectstyle.cayenne.event;
 
-import org.objectstyle.cayenne.event.CayenneEvent;
+import java.util.HashMap;
+import java.util.Map;
+
+import junit.framework.TestCase;
 
 /**
- * An event indicating a change in the object graph. A change is expressed as a GraphDiff,
- * so the easiest way to process the event is the following:
- * 
- * <pre>
- *            GraphChangeHandler handler = ..;
- *            event.getDiff().apply(handler);
- * </pre>
- * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-public class GraphEvent extends CayenneEvent {
+public class XMPPBridgeTst extends TestCase {
 
-    static final int COMMIT_STARTED = 1;
-    static final int COMMITTED = 2;
-    static final int COMMIT_ABORTED = 3;
-    static final int ROLLEDBACK = 4;
+    public void testEventSerialization() throws Exception {
+        Map info = new HashMap();
+        info.put("a", "b");
+        CayenneEvent e = new CayenneEvent(this, this, info);
 
-    protected int type;
-    protected GraphDiff diff;
+        String string = XMPPBridge.serializeToString(e);
+        assertNotNull(string);
 
-    public GraphEvent(Object source, GraphDiff diff) {
-        super(source);
-        this.diff = diff;
-    }
+        Object copy = XMPPBridge.deserializeFromString(string);
+        assertNotNull(copy);
+        assertTrue(copy instanceof CayenneEvent);
 
-    public GraphDiff getDiff() {
-        return diff;
+        CayenneEvent e2 = (CayenneEvent) copy;
+        assertEquals(info, e2.getInfo());
+        assertNull(e2.getPostedBy());
+        assertNull(e2.getSource());
     }
 }

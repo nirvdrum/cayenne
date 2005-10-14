@@ -55,11 +55,19 @@
  */
 package org.objectstyle.cayenne.event;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.jivesoftware.smack.GroupChat;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.util.Base64Codec;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * An EventBridge implementation based on XMPP protocol and Smack XMPP client library.
@@ -162,12 +170,55 @@ public class XMPPBridge extends EventBridge {
     }
 
     protected void sendExternalEvent(CayenneEvent localEvent) throws Exception {
-        // TODO:
+        groupChat.sendMessage(serializeToString(localEvent));
     }
 
     class XMPPListener implements PacketListener {
 
         public void processPacket(Packet packet) {
+
+            if (packet instanceof Message) {
+                Message message = (Message) packet;
+                String payload = message.getBody();
+
+                try {
+                    Object event = deserializeFromString(payload);
+                    if (event instanceof CayenneEvent) {
+                        onExternalEvent((CayenneEvent) event);
+                    }
+                }
+                catch (Exception ex) {
+                    // ignore for now... need to add logging.
+                }
+            }
         }
+    }
+
+    /**
+     * Decodes the String (assuming it is using Base64 encoding), and then deserializes
+     * object from the byte array.
+     */
+    static Object deserializeFromString(String string) throws Exception {
+        if (Util.isEmptyString(string)) {
+            return null;
+        }
+
+        byte[] bytes = Base64Codec.decodeBase64(string.getBytes());
+        ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes));
+        Object object = in.readObject();
+        in.close();
+        return object;
+    }
+
+    /**
+     * Serializes object and then encodes it using Base64 encoding.
+     */
+    static String serializeToString(Object object) throws Exception {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        ObjectOutputStream out = new ObjectOutputStream(bytes);
+        out.writeObject(object);
+        out.close();
+
+        return new String(Base64Codec.encodeBase64(bytes.toByteArray()));
     }
 }

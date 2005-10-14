@@ -62,7 +62,7 @@ import java.util.Map;
 import org.objectstyle.cayenne.event.CayenneEvent;
 
 /**
- * Event sent on modification of the DataRowStore. 
+ * Event sent on modification of the DataRowStore.
  * 
  * @since 1.1
  * @author Andrei Adamchik
@@ -75,29 +75,27 @@ public class SnapshotEvent extends CayenneEvent {
     protected Map modifiedDiffs;
     protected Collection indirectlyModifiedIds;
 
-/**
- * @deprecated 
- */
-    public SnapshotEvent(
-            Object source,
-            Object postedBy,
-            Map modifiedDiffs,
-            Collection deletedIds,
-            Collection indirectlyModifiedIds) {
-                
-    	this(source, postedBy, modifiedDiffs, deletedIds, Collections.EMPTY_LIST, indirectlyModifiedIds);
+    /**
+     * @deprecated since 1.2
+     */
+    public SnapshotEvent(Object source, Object postedBy, Map modifiedDiffs,
+            Collection deletedIds, Collection indirectlyModifiedIds) {
+
+        this(
+                source,
+                postedBy,
+                modifiedDiffs,
+                deletedIds,
+                Collections.EMPTY_LIST,
+                indirectlyModifiedIds);
     }
 
-    public SnapshotEvent(
-            Object source,
-            Object postedBy,
-            Map modifiedDiffs,
-            Collection deletedIds,
-            Collection invalidatedIds,
+    public SnapshotEvent(Object source, Object postedBy, Map modifiedDiffs,
+            Collection deletedIds, Collection invalidatedIds,
             Collection indirectlyModifiedIds) {
-                
+
         super(source, postedBy, null);
-        
+
         this.timestamp = System.currentTimeMillis();
         this.modifiedDiffs = modifiedDiffs;
         this.deletedIds = deletedIds;
@@ -108,7 +106,7 @@ public class SnapshotEvent extends CayenneEvent {
     public long getTimestamp() {
         return timestamp;
     }
- 
+
     public Map getModifiedDiffs() {
         return (modifiedDiffs != null) ? modifiedDiffs : Collections.EMPTY_MAP;
     }
@@ -116,13 +114,15 @@ public class SnapshotEvent extends CayenneEvent {
     public Collection getDeletedIds() {
         return (deletedIds != null) ? deletedIds : Collections.EMPTY_LIST;
     }
-    
+
     public Collection getInvalidatedIds() {
         return (invalidatedIds != null) ? invalidatedIds : Collections.EMPTY_LIST;
     }
-    
+
     public Collection getIndirectlyModifiedIds() {
-        return (indirectlyModifiedIds != null) ? indirectlyModifiedIds : Collections.EMPTY_LIST;
+        return (indirectlyModifiedIds != null)
+                ? indirectlyModifiedIds
+                : Collections.EMPTY_LIST;
     }
 
     public String toString() {
@@ -138,15 +138,16 @@ public class SnapshotEvent extends CayenneEvent {
         if (!deleted.isEmpty()) {
             buffer.append(", deleted ").append(deleted.size()).append(" id(s)");
         }
-        
+
         Collection invalidated = getInvalidatedIds();
         if (!invalidated.isEmpty()) {
             buffer.append(", invalidated ").append(invalidated.size()).append(" id(s)");
         }
-        
+
         Collection related = getIndirectlyModifiedIds();
         if (!related.isEmpty()) {
-            buffer.append(", indirectly modified ").append(related.size()).append(" id(s)");
+            buffer.append(", indirectly modified ").append(related.size()).append(
+                    " id(s)");
         }
 
         return buffer.toString();
