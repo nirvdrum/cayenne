@@ -55,49 +55,21 @@
  */
 package org.objectstyle.cayenne.opp;
 
-/**
- * Service interface needed for server-side deployment with HessianConnector. A mapping in
- * web.xml may look like this:
- * 
- * <pre>
- *         &lt;servlet&gt;
- *           &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *           &lt;servlet-class&gt;com.caucho.hessian.server.HessianServlet&lt;/servlet-class&gt;
- *           &lt;!-- Cayenne service API --&gt;
- *           &lt;init-param&gt;
- *             &lt;param-name&gt;api-class&lt;/param-name&gt;
- *             &lt;param-value&gt;org.objectstyle.cayenne.opp.HessianService&lt;/param-value&gt;
- *           &lt;/init-param&gt;
- *           &lt;!-- Cayenne service implementation --&gt;
- *           &lt;init-param&gt;
- *             &lt;param-name&gt;service-class&lt;/param-name&gt;
- *             &lt;param-value&gt;org.objectstyle.cayenne.service.HessianServiceHandler&lt;/param-value&gt;
- *           &lt;/init-param&gt;
- *         &lt;/servlet&gt;
- *         &lt;servlet-mapping&gt;
- *           &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *           &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
- *         &lt;/servlet-mapping&gt;
- * </pre>
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public interface HessianService {
+import junit.framework.TestCase;
 
-    /**
-     * Establishes a dedicated session with Cayenne OPPChannel, returning session id.
-     */
-    HessianSessionDescriptor establishSession();
+public class HessianSessionDescriptorTst extends TestCase {
 
-    /**
-     * Creates a new session with the specified or joins an existing one. This method is
-     * used to bootstrap collaborating clients of a single "group chat".
-     */
-    HessianSessionDescriptor establishSharedSession(String name);
-
-    /**
-     * Processes message on a remote server, returning the result of such processing.
-     */
-    Object processMessage(String sessionId, OPPMessage message) throws Throwable;
+    public void testConstructor1() {
+        HessianSessionDescriptor descriptor = new HessianSessionDescriptor("abc");
+        assertEquals("abc", descriptor.getSessionId());
+        assertFalse(descriptor.isListeningForServerEvents());
+        assertFalse(descriptor.isServerEventsEnabled());
+    }
+    
+    public void testConstructor2() {
+        HessianSessionDescriptor descriptor = new HessianSessionDescriptor("abc", "factory", null);
+        assertEquals("abc", descriptor.getSessionId());
+        assertFalse(descriptor.isListeningForServerEvents());
+        assertTrue(descriptor.isServerEventsEnabled());
+    }
 }

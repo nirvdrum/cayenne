@@ -75,6 +75,11 @@ public class SyncMessage implements OPPMessage {
     protected int type;
     protected GraphDiff senderChanges;
 
+    // private constructor for Hessian deserialization
+    private SyncMessage() {
+        
+    }
+    
     public SyncMessage(int type, GraphDiff senderChanges) {
         // validate type
         if (type != FLUSH_TYPE && type != COMMIT_TYPE && type != ROLLBACK_TYPE) {

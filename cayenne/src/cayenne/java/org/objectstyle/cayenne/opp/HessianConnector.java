@@ -84,7 +84,8 @@ public class HessianConnector extends BaseConnector {
     protected String url;
     protected String userName;
     protected String password;
-    protected String sessionId;
+
+    protected HessianSessionDescriptor session;
 
     protected HessianService service;
 
@@ -156,7 +157,7 @@ public class HessianConnector extends BaseConnector {
      */
     protected void beforeSendMessage(OPPMessage message) throws CayenneRuntimeException {
         // for now only support session-based communications...
-        if (sessionId == null) {
+        if (session == null) {
             connect();
         }
     }
@@ -166,7 +167,7 @@ public class HessianConnector extends BaseConnector {
      */
     protected Object doSendMessage(OPPMessage message) throws CayenneRuntimeException {
         try {
-            return service.processMessage(sessionId, message);
+            return service.processMessage(session.getSessionId(), message);
         }
         catch (Throwable th) {
             th = unwindThrowable(th);
@@ -179,7 +180,7 @@ public class HessianConnector extends BaseConnector {
      * Establishes a session with remote service.
      */
     protected synchronized void connect() throws CayenneRuntimeException {
-        if (this.sessionId != null) {
+        if (session != null) {
             return;
         }
 
@@ -217,12 +218,12 @@ public class HessianConnector extends BaseConnector {
 
         // create server session...
         try {
-            this.sessionId = service.establishSession();
+            session = service.establishSession();
 
             if (logger.isInfoEnabled()) {
                 long time = System.currentTimeMillis() - t0;
-                logger.info("=== Connected, session id: "
-                        + sessionId
+                logger.info("=== Connected, session: "
+                        + session
                         + " - took "
                         + time
                         + " ms.");

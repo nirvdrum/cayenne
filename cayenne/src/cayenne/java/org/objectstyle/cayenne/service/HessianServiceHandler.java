@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.opp.HessianService;
+import org.objectstyle.cayenne.opp.HessianSessionDescriptor;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.OPPMessage;
 import org.objectstyle.cayenne.util.IDUtil;
@@ -130,16 +131,16 @@ public class HessianServiceHandler implements HessianService, Service {
         logObj.debug("CayenneHessianService destroyed");
     }
 
-    public String establishSession() {
+    public HessianSessionDescriptor establishSession() {
         logObj.debug("Session requested by client");
 
         String id = createSession();
 
         logObj.debug("Established client session: " + id);
-        return id;
+        return new HessianSessionDescriptor(id);
     }
 
-    public String establishSharedSession(String name) {
+    public HessianSessionDescriptor establishSharedSession(String name) {
         logObj.debug("Shared session requested by client. Group name: " + name);
 
         if (name == null) {
@@ -165,7 +166,7 @@ public class HessianServiceHandler implements HessianService, Service {
             sharedSessions.put(name, id);
         }
 
-        return id;
+        return new HessianSessionDescriptor(id);
     }
 
     public Object processMessage(String sessionId, OPPMessage command) throws Throwable {

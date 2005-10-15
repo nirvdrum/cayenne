@@ -57,10 +57,25 @@ package org.objectstyle.cayenne.opp;
 
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.NodeCreateOperation;
 
 import junit.framework.TestCase;
 
 public class SyncMessageTst extends TestCase {
+    
+    public void testHessianSerialization() throws Exception {
+        
+        GraphDiff diff = new NodeCreateOperation(new Object());
+        SyncMessage message = new SyncMessage(SyncMessage.FLUSH_TYPE, diff);
+        
+        Object d = HessianConnector.cloneViaHessianSerialization(message);
+        assertNotNull(d);
+        assertTrue(d instanceof SyncMessage);
+        
+        SyncMessage ds = (SyncMessage) d;
+        assertEquals(message.getType(), ds.getType());
+        assertNotNull(ds.getSenderChanges());
+    }
 
     public void testConstructor() {
         GraphDiff diff = new CompoundDiff();
