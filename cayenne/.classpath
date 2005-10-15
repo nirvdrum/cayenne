@@ -14,7 +14,7 @@
 	<classpathentry kind="src" path="src/pdf/java"/>
 	<classpathentry excluding="com/*" kind="src" path="src/dvmodeler/java"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/ant-1.6.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="otherlib/ashwood-1.1.jar"/>
+	<classpathentry exported="true" sourcepath="/cayenne-otherlib-src/ashwood-1.1/src" kind="lib" path="otherlib/ashwood-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/bcel-5.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/commons-collections-3.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/commons-dbcp-1.2.1.jar"/>
