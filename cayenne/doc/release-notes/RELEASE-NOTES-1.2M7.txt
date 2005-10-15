@@ -11,12 +11,16 @@ http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
 
 Changes/New Features:
 
-* ObjectContext graph events.
-* OPPChannel graph events.
-* ObjectContext API changes:
+* ObjectContext API:
+  - ObjectContext graph events.
+  - OPPChannel graph events (including remote)
   - commit/rollback renamed to look like DataContext ones - commitChanges/rollbackChanges
   - new revertChanges and flushChanges methods.
-* Runtime-customizable ClassDescriptors.
+  - Runtime-customizable ClassDescriptors.
+  
+* Multi Tier API:
+  - support for shared sessions (peer ObjectContexts controlled by different users share the same parent)
+
 * Auto-sorted relationship list - org.objectstyle.cayenne.util.IndexPropertyList. 
   Supported for ObjectContext only for now, but should be easy to extend to DataContext.
 * Cayenne stack events are no longer sent via a shared "default" EventManager. Instead

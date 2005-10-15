@@ -60,24 +60,24 @@ package org.objectstyle.cayenne.opp;
  * web.xml may look like this:
  * 
  * <pre>
- *      &lt;servlet&gt;
- *        &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *        &lt;servlet-class&gt;com.caucho.hessian.server.HessianServlet&lt;/servlet-class&gt;
- *        &lt;!-- Cayenne service API --&gt;
- *        &lt;init-param&gt;
- *          &lt;param-name&gt;api-class&lt;/param-name&gt;
- *          &lt;param-value&gt;org.objectstyle.cayenne.opp.HessianService&lt;/param-value&gt;
- *        &lt;/init-param&gt;
- *        &lt;!-- Cayenne service implementation --&gt;
- *        &lt;init-param&gt;
- *          &lt;param-name&gt;service-class&lt;/param-name&gt;
- *          &lt;param-value&gt;org.objectstyle.cayenne.service.HessianServiceHandler&lt;/param-value&gt;
- *        &lt;/init-param&gt;
- *      &lt;/servlet&gt;
- *      &lt;servlet-mapping&gt;
- *        &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *        &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
- *      &lt;/servlet-mapping&gt;
+ *         &lt;servlet&gt;
+ *           &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
+ *           &lt;servlet-class&gt;com.caucho.hessian.server.HessianServlet&lt;/servlet-class&gt;
+ *           &lt;!-- Cayenne service API --&gt;
+ *           &lt;init-param&gt;
+ *             &lt;param-name&gt;api-class&lt;/param-name&gt;
+ *             &lt;param-value&gt;org.objectstyle.cayenne.opp.HessianService&lt;/param-value&gt;
+ *           &lt;/init-param&gt;
+ *           &lt;!-- Cayenne service implementation --&gt;
+ *           &lt;init-param&gt;
+ *             &lt;param-name&gt;service-class&lt;/param-name&gt;
+ *             &lt;param-value&gt;org.objectstyle.cayenne.service.HessianServiceHandler&lt;/param-value&gt;
+ *           &lt;/init-param&gt;
+ *         &lt;/servlet&gt;
+ *         &lt;servlet-mapping&gt;
+ *           &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
+ *           &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
+ *         &lt;/servlet-mapping&gt;
  * </pre>
  * 
  * @since 1.2
@@ -86,9 +86,15 @@ package org.objectstyle.cayenne.opp;
 public interface HessianService {
 
     /**
-     * Establishes a session with CayenneService.
+     * Establishes a dedicated session with Cayenne OPPChannel, returning session id.
      */
     String establishSession();
+
+    /**
+     * Creates a new session with the specified or joins an existing one. This method is
+     * used to bootstrap collaborating clients of a single "group chat".
+     */
+    String establishSharedSession(String name);
 
     /**
      * Processes message on a remote server, returning the result of such processing.

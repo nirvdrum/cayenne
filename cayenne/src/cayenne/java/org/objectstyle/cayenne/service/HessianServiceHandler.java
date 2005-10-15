@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.service;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,8 +77,8 @@ import com.caucho.services.server.Service;
 /**
  * A default implementation of HessianService service protocol. Supports client sessions.
  * For more info on Hessian see http://www.caucho.com/resin-3.0/protocols/hessian.xtp. See
- * {@link org.objectstyle.cayenne.opp.HessianService}for deployment
- * configuration examples.
+ * {@link org.objectstyle.cayenne.opp.HessianService}for deployment configuration
+ * examples.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -89,6 +88,7 @@ public class HessianServiceHandler implements HessianService, Service {
     private static final Logger logObj = Logger.getLogger(HessianServiceHandler.class);
 
     protected Map commandHandlers;
+    protected Map sharedSessions;
     protected DataDomain domain;
 
     /**
@@ -110,9 +110,13 @@ public class HessianServiceHandler implements HessianService, Service {
             throw new ServletException("Error starting Cayenne", ex);
         }
 
-        // TODO: handle multiple domains..
+        // TODO (Andrus 10/15/2005) this assumes that mapping only has a single domain...
+        // do something about multiple domains
         this.domain = cayenneConfig.getDomain();
-        this.commandHandlers = Collections.synchronizedMap(new HashMap());
+
+        this.commandHandlers = new HashMap();
+        this.sharedSessions = new HashMap();
+
         logObj.debug("CayenneHessianService started");
     }
 
@@ -120,21 +124,47 @@ public class HessianServiceHandler implements HessianService, Service {
      * Hessian Service lifecycle method.
      */
     public void destroy() {
-        logObj.debug("CayenneHessianService destroyed");
         this.commandHandlers = null;
+        this.sharedSessions = null;
+
+        logObj.debug("CayenneHessianService destroyed");
     }
 
     public String establishSession() {
-        logObj.debug("CayenneHessianService - session requested by client");
-        String id = makeId();
+        logObj.debug("Session requested by client");
 
-        ObjectDataContext context = new ObjectDataContext(domain);
+        String id = createSession();
 
-        synchronized (commandHandlers) {
-            commandHandlers.put(id, new ClientServerChannel(context, false));
+        logObj.debug("Established client session: " + id);
+        return id;
+    }
+
+    public String establishSharedSession(String name) {
+        logObj.debug("Shared session requested by client. Group name: " + name);
+
+        if (name == null) {
+            throw new CayenneRuntimeException("Invalid shared session name: " + name);
         }
 
-        logObj.debug("CayenneHessianService - established client session: " + id);
+        String id;
+
+        synchronized (commandHandlers) {
+            id = (String) sharedSessions.get(name);
+
+            if (id == null && commandHandlers.get(id) == null) {
+                id = createSession();
+                logObj.debug("Created new shared session with name '" + name + "':" + id);
+            }
+            else {
+                logObj.debug("Found existing shared session with name '"
+                        + name
+                        + "':"
+                        + id);
+            }
+
+            sharedSessions.put(name, id);
+        }
+
         return id;
     }
 
@@ -147,7 +177,6 @@ public class HessianServiceHandler implements HessianService, Service {
             handler = (OPPChannel) commandHandlers.get(sessionId);
         }
 
-        // TODO: expire sessions...
         if (handler == null) {
             throw new CayenneRuntimeException("Invalid sessionId: " + sessionId);
         }
@@ -163,7 +192,26 @@ public class HessianServiceHandler implements HessianService, Service {
         }
     }
 
-    private String makeId() {
+    String createSession() {
+        String id = makeId();
+
+        ObjectDataContext context = new ObjectDataContext(domain);
+
+        // TODO (Andrus, 10/15/2005) This will result in a memory leak as there is no
+        // session timeout; must attach context to the HttpSession. Not entirely sure how
+        // this would work with Hessian. One thing I found so far is that getting thread
+        // HttpRequest can be done by calling "ServiceContext.getRequest()"
+
+        // or create our own TimeoutMap ... it will be useful in million other places
+
+        synchronized (commandHandlers) {
+            commandHandlers.put(id, new ClientServerChannel(context, false));
+        }
+
+        return id;
+    }
+
+    String makeId() {
         byte[] bytes = IDUtil.pseudoUniqueByteSequence(32);
 
         // use safe encoding... not that it matters to Hessian, but it is more readable
