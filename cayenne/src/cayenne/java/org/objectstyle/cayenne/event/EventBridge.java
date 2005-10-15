@@ -86,7 +86,14 @@ import org.objectstyle.cayenne.util.IDUtil;
  */
 public abstract class EventBridge implements EventListener {
 
+    /**
+     * @deprecated unused since 1.2
+     */
     public static final String VM_ID = new String(IDUtil.pseudoUniqueByteSequence16());
+    
+    /**
+     * @deprecated unused since 1.2
+     */
     public static final String VM_ID_PROPERRTY = "VM_ID";
 
     public static final int RECEIVE_LOCAL = 1;

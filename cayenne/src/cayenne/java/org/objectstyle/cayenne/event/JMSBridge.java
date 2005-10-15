@@ -74,17 +74,22 @@ import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.util.IDUtil;
 
 /**
- * Implementation of EventBridge that passes and receives events via JMS 
- * (Java Messaging Service). JMSBridge uses "publish/subscribe" model for communication
- * with external agents.
+ * Implementation of EventBridge that passes and receives events via JMS (Java Messaging
+ * Service). JMSBridge uses "publish/subscribe" model for communication with external
+ * agents.
  * 
  * @author Andrei Adamchik
  * @since 1.1
  */
 public class JMSBridge extends EventBridge implements MessageListener {
+
     private static Logger logObj = Logger.getLogger(JMSBridge.class);
+
+    static final String VM_ID = new String(IDUtil.pseudoUniqueByteSequence16());
+    static final String VM_ID_PROPERRTY = "VM_ID";
 
     protected String topicConnectionFactoryName;
 
@@ -105,8 +110,8 @@ public class JMSBridge extends EventBridge implements MessageListener {
     public void onMessage(Message message) {
 
         try {
-            Object vmID = message.getObjectProperty(VM_ID_PROPERRTY);
-            if (VM_ID.equals(vmID)) {
+            Object vmID = message.getObjectProperty(JMSBridge.VM_ID_PROPERRTY);
+            if (JMSBridge.VM_ID.equals(vmID)) {
                 logObj.debug("Message from same VM ignoring.");
                 return;
             }
@@ -123,8 +128,7 @@ public class JMSBridge extends EventBridge implements MessageListener {
             CayenneEvent event = messageObjectToEvent(objectMessage.getObject());
             if (event != null) {
                 if (logObj.isDebugEnabled()) {
-                    logObj.debug(
-                        "Received CayenneEvent: "
+                    logObj.debug("Received CayenneEvent: "
                             + event.getClass().getName()
                             + ", id: "
                             + vmID);
@@ -133,22 +137,24 @@ public class JMSBridge extends EventBridge implements MessageListener {
                 onExternalEvent(event);
             }
 
-        } catch (MessageFormatException mfex) {
+        }
+        catch (MessageFormatException mfex) {
             Exception linkedException = mfex.getLinkedException();
             Exception logException = (linkedException != null) ? linkedException : mfex;
             logObj.info("Message Format Exception: ", logException);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             logObj.info("Exception while processing message: ", ex);
         }
     }
 
-    /** 
+    /**
      * @return Name of javax.jms.TopicConnectionFactory accessible via JNDI.
      */
     public String getTopicConnectionFactoryName() {
         return topicConnectionFactoryName;
     }
-    
+
     public void setTopicConnectionFactoryName(String name) {
         this.topicConnectionFactoryName = name;
     }
@@ -158,14 +164,15 @@ public class JMSBridge extends EventBridge implements MessageListener {
      */
     protected void startupExternal() throws Exception {
         Context jndiContext = new InitialContext();
-        TopicConnectionFactory connectionFactory =
-            (TopicConnectionFactory) jndiContext.lookup(topicConnectionFactoryName);
+        TopicConnectionFactory connectionFactory = (TopicConnectionFactory) jndiContext
+                .lookup(topicConnectionFactoryName);
 
         Topic topic = null;
 
         try {
             topic = (Topic) jndiContext.lookup(externalSubject);
-        } catch (NameNotFoundException ex) {
+        }
+        catch (NameNotFoundException ex) {
             // can't find topic, try to create it
             topic = topicNotFound(jndiContext, ex);
 
@@ -177,30 +184,30 @@ public class JMSBridge extends EventBridge implements MessageListener {
         // config publisher
         if (receivesLocalEvents()) {
             this.sendConnection = connectionFactory.createTopicConnection();
-            this.sendSession =
-                sendConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+            this.sendSession = sendConnection.createTopicSession(
+                    false,
+                    Session.AUTO_ACKNOWLEDGE);
             this.publisher = sendSession.createPublisher(topic);
         }
 
         // config subscriber
         if (receivesExternalEvents()) {
             this.receivedConnection = connectionFactory.createTopicConnection();
-            this.subscriber =
-                receivedConnection.createTopicSession(
+            this.subscriber = receivedConnection.createTopicSession(
                     false,
-                    Session.AUTO_ACKNOWLEDGE).createSubscriber(
-                    topic);
+                    Session.AUTO_ACKNOWLEDGE).createSubscriber(topic);
             this.subscriber.setMessageListener(this);
             this.receivedConnection.start();
         }
     }
 
     /**
-     * Attempts to create missing Topic. Since Topic creation is JMS-implementation specific,
-     * this task is left to subclasses. Current implementation simply rethrows the exception.
+     * Attempts to create missing Topic. Since Topic creation is JMS-implementation
+     * specific, this task is left to subclasses. Current implementation simply rethrows
+     * the exception.
      */
     protected Topic topicNotFound(Context jndiContext, NamingException ex)
-        throws Exception {
+            throws Exception {
         throw ex;
     }
 
@@ -213,7 +220,8 @@ public class JMSBridge extends EventBridge implements MessageListener {
         if (publisher != null) {
             try {
                 publisher.close();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 lastException = ex;
             }
         }
@@ -221,7 +229,8 @@ public class JMSBridge extends EventBridge implements MessageListener {
         if (subscriber != null) {
             try {
                 subscriber.close();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 lastException = ex;
             }
         }
@@ -229,7 +238,8 @@ public class JMSBridge extends EventBridge implements MessageListener {
         if (receivedConnection != null) {
             try {
                 receivedConnection.close();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 lastException = ex;
             }
         }
@@ -237,7 +247,8 @@ public class JMSBridge extends EventBridge implements MessageListener {
         if (sendSession != null) {
             try {
                 sendSession.close();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 lastException = ex;
             }
         }
@@ -245,7 +256,8 @@ public class JMSBridge extends EventBridge implements MessageListener {
         if (sendConnection != null) {
             try {
                 sendConnection.close();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 lastException = ex;
             }
         }
@@ -263,25 +275,25 @@ public class JMSBridge extends EventBridge implements MessageListener {
 
     protected void sendExternalEvent(CayenneEvent localEvent) throws Exception {
         logObj.debug("Sending event remotely: " + localEvent);
-        ObjectMessage message =
-            sendSession.createObjectMessage(eventToMessageObject(localEvent));
-        message.setObjectProperty(VM_ID_PROPERRTY, VM_ID);
+        ObjectMessage message = sendSession
+                .createObjectMessage(eventToMessageObject(localEvent));
+        message.setObjectProperty(JMSBridge.VM_ID_PROPERRTY, JMSBridge.VM_ID);
         publisher.publish(message);
     }
 
     /**
-     * Converts CayenneEvent to a serializable object that will be sent via JMS. 
-     * Default implementation simply returns the event, but subclasses can customize
-     * this behavior.
+     * Converts CayenneEvent to a serializable object that will be sent via JMS. Default
+     * implementation simply returns the event, but subclasses can customize this
+     * behavior.
      */
     protected Serializable eventToMessageObject(CayenneEvent event) throws Exception {
         return event;
     }
 
     /**
-     * Converts a Serializable instance to CayenneEvent. Returns null if the object
-     * is not supported. Default implementation simply tries to cast the object to
-     * CayenneEvent, but subclasses can customize this behavior.
+     * Converts a Serializable instance to CayenneEvent. Returns null if the object is not
+     * supported. Default implementation simply tries to cast the object to CayenneEvent,
+     * but subclasses can customize this behavior.
      */
     protected CayenneEvent messageObjectToEvent(Serializable object) throws Exception {
         return (object instanceof CayenneEvent) ? (CayenneEvent) object : null;
