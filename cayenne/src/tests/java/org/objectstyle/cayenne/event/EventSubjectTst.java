@@ -52,95 +52,101 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 
 package org.objectstyle.cayenne.event;
 
-import org.objectstyle.cayenne.unit.CayenneTestCase;
-
 import junit.framework.Assert;
+import junit.framework.TestCase;
 
-public class EventSubjectTst
-	extends CayenneTestCase
-{
+import org.objectstyle.cayenne.opp.hessian.HessianConnection;
+import org.objectstyle.cayenne.util.Util;
 
-	public void testIllegalArguments() {
-		try {
-			EventSubject.getSubject(null, "Subject");
-			Assert.fail();
-		}
-		
-		catch (IllegalArgumentException ex) {
-			// OK
-		}
+public class EventSubjectTst extends TestCase {
 
-		try {
-			EventSubject.getSubject(Object.class, null);
-			Assert.fail();
-		}
-		
-		catch (IllegalArgumentException ex) {
-			// OK
-		}
+    public void testIllegalArguments() {
+        try {
+            EventSubject.getSubject(null, "Subject");
+            Assert.fail();
+        }
+        catch (IllegalArgumentException ex) {
+            // OK
+        }
 
-		try {
-			EventSubject.getSubject(Object.class, "");
-			Assert.fail();
-		}
-		
-		catch (IllegalArgumentException ex) {
-			// OK
-		}
-	}
+        try {
+            EventSubject.getSubject(Object.class, null);
+            Assert.fail();
+        }
+        catch (IllegalArgumentException ex) {
+            // OK
+        }
 
-	public void testIdenticalSubject() {
-		EventSubject s1 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
-		EventSubject s2 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
-		Assert.assertSame(s1, s2);
-	}
+        try {
+            EventSubject.getSubject(Object.class, "");
+            Assert.fail();
+        }
+        catch (IllegalArgumentException ex) {
+            // OK
+        }
+    }
 
-	public void testEqualityOfIdenticalSubjects() {
-		EventSubject s1 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
-		EventSubject s2 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
-		Assert.assertEquals(s1, s2);
-	}
+    public void testEqualityOfClonedSubjects() throws Exception {
+        EventSubject s1 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
+        EventSubject s2 = (EventSubject) Util.cloneViaSerialization(s1);
 
-	public void testEqualityOfSubjectsByDifferentOwner() {
-		EventSubject s1 = EventSubject.getSubject(EventSubject.class, "MySubject");
-		EventSubject s2 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
-		Assert.assertFalse(s1.equals(s2));
-	}
+        assertNotSame(s1, s2);
+        assertEquals(s1, s2);
+        assertEquals(s1.hashCode(), s2.hashCode());
+    }
 
-	public void testEqualityOfSubjectsByDifferentTopic() {
-		EventSubject s1 = EventSubject.getSubject(EventSubjectTst.class, "Subject1");
-		EventSubject s2 = EventSubject.getSubject(EventSubjectTst.class, "Subject2");
-		Assert.assertFalse(s1.equals(s2));
-	}
+    public void testEqualityOfClonedSubjectsHessian() throws Exception {
+        EventSubject s1 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
+        EventSubject s2 = (EventSubject) HessianConnection
+                .cloneViaHessianSerialization(s1);
 
-	public void testSubjectEqualsNull() {
-		EventSubject s1 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
-		Assert.assertFalse(s1.equals(null));
-	}
+        assertNotSame(s1, s2);
+        assertEquals(s1, s2);
+        assertEquals(s1.hashCode(), s2.hashCode());
+    }
+
+    public void testIdenticalSubject() {
+        EventSubject s1 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
+        EventSubject s2 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
+        Assert.assertSame(s1, s2);
+    }
+
+    public void testEqualityOfIdenticalSubjects() {
+        EventSubject s1 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
+        EventSubject s2 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
+        Assert.assertEquals(s1, s2);
+    }
+
+    public void testEqualityOfSubjectsByDifferentOwner() {
+        EventSubject s1 = EventSubject.getSubject(EventSubject.class, "MySubject");
+        EventSubject s2 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
+        Assert.assertFalse(s1.equals(s2));
+    }
+
+    public void testEqualityOfSubjectsByDifferentTopic() {
+        EventSubject s1 = EventSubject.getSubject(EventSubjectTst.class, "Subject1");
+        EventSubject s2 = EventSubject.getSubject(EventSubjectTst.class, "Subject2");
+        Assert.assertFalse(s1.equals(s2));
+    }
+
+    public void testSubjectEqualsNull() {
+        EventSubject s1 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
+        Assert.assertFalse(s1.equals(null));
+    }
 
     // TODO: (Andrus) This test can not be run reliably and in fact consistently
-    // fails in some environments, since forcing GC at a certain time is not 
+    // fails in some environments, since forcing GC at a certain time is not
     // guaranteed.
-/*
-	public void testSubjectGC() {
-		EventSubject s = EventSubject.getSubject(EventSubjectTst.class, "GCSubject");
-		long hash1 = s.hashCode();
-
-		// try to make the subject go away
-		s = null;
-		System.gc();
-		System.gc();
-
-		s = EventSubject.getSubject(EventSubjectTst.class, "GCSubject");
-		long hash2 = s.hashCode();
-
-		Assert.assertTrue(hash1 != hash2);
-	}
-	*/
+    /*
+     * public void testSubjectGC() { EventSubject s =
+     * EventSubject.getSubject(EventSubjectTst.class, "GCSubject"); long hash1 =
+     * s.hashCode(); // try to make the subject go away s = null; System.gc();
+     * System.gc(); s = EventSubject.getSubject(EventSubjectTst.class, "GCSubject"); long
+     * hash2 = s.hashCode(); Assert.assertTrue(hash1 != hash2); }
+     */
 
 }
-

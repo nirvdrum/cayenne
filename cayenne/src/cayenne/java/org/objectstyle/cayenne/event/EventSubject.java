@@ -60,6 +60,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import org.apache.commons.collections.map.ReferenceMap;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
  * This class encapsulates the String that is used to identify the <em>subject</em> that
@@ -137,7 +138,7 @@ public class EventSubject implements Serializable {
     }
 
     public int hashCode() {
-        return (super.hashCode() ^ _fullyQualifiedSubjectName.hashCode());
+        return new HashCodeBuilder(17, 3).append(_fullyQualifiedSubjectName).toHashCode();
     }
 
     public String getSubjectName() {
