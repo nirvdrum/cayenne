@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
  * helper class to generate pseudo-GUID sequences.
- *  
+ * 
  * @author Andrei Adamchik
  */
 public class IDUtil {
@@ -75,30 +75,33 @@ public class IDUtil {
     static {
         try {
             md = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
+        }
+        catch (NoSuchAlgorithmException e) {
             throw new CayenneRuntimeException("Can't initialize MessageDigest.", e);
         }
 
         try {
             ipAddress = java.net.InetAddress.getLocalHost().getAddress();
-        } catch (UnknownHostException e) {
+        }
+        catch (UnknownHostException e) {
             // use loopback interface
-            ipAddress = new byte[] { 127, 0, 0, 1 };
+            ipAddress = new byte[] {
+                    127, 0, 0, 1
+            };
         }
     }
 
     /**
-      * 
-      * @param length the length of returned byte[]
-      * @return A pseudo-unique byte array of the specified length. Length must be at least
-      * 16 bytes, or an exception is thrown. 
-      * 
-      * @since 1.0.2
-      */
+     * @param length the length of returned byte[]
+     * @return A pseudo-unique byte array of the specified length. Length must be at least
+     *         16 bytes, or an exception is thrown.
+     * @since 1.0.2
+     */
     public synchronized static byte[] pseudoUniqueByteSequence(int length) {
         if (length < 16) {
             throw new IllegalArgumentException(
-                "Can't generate unique byte sequence shorter than 16 bytes: " + length);
+                    "Can't generate unique byte sequence shorter than 16 bytes: "
+                            + length);
         }
 
         if (length == 16) {
@@ -127,20 +130,25 @@ public class IDUtil {
     public static byte[] pseudoUniqueByteSequence16() {
         byte[] bytes = new byte[20];
 
-        appendLongBytes(bytes, 0, System.currentTimeMillis());
-        appendLongBytes(bytes, 8, currentId++);
+        // copy IP at the end of array ... everything else will be done inside a
+        // synchronized block.
         System.arraycopy(ipAddress, 0, bytes, 16, ipAddress.length);
 
-        // spend some time so that the next call would return the different timestamp
-        try {
-            Thread.sleep(2);
-        } catch (InterruptedException e) {
-            // ignoring...
-        }
+        synchronized (md) {
+            // spend some time so that the next call would return the different timestamp
+            try {
+                Thread.sleep(1);
+            }
+            catch (InterruptedException e) {
+                // ignoring...
+            }
 
-        return md.digest(bytes);
+            appendLongBytes(bytes, 0, System.currentTimeMillis());
+            appendLongBytes(bytes, 8, currentId++);
+
+            return md.digest(bytes);
+        }
     }
-    
 
     private static void appendLongBytes(byte[] bytes, int offset, long value) {
         for (int i = 0; i < 8; ++i) {
@@ -151,5 +159,4 @@ public class IDUtil {
 
     private IDUtil() {
     }
-
 }
