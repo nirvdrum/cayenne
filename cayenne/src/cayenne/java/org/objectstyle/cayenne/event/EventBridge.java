@@ -84,13 +84,20 @@ import org.objectstyle.cayenne.util.IDUtil;
  * @author Andrus Adamchik
  * @since 1.1
  */
+// TODO Andrus, 10/15/2005 - potential inefficiency of concrete implementations of
+// EventBridgeFactory is that all the expensive resources are managed by the bridge
+// itself. Scaling to a big number of bridge instances would require resource pooling to
+// be done by the factory singleton.
+//
+// So far we've been using no more than one or two bridges per Cayenne application, so
+// this is not a *big* problem yet.
 public abstract class EventBridge implements EventListener {
 
     /**
      * @deprecated unused since 1.2
      */
     public static final String VM_ID = new String(IDUtil.pseudoUniqueByteSequence16());
-    
+
     /**
      * @deprecated unused since 1.2
      */
