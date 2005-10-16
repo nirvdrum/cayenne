@@ -118,6 +118,10 @@ public class HessianServiceHandler implements HessianService, Service {
         this.commandHandlers = new HashMap();
         this.sharedSessions = new HashMap();
 
+        
+        // if EventBridgeFactory is configured, extract parameters and 
+        config.getInitParameterNames();
+        
         logObj.debug("CayenneHessianService started");
     }
 
@@ -134,10 +138,10 @@ public class HessianServiceHandler implements HessianService, Service {
     public HessianSessionDescriptor establishSession() {
         logObj.debug("Session requested by client");
 
-        String id = createSession();
+        HessianSessionDescriptor session = createSession();
 
-        logObj.debug("Established client session: " + id);
-        return new HessianSessionDescriptor(id);
+        logObj.debug("Established client session: " + session);
+        return session;
     }
 
     public HessianSessionDescriptor establishSharedSession(String name) {
@@ -147,26 +151,24 @@ public class HessianServiceHandler implements HessianService, Service {
             throw new CayenneRuntimeException("Invalid shared session name: " + name);
         }
 
-        String id;
+        HessianSessionDescriptor session;
 
         synchronized (commandHandlers) {
-            id = (String) sharedSessions.get(name);
+            session = (HessianSessionDescriptor) sharedSessions.get(name);
 
-            if (id == null && commandHandlers.get(id) == null) {
-                id = createSession();
-                logObj.debug("Created new shared session with name '" + name + "':" + id);
+            if (session == null || commandHandlers.get(session) == null) {
+                session = createSession();
+                session.setName(name);
+                logObj.debug("Created new shared session:" + session);
             }
             else {
-                logObj.debug("Found existing shared session with name '"
-                        + name
-                        + "':"
-                        + id);
+                logObj.debug("Found existing shared session:" + session);
             }
 
-            sharedSessions.put(name, id);
+            sharedSessions.put(name, session);
         }
 
-        return new HessianSessionDescriptor(id);
+        return session;
     }
 
     public Object processMessage(String sessionId, OPPMessage command) throws Throwable {
@@ -193,8 +195,9 @@ public class HessianServiceHandler implements HessianService, Service {
         }
     }
 
-    String createSession() {
-        String id = makeId();
+    HessianSessionDescriptor createSession() {
+
+        HessianSessionDescriptor session = new HessianSessionDescriptor(makeId());
 
         ObjectDataContext context = new ObjectDataContext(domain);
 
@@ -206,10 +209,10 @@ public class HessianServiceHandler implements HessianService, Service {
         // or create our own TimeoutMap ... it will be useful in million other places
 
         synchronized (commandHandlers) {
-            commandHandlers.put(id, new ClientServerChannel(context, false));
+            commandHandlers.put(session, new ClientServerChannel(context, false));
         }
 
-        return id;
+        return session;
     }
 
     String makeId() {

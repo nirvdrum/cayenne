@@ -65,11 +65,28 @@ public class HessianSessionDescriptorTst extends TestCase {
         assertFalse(descriptor.isListeningForServerEvents());
         assertFalse(descriptor.isServerEventsEnabled());
     }
-    
+
     public void testConstructor2() {
-        HessianSessionDescriptor descriptor = new HessianSessionDescriptor("abc", "factory", null);
+        HessianSessionDescriptor descriptor = new HessianSessionDescriptor(
+                "abc",
+                "factory",
+                null);
         assertEquals("abc", descriptor.getSessionId());
         assertFalse(descriptor.isListeningForServerEvents());
         assertTrue(descriptor.isServerEventsEnabled());
+    }
+
+    public void testHashCode() {
+        HessianSessionDescriptor d1 = new HessianSessionDescriptor("1");
+        HessianSessionDescriptor d2 = new HessianSessionDescriptor("1");
+
+        assertEquals(d1.hashCode(), d1.hashCode());
+        assertEquals(d1.hashCode(), d2.hashCode());
+
+        d2.setName("some name");
+        assertEquals(d1.hashCode(), d2.hashCode());
+
+        HessianSessionDescriptor d3 = new HessianSessionDescriptor("2");
+        assertFalse(d1.hashCode() == d3.hashCode());
     }
 }

@@ -57,33 +57,58 @@ package org.objectstyle.cayenne.opp;
 
 /**
  * Service interface needed for server-side deployment with HessianConnector. A mapping in
- * web.xml may look like this:
+ * <code>web.xml</code> may look like this:
  * 
  * <pre>
- *         &lt;servlet&gt;
- *           &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *           &lt;servlet-class&gt;com.caucho.hessian.server.HessianServlet&lt;/servlet-class&gt;
- *           &lt;!-- Cayenne service API --&gt;
- *           &lt;init-param&gt;
- *             &lt;param-name&gt;api-class&lt;/param-name&gt;
- *             &lt;param-value&gt;org.objectstyle.cayenne.opp.HessianService&lt;/param-value&gt;
- *           &lt;/init-param&gt;
- *           &lt;!-- Cayenne service implementation --&gt;
- *           &lt;init-param&gt;
- *             &lt;param-name&gt;service-class&lt;/param-name&gt;
- *             &lt;param-value&gt;org.objectstyle.cayenne.service.HessianServiceHandler&lt;/param-value&gt;
- *           &lt;/init-param&gt;
- *         &lt;/servlet&gt;
- *         &lt;servlet-mapping&gt;
- *           &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *           &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
- *         &lt;/servlet-mapping&gt;
+ *  &lt;servlet&gt;
+ *    &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
+ *    &lt;servlet-class&gt;com.caucho.hessian.server.HessianServlet&lt;/servlet-class&gt;
+ *                
+ *    &lt;!-- Cayenne service API --&gt;
+ *    &lt;init-param&gt;
+ *       &lt;param-name&gt;api-class&lt;/param-name&gt;
+ *       &lt;param-value&gt;org.objectstyle.cayenne.opp.HessianService&lt;/param-value&gt;
+ *    &lt;/init-param&gt;
+ *                
+ *    &lt;!-- Cayenne service implementation --&gt;
+ *    &lt;init-param&gt;
+ *       &lt;param-name&gt;service-class&lt;/param-name&gt;
+ *       &lt;param-value&gt;org.objectstyle.cayenne.service.HessianServiceHandler&lt;/param-value&gt;
+ *    &lt;/init-param&gt;
+ *  &lt;/servlet&gt;
+ *              
+ *  &lt;servlet-mapping&gt;
+ *    &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
+ *    &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
+ *  &lt;/servlet-mapping&gt;
  * </pre>
+ * 
+ * To deploy with XMPP event bridge that allows to channel server events to the client you
+ * will need to add a few more "init-params" to the "servlet" section:
+ * 
+ * <pre>
+ *    &lt;init-param&gt;
+ *       &lt;param-name&gt;cayenne.HessianService.EventBridge.factory&lt;/param-name&gt;
+ *       &lt;param-value&gt;org.objectstyle.cayenne.event.XMPPBridgeFactory&lt;/param-value&gt;
+ *    &lt;/init-param&gt;
+ *    &lt;init-param&gt;
+ *       &lt;param-name&gt;cayenne.XMPPBridge.xmppHost&lt;/param-name&gt;
+ *       &lt;param-value&gt;my-xmpp-server.com&lt;/param-value&gt;
+ *    &lt;/init-param&gt;
+ *    &lt;init-param&gt;
+ *       &lt;param-name&gt;cayenne.XMPPBridge.xmppPort&lt;/param-name&gt;
+ *       &lt;param-value&gt;3333&lt;/param-value&gt;
+ *    &lt;/init-param&gt;
+ * </pre>
+ * 
+ * <i>Parameter above will likely be configurable via the Modeler in Cayenne 1.2.</i>
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
 public interface HessianService {
+
+    public static final String EVENT_BRIDGE_FACTORY_PROPERTY = "cayenne.HessianService.EventBridge.factory";
 
     /**
      * Establishes a dedicated session with Cayenne OPPChannel, returning session id.

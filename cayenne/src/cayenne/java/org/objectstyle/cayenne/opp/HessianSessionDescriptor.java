@@ -59,12 +59,12 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.event.EventBridge;
 import org.objectstyle.cayenne.event.EventBridgeFactory;
 import org.objectstyle.cayenne.event.EventManager;
-import org.objectstyle.cayenne.event.EventSubject;
 
 /**
  * A descriptor passed from HessianService to the caller when a session is established. It
@@ -76,6 +76,7 @@ import org.objectstyle.cayenne.event.EventSubject;
  */
 public class HessianSessionDescriptor implements Serializable {
 
+    protected String name;
     protected String sessionId;
 
     protected String eventBridgeFactory;
@@ -110,8 +111,23 @@ public class HessianSessionDescriptor implements Serializable {
         this.eventBridgeParameters = eventBridgeParameters;
     }
 
+    public int hashCode() {
+        return new HashCodeBuilder(71, 5).append(sessionId).toHashCode();
+    }
+
     public String getSessionId() {
         return sessionId;
+    }
+
+    /**
+     * Returns session group name. Group name is used for shared sessions.
+     */
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public boolean isServerEventsEnabled() {
@@ -128,9 +144,8 @@ public class HessianSessionDescriptor implements Serializable {
      * 
      * @throws CayenneRuntimeException if EventBridge startup fails for any reason.
      */
-    public void startListeningForServerEvents(
-            EventManager eventManager,
-            EventSubject localSubject) throws CayenneRuntimeException {
+    public void startListeningForServerEvents(EventManager eventManager)
+            throws CayenneRuntimeException {
 
         // shutdown old bridge...
         stopListeningForServerEvents(eventManager);
@@ -147,11 +162,13 @@ public class HessianSessionDescriptor implements Serializable {
                     ? eventBridgeParameters
                     : Collections.EMPTY_MAP;
 
-            this.eventBridge = factory.createEventBridge(localSubject, parameters);
+            this.eventBridge = factory.createEventBridge(OPPChannel.GRAPH_CHANGED_SUBJECT, parameters);
         }
         catch (Exception ex) {
-            throw new CayenneRuntimeException("Error starting EventBridge.", ex);
+            throw new CayenneRuntimeException("Error creating EventBridge.", ex);
         }
+        
+        
     }
 
     public void stopListeningForServerEvents(EventManager eventManager)
@@ -174,8 +191,18 @@ public class HessianSessionDescriptor implements Serializable {
     }
 
     public String toString() {
-        return new ToStringBuilder(this).append("sessionId", sessionId).append(
-                "eventBridgeFactory",
-                eventBridgeFactory).toString();
+        ToStringBuilder builder = new ToStringBuilder(this)
+                .append("sessionId", sessionId);
+
+        if (eventBridgeFactory != null) {
+            builder.append("eventBridgeFactory", eventBridgeFactory);
+        }
+
+        if (name != null) {
+            builder.append("name", name);
+        }
+
+        return builder.toString();
     }
+
 }
