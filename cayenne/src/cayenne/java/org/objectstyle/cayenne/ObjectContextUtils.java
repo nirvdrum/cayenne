@@ -147,6 +147,21 @@ public class ObjectContextUtils {
     }
 
     /**
+     * Listen for events from all channels that use a given EventManager.
+     */
+    public static boolean listenForChannelEvents(
+            EventManager manager,
+            GraphEventListener listener) {
+
+        if (manager == null) {
+            return false;
+        }
+
+        listenForSubjects(manager, listener, null, CHANNEL_SUBJECTS);
+        return true;
+    }
+
+    /**
      * Registers GraphEventListener for multiple subjects at once.
      */
     static void listenForSubjects(

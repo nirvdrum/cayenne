@@ -86,6 +86,7 @@ public class HessianConnection extends BaseConnection {
     protected String url;
     protected String userName;
     protected String password;
+    protected String sharedSessionName;
 
     protected HessianSession session;
     protected HessianService service;
@@ -107,20 +108,20 @@ public class HessianConnection extends BaseConnection {
     }
 
     /**
-     * A shortcut for HessianConnector(String,String,String) used when no HTTP basic
-     * authentication is required.
+     * Creates HessianConnection that will establish dedicated session and will not use
+     * HTTP basic authentication.
      */
     public HessianConnection(String url) {
-        this(url, null, null);
+        this(url, null, null, null);
     }
 
     /**
-     * Creates a HessianConnector initializing it with a service URL. User name and
-     * password are needed only if basic authentication is used. Otherwise they can be
-     * null. URL on the other hand is required. Null URL would cause an
-     * IllegalArgumentException.
+     * Creates a HessianConnection. This constructor can optionally setup basic
+     * authentication credentials and configure shared session. <code>url</code> is the
+     * only required parameter.
      */
-    public HessianConnection(String url, String userName, String password) {
+    public HessianConnection(String url, String userName, String password,
+            String sharedSessionName) {
         if (url == null) {
             throw new IllegalArgumentException("URL of Cayenne service is null.");
         }
@@ -128,6 +129,7 @@ public class HessianConnection extends BaseConnection {
         this.url = url;
         this.userName = userName;
         this.password = password;
+        this.sharedSessionName = sharedSessionName;
     }
 
     /**
@@ -151,6 +153,11 @@ public class HessianConnection extends BaseConnection {
      */
     public String getPassword() {
         return password;
+    }
+
+    
+    public String getSharedSessionName() {
+        return sharedSessionName;
     }
 
     public EventBridge getServerEventBridge() throws CayenneRuntimeException {
@@ -209,6 +216,14 @@ public class HessianConnection extends BaseConnection {
 
             log.append(url);
             log.append("]");
+
+            if (sharedSessionName != null) {
+                log.append(" - shared session '").append(sharedSessionName).append("'");
+            }
+            else {
+                log.append(" - dedicated session.");
+            }
+
             logger.info(log.toString());
         }
 
@@ -227,7 +242,9 @@ public class HessianConnection extends BaseConnection {
 
         // create server session...
         try {
-            session = service.establishSession();
+            session = (sharedSessionName != null) ? service
+                    .establishSharedSession(sharedSessionName) : service
+                    .establishSession();
 
             if (logger.isInfoEnabled()) {
                 long time = System.currentTimeMillis() - t0;

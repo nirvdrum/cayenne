@@ -183,6 +183,7 @@ public class XMPPBridge extends EventBridge {
                     + chatService
                     + "."
                     + connection.getHost());
+            
             groupChat.join(sessionHandle);
             groupChat.addMessageListener(new XMPPListener());
         }

@@ -69,9 +69,10 @@ public class HessianConnectionTst extends TestCase {
     }
     
     public void testConstructor3Arg() {
-        HessianConnection c = new HessianConnection("a", "b", "c");
+        HessianConnection c = new HessianConnection("a", "b", "c", "d");
         assertEquals("a", c.getUrl());
         assertEquals("b", c.getUserName());
         assertEquals("c", c.getPassword());
+        assertEquals("d", c.getSharedSessionName());
     }
 }
