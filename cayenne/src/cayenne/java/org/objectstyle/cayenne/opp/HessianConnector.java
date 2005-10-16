@@ -236,6 +236,11 @@ public class HessianConnector extends BaseConnector {
                     th);
             throw new CayenneRuntimeException(message, th);
         }
+
+        if (session.isServerEventsEnabled()) {
+            logger.info("=== Enabling server events handler...");
+            session.startListeningForServerEvents(getEventManager());
+        }
     }
 
     String buildExceptionMessage(String message, Throwable th) {

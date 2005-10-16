@@ -193,13 +193,15 @@ public abstract class EventBridge implements EventListener {
     }
 
     /**
-     * Sets up this EventBridge to receive local events from the instance of EventManager.
-     * Internally calls "startupExternal".
+     * Starts an EventBridge in the specified mode.
      */
     public void startup(EventManager eventManager, int mode) throws Exception {
         this.startup(eventManager, mode, null);
     }
 
+    /**
+     * Starts an EventBridge in the specified mode.
+     */
     public void startup(EventManager eventManager, int mode, Object eventsSource)
             throws Exception {
 

@@ -141,6 +141,9 @@ public class HessianSessionDescriptor implements Serializable {
         return eventBridgeFactory != null;
     }
 
+    /**
+     * Returns true if EventBridge is started.
+     */
     public boolean isListeningForServerEvents() {
         return eventBridge != null;
     }
@@ -155,7 +158,7 @@ public class HessianSessionDescriptor implements Serializable {
             throws CayenneRuntimeException {
 
         // shutdown old bridge...
-        stopListeningForServerEvents(eventManager);
+        stopListeningForServerEvents();
 
         if (!isServerEventsEnabled()) {
             return;
@@ -170,6 +173,7 @@ public class HessianSessionDescriptor implements Serializable {
                     : Collections.EMPTY_MAP;
 
             this.eventBridge = factory.createEventBridge(SUBJECTS, sessionId, parameters);
+            eventBridge.startup(eventManager, EventBridge.RECEIVE_EXTERNAL);
         }
         catch (Exception ex) {
             throw new CayenneRuntimeException("Error creating EventBridge.", ex);
@@ -177,8 +181,7 @@ public class HessianSessionDescriptor implements Serializable {
 
     }
 
-    public void stopListeningForServerEvents(EventManager eventManager)
-            throws CayenneRuntimeException {
+    public void stopListeningForServerEvents() throws CayenneRuntimeException {
 
         if (this.eventBridge != null) {
 

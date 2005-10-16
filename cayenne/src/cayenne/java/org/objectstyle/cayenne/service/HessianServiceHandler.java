@@ -118,10 +118,10 @@ public class HessianServiceHandler implements HessianService, Service {
         this.commandHandlers = new HashMap();
         this.sharedSessions = new HashMap();
 
-        
-        // if EventBridgeFactory is configured, extract parameters and 
+        // if EventBridgeFactory is configured, extract parameters and create an event
+        // bridge
         config.getInitParameterNames();
-        
+
         logObj.debug("CayenneHessianService started");
     }
 
@@ -198,7 +198,6 @@ public class HessianServiceHandler implements HessianService, Service {
     HessianSessionDescriptor createSession() {
 
         HessianSessionDescriptor session = new HessianSessionDescriptor(makeId());
-
         ObjectDataContext context = new ObjectDataContext(domain);
 
         // TODO (Andrus, 10/15/2005) This will result in a memory leak as there is no
@@ -209,7 +208,7 @@ public class HessianServiceHandler implements HessianService, Service {
         // or create our own TimeoutMap ... it will be useful in million other places
 
         synchronized (commandHandlers) {
-            commandHandlers.put(session, new ClientServerChannel(context, false));
+            commandHandlers.put(session, new ClientServerChannel(context, true));
         }
 
         return session;
