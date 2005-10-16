@@ -90,13 +90,10 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrus Adamchik
  * @since 1.1
  */
-// TODO Andrus, 10/15/2005 - potential inefficiency of concrete implementations of
+// TODO Andrus, 10/15/2005 - potentially big inefficiency of concrete implementations of
 // EventBridgeFactory is that all the expensive resources are managed by the bridge
 // itself. Scaling to a big number of bridge instances would require resource pooling to
 // be done by the factory singleton.
-//
-// So far we've been using no more than one or two bridges per Cayenne application, so
-// this is very low priority.
 public abstract class EventBridge implements EventListener {
 
     /**
@@ -163,6 +160,15 @@ public abstract class EventBridge implements EventListener {
     }
 
     /**
+     * Returns true if this bridge is active.
+     * 
+     * @since 1.2
+     */
+    public boolean isRunning() {
+        return eventManager != null;
+    }
+
+    /**
      * Returns a subject used for events within the local JVM.
      * 
      * @deprecated since 1.2 EventBridge supports multiple local subjects, so use
@@ -184,6 +190,16 @@ public abstract class EventBridge implements EventListener {
         return localSubjects;
     }
 
+    /**
+     * Returns local EventManager used by the bridge. Returned value will be null before
+     * the bridge is started and after it is shutdown.
+     * 
+     * @since 1.2
+     */
+    public EventManager getEventManager() {
+        return eventManager;
+    }
+
     public boolean receivesLocalEvents() {
         return mode == RECEIVE_LOCAL_EXTERNAL || mode == RECEIVE_LOCAL;
     }
@@ -202,7 +218,7 @@ public abstract class EventBridge implements EventListener {
     /**
      * Starts an EventBridge in the specified mode.
      */
-    public void startup(EventManager eventManager, int mode, Object eventsSource)
+    public void startup(EventManager eventManager, int mode, Object localEventSource)
             throws Exception {
 
         // uninstall old event manager
@@ -220,6 +236,7 @@ public abstract class EventBridge implements EventListener {
         if (receivesLocalEvents() && !localSubjects.isEmpty()) {
 
             listeners = new ArrayList(localSubjects.size());
+
             Iterator it = localSubjects.iterator();
             while (it.hasNext()) {
 
@@ -232,7 +249,7 @@ public abstract class EventBridge implements EventListener {
                         "onLocalEvent",
                         CayenneEvent.class,
                         subject,
-                        eventsSource);
+                        localEventSource);
             }
         }
 

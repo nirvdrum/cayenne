@@ -55,7 +55,9 @@
  */
 package org.objectstyle.cayenne.opp.hessian;
 
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.ServletConfig;
@@ -66,6 +68,8 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
+import org.objectstyle.cayenne.event.EventBridge;
+import org.objectstyle.cayenne.event.EventBridgeFactory;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.OPPMessage;
 import org.objectstyle.cayenne.service.ClientServerChannel;
@@ -76,10 +80,12 @@ import com.caucho.services.server.Service;
 
 /**
  * A default implementation of HessianService service protocol. Supports client sessions.
- * For more info on Hessian see http://www.caucho.com/resin-3.0/protocols/hessian.xtp. See
- * {@link org.objectstyle.cayenne.opp.hessian.HessianService}for deployment configuration
- * examples.
+ * For more info on Hessian see http://www.caucho.com/resin-3.0/protocols/hessian.xtp.
  * 
+ * @see org.objectstyle.cayenne.opp.hessian.HessianServlet for deployment configuration
+ *      information.
+ * @see org.objectstyle.cayenne.opp.hessian.HessianService for deployment configuration
+ *      information.
  * @since 1.2
  * @author Andrus Adamchik
  */
@@ -88,8 +94,17 @@ public class HessianServiceHandler implements HessianService, Service {
     private static final Logger logObj = Logger.getLogger(HessianServiceHandler.class);
 
     protected Map sessionChannels;
+    protected Map sessionBridges;
+
     protected Map sharedSessions;
+
     protected DataDomain domain;
+
+    protected String eventBridgeFactoryName;
+    protected Map eventBridgeParameters;
+
+    // cached factory...
+    EventBridgeFactory eventBridgeFactory;
 
     /**
      * Hessian service lifecycle method that performs Cayenne initialization.
@@ -97,7 +112,7 @@ public class HessianServiceHandler implements HessianService, Service {
     public void init(ServletConfig config) throws ServletException {
 
         // start Cayenne service
-        logObj.debug("CayenneHessianService is starting");
+        logObj.debug("HessianServiceHandler is starting");
 
         Configuration cayenneConfig = new DefaultConfiguration(
                 Configuration.DEFAULT_DOMAIN_FILE);
@@ -110,18 +125,42 @@ public class HessianServiceHandler implements HessianService, Service {
             throw new ServletException("Error starting Cayenne", ex);
         }
 
-        // TODO (Andrus 10/15/2005) this assumes that mapping only has a single domain...
+        // TODO (Andrus 10/15/2005) this assumes that mapping has a single domain...
         // do something about multiple domains
         this.domain = cayenneConfig.getDomain();
 
         this.sessionChannels = new HashMap();
         this.sharedSessions = new HashMap();
+        this.sessionBridges = new HashMap();
 
-        // if EventBridgeFactory is configured, extract parameters and create an event
-        // bridge
-        config.getInitParameterNames();
+        // event bridge setup...
+        String eventBridgeFactoryName = config
+                .getInitParameter(HessianService.EVENT_BRIDGE_FACTORY_PROPERTY);
 
-        logObj.debug("CayenneHessianService started");
+        if (eventBridgeFactoryName != null) {
+            Map parameters = new HashMap();
+            Enumeration en = config.getInitParameterNames();
+            while (en.hasMoreElements()) {
+                String key = (String) en.nextElement();
+                parameters.put(key, config.getInitParameter(key));
+            }
+
+            try {
+                this.eventBridgeFactory = (EventBridgeFactory) Class.forName(
+                        eventBridgeFactoryName).newInstance();
+            }
+            catch (Throwable e) {
+                throw new ServletException("Error creating EventBridgeFactory '"
+                        + eventBridgeFactoryName
+                        + "'", e);
+            }
+
+            // if the factory is good, save bridge parameters...
+            this.eventBridgeFactoryName = eventBridgeFactoryName;
+            this.eventBridgeParameters = parameters;
+        }
+
+        logObj.debug("HessianServiceHandler started");
     }
 
     /**
@@ -130,8 +169,26 @@ public class HessianServiceHandler implements HessianService, Service {
     public void destroy() {
         this.sessionChannels = null;
         this.sharedSessions = null;
+        this.eventBridgeFactory = null;
 
-        logObj.debug("CayenneHessianService destroyed");
+        if (sessionBridges != null) {
+
+            Iterator it = sessionBridges.values().iterator();
+            while (it.hasNext()) {
+                EventBridge b = (EventBridge) it.next();
+
+                try {
+                    b.shutdown();
+                }
+                catch (Throwable th) {
+                    // ignore, continue with shutdown
+                }
+            }
+
+            sessionBridges = null;
+        }
+
+        logObj.debug("HessianServiceHandler destroyed");
     }
 
     public HessianSession establishSession() {
@@ -196,7 +253,34 @@ public class HessianServiceHandler implements HessianService, Service {
 
     HessianSession createSession() {
 
-        HessianSession session = new HessianSession(makeId());
+        HessianSession session = new HessianSession(
+                makeId(),
+                eventBridgeFactoryName,
+                eventBridgeParameters);
+
+        OPPChannel channel = new ClientServerChannel(domain, true);
+
+        // TODO (Andrus, 10/16/2005) !!!!!!! This is a HUGE resource leak, as each session
+        // would get its own bridge.
+        if (eventBridgeFactory != null) {
+            EventBridge bridge = eventBridgeFactory.createEventBridge(
+                    HessianSession.SUBJECTS,
+                    session.getSessionId(),
+                    eventBridgeParameters);
+
+            try {
+                bridge.startup(
+                        channel.getEventManager(),
+                        EventBridge.RECEIVE_LOCAL,
+                        channel);
+            }
+            catch (Exception e) {
+                throw new CayenneRuntimeException("Error starting the bridge: "
+                        + e.getLocalizedMessage(), e);
+            }
+
+            sessionBridges.put(session.getSessionId(), bridge);
+        }
 
         // TODO (Andrus, 10/15/2005) This will result in a memory leak as there is no
         // session timeout; must attach context to the HttpSession. Not entirely sure how
@@ -206,9 +290,7 @@ public class HessianServiceHandler implements HessianService, Service {
         // or create our own TimeoutMap ... it will be useful in million other places
 
         synchronized (sessionChannels) {
-            sessionChannels.put(session.getSessionId(), new ClientServerChannel(
-                    domain,
-                    true));
+            sessionChannels.put(session.getSessionId(), channel);
         }
 
         return session;

@@ -62,35 +62,39 @@ import org.objectstyle.cayenne.opp.OPPMessage;
  * <code>web.xml</code> may look like this:
  * 
  * <pre>
- *  &lt;servlet&gt;
- *    &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *    &lt;servlet-class&gt;org.objectstyle.cayenne.opp.hessian.HessianServlet&lt;/servlet-class&gt;
- *  &lt;/servlet&gt;            
- *  &lt;servlet-mapping&gt;
- *    &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *    &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
- *  &lt;/servlet-mapping&gt;
+ *   &lt;servlet&gt;
+ *     &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
+ *     &lt;servlet-class&gt;org.objectstyle.cayenne.opp.hessian.HessianServlet&lt;/servlet-class&gt;
+ *   &lt;/servlet&gt;            
+ *   &lt;servlet-mapping&gt;
+ *     &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
+ *     &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
+ *   &lt;/servlet-mapping&gt;
  * </pre>
  * 
- * To deploy with XMPP event bridge that allows to channel server events to the client you
- * will need to add a few more "init-params" to the "servlet" section:
+ * To deploy with XMPP event bridge that allows clients to receive server events you will
+ * need to add a few more "init-params" to the "servlet" section:
  * 
  * <pre>
- *    &lt;init-param&gt;
- *       &lt;param-name&gt;cayenne.HessianService.EventBridge.factory&lt;/param-name&gt;
- *       &lt;param-value&gt;org.objectstyle.cayenne.event.XMPPBridgeFactory&lt;/param-value&gt;
- *    &lt;/init-param&gt;
- *    &lt;init-param&gt;
- *       &lt;param-name&gt;cayenne.XMPPBridge.xmppHost&lt;/param-name&gt;
- *       &lt;param-value&gt;my-xmpp-server.com&lt;/param-value&gt;
- *    &lt;/init-param&gt;
- *    &lt;init-param&gt;
- *       &lt;param-name&gt;cayenne.XMPPBridge.xmppPort&lt;/param-name&gt;
- *       &lt;param-value&gt;3333&lt;/param-value&gt;
- *    &lt;/init-param&gt;
+ *     &lt;init-param&gt;
+ *        &lt;param-name&gt;cayenne.HessianService.EventBridge.factory&lt;/param-name&gt;
+ *        &lt;param-value&gt;org.objectstyle.cayenne.event.XMPPBridgeFactory&lt;/param-value&gt;
+ *     &lt;/init-param&gt;
+ *     &lt;init-param&gt;
+ *        &lt;param-name&gt;cayenne.XMPPBridge.xmppHost&lt;/param-name&gt;
+ *        &lt;param-value&gt;my-xmpp-server.com&lt;/param-value&gt;
+ *     &lt;/init-param&gt;
+ *     &lt;init-param&gt;
+ *        &lt;param-name&gt;cayenne.XMPPBridge.xmppPort&lt;/param-name&gt;
+ *        &lt;param-value&gt;3333&lt;/param-value&gt;
+ *     &lt;/init-param&gt;
+ *     &lt;init-param&gt;
+ *        &lt;param-name&gt;cayenne.XMPPBridge.xmppChatService&lt;/param-name&gt;
+ *        &lt;param-value&gt;conferencelt;/param-value&gt;
+ *     &lt;/init-param&gt;
  * </pre>
  * 
- * <i>Parameter above will likely be configurable via the Modeler in Cayenne 1.2.</i>
+ * <i>Parameters above will likely be configurable via the Modeler in the future.</i>
  * 
  * @since 1.2
  * @author Andrus Adamchik

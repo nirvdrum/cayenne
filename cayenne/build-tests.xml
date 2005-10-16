@@ -44,6 +44,7 @@
 			<include name="${commons.pool.jar}"/>
 			<include name="${hessian.jar}"/>
 			<include name="${smack.jar}"/>
+			<include name="${smackx.jar}"/>
 		</fileset>
 		<fileset dir="${ant.home}/lib">
 			<include name="*.jar"/>

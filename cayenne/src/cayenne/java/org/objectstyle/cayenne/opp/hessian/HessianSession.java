@@ -102,7 +102,8 @@ public class HessianSession implements Serializable {
     }
 
     /**
-     * Creates a HessianServiceDescriptor with server events support.
+     * Creates a HessianServiceDescriptor. If <code>eventBridgeFactory</code> argument
+     * is not null, session will support server events.
      */
     public HessianSession(String sessionId, String eventBridgeFactory,
             Map eventBridgeParameters) {

@@ -77,6 +77,8 @@ public class XMPPBridgeFactory implements EventBridgeFactory {
      */
     public static final String XMPP_PORT_PROPERTY = "cayenne.XMPPBridge.xmppPort";
 
+    public static final String XMPP_CHAT_SERVICE_PROPERTY = "cayenne.XMPPBridge.xmppChatService";
+
     // TODO Andrus, 10/13/2005 - secure connections and authentication...
 
     // public static final String XMPP_SECURE_CONNECTION_PROPERTY =
@@ -100,6 +102,7 @@ public class XMPPBridgeFactory implements EventBridgeFactory {
             String externalSubject,
             Map properties) {
 
+        String chatService = (String) properties.get(XMPP_CHAT_SERVICE_PROPERTY);
         String host = (String) properties.get(XMPP_HOST_PROPERTY);
         String portString = (String) properties.get(XMPP_PORT_PROPERTY);
         int port = -1;
@@ -117,6 +120,7 @@ public class XMPPBridgeFactory implements EventBridgeFactory {
 
         bridge.setXmppHost(host);
         bridge.setXmppPort(port);
+        bridge.setChatService(chatService);
 
         return bridge;
     }

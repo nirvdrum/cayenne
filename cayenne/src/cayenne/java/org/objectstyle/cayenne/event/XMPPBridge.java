@@ -65,6 +65,7 @@ import java.util.Collections;
 import org.jivesoftware.smack.GroupChat;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -89,6 +90,7 @@ public class XMPPBridge extends EventBridge {
 
     protected String xmppHost;
     protected int xmppPort;
+    protected String chatService;
     protected String sessionHandle;
 
     protected XMPPConnection connection;
@@ -129,6 +131,14 @@ public class XMPPBridge extends EventBridge {
         this.xmppPort = xmppPort;
     }
 
+    public String getChatService() {
+        return chatService;
+    }
+
+    public void setChatService(String chatService) {
+        this.chatService = chatService;
+    }
+
     public String getSessionHandle() {
         return sessionHandle;
     }
@@ -144,23 +154,43 @@ public class XMPPBridge extends EventBridge {
             throw new CayenneRuntimeException("Null 'xmppHost', can't start XMPPBridge");
         }
 
+        if (chatService == null) {
+            throw new CayenneRuntimeException(
+                    "Null 'chatService', can't start XMPPBridge");
+        }
+
         // shutdown old bridge
         if (connected) {
             shutdownExternal();
         }
 
-        // connect
-        this.connection = xmppPort > 0
-                ? new XMPPConnection(xmppHost, xmppPort)
-                : new XMPPConnection(xmppHost);
+        try {
+            // connect
+            this.connection = xmppPort > 0
+                    ? new XMPPConnection(xmppHost, xmppPort)
+                    : new XMPPConnection(xmppHost);
 
-        connection.loginAnonymously();
+            connection.loginAnonymously();
+        }
+        catch (XMPPException e) {
+            throw new CayenneRuntimeException("Error connecting to XMPP Server"
+                    + e.getLocalizedMessage());
+        }
 
-        this.groupChat = connection.createGroupChat(externalSubject
-                + "."
-                + connection.getHost());
-        groupChat.join(sessionHandle);
-        groupChat.addMessageListener(new XMPPListener());
+        try {
+            this.groupChat = connection.createGroupChat(externalSubject
+                    + '@'
+                    + chatService
+                    + "."
+                    + connection.getHost());
+            groupChat.join(sessionHandle);
+            groupChat.addMessageListener(new XMPPListener());
+        }
+        catch (XMPPException e) {
+            throw new CayenneRuntimeException("Error setting up a group chat: "
+                    + e.getLocalizedMessage());
+        }
+
         this.connected = true;
     }
 
