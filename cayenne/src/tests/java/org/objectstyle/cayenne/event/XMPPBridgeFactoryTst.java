@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.event;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,18 +67,24 @@ public class XMPPBridgeFactoryTst extends TestCase {
     public void testCreateEventBridge() {
         XMPPBridgeFactory factory = new XMPPBridgeFactory();
 
-        EventSubject subject = EventSubject.getSubject(getClass(), "test");
+        Collection subjects = Collections.singleton(EventSubject.getSubject(
+                getClass(),
+                "test"));
         Map properties = new HashMap();
         properties.put(XMPPBridgeFactory.XMPP_HOST_PROPERTY, "somehost.com");
         properties.put(XMPPBridgeFactory.XMPP_PORT_PROPERTY, "12345");
 
-        EventBridge bridge = factory.createEventBridge(subject, properties);
+        EventBridge bridge = factory.createEventBridge(
+                subjects,
+                "remote-subject",
+                properties);
 
         assertTrue(bridge instanceof XMPPBridge);
 
         XMPPBridge xmppBridge = (XMPPBridge) bridge;
 
-        assertSame(subject, xmppBridge.getLocalSubject());
+        assertEquals(subjects, xmppBridge.getLocalSubjects());
+        assertEquals("remote-subject", xmppBridge.getExternalSubject());
         assertEquals("somehost.com", xmppBridge.getXmppHost());
         assertEquals(12345, xmppBridge.getXmppPort());
     }

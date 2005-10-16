@@ -71,6 +71,7 @@ public class CayenneEvent extends EventObject {
 
     protected Map info;
     protected transient Object postedBy;
+    protected EventSubject subject;
 
     public CayenneEvent(Object source) {
         this(source, null);
@@ -94,6 +95,20 @@ public class CayenneEvent extends EventObject {
 
     public Map getInfo() {
         return info != null ? info : Collections.EMPTY_MAP;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public EventSubject getSubject() {
+        return subject;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setSubject(EventSubject subject) {
+        this.subject = subject;
     }
 
     /**

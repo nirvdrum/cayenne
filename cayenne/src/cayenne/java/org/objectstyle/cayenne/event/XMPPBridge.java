@@ -59,6 +59,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.jivesoftware.smack.GroupChat;
 import org.jivesoftware.smack.PacketListener;
@@ -97,7 +99,14 @@ public class XMPPBridge extends EventBridge {
      * Creates an XMPPBridge. External subject will be used as the chat group name.
      */
     public XMPPBridge(EventSubject localSubject, String externalSubject) {
-        super(localSubject, externalSubject);
+        this(Collections.singleton(localSubject), externalSubject);
+    }
+
+    /**
+     * Creates an XMPPBridge. External subject will be used as the chat group name.
+     */
+    public XMPPBridge(Collection localSubjects, String externalSubject) {
+        super(localSubjects, externalSubject);
 
         // generate a unique session handle... users can override it to use a specific
         // handle...

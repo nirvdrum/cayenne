@@ -227,8 +227,13 @@ public class DataRowStore implements Serializable {
             try {
                 EventBridgeFactory factory = (EventBridgeFactory) Class.forName(
                         eventBridgeFactory).newInstance();
+
+                Collection subjects = Collections.singleton(getSnapshotEventSubject());
+                String externalSubject = EventBridge
+                        .convertToExternalSubject(getSnapshotEventSubject());
                 this.remoteNotificationsHandler = factory.createEventBridge(
-                        getSnapshotEventSubject(),
+                        subjects,
+                        externalSubject,
                         properties);
             }
             catch (Exception ex) {

@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.event;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -85,7 +87,18 @@ public class XMPPBridgeFactory implements EventBridgeFactory {
     // public static final String XMPP_PASSWORD_PROPERTY =
     // "cayenne.XMPPBridge.xmppPassword";
 
+    /**
+     * @deprecated since 1.2, as we now need to support multiple subjects.
+     */
     public EventBridge createEventBridge(EventSubject localSubject, Map properties) {
+        return createEventBridge(Collections.singleton(localSubject), EventBridge
+                .convertToExternalSubject(localSubject), properties);
+    }
+
+    public EventBridge createEventBridge(
+            Collection localSubjects,
+            String externalSubject,
+            Map properties) {
 
         String host = (String) properties.get(XMPP_HOST_PROPERTY);
         String portString = (String) properties.get(XMPP_PORT_PROPERTY);
@@ -100,8 +113,7 @@ public class XMPPBridgeFactory implements EventBridgeFactory {
             }
         }
 
-        XMPPBridge bridge = new XMPPBridge(localSubject, EventBridge
-                .convertToExternalSubject(localSubject));
+        XMPPBridge bridge = new XMPPBridge(localSubjects, externalSubject);
 
         bridge.setXmppHost(host);
         bridge.setXmppPort(port);

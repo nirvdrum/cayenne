@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.event;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import org.apache.log4j.Logger;
 import org.jgroups.Channel;
@@ -88,6 +89,13 @@ public class JavaGroupsBridge extends EventBridge implements MessageListener {
      */
     public JavaGroupsBridge(EventSubject localSubject, String externalSubject) {
         super(localSubject, externalSubject);
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public JavaGroupsBridge(Collection localSubjects, String externalSubject) {
+        super(localSubjects, externalSubject);
     }
 
     public String getConfigURL() {

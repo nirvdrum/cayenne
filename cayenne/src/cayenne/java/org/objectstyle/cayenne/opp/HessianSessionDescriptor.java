@@ -56,6 +56,8 @@
 package org.objectstyle.cayenne.opp;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -75,6 +77,11 @@ import org.objectstyle.cayenne.event.EventManager;
  * @author Andrus Adamchik
  */
 public class HessianSessionDescriptor implements Serializable {
+
+    static final Collection SUBJECTS = Arrays.asList(new Object[] {
+            OPPChannel.GRAPH_CHANGED_SUBJECT, OPPChannel.GRAPH_COMMITTED_SUBJECT,
+            OPPChannel.GRAPH_ROLLEDBACK_SUBJECT
+    });
 
     protected String name;
     protected String sessionId;
@@ -162,21 +169,18 @@ public class HessianSessionDescriptor implements Serializable {
                     ? eventBridgeParameters
                     : Collections.EMPTY_MAP;
 
-            this.eventBridge = factory.createEventBridge(OPPChannel.GRAPH_CHANGED_SUBJECT, parameters);
+            this.eventBridge = factory.createEventBridge(SUBJECTS, sessionId, parameters);
         }
         catch (Exception ex) {
             throw new CayenneRuntimeException("Error creating EventBridge.", ex);
         }
-        
-        
+
     }
 
     public void stopListeningForServerEvents(EventManager eventManager)
             throws CayenneRuntimeException {
 
         if (this.eventBridge != null) {
-
-            eventManager.removeListener(eventBridge, eventBridge.getLocalSubject());
 
             try {
                 this.eventBridge.shutdown();

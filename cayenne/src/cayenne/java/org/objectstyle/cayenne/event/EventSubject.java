@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.event;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import org.apache.commons.collections.map.ReferenceMap;
@@ -74,8 +75,7 @@ import org.apache.commons.collections.map.ReferenceMap;
  * @author Dirk Olmes
  * @author Holger Hoffstaette
  */
-
-public class EventSubject {
+public class EventSubject implements Serializable {
 
     // a Map that will allow the values to be GC'ed
     private static Map _registeredSubjects = new ReferenceMap(

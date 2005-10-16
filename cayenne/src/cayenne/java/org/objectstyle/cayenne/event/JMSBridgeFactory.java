@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.event;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -71,9 +73,19 @@ public class JMSBridgeFactory implements EventBridgeFactory {
 
     public static final String TOPIC_CONNECTION_FACTORY_PROPERTY = "cayenne.JMSBridge.topic.connection.factory";
 
+    /**
+     * @deprecated since 1.2, as we now need to support multiple subjects.
+     */
     public EventBridge createEventBridge(EventSubject localSubject, Map properties) {
-        JMSBridge bridge = new JMSBridge(localSubject, EventBridge
-                .convertToExternalSubject(localSubject));
+        return createEventBridge(Collections.singleton(localSubject), EventBridge
+                .convertToExternalSubject(localSubject), properties);
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public EventBridge createEventBridge(Collection localSubjects, String externalSubject, Map properties) {
+        JMSBridge bridge = new JMSBridge(localSubjects, externalSubject);
 
         // configure properties
         String topicConnectionFactory = (String) properties

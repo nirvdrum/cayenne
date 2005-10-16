@@ -56,6 +56,8 @@
 package org.objectstyle.cayenne.event;
 
 import java.lang.reflect.Constructor;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -63,71 +65,85 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.property.PropertyUtils;
 
 /**
- * Factory to create JavaGroupsBridge instances. If JavaGroups library is not installed this
- * factory will return a noop EventBridge as a failover mechanism.
+ * Factory to create JavaGroupsBridge instances. If JavaGroups library is not installed
+ * this factory will return a noop EventBridge as a failover mechanism.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
 public class JavaGroupsBridgeFactory implements EventBridgeFactory {
+
     private static Logger logObj = Logger.getLogger(JavaGroupsBridgeFactory.class);
 
     public static final String MCAST_ADDRESS_DEFAULT = "228.0.0.5";
     public static final String MCAST_PORT_DEFAULT = "22222";
 
-    public static final String MCAST_ADDRESS_PROPERTY =
-        "cayenne.JavaGroupsBridge.mcast.address";
-    public static final String MCAST_PORT_PROPERTY =
-        "cayenne.JavaGroupsBridge.mcast.port";
+    public static final String MCAST_ADDRESS_PROPERTY = "cayenne.JavaGroupsBridge.mcast.address";
+    public static final String MCAST_PORT_PROPERTY = "cayenne.JavaGroupsBridge.mcast.port";
 
     /**
-     * Defines a property for JavaGroups XML configuration file. Example file can be found at
-     * <a href="http://www.filip.net/javagroups/javagroups-protocol.xml">http://www.filip.net/javagroups/javagroups-protocol.xml</a>.
+     * Defines a property for JavaGroups XML configuration file. Example file can be found
+     * at <a
+     * href="http://www.filip.net/javagroups/javagroups-protocol.xml">http://www.filip.net/javagroups/javagroups-protocol.xml</a>.
      */
-    public static final String JGROUPS_CONFIG_URL_PROPERTY =
-        "javagroupsbridge.config.url";
+    public static final String JGROUPS_CONFIG_URL_PROPERTY = "javagroupsbridge.config.url";
 
     /**
-     * Creates a JavaGroupsBridge instance. Since JavaGroups is not shipped with Cayenne and should be
-     * installed separately, a common misconfiguration problem may be the absense of JavaGroups jar file.
-     * This factory returns a dummy noop EventBridge, if this is the case. This would
-     * allow the application to continue to run, but without remote notifications.
+     * @deprecated since 1.2, as we now need to support multiple subjects.
      */
     public EventBridge createEventBridge(EventSubject localSubject, Map properties) {
+        return createEventBridge(Collections.singleton(localSubject), EventBridge
+                .convertToExternalSubject(localSubject), properties);
+    }
+
+    /**
+     * Creates a JavaGroupsBridge instance. Since JavaGroups is not shipped with Cayenne
+     * and should be installed separately, a common misconfiguration problem may be the
+     * absense of JavaGroups jar file. This factory returns a dummy noop EventBridge, if
+     * this is the case. This would allow the application to continue to run, but without
+     * remote notifications.
+     */
+    public EventBridge createEventBridge(
+            Collection localSubjects,
+            String externalSubject,
+            Map properties) {
+
         try {
             // sniff JavaGroups presence
             Class.forName("org.jgroups.Channel");
-            return createJavaGroupsBridge(localSubject, properties);
-        } catch (Exception ex) {
+            return createJavaGroupsBridge(localSubjects, externalSubject, properties);
+        }
+        catch (Exception ex) {
             // recover from no JavaGroups
             return createNoopBridge();
         }
     }
 
     private EventBridge createNoopBridge() {
-        logObj.warn(
-            "*** Remote events disabled. Reason: JGroups is not available. Download JGroups from http://www.jgroups.org/");
+        logObj
+                .warn("*** Remote events disabled. Reason: JGroups is not available. Download JGroups from http://www.jgroups.org/");
         return new NoopEventBridge();
     }
 
     private EventBridge createJavaGroupsBridge(
-        EventSubject localSubject,
-        Map properties) {
+            Collection localSubjects,
+            String externalSubject,
+            Map properties) {
 
         // create JavaGroupsBridge using reflection to avoid triggering
         // ClassNotFound exceptions due to JavaGroups absence.
 
+        
         try {
-            Constructor c =
-                Class.forName(
+            Constructor c = Class.forName(
                     "org.objectstyle.cayenne.event.JavaGroupsBridge").getConstructor(
-                    new Class[] { EventSubject.class, String.class });
+                    new Class[] {
+                            Collection.class, String.class
+                    });
 
-            Object bridge =
-                c.newInstance(
-                    new Object[] {
-                        localSubject,
-                        EventBridge.convertToExternalSubject(localSubject)});
+            Object bridge = c.newInstance(new Object[] {
+                    localSubjects, externalSubject
+            });
 
             // configure properties
             String multicastAddress = (String) properties.get(MCAST_ADDRESS_PROPERTY);
@@ -136,16 +152,16 @@ public class JavaGroupsBridgeFactory implements EventBridgeFactory {
 
             PropertyUtils.setProperty(bridge, "configURL", configURL);
             PropertyUtils.setProperty(
-                bridge,
-                "multicastAddress",
-                multicastAddress != null ? multicastAddress : MCAST_ADDRESS_DEFAULT);
-            PropertyUtils.setProperty(
-                bridge,
-                "multicastPort",
-                multicastPort != null ? multicastPort : MCAST_PORT_DEFAULT);
+                    bridge,
+                    "multicastAddress",
+                    multicastAddress != null ? multicastAddress : MCAST_ADDRESS_DEFAULT);
+            PropertyUtils.setProperty(bridge, "multicastPort", multicastPort != null
+                    ? multicastPort
+                    : MCAST_PORT_DEFAULT);
 
             return (EventBridge) bridge;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             throw new CayenneRuntimeException("Error creating JavaGroupsBridge", ex);
         }
     }
@@ -154,7 +170,7 @@ public class JavaGroupsBridgeFactory implements EventBridgeFactory {
     class NoopEventBridge extends EventBridge {
 
         public NoopEventBridge() {
-            super(null, null);
+            super(Collections.EMPTY_SET, null);
         }
 
         public boolean receivesExternalEvents() {

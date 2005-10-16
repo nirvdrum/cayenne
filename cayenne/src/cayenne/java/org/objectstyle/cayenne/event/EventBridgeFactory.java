@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.event;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -64,5 +65,19 @@ import java.util.Map;
  * @author Andrei Adamchik
  */
 public interface EventBridgeFactory {
-    public EventBridge createEventBridge(EventSubject localSubject, Map properties);
+
+    /**
+     * @deprecated since 1.2 EventBridge must support multiple subjects.
+     */
+    EventBridge createEventBridge(EventSubject localSubject, Map properties);
+
+    /**
+     * Creates an EventBridge with the specified parameters.
+     * 
+     * @since 1.2
+     */
+    EventBridge createEventBridge(
+            Collection localSubjects,
+            String externalSubject,
+            Map properties);
 }

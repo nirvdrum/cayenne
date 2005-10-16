@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.event;
 
+import java.util.Collection;
 import java.util.Collections;
 
 import junit.framework.TestCase;
@@ -64,14 +65,30 @@ import junit.framework.TestCase;
  */
 public class JGroupsBridgeFactoryTst extends TestCase {
 
-    public void testCreateEventBridge() throws Exception {
+    /**
+     * @deprecated since 1.2
+     */
+    public void testCreateEventBridgeOld() throws Exception {
         EventSubject subject = new EventSubject("test");
         EventBridge bridge = new JavaGroupsBridgeFactory().createEventBridge(
                 subject,
                 Collections.EMPTY_MAP);
-        
+
         assertNotNull(bridge);
         assertTrue(bridge instanceof JavaGroupsBridge);
         assertSame(subject, bridge.getLocalSubject());
+    }
+
+    public void testCreateEventBridge() throws Exception {
+        Collection subjects = Collections.singleton(new EventSubject("test"));
+        EventBridge bridge = new JavaGroupsBridgeFactory().createEventBridge(
+                subjects,
+                "abcd",
+                Collections.EMPTY_MAP);
+
+        assertNotNull(bridge);
+        assertTrue(bridge instanceof JavaGroupsBridge);
+        assertEquals(subjects, bridge.getLocalSubjects());
+        assertEquals("abcd", bridge.getExternalSubject());
     }
 }

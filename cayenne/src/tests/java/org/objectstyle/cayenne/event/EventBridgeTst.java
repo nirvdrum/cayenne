@@ -55,21 +55,38 @@
  */
 package org.objectstyle.cayenne.event;
 
+import java.util.Collection;
+
+import junit.framework.TestCase;
+
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.util.ThreadedTestHelper;
 
 /**
  * @author Andrei Adamchik
  */
-public class EventBridgeTst extends CayenneTestCase {
+public class EventBridgeTst extends TestCase {
+
+    /**
+     * @deprecated since 1.2
+     */
+    public void testConstructorOld() throws Exception {
+        EventSubject local = EventSubject.getSubject(EventBridgeTst.class, "testInstall");
+        String external = "externalSubject";
+        TestBridge bridge = new TestBridge(local, external);
+
+        assertEquals(local, bridge.getLocalSubject());
+        assertEquals(external, bridge.getExternalSubject());
+    }
 
     public void testConstructor() throws Exception {
         EventSubject local = EventSubject.getSubject(EventBridgeTst.class, "testInstall");
         String external = "externalSubject";
         TestBridge bridge = new TestBridge(local, external);
 
-        assertEquals(local, bridge.getLocalSubject());
+        Collection subjects = bridge.getLocalSubjects();
+        assertEquals(1, subjects.size());
+        assertTrue(subjects.contains(local));
         assertEquals(external, bridge.getExternalSubject());
     }
 
@@ -109,30 +126,66 @@ public class EventBridgeTst extends CayenneTestCase {
     }
 
     public void testSendExternalEvent() throws Exception {
-        
-        EventSubject local = EventSubject.getSubject(EventBridgeTst.class, "testInstall");
+
+        final EventSubject local = EventSubject.getSubject(EventBridgeTst.class, "testInstall");
         String external = "externalSubject";
         final TestBridge bridge = new TestBridge(local, external);
 
         EventManager manager = new EventManager(2);
         bridge.startup(manager, EventBridge.RECEIVE_LOCAL_EXTERNAL);
 
-        final SnapshotEvent event = new SnapshotEvent(this, this, null, null, null, null);
+        final SnapshotEvent eventWithNoSubject = new SnapshotEvent(
+                this,
+                this,
+                null,
+                null,
+                null,
+                null);
 
-        manager.postEvent(event, local);
+        manager.postEvent(eventWithNoSubject, local);
+
+        // check that event was received and that subject was injected...
 
         // since bridge is notified asynchronously by default,
         // we must wait till notification is received
         ThreadedTestHelper helper = new ThreadedTestHelper() {
+
             protected void assertResult() throws Exception {
-                assertSame(event, bridge.lastLocalEvent);
+                assertTrue(bridge.lastLocalEvent instanceof SnapshotEvent);
+                assertEquals(local, bridge.lastLocalEvent.getSubject());
             }
         };
-        
+
         helper.assertWithTimeout(5000);
+        
+        
+        final SnapshotEvent eventWithSubject = new SnapshotEvent(
+                this,
+                this,
+                null,
+                null,
+                null,
+                null);
+        eventWithSubject.setSubject(local);
+        manager.postEvent(eventWithNoSubject, local);
+
+        // check that event was received and that subject was injected...
+
+        // since bridge is notified asynchronously by default,
+        // we must wait till notification is received
+        ThreadedTestHelper helper1 = new ThreadedTestHelper() {
+
+            protected void assertResult() throws Exception {
+                assertTrue(bridge.lastLocalEvent instanceof SnapshotEvent);
+                assertEquals(local, bridge.lastLocalEvent.getSubject());
+            }
+        };
+
+        helper1.assertWithTimeout(5000);
     }
 
     class TestBridge extends EventBridge {
+
         CayenneEvent lastLocalEvent;
         int startupCalls;
         int shutdownCalls;

@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.event;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import javax.jms.Message;
 import javax.jms.MessageFormatException;
@@ -101,6 +102,13 @@ public class JMSBridge extends EventBridge implements MessageListener {
 
     public JMSBridge(EventSubject localSubject, String externalSubject) {
         super(localSubject, externalSubject);
+    }
+
+    /**
+     * @since 1.2
+     */
+    public JMSBridge(Collection localSubjects, String externalSubject) {
+        super(localSubjects, externalSubject);
     }
 
     /**

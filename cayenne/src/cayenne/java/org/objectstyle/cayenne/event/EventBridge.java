@@ -56,20 +56,26 @@
 
 package org.objectstyle.cayenne.event;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.EventListener;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import org.objectstyle.cayenne.util.IDUtil;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * An object that passes events between a local EventManager and some other event dispatch
- * mechansim. The most common example is sending local events to remote JVMs and receiving
+ * mechanism. The most common example is sending local events to remote JVMs and receiving
  * remote events dispatched by those VMs. EventBridge makes possible to connect a network
  * of regular EventManagers in a single "virtual" distributed EventManager.
  * </p>
  * <p>
  * EventBridge encapsulates a transport agreed upon by all paries (such as JMS) and
- * maintains two event subjects. A "local" subject - to communicate with local
- * EventManager, and a "remote" subject - to use for "external" communications that are
+ * maintains an array of "local" subjects to communicate with local EventManager, and a
+ * single "remote" subject - to use for "external" communications that are
  * transport-specific.
  * <p>
  * Subclasses that require special setup to listen for external events should implement
@@ -90,7 +96,7 @@ import org.objectstyle.cayenne.util.IDUtil;
 // be done by the factory singleton.
 //
 // So far we've been using no more than one or two bridges per Cayenne application, so
-// this is not a *big* problem yet.
+// this is very low priority.
 public abstract class EventBridge implements EventListener {
 
     /**
@@ -108,14 +114,18 @@ public abstract class EventBridge implements EventListener {
     public static final int RECEIVE_LOCAL_EXTERNAL = 3;
 
     protected String externalSubject;
-    protected EventSubject localSubject;
+    protected Collection localSubjects;
     protected EventManager eventManager;
     protected int mode;
 
+    // keeps all listeners so that they are not deallocated
+    Collection listeners;
+
     /**
-     * Performs consistent translation from EventSubjects to a String that can be used by
-     * external transport as subject for distributed communications. Substitutes all chars
-     * that can be incorrectly interpreted by whoever (JNDI, ...?).
+     * A utility method that performs consistent translation from an EventSubject to a
+     * String that can be used by external transport as subject for distributed
+     * communications. Substitutes all chars that can be incorrectly interpreted by
+     * whoever (JNDI, ...?).
      */
     public static String convertToExternalSubject(EventSubject localSubject) {
         char[] chars = localSubject.getSubjectName().toCharArray();
@@ -128,8 +138,20 @@ public abstract class EventBridge implements EventListener {
         return new String(chars);
     }
 
+    /**
+     * Creates an EventBridge with a single local subject.
+     */
     public EventBridge(EventSubject localSubject, String externalSubject) {
-        this.localSubject = localSubject;
+        this(Collections.singleton(localSubject), externalSubject);
+    }
+
+    /**
+     * Creates an EventBridge with multiple local subjects and a single external subject.
+     * 
+     * @since 1.2
+     */
+    public EventBridge(Collection localSubjects, String externalSubject) {
+        this.localSubjects = new HashSet(localSubjects);
         this.externalSubject = externalSubject;
     }
 
@@ -142,9 +164,24 @@ public abstract class EventBridge implements EventListener {
 
     /**
      * Returns a subject used for events within the local JVM.
+     * 
+     * @deprecated since 1.2 EventBridge supports multiple local subjects, so use
+     *             'getLocalSubjects()' instead. This method returns the first subject
+     *             from the subject array for backwards compatibility.
      */
     public EventSubject getLocalSubject() {
-        return localSubject;
+        return localSubjects.size() > 0
+                ? (EventSubject) localSubjects.iterator().next()
+                : null;
+    }
+
+    /**
+     * Returns a Collection of local EventSubjects.
+     * 
+     * @since 1.2
+     */
+    public Collection getLocalSubjects() {
+        return localSubjects;
     }
 
     public boolean receivesLocalEvents() {
@@ -165,11 +202,9 @@ public abstract class EventBridge implements EventListener {
 
     public void startup(EventManager eventManager, int mode, Object eventsSource)
             throws Exception {
+
         // uninstall old event manager
         if (this.eventManager != null) {
-            // maybe leave external interface open?
-            // on the other hand, the approach below is probably cleaner
-            // since nothing is known about the previous state
             shutdown();
         }
 
@@ -180,15 +215,23 @@ public abstract class EventBridge implements EventListener {
         this.eventManager = eventManager;
         this.mode = mode;
 
-        if (receivesLocalEvents()) {
-            // by default set as a non-blocking listener
-            // also, listen only for source events
-            eventManager.addNonBlockingListener(
-                    this,
-                    "onLocalEvent",
-                    CayenneEvent.class,
-                    localSubject,
-                    eventsSource);
+        if (receivesLocalEvents() && !localSubjects.isEmpty()) {
+
+            listeners = new ArrayList(localSubjects.size());
+            Iterator it = localSubjects.iterator();
+            while (it.hasNext()) {
+
+                EventSubject subject = (EventSubject) it.next();
+                SubjectListener listener = new SubjectListener(subject);
+
+                listeners.add(listener);
+                eventManager.addNonBlockingListener(
+                        listener,
+                        "onLocalEvent",
+                        CayenneEvent.class,
+                        subject,
+                        eventsSource);
+            }
         }
 
         startupExternal();
@@ -203,8 +246,18 @@ public abstract class EventBridge implements EventListener {
      * Stops listening for events on both local and external interfaces.
      */
     public void shutdown() throws Exception {
-        this.eventManager.removeListener(this);
-        this.eventManager = null;
+
+        if (listeners != null && eventManager != null) {
+
+            Iterator it = listeners.iterator();
+            while (it.hasNext()) {
+                SubjectListener listener = (SubjectListener) it.next();
+                eventManager.removeListener(listener, listener.subject);
+            }
+
+            eventManager = null;
+            listeners = null;
+        }
 
         shutdownExternal();
     }
@@ -222,6 +275,13 @@ public abstract class EventBridge implements EventListener {
      */
     public void onExternalEvent(CayenneEvent event) {
         if (eventManager != null) {
+
+            EventSubject localSubject = event.getSubject();
+
+            // check for valid subject
+            if (localSubject == null || !localSubjects.contains(localSubject)) {
+                return;
+            }
 
             // initialize event sources
             event.setPostedBy(this);
@@ -243,6 +303,8 @@ public abstract class EventBridge implements EventListener {
     /**
      * Invoked by local EventManager when a local event of interest occurred. Internally
      * delegates to "sendExternalEvent" abstract method.
+     * 
+     * @deprecated Unused since 1.2, as event dispatch is done via internal listeners.
      */
     public void onLocalEvent(CayenneEvent event) throws Exception {
         if (event.getSource() != this) {
@@ -250,5 +312,35 @@ public abstract class EventBridge implements EventListener {
         }
     }
 
+    /**
+     * Sends a Cayenne event over the transport supported by this bridge.
+     */
     protected abstract void sendExternalEvent(CayenneEvent localEvent) throws Exception;
+
+    final class SubjectListener {
+
+        EventSubject subject;
+
+        SubjectListener(EventSubject subject) {
+            this.subject = subject;
+        }
+
+        void onLocalEvent(CayenneEvent event) throws Exception {
+            if (event.getSource() != EventBridge.this) {
+
+                // make sure external event has the right subject, if not make a clone
+                // with the right one...
+                if (!subject.equals(event.getSubject())) {
+                    CayenneEvent clone = (CayenneEvent) Util.cloneViaSerialization(event);
+                    clone.setSubject(subject);
+                    clone.setPostedBy(event.getPostedBy());
+                    clone.setSource(event.getSource());
+
+                    event = clone;
+                }
+
+                sendExternalEvent(event);
+            }
+        }
+    }
 }
