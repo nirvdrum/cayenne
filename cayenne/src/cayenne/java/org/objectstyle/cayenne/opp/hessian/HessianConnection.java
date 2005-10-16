@@ -53,13 +53,16 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.opp;
+package org.objectstyle.cayenne.opp.hessian;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.event.EventBridge;
+import org.objectstyle.cayenne.opp.BaseConnection;
+import org.objectstyle.cayenne.opp.OPPMessage;
 import org.objectstyle.cayenne.util.Util;
 
 import com.caucho.hessian.client.HessianProxyFactory;
@@ -69,24 +72,22 @@ import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.HessianProtocolException;
 
 /**
- * An OPPConnector that passes messages to a remotely deployed HessianService. It supports
- * HTTP BASIC authentication. HessianConnector serializes messages and responses using
- * Hessian binary web service protocol over HTTP. For more info on Hessian see Caucho site
- * at <a
+ * An OPPConnection that passes messages to a remotely deployed HessianService. It
+ * supports HTTP BASIC authentication. HessianConnection serializes messages using Hessian
+ * binary web service protocol over HTTP. For more info on Hessian see Caucho site at <a
  * href="http://www.caucho.com/resin-3.0/protocols/hessian.xtp">http://www.caucho.com/resin-3.0/protocols/hessian.xtp</a>.
- * HessianConnector supports logging of message traffic via Jakarta commons-logging API.
+ * HessianConnection supports logging of message traffic via Jakarta commons-logging API.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class HessianConnector extends BaseConnector {
+public class HessianConnection extends BaseConnection {
 
     protected String url;
     protected String userName;
     protected String password;
 
-    protected HessianSessionDescriptor session;
-
+    protected HessianSession session;
     protected HessianService service;
 
     /**
@@ -109,7 +110,7 @@ public class HessianConnector extends BaseConnector {
      * A shortcut for HessianConnector(String,String,String) used when no HTTP basic
      * authentication is required.
      */
-    public HessianConnector(String url) {
+    public HessianConnection(String url) {
         this(url, null, null);
     }
 
@@ -119,7 +120,7 @@ public class HessianConnector extends BaseConnector {
      * null. URL on the other hand is required. Null URL would cause an
      * IllegalArgumentException.
      */
-    public HessianConnector(String url, String userName, String password) {
+    public HessianConnection(String url, String userName, String password) {
         if (url == null) {
             throw new IllegalArgumentException("URL of Cayenne service is null.");
         }
@@ -150,6 +151,14 @@ public class HessianConnector extends BaseConnector {
      */
     public String getPassword() {
         return password;
+    }
+
+    public EventBridge getServerEventBridge() throws CayenneRuntimeException {
+        if (session == null) {
+            connect();
+        }
+
+        return session.isServerEventsEnabled() ? session.createServerEventBridge() : null;
     }
 
     /**
@@ -237,10 +246,7 @@ public class HessianConnector extends BaseConnector {
             throw new CayenneRuntimeException(message, th);
         }
 
-        if (session.isServerEventsEnabled()) {
-            logger.info("=== Enabling server events handler...");
-            session.startListeningForServerEvents(getEventManager());
-        }
+        // TODO: send a connect event...
     }
 
     String buildExceptionMessage(String message, Throwable th) {

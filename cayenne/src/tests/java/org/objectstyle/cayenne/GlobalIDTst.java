@@ -57,7 +57,7 @@ package org.objectstyle.cayenne;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.opp.HessianConnector;
+import org.objectstyle.cayenne.opp.hessian.HessianConnection;
 import org.objectstyle.cayenne.util.Util;
 
 public class GlobalIDTst extends TestCase {
@@ -97,7 +97,7 @@ public class GlobalIDTst extends TestCase {
 
     public void testHessianSerializabilityTemp() throws Exception {
         GlobalID temp1 = new GlobalID("e");
-        GlobalID temp2 = (GlobalID) HessianConnector.cloneViaHessianSerialization(temp1);
+        GlobalID temp2 = (GlobalID) HessianConnection.cloneViaHessianSerialization(temp1);
         
         assertTrue(temp1.isTemporary());
         assertNotSame(temp1, temp2);
@@ -106,7 +106,7 @@ public class GlobalIDTst extends TestCase {
 
     public void testHessianSerializabilityPerm() throws Exception {
         GlobalID perm1 = new GlobalID("e", "a", "b");
-        GlobalID perm2 = (GlobalID) HessianConnector.cloneViaHessianSerialization(perm1);
+        GlobalID perm2 = (GlobalID) HessianConnection.cloneViaHessianSerialization(perm1);
         
         assertFalse(perm2.isTemporary());
         assertNotSame(perm1, perm2);

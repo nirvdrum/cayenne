@@ -53,25 +53,59 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.opp;
+package org.objectstyle.cayenne.opp.hessian;
 
-import org.objectstyle.cayenne.opp.HessianConnector;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 
-import junit.framework.TestCase;
+/**
+ * An extension of the <code>com.caucho.hessian.server.HessianServlet</code> that
+ * installs default Cayenne handlers, simplifying <code>web.xml</code> configuration.
+ * Here is a sample configuration:
+ * 
+ * <pre>
+ *    &lt;servlet&gt;
+ *      &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
+ *      &lt;servlet-class&gt;org.objectstyle.cayenne.opp.hessian.HessianServlet&lt;/servlet-class&gt;
+ *    &lt;/servlet&gt;
+ *        
+ *    &lt;servlet-mapping&gt;
+ *      &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
+ *      &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
+ *    &lt;/servlet-mapping&gt;
+ * </pre>
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+public class HessianServlet extends com.caucho.hessian.server.HessianServlet {
 
-public class HessianConnectorTst extends TestCase {
+    static final String HOME_API_PARAMETER = "home-api";
+    static final String API_CLASS_PARAMETER = "api-class";
 
-    public void testConstructor1Arg() {
-        HessianConnector c = new HessianConnector("a");
-        assertEquals("a", c.getUrl());
-        assertNull(c.getUserName());
-        assertNull(c.getPassword());
-    }
-    
-    public void testConstructor3Arg() {
-        HessianConnector c = new HessianConnector("a", "b", "c");
-        assertEquals("a", c.getUrl());
-        assertEquals("b", c.getUserName());
-        assertEquals("c", c.getPassword());
+    static final String SERVICE_CLASS_PARAMETER = "service-class";
+    static final String HOME_CLASS_PARAMETER = "home-class";
+
+    /**
+     * Installs HessianServiceHandler to respond to HessianService requests, unless
+     * overridden by servlet configuration.
+     */
+    public void init(ServletConfig config) throws ServletException {
+
+        // init defaults
+        if (config.getInitParameter(API_CLASS_PARAMETER) == null
+                && config.getInitParameter(HOME_API_PARAMETER) == null) {
+            setHomeAPI(HessianService.class);
+        }
+
+        if (config.getInitParameter(SERVICE_CLASS_PARAMETER) == null
+                && config.getInitParameter(HOME_CLASS_PARAMETER) == null) {
+            HessianServiceHandler handler = new HessianServiceHandler();
+            handler.init(config);
+            setHome(handler);
+        }
+
+        // proceed to super
+        super.init(config);
     }
 }

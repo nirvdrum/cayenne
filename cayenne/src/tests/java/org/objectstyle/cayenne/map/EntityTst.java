@@ -60,7 +60,7 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.opp.HessianConnector;
+import org.objectstyle.cayenne.opp.hessian.HessianConnection;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.util.Util;
 
@@ -98,12 +98,12 @@ public class EntityTst extends CayenneTestCase {
     public void testSerializabilityWithHessian() throws Exception {
         Entity entity = new MockEntity("entity");
 
-        Entity d1 = (Entity) HessianConnector.cloneViaHessianSerialization(entity);
+        Entity d1 = (Entity) HessianConnection.cloneViaHessianSerialization(entity);
         assertEquals(entity.getName(), d1.getName());
 
         entity.addAttribute(new MockAttribute("abc"));
         entity.addRelationship(new MockRelationship("xyz"));
-        Entity d2 = (Entity) HessianConnector.cloneViaHessianSerialization(entity);
+        Entity d2 = (Entity) HessianConnection.cloneViaHessianSerialization(entity);
         assertNotNull(d2.getAttribute("abc"));
         assertNotNull(d2.getRelationship("xyz"));
 

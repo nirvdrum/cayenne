@@ -55,50 +55,100 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.event.EventBridge;
+import org.objectstyle.cayenne.opp.hessian.HessianConnection;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * A noop CayenneConnector used for unit testing. Accumulates commands sent via this
- * connector without doing anything with them.
+ * An OPPConnection that connects to an OPPChannel. Used as an emulator of a remote
+ * service. Emulation includes serialization/deserialization of objects.
  * 
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class MockOPPConnector implements OPPConnector {
+public class LocalConnection extends BaseConnection {
 
-    protected Collection commands;
-    protected Object fakeResponse;
+    public static final int NO_SERIALIZATION = 0;
+    public static final int JAVA_SERIALIZATION = 1;
+    public static final int HESSIAN_SERIALIZATION = 2;
 
-    public MockOPPConnector() {
-        this(null);
+    protected OPPChannel channel;
+    protected int serializationPolicy;
+
+    /**
+     * Creates LocalConnector with specified handler and no serialization.
+     */
+    public LocalConnection(OPPChannel handler) {
+        this(handler, NO_SERIALIZATION);
     }
 
-    public MockOPPConnector(Object defaultResponse) {
-        this.commands = new ArrayList();
-        this.fakeResponse = defaultResponse;
+    /**
+     * Creates a LocalConnector with specified handler and serialization policy. Valid
+     * policies are defined as final static int field in this class.
+     */
+    public LocalConnection(OPPChannel handler, int serializationPolicy) {
+        this.channel = handler;
+
+        // convert invalid policy to NO_SER..
+        this.serializationPolicy = serializationPolicy == JAVA_SERIALIZATION
+                || serializationPolicy == HESSIAN_SERIALIZATION
+                ? serializationPolicy
+                : NO_SERIALIZATION;
     }
 
-    public void reset() {
-        commands.clear();
-        fakeResponse = null;
+    public boolean isSerializingMessages() {
+        return serializationPolicy == JAVA_SERIALIZATION
+                || serializationPolicy == HESSIAN_SERIALIZATION;
     }
 
-    public EventManager getEventManager() {
+    /**
+     * Returns wrapped OPPChannel.
+     */
+    public OPPChannel getChannel() {
+        return channel;
+    }
+
+    /**
+     * Returns null.
+     */
+    public EventBridge getServerEventBridge() {
         return null;
     }
 
-    public void setResponse(Object fakeResponse) {
-        this.fakeResponse = fakeResponse;
+    /**
+     * Does nothing.
+     */
+    protected void beforeSendMessage(OPPMessage message) {
+        // noop
     }
 
-    public Collection getCommands() {
-        return commands;
-    }
+    /**
+     * Dispatches a message to an internal handler.
+     */
+    protected Object doSendMessage(OPPMessage message) throws CayenneRuntimeException {
 
-    public Object sendMessage(OPPMessage command) {
-        commands.add(command);
-        return fakeResponse;
+        OPPMessage processedMessage;
+
+        try {
+            switch (serializationPolicy) {
+                case HESSIAN_SERIALIZATION:
+                    processedMessage = (OPPMessage) HessianConnection
+                            .cloneViaHessianSerialization(message);
+                    break;
+
+                case JAVA_SERIALIZATION:
+                    processedMessage = (OPPMessage) Util.cloneViaSerialization(message);
+                    break;
+
+                default:
+                    processedMessage = message;
+            }
+
+            return processedMessage.dispatch(channel);
+        }
+        catch (Exception ex) {
+            throw new CayenneRuntimeException("Error sending message", ex);
+        }
     }
 }

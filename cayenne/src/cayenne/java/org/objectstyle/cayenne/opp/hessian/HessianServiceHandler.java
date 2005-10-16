@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne.opp.hessian;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,10 +66,9 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
-import org.objectstyle.cayenne.opp.HessianService;
-import org.objectstyle.cayenne.opp.HessianSessionDescriptor;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.OPPMessage;
+import org.objectstyle.cayenne.service.ClientServerChannel;
 import org.objectstyle.cayenne.util.IDUtil;
 import org.objectstyle.cayenne.util.Util;
 
@@ -78,7 +77,7 @@ import com.caucho.services.server.Service;
 /**
  * A default implementation of HessianService service protocol. Supports client sessions.
  * For more info on Hessian see http://www.caucho.com/resin-3.0/protocols/hessian.xtp. See
- * {@link org.objectstyle.cayenne.opp.HessianService}for deployment configuration
+ * {@link org.objectstyle.cayenne.opp.hessian.HessianService}for deployment configuration
  * examples.
  * 
  * @since 1.2
@@ -88,7 +87,7 @@ public class HessianServiceHandler implements HessianService, Service {
 
     private static final Logger logObj = Logger.getLogger(HessianServiceHandler.class);
 
-    protected Map commandHandlers;
+    protected Map sessionChannels;
     protected Map sharedSessions;
     protected DataDomain domain;
 
@@ -115,7 +114,7 @@ public class HessianServiceHandler implements HessianService, Service {
         // do something about multiple domains
         this.domain = cayenneConfig.getDomain();
 
-        this.commandHandlers = new HashMap();
+        this.sessionChannels = new HashMap();
         this.sharedSessions = new HashMap();
 
         // if EventBridgeFactory is configured, extract parameters and create an event
@@ -129,34 +128,34 @@ public class HessianServiceHandler implements HessianService, Service {
      * Hessian Service lifecycle method.
      */
     public void destroy() {
-        this.commandHandlers = null;
+        this.sessionChannels = null;
         this.sharedSessions = null;
 
         logObj.debug("CayenneHessianService destroyed");
     }
 
-    public HessianSessionDescriptor establishSession() {
+    public HessianSession establishSession() {
         logObj.debug("Session requested by client");
 
-        HessianSessionDescriptor session = createSession();
+        HessianSession session = createSession();
 
         logObj.debug("Established client session: " + session);
         return session;
     }
 
-    public HessianSessionDescriptor establishSharedSession(String name) {
+    public HessianSession establishSharedSession(String name) {
         logObj.debug("Shared session requested by client. Group name: " + name);
 
         if (name == null) {
             throw new CayenneRuntimeException("Invalid shared session name: " + name);
         }
 
-        HessianSessionDescriptor session;
+        HessianSession session;
 
-        synchronized (commandHandlers) {
-            session = (HessianSessionDescriptor) sharedSessions.get(name);
+        synchronized (sessionChannels) {
+            session = (HessianSession) sharedSessions.get(name);
 
-            if (session == null || commandHandlers.get(session) == null) {
+            if (session == null || sessionChannels.get(session.getSessionId()) == null) {
                 session = createSession();
                 session.setName(name);
                 logObj.debug("Created new shared session:" + session);
@@ -176,8 +175,8 @@ public class HessianServiceHandler implements HessianService, Service {
         logObj.debug("processMessage, sessionId: " + sessionId);
 
         OPPChannel handler;
-        synchronized (commandHandlers) {
-            handler = (OPPChannel) commandHandlers.get(sessionId);
+        synchronized (sessionChannels) {
+            handler = (OPPChannel) sessionChannels.get(sessionId);
         }
 
         if (handler == null) {
@@ -195,10 +194,9 @@ public class HessianServiceHandler implements HessianService, Service {
         }
     }
 
-    HessianSessionDescriptor createSession() {
+    HessianSession createSession() {
 
-        HessianSessionDescriptor session = new HessianSessionDescriptor(makeId());
-        ObjectDataContext context = new ObjectDataContext(domain);
+        HessianSession session = new HessianSession(makeId());
 
         // TODO (Andrus, 10/15/2005) This will result in a memory leak as there is no
         // session timeout; must attach context to the HttpSession. Not entirely sure how
@@ -207,8 +205,10 @@ public class HessianServiceHandler implements HessianService, Service {
 
         // or create our own TimeoutMap ... it will be useful in million other places
 
-        synchronized (commandHandlers) {
-            commandHandlers.put(session, new ClientServerChannel(context, true));
+        synchronized (sessionChannels) {
+            sessionChannels.put(session.getSessionId(), new ClientServerChannel(
+                    domain,
+                    true));
         }
 
         return session;

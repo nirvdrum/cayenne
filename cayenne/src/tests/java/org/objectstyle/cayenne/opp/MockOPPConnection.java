@@ -55,38 +55,51 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import junit.framework.TestCase;
+import java.util.ArrayList;
+import java.util.Collection;
 
-public class HessianSessionDescriptorTst extends TestCase {
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.event.EventBridge;
 
-    public void testConstructor1() {
-        HessianSessionDescriptor descriptor = new HessianSessionDescriptor("abc");
-        assertEquals("abc", descriptor.getSessionId());
-        assertFalse(descriptor.isListeningForServerEvents());
-        assertFalse(descriptor.isServerEventsEnabled());
+/**
+ * A noop CayenneConnector used for unit testing. Accumulates commands sent via this
+ * connector without doing anything with them.
+ * 
+ * @author Andrus Adamchik
+ */
+public class MockOPPConnection implements OPPConnection {
+
+    protected Collection commands;
+    protected Object fakeResponse;
+
+    public MockOPPConnection() {
+        this(null);
     }
 
-    public void testConstructor2() {
-        HessianSessionDescriptor descriptor = new HessianSessionDescriptor(
-                "abc",
-                "factory",
-                null);
-        assertEquals("abc", descriptor.getSessionId());
-        assertFalse(descriptor.isListeningForServerEvents());
-        assertTrue(descriptor.isServerEventsEnabled());
+    public MockOPPConnection(Object defaultResponse) {
+        this.commands = new ArrayList();
+        this.fakeResponse = defaultResponse;
     }
 
-    public void testHashCode() {
-        HessianSessionDescriptor d1 = new HessianSessionDescriptor("1");
-        HessianSessionDescriptor d2 = new HessianSessionDescriptor("1");
+    public void reset() {
+        commands.clear();
+        fakeResponse = null;
+    }
 
-        assertEquals(d1.hashCode(), d1.hashCode());
-        assertEquals(d1.hashCode(), d2.hashCode());
+    public EventBridge getServerEventBridge() throws CayenneRuntimeException {
+        return null;
+    }
 
-        d2.setName("some name");
-        assertEquals(d1.hashCode(), d2.hashCode());
+    public void setResponse(Object fakeResponse) {
+        this.fakeResponse = fakeResponse;
+    }
 
-        HessianSessionDescriptor d3 = new HessianSessionDescriptor("2");
-        assertFalse(d1.hashCode() == d3.hashCode());
+    public Collection getCommands() {
+        return commands;
+    }
+
+    public Object sendMessage(OPPMessage command) {
+        commands.add(command);
+        return fakeResponse;
     }
 }

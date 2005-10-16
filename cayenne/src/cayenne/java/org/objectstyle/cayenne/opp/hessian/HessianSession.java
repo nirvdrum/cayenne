@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.opp;
+package org.objectstyle.cayenne.opp.hessian;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -66,7 +66,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.event.EventBridge;
 import org.objectstyle.cayenne.event.EventBridgeFactory;
-import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.opp.OPPChannel;
 
 /**
  * A descriptor passed from HessianService to the caller when a session is established. It
@@ -76,7 +76,7 @@ import org.objectstyle.cayenne.event.EventManager;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class HessianSessionDescriptor implements Serializable {
+public class HessianSession implements Serializable {
 
     static final Collection SUBJECTS = Arrays.asList(new Object[] {
             OPPChannel.GRAPH_CHANGED_SUBJECT, OPPChannel.GRAPH_COMMITTED_SUBJECT,
@@ -89,24 +89,22 @@ public class HessianSessionDescriptor implements Serializable {
     protected String eventBridgeFactory;
     protected Map eventBridgeParameters;
 
-    transient EventBridge eventBridge;
-
     // private constructor used by hessian deserialization mechanism
-    private HessianSessionDescriptor() {
+    private HessianSession() {
 
     }
 
     /**
      * Creates a HessianServiceDescriptor without server events support.
      */
-    public HessianSessionDescriptor(String sessionId) {
+    public HessianSession(String sessionId) {
         this(sessionId, null, null);
     }
 
     /**
      * Creates a HessianServiceDescriptor with server events support.
      */
-    public HessianSessionDescriptor(String sessionId, String eventBridgeFactory,
+    public HessianSession(String sessionId, String eventBridgeFactory,
             Map eventBridgeParameters) {
 
         if (sessionId == null) {
@@ -142,26 +140,15 @@ public class HessianSessionDescriptor implements Serializable {
     }
 
     /**
-     * Returns true if EventBridge is started.
-     */
-    public boolean isListeningForServerEvents() {
-        return eventBridge != null;
-    }
-
-    /**
-     * Starts an EventBridge that will listen for server events. Does nothing if server
+     * Creates an EventBridge that will listen for server events. Returns null if server
      * events support is not configured in the descriptor.
      * 
      * @throws CayenneRuntimeException if EventBridge startup fails for any reason.
      */
-    public void startListeningForServerEvents(EventManager eventManager)
-            throws CayenneRuntimeException {
-
-        // shutdown old bridge...
-        stopListeningForServerEvents();
+    public EventBridge createServerEventBridge() throws CayenneRuntimeException {
 
         if (!isServerEventsEnabled()) {
-            return;
+            return null;
         }
 
         try {
@@ -172,28 +159,10 @@ public class HessianSessionDescriptor implements Serializable {
                     ? eventBridgeParameters
                     : Collections.EMPTY_MAP;
 
-            this.eventBridge = factory.createEventBridge(SUBJECTS, sessionId, parameters);
-            eventBridge.startup(eventManager, EventBridge.RECEIVE_EXTERNAL);
+            return factory.createEventBridge(SUBJECTS, sessionId, parameters);
         }
         catch (Exception ex) {
             throw new CayenneRuntimeException("Error creating EventBridge.", ex);
-        }
-
-    }
-
-    public void stopListeningForServerEvents() throws CayenneRuntimeException {
-
-        if (this.eventBridge != null) {
-
-            try {
-                this.eventBridge.shutdown();
-            }
-            catch (Exception e) {
-                throw new CayenneRuntimeException("Error shutting down EventBridge", e);
-            }
-            finally {
-                this.eventBridge = null;
-            }
         }
     }
 
@@ -211,5 +180,4 @@ public class HessianSessionDescriptor implements Serializable {
 
         return builder.toString();
     }
-
 }

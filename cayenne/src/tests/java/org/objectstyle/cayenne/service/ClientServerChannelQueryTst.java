@@ -60,8 +60,8 @@ import java.util.List;
 import org.objectstyle.cayenne.CayenneContext;
 import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.opp.OPPConnectorChannel;
-import org.objectstyle.cayenne.opp.LocalConnector;
+import org.objectstyle.cayenne.opp.OPPServerChannel;
+import org.objectstyle.cayenne.opp.LocalConnection;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -211,10 +211,10 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
      */
     protected CayenneContext buildContext() {
         OPPChannel handler = new ClientServerChannel(getDomain());
-        LocalConnector connector = new LocalConnector(
+        LocalConnection connector = new LocalConnection(
                 handler,
-                LocalConnector.HESSIAN_SERIALIZATION);
+                LocalConnection.HESSIAN_SERIALIZATION);
 
-        return new CayenneContext(new OPPConnectorChannel(connector));
+        return new CayenneContext(new OPPServerChannel(connector));
     }
 }

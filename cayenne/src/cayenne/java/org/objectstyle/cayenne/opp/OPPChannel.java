@@ -65,8 +65,12 @@ import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
  * A two-way communication channel connecting a parent persistence engine and its
- * "children". In other words OPPChannel is an abstraction of an access stack used by
- * ObjectContexts.
+ * "children". OPPChannel defines a number of methods to send messages and receieve
+ * synchronous replies. It can also notify listeners asynchronously about the events that
+ * occur on the parent end of the channel.
+ * <p>
+ * OPPChannel used by ObjectContext as an abstraction of an access stack.
+ * </p>
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -86,8 +90,8 @@ public interface OPPChannel {
             "graphRolledback");
 
     /**
-     * Returns an EventManager that associated with this channel. Channel may return null
-     * if EventManager is not available for any reason.
+     * Returns an EventManager associated with this channel. Channel may return null if
+     * EventManager is not available for any reason.
      */
     EventManager getEventManager();
 

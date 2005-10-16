@@ -58,9 +58,9 @@ package org.objectstyle.cayenne;
 import java.util.Iterator;
 import java.util.List;
 
-import org.objectstyle.cayenne.opp.OPPConnectorChannel;
-import org.objectstyle.cayenne.opp.LocalConnector;
-import org.objectstyle.cayenne.opp.OPPConnector;
+import org.objectstyle.cayenne.opp.OPPServerChannel;
+import org.objectstyle.cayenne.opp.LocalConnection;
+import org.objectstyle.cayenne.opp.OPPConnection;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
 import org.objectstyle.cayenne.service.ClientServerChannel;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
@@ -81,8 +81,8 @@ public class PersistentObjectInContextTst extends CayenneTestCase {
 
     protected ObjectContext createObjectContext() {
         // wrap ClientServerChannel in LocalConnector to enable logging...
-        OPPConnector connector = new LocalConnector(new ClientServerChannel(getDomain()));
-        return new CayenneContext(new OPPConnectorChannel(connector));
+        OPPConnection connector = new LocalConnection(new ClientServerChannel(getDomain()));
+        return new CayenneContext(new OPPServerChannel(connector));
     }
 
     public void testResolveToManyReverseResolved() throws Exception {

@@ -117,6 +117,8 @@
 				there is a number of server-side only classes in remaining packages
 			-->
  			<fileset dir="${core.build}/classes">
+				<exclude name="org/objectstyle/cayenne/DataObject.class"/>
+				<exclude name="org/objectstyle/cayenne/CayenneDataObject.class"/>
 				<exclude name="org/objectstyle/cayenne/access/**"/>
 				<exclude name="org/objectstyle/cayenne/conf/**"/>
 				<exclude name="org/objectstyle/cayenne/conn/**"/>
@@ -127,6 +129,8 @@
 				<exclude name="org/objectstyle/cayenne/service/**"/>
 				<exclude name="org/objectstyle/cayenne/tools/**"/>
 				<exclude name="org/objectstyle/cayenne/wocompat/**"/>
+				<exclude name="org/objectstyle/cayenne/opp/hessian/HessianServlet.class"/>
+				<exclude name="org/objectstyle/cayenne/opp/hessian/HessianServiceHandler.class"/>
 			</fileset>
 			
 			<!-- 

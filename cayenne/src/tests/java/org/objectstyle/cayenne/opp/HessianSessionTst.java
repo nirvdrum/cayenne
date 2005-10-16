@@ -55,61 +55,35 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import org.objectstyle.cayenne.opp.LocalConnector;
-import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.opp.hessian.HessianSession;
 
 import junit.framework.TestCase;
 
-/**
- * @author Andrus Adamchik
- */
-public class LocalConnectorTst extends TestCase {
+public class HessianSessionTst extends TestCase {
 
-    public void testConstructors() {
-        OPPChannel handler1 = new MockOPPChannel();
-        LocalConnector connector1 = new LocalConnector(handler1);
-        assertFalse(connector1.isSerializingMessages());
-        assertSame(handler1, connector1.getChannel());
-
-        OPPChannel handler2 = new MockOPPChannel();
-        LocalConnector connector2 = new LocalConnector(
-                handler2,
-                LocalConnector.JAVA_SERIALIZATION);
-        assertTrue(connector2.isSerializingMessages());
-        assertSame(handler2, connector2.getChannel());
+    public void testConstructor1() {
+        HessianSession descriptor = new HessianSession("abc");
+        assertEquals("abc", descriptor.getSessionId());
+        assertFalse(descriptor.isServerEventsEnabled());
     }
 
-    public void testSendMessage() {
-        OPPChannel handler = new MockOPPChannel();
-
-        // create connector without serialization support...
-        LocalConnector connector = new LocalConnector(handler);
-
-        // test that messages are being dispatched...
-
-        MockOPPMessage message1 = new MockOPPMessage();
-        connector.sendMessage(message1);
-        assertSame(handler, message1.getLastChannel());
-
-        MockOPPMessage message2 = new MockOPPMessage();
-        connector.sendMessage(message2);
-        assertSame(handler, message2.getLastChannel());
+    public void testConstructor2() {
+        HessianSession descriptor = new HessianSession("abc", "factory", null);
+        assertEquals("abc", descriptor.getSessionId());
+        assertTrue(descriptor.isServerEventsEnabled());
     }
 
-    public void testSendMessageSerialized() {
-        OPPChannel handler = new MockOPPChannel();
+    public void testHashCode() {
+        HessianSession d1 = new HessianSession("1");
+        HessianSession d2 = new HessianSession("1");
 
-        // create connector without serialization support...
-        LocalConnector connector = new LocalConnector(
-                handler,
-                LocalConnector.HESSIAN_SERIALIZATION);
+        assertEquals(d1.hashCode(), d1.hashCode());
+        assertEquals(d1.hashCode(), d2.hashCode());
 
-        // indirectly test that a dispatch was done on a different message
-        // a better test would involve some serialization tricks with
-        // MockAbstractMessage....
+        d2.setName("some name");
+        assertEquals(d1.hashCode(), d2.hashCode());
 
-        MockOPPMessage message1 = new MockOPPMessage();
-        connector.sendMessage(message1);
-        assertNull(message1.getLastChannel());
+        HessianSession d3 = new HessianSession("2");
+        assertFalse(d1.hashCode() == d3.hashCode());
     }
 }

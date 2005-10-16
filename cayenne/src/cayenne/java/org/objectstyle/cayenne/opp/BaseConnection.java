@@ -58,29 +58,24 @@ package org.objectstyle.cayenne.opp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.event.EventManager;
 
 /**
- * A convenience superlcass of client connectors that provides common message logging
- * functionality.
+ * A convenience superlcass simplifing concrete OPPConnection implmenetations. Provides
+ * common message logging functionality.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public abstract class BaseConnector implements OPPConnector {
+public abstract class BaseConnection implements OPPConnection {
 
     protected Log logger;
     protected long messageId;
-    protected EventManager eventManager;
 
     /**
      * Default constructor that initializes logging and a single threaded EventManager.
      */
-    protected BaseConnector() {
+    protected BaseConnection() {
         this.logger = LogFactory.getLog(getClass());
-
-        // by default use single-threaded EventManager...
-        this.eventManager = new EventManager(0);
     }
 
     /**
@@ -164,12 +159,4 @@ public abstract class BaseConnector implements OPPConnector {
      */
     protected abstract Object doSendMessage(OPPMessage message)
             throws CayenneRuntimeException;
-
-    public EventManager getEventManager() {
-        return eventManager;
-    }
-
-    public void setEventManager(EventManager eventManager) {
-        this.eventManager = eventManager;
-    }
 }

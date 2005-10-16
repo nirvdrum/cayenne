@@ -60,7 +60,7 @@ import junit.framework.TestCase;
 import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.MockDataObject;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.opp.HessianConnector;
+import org.objectstyle.cayenne.opp.hessian.HessianConnection;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -100,7 +100,7 @@ public class RelationshipQueryTst extends TestCase {
         GlobalID oid = new GlobalID("test", "a", "b");
         RelationshipQuery query = new RelationshipQuery(oid, "relX");
 
-        RelationshipQuery q1 = (RelationshipQuery) HessianConnector
+        RelationshipQuery q1 = (RelationshipQuery) HessianConnection
                 .cloneViaHessianSerialization(query);
         assertNotNull(q1);
         assertEquals(oid, q1.getGlobalID());

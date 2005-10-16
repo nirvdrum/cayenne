@@ -55,70 +55,30 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import java.util.List;
-
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.event.EventManager;
-import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.event.EventBridge;
 
 /**
- * An OPPChannel adapter that forwards messages via a CayenneConnector.
+ * A connection object used to interact with an OPP server. Connection supports
+ * synchronous interaction via <code>sendMessage(OPPMessage)</code> and asynchronous
+ * listening for server events.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class OPPConnectorChannel implements OPPChannel {
-
-    protected OPPConnector connector;
-
-    public OPPConnectorChannel(OPPConnector connector) {
-        this.connector = connector;
-    }
-
-    public EventManager getEventManager() {
-        return connector != null ? connector.getEventManager() : null;
-    }
-
-    public List onSelectQuery(SelectMessage message) {
-        return (List) send(message, List.class);
-    }
-
-    public int[] onUpdateQuery(UpdateMessage message) {
-        return (int[]) send(message, int[].class);
-    }
-
-    public QueryResponse onGenericQuery(GenericQueryMessage message) {
-        return (QueryResponse) send(message, QueryResponse.class);
-    }
-
-    public GraphDiff onSync(SyncMessage message) {
-        return (GraphDiff) send(message, GraphDiff.class);
-    }
-
-    public EntityResolver onBootstrap(BootstrapMessage message) {
-        return (EntityResolver) send(message, EntityResolver.class);
-    }
+public interface OPPConnection {
 
     /**
-     * Sends a message via connector, getting a result as an instance of a specific class.
+     * Returns an EventBridge that receives OPP server events. Caller would normally
+     * register returned bridge with a local EventManager, thus allowing local listeners
+     * to receive server events.
      * 
-     * @throws org.objectstyle.cayenne.client.CayenneClientException if an underlying
-     *             connector exception occured, or a result is not of expected type.
+     * @return An EventBridge or null if server events are not supported.
      */
-    protected Object send(OPPMessage message, Class resultClass) {
-        Object result = connector.sendMessage(message);
+    EventBridge getServerEventBridge() throws CayenneRuntimeException;
 
-        if (result != null && !resultClass.isInstance(result)) {
-            String resultString = new ToStringBuilder(result).toString();
-            throw new CayenneRuntimeException("Expected result type: "
-                    + resultClass.getName()
-                    + ", actual: "
-                    + resultString);
-        }
-
-        return result;
-    }
+    /**
+     * Sends a synchronous OPPMessage to the server, returning a reply.
+     */
+    Object sendMessage(OPPMessage message) throws CayenneRuntimeException;
 }

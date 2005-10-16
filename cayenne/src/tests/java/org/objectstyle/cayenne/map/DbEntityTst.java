@@ -59,7 +59,7 @@ import java.util.List;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.opp.HessianConnector;
+import org.objectstyle.cayenne.opp.hessian.HessianConnection;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.util.Util;
 
@@ -106,7 +106,7 @@ public class DbEntityTst extends CayenneTestCase {
         generated.setGenerated(true);
         entity.addAttribute(generated);
 
-        DbEntity d2 = (DbEntity) HessianConnector.cloneViaHessianSerialization(entity);
+        DbEntity d2 = (DbEntity) HessianConnection.cloneViaHessianSerialization(entity);
 
         assertNotNull(d2.getPrimaryKey());
         assertEquals(entity.getPrimaryKey().size(), d2.getPrimaryKey().size());

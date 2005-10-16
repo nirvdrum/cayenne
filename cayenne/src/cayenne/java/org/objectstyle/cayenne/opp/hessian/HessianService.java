@@ -53,92 +53,65 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.opp;
+package org.objectstyle.cayenne.opp.hessian;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.opp.OPPMessage;
 
 /**
- * An OPPConnector that emulates a remote connector, while running in the same VM as
- * OPPChannel it connects to. Emulation includes serialization/deserialization of objects.
- * It is useful for testing and speeding up development cycle.
+ * Service interface needed for server-side deployment with HessianConnector. A mapping in
+ * <code>web.xml</code> may look like this:
+ * 
+ * <pre>
+ *  &lt;servlet&gt;
+ *    &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
+ *    &lt;servlet-class&gt;org.objectstyle.cayenne.opp.hessian.HessianServlet&lt;/servlet-class&gt;
+ *  &lt;/servlet&gt;            
+ *  &lt;servlet-mapping&gt;
+ *    &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
+ *    &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
+ *  &lt;/servlet-mapping&gt;
+ * </pre>
+ * 
+ * To deploy with XMPP event bridge that allows to channel server events to the client you
+ * will need to add a few more "init-params" to the "servlet" section:
+ * 
+ * <pre>
+ *    &lt;init-param&gt;
+ *       &lt;param-name&gt;cayenne.HessianService.EventBridge.factory&lt;/param-name&gt;
+ *       &lt;param-value&gt;org.objectstyle.cayenne.event.XMPPBridgeFactory&lt;/param-value&gt;
+ *    &lt;/init-param&gt;
+ *    &lt;init-param&gt;
+ *       &lt;param-name&gt;cayenne.XMPPBridge.xmppHost&lt;/param-name&gt;
+ *       &lt;param-value&gt;my-xmpp-server.com&lt;/param-value&gt;
+ *    &lt;/init-param&gt;
+ *    &lt;init-param&gt;
+ *       &lt;param-name&gt;cayenne.XMPPBridge.xmppPort&lt;/param-name&gt;
+ *       &lt;param-value&gt;3333&lt;/param-value&gt;
+ *    &lt;/init-param&gt;
+ * </pre>
+ * 
+ * <i>Parameter above will likely be configurable via the Modeler in Cayenne 1.2.</i>
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class LocalConnector extends BaseConnector {
+public interface HessianService {
 
-    public static final int NO_SERIALIZATION = 0;
-    public static final int JAVA_SERIALIZATION = 1;
-    public static final int HESSIAN_SERIALIZATION = 2;
-
-    protected OPPChannel channel;
-    protected int serializationPolicy;
+    public static final String EVENT_BRIDGE_FACTORY_PROPERTY = "cayenne.HessianService.EventBridge.factory";
 
     /**
-     * Creates LocalConnector with specified handler and no serialization.
+     * Establishes a dedicated session with Cayenne OPPChannel, returning session id.
      */
-    public LocalConnector(OPPChannel handler) {
-        this(handler, NO_SERIALIZATION);
-    }
+    HessianSession establishSession();
 
     /**
-     * Creates a LocalConnector with specified handler and serialization policy. Valid
-     * policies are defined as final static int field in this class.
+     * Creates a new session with the specified or joins an existing one. This method is
+     * used to bootstrap collaborating clients of a single "group chat".
      */
-    public LocalConnector(OPPChannel handler, int serializationPolicy) {
-        this.channel = handler;
-
-        // convert invalid policy to NO_SER..
-        this.serializationPolicy = serializationPolicy == JAVA_SERIALIZATION
-                || serializationPolicy == HESSIAN_SERIALIZATION
-                ? serializationPolicy
-                : NO_SERIALIZATION;
-    }
-
-    public boolean isSerializingMessages() {
-        return serializationPolicy == JAVA_SERIALIZATION
-                || serializationPolicy == HESSIAN_SERIALIZATION;
-    }
-
-    public OPPChannel getChannel() {
-        return channel;
-    }
+    HessianSession establishSharedSession(String name);
 
     /**
-     * Does nothing.
+     * Processes message on a remote server, returning the result of such processing.
      */
-    protected void beforeSendMessage(OPPMessage message) {
-        // noop
-    }
-
-    /**
-     * Dispatches a message to an internal handler.
-     */
-    protected Object doSendMessage(OPPMessage message) throws CayenneRuntimeException {
-
-        OPPMessage processedMessage;
-
-        try {
-            switch (serializationPolicy) {
-                case HESSIAN_SERIALIZATION:
-                    processedMessage = (OPPMessage) HessianConnector
-                            .cloneViaHessianSerialization(message);
-                    break;
-
-                case JAVA_SERIALIZATION:
-                    processedMessage = (OPPMessage) Util.cloneViaSerialization(message);
-                    break;
-
-                default:
-                    processedMessage = message;
-            }
-
-            return processedMessage.dispatch(channel);
-        }
-        catch (Exception ex) {
-            throw new CayenneRuntimeException("Error sending message", ex);
-        }
-
-    }
+    Object processMessage(String sessionId, OPPMessage message) throws Throwable;
 }

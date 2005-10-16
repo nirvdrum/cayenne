@@ -55,24 +55,23 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.opp.hessian.HessianConnection;
 
-/**
- * Encapsulates a transport for sending OPPMessages to a (possibly remote) OPPChannel.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public interface OPPConnector {
+import junit.framework.TestCase;
 
-    /**
-     * Returns EventManager associated with this channel.
-     */
-    EventManager getEventManager();
+public class HessianConnectionTst extends TestCase {
 
-    /**
-     * Sends a message to the server, returning a reply.
-     */
-    Object sendMessage(OPPMessage message) throws CayenneRuntimeException;
+    public void testConstructor1Arg() {
+        HessianConnection c = new HessianConnection("a");
+        assertEquals("a", c.getUrl());
+        assertNull(c.getUserName());
+        assertNull(c.getPassword());
+    }
+    
+    public void testConstructor3Arg() {
+        HessianConnection c = new HessianConnection("a", "b", "c");
+        assertEquals("a", c.getUrl());
+        assertEquals("b", c.getUserName());
+        assertEquals("c", c.getPassword());
+    }
 }

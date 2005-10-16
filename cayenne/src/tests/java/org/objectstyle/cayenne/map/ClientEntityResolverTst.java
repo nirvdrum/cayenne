@@ -61,7 +61,7 @@ import java.util.Collections;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.opp.HessianConnector;
+import org.objectstyle.cayenne.opp.hessian.HessianConnection;
 
 public class ClientEntityResolverTst extends TestCase {
 
@@ -75,7 +75,7 @@ public class ClientEntityResolverTst extends TestCase {
         EntityResolver resolver = new EntityResolver(entities);
 
         // simple case
-        Object c1 = HessianConnector.cloneViaHessianSerialization(resolver);
+        Object c1 = HessianConnection.cloneViaHessianSerialization(resolver);
 
         assertNotNull(c1);
         assertTrue(c1 instanceof EntityResolver);
@@ -88,7 +88,7 @@ public class ClientEntityResolverTst extends TestCase {
         // with descriptors resolved...
         assertNotNull(entity.getClassDescriptor());
 
-        EntityResolver cr2 = (EntityResolver) HessianConnector
+        EntityResolver cr2 = (EntityResolver) HessianConnection
                 .cloneViaHessianSerialization(resolver);
         assertNotNull(cr2);
         assertEquals(1, cr2.getObjEntities().size());

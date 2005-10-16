@@ -20,6 +20,10 @@ Changes/New Features:
   
 * Multi Tier API:
   - support for shared sessions (peer ObjectContexts controlled by different users share the same parent)
+  - OPPConnector was renamed to OPPConnection (all implementors were renamed accordingly).
+  - web.xml configuration is simplified (see HessianService Javadocs for details). 
+    WARINING: You must update your web.xml if you used HessianService with M6, check UPGRADE-NOTES for details.
+  
 
 * Auto-sorted relationship list - org.objectstyle.cayenne.util.IndexPropertyList. 
   Supported for ObjectContext only for now, but should be easy to extend to DataContext.
