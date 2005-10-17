@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -159,7 +161,7 @@ class ObjectContextOperationRecorder {
 
     // moded Sublist from JDK that doesn't check for co-modification, as the underlying
     // list is guaranteed to only grow and never shrink or be replaced.
-    class SubList extends AbstractList {
+    static class SubList extends AbstractList implements Serializable {
 
         private List list;
         private int offset;
@@ -196,6 +198,11 @@ class ObjectContextOperationRecorder {
             if (index < 0 || index >= size) {
                 throw new IndexOutOfBoundsException("Index: " + index + ",Size: " + size);
             }
+        }
+
+        // serialization method...
+        private Object writeReplace() throws ObjectStreamException {
+            return new ArrayList(list.subList(offset, offset + size));
         }
     }
 }

@@ -183,7 +183,7 @@ public class XMPPBridge extends EventBridge {
                     + chatService
                     + "."
                     + connection.getHost());
-            
+
             groupChat.join(sessionHandle);
             groupChat.addMessageListener(new XMPPListener());
         }
@@ -210,7 +210,14 @@ public class XMPPBridge extends EventBridge {
     }
 
     protected void sendExternalEvent(CayenneEvent localEvent) throws Exception {
-        groupChat.sendMessage(serializeToString(localEvent));
+
+        Message message = groupChat.createMessage();
+        message.setBody(serializeToString(localEvent));
+
+        // set thread to our session handle to be able to discard messages from self
+        message.setThread(sessionHandle);
+
+        groupChat.sendMessage(message);
     }
 
     class XMPPListener implements PacketListener {
@@ -219,16 +226,24 @@ public class XMPPBridge extends EventBridge {
 
             if (packet instanceof Message) {
                 Message message = (Message) packet;
-                String payload = message.getBody();
 
-                try {
-                    Object event = deserializeFromString(payload);
-                    if (event instanceof CayenneEvent) {
-                        onExternalEvent((CayenneEvent) event);
-                    }
+                // filter our own messages
+                if (sessionHandle.equals(message.getThread())) {
+                    // discarding
                 }
-                catch (Exception ex) {
-                    // ignore for now... need to add logging.
+                else {
+
+                    String payload = message.getBody();
+
+                    try {
+                        Object event = deserializeFromString(payload);
+                        if (event instanceof CayenneEvent) {
+                            onExternalEvent((CayenneEvent) event);
+                        }
+                    }
+                    catch (Exception ex) {
+                        // ignore for now... need to add logging.
+                    }
                 }
             }
         }

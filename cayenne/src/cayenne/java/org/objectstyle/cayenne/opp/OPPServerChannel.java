@@ -64,7 +64,10 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.event.EventBridge;
 import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.event.EventSubject;
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
@@ -79,50 +82,53 @@ public class OPPServerChannel implements OPPChannel {
 
     protected OPPConnection connection;
     protected EventManager eventManager;
+    protected boolean channelEventsEnabled;
 
     EventBridge serverEventBridge;
 
     /**
-     * Creates a new channel accessing OPP server via provided connection. Channel will
-     * use a muktithreaded EventManager by default.
+     * Creates a new channel accessing OPP server via provided connection. Channel created
+     * using this constructor will post no events of its own and provide its users with a
+     * multithreaded EventManager.
      */
     public OPPServerChannel(OPPConnection connection) {
-        this(connection, new EventManager(2));
+        this(connection, false);
     }
 
-    public OPPServerChannel(OPPConnection connection, EventManager eventManager)
-            throws CayenneRuntimeException {
+    public OPPServerChannel(OPPConnection connection, boolean channelEventsEnabled) {
+        this(connection, channelEventsEnabled, new EventManager(2));
+    }
+
+    public OPPServerChannel(OPPConnection connection, boolean channelEventsEnabled,
+            EventManager eventManager) throws CayenneRuntimeException {
 
         this.connection = connection;
         this.eventManager = eventManager;
+        this.channelEventsEnabled = eventManager != null && channelEventsEnabled;
 
-        if (eventManager != null) {
-            startBridge();
-        }
-        else {
-            logger.info("Channel has no EventManager, ignoring.");
-        }
+        startBridge();
     }
 
     void startBridge() {
+        if (eventManager == null) {
+            logger.info("Channel has no EventManager, won't install EventBridge.");
+            return;
+        }
+
         EventBridge bridge = connection.getServerEventBridge();
-        if (bridge != null) {
-
-            try {
-                bridge.startup(eventManager, EventBridge.RECEIVE_EXTERNAL, this);
-            }
-            catch (Exception e) {
-                throw new CayenneRuntimeException(
-                        "Error starting EventBridge " + bridge,
-                        e);
-            }
-
-            this.serverEventBridge = bridge;
-        }
-        else {
-            // let it go ...
+        if (bridge == null) {
             logger.info("Remote service doesn't support channel events.");
+            return;
         }
+
+        try {
+            bridge.startup(eventManager, EventBridge.RECEIVE_LOCAL_EXTERNAL, this);
+        }
+        catch (Exception e) {
+            throw new CayenneRuntimeException("Error starting EventBridge " + bridge, e);
+        }
+
+        this.serverEventBridge = bridge;
     }
 
     public EventManager getEventManager() {
@@ -142,7 +148,50 @@ public class OPPServerChannel implements OPPChannel {
     }
 
     public GraphDiff onSync(SyncMessage message) {
-        return (GraphDiff) send(message, GraphDiff.class);
+        GraphDiff replyDiff = (GraphDiff) send(message, GraphDiff.class);
+
+        if (channelEventsEnabled) {
+            EventSubject subject;
+
+            switch (message.getType()) {
+                case SyncMessage.ROLLBACK_TYPE:
+                    subject = OPPChannel.GRAPH_ROLLEDBACK_SUBJECT;
+                    break;
+                case SyncMessage.FLUSH_TYPE:
+                    subject = OPPChannel.GRAPH_CHANGED_SUBJECT;
+                    break;
+                case SyncMessage.COMMIT_TYPE:
+                    subject = OPPChannel.GRAPH_COMMITTED_SUBJECT;
+                    break;
+                default:
+                    subject = null;
+            }
+
+            if (subject != null) {
+
+                // combine message sender changes and message receiver changes into a
+                // single event
+                boolean sentNoop = message.getSenderChanges() == null
+                        || message.getSenderChanges().isNoop();
+                boolean receivedNoop = replyDiff == null || replyDiff.isNoop();
+
+                if (!sentNoop || !receivedNoop) {
+                    CompoundDiff notification = new CompoundDiff();
+
+                    if (!sentNoop) {
+                        notification.add(message.getSenderChanges());
+                    }
+
+                    if (!receivedNoop) {
+                        notification.add(replyDiff);
+                    }
+
+                    eventManager.postEvent(new GraphEvent(this, notification), subject);
+                }
+            }
+        }
+
+        return replyDiff;
     }
 
     public EntityResolver onBootstrap(BootstrapMessage message) {

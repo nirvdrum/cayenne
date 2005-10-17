@@ -60,6 +60,8 @@ import junit.framework.TestCase;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
+import org.objectstyle.cayenne.opp.hessian.HessianConnection;
+import org.objectstyle.cayenne.util.Util;
 
 public class ObjectContextOperationRecorderTst extends TestCase {
 
@@ -98,5 +100,31 @@ public class ObjectContextOperationRecorderTst extends TestCase {
 
         CompoundDiff diff2 = (CompoundDiff) recorder.getDiffs();
         assertEquals(2, diff2.getDiffs().size());
+    }
+
+    public void testGetDiffsSerializable() throws Exception {
+        ObjectContextOperationRecorder recorder = new ObjectContextOperationRecorder();
+        recorder.addOperation(new NodeCreateOperation(new GlobalID("test")));
+        CompoundDiff diff = (CompoundDiff) recorder.getDiffs();
+
+        Object clone = Util.cloneViaSerialization(diff);
+        assertNotNull(clone);
+        assertTrue(clone instanceof CompoundDiff);
+
+        CompoundDiff d1 = (CompoundDiff) clone;
+        assertEquals(1, d1.getDiffs().size());
+    }
+
+    public void testGetDiffsSerializableWithHessian() throws Exception {
+        ObjectContextOperationRecorder recorder = new ObjectContextOperationRecorder();
+        recorder.addOperation(new NodeCreateOperation(new Object()));
+        CompoundDiff diff = (CompoundDiff) recorder.getDiffs();
+
+        Object clone = HessianConnection.cloneViaHessianSerialization(diff);
+        assertNotNull(clone);
+        assertTrue(clone instanceof CompoundDiff);
+
+        CompoundDiff d1 = (CompoundDiff) clone;
+        assertEquals(1, d1.getDiffs().size());
     }
 }

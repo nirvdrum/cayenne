@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.opp.hessian;
 
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.ServletConfig;
@@ -68,8 +67,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
-import org.objectstyle.cayenne.event.EventBridge;
-import org.objectstyle.cayenne.event.EventBridgeFactory;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.OPPMessage;
 import org.objectstyle.cayenne.service.ClientServerChannel;
@@ -94,17 +91,12 @@ public class HessianServiceHandler implements HessianService, Service {
     private static final Logger logObj = Logger.getLogger(HessianServiceHandler.class);
 
     protected Map sessionChannels;
-    protected Map sessionBridges;
-
     protected Map sharedSessions;
 
     protected DataDomain domain;
 
     protected String eventBridgeFactoryName;
     protected Map eventBridgeParameters;
-
-    // cached factory...
-    EventBridgeFactory eventBridgeFactory;
 
     /**
      * Hessian service lifecycle method that performs Cayenne initialization.
@@ -131,7 +123,6 @@ public class HessianServiceHandler implements HessianService, Service {
 
         this.sessionChannels = new HashMap();
         this.sharedSessions = new HashMap();
-        this.sessionBridges = new HashMap();
 
         // event bridge setup...
         String eventBridgeFactoryName = config
@@ -145,17 +136,6 @@ public class HessianServiceHandler implements HessianService, Service {
                 parameters.put(key, config.getInitParameter(key));
             }
 
-            try {
-                this.eventBridgeFactory = (EventBridgeFactory) Class.forName(
-                        eventBridgeFactoryName).newInstance();
-            }
-            catch (Throwable e) {
-                throw new ServletException("Error creating EventBridgeFactory '"
-                        + eventBridgeFactoryName
-                        + "'", e);
-            }
-
-            // if the factory is good, save bridge parameters...
             this.eventBridgeFactoryName = eventBridgeFactoryName;
             this.eventBridgeParameters = parameters;
         }
@@ -169,25 +149,7 @@ public class HessianServiceHandler implements HessianService, Service {
     public void destroy() {
         this.sessionChannels = null;
         this.sharedSessions = null;
-        this.eventBridgeFactory = null;
-
-        if (sessionBridges != null) {
-
-            Iterator it = sessionBridges.values().iterator();
-            while (it.hasNext()) {
-                EventBridge b = (EventBridge) it.next();
-
-                try {
-                    b.shutdown();
-                }
-                catch (Throwable th) {
-                    // ignore, continue with shutdown
-                }
-            }
-
-            sessionBridges = null;
-        }
-
+        
         logObj.debug("HessianServiceHandler destroyed");
     }
 
@@ -258,29 +220,9 @@ public class HessianServiceHandler implements HessianService, Service {
                 eventBridgeFactoryName,
                 eventBridgeParameters);
 
-        OPPChannel channel = new ClientServerChannel(domain, true);
-
-        // TODO (Andrus, 10/16/2005) !!!!!!! This is a HUGE resource leak, as each session
-        // would get its own bridge.
-        if (eventBridgeFactory != null) {
-            EventBridge bridge = eventBridgeFactory.createEventBridge(
-                    HessianSession.SUBJECTS,
-                    session.getSessionId(),
-                    eventBridgeParameters);
-
-            try {
-                bridge.startup(
-                        channel.getEventManager(),
-                        EventBridge.RECEIVE_LOCAL,
-                        channel);
-            }
-            catch (Exception e) {
-                throw new CayenneRuntimeException("Error starting the bridge: "
-                        + e.getLocalizedMessage(), e);
-            }
-
-            sessionBridges.put(session.getSessionId(), bridge);
-        }
+        // block channel events - client will communicate their changes in a
+        // peer-to-peer fashion.
+        OPPChannel channel = new ClientServerChannel(domain, false);
 
         // TODO (Andrus, 10/15/2005) This will result in a memory leak as there is no
         // session timeout; must attach context to the HttpSession. Not entirely sure how
