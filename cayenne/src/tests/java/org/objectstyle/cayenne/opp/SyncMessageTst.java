@@ -55,45 +55,50 @@
  */
 package org.objectstyle.cayenne.opp;
 
+import junit.framework.TestCase;
+
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
 import org.objectstyle.cayenne.opp.hessian.HessianConnection;
 
-import junit.framework.TestCase;
-
 public class SyncMessageTst extends TestCase {
-    
-    public void testHessianSerialization() throws Exception {
-        
-        GraphDiff diff = new NodeCreateOperation(new Object());
-        SyncMessage message = new SyncMessage(SyncMessage.FLUSH_TYPE, diff);
-        
-        Object d = HessianConnection.cloneViaHessianSerialization(message);
-        assertNotNull(d);
-        assertTrue(d instanceof SyncMessage);
-        
-        SyncMessage ds = (SyncMessage) d;
-        assertEquals(message.getType(), ds.getType());
-        assertNotNull(ds.getSenderChanges());
-    }
 
     public void testConstructor() {
+        Object source = new Object();
         GraphDiff diff = new CompoundDiff();
-        SyncMessage message = new SyncMessage(SyncMessage.FLUSH_TYPE, diff);
+        SyncMessage message = new SyncMessage(source, SyncMessage.FLUSH_TYPE, diff);
 
+        assertSame(source, message.getSource());
         assertEquals(SyncMessage.FLUSH_TYPE, message.getType());
         assertSame(diff, message.getSenderChanges());
     }
 
+    public void testHessianSerialization() throws Exception {
+
+        Object source = new Object();
+        GraphDiff diff = new NodeCreateOperation(new Object());
+        SyncMessage message = new SyncMessage(source, SyncMessage.FLUSH_TYPE, diff);
+
+        Object d = HessianConnection.cloneViaHessianSerialization(message);
+        assertNotNull(d);
+        assertTrue(d instanceof SyncMessage);
+
+        SyncMessage ds = (SyncMessage) d;
+        assertNull(ds.getSource());
+        assertEquals(message.getType(), ds.getType());
+        assertNotNull(ds.getSenderChanges());
+    }
+
     public void testConstructorInvalid() {
-        new SyncMessage(SyncMessage.FLUSH_TYPE, new CompoundDiff());
-        new SyncMessage(SyncMessage.COMMIT_TYPE, new CompoundDiff());
-        new SyncMessage(SyncMessage.ROLLBACK_TYPE, new CompoundDiff());
+        Object source = new Object();
+        new SyncMessage(source, SyncMessage.FLUSH_TYPE, new CompoundDiff());
+        new SyncMessage(source, SyncMessage.COMMIT_TYPE, new CompoundDiff());
+        new SyncMessage(null, SyncMessage.ROLLBACK_TYPE, new CompoundDiff());
 
         int bogusType = 45678;
         try {
-            new SyncMessage(bogusType, new CompoundDiff());
+            new SyncMessage(source, bogusType, new CompoundDiff());
             fail("invalid type was allowed to go unnoticed...");
         }
         catch (IllegalArgumentException e) {

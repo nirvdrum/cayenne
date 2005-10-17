@@ -127,7 +127,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 .getEntityResolver(), new MockDataRowStore());
 
         ClientServerChannel channel = new ClientServerChannel(context, false);
-        channel.onSync(new SyncMessage(SyncMessage.COMMIT_TYPE, new MockGraphDiff()));
+        channel.onSync(new SyncMessage(context, SyncMessage.COMMIT_TYPE, new MockGraphDiff()));
 
         // no changes in context, so no commit should be executed
         assertFalse(parent.isCommitChangesInContext());
@@ -135,7 +135,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
         parent.reset();
 
         // introduce changes
-        channel.onSync(new SyncMessage(SyncMessage.COMMIT_TYPE, new NodeCreateOperation(
+        channel.onSync(new SyncMessage(context, SyncMessage.COMMIT_TYPE, new NodeCreateOperation(
                 new GlobalID("MtTable1"))));
         assertTrue(parent.isCommitChangesInContext());
     }

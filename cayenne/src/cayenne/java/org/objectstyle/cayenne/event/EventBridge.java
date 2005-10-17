@@ -114,6 +114,7 @@ public abstract class EventBridge implements EventListener {
     protected Collection localSubjects;
     protected EventManager eventManager;
     protected int mode;
+    protected Object postAs;
 
     // keeps all listeners so that they are not deallocated
     Collection listeners;
@@ -230,6 +231,7 @@ public abstract class EventBridge implements EventListener {
             throw new NullPointerException("'eventManager' can't be null.");
         }
 
+        this.postAs = localEventSource;
         this.eventManager = eventManager;
         this.mode = mode;
 
@@ -266,6 +268,8 @@ public abstract class EventBridge implements EventListener {
      */
     public void shutdown() throws Exception {
 
+        this.postAs = null;
+
         if (listeners != null && eventManager != null) {
 
             Iterator it = listeners.iterator();
@@ -288,11 +292,11 @@ public abstract class EventBridge implements EventListener {
     protected abstract void shutdownExternal() throws Exception;
 
     /**
-     * Helper method for sucblasses to asynchronously post an event obtained from a remote
-     * source. Subclasses do not have to use this method, but they probably should for
-     * consistency.
+     * Helper method intended to be called explicitly by subclasses to asynchronously post
+     * an event obtained from a remote source. Subclasses do not have to use this method,
+     * but they probably should for consistency.
      */
-    public void onExternalEvent(CayenneEvent event) {
+    protected void onExternalEvent(CayenneEvent event) {
         if (eventManager != null) {
 
             EventSubject localSubject = event.getSubject();
@@ -303,7 +307,9 @@ public abstract class EventBridge implements EventListener {
             }
 
             // initialize event sources
-            event.setPostedBy(this);
+
+            event.setPostedBy(postAs != null ? postAs : this);
+
             if (event.getSource() == null) {
                 event.setSource(this);
             }

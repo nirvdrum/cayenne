@@ -206,6 +206,7 @@ public class CayenneContext implements ObjectContext {
 
             try {
                 commitDiff = channel.onSync(new SyncMessage(
+                        this,
                         SyncMessage.COMMIT_TYPE,
                         graphManager.getDiffs()));
             }
@@ -232,7 +233,7 @@ public class CayenneContext implements ObjectContext {
             GraphDiff diff = graphManager.getDiffs();
             graphManager.graphReverted();
 
-            channel.onSync(new SyncMessage(SyncMessage.ROLLBACK_TYPE, diff));
+            channel.onSync(new SyncMessage(this, SyncMessage.ROLLBACK_TYPE, diff));
         }
     }
 
@@ -240,7 +241,7 @@ public class CayenneContext implements ObjectContext {
         if (graphManager.hasChangesSinceLastFlush()) {
             GraphDiff diff = graphManager.getDiffsSinceLastFlush();
             graphManager.graphFlushed();
-            channel.onSync(new SyncMessage(SyncMessage.FLUSH_TYPE, diff));
+            channel.onSync(new SyncMessage(this, SyncMessage.FLUSH_TYPE, diff));
         }
     }
 

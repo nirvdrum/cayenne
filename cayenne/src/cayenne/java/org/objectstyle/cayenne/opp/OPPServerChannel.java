@@ -186,7 +186,10 @@ public class OPPServerChannel implements OPPChannel {
                         notification.add(replyDiff);
                     }
 
-                    eventManager.postEvent(new GraphEvent(this, notification), subject);
+                    Object eventSource = (message.getSource() != null) ? message.getSource() : this;
+                    GraphEvent e = new GraphEvent(eventSource, notification);
+                    e.setPostedBy(this);
+                    eventManager.postEvent(e, subject);
                 }
             }
         }

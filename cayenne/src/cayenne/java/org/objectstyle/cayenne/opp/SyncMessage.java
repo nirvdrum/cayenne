@@ -72,24 +72,33 @@ public class SyncMessage implements OPPMessage {
     public static final int COMMIT_TYPE = 2;
     public static final int ROLLBACK_TYPE = 3;
 
+    protected transient Object source;
     protected int type;
     protected GraphDiff senderChanges;
 
     // private constructor for Hessian deserialization
     private SyncMessage() {
-        
+
     }
-    
-    public SyncMessage(int type, GraphDiff senderChanges) {
+
+    public SyncMessage(Object source, int type, GraphDiff senderChanges) {
         // validate type
         if (type != FLUSH_TYPE && type != COMMIT_TYPE && type != ROLLBACK_TYPE) {
             throw new IllegalArgumentException("'type' is invalid: " + type);
         }
 
+        this.source = source;
         this.type = type;
         this.senderChanges = senderChanges;
     }
     
+    /**
+     * Returns a source of SyncMessage.
+     */
+    public Object getSource() {
+        return source;
+    }
+
     public int getType() {
         return type;
     }

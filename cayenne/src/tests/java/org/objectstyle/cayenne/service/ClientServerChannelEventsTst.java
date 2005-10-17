@@ -86,7 +86,7 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
                 channel);
 
         GraphDiff diff = new NodeCreateOperation(new GlobalID("MtTable1"));
-        channel.onSync(new SyncMessage(SyncMessage.COMMIT_TYPE, diff));
+        channel.onSync(new SyncMessage(null, SyncMessage.COMMIT_TYPE, diff));
 
         assertTrue(listener.notificationPosted);
     }
@@ -104,7 +104,7 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
                 channel);
 
         GraphDiff diff = new NodeCreateOperation(new GlobalID("MtTable1"));
-        channel.onSync(new SyncMessage(SyncMessage.FLUSH_TYPE, diff));
+        channel.onSync(new SyncMessage(null, SyncMessage.FLUSH_TYPE, diff));
         assertTrue(listener.notificationPosted);
     }
 
@@ -114,7 +114,7 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
         ClientServerChannel channel = new ClientServerChannel(getDomain(), true);
 
         GraphDiff diff = new NodeCreateOperation(new GlobalID("MtTable1"));
-        channel.onSync(new SyncMessage(SyncMessage.FLUSH_TYPE, diff));
+        channel.onSync(new SyncMessage(null, SyncMessage.FLUSH_TYPE, diff));
 
         channel.getEventManager().addListener(
                 listener,
@@ -123,7 +123,7 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
                 OPPChannel.GRAPH_ROLLEDBACK_SUBJECT,
                 channel);
 
-        channel.onSync(new SyncMessage(SyncMessage.ROLLBACK_TYPE, null));
+        channel.onSync(new SyncMessage(null, SyncMessage.ROLLBACK_TYPE, null));
         assertTrue(listener.notificationPosted);
     }
 
