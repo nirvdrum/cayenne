@@ -65,6 +65,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -200,12 +201,15 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
             // as slow!!!
             if (resolver.lookupObjEntity(rootClass) == null) {
 
-                String entityName;
+                ObjEntity entity = resolver.getClientEntityResolver()
+						.lookupObjEntity(rootClass);
 
-                entityName = resolver
-                        .getClientEntityResolver()
-                        .lookupObjEntity(rootClass)
-                        .getName();
+				if (null == entity) {
+					throw new CayenneRuntimeException(
+							"No entity mapped for class: " + rootClass);
+				}
+
+				String entityName = entity.getName();
 
                 SelectQuery replacement = queryWithParameters(Collections.EMPTY_MAP, true);
                 replacement.setRoot(entityName);
