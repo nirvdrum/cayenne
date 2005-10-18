@@ -73,11 +73,12 @@ import org.objectstyle.cayenne.opp.UpdateMessage;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class CayenneContextChannel implements OPPChannel {
+// TODO (Andrus 10/17/2005) - make public once it is ready for prime time
+class CayenneContextChannel implements OPPChannel {
 
     protected CayenneContext context;
 
-    public CayenneContextChannel(CayenneContext context) {
+    CayenneContextChannel(CayenneContext context) {
         if (context == null) {
             throw new IllegalArgumentException("Null context");
         }

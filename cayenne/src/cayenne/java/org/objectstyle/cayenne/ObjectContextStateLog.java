@@ -72,12 +72,12 @@ import org.objectstyle.cayenne.graph.GraphManager;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ObjectContextStateRecorder implements GraphChangeHandler {
+class ObjectContextStateLog implements GraphChangeHandler {
 
     Set dirtyIds;
     GraphManager graphManager;
 
-    ObjectContextStateRecorder(GraphManager graphManager) {
+    ObjectContextStateLog(GraphManager graphManager) {
         this.dirtyIds = new HashSet();
         this.graphManager = graphManager;
     }

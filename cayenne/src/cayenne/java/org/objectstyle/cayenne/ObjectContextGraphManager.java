@@ -84,111 +84,111 @@ final class ObjectContextGraphManager extends GraphMap {
     static final String COMMIT_MARKER = "commit";
     static final String FLUSH_MARKER = "flush";
 
-    ObjectContext context;
+    CayenneContext context;
     Collection deadIds;
     boolean changeEventsEnabled;
     boolean lifecycleEventsEnabled;
 
-    ObjectContextStateRecorder stateRecorder;
-    ObjectContextOperationRecorder opRecorder;
+    ObjectContextStateLog stateLog;
+    ObjectContextChangeLog changeLog;
 
-    ObjectContextGraphManager(ObjectContext context, boolean changeEventsEnabled,
+    ObjectContextGraphManager(CayenneContext context, boolean changeEventsEnabled,
             boolean lifecycleEventsEnabled) {
 
         this.context = context;
         this.changeEventsEnabled = changeEventsEnabled;
         this.lifecycleEventsEnabled = lifecycleEventsEnabled;
 
-        this.stateRecorder = new ObjectContextStateRecorder(this);
-        this.opRecorder = new ObjectContextOperationRecorder();
+        this.stateLog = new ObjectContextStateLog(this);
+        this.changeLog = new ObjectContextChangeLog();
     }
 
     boolean hasChanges() {
-        return opRecorder.size() > 0;
+        return changeLog.size() > 0;
     }
 
     boolean hasChangesSinceLastFlush() {
-        int size = opRecorder.hasMarker(FLUSH_MARKER) ? opRecorder
-                .sizeAfterMarker(FLUSH_MARKER) : opRecorder.size();
+        int size = changeLog.hasMarker(FLUSH_MARKER) ? changeLog
+                .sizeAfterMarker(FLUSH_MARKER) : changeLog.size();
         return size > 0;
     }
 
     GraphDiff getDiffs() {
-        return opRecorder.getDiffs();
+        return changeLog.getDiffs();
     }
 
     GraphDiff getDiffsSinceLastFlush() {
-        return opRecorder.hasMarker(FLUSH_MARKER) ? opRecorder
-                .getDiffsAfterMarker(FLUSH_MARKER) : opRecorder.getDiffs();
+        return changeLog.hasMarker(FLUSH_MARKER) ? changeLog
+                .getDiffsAfterMarker(FLUSH_MARKER) : changeLog.getDiffs();
     }
 
     Collection dirtyNodes() {
-        return stateRecorder.dirtyNodes();
+        return stateLog.dirtyNodes();
     }
 
     Collection dirtyNodes(int state) {
-        return stateRecorder.dirtyNodes(state);
+        return stateLog.dirtyNodes(state);
     }
 
     // ****** Sync Events API *****
-    void processSyncWithChild(GraphDiff childDiff) {
-        throw new CayenneRuntimeException("Not implemented yet");
-    }
-
     /**
      * Clears commit marker, but keeps all recorded operations.
      */
     void graphCommitAborted() {
-        opRecorder.removeMarker(COMMIT_MARKER);
+        changeLog.removeMarker(COMMIT_MARKER);
 
         if (lifecycleEventsEnabled) {
             send(null, ObjectContext.GRAPH_COMMIT_ABORTED_SUBJECT);
         }
     }
 
+    /**
+     * Sets commit start marker in the change log. If events are enabled, posts commit
+     * start event.
+     */
     void graphCommitStarted() {
         if (lifecycleEventsEnabled) {
 
-            GraphDiff diff = opRecorder.getDiffs();
-            opRecorder.setMarker(COMMIT_MARKER);
+            GraphDiff diff = changeLog.getDiffs();
+            changeLog.setMarker(COMMIT_MARKER);
 
             // include all diffs up to this point
             send(diff, ObjectContext.GRAPH_COMMIT_STARTED_SUBJECT);
         }
         else {
-            opRecorder.setMarker(COMMIT_MARKER);
+            changeLog.setMarker(COMMIT_MARKER);
         }
     }
 
     void graphCommitted(GraphDiff parentSyncDiff) {
-        processParentSync(parentSyncDiff);
+        if (parentSyncDiff != null) {
+            new ObjectContextMergeHandler(context).merge(parentSyncDiff);
+        }
 
         if (lifecycleEventsEnabled) {
-            GraphDiff diff = opRecorder.getDiffsAfterMarker(COMMIT_MARKER);
+            GraphDiff diff = changeLog.getDiffsAfterMarker(COMMIT_MARKER);
 
-            stateRecorder.graphCommitted();
-            opRecorder.reset();
+            stateLog.graphCommitted();
             reset();
 
             // include all diffs after the commit start marker.
             send(diff, ObjectContext.GRAPH_COMMITTED_SUBJECT);
         }
         else {
-            stateRecorder.graphCommitted();
-            opRecorder.reset();
+            stateLog.graphCommitted();
+            reset();
         }
     }
 
     void graphFlushed() {
-        opRecorder.setMarker(FLUSH_MARKER);
+        changeLog.setMarker(FLUSH_MARKER);
     }
 
     void graphReverted() {
-        GraphDiff diff = opRecorder.getDiffs();
+        GraphDiff diff = changeLog.getDiffs();
 
         diff.undo(new NullChangeHandler());
-        stateRecorder.graphReverted();
-        opRecorder.reset();
+        stateLog.graphReverted();
         reset();
 
         if (lifecycleEventsEnabled) {
@@ -199,28 +199,28 @@ final class ObjectContextGraphManager extends GraphMap {
     // ****** GraphChangeHandler API ******
     // =====================================================
 
-    public void nodeIdChanged(Object nodeId, Object newId) {
-        stateRecorder.nodeIdChanged(nodeId, newId);
+    public synchronized void nodeIdChanged(Object nodeId, Object newId) {
+        stateLog.nodeIdChanged(nodeId, newId);
         processChange(new NodeIdChangeOperation(nodeId, newId));
     }
 
-    public void nodeCreated(Object nodeId) {
-        stateRecorder.nodeCreated(nodeId);
+    public synchronized void nodeCreated(Object nodeId) {
+        stateLog.nodeCreated(nodeId);
         processChange(new NodeCreateOperation(nodeId));
     }
 
-    public void nodeRemoved(Object nodeId) {
-        stateRecorder.nodeRemoved(nodeId);
+    public synchronized void nodeRemoved(Object nodeId) {
+        stateLog.nodeRemoved(nodeId);
         processChange(new NodeDeleteOperation(nodeId));
     }
 
-    public void nodePropertyChanged(
+    public synchronized void nodePropertyChanged(
             Object nodeId,
             String property,
             Object oldValue,
             Object newValue) {
 
-        stateRecorder.nodePropertyChanged(nodeId, property, oldValue, newValue);
+        stateLog.nodePropertyChanged(nodeId, property, oldValue, newValue);
         processChange(new NodePropertyChangeOperation(
                 nodeId,
                 property,
@@ -228,13 +228,13 @@ final class ObjectContextGraphManager extends GraphMap {
                 newValue));
     }
 
-    public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
-        stateRecorder.arcCreated(nodeId, targetNodeId, arcId);
+    public synchronized void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
+        stateLog.arcCreated(nodeId, targetNodeId, arcId);
         processChange(new ArcCreateOperation(nodeId, targetNodeId, arcId));
     }
 
-    public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
-        stateRecorder.arcDeleted(nodeId, targetNodeId, arcId);
+    public synchronized void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
+        stateLog.arcDeleted(nodeId, targetNodeId, arcId);
         processChange(new ArcDeleteOperation(nodeId, targetNodeId, arcId));
     }
 
@@ -242,7 +242,7 @@ final class ObjectContextGraphManager extends GraphMap {
     // =====================================================
 
     private void processChange(GraphDiff diff) {
-        opRecorder.addOperation(diff);
+        changeLog.addOperation(diff);
 
         if (changeEventsEnabled) {
             send(diff, ObjectContext.GRAPH_CHANGED_SUBJECT);
@@ -264,15 +264,10 @@ final class ObjectContextGraphManager extends GraphMap {
         }
     }
 
-    private void processParentSync(GraphDiff parentSyncDiff) {
-        if (parentSyncDiff != null) {
-            parentSyncDiff.apply(new ParentSyncHandler());
-        }
-    }
+    void reset() {
+        changeLog.reset();
 
-    private void reset() {
         if (deadIds != null) {
-
             // unregister dead ids...
             Iterator it = deadIds.iterator();
             while (it.hasNext()) {
@@ -281,6 +276,14 @@ final class ObjectContextGraphManager extends GraphMap {
 
             deadIds = null;
         }
+    }
+
+    Collection deadIds() {
+        if (deadIds == null) {
+            deadIds = new ArrayList();
+        }
+
+        return deadIds;
     }
 
     class NullChangeHandler implements GraphChangeHandler {
@@ -305,74 +308,6 @@ final class ObjectContextGraphManager extends GraphMap {
         }
 
         public void nodeRemoved(Object nodeId) {
-        }
-
-        public void graphCommitAborted() {
-        }
-
-        public void graphCommitStarted() {
-        }
-
-        public void graphCommitted() {
-        }
-
-        public void graphRolledback() {
-        }
-    }
-
-    class ParentSyncHandler implements GraphChangeHandler {
-
-        public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
-        }
-
-        public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
-        }
-
-        public void nodeCreated(Object nodeId) {
-        }
-
-        public void nodeIdChanged(Object nodeId, Object newId) {
-
-            // do not unregister the node just yet... only put replaced id in deadIds to
-            // remove it later. Otherwise stored operations will not work
-            Object node = getNode(nodeId);
-
-            if (node != null) {
-                if (deadIds == null) {
-                    deadIds = new ArrayList();
-                }
-
-                deadIds.add(nodeId);
-
-                registerNode(newId, node);
-
-                if (node instanceof Persistent) {
-                    // inject new id
-                    ((Persistent) node).setGlobalID((GlobalID) newId);
-                }
-            }
-        }
-
-        public void nodePropertyChanged(
-                Object nodeId,
-                String property,
-                Object oldValue,
-                Object newValue) {
-        }
-
-        public void nodeRemoved(Object nodeId) {
-        }
-
-        public void graphCommitAborted() {
-        }
-
-        public void graphCommitStarted() {
-        }
-
-        public void graphCommitted() {
-        }
-
-        public void graphRolledback() {
         }
     }
 }

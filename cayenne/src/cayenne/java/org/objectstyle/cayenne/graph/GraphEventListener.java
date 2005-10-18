@@ -62,10 +62,10 @@ package org.objectstyle.cayenne.graph;
  * "visitor":
  * 
  * <pre>
- *  public void graphChanged(GraphEvent event) {
- *    GraphChangeHandler handler = ..;
- *    event.getDiff().apply(handler);
- *  }
+ * public void graphChanged(GraphEvent event) {
+ *   GraphChangeHandler handler = ..;
+ *   event.getDiff().apply(handler);
+ * }
  * </pre>
  * 
  * @since 1.2
@@ -74,7 +74,7 @@ package org.objectstyle.cayenne.graph;
 public interface GraphEventListener {
 
     /**
-     * Notifies implementing object that that one or more graph nodes have changed.
+     * Notifies implementing object that one or more graph nodes or arcs have changed.
      */
     void graphChanged(GraphEvent event);
 

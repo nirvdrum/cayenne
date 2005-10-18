@@ -71,12 +71,12 @@ import org.objectstyle.cayenne.graph.GraphDiff;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ObjectContextOperationRecorder {
+class ObjectContextChangeLog {
 
     List diffs;
     Map markers;
 
-    ObjectContextOperationRecorder() {
+    ObjectContextChangeLog() {
         reset();
     }
 

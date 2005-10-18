@@ -125,6 +125,13 @@ public class IndexPropertyList extends AbstractList {
         this.dirty = sortNeeded;
     }
 
+    /**
+     * Changes list state to "dirty" forcing reordering on next access.
+     */
+    public void touch() {
+        this.dirty = true;
+    }
+
     public Object get(int index) {
         if (dirty) {
             sort();

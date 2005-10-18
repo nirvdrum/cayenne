@@ -76,14 +76,6 @@ class CayenneContextGraphAction {
         this.arcChangeInProcess = new ThreadLocal();
     }
 
-    boolean isArchChangeInProcess() {
-        return arcChangeInProcess.get() != null;
-    }
-
-    void setArcChangeInProcess(boolean flag) {
-        arcChangeInProcess.set(flag ? Boolean.TRUE : null);
-    }
-
     /**
      * Handles property change in a Peristent object.
      */
@@ -168,6 +160,14 @@ class CayenneContextGraphAction {
                 oldValue,
                 newValue);
         markAsDirty(object);
+    }
+
+    boolean isArchChangeInProcess() {
+        return arcChangeInProcess.get() != null;
+    }
+
+    void setArcChangeInProcess(boolean flag) {
+        arcChangeInProcess.set(flag ? Boolean.TRUE : null);
     }
 
     /**

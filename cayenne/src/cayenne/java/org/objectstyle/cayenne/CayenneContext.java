@@ -59,6 +59,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -95,6 +96,9 @@ public class CayenneContext implements ObjectContext {
     // Here we go further and make action a thread-safe ivar that tracks its own thread
     // state.
     CayenneContextGraphAction graphAction;
+
+    // object that merges "backdoor" changes that come from the channel.
+    ObjectContextMergeHandler mergeHandler;
 
     /**
      * Creates a new CayenneContext with no channel and disabled graph events.
@@ -137,7 +141,27 @@ public class CayenneContext implements ObjectContext {
      * Sets the context channel, setting up a listener for channel events.
      */
     public void setChannel(OPPChannel channel) {
-        this.channel = channel;
+        if (this.channel != channel) {
+
+            if (this.mergeHandler != null) {
+                this.mergeHandler.active = false;
+                this.mergeHandler = null;
+            }
+
+            this.channel = channel;
+
+            EventManager eventManager = (channel != null)
+                    ? channel.getEventManager()
+                    : null;
+            if (eventManager != null) {
+                this.mergeHandler = new ObjectContextMergeHandler(this);
+
+                // listen to ALL channel events, not just our channel... we have to reset
+                // listener on channel switch, as there is no guarantee that a new channel
+                // uses the same EventManager.
+                ObjectContextUtils.listenForChannelEvents(eventManager, mergeHandler);
+            }
+        }
     }
 
     /**
@@ -188,6 +212,10 @@ public class CayenneContext implements ObjectContext {
         return graphManager;
     }
 
+    CayenneContextGraphAction internalGraphAction() {
+        return graphAction;
+    }
+
     /**
      * Commits changes to uncommitted objects. First checks if there are changes in this
      * context and if any changes are detected, sends a commit message to remote Cayenne
@@ -198,56 +226,65 @@ public class CayenneContext implements ObjectContext {
     }
 
     GraphDiff doCommitChanges() {
-
         GraphDiff commitDiff = null;
-        if (graphManager.hasChanges()) {
 
-            graphManager.graphCommitStarted();
+        synchronized (graphManager) {
 
-            try {
-                commitDiff = channel.onSync(new SyncMessage(
-                        this,
-                        SyncMessage.COMMIT_TYPE,
-                        graphManager.getDiffs()));
-            }
-            catch (Throwable th) {
-                graphManager.graphCommitAborted();
+            if (graphManager.hasChanges()) {
 
-                if (th instanceof CayenneRuntimeException) {
-                    throw (CayenneRuntimeException) th;
+                graphManager.graphCommitStarted();
+
+                try {
+                    commitDiff = channel.onSync(new SyncMessage(
+                            this,
+                            SyncMessage.COMMIT_TYPE,
+                            graphManager.getDiffsSinceLastFlush()));
                 }
-                else {
-                    throw new CayenneRuntimeException("Commit error", th);
-                }
-            }
+                catch (Throwable th) {
+                    graphManager.graphCommitAborted();
 
-            graphManager.graphCommitted(commitDiff);
+                    if (th instanceof CayenneRuntimeException) {
+                        throw (CayenneRuntimeException) th;
+                    }
+                    else {
+                        throw new CayenneRuntimeException("Commit error", th);
+                    }
+                }
+
+                graphManager.graphCommitted(commitDiff);
+            }
         }
 
         return commitDiff;
     }
 
     public void rollbackChanges() {
-        if (graphManager.hasChanges()) {
+        synchronized (graphManager) {
+            if (graphManager.hasChanges()) {
 
-            GraphDiff diff = graphManager.getDiffs();
-            graphManager.graphReverted();
+                GraphDiff diff = graphManager.getDiffs();
+                graphManager.graphReverted();
 
-            channel.onSync(new SyncMessage(this, SyncMessage.ROLLBACK_TYPE, diff));
+                channel.onSync(new SyncMessage(this, SyncMessage.ROLLBACK_TYPE, diff));
+            }
         }
     }
 
     public void flushChanges() {
-        if (graphManager.hasChangesSinceLastFlush()) {
-            GraphDiff diff = graphManager.getDiffsSinceLastFlush();
-            graphManager.graphFlushed();
-            channel.onSync(new SyncMessage(this, SyncMessage.FLUSH_TYPE, diff));
+        synchronized (graphManager) {
+            if (graphManager.hasChangesSinceLastFlush()) {
+                GraphDiff diff = graphManager.getDiffsSinceLastFlush();
+                graphManager.graphFlushed();
+                channel.onSync(new SyncMessage(this, SyncMessage.FLUSH_TYPE, diff));
+            }
         }
     }
 
     public void revertChanges() {
-        if (graphManager.hasChanges()) {
-            graphManager.graphReverted();
+        synchronized (graphManager) {
+            if (graphManager.hasChanges()) {
+                graphManager.graphReverted();
+            }
         }
     }
 
@@ -291,19 +328,9 @@ public class CayenneContext implements ObjectContext {
                     + persistentClass);
         }
 
-        ClassDescriptor descriptor = entity.getClassDescriptor();
-
-        Persistent object = (Persistent) descriptor.createObject();
-        descriptor.prepareForAccess(object);
-
-        object.setGlobalID(new GlobalID(entity.getName()));
-        object.setPersistenceState(PersistenceState.NEW);
-        object.setObjectContext(this);
-
-        graphManager.registerNode(object.getGlobalID(), object);
-        graphManager.nodeCreated(object.getGlobalID());
-
-        return object;
+        synchronized (graphManager) {
+            return _newObject(entity, new GlobalID(entity.getName()));
+        }
     }
 
     public int[] performUpdateQuery(QueryExecutionPlan query) {
@@ -320,50 +347,53 @@ public class CayenneContext implements ObjectContext {
         // postprocess fetched objects...
 
         ListIterator it = objects.listIterator();
-        while (it.hasNext()) {
 
-            Persistent fetchedObject = (Persistent) it.next();
+        synchronized (graphManager) {
+            while (it.hasNext()) {
 
-            // sanity check
-            if (fetchedObject.getGlobalID() == null) {
-                throw new CayenneRuntimeException(
-                        "Server returned an object without an id: " + fetchedObject);
-            }
+                Persistent fetchedObject = (Persistent) it.next();
 
-            Persistent cachedObject = (Persistent) graphManager.getNode(fetchedObject
-                    .getGlobalID());
-
-            if (cachedObject != null) {
-
-                // TODO: implement smart merge for modified objects...
-                if (cachedObject.getPersistenceState() != PersistenceState.MODIFIED) {
-
-                    // refresh existing object...
-
-                    // lookup descriptor on the spot - we can be dealing with a mix of
-                    // different objects in the inheritance hierarchy...
-                    ClassDescriptor descriptor = getClassDescriptor(cachedObject);
-
-                    if (cachedObject.getPersistenceState() == PersistenceState.HOLLOW) {
-                        cachedObject.setPersistenceState(PersistenceState.COMMITTED);
-                        descriptor.prepareForAccess(cachedObject);
-                    }
-
-                    descriptor.copyProperties(fetchedObject, cachedObject);
+                // sanity check
+                if (fetchedObject.getGlobalID() == null) {
+                    throw new CayenneRuntimeException(
+                            "Server returned an object without an id: " + fetchedObject);
                 }
 
-                it.set(cachedObject);
-            }
-            else {
+                Persistent cachedObject = (Persistent) graphManager.getNode(fetchedObject
+                        .getGlobalID());
 
-                // lookup descriptor on the spot - we can deal with a mix of different
-                // objects in the hierarchy...
-                ClassDescriptor descriptor = getClassDescriptor(fetchedObject);
+                if (cachedObject != null) {
 
-                fetchedObject.setPersistenceState(PersistenceState.COMMITTED);
-                fetchedObject.setObjectContext(this);
-                descriptor.prepareForAccess(fetchedObject);
-                graphManager.registerNode(fetchedObject.getGlobalID(), fetchedObject);
+                    // TODO: implement smart merge for modified objects...
+                    if (cachedObject.getPersistenceState() != PersistenceState.MODIFIED) {
+
+                        // refresh existing object...
+
+                        // lookup descriptor on the spot - we can be dealing with a mix of
+                        // different objects in the inheritance hierarchy...
+                        ClassDescriptor descriptor = getClassDescriptor(cachedObject);
+
+                        if (cachedObject.getPersistenceState() == PersistenceState.HOLLOW) {
+                            cachedObject.setPersistenceState(PersistenceState.COMMITTED);
+                            descriptor.prepareForAccess(cachedObject);
+                        }
+
+                        descriptor.copyProperties(fetchedObject, cachedObject);
+                    }
+
+                    it.set(cachedObject);
+                }
+                else {
+
+                    // lookup descriptor on the spot - we can deal with a mix of different
+                    // objects in the hierarchy...
+                    ClassDescriptor descriptor = getClassDescriptor(fetchedObject);
+
+                    fetchedObject.setPersistenceState(PersistenceState.COMMITTED);
+                    fetchedObject.setObjectContext(this);
+                    descriptor.prepareForAccess(fetchedObject);
+                    graphManager.registerNode(fetchedObject.getGlobalID(), fetchedObject);
+                }
             }
         }
 
@@ -388,23 +418,27 @@ public class CayenneContext implements ObjectContext {
     }
 
     public Collection uncommittedObjects() {
-        // TODO: sync on graphManager?
-        return graphManager.dirtyNodes();
+        synchronized (graphManager) {
+            return graphManager.dirtyNodes();
+        }
     }
 
     public Collection deletedObjects() {
-        // TODO: sync on graphManager?
-        return graphManager.dirtyNodes(PersistenceState.DELETED);
+        synchronized (graphManager) {
+            return graphManager.dirtyNodes(PersistenceState.DELETED);
+        }
     }
 
     public Collection modifiedObjects() {
-        // TODO: sync on graphManager?
-        return graphManager.dirtyNodes(PersistenceState.MODIFIED);
+        synchronized (graphManager) {
+            return graphManager.dirtyNodes(PersistenceState.MODIFIED);
+        }
     }
 
     public Collection newObjects() {
-        // TODO: sync on graphManager?
-        return graphManager.dirtyNodes(PersistenceState.NEW);
+        synchronized (graphManager) {
+            return graphManager.dirtyNodes(PersistenceState.NEW);
+        }
     }
 
     /**
@@ -420,5 +454,22 @@ public class CayenneContext implements ObjectContext {
         ObjEntity entity = getEntityResolver().lookupObjEntity(
                 object.getGlobalID().getEntityName());
         return entity.getClassDescriptor();
+    }
+
+    // ****** non-public methods ******
+
+    Persistent _newObject(ObjEntity entity, GlobalID id) {
+        ClassDescriptor descriptor = entity.getClassDescriptor();
+
+        Persistent object = (Persistent) descriptor.createObject();
+        descriptor.prepareForAccess(object);
+
+        object.setPersistenceState(PersistenceState.NEW);
+        object.setObjectContext(this);
+        object.setGlobalID(id);
+        graphManager.registerNode(object.getGlobalID(), object);
+        graphManager.nodeCreated(object.getGlobalID());
+
+        return object;
     }
 }

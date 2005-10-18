@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.util.Util;
 public class ObjectContextOperationRecorderTst extends TestCase {
 
     public void testReset() {
-        ObjectContextOperationRecorder recorder = new ObjectContextOperationRecorder();
+        ObjectContextChangeLog recorder = new ObjectContextChangeLog();
         assertNotNull(recorder.getDiffs());
         assertTrue(recorder.getDiffs().isNoop());
 
@@ -90,7 +90,7 @@ public class ObjectContextOperationRecorderTst extends TestCase {
     public void testGetDiffs() {
         // assert that after returning, the diffs array won't get modified by operation
         // recorder
-        ObjectContextOperationRecorder recorder = new ObjectContextOperationRecorder();
+        ObjectContextChangeLog recorder = new ObjectContextChangeLog();
         recorder.addOperation(new NodeCreateOperation(new Object()));
         CompoundDiff diff = (CompoundDiff) recorder.getDiffs();
         assertEquals(1, diff.getDiffs().size());
@@ -103,7 +103,7 @@ public class ObjectContextOperationRecorderTst extends TestCase {
     }
 
     public void testGetDiffsSerializable() throws Exception {
-        ObjectContextOperationRecorder recorder = new ObjectContextOperationRecorder();
+        ObjectContextChangeLog recorder = new ObjectContextChangeLog();
         recorder.addOperation(new NodeCreateOperation(new GlobalID("test")));
         CompoundDiff diff = (CompoundDiff) recorder.getDiffs();
 
@@ -116,7 +116,7 @@ public class ObjectContextOperationRecorderTst extends TestCase {
     }
 
     public void testGetDiffsSerializableWithHessian() throws Exception {
-        ObjectContextOperationRecorder recorder = new ObjectContextOperationRecorder();
+        ObjectContextChangeLog recorder = new ObjectContextChangeLog();
         recorder.addOperation(new NodeCreateOperation(new Object()));
         CompoundDiff diff = (CompoundDiff) recorder.getDiffs();
 
