@@ -93,17 +93,15 @@ public class ObjAttribute extends Attribute {
     /**
      * Returns Java class of an object property described by this attribute. Wraps any
      * thrown exceptions into CayenneRuntimeException.
-     * 
-     * @since 1.2
      */
-    public Class getJavaClass(ClassLoader classLoader) {
+    public Class getJavaClass() {
         if (this.getType() == null) {
             return null;
         }
 
         try {
             // tolerate null class loader
-            return Util.getJavaClass(classLoader, getType());
+            return Util.getJavaClass(getType());
         }
         catch (ClassNotFoundException e) {
             throw new CayenneRuntimeException("Failed to load class for name '"

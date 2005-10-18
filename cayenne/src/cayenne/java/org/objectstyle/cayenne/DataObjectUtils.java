@@ -63,7 +63,6 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ObjectStore;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.EntityInheritanceTree;
@@ -145,8 +144,8 @@ public final class DataObjectUtils {
                     .getDataContext()
                     .getEntityResolver()
                     .lookupDbEntity(dataObject);
-            
-            if(entity != null && entity.isFullReplacementIdAttached(id)) {
+
+            if (entity != null && entity.isFullReplacementIdAttached(id)) {
                 return id.getReplacementIdMap();
             }
         }
@@ -257,7 +256,7 @@ public final class DataObjectUtils {
             throw new CayenneRuntimeException("Non-existent ObjEntity: " + objEntityName);
         }
 
-        Class dataObjectClass = entity.getJavaClass(Configuration.getResourceLoader());
+        Class dataObjectClass = entity.getJavaClass();
 
         return objectForPK(context, new ObjectId(dataObjectClass, pk));
     }
@@ -295,8 +294,8 @@ public final class DataObjectUtils {
                 Iterator it = children.iterator();
                 while (it.hasNext()) {
                     EntityInheritanceTree child = (EntityInheritanceTree) it.next();
-                    ObjectId childID = new ObjectId(child.getEntity().getJavaClass(
-                            Configuration.getResourceLoader()), id.getIdSnapshot());
+                    ObjectId childID = new ObjectId(child.getEntity().getJavaClass(), id
+                            .getIdSnapshot());
 
                     DataObject childObject = objectStore.getObject(childID);
                     if (childObject != null) {
@@ -344,8 +343,7 @@ public final class DataObjectUtils {
         }
 
         DbAttribute attr = (DbAttribute) pkAttributes.get(0);
-        return new ObjectId(entity.getJavaClass(Configuration.getResourceLoader()), attr
-                .getName(), pk);
+        return new ObjectId(entity.getJavaClass(), attr.getName(), pk);
     }
 
     static ObjectId buildId(DataContext context, Class dataObjectClass, Object pk) {

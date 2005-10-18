@@ -42,7 +42,6 @@ import java.net.URL;
 import org.apache.oro.text.perl.Perl5Util;
 import org.apache.tools.ant.Location;
 import org.apache.tools.ant.Project;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
 import org.objectstyle.cayenne.util.ResourceLocator;
@@ -69,12 +68,6 @@ public class CayenneGeneratorTst extends CayenneTestCase {
         locator.setSkipClasspath(false);
         locator.setSkipCurrentDirectory(true);
         locator.setSkipHomeDirectory(true);
-
-        // Configuration superclass statically defines what
-        // ClassLoader to use for resources. This
-        // allows applications to control where resources
-        // are loaded from.
-        locator.setClassLoader(Configuration.getResourceLoader());
 
         URL url1 = locator.findResource("test-resources/testmap.map.xml");
         Util.copy(url1, map);

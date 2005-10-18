@@ -111,19 +111,6 @@ public abstract class Configuration {
         }
     };
 
-    /**
-     * Defines a ClassLoader to use for resource lookup. Configuration objects that are
-     * using ClassLoaders to locate resources may need to be bootstrapped explicitly.
-     */
-    protected static ClassLoader resourceLoader;
-
-    /**
-     * Stores ClassLoader set up for the current thread.
-     * 
-     * @since 1.2
-     */
-    protected static ThreadLocal threadClassLoader = new ThreadLocal();
-
     /** Lookup map that stores DataDomains with names as keys. */
     protected CayenneMap dataDomains = new CayenneMap(this);
     protected DataSourceFactory overrideFactory;
@@ -141,26 +128,10 @@ public abstract class Configuration {
     protected EventManager eventManager;
 
     /**
-     * Stores instance ClassLoader.
-     * 
-     * @since 1.2
-     */
-    protected ClassLoader classLoader;
-
-    /**
-     * Sets <code>cl</code> class's ClassLoader to serve as shared configuration
-     * resource ClassLoader. If shared Configuration object does not use ClassLoader, this
-     * method call will have no effect on how resources are loaded.
+     * @deprecated since 1.2. Use Thread.currentThread().setContextClassLoader() instead.
      */
     public static void bootstrapSharedConfiguration(Class cl) {
-        if (cl.getClassLoader() != null) {
-            resourceLoader = cl.getClassLoader();
-        }
-        else {
-            logObj
-                    .debug("An attempt to bootstrap configuration with null class loader for class "
-                            + cl.getName());
-        }
+        logObj.warn("This method does nothing.");
     }
 
     /**
@@ -242,26 +213,16 @@ public abstract class Configuration {
     }
 
     /**
-     * Returns the ClassLoader used to load resources. Since Cayenne 1.2 this method
-     * implements different logic for providing a class loader. First it checks whether a
-     * thread-local ClassLoader was provided via "setThreadClassLoader", then it checked
-     * static resourceLoader, and finally it returns current thread context ClassLoader.
+     * @deprecated since 1.2 use Thread.currentThread().getContextClassLoader(). This is
+     *             what Cayenne uses internally.
      */
     public static ClassLoader getResourceLoader() {
-        ClassLoader loader = (ClassLoader) threadClassLoader.get();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
         if (loader == null) {
-            loader = Configuration.resourceLoader;
-        }
-
-        if (loader == null) {
-            loader = Thread.currentThread().getContextClassLoader();
+            loader = Configuration.class.getClassLoader();
         }
 
         return loader;
-    }
-
-    public static void setThreadClassLoader(ClassLoader classLoader) {
-        threadClassLoader.set(classLoader);
     }
 
     /**
@@ -684,22 +645,5 @@ public abstract class Configuration {
 
     public void uninstallConfigurationShutdownHook() {
         Runtime.getRuntime().removeShutdownHook(configurationShutdownHook);
-    }
-
-    /**
-     * Returns ClassLoader set for this instance if it is not null. Otherwise returns
-     * static ClassLoader by calling "Configuration.getResourceLoader()".
-     * 
-     * @since 1.2
-     */
-    public ClassLoader getClassLoader() {
-        return classLoader != null ? classLoader : Configuration.getResourceLoader();
-    }
-
-    /**
-     * @since 1.2
-     */
-    public void setClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
     }
 }

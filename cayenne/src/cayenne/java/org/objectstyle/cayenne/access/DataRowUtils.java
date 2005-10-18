@@ -64,7 +64,6 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -73,8 +72,8 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * DataRowUtils contains a number of static methods to work with DataRows. This
- * is a helper class for DataContext and ObjectStore
+ * DataRowUtils contains a number of static methods to work with DataRows. This is a
+ * helper class for DataContext and ObjectStore
  * 
  * @author Andrei Adamchik
  * @since 1.1
@@ -82,27 +81,26 @@ import org.objectstyle.cayenne.util.Util;
 class DataRowUtils {
 
     /**
-     * Replaces all object attribute values with snapshot values. Sets object
-     * state to COMMITTED, unless the snapshot is partial in which case the
-     * state is set to HOLLOW
+     * Replaces all object attribute values with snapshot values. Sets object state to
+     * COMMITTED, unless the snapshot is partial in which case the state is set to HOLLOW
      */
     static void refreshObjectWithSnapshot(
-        ObjEntity objEntity,
-        DataObject object,
-        DataRow snapshot,
-        boolean invalidateToManyRelationships) {
+            ObjEntity objEntity,
+            DataObject object,
+            DataRow snapshot,
+            boolean invalidateToManyRelationships) {
 
         Map attrMap = objEntity.getAttributeMap();
         Iterator it = attrMap.entrySet().iterator();
         boolean isPartialSnapshot = false;
         while (it.hasNext()) {
-        	Map.Entry entry = (Map.Entry) it.next();
+            Map.Entry entry = (Map.Entry) it.next();
             String attrName = (String) entry.getKey();
             ObjAttribute attr = (ObjAttribute) entry.getValue();
             String dbAttrPath = attr.getDbAttributePath();
             object.writePropertyDirectly(attrName, snapshot.get(dbAttrPath));
             if (!snapshot.containsKey(dbAttrPath)) {
-                //Note the distinction between
+                // Note the distinction between
                 // 1) the map returning null because there was no mapping
                 // for that key and
                 // 2) returning null because 'null' was the value mapped
@@ -128,8 +126,8 @@ class DataRowUtils {
                 if (toManyList == null) {
                     object.writePropertyDirectly(rel.getName(), Fault.getToManyFault());
                 }
-                else if (
-                    invalidateToManyRelationships && toManyList instanceof ToManyList) {
+                else if (invalidateToManyRelationships
+                        && toManyList instanceof ToManyList) {
                     ((ToManyList) toManyList).invalidateObjectList();
                 }
 
@@ -151,24 +149,25 @@ class DataRowUtils {
     }
 
     static void forceMergeWithSnapshot(
-        ObjEntity entity,
-        DataObject anObject,
-        DataRow snapshot) {
+            ObjEntity entity,
+            DataObject anObject,
+            DataRow snapshot) {
 
         DataContext context = anObject.getDataContext();
-        Map oldSnap =
-            context.getObjectStore().getSnapshot(anObject.getObjectId(), context);
+        Map oldSnap = context.getObjectStore().getSnapshot(
+                anObject.getObjectId(),
+                context);
 
         // attributes
         Map attrMap = entity.getAttributeMap();
         Iterator it = attrMap.entrySet().iterator();
         while (it.hasNext()) {
-        	Map.Entry entry = (Map.Entry)it.next();
-        	
+            Map.Entry entry = (Map.Entry) it.next();
+
             String attrName = (String) entry.getKey();
             ObjAttribute attr = (ObjAttribute) entry.getValue();
 
-            //processing compound attributes correctly
+            // processing compound attributes correctly
             String dbAttrPath = attr.getDbAttributePath();
 
             // supports merging of partial snapshots...
@@ -186,7 +185,7 @@ class DataRowUtils {
             // if value not modified, update it from snapshot,
             // otherwise leave it alone
             if (Util.nullSafeEquals(curVal, oldVal)
-                && !Util.nullSafeEquals(newVal, curVal)) {
+                    && !Util.nullSafeEquals(newVal, curVal)) {
                 anObject.writePropertyDirectly(attrName, newVal);
             }
         }
@@ -205,16 +204,14 @@ class DataRowUtils {
             // if value not modified, update it from snapshot,
             // otherwise leave it alone
             if (!isToOneTargetModified(rel, anObject, oldSnap)
-                && isJoinAttributesModified(rel, snapshot, oldSnap)) {
+                    && isJoinAttributesModified(rel, snapshot, oldSnap)) {
 
-                DbRelationship dbRelationship =
-                    (DbRelationship) rel.getDbRelationships().get(0);
+                DbRelationship dbRelationship = (DbRelationship) rel
+                        .getDbRelationships()
+                        .get(0);
 
-                ObjectId id =
-                    snapshot.createTargetObjectId(
-                        ((ObjEntity) rel.getTargetEntity()).getJavaClass(
-                            Configuration.getResourceLoader()),
-                        dbRelationship);
+                ObjectId id = snapshot.createTargetObjectId(((ObjEntity) rel
+                        .getTargetEntity()).getJavaClass(), dbRelationship);
                 DataObject target = (id != null) ? context.registeredObject(id) : null;
 
                 anObject.writePropertyDirectly(rel.getName(), target);
@@ -223,23 +220,24 @@ class DataRowUtils {
     }
 
     /**
-     * Merges changes reflected in snapshot map to the object. Changes made to
-     * attributes and to-one relationships will be merged. In case an object is
-     * already modified, modified properties will not be overwritten.
+     * Merges changes reflected in snapshot map to the object. Changes made to attributes
+     * and to-one relationships will be merged. In case an object is already modified,
+     * modified properties will not be overwritten.
      */
     static void mergeObjectWithSnapshot(
-        ObjEntity entity,
-        DataObject anObject,
-        Map snapshot) {
+            ObjEntity entity,
+            DataObject anObject,
+            Map snapshot) {
 
         // TODO: once we use DataRow consistently instead of a Map, this line
         // should go away.
         // Instead method signiture should include "DataRow".
-        DataRow dataRow =
-            (snapshot instanceof DataRow) ? (DataRow) snapshot : new DataRow(snapshot);
+        DataRow dataRow = (snapshot instanceof DataRow)
+                ? (DataRow) snapshot
+                : new DataRow(snapshot);
 
         if (entity.isReadOnly()
-            || anObject.getPersistenceState() == PersistenceState.HOLLOW) {
+                || anObject.getPersistenceState() == PersistenceState.HOLLOW) {
             refreshObjectWithSnapshot(entity, anObject, dataRow, true);
         }
         else if (anObject.getPersistenceState() == PersistenceState.COMMITTED) {
@@ -253,16 +251,15 @@ class DataRowUtils {
     }
 
     /**
-     * Checks if a new snapshot has a modified to-one relationship compared to
-     * the cached snapshot.
+     * Checks if a new snapshot has a modified to-one relationship compared to the cached
+     * snapshot.
      */
     static boolean isJoinAttributesModified(
-        ObjRelationship relationship,
-        Map newSnapshot,
-        Map storedSnapshot) {
+            ObjRelationship relationship,
+            Map newSnapshot,
+            Map storedSnapshot) {
 
-        Iterator it =
-            ((DbRelationship) relationship.getDbRelationships().get(0))
+        Iterator it = ((DbRelationship) relationship.getDbRelationships().get(0))
                 .getJoins()
                 .iterator();
         while (it.hasNext()) {
@@ -271,10 +268,8 @@ class DataRowUtils {
 
             // for equality to be true, snapshot must contain all matching pk
             // values
-            if (!Util
-                .nullSafeEquals(
-                    newSnapshot.get(propertyName),
-                    storedSnapshot.get(propertyName))) {
+            if (!Util.nullSafeEquals(newSnapshot.get(propertyName), storedSnapshot
+                    .get(propertyName))) {
                 return true;
             }
         }
@@ -283,13 +278,12 @@ class DataRowUtils {
     }
 
     /**
-     * Checks if an object has its to-one relationship target modified in
-     * memory.
+     * Checks if an object has its to-one relationship target modified in memory.
      */
     static boolean isToOneTargetModified(
-        ObjRelationship relationship,
-        DataObject object,
-        Map storedSnapshot) {
+            ObjRelationship relationship,
+            DataObject object,
+            Map storedSnapshot) {
 
         if (object.getPersistenceState() != PersistenceState.MODIFIED) {
             return false;
@@ -311,8 +305,7 @@ class DataRowUtils {
 
         // check if ObjectId map is a subset of a stored snapshot;
         // this is an equality condition
-        Iterator it =
-            ((DbRelationship) relationship.getDbRelationships().get(0))
+        Iterator it = ((DbRelationship) relationship.getDbRelationships().get(0))
                 .getJoins()
                 .iterator();
 
@@ -331,10 +324,9 @@ class DataRowUtils {
                 // pk values
                 // note that we must use target entity names to extract id
                 // values.
-                if (!Util
-                    .nullSafeEquals(
-                        currentId.getValueForAttribute(join.getTarget().getName()),
-                        storedSnapshot.get(propertyName))) {
+                if (!Util.nullSafeEquals(currentId.getValueForAttribute(join
+                        .getTarget()
+                        .getName()), storedSnapshot.get(propertyName))) {
                     return true;
                 }
             }

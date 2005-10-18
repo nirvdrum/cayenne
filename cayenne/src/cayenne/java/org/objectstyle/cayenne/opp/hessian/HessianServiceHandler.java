@@ -80,10 +80,8 @@ import com.caucho.services.server.Service;
  * A default implementation of HessianService service protocol. Supports client sessions.
  * For more info on Hessian see http://www.caucho.com/resin-3.0/protocols/hessian.xtp.
  * 
- * @see org.objectstyle.cayenne.opp.hessian.HessianServlet for deployment configuration
- *      information.
- * @see org.objectstyle.cayenne.opp.hessian.HessianService for deployment configuration
- *      information.
+ * @see org.objectstyle.cayenne.opp.hessian.HessianServlet
+ * @see org.objectstyle.cayenne.opp.hessian.HessianService
  * @since 1.2
  * @author Andrus Adamchik
  */

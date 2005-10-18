@@ -63,8 +63,6 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenuItem;
@@ -137,10 +135,6 @@ public class OpenProjectAction extends ProjectAction {
 
     /** Opens specified project file. File must already exist. */
     public void openProject(File file) {
-        // Using fresh ModelerClassLoader, as we need to support custom adapters
-        ConfigurationHack.setResourceLoader(getApplication()
-                .getClassLoadingService()
-                .getClassLoader());
 
         try {
             getApplication().getFrameController().addToLastProjListAction(
@@ -180,13 +174,5 @@ public class OpenProjectAction extends ProjectAction {
         logObj.info("Will upgrade project " + project.getMainFile());
         project.upgrade();
         return true;
-    }
-
-    static final class ConfigurationHack extends DefaultConfiguration {
-
-        // TODO: get rid of this once we are out of the API freeze..
-        static void setResourceLoader(ClassLoader loader) {
-            Configuration.resourceLoader = loader;
-        }
     }
 }

@@ -61,7 +61,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.project.DataMapFile;
@@ -228,13 +227,6 @@ public class MapLoader extends DefaultHandler {
         locator.setSkipClasspath(false);
         locator.setSkipCurrentDirectory(false);
         locator.setSkipHomeDirectory(false);
-
-        // Configuration superclass statically defines what
-        // ClassLoader to use for resources. This
-        // allows applications to control where resources
-        // are loaded from.
-        locator.setClassLoader(Configuration.getResourceLoader());
-
         return locator;
     }
 

@@ -60,7 +60,6 @@ import java.util.List;
 
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ToManyList;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -127,9 +126,9 @@ public abstract class Fault implements Serializable {
             // criteria that requires fully resolving an object are:
 
             // 1. Target ObjectId can't be fully expressed using the values
-            //    from source object snapshot or
+            // from source object snapshot or
             // 2. Target object has subclasses, and it is not clear which class
-            //    to instantiate.
+            // to instantiate.
 
             ObjEntity targetEntity = (ObjEntity) relationship.getTargetEntity();
             if (relationship.isSourceIndependentFromTargetChange()) {
@@ -158,8 +157,7 @@ public abstract class Fault implements Serializable {
             DbRelationship dbRel = (DbRelationship) relationship
                     .getDbRelationships()
                     .get(0);
-            Class targetClass = targetEntity.getJavaClass(Configuration
-                    .getResourceLoader());
+            Class targetClass = targetEntity.getJavaClass();
             ObjectId id = context.getObjectStore().getSnapshot(
                     sourceObject.getObjectId(),
                     context).createTargetObjectId(targetClass, dbRel);
@@ -167,7 +165,6 @@ public abstract class Fault implements Serializable {
             if (id == null) {
                 return null;
             }
-
 
             if (resolver.lookupInheritanceTree(targetEntity) != null) {
                 // this should find a correct subclass if we have inheritance case....

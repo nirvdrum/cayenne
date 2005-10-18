@@ -98,9 +98,6 @@ public class DataPortTask extends CayenneTask {
 
         FileConfiguration configuration = new FileConfiguration(projectFile);
 
-        // setup the right ClassLoader
-        configuration.setClassLoader(getClass().getClassLoader());
-
         try {
             configuration.initialize();
         }

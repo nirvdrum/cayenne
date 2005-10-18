@@ -65,6 +65,7 @@ import javax.swing.ActionMap;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JRootPane;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
@@ -138,7 +139,6 @@ public class Application {
     public static final String PREFERENCES_MAP_PACKAGE = "pref";
     public static final String APPLICATION_NAME_PROPERTY = "cayenne.modeler.application.name";
     public static final String PREFERENCES_VERSION_PROPERTY = "cayenne.modeler.pref.version";
-    
 
     public static final String DEFAULT_APPLICATION_NAME = "CayenneModeler";
 
@@ -182,9 +182,8 @@ public class Application {
             subdir = PREFERENCES_VERSION;
         }
 
-        File dbDir = new File(CayenneUserDir
-                .getInstance()
-                .resolveFile(PREFERENCES_DB_SUBDIRECTORY), subdir);
+        File dbDir = new File(CayenneUserDir.getInstance().resolveFile(
+                PREFERENCES_DB_SUBDIRECTORY), subdir);
         dbDir.mkdirs();
         this.preferencesDB = new File(dbDir, "db").getAbsolutePath();
     }
@@ -196,7 +195,7 @@ public class Application {
     public ClassLoadingService getClassLoadingService() {
         return modelerClassLoader;
     }
-    
+
     public AdapterMapping getAdapterMapping() {
         return adapterMapping;
     }
@@ -272,7 +271,7 @@ public class Application {
      * Reinitializes ModelerClassLoader from preferences.
      */
     public void initClassLoader() {
-        FileClassLoadingService classLoader = new FileClassLoadingService();
+        final FileClassLoadingService classLoader = new FileClassLoadingService();
 
         // init from preferences...
         Domain classLoaderDomain = getPreferenceDomain().getSubdomain(
@@ -294,6 +293,20 @@ public class Application {
         }
 
         this.modelerClassLoader = classLoader;
+
+        // set as EventDispatch thread default class loader
+        if (SwingUtilities.isEventDispatchThread()) {
+            Thread.currentThread().setContextClassLoader(classLoader.getClassLoader());
+        }
+        else {
+            SwingUtilities.invokeLater(new Runnable() {
+
+                public void run() {
+                    Thread.currentThread().setContextClassLoader(
+                            classLoader.getClassLoader());
+                }
+            });
+        }
     }
 
     protected void initPreferences() {

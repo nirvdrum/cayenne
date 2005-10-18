@@ -201,14 +201,10 @@ public class DataContext implements QueryEngine, Serializable {
     protected transient String lazyInitParentDomainName;
 
     /**
-     * A factory method of DataObjects. Uses Configuration ClassLoader to instantiate a
-     * new instance of DataObject of a given class.
+     * A factory method of DataObjects.
      */
     private static final DataObject newDataObject(String className) throws Exception {
-        return (DataObject) Configuration
-                .getResourceLoader()
-                .loadClass(className)
-                .newInstance();
+        return (DataObject) Util.getJavaClass(className).newInstance();
     }
 
     /**
@@ -935,7 +931,7 @@ public class DataContext implements QueryEngine, Serializable {
     public void rollbackChanges() {
         getObjectStore().objectsRolledBack();
     }
-    
+
     /**
      * @deprecated Since 1.2, use "commitChnages()" instead.
      */
@@ -948,7 +944,7 @@ public class DataContext implements QueryEngine, Serializable {
      * delete queries (generated internally).
      */
     public void commitChanges() throws CayenneRuntimeException {
-   
+
         if (this.getParent() == null) {
             throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
         }

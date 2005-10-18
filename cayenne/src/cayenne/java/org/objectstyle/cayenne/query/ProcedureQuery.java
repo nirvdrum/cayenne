@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.access.jdbc.ColumnDescriptor;
 import org.objectstyle.cayenne.access.jdbc.RowDescriptor;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.QueryBuilder;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
@@ -421,24 +422,27 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     }
 
     /**
-     * Returns Java class of the DataObjects returned by this query. If ClassLoader
-     * argument is null, uses Class.forName(..) to discover result class.
+     * Returns Java class of the DataObjects returned by this query.
      * 
+     * @deprecated since 1.2 - using thread ClassLoader implicitly.
      * @since 1.1
      */
     public Class getResultClass(ClassLoader classLoader) {
+        return getResultClass();
+    }
+
+    /**
+     * Returns Java class of the DataObjects returned by this query.
+     * 
+     * @since 1.2
+     */
+    public Class getResultClass() {
         if (this.getResultClassName() == null) {
             return null;
         }
 
         try {
-            // tolerate null class loader
-            if (classLoader == null) {
-                return Class.forName(this.getResultClassName());
-            }
-            else {
-                return classLoader.loadClass(this.getResultClassName());
-            }
+            return Util.getJavaClass(getResultClassName());
         }
         catch (ClassNotFoundException e) {
             throw new CayenneRuntimeException("Failed to load class for name '"

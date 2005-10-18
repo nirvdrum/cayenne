@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -69,16 +68,16 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * DataRow is a map that holds values retrieved from the database for a 
- * given query row. DataRows are used to cache database data snapshots, 
- * and as a reference point for tracking DataObject changes.
+ * DataRow is a map that holds values retrieved from the database for a given query row.
+ * DataRows are used to cache database data snapshots, and as a reference point for
+ * tracking DataObject changes.
  * 
  * @author Andrei Adamchik
  * @since 1.1
  */
 
 // TODO: Maybe implement "locking" of snapshot after it has been created,
-// since snapshots are expected to be immutable 
+// since snapshots are expected to be immutable
 public class DataRow extends HashMap {
 
     // "volatile" is supposed to ensure consistency in read and increment operations;
@@ -114,8 +113,8 @@ public class DataRow extends HashMap {
     }
 
     /**
-     * Builds a new DataRow, merging changes from <code>diff</code>
-     * parameter with data contained in this DataRow.
+     * Builds a new DataRow, merging changes from <code>diff</code> parameter with data
+     * contained in this DataRow.
      */
     public DataRow applyDiff(DataRow diff) {
         DataRow merged = new DataRow(this);
@@ -130,12 +129,12 @@ public class DataRow extends HashMap {
     }
 
     /**
-      * Creates a DataRow that contains only the keys that have values that differ
-      * between this object and <code>row</code> parameter. Diff values are taken from the
-      * <code>row</code> parameter. It is assumed that key 
-      * sets are compatible in both rows (e.g. they represent
-      * snapshots for the same entity). Returns null if no differences are found.
-      */
+     * Creates a DataRow that contains only the keys that have values that differ between
+     * this object and <code>row</code> parameter. Diff values are taken from the
+     * <code>row</code> parameter. It is assumed that key sets are compatible in both
+     * rows (e.g. they represent snapshots for the same entity). Returns null if no
+     * differences are found.
+     */
     public DataRow createDiff(DataRow row) {
 
         // build a diff...
@@ -161,30 +160,29 @@ public class DataRow extends HashMap {
     }
 
     /**
-      * Creates an ObjectId from the values in the snapshot.
-      * If needed attributes are missing in a snapshot,
-      * CayenneRuntimeException is thrown.
-      */
+     * Creates an ObjectId from the values in the snapshot. If needed attributes are
+     * missing in a snapshot, CayenneRuntimeException is thrown.
+     */
     public ObjectId createObjectId(ObjEntity entity) {
-        return createObjectId(
-            entity.getJavaClass(Configuration.getResourceLoader()),
-            entity.getDbEntity());
+        return createObjectId(entity.getJavaClass(), entity.getDbEntity());
     }
 
     public ObjectId createObjectId(Class objectClass, DbEntity entity) {
 
         // ... handle special case - PK.size == 1
-        //     use some not-so-significant optimizations...
+        // use some not-so-significant optimizations...
 
         List pk = entity.getPrimaryKey();
         if (pk.size() == 1) {
             DbAttribute attr = (DbAttribute) pk.get(0);
             Object val = this.get(attr.getName());
             if (val == null) {
-                throw new CayenneRuntimeException(
-                    "Null value for '" + attr.getName() + "'. Snapshot: " + this);
+                throw new CayenneRuntimeException("Null value for '"
+                        + attr.getName()
+                        + "'. Snapshot: "
+                        + this);
             }
-            
+
             return new ObjectId(objectClass, attr.getName(), val);
         }
 
@@ -196,8 +194,10 @@ public class DataRow extends HashMap {
             DbAttribute attr = (DbAttribute) it.next();
             Object val = this.get(attr.getName());
             if (val == null) {
-                throw new CayenneRuntimeException(
-                    "Null value for '" + attr.getName() + "'. Snapshot: " + this);
+                throw new CayenneRuntimeException("Null value for '"
+                        + attr.getName()
+                        + "'. Snapshot: "
+                        + this);
             }
 
             idMap.put(attr.getName(), val);
@@ -207,13 +207,11 @@ public class DataRow extends HashMap {
     }
 
     /**
-     * Returns an ObjectId of an object on the other side of the to-one relationship,
-     * for this DataRow representing a source of relationship. Returns null if snapshot 
-     * FK columns indicate a null to-one relationship.
+     * Returns an ObjectId of an object on the other side of the to-one relationship, for
+     * this DataRow representing a source of relationship. Returns null if snapshot FK
+     * columns indicate a null to-one relationship.
      */
-    public ObjectId createTargetObjectId(
-        Class targetClass,
-        DbRelationship relationship) {
+    public ObjectId createTargetObjectId(Class targetClass, DbRelationship relationship) {
 
         if (relationship.isToMany()) {
             throw new CayenneRuntimeException("Only 'to one' can have a target ObjectId.");

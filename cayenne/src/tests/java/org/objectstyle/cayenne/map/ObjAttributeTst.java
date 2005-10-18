@@ -100,20 +100,16 @@ public class ObjAttributeTst extends TestCase {
 
         ObjAttribute a1 = new ObjAttribute("test");
         a1.setType("byte");
-        assertEquals(byte.class.getName(), a1.getJavaClass(
-                Thread.currentThread().getContextClassLoader()).getName());
+        assertEquals(byte.class.getName(), a1.getJavaClass().getName());
 
         a1.setType("byte[]");
-        assertEquals(byte[].class.getName(), a1.getJavaClass(
-                Thread.currentThread().getContextClassLoader()).getName());
+        assertEquals(byte[].class.getName(), a1.getJavaClass().getName());
 
         a1.setType("java.lang.Byte");
-        assertEquals(Byte.class.getName(), a1.getJavaClass(
-                Thread.currentThread().getContextClassLoader()).getName());
+        assertEquals(Byte.class.getName(), a1.getJavaClass().getName());
 
         a1.setType("java.lang.Byte[]");
-        assertEquals(Byte[].class.getName(), a1.getJavaClass(
-                Thread.currentThread().getContextClassLoader()).getName());
+        assertEquals(Byte[].class.getName(), a1.getJavaClass().getName());
     }
 
 }

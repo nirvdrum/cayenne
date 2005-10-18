@@ -303,7 +303,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
         DbAdapter dbAdapter = null;
 
         try {
-            ClassLoader cl = config.getClassLoader();
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
             Class dbAdapterClass = (cl != null) ? cl.loadClass(adapter) : Class
                     .forName(adapter);
             dbAdapter = (DbAdapter) dbAdapterClass.newInstance();

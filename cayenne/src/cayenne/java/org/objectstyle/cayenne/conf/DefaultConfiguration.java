@@ -119,11 +119,6 @@ public class DefaultConfiguration extends Configuration {
             locator.addClassPath(Util.getPackagePath(this.getClass().getName()));
         }
 
-        // The Configuration superclass statically defines what
-        // ClassLoader to use for resources. This allows applications to
-        // control where resources are loaded from.
-        locator.setClassLoader(Configuration.getResourceLoader());
-
         setResourceLocator(locator);
     }
 

@@ -24,7 +24,8 @@ Changes/New Features:
   - web.xml configuration is simplified (see HessianService Javadocs for details). 
     WARINING: You must update your web.xml if you used HessianService with M6, check UPGRADE-NOTES for details.
   
-
+* No longer storing or relying on ClassLoader stored in Configuration. 
+  Thread.currentThread().getContextClassLoader() is what Cayenne now uses internally.
 * Auto-sorted relationship list - org.objectstyle.cayenne.util.IndexPropertyList. 
   Supported for ObjectContext only for now, but should be easy to extend to DataContext.
 * Cayenne stack events are no longer sent via a shared "default" EventManager. Instead

@@ -252,21 +252,26 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
      * Returns Java class of persistent objects described by this entity. Casts any thrown
      * exceptions into CayenneRuntimeException.
      * 
+     * @deprecated since 1.2 thread ClassLoader is used.
      * @since 1.0.7
      */
     public Class getJavaClass(ClassLoader classLoader) {
+        return getJavaClass();
+    }
+    
+    /**
+     * Returns Java class of persistent objects described by this entity. Casts any thrown
+     * exceptions into CayenneRuntimeException.
+     * 
+     * @since 1.2
+     */
+    public Class getJavaClass() {
         if (this.getClassName() == null) {
             return null;
         }
 
         try {
-            // tolerate null class loader
-            if (classLoader == null) {
-                return Class.forName(this.getClassName());
-            }
-            else {
-                return classLoader.loadClass(this.getClassName());
-            }
+            return Util.getJavaClass(getClassName());
         }
         catch (ClassNotFoundException e) {
             throw new CayenneRuntimeException("Failed to load class for name '"

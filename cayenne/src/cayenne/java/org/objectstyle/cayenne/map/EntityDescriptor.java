@@ -124,13 +124,12 @@ public class EntityDescriptor extends BaseClassDescriptor {
         }
 
         // init class
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        this.objectClass = entity.getJavaClass(loader);
+        this.objectClass = entity.getJavaClass();
 
         // init property descriptors...
         Map allDescriptors = new HashMap();
-        compileAttributes(loader, allDescriptors);
-        compileRelationships(loader, allDescriptors);
+        compileAttributes(allDescriptors);
+        compileRelationships(allDescriptors);
 
         this.declaredProperties = allDescriptors;
     }
@@ -138,7 +137,7 @@ public class EntityDescriptor extends BaseClassDescriptor {
     /**
      * Implements an attributes compilation step. Called internally from "compile".
      */
-    protected void compileAttributes(ClassLoader loader, Map allDescriptors) {
+    protected void compileAttributes(Map allDescriptors) {
 
         // only include this entity attributes and skip superclasses...
         Iterator it = entity.getDeclaredAttributes().iterator();
@@ -148,7 +147,7 @@ public class EntityDescriptor extends BaseClassDescriptor {
             FieldProperty property = new FieldProperty(
                     objectClass,
                     attribute.getName(),
-                    attribute.getJavaClass(loader));
+                    attribute.getJavaClass());
             allDescriptors.put(attribute.getName(), property);
         }
     }
@@ -158,7 +157,7 @@ public class EntityDescriptor extends BaseClassDescriptor {
      * ValueHolderProperty and to-many - to CollectionProperty. Called internally from
      * "compile" method.
      */
-    protected void compileRelationships(ClassLoader loader, Map allDescriptors) {
+    protected void compileRelationships(Map allDescriptors) {
 
         // only include this entity relationships and skip superclasses...
         Iterator it = entity.getDeclaredRelationships().iterator();

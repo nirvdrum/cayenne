@@ -71,13 +71,12 @@ public class UtilTst extends TestCase {
     }
 
     public void testGetJavaClass() throws Exception {
-        assertEquals(byte.class.getName(), Util.getJavaClass(null, "byte").getName());
-        assertEquals(byte[].class.getName(), Util.getJavaClass(null, "byte[]").getName());
-        assertEquals(String[].class.getName(), Util.getJavaClass(
-                null,
-                "java.lang.String[]").getName());
+        assertEquals(byte.class.getName(), Util.getJavaClass("byte").getName());
+        assertEquals(byte[].class.getName(), Util.getJavaClass("byte[]").getName());
+        assertEquals(String[].class.getName(), Util
+                .getJavaClass("java.lang.String[]")
+                .getName());
         assertEquals(new UtilTst[0].getClass().getName(), Util.getJavaClass(
-                null,
                 getClass().getName() + "[]").getName());
     }
 

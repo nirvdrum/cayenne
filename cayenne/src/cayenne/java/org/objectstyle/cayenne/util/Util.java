@@ -605,8 +605,10 @@ public class Util {
     /**
      * Creates a Java class, handling regular class names as well as single-dimensional
      * arrays and primitive types.
+     * 
+     * @since 1.2
      */
-    public static Class getJavaClass(ClassLoader classLoader, String className)
+    public static Class getJavaClass(String className)
             throws ClassNotFoundException {
 
         // is there a better way to get array class from string name?
@@ -614,6 +616,8 @@ public class Util {
         if (className == null) {
             throw new ClassNotFoundException("Null class name");
         }
+        
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         if (classLoader == null) {
             classLoader = Util.class.getClassLoader();

@@ -291,8 +291,6 @@ public class ResourceLocator {
      * directory, current directory and CLASSPATH.
      */
     public ResourceLocator() {
-        super();
-        this.setClassLoader(this.getClass().getClassLoader());
         this.additionalClassPaths = new ArrayList();
         this.additionalFilesystemPaths = new ArrayList();
     }
@@ -396,14 +394,14 @@ public class ResourceLocator {
                 while (cpi.hasNext()) {
                     String fullName = cpi.next() + "/" + name;
                     logObj.debug("searching for: " + fullName);
-                    URL url = findURLInClassLoader(fullName, classLoader);
+                    URL url = findURLInClassLoader(fullName, getClassLoader());
                     if (url != null) {
                         return url;
                     }
                 }
             }
 
-            URL url = findURLInClassLoader(name, classLoader);
+            URL url = findURLInClassLoader(name, getClassLoader());
             if (url != null) {
                 return url;
             }
@@ -481,7 +479,21 @@ public class ResourceLocator {
      * Returns the ClassLoader associated with this ResourceLocator.
      */
     public ClassLoader getClassLoader() {
-        return classLoader;
+        ClassLoader loader = this.classLoader;
+
+        if (loader == null) {
+            loader = Thread.currentThread().getContextClassLoader();
+        }
+
+        if (loader == null) {
+            loader = getClass().getClassLoader();
+        }
+
+        if (loader == null) {
+            loader = ClassLoader.getSystemClassLoader();
+        }
+
+        return loader;
     }
 
     /**
@@ -489,13 +501,6 @@ public class ResourceLocator {
      * ClassLoader of the ResourceLocator class will be used.
      */
     public void setClassLoader(ClassLoader classLoader) {
-        if (classLoader == null) {
-            classLoader = this.getClass().getClassLoader();
-            if (classLoader == null) {
-                classLoader = ClassLoader.getSystemClassLoader();
-            }
-        }
-
         this.classLoader = classLoader;
     }
 

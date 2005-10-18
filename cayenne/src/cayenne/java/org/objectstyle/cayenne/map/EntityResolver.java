@@ -69,7 +69,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 
@@ -156,9 +155,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
             throw new CayenneRuntimeException("Unknown entity:" + id.getEntityName());
         }
 
-        Class objectClass = entity.getJavaClass(Thread
-                .currentThread()
-                .getContextClassLoader());
+        Class objectClass = entity.getJavaClass();
         return (id.isTemporary())
                 ? new ObjectId(objectClass, id.getKey())
                 : new ObjectId(objectClass, id.getObjectIdKeys());
@@ -309,8 +306,10 @@ public class EntityResolver implements MappingNamespace, Serializable {
                 if (indexedByClass && className != null) {
                     Class entityClass;
                     try {
-                        entityClass = Configuration.getResourceLoader().loadClass(
-                                className);
+                        entityClass = Thread
+                                .currentThread()
+                                .getContextClassLoader()
+                                .loadClass(className);
                     }
                     catch (ClassNotFoundException e) {
                         // DataMaps can contain all kinds of garbage...
@@ -571,7 +570,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
         // of result type
 
         Object root = (q instanceof ProcedureQuery) ? ((ProcedureQuery) q)
-                .getResultClass(Configuration.getResourceLoader()) : q.getRoot();
+                .getResultClass() : q.getRoot();
 
         if (root instanceof DbEntity) {
             throw new CayenneRuntimeException(

@@ -72,7 +72,6 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.access.ToManyList;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -231,7 +230,7 @@ class PrefetchResolver {
             }
         }
 
-        //  resolve children
+        // resolve children
         if (children != null) {
             Iterator it = children.entrySet().iterator();
             while (it.hasNext()) {
@@ -284,8 +283,7 @@ class PrefetchResolver {
      * node "incoming" relationship.
      */
     Map partitionBySource(List objects) {
-        Class sourceObjectClass = ((ObjEntity) incoming.getSourceEntity())
-                .getJavaClass(Configuration.getResourceLoader());
+        Class sourceObjectClass = ((ObjEntity) incoming.getSourceEntity()).getJavaClass();
         ObjRelationship reverseRelationship = incoming.getReverseRelationship();
 
         // Might be used later on... obtain and cast only once
