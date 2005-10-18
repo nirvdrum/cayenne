@@ -55,76 +55,43 @@
  */
 package org.objectstyle.cayenne;
 
+import org.objectstyle.cayenne.graph.GraphEvent;
+import org.objectstyle.cayenne.opp.MockOPPChannel;
+import org.objectstyle.cayenne.opp.OPPChannel;
+
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.graph.CompoundDiff;
-import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.graph.NodeCreateOperation;
-import org.objectstyle.cayenne.opp.hessian.HessianConnection;
-import org.objectstyle.cayenne.util.Util;
+public class ObjectContextMergeHandlerTst extends TestCase {
 
-public class ObjectContextOperationRecorderTst extends TestCase {
+    public void testShouldProcessEvent() {
+        OPPChannel channel = new MockOPPChannel();
+        CayenneContext context = new CayenneContext(channel);
 
-    public void testReset() {
-        ObjectContextChangeLog recorder = new ObjectContextChangeLog();
-        assertNotNull(recorder.getDiffs());
-        assertTrue(recorder.getDiffs().isNoop());
+        ObjectContextMergeHandler handler = new ObjectContextMergeHandler(context);
 
-        recorder.addOperation(new NodeCreateOperation(new Object()));
-        assertNotNull(recorder.getDiffs());
-        assertFalse(recorder.getDiffs().isNoop());
+        // 1. Our context initiated the sync:
+        // src == context && postedBy == channel
+        GraphEvent e1 = new GraphEvent(context, channel, null);
+        assertFalse(handler.shouldProcessEvent(e1));
 
-        recorder.reset();
-        assertNotNull(recorder.getDiffs());
-        assertTrue(recorder.getDiffs().isNoop());
+        // 2. Another context initiated the sync:
+        // src != context && postedBy == channel
+        GraphEvent e2 = new GraphEvent(new MockObjectContext(), channel, null);
+        assertTrue(handler.shouldProcessEvent(e2));
 
-        // now test that a diff stored before "clear" is not affected by 'clear'
-        recorder.addOperation(new NodeCreateOperation(new Object()));
-        GraphDiff diff = recorder.getDiffs();
-        assertFalse(diff.isNoop());
+        // 2.1 Another object initiated the sync:
+        // src != context && postedBy == channel
+        GraphEvent e21 = new GraphEvent(new Object(), channel, null);
+        assertTrue(handler.shouldProcessEvent(e21));
 
-        recorder.reset();
-        assertFalse(diff.isNoop());
-    }
+        // 3. Another channel initiated the sync:
+        // src == ? && postedBy != channel
+        GraphEvent e3 = new GraphEvent(new Object(), new MockOPPChannel(), null);
+        assertFalse(handler.shouldProcessEvent(e3));
 
-    public void testGetDiffs() {
-        // assert that after returning, the diffs array won't get modified by operation
-        // recorder
-        ObjectContextChangeLog recorder = new ObjectContextChangeLog();
-        recorder.addOperation(new NodeCreateOperation(new Object()));
-        CompoundDiff diff = (CompoundDiff) recorder.getDiffs();
-        assertEquals(1, diff.getDiffs().size());
-
-        recorder.addOperation(new NodeCreateOperation(new Object()));
-        assertEquals(1, diff.getDiffs().size());
-
-        CompoundDiff diff2 = (CompoundDiff) recorder.getDiffs();
-        assertEquals(2, diff2.getDiffs().size());
-    }
-
-    public void testGetDiffsSerializable() throws Exception {
-        ObjectContextChangeLog recorder = new ObjectContextChangeLog();
-        recorder.addOperation(new NodeCreateOperation(new GlobalID("test")));
-        CompoundDiff diff = (CompoundDiff) recorder.getDiffs();
-
-        Object clone = Util.cloneViaSerialization(diff);
-        assertNotNull(clone);
-        assertTrue(clone instanceof CompoundDiff);
-
-        CompoundDiff d1 = (CompoundDiff) clone;
-        assertEquals(1, d1.getDiffs().size());
-    }
-
-    public void testGetDiffsSerializableWithHessian() throws Exception {
-        ObjectContextChangeLog recorder = new ObjectContextChangeLog();
-        recorder.addOperation(new NodeCreateOperation(new Object()));
-        CompoundDiff diff = (CompoundDiff) recorder.getDiffs();
-
-        Object clone = HessianConnection.cloneViaHessianSerialization(diff);
-        assertNotNull(clone);
-        assertTrue(clone instanceof CompoundDiff);
-
-        CompoundDiff d1 = (CompoundDiff) clone;
-        assertEquals(1, d1.getDiffs().size());
+        // 4. inactive
+        GraphEvent e4 = new GraphEvent(new MockObjectContext(), channel, null);
+        handler.active = false;
+        assertFalse(handler.shouldProcessEvent(e4));
     }
 }

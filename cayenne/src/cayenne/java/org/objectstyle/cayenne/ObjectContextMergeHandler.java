@@ -287,11 +287,12 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
 
     // Returns true if this object is active; an event came from our channel, but did not
     // originate in it.
-    private boolean shouldProcessEvent(GraphEvent e) {
+    boolean shouldProcessEvent(GraphEvent e) {
         // only process events that came from our channel, but did not originate in it
         return active
-                && e.getSource() != context.getChannel()
-                && e.getPostedBy() == context.getChannel();
+                && e.getPostedBy() == context.getChannel()
+                && e.getSource() != context
+                && e.getSource() != context.getChannel();
     }
 
     // executes a closure, disabling ObjectContext events for the duration of the
