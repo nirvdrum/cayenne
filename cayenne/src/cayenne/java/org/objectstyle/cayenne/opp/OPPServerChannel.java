@@ -84,7 +84,7 @@ public class OPPServerChannel implements OPPChannel {
     protected EventManager eventManager;
     protected boolean channelEventsEnabled;
 
-    EventBridge serverEventBridge;
+    EventBridge remoteChannelListener;
 
     /**
      * Creates a new channel accessing OPP server via provided connection. Channel created
@@ -106,29 +106,7 @@ public class OPPServerChannel implements OPPChannel {
         this.eventManager = eventManager;
         this.channelEventsEnabled = eventManager != null && channelEventsEnabled;
 
-        startBridge();
-    }
-
-    void startBridge() {
-        if (eventManager == null) {
-            logger.info("Channel has no EventManager, won't install EventBridge.");
-            return;
-        }
-
-        EventBridge bridge = connection.getServerEventBridge();
-        if (bridge == null) {
-            logger.info("Remote service doesn't support channel events.");
-            return;
-        }
-
-        try {
-            bridge.startup(eventManager, EventBridge.RECEIVE_LOCAL_EXTERNAL, this);
-        }
-        catch (Exception e) {
-            throw new CayenneRuntimeException("Error starting EventBridge " + bridge, e);
-        }
-
-        this.serverEventBridge = bridge;
+        setupRemoteChannelListener();
     }
 
     public EventManager getEventManager() {
@@ -186,7 +164,8 @@ public class OPPServerChannel implements OPPChannel {
                         notification.add(replyDiff);
                     }
 
-                    Object eventSource = (message.getSource() != null) ? message.getSource() : this;
+                    Object eventSource = (message.getSource() != null) ? message
+                            .getSource() : this;
                     GraphEvent e = new GraphEvent(eventSource, notification);
                     e.setPostedBy(this);
                     eventManager.postEvent(e, subject);
@@ -199,6 +178,34 @@ public class OPPServerChannel implements OPPChannel {
 
     public EntityResolver onBootstrap(BootstrapMessage message) {
         return (EntityResolver) send(message, EntityResolver.class);
+    }
+
+    /**
+     * Starts up an EventBridge to listen for remote updates. Returns true if the listener
+     * was setup, false if not. False can be returned if the underlying connection doesn't
+     * support events of if there is no EventManager available.
+     */
+    protected boolean setupRemoteChannelListener() throws CayenneRuntimeException {
+        if (eventManager == null) {
+            logger.info("Channel has no EventManager, won't install EventBridge.");
+            return false;
+        }
+
+        EventBridge bridge = connection.getServerEventBridge();
+        if (bridge == null) {
+            logger.info("Remote service doesn't support channel events.");
+            return false;
+        }
+
+        try {
+            bridge.startup(eventManager, EventBridge.RECEIVE_LOCAL_EXTERNAL, this);
+        }
+        catch (Exception e) {
+            throw new CayenneRuntimeException("Error starting EventBridge " + bridge, e);
+        }
+
+        this.remoteChannelListener = bridge;
+        return true;
     }
 
     /**
