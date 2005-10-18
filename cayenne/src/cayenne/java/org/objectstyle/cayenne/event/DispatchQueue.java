@@ -64,31 +64,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.event.EventManager.Dispatch;
 import org.objectstyle.cayenne.util.Invocation;
 
 /**
- * Stores a set of Invocation objects, organizing them by sender. 
- * Listeners have an option to receive events for a particular sender
- * or to receive all events. EventManager creates one DispatchQueue per
- * EventSubject. DispatchQueue is thread-safe - all methods that read/modify
- * internal collections are synchronized.
+ * Stores a set of Invocation objects, organizing them by sender. Listeners have an option
+ * to receive events for a particular sender or to receive all events. EventManager
+ * creates one DispatchQueue per EventSubject. DispatchQueue is thread-safe - all methods
+ * that read/modify internal collections are synchronized.
  * 
  * @author Andrei Adamchik
  * @since 1.1
  */
 class DispatchQueue {
-    private static Logger logObj = Logger.getLogger(DispatchQueue.class);
-
-    // TODO: implement a maintenance thread to cleanup dead invocations with deallocated targets
 
     private Set subjectInvocations = new HashSet();
     private Map invocationsBySender = new WeakHashMap();
 
     /**
-     * Dispatches event to all listeners in the queue that are
-     * registered for this event and sender.
+     * Dispatches event to all listeners in the queue that are registered for this event
+     * and sender.
      */
     synchronized void dispatchEvent(Dispatch dispatch) {
         // dispatch to "any sender" listeners
@@ -186,8 +181,6 @@ class DispatchQueue {
             // targets)
             if (!dispatch.fire(invocation)) {
                 invocations.remove(invocation);
-                logObj.debug("Failed invocation, removing: "
-                        + invocation.getMethod().getName());
             }
         }
     }
