@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.collection.CompositeCollection;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.GlobalID;
@@ -92,8 +91,6 @@ import org.objectstyle.cayenne.query.Query;
 // exception instead of returning null or doing multiple lookups - this will allow to
 // discover mapping inconsistencies early...
 public class EntityResolver implements MappingNamespace, Serializable {
-
-    private static final Logger logObj = Logger.getLogger(EntityResolver.class);
 
     protected boolean indexedByClass;
 
@@ -316,11 +313,10 @@ public class EntityResolver implements MappingNamespace, Serializable {
                                 className);
                     }
                     catch (ClassNotFoundException e) {
-                        // print a big warning and continue... DataMaps can contain all
-                        // kinds of garbage...
-                        logObj.warn("*** Class '"
-                                + className
-                                + "' not found in runtime. Ignoring.");
+                        // DataMaps can contain all kinds of garbage...
+                        // TODO (Andrus, 10/18/2005) it would be nice to log something
+                        // here, but since EntityResolver is used on the client, log4J is
+                        // a no-go...
                         continue;
                     }
 
@@ -369,11 +365,9 @@ public class EntityResolver implements MappingNamespace, Serializable {
                         }
                         else {
                             // bad mapping?
-                            logObj.debug("Invalid superEntity '"
-                                    + superOEName
-                                    + "' for entity '"
-                                    + oe.getName()
-                                    + "'");
+                            // TODO (Andrus, 10/18/2005) it would be nice to log something
+                            // here, but since EntityResolver is used on the client, log4J
+                            // is a no-go...
                             continue;
                         }
                     }

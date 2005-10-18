@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.exp;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.property.PropertyUtils;
@@ -78,8 +77,6 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 abstract class ASTNode {
-
-    private static Logger logObj = Logger.getLogger(ASTNode.class);
 
     protected ASTNode nextNode;
 
@@ -326,7 +323,6 @@ abstract class ASTNode {
                         + "."
                         + propertyPath
                         + "'.";
-                logObj.warn(msg, ex);
                 throw new ExpressionException(msg, ex);
             }
             return nextNode;
