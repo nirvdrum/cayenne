@@ -198,7 +198,8 @@ public class OPPServerChannel implements OPPChannel {
         }
 
         try {
-            bridge.startup(eventManager, EventBridge.RECEIVE_LOCAL_EXTERNAL, this);
+            // make sure events are sent on behalf of this channel...and received from all
+            bridge.startup(eventManager, EventBridge.RECEIVE_LOCAL_EXTERNAL, null, this);
         }
         catch (Exception e) {
             throw new CayenneRuntimeException("Error starting EventBridge " + bridge, e);

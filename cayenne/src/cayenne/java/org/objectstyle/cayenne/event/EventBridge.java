@@ -221,6 +221,17 @@ public abstract class EventBridge implements EventListener {
      */
     public void startup(EventManager eventManager, int mode, Object localEventSource)
             throws Exception {
+        startup(eventManager, mode, localEventSource, this);
+    }
+    
+    /**
+     * Starts EventBridge with the specified local and remote event sources.
+     * 
+     * @since 1.2 
+     */
+    // TODO (Andrus, 10/18/2005) see CAY-395 - we will likely swap postedBy and source.
+    public void startup(EventManager eventManager, int mode, Object localEventSource, Object remoteEventSource)
+    throws Exception {
 
         // uninstall old event manager
         if (this.eventManager != null) {
@@ -231,7 +242,7 @@ public abstract class EventBridge implements EventListener {
             throw new NullPointerException("'eventManager' can't be null.");
         }
 
-        this.postAs = localEventSource;
+        this.postAs = remoteEventSource;
         this.eventManager = eventManager;
         this.mode = mode;
 
