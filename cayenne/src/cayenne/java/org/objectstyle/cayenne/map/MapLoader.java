@@ -60,7 +60,6 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.TypesMapping;
@@ -71,7 +70,6 @@ import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -85,7 +83,7 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class MapLoader extends DefaultHandler {
 
-    private static final Logger logObj = Logger.getLogger(MapLoader.class);
+   // private static final Logger logObj = Logger.getLogger(MapLoader.class);
 
     public static final String DATA_MAP_TAG = "data-map";
     public static final String PROPERTY_TAG = "property";
@@ -388,33 +386,6 @@ public class MapLoader extends DefaultHandler {
         charactersBuffer = null;
     }
 
-    public void warning(SAXParseException e) throws SAXException {
-        logObj.warn("**Parsing warning**\n"
-                + "Line:"
-                + e.getLineNumber()
-                + "\nMessage:"
-                + e.getMessage());
-        throw new SAXException("Warning!");
-    }
-
-    public void error(SAXParseException e) throws SAXException {
-        logObj.error("**Parsing error**\n"
-                + "Line:"
-                + e.getLineNumber()
-                + "\nMessage:"
-                + e.getMessage());
-        throw new SAXException("Warning!");
-    }
-
-    public void fatalError(SAXParseException e) throws SAXException {
-        logObj.fatal("**Parsing fatal error**\n"
-                + "Line:"
-                + e.getLineNumber()
-                + "\nMessage:"
-                + e.getMessage());
-        throw new SAXException("Warning!");
-    }
-
     private void processStartDbEntity(Attributes atts) {
         String name = atts.getValue("", "name");
         String parentName = atts.getValue("", "parentName");
@@ -566,7 +537,7 @@ public class MapLoader extends DefaultHandler {
     private void processStartDbRelationship(Attributes atts) throws SAXException {
         String name = atts.getValue("", "name");
         if (name == null) {
-            throw new SAXException("MapLoaderImpl::processStartDbRelationship(),"
+            throw new SAXException("MapLoader::processStartDbRelationship(),"
                     + " Unable to parse name. Attributes:\n"
                     + printAttributes(atts).toString());
         }
@@ -574,14 +545,11 @@ public class MapLoader extends DefaultHandler {
         String sourceName = atts.getValue("", "source");
         if (sourceName == null) {
             throw new SAXException(
-                    "MapLoaderImpl::processStartDbRelationship() - null source entity");
+                    "MapLoader::processStartDbRelationship() - null source entity");
         }
 
         DbEntity source = dataMap.getDbEntity(sourceName);
         if (source == null) {
-            logObj
-                    .debug("MapLoaderImpl::processStartDbRelationship() - Unable to find source "
-                            + sourceName);
             return;
         }
 
@@ -607,7 +575,7 @@ public class MapLoader extends DefaultHandler {
 
         String name = atts.getValue("", "name");
         if (name == null) {
-            throw new SAXException("MapLoaderImpl::processStartDbRelationshipRef()"
+            throw new SAXException("MapLoader::processStartDbRelationshipRef()"
                     + ", Null DbRelationship name for "
                     + objRelationship.getName());
         }
@@ -627,21 +595,21 @@ public class MapLoader extends DefaultHandler {
     private void processStartObjRelationship(Attributes atts) throws SAXException {
         String name = atts.getValue("", "name");
         if (null == name) {
-            throw new SAXException("MapLoaderImpl::processStartObjRelationship(),"
+            throw new SAXException("MapLoader::processStartObjRelationship(),"
                     + " Unable to parse target. Attributes:\n"
                     + printAttributes(atts).toString());
         }
 
         String sourceName = atts.getValue("", "source");
         if (sourceName == null) {
-            throw new SAXException("MapLoaderImpl::processStartObjRelationship(),"
+            throw new SAXException("MapLoader::processStartObjRelationship(),"
                     + " Unable to parse source. Attributes:\n"
                     + printAttributes(atts).toString());
         }
 
         ObjEntity source = dataMap.getObjEntity(sourceName);
         if (source == null) {
-            throw new SAXException("MapLoaderImpl::processStartObjRelationship(),"
+            throw new SAXException("MapLoader::processStartObjRelationship(),"
                     + " Unable to find source "
                     + sourceName);
         }
@@ -665,7 +633,7 @@ public class MapLoader extends DefaultHandler {
 
         String name = attributes.getValue("", "name");
         if (null == name) {
-            throw new SAXException("MapLoaderImpl::processStartProcedure(),"
+            throw new SAXException("MapLoader::processStartProcedure(),"
                     + " no procedure name.");
         }
 
@@ -686,7 +654,7 @@ public class MapLoader extends DefaultHandler {
 
         String name = attributes.getValue("", "name");
         if (name == null) {
-            throw new SAXException("MapLoaderImpl::processStartProcedureParameter(),"
+            throw new SAXException("MapLoader::processStartProcedureParameter(),"
                     + " no procedure parameter name.");
         }
 
