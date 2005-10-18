@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.opp.hessian;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -98,6 +99,15 @@ public class HessianServiceHandler implements HessianService, Service {
     protected String eventBridgeFactoryName;
     protected Map eventBridgeParameters;
 
+    public String getEventBridgeFactoryName() {
+        return eventBridgeFactoryName;
+    }
+
+    public Map getEventBridgeParameters() {
+        return eventBridgeParameters != null ? Collections
+                .unmodifiableMap(eventBridgeParameters) : Collections.EMPTY_MAP;
+    }
+
     /**
      * Hessian service lifecycle method that performs Cayenne initialization.
      */
@@ -106,21 +116,7 @@ public class HessianServiceHandler implements HessianService, Service {
         // start Cayenne service
         logObj.debug("HessianServiceHandler is starting");
 
-        Configuration cayenneConfig = new DefaultConfiguration(
-                Configuration.DEFAULT_DOMAIN_FILE);
-
-        try {
-            cayenneConfig.initialize();
-            cayenneConfig.didInitialize();
-        }
-        catch (Exception ex) {
-            throw new ServletException("Error starting Cayenne", ex);
-        }
-
-        // TODO (Andrus 10/15/2005) this assumes that mapping has a single domain...
-        // do something about multiple domains
-        this.domain = cayenneConfig.getDomain();
-
+        this.domain = initDomain(config);
         this.sessionChannels = new HashMap();
         this.sharedSessions = new HashMap();
 
@@ -149,14 +145,14 @@ public class HessianServiceHandler implements HessianService, Service {
     public void destroy() {
         this.sessionChannels = null;
         this.sharedSessions = null;
-        
+
         logObj.debug("HessianServiceHandler destroyed");
     }
 
     public HessianSession establishSession() {
         logObj.debug("Session requested by client");
 
-        HessianSession session = createSession();
+        HessianSession session = createSession(false);
 
         logObj.debug("Established client session: " + session);
         return session;
@@ -175,7 +171,7 @@ public class HessianServiceHandler implements HessianService, Service {
             session = (HessianSession) sharedSessions.get(name);
 
             if (session == null || sessionChannels.get(session.getSessionId()) == null) {
-                session = createSession();
+                session = createSession(true);
                 session.setName(name);
                 logObj.debug("Created new shared session:" + session);
             }
@@ -213,14 +209,17 @@ public class HessianServiceHandler implements HessianService, Service {
         }
     }
 
-    HessianSession createSession() {
+    HessianSession createSession(boolean enableEvents) {
 
-        HessianSession session = new HessianSession(
-                makeId(),
+        // do not add EventBridge to the session if 'enableEvents' is false
+
+        String id = makeId();
+        HessianSession session = (enableEvents) ? new HessianSession(
+                id,
                 eventBridgeFactoryName,
-                eventBridgeParameters);
+                eventBridgeParameters) : new HessianSession(id);
 
-        // block channel events - client will communicate their changes in a
+        // block server-side channel events - clients will communicate their changes in a
         // peer-to-peer fashion.
         OPPChannel channel = new ClientServerChannel(domain, false);
 
@@ -255,4 +254,22 @@ public class HessianServiceHandler implements HessianService, Service {
 
         return buffer.toString();
     }
+
+    DataDomain initDomain(ServletConfig config) throws ServletException {
+        Configuration cayenneConfig = new DefaultConfiguration(
+                Configuration.DEFAULT_DOMAIN_FILE);
+
+        try {
+            cayenneConfig.initialize();
+            cayenneConfig.didInitialize();
+        }
+        catch (Exception ex) {
+            throw new ServletException("Error starting Cayenne", ex);
+        }
+
+        // TODO (Andrus 10/15/2005) this assumes that mapping has a single domain...
+        // do something about multiple domains
+        return cayenneConfig.getDomain();
+    }
+
 }

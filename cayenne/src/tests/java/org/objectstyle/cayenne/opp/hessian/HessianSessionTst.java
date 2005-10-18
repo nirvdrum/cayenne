@@ -53,26 +53,37 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.opp;
+package org.objectstyle.cayenne.opp.hessian;
 
-import org.objectstyle.cayenne.opp.hessian.HessianConnection;
+import org.objectstyle.cayenne.opp.hessian.HessianSession;
 
 import junit.framework.TestCase;
 
-public class HessianConnectionTst extends TestCase {
+public class HessianSessionTst extends TestCase {
 
-    public void testConstructor1Arg() {
-        HessianConnection c = new HessianConnection("a");
-        assertEquals("a", c.getUrl());
-        assertNull(c.getUserName());
-        assertNull(c.getPassword());
+    public void testConstructor1() {
+        HessianSession descriptor = new HessianSession("abc");
+        assertEquals("abc", descriptor.getSessionId());
+        assertFalse(descriptor.isServerEventsEnabled());
     }
-    
-    public void testConstructor3Arg() {
-        HessianConnection c = new HessianConnection("a", "b", "c", "d");
-        assertEquals("a", c.getUrl());
-        assertEquals("b", c.getUserName());
-        assertEquals("c", c.getPassword());
-        assertEquals("d", c.getSharedSessionName());
+
+    public void testConstructor2() {
+        HessianSession descriptor = new HessianSession("abc", "factory", null);
+        assertEquals("abc", descriptor.getSessionId());
+        assertTrue(descriptor.isServerEventsEnabled());
+    }
+
+    public void testHashCode() {
+        HessianSession d1 = new HessianSession("1");
+        HessianSession d2 = new HessianSession("1");
+
+        assertEquals(d1.hashCode(), d1.hashCode());
+        assertEquals(d1.hashCode(), d2.hashCode());
+
+        d2.setName("some name");
+        assertEquals(d1.hashCode(), d2.hashCode());
+
+        HessianSession d3 = new HessianSession("2");
+        assertFalse(d1.hashCode() == d3.hashCode());
     }
 }

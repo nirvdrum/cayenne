@@ -53,37 +53,83 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.opp;
+package org.objectstyle.cayenne.opp.hessian;
 
-import org.objectstyle.cayenne.opp.hessian.HessianSession;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
 
-public class HessianSessionTst extends TestCase {
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.event.MockEventBridgeFactory;
 
-    public void testConstructor1() {
-        HessianSession descriptor = new HessianSession("abc");
-        assertEquals("abc", descriptor.getSessionId());
-        assertFalse(descriptor.isServerEventsEnabled());
+import com.mockrunner.mock.web.MockServletConfig;
+
+public class HessianServiceHandlerTst extends TestCase {
+
+    public void testInit() throws Exception {
+        MockServletConfig config = new MockServletConfig();
+        config.setInitParameter(
+                HessianService.EVENT_BRIDGE_FACTORY_PROPERTY,
+                MockEventBridgeFactory.class.getName());
+
+        HessianServiceHandler handler = new HessianServiceHandler() {
+
+            DataDomain initDomain(ServletConfig config) throws ServletException {
+                return new DataDomain("test");
+            }
+        };
+
+        handler.init(config);
+        assertEquals(MockEventBridgeFactory.class.getName(), handler
+                .getEventBridgeFactoryName());
     }
 
-    public void testConstructor2() {
-        HessianSession descriptor = new HessianSession("abc", "factory", null);
-        assertEquals("abc", descriptor.getSessionId());
-        assertTrue(descriptor.isServerEventsEnabled());
+    public void testEstablishSession() throws Exception {
+        MockServletConfig config = new MockServletConfig();
+        config.setInitParameter(
+                HessianService.EVENT_BRIDGE_FACTORY_PROPERTY,
+                MockEventBridgeFactory.class.getName());
+
+        HessianServiceHandler handler = new HessianServiceHandler() {
+
+            DataDomain initDomain(ServletConfig config) throws ServletException {
+                return new DataDomain("test");
+            }
+        };
+
+        handler.init(config);
+
+        HessianSession session = handler.establishSession();
+        assertNotNull(session);
+        assertFalse(session.isServerEventsEnabled());
+        
+        HessianSession session2 = handler.establishSession();
+        assertNotNull(session2);
+        assertNotSame(session, session2);
     }
+    
+    public void testEstablishSharedSession() throws Exception {
+        MockServletConfig config = new MockServletConfig();
+        config.setInitParameter(
+                HessianService.EVENT_BRIDGE_FACTORY_PROPERTY,
+                MockEventBridgeFactory.class.getName());
 
-    public void testHashCode() {
-        HessianSession d1 = new HessianSession("1");
-        HessianSession d2 = new HessianSession("1");
+        HessianServiceHandler handler = new HessianServiceHandler() {
 
-        assertEquals(d1.hashCode(), d1.hashCode());
-        assertEquals(d1.hashCode(), d2.hashCode());
+            DataDomain initDomain(ServletConfig config) throws ServletException {
+                return new DataDomain("test");
+            }
+        };
 
-        d2.setName("some name");
-        assertEquals(d1.hashCode(), d2.hashCode());
+        handler.init(config);
 
-        HessianSession d3 = new HessianSession("2");
-        assertFalse(d1.hashCode() == d3.hashCode());
+        HessianSession session = handler.establishSharedSession("shared");
+        assertNotNull(session);
+        assertTrue(session.isServerEventsEnabled());
+        
+        HessianSession session2 = handler.establishSharedSession("shared");
+        assertNotNull(session2);
+        assertSame(session, session2);
     }
 }
