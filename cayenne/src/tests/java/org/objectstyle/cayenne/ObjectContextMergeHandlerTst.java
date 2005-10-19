@@ -58,10 +58,18 @@ package org.objectstyle.cayenne;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
+import org.objectstyle.cayenne.unit.AccessStack;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestResources;
 
-import junit.framework.TestCase;
+public class ObjectContextMergeHandlerTst extends CayenneTestCase {
 
-public class ObjectContextMergeHandlerTst extends TestCase {
+    protected AccessStack buildAccessStack() {
+        return CayenneTestResources
+                .getResources()
+                .getAccessStack(MULTI_TIER_ACCESS_STACK);
+    }
 
     public void testShouldProcessEvent() {
         OPPChannel channel = new MockOPPChannel();
@@ -93,5 +101,50 @@ public class ObjectContextMergeHandlerTst extends TestCase {
         GraphEvent e4 = new GraphEvent(new MockObjectContext(), channel, null);
         handler.active = false;
         assertFalse(handler.shouldProcessEvent(e4));
+    }
+
+    public void testNodePropertyChanged() {
+        OPPChannel channel = new MockOPPChannel(getDomain()
+                .getEntityResolver()
+                .getClientEntityResolver());
+
+        CayenneContext context = new CayenneContext(channel);
+        ClientMtTable1 o1 = (ClientMtTable1) context.newObject(ClientMtTable1.class);
+
+        ObjectContextMergeHandler handler = new ObjectContextMergeHandler(context);
+
+        assertNull(o1.getGlobalAttribute1Direct());
+
+        handler.nodePropertyChanged(
+                o1.getGlobalID(),
+                ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY,
+                null,
+                "abc");
+        assertEquals("abc", o1.getGlobalAttribute1Direct());
+
+        handler.nodePropertyChanged(
+                o1.getGlobalID(),
+                ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY,
+                "abc",
+                "xyz");
+
+        assertEquals("xyz", o1.getGlobalAttribute1Direct());
+
+        // block if old value is different
+        handler.nodePropertyChanged(
+                o1.getGlobalID(),
+                ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY,
+                "123",
+                "mnk");
+
+        assertEquals("xyz", o1.getGlobalAttribute1Direct());
+
+        handler.nodePropertyChanged(
+                o1.getGlobalID(),
+                ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY,
+                "xyz",
+                null);
+
+        assertNull(o1.getGlobalAttribute1Direct());
     }
 }

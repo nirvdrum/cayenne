@@ -138,7 +138,7 @@ final class ObjectContextGraphManager extends GraphMap {
         changeLog.removeMarker(COMMIT_MARKER);
 
         if (lifecycleEventsEnabled) {
-            send(null, ObjectContext.GRAPH_COMMIT_ABORTED_SUBJECT);
+            send(null, ObjectContext.GRAPH_COMMIT_ABORTED_SUBJECT, context);
         }
     }
 
@@ -153,7 +153,7 @@ final class ObjectContextGraphManager extends GraphMap {
             changeLog.setMarker(COMMIT_MARKER);
 
             // include all diffs up to this point
-            send(diff, ObjectContext.GRAPH_COMMIT_STARTED_SUBJECT);
+            send(diff, ObjectContext.GRAPH_COMMIT_STARTED_SUBJECT, context);
         }
         else {
             changeLog.setMarker(COMMIT_MARKER);
@@ -172,7 +172,7 @@ final class ObjectContextGraphManager extends GraphMap {
             reset();
 
             // include all diffs after the commit start marker.
-            send(diff, ObjectContext.GRAPH_COMMITTED_SUBJECT);
+            send(diff, ObjectContext.GRAPH_COMMITTED_SUBJECT, context);
         }
         else {
             stateLog.graphCommitted();
@@ -192,7 +192,7 @@ final class ObjectContextGraphManager extends GraphMap {
         reset();
 
         if (lifecycleEventsEnabled) {
-            send(diff, ObjectContext.GRAPH_ROLLEDBACK_SUBJECT);
+            send(diff, ObjectContext.GRAPH_ROLLEDBACK_SUBJECT, context);
         }
     }
 
@@ -245,7 +245,7 @@ final class ObjectContextGraphManager extends GraphMap {
         changeLog.addOperation(diff);
 
         if (changeEventsEnabled) {
-            send(diff, ObjectContext.GRAPH_CHANGED_SUBJECT);
+            send(diff, ObjectContext.GRAPH_CHANGED_SUBJECT, context);
         }
     }
 
@@ -253,13 +253,13 @@ final class ObjectContextGraphManager extends GraphMap {
      * Wraps GraphDiff in a GraphEvent and sends it via EventManager with specified
      * subject.
      */
-    private void send(GraphDiff diff, EventSubject subject) {
+    void send(GraphDiff diff, EventSubject subject, Object eventSource) {
         EventManager manager = (context.getChannel() != null) ? context
                 .getChannel()
                 .getEventManager() : null;
 
         if (manager != null) {
-            GraphEvent e = new GraphEvent(context, diff);
+            GraphEvent e = new GraphEvent(eventSource, context, diff);
             manager.postEvent(e, subject);
         }
     }

@@ -55,17 +55,13 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.Collection;
-
-import org.apache.commons.collections.Closure;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.graph.GraphEventListener;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.property.IndirectProperty;
+import org.objectstyle.cayenne.property.ArcProperty;
 import org.objectstyle.cayenne.property.Property;
-import org.objectstyle.cayenne.util.IndexPropertyList;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -90,12 +86,16 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
     public void graphChanged(final GraphEvent e) {
         // process flush
         if (shouldProcessEvent(e) && e.getDiff() != null) {
-            execute(new Closure() {
+            execute(new Runnable() {
 
-                public void execute(Object arg0) {
-                    merge(e.getDiff());
+                public void run() {
+                    e.getDiff().apply(ObjectContextMergeHandler.this);
+
                 }
             });
+
+            // post event outside of "execute" to make sure it is sent
+            repostAfterMerge(e);
         }
     }
 
@@ -114,12 +114,12 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
         if (shouldProcessEvent(e)) {
             final boolean hadChanges = context.internalGraphManager().hasChanges();
 
-            execute(new Closure() {
+            execute(new Runnable() {
 
-                public void execute(Object arg0) {
+                public void run() {
 
                     if (e.getDiff() != null) {
-                        merge(e.getDiff());
+                        e.getDiff().apply(ObjectContextMergeHandler.this);
                     }
 
                     if (!hadChanges) {
@@ -128,21 +128,27 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
                     }
                 }
             });
+
+            // post event outside of "execute" to make sure it is sent
+            repostAfterMerge(e);
         }
     }
 
-    public void graphRolledback(GraphEvent e) {
+    public void graphRolledback(final GraphEvent e) {
 
         if (shouldProcessEvent(e)) {
 
             // do we need to merge anything?
             if (context.internalGraphManager().hasChanges()) {
-                execute(new Closure() {
+                execute(new Runnable() {
 
-                    public void execute(Object arg0) {
+                    public void run() {
                         context.internalGraphManager().graphReverted();
                     }
                 });
+
+                // post event outside of "execute" to make sure it is sent
+                repostAfterMerge(e);
             }
         }
     }
@@ -157,13 +163,23 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
 
     // ******* End GraphEventListener methods *******
 
+    void repostAfterMerge(GraphEvent originalEvent) {
+        // though the subject is CHANGE, "merge" events are really lifecycle.
+        if (context.isLifecycleEventsEnabled()) {
+            context.internalGraphManager().send(
+                    originalEvent.getDiff(),
+                    ObjectContext.GRAPH_CHANGED_SUBJECT,
+                    originalEvent.getSource());
+        }
+    }
+
     /**
      * Executes merging of the external diff.
      */
     void merge(final GraphDiff diff) {
-        execute(new Closure() {
+        execute(new Runnable() {
 
-            public void execute(Object arg0) {
+            public void run() {
                 diff.apply(ObjectContextMergeHandler.this);
             }
         });
@@ -211,6 +227,7 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
             Property p = propertyForId(nodeId, property);
             if (Util.nullSafeEquals(p.readValue(object), oldValue)) {
 
+                p.writeValue(object, oldValue, newValue);
                 context.internalGraphAction().handleSimplePropertyChange(
                         (Persistent) object,
                         property,
@@ -227,28 +244,23 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
             Object target = context.internalGraphManager().getNode(targetNodeId);
             if (target != null) {
 
-                // TODO (Andrus, 10/17/2005) - to avoid overriding local changes (and
-                // processing duplication) we need to pair up complimentary arc change
-                // events; or maybe redesign graph notifications to batch arc changes in a
-                // single atomic operation. E.g. an arcId can be denoted as a combination
-                // of forward and reverse relationships, like "toArtist|paintingArray",
-                // simplifying processing.
+                // TODO (Andrus, 10/17/2005) - check for local modifications to avoid
+                // overwriting...
 
-                IndirectProperty p = (IndirectProperty) propertyForId(nodeId, arcId
-                        .toString());
-                Object holder = p.readValueHolder(source);
-                if (holder instanceof ValueHolder) {
-                    ((ValueHolder) holder).setValue(p.getPropertyType(), target);
+                ArcProperty p = (ArcProperty) propertyForId(nodeId, arcId.toString());
+
+                // TODO (Andrus, 10/17/2005) handle ordered lists...
+                p.writeValue(source, null, target);
+
+                try {
+                    context.internalGraphAction().handleArcPropertyChange(
+                            (Persistent) source,
+                            p,
+                            null,
+                            target);
                 }
-                else if (holder instanceof Collection) {
-                    ((Collection) holder).add(target);
-
-                    // handle ordered lists...
-                    // TODO (Andrus, 10/17/2005) - ordering info should be available
-                    // from property descriptor to avoid concrete class cast
-                    if (holder instanceof IndexPropertyList) {
-                        ((IndexPropertyList) holder).touch();
-                    }
+                finally {
+                    context.internalGraphAction().setArcChangeInProcess(false);
                 }
             }
         }
@@ -262,15 +274,18 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
             if (target != null) {
 
                 // (see "TODO" in 'arcCreated')
+                ArcProperty p = (ArcProperty) propertyForId(nodeId, arcId.toString());
+                p.writeValue(source, target, null);
 
-                IndirectProperty p = (IndirectProperty) propertyForId(nodeId, arcId
-                        .toString());
-                Object holder = p.readValueHolder(source);
-                if (holder instanceof ValueHolder) {
-                    ((ValueHolder) holder).setValue(p.getPropertyType(), null);
+                try {
+                    context.internalGraphAction().handleArcPropertyChange(
+                            (Persistent) source,
+                            p,
+                            target,
+                            null);
                 }
-                else if (holder instanceof Collection) {
-                    ((Collection) holder).remove(target);
+                finally {
+                    context.internalGraphAction().setArcChangeInProcess(false);
                 }
             }
         }
@@ -298,7 +313,7 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
     // executes a closure, disabling ObjectContext events for the duration of the
     // execution.
 
-    private void execute(Closure closure) {
+    private void execute(Runnable closure) {
 
         synchronized (context.internalGraphManager()) {
             boolean changeEventsEnabled = context.internalGraphManager().changeEventsEnabled;
@@ -307,15 +322,12 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
             boolean lifecycleEventsEnabled = context.internalGraphManager().lifecycleEventsEnabled;
             context.internalGraphManager().lifecycleEventsEnabled = false;
 
-            context.internalGraphAction().setArcChangeInProcess(true);
-
             try {
-                closure.execute(null);
+                closure.run();
             }
             finally {
                 context.internalGraphManager().changeEventsEnabled = changeEventsEnabled;
                 context.internalGraphManager().lifecycleEventsEnabled = lifecycleEventsEnabled;
-                context.internalGraphAction().setArcChangeInProcess(false);
             }
         }
     }

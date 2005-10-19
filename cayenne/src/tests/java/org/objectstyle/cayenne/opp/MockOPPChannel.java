@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.map.EntityResolver;
  */
 public class MockOPPChannel implements OPPChannel {
 
+    protected EntityResolver resolver;
     protected List messages = new ArrayList();
     protected GraphDiff commitResponse;
     protected List selectResponse;
@@ -84,6 +85,10 @@ public class MockOPPChannel implements OPPChannel {
 
     public MockOPPChannel(List selectResponse) {
         this.selectResponse = selectResponse;
+    }
+    
+    public MockOPPChannel(EntityResolver resolver) {
+        this.resolver = resolver;
     }
 
     public EventManager getEventManager() {
@@ -116,6 +121,6 @@ public class MockOPPChannel implements OPPChannel {
 
     public EntityResolver onBootstrap(BootstrapMessage message) {
         messages.add(message);
-        return null;
+        return resolver;
     }
 }
