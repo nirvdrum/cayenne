@@ -117,7 +117,9 @@
 				there is a number of server-side only classes in remaining packages
 			-->
  			<fileset dir="${core.build}/classes">
+			<!-- EntityResolver relies on DataObject
 				<exclude name="org/objectstyle/cayenne/DataObject.class"/>
+			-->
 				<exclude name="org/objectstyle/cayenne/CayenneDataObject.class"/>
 				<exclude name="org/objectstyle/cayenne/access/**"/>
 				<exclude name="org/objectstyle/cayenne/conf/**"/>
