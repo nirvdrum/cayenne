@@ -156,6 +156,13 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         assertSame(context, o.getObjectContext());
         assertNull(o.getGlobalAttribute1Direct());
 
+        // make sure value holders are set but not resolved
+        assertNotNull(o.getTable2ArrayDirect());
+        assertTrue(((PersistentObjectList) o.getTable2ArrayDirect()).isFault());
+
+        // make sure we haven't tripped the fault yet
+        assertEquals(PersistenceState.HOLLOW, o.getPersistenceState());
+
         // try tripping fault
         assertEquals("g1", o.getGlobalAttribute1());
         assertEquals(PersistenceState.COMMITTED, o.getPersistenceState());
@@ -173,9 +180,6 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         assertTrue(fault instanceof ClientMtTable1);
 
         ClientMtTable1 o = (ClientMtTable1) fault;
-        assertEquals(PersistenceState.HOLLOW, o.getPersistenceState());
-        assertSame(context, o.getObjectContext());
-        assertNull(o.getGlobalAttribute1Direct());
 
         // try tripping fault
 

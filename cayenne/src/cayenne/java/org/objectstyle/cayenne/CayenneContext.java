@@ -475,11 +475,12 @@ public class CayenneContext implements ObjectContext {
         ClassDescriptor descriptor = entity.getClassDescriptor();
 
         Persistent object = (Persistent) descriptor.createObject();
-        descriptor.prepareForAccess(object);
 
         object.setPersistenceState(PersistenceState.NEW);
         object.setObjectContext(this);
         object.setGlobalID(id);
+
+        descriptor.prepareForAccess(object);
         graphManager.registerNode(object.getGlobalID(), object);
         graphManager.nodeCreated(object.getGlobalID());
 
@@ -490,11 +491,15 @@ public class CayenneContext implements ObjectContext {
         ClassDescriptor descriptor = entity.getClassDescriptor();
 
         Persistent object = (Persistent) descriptor.createObject();
-        descriptor.prepareForAccess(object);
 
         object.setPersistenceState(PersistenceState.HOLLOW);
         object.setObjectContext(this);
         object.setGlobalID(id);
+
+        // note that this must be called AFTER setting persistence state, otherwise we'd
+        // get ValueHolders incorrectly marked as resolved
+        descriptor.prepareForAccess(object);
+
         graphManager.registerNode(object.getGlobalID(), object);
 
         return object;
