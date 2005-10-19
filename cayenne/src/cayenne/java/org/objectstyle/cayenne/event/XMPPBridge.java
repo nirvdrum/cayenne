@@ -90,6 +90,8 @@ import org.objectstyle.cayenne.util.Util;
 public class XMPPBridge extends EventBridge {
 
     static final String DEFAULT_CHAT_SERVICE = "conference";
+    static final int DEFAULT_XMPP_PORT = 5222;
+    static final int DEFAULT_XMPP_SECURE_PORT = 5223;
 
     protected boolean secureConnection;
     protected String loginId;
@@ -192,18 +194,19 @@ public class XMPPBridge extends EventBridge {
         try {
             // connect and log in to chat
             if (secureConnection) {
-                this.connection = xmppPort > 0
-                        ? new SSLXMPPConnection(xmppHost, xmppPort)
-                        : new SSLXMPPConnection(xmppHost);
+                int port = xmppPort > 0 ? xmppPort : DEFAULT_XMPP_SECURE_PORT;
+                this.connection = new SSLXMPPConnection(xmppHost, port);
             }
             else {
-                this.connection = xmppPort > 0
-                        ? new XMPPConnection(xmppHost, xmppPort)
-                        : new XMPPConnection(xmppHost);
+                int port = xmppPort > 0 ? xmppPort : DEFAULT_XMPP_PORT;
+                this.connection = new XMPPConnection(xmppHost, port);
             }
 
             if (loginId != null) {
-                connection.login(loginId, password);
+                // it is important to provide a (pseudo) globally unique string as the
+                // third argument ("sessionHandle" is such string); without it same
+                // loginId can not be reused from the same machine.
+                connection.login(loginId, password, sessionHandle);
             }
             else {
                 connection.loginAnonymously();
