@@ -114,25 +114,11 @@ public class HessianServiceHandler implements HessianService, Service {
         // start Cayenne service
         logObj.debug("HessianServiceHandler is starting");
 
-        this.domain = initDomain(config);
+        initDomain(config);
+        initEventBridgeParameters(config);
+
         this.sessionChannels = new HashMap();
         this.sharedSessions = new HashMap();
-
-        // event bridge setup...
-        String eventBridgeFactoryName = config
-                .getInitParameter(HessianService.EVENT_BRIDGE_FACTORY_PROPERTY);
-
-        if (eventBridgeFactoryName != null) {
-            Map parameters = new HashMap();
-            Enumeration en = config.getInitParameterNames();
-            while (en.hasMoreElements()) {
-                String key = (String) en.nextElement();
-                parameters.put(key, config.getInitParameter(key));
-            }
-
-            this.eventBridgeFactoryName = eventBridgeFactoryName;
-            this.eventBridgeParameters = parameters;
-        }
 
         logObj.debug("HessianServiceHandler started");
     }
@@ -253,7 +239,7 @@ public class HessianServiceHandler implements HessianService, Service {
         return buffer.toString();
     }
 
-    DataDomain initDomain(ServletConfig config) throws ServletException {
+    protected void initDomain(ServletConfig config) throws ServletException {
         Configuration cayenneConfig = new DefaultConfiguration(
                 Configuration.DEFAULT_DOMAIN_FILE);
 
@@ -267,7 +253,24 @@ public class HessianServiceHandler implements HessianService, Service {
 
         // TODO (Andrus 10/15/2005) this assumes that mapping has a single domain...
         // do something about multiple domains
-        return cayenneConfig.getDomain();
+        this.domain = cayenneConfig.getDomain();
     }
 
+    protected void initEventBridgeParameters(ServletConfig config)
+            throws ServletException {
+        String eventBridgeFactoryName = config
+                .getInitParameter(HessianService.EVENT_BRIDGE_FACTORY_PROPERTY);
+
+        if (eventBridgeFactoryName != null) {
+            Map parameters = new HashMap();
+            Enumeration en = config.getInitParameterNames();
+            while (en.hasMoreElements()) {
+                String key = (String) en.nextElement();
+                parameters.put(key, config.getInitParameter(key));
+            }
+
+            this.eventBridgeFactoryName = eventBridgeFactoryName;
+            this.eventBridgeParameters = parameters;
+        }
+    }
 }

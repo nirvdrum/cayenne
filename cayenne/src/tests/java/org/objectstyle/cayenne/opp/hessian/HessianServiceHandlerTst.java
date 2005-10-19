@@ -75,8 +75,8 @@ public class HessianServiceHandlerTst extends TestCase {
 
         HessianServiceHandler handler = new HessianServiceHandler() {
 
-            DataDomain initDomain(ServletConfig config) throws ServletException {
-                return new DataDomain("test");
+            public void initDomain(ServletConfig config) throws ServletException {
+                this.domain = new DataDomain("test");
             }
         };
 
@@ -93,8 +93,8 @@ public class HessianServiceHandlerTst extends TestCase {
 
         HessianServiceHandler handler = new HessianServiceHandler() {
 
-            DataDomain initDomain(ServletConfig config) throws ServletException {
-                return new DataDomain("test");
+            public void initDomain(ServletConfig config) throws ServletException {
+                this.domain = new DataDomain("test");
             }
         };
 
@@ -103,12 +103,12 @@ public class HessianServiceHandlerTst extends TestCase {
         HessianSession session = handler.establishSession();
         assertNotNull(session);
         assertFalse(session.isServerEventsEnabled());
-        
+
         HessianSession session2 = handler.establishSession();
         assertNotNull(session2);
         assertNotSame(session, session2);
     }
-    
+
     public void testEstablishSharedSession() throws Exception {
         MockServletConfig config = new MockServletConfig();
         config.setInitParameter(
@@ -117,8 +117,8 @@ public class HessianServiceHandlerTst extends TestCase {
 
         HessianServiceHandler handler = new HessianServiceHandler() {
 
-            DataDomain initDomain(ServletConfig config) throws ServletException {
-                return new DataDomain("test");
+            public void initDomain(ServletConfig config) throws ServletException {
+                this.domain = new DataDomain("test");
             }
         };
 
@@ -127,7 +127,7 @@ public class HessianServiceHandlerTst extends TestCase {
         HessianSession session = handler.establishSharedSession("shared");
         assertNotNull(session);
         assertTrue(session.isServerEventsEnabled());
-        
+
         HessianSession session2 = handler.establishSharedSession("shared");
         assertNotNull(session2);
         assertSame(session, session2);

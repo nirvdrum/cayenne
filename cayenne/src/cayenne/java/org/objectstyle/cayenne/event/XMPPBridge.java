@@ -64,6 +64,7 @@ import java.util.Collections;
 
 import org.jivesoftware.smack.GroupChat;
 import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.SSLXMPPConnection;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
@@ -88,6 +89,11 @@ import org.objectstyle.cayenne.util.Util;
  */
 public class XMPPBridge extends EventBridge {
 
+    static final String DEFAULT_CHAT_SERVICE = "conference";
+
+    protected boolean secureConnection;
+    protected String loginId;
+    protected String password;
     protected String xmppHost;
     protected int xmppPort;
     protected String chatService;
@@ -131,6 +137,30 @@ public class XMPPBridge extends EventBridge {
         this.xmppPort = xmppPort;
     }
 
+    public String getLoginId() {
+        return loginId;
+    }
+
+    public void setLoginId(String loginId) {
+        this.loginId = loginId;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public boolean isSecureConnection() {
+        return secureConnection;
+    }
+
+    public void setSecureConnection(boolean secureConnection) {
+        this.secureConnection = secureConnection;
+    }
+
     public String getChatService() {
         return chatService;
     }
@@ -154,33 +184,44 @@ public class XMPPBridge extends EventBridge {
             throw new CayenneRuntimeException("Null 'xmppHost', can't start XMPPBridge");
         }
 
-        if (chatService == null) {
-            throw new CayenneRuntimeException(
-                    "Null 'chatService', can't start XMPPBridge");
-        }
-
         // shutdown old bridge
         if (connected) {
             shutdownExternal();
         }
 
         try {
-            // connect
-            this.connection = xmppPort > 0
-                    ? new XMPPConnection(xmppHost, xmppPort)
-                    : new XMPPConnection(xmppHost);
+            // connect and log in to chat
+            if (secureConnection) {
+                this.connection = xmppPort > 0
+                        ? new SSLXMPPConnection(xmppHost, xmppPort)
+                        : new SSLXMPPConnection(xmppHost);
+            }
+            else {
+                this.connection = xmppPort > 0
+                        ? new XMPPConnection(xmppHost, xmppPort)
+                        : new XMPPConnection(xmppHost);
+            }
 
-            connection.loginAnonymously();
+            if (loginId != null) {
+                connection.login(loginId, password);
+            }
+            else {
+                connection.loginAnonymously();
+            }
         }
         catch (XMPPException e) {
             throw new CayenneRuntimeException("Error connecting to XMPP Server"
                     + e.getLocalizedMessage());
         }
 
+        String service = this.chatService != null
+                ? this.chatService
+                : DEFAULT_CHAT_SERVICE;
+
         try {
             this.groupChat = connection.createGroupChat(externalSubject
                     + '@'
-                    + chatService
+                    + service
                     + "."
                     + connection.getHost());
 

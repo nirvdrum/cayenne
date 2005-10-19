@@ -73,21 +73,18 @@ public class XMPPBridgeFactory implements EventBridgeFactory {
     public static final String XMPP_HOST_PROPERTY = "cayenne.XMPPBridge.xmppHost";
 
     /**
-     * An optional property.
+     * An optional property, port 5222 is used as default XMPP port.
      */
     public static final String XMPP_PORT_PROPERTY = "cayenne.XMPPBridge.xmppPort";
 
+    /**
+     * An optional property, "conference" is used as default chat service.
+     */
     public static final String XMPP_CHAT_SERVICE_PROPERTY = "cayenne.XMPPBridge.xmppChatService";
 
-    // TODO Andrus, 10/13/2005 - secure connections and authentication...
-
-    // public static final String XMPP_SECURE_CONNECTION_PROPERTY =
-    // "cayenne.XMPPBridge.xmppSecure";
-
-    // public static final String XMPP_LOGIN_PROPERTY = "cayenne.XMPPBridge.xmppLogin";
-
-    // public static final String XMPP_PASSWORD_PROPERTY =
-    // "cayenne.XMPPBridge.xmppPassword";
+    public static final String XMPP_SECURE_CONNECTION_PROPERTY = "cayenne.XMPPBridge.xmppSecure";
+    public static final String XMPP_LOGIN_PROPERTY = "cayenne.XMPPBridge.xmppLogin";
+    public static final String XMPP_PASSWORD_PROPERTY = "cayenne.XMPPBridge.xmppPassword";
 
     /**
      * @deprecated since 1.2, as we now need to support multiple subjects.
@@ -104,6 +101,14 @@ public class XMPPBridgeFactory implements EventBridgeFactory {
 
         String chatService = (String) properties.get(XMPP_CHAT_SERVICE_PROPERTY);
         String host = (String) properties.get(XMPP_HOST_PROPERTY);
+
+        String loginId = (String) properties.get(XMPP_LOGIN_PROPERTY);
+        String password = (String) properties.get(XMPP_PASSWORD_PROPERTY);
+
+        String secureConnectionString = (String) properties
+                .get(XMPP_SECURE_CONNECTION_PROPERTY);
+        boolean secureConnection = "true".equalsIgnoreCase(secureConnectionString);
+
         String portString = (String) properties.get(XMPP_PORT_PROPERTY);
         int port = -1;
         if (portString != null) {
@@ -121,6 +126,9 @@ public class XMPPBridgeFactory implements EventBridgeFactory {
         bridge.setXmppHost(host);
         bridge.setXmppPort(port);
         bridge.setChatService(chatService);
+        bridge.setSecureConnection(secureConnection);
+        bridge.setLoginId(loginId);
+        bridge.setPassword(password);
 
         return bridge;
     }
