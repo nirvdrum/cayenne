@@ -60,6 +60,8 @@ import junit.framework.TestCase;
 import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.MockDataObject;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.opp.hessian.HessianConnection;
+import org.objectstyle.cayenne.util.Util;
 
 public class SingleObjectQueryTst extends TestCase {
 
@@ -78,5 +80,25 @@ public class SingleObjectQueryTst extends TestCase {
         SingleObjectQuery query = new SingleObjectQuery(oid);
         assertSame(oid, query.getGlobalID());
         assertNull(query.getObjectID());
+    }
+
+    public void testSerializability() throws Exception {
+        GlobalID oid = new GlobalID("test", "a", "b");
+        SingleObjectQuery query = new SingleObjectQuery(oid);
+
+        Object o = Util.cloneViaSerialization(query);
+        assertNotNull(o);
+        assertTrue(o instanceof SingleObjectQuery);
+        assertEquals(oid, ((SingleObjectQuery) o).getGlobalID());
+    }
+
+    public void testSerializabilityWithHessian() throws Exception {
+        GlobalID oid = new GlobalID("test", "a", "b");
+        SingleObjectQuery query = new SingleObjectQuery(oid);
+
+        Object o = HessianConnection.cloneViaHessianSerialization(query);
+        assertNotNull(o);
+        assertTrue(o instanceof SingleObjectQuery);
+        assertEquals(oid, ((SingleObjectQuery) o).getGlobalID());
     }
 }

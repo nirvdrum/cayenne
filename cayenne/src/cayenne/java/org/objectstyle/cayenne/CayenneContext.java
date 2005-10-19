@@ -329,7 +329,7 @@ public class CayenneContext implements ObjectContext {
         }
 
         synchronized (graphManager) {
-            return _newObject(entity, new GlobalID(entity.getName()));
+            return createNewObject(entity, new GlobalID(entity.getName()));
         }
     }
 
@@ -446,7 +446,20 @@ public class CayenneContext implements ObjectContext {
      */
     protected void ensureFaultResolved(Persistent object) {
         if (object.getPersistenceState() == PersistenceState.HOLLOW) {
-            performSelectQuery(new SingleObjectQuery(object.getGlobalID()));
+
+            GlobalID gid = object.getGlobalID();
+            List objects = performSelectQuery(new SingleObjectQuery(gid));
+
+            if (objects.size() == 0) {
+                throw new FaultFailureException(
+                        "Error resolving fault, no matching row exists in the database for GlobalID: "
+                                + gid);
+            }
+            else if (objects.size() > 1) {
+                throw new FaultFailureException(
+                        "Error resolving fault, more than one row exists in the database for GlobalID: "
+                                + gid);
+            }
         }
     }
 
@@ -458,7 +471,7 @@ public class CayenneContext implements ObjectContext {
 
     // ****** non-public methods ******
 
-    Persistent _newObject(ObjEntity entity, GlobalID id) {
+    Persistent createNewObject(ObjEntity entity, GlobalID id) {
         ClassDescriptor descriptor = entity.getClassDescriptor();
 
         Persistent object = (Persistent) descriptor.createObject();
@@ -469,6 +482,20 @@ public class CayenneContext implements ObjectContext {
         object.setGlobalID(id);
         graphManager.registerNode(object.getGlobalID(), object);
         graphManager.nodeCreated(object.getGlobalID());
+
+        return object;
+    }
+
+    Persistent createFault(ObjEntity entity, GlobalID id) {
+        ClassDescriptor descriptor = entity.getClassDescriptor();
+
+        Persistent object = (Persistent) descriptor.createObject();
+        descriptor.prepareForAccess(object);
+
+        object.setPersistenceState(PersistenceState.HOLLOW);
+        object.setObjectContext(this);
+        object.setGlobalID(id);
+        graphManager.registerNode(object.getGlobalID(), object);
 
         return object;
     }

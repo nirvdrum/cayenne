@@ -86,7 +86,7 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
     public void graphChanged(final GraphEvent e) {
         // process flush
         if (shouldProcessEvent(e) && e.getDiff() != null) {
-            execute(new Runnable() {
+            runWithEventsDisabled(new Runnable() {
 
                 public void run() {
                     e.getDiff().apply(ObjectContextMergeHandler.this);
@@ -114,7 +114,7 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
         if (shouldProcessEvent(e)) {
             final boolean hadChanges = context.internalGraphManager().hasChanges();
 
-            execute(new Runnable() {
+            runWithEventsDisabled(new Runnable() {
 
                 public void run() {
 
@@ -140,7 +140,7 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
 
             // do we need to merge anything?
             if (context.internalGraphManager().hasChanges()) {
-                execute(new Runnable() {
+                runWithEventsDisabled(new Runnable() {
 
                     public void run() {
                         context.internalGraphManager().graphReverted();
@@ -177,7 +177,7 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
      * Executes merging of the external diff.
      */
     void merge(final GraphDiff diff) {
-        execute(new Runnable() {
+        runWithEventsDisabled(new Runnable() {
 
             public void run() {
                 diff.apply(ObjectContextMergeHandler.this);
@@ -204,7 +204,7 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
     }
 
     public void nodeCreated(Object nodeId) {
-        context._newObject(entityForId(nodeId), (GlobalID) nodeId);
+        context.createNewObject(entityForId(nodeId), (GlobalID) nodeId);
     }
 
     public void nodeRemoved(Object nodeId) {
@@ -238,56 +238,71 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
     }
 
     public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
+        // null source or target likely means the object is not faulted yet... Faults
+        // shouldn't get disturbed by adding/removing arcs
+
         Object source = context.internalGraphManager().getNode(nodeId);
-        if (source != null) {
+        if (source == null) {
+            source = context.createFault(entityForId(nodeId), (GlobalID) nodeId);
+        }
 
-            Object target = context.internalGraphManager().getNode(targetNodeId);
-            if (target != null) {
+        Object target = context.internalGraphManager().getNode(targetNodeId);
+        if (target == null) {
+            target = context.createFault(
+                    entityForId(targetNodeId),
+                    (GlobalID) targetNodeId);
+        }
 
-                // TODO (Andrus, 10/17/2005) - check for local modifications to avoid
-                // overwriting...
+        // TODO (Andrus, 10/17/2005) - check for local modifications to avoid
+        // overwriting...
 
-                ArcProperty p = (ArcProperty) propertyForId(nodeId, arcId.toString());
+        ArcProperty p = (ArcProperty) propertyForId(nodeId, arcId.toString());
 
-                // TODO (Andrus, 10/17/2005) handle ordered lists...
-                p.writeValue(source, null, target);
+        // TODO (Andrus, 10/17/2005) handle ordered lists...
+        p.writeValue(source, null, target);
 
-                try {
-                    context.internalGraphAction().handleArcPropertyChange(
-                            (Persistent) source,
-                            p,
-                            null,
-                            target);
-                }
-                finally {
-                    context.internalGraphAction().setArcChangeInProcess(false);
-                }
-            }
+        try {
+            context.internalGraphAction().handleArcPropertyChange(
+                    (Persistent) source,
+                    p,
+                    null,
+                    target);
+        }
+        finally {
+            context.internalGraphAction().setArcChangeInProcess(false);
         }
     }
 
     public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
+
+        // null source or target likely means the object is not faulted yet... Faults
+        // shouldn't get disturbed by adding/removing arcs
+
         Object source = context.internalGraphManager().getNode(nodeId);
-        if (source != null) {
+        if (source == null) {
+            source = context.createFault(entityForId(nodeId), (GlobalID) nodeId);
+        }
 
-            Object target = context.internalGraphManager().getNode(targetNodeId);
-            if (target != null) {
+        Object target = context.internalGraphManager().getNode(targetNodeId);
+        if (target == null) {
+            target = context.createFault(
+                    entityForId(targetNodeId),
+                    (GlobalID) targetNodeId);
+        }
 
-                // (see "TODO" in 'arcCreated')
-                ArcProperty p = (ArcProperty) propertyForId(nodeId, arcId.toString());
-                p.writeValue(source, target, null);
+        // (see "TODO" in 'arcCreated')
+        ArcProperty p = (ArcProperty) propertyForId(nodeId, arcId.toString());
+        p.writeValue(source, target, null);
 
-                try {
-                    context.internalGraphAction().handleArcPropertyChange(
-                            (Persistent) source,
-                            p,
-                            target,
-                            null);
-                }
-                finally {
-                    context.internalGraphAction().setArcChangeInProcess(false);
-                }
-            }
+        try {
+            context.internalGraphAction().handleArcPropertyChange(
+                    (Persistent) source,
+                    p,
+                    target,
+                    null);
+        }
+        finally {
+            context.internalGraphAction().setArcChangeInProcess(false);
         }
     }
 
@@ -313,7 +328,7 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
     // executes a closure, disabling ObjectContext events for the duration of the
     // execution.
 
-    private void execute(Runnable closure) {
+    private void runWithEventsDisabled(Runnable closure) {
 
         synchronized (context.internalGraphManager()) {
             boolean changeEventsEnabled = context.internalGraphManager().changeEventsEnabled;

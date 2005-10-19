@@ -74,6 +74,11 @@ public class SingleObjectQuery implements QueryExecutionPlan {
 
     protected GlobalID globalID;
     protected ObjectId objectID;
+    
+    // needed for hessian serialization
+    private SingleObjectQuery() {
+        
+    }
 
     public SingleObjectQuery(GlobalID globalID) {
         if (globalID == null) {

@@ -58,13 +58,13 @@ package org.objectstyle.cayenne;
 import java.util.Arrays;
 import java.util.List;
 
-import org.objectstyle.cayenne.CayenneContext;
-import org.objectstyle.cayenne.GlobalID;
-import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.service.ClientServerChannel;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
+import org.objectstyle.cayenne.testdo.mt.MtTable1;
 import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
@@ -138,5 +138,53 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         ClientMtTable1 o2 = (ClientMtTable1) context.newObject(ClientMtTable1.class);
         assertNotNull(o2.getTable2ArrayDirect());
         assertFalse(((PersistentObjectList) o2.getTable2ArrayDirect()).isFault());
+    }
+
+    public void testCreateFault() throws Exception {
+        createTestData("prepare");
+
+        CayenneContext context = new CayenneContext(new ClientServerChannel(getDomain()));
+        GlobalID id = new GlobalID("MtTable1", MtTable1.TABLE1_ID_PK_COLUMN, new Integer(
+                1));
+        ObjEntity entity = getObjEntity("MtTable1").getClientEntity();
+
+        Object fault = context.createFault(entity, id);
+        assertTrue(fault instanceof ClientMtTable1);
+
+        ClientMtTable1 o = (ClientMtTable1) fault;
+        assertEquals(PersistenceState.HOLLOW, o.getPersistenceState());
+        assertSame(context, o.getObjectContext());
+        assertNull(o.getGlobalAttribute1Direct());
+
+        // try tripping fault
+        assertEquals("g1", o.getGlobalAttribute1());
+        assertEquals(PersistenceState.COMMITTED, o.getPersistenceState());
+    }
+
+    public void testCreateBadFault() throws Exception {
+        createTestData("prepare");
+
+        CayenneContext context = new CayenneContext(new ClientServerChannel(getDomain()));
+        GlobalID id = new GlobalID("MtTable1", MtTable1.TABLE1_ID_PK_COLUMN, new Integer(
+                2));
+        ObjEntity entity = getObjEntity("MtTable1").getClientEntity();
+
+        Object fault = context.createFault(entity, id);
+        assertTrue(fault instanceof ClientMtTable1);
+
+        ClientMtTable1 o = (ClientMtTable1) fault;
+        assertEquals(PersistenceState.HOLLOW, o.getPersistenceState());
+        assertSame(context, o.getObjectContext());
+        assertNull(o.getGlobalAttribute1Direct());
+
+        // try tripping fault
+
+        try {
+            o.getGlobalAttribute1();
+            fail("resolving bad fault should've thrown");
+        }
+        catch (FaultFailureException e) {
+            // expected
+        }
     }
 }
