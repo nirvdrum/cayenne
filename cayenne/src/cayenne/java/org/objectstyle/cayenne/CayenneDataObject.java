@@ -736,7 +736,6 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
         EntityResolver er = getDataContext().getEntityResolver();
         ObjEntity object = er.lookupObjEntity(getClass());
 
-        // TODO: "split" is JDK 1.4... most of Cayenne is still 1.3 compatible
         String[] fields = this.getClass().getName().split("\\.");
         encoder.setRoot(fields[fields.length - 1], this.getClass().getName());
 
