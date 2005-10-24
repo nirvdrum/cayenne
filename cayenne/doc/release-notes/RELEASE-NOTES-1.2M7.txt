@@ -23,7 +23,9 @@ Changes/New Features:
   - OPPConnector was renamed to OPPConnection (all implementors were renamed accordingly).
   - web.xml configuration is simplified (see HessianService Javadocs for details). 
     WARINING: You must update your web.xml if you used HessianService with M6, check UPGRADE-NOTES for details.
-  
+
+* JDOM is no longer needed for XML (de)serialization - everything is done using JAXP classes 
+  bundled with JDK.
 * No longer storing or relying on ClassLoader stored in Configuration. 
   Thread.currentThread().getContextClassLoader() is what Cayenne now uses internally.
 * Auto-sorted relationship list - org.objectstyle.cayenne.util.IndexPropertyList. 
@@ -34,3 +36,5 @@ Changes/New Features:
 * Listener methods registered with EventManager no longer have to be public. Any non-public methods 
   and non-public classes will work. This is nice for implementing listener methods without exposing 
   them in the API (or using inner classes that didn't work before).
+  
+  

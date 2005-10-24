@@ -49,8 +49,8 @@
 			transport, J2EE libraries must be available at runtime, and JMS services must be running.
             </p>
             
-            <p><strong>- (Optional) JDOM.</strong> If you use XML serialization features or 
-           develop a Swing application with
+            <p><strong>- (Optional) JDOM.</strong> If you use
+           develop Swing applications with
             <a href="../dataview/index.html">DataViews</a>, you need to have JDOM jars installed. JDOM can be downloaded 
             from  <a href="http://www.jdom.org/" target="_blank">http://www.jdom.org/</a>.
             </p>
