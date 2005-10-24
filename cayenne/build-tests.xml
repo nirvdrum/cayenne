@@ -46,9 +46,9 @@
 			<include name="${smack.jar}"/>
 			<include name="${smackx.jar}"/>
 		</fileset>
-		<fileset dir="${ant.home}/lib">
-			<include name="*.jar"/>
-		</fileset>
+		
+		<!-- Exclude any XML parsers Ant might bundle...rely on JAXP instead -->
+		<fileset dir="${ant.home}/lib" includes="*.jar" excludes="*xalan*,*xerces*,*xml-api*"/>
 		<fileset dir="${dist}/lib">
 			<include name="cayenne.jar"/>
 		</fileset>
@@ -117,7 +117,7 @@
     		enabled="${coverage.enabled}"
     		verbosity="quiet"
     		fork="true"
-    		libclasspathref="classpath"
+    		libclasspathref="agnostic-classpath"
     		classname="org.apache.tools.ant.Main"
     		failonerror="true">
 
@@ -150,7 +150,7 @@
 			<sysproperty key="dist" value="${dist}"/>
 			<sysproperty key="test.filter" value="${test.filter}"/>
 			<sysproperty key="test.exclude" value="${test.exclude}"/>      
-			<classpath refid="classpath"/>
+			<classpath refid="agnostic-classpath"/>
     	</emmajava>
 
     </target>    

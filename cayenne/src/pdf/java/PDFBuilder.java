@@ -68,9 +68,13 @@ import java.util.StringTokenizer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
-import org.apache.xerces.parsers.SAXParser;
-import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -108,9 +112,6 @@ public class PDFBuilder {
         String title = args[1];
         String outputPDF = args[2];
 
-        // this seems to be needed
-        System.setProperty("org.xml.sax.driver", SAXParser.class.getName());
-
         try {
             PDFBuilder pdfBuilder = new PDFBuilder(baseDir, title);
             pdfBuilder.buildPDF(new FileOutputStream(outputPDF));
@@ -137,14 +138,16 @@ public class PDFBuilder {
         try {
             createOptimizedDocument();
 
+            Source source = new DOMSource(xmlDoc);
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            XMLSerializer serializer = new XMLSerializer();
-            serializer.setOutputByteStream(buffer);
-            serializer.serialize(xmlDoc);
+            Result result = new StreamResult(buffer);
+
+            Transformer xformer = TransformerFactory.newInstance().newTransformer();
+            xformer.transform(source, result);
+
             ByteArrayInputStream DOMtoSAX = new ByteArrayInputStream(buffer.toByteArray());
             PDFDocumentCreator PDFDocumentCreator = new PDFDocumentCreator();
             PDFDocumentCreator.run(DOMtoSAX, resultStream);
-
         }
         finally {
             resultStream.close();

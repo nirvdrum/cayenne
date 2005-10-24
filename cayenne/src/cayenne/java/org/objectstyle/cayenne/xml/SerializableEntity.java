@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,100 +55,89 @@
  */
 package org.objectstyle.cayenne.xml;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Iterator;
 
-import org.objectstyle.cayenne.CayenneDataObject;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.property.PropertyUtils;
+import org.w3c.dom.Element;
 
 /**
- * @author Andrei Adamchik
+ * A flyweight wrapper for serializing with XML mapping. This object is NOT thread-safe.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public class TestObject extends CayenneDataObject {
+class SerializableEntity implements XMLSerializable {
 
-    protected String name = "";
-    protected int age;
-    protected boolean open;
-    protected List children = new ArrayList();
+    Element descriptor;
+    XMLMappingDescriptor descriptorMap;
 
-    public TestObject() {
-        this("", 0, false);
+    // same node can store more than one object during encoding
+    transient Object object;
+
+    public SerializableEntity(XMLMappingDescriptor descriptorMap, Element descriptor) {
+        this.descriptor = descriptor;
+        this.descriptorMap = descriptorMap;
     }
 
-    public TestObject(String name, int age, boolean open) {
-        this.name = name;
-        this.age = age;
-        this.open = open;
+    String getName() {
+        return descriptor.getAttribute("name");
     }
 
-    public int getAge() {
-        return age;
+    Element getDescriptor() {
+        return descriptor;
     }
 
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isOpen() {
-        return open;
-    }
-
-    public void setOpen(boolean open) {
-        this.open = open;
-    }
-
-    public void setChildren(List children) {
-        this.children = children;
-    }
-
-    public void addChild(TestObject child) {
-        children.add(child);
-    }
-
-    public void removeChild(TestObject child) {
-        children.remove(child);
-    }
-
-    public List getChildren() {
-        return children;
-    }
-
-    public boolean equals(Object o) {
-        if (null == o || !(o instanceof TestObject)) {
-            return false;
-        }
-
-        TestObject test = (TestObject) o;
-
-        return ((test.getAge() == age) && (name.equals(test.getName())) && (test.isOpen() == open));
+    void setObject(Object object) {
+        this.object = object;
     }
 
     public void encodeAsXML(XMLEncoder encoder) {
-        encoder.setRoot("Test", this.getClass().getName());
-        encoder.encodeProperty("name", name);
-        encoder.encodeProperty("age", new Integer(age));
-        encoder.encodeProperty("open", new Boolean(open));
-        encoder.encodeProperty("children", children);
+        if (object instanceof Collection) {
+            Collection c = (Collection) object;
+            if (!c.isEmpty()) {
+
+                // push the first node, and create the rest as peers.
+                Iterator it = c.iterator();
+                encodeObject(encoder, it.next(), true);
+                while (it.hasNext()) {
+                    encodeObject(encoder, it.next(), false);
+                }
+            }
+        }
+        else {
+            encodeObject(encoder, this.object, true);
+        }
     }
 
     public void decodeFromXML(XMLDecoder decoder) {
+        throw new CayenneRuntimeException("Decoding is not supported by this object");
+    }
 
-        if (null != decoder.decodeInteger("age")) {
-            age = decoder.decodeInteger("age").intValue();
+    void encodeObject(XMLEncoder encoder, Object object, boolean push) {
+        encoder.setRoot(descriptor.getAttribute("xmlTag"), null, push);
+
+        Iterator it = XMLUtil.getChildren(descriptor).iterator();
+        while (it.hasNext()) {
+
+            Element property = (Element) it.next();
+            String xmlTag = property.getAttribute("xmlTag");
+            String name = property.getAttribute("name");
+            Object value = PropertyUtils.getProperty(object, name);
+
+            if (value == null) {
+                continue;
+            }
+
+            SerializableEntity relatedEntity = descriptorMap.getEntity(xmlTag);
+            if (relatedEntity != null) {
+                relatedEntity.setObject(value);
+                relatedEntity.encodeAsXML(encoder);
+            }
+            else {
+                encoder.encodeProperty(xmlTag, value, false);
+            }
         }
-
-        if (null != decoder.decodeBoolean("open")) {
-            open = decoder.decodeBoolean("open").booleanValue();
-        }
-
-        name = decoder.decodeString("name");
-        children = (List) decoder.decodeObject("children");
     }
 }

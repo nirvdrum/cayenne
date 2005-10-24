@@ -68,32 +68,26 @@ import junit.framework.TestCase;
 public class XMLEncoderTst extends TestCase {
 
     static final String XML_DATA_DIR = "src/tests/resources/test-resources/xmlcoding/";
-    protected XMLEncoder encoder;
-
-    public void setUp() {
-        encoder = new XMLEncoder();
-    }
 
     public void testObjectWithNullProperties() throws Exception {
+        XMLEncoder encoder = new XMLEncoder();
+
         TestObject test = new TestObject();
         test.setName(null);
-        
-        try {
-            test.encodeAsXML(encoder);
-        }
-        catch (NullPointerException e) {
-            fail("Threw a NullPointerException when it should not have.");
-        }
+        test.encodeAsXML(encoder);
     }
-    
+
     public void testEncodeSimpleCollection() throws Exception {
+        XMLEncoder encoder = new XMLEncoder();
+
         TestObject test = new TestObject();
         test.addChild(new TestObject("Bill", 98, true));
         test.addChild(new TestObject("Sue", 45, false));
 
         encoder.setRoot("Test", test.getClass().getName());
         encoder.encodeProperty("children", test.getChildren());
-
+        String result = encoder.nodeToString(encoder.getRootNode());
+        
         BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
                 + "encoded-simple-collection.xml"));
         StringBuffer comp = new StringBuffer();
@@ -101,10 +95,11 @@ public class XMLEncoderTst extends TestCase {
             comp.append(in.readLine()).append("\n");
         }
 
-        assertEquals(comp.toString(), encoder.getXml());
+        assertEquals(comp.toString(), result);
     }
 
     public void testEncodeComplexCollection() throws Exception {
+        XMLEncoder encoder = new XMLEncoder();
         TestObject obj1 = new TestObject();
         obj1.setName("George");
         obj1.addChild(new TestObject("Bill", 62, true));
@@ -115,7 +110,7 @@ public class XMLEncoderTst extends TestCase {
 
         obj1.addChild(obj2);
 
-        encoder.encodeProperty("TestObjects", obj1);
+        String result = encoder.encode("TestObjects", obj1);
 
         BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
                 + "encoded-complex-collection.xml"));
@@ -124,16 +119,17 @@ public class XMLEncoderTst extends TestCase {
             comp.append(in.readLine()).append("\n");
         }
 
-        assertEquals(comp.toString(), encoder.getXml());
+        assertEquals(comp.toString(), result);
     }
 
     public void testSimpleMapping() throws Exception {
+        XMLEncoder encoder = new XMLEncoder(XML_DATA_DIR + "simple-mapping.xml");
         TestObject test = new TestObject();
         test.setAge(57);
         test.setName("George");
         test.setOpen(false);
 
-        encoder.encode(test, XML_DATA_DIR + "simple-mapping.xml");
+        String result = encoder.encode(test);
 
         BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
                 + "simple-mapped.xml"));
@@ -141,10 +137,11 @@ public class XMLEncoderTst extends TestCase {
         while (in.ready()) {
             comp.append(in.readLine()).append("\n");
         }
-        assertEquals(comp.toString(), encoder.getXml());
+        assertEquals(comp.toString(), result);
     }
 
     public void testCollectionMapping() throws Exception {
+        XMLEncoder encoder = new XMLEncoder(XML_DATA_DIR + "collection-mapping.xml");
         TestObject george = new TestObject();
         george.setName("George");
         george.addChild(new TestObject("Bill", 34, true));
@@ -153,7 +150,7 @@ public class XMLEncoderTst extends TestCase {
         sue.addChild(new TestObject("Mike", 3, true));
         george.addChild(sue);
 
-        encoder.encode(george, XML_DATA_DIR + "collection-mapping.xml");
+        String result = encoder.encode(george);
 
         BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
                 + "collection-mapped.xml"));
@@ -162,18 +159,17 @@ public class XMLEncoderTst extends TestCase {
             comp.append(in.readLine()).append("\n");
         }
 
-        
-        assertEquals(comp.toString(), encoder.getXml());
+        assertEquals(comp.toString(), result);
     }
 
     public void testEncodeDataObjectsList() throws Exception {
-        final List dataObjects = new ArrayList();
+        List dataObjects = new ArrayList();
 
         dataObjects.add(new TestObject("George", 5, true));
         dataObjects.add(new TestObject("Mary", 28, false));
         dataObjects.add(new TestObject("Joe", 31, true));
 
-        final String xml = XMLEncoder.encodeList("EncodedTestList", dataObjects);
+        String xml = new XMLEncoder().encode("EncodedTestList", dataObjects);
 
         BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
                 + "data-objects-encoded.xml"));
@@ -186,14 +182,15 @@ public class XMLEncoderTst extends TestCase {
     }
 
     public void testDataObjectsListMapping() throws Exception {
-        final List dataObjects = new ArrayList();
+        List dataObjects = new ArrayList();
 
         dataObjects.add(new TestObject("George", 5, true));
         dataObjects.add(new TestObject("Mary", 28, false));
         dataObjects.add(new TestObject("Joe", 31, true));
 
-        final String xml = XMLEncoder.encodeList("EncodedTestList", dataObjects, XML_DATA_DIR
-                + "simple-mapping.xml");
+        String xml = new XMLEncoder(XML_DATA_DIR + "simple-mapping.xml").encode(
+                "EncodedTestList",
+                dataObjects);
 
         BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
                 + "data-objects-mapped.xml"));

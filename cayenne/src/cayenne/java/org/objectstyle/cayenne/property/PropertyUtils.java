@@ -117,11 +117,13 @@ public class PropertyUtils {
             return value;
         }
         catch (Exception e) {
+            String objectType = value != null ? value.getClass().getName() : "<null>";
             throw new CayenneRuntimeException("Error reading property segment '"
                     + pathSegment
                     + "' in path '"
                     + nestedPropertyName
-                    + "'", e);
+                    + "' for type "
+                    + objectType, e);
         }
     }
 

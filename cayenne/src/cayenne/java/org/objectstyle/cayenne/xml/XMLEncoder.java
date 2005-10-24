@@ -55,255 +55,306 @@
  */
 package org.objectstyle.cayenne.xml;
 
+import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.util.Util;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * A helper class to encode objects to XML.
  * 
  * @since 1.2
- * @author Kevin J. Menard, Jr.
+ * @author Kevin J. Menard, Jr., Andrus Adamchik
  */
 public class XMLEncoder {
 
-    /** The root of the XML document for the encoded object. */
-    private Element root;
+    private XMLMappingDescriptor mappingDescriptor;
+
+    // temp ivars that define the structure of the encoding stack.
+    private Document document;
+    private Node parent;
+    private String tagOverride;
+    private boolean inProgress;
 
     /**
-     * Encodes object using provided mapping file.
+     * Encodes a collection of objects. This intended to be used to encode a list of
+     * DataObjects returned from a query or relationship retrieval.
      * 
-     * @param object The object to encode.
-     * @param mappingFile The mapping file that defines the encoding.
-     * @return The encoded object in XML.
-     * @throws CayenneRuntimeException
+     * @param rootXmlTag The name of the root XML element for the encoded collection.
+     * @param objects The List of DataObjects to encode.
+     * @return An XML string representing the encoded collection.
+     * @deprecated Since 1.2M7
      */
-    public String encode(Object object, String mappingFile)
-            throws CayenneRuntimeException {
+    // TODO: Andrus, 10/25/2005 - with new encoder API this method is really redundant
+    public static String encodeList(String rootXmlTag, List objects) {
+        return new XMLEncoder().encode(rootXmlTag, objects);
+    }
 
-        this.root = new XMLMappingUtil(mappingFile).encode(object);
-        
-        return getXml();
+    /**
+     * Encodes a collection of objects. This intended to be used to encode a list of
+     * DataObjects returned from a query or relationship retrieval.
+     * 
+     * @param rootXmlTag The name of the root XML element for the encoded collection.
+     * @param objects The List of DataObjects to encode.
+     * @param mappingUrl The mapping file that defines how the list elements should be
+     *            encoded.
+     * @return An XML string representing the encoded collection.
+     * @deprecated
+     * @since 1.2M7
+     */
+    // TODO: Andrus, 10/25/2005 - with new encoder API this method is really redundant
+    public static String encodeList(String rootXmlTag, List objects, String mappingUrl) {
+        return new XMLEncoder(mappingUrl).encode(rootXmlTag, objects);
+    }
+
+    /**
+     * Creates new XMLEncoder.
+     */
+    public XMLEncoder() {
+
+    }
+
+    /**
+     * Creates new XMLEncoder that will use a mapping descriptor loaded via provided URL.
+     */
+    public XMLEncoder(String mappingUrl) {
+        this.mappingDescriptor = new XMLMappingDescriptor(mappingUrl);
+    }
+
+    /**
+     * A callback for XMLSerializable objects to add a node to an encoding tree.
+     */
+    public void setRoot(String xmlTag, String type) {
+        setRoot(xmlTag, type, true);
+    }
+
+    /**
+     * A callback method for XMLSerializable objects to encode an object property. Note
+     * that the object must call "setRoot" prior to encoding its properties.
+     * 
+     * @param xmlTag The name of the XML element used to represent the property.
+     * @param property The object's property value to encode.
+     */
+    public void encodeProperty(String xmlTag, Object value) {
+        encodeProperty(xmlTag, value, true);
+    }
+
+    /**
+     * Encodes an object using "root" as a root tag.
+     */
+    public String encode(Object object) throws CayenneRuntimeException {
+        return encode("root", object);
+    }
+
+    /**
+     * Encodes using provided root XML tag.
+     */
+    public String encode(String rootTag, Object object) throws CayenneRuntimeException {
+
+        try {
+            initDocument(rootTag, object != null ? object.getClass().getName() : null);
+
+            if (mappingDescriptor != null) {
+                mappingDescriptor.getRootEntity().setObject(object);
+                mappingDescriptor.getRootEntity().encodeAsXML(this);
+            }
+            else {
+                encodeProperty(rootTag, object);
+            }
+
+            return nodeToString(getRootNode());
+        }
+        finally {
+            // make sure we can restart the encoder...
+            inProgress = false;
+        }
     }
 
     /**
      * Retrieves the XML representation of the encoded object.
      * 
      * @return The encoded object in XML.
+     * @deprecated since 1.2M7 as this implies that last encoding state is preserved after
+     *             the run.
      */
     public String getXml() {
-        Document doc = new Document(root);
-
-        // Return the XML tree as a pretty, formatted string.
-        // TODO Make this output configurable.
-        XMLOutputter serializer = new XMLOutputter();
-        Format format = Format.getPrettyFormat();
-
-        format.setOmitDeclaration(true);
-        format.setLineSeparator("\n");
-
-        serializer.setFormat(format);
-
-        String ret = serializer.outputString(doc);
-        doc.detachRootElement();
-
-        ret = stripDoubleLineBreaks(ret);
-
-        return ret;
-    }
-
-    // compensates for the lack of String.replace in JDK1.3
-    private String stripDoubleLineBreaks(String string) {
-        if (Util.isEmptyString(string)) {
-            return string;
-        }
-
-        StringBuffer buffer = new StringBuffer(string.length());
-        char previous = 0;
-        for (int i = 0; i < string.length(); i++) {
-            char c = string.charAt(i);
-            if (c == previous && previous == '\n') {
-                continue;
-            }
-
-            buffer.append(c);
-            previous = c;
-        }
-
-        return buffer.toString();
+        return nodeToString(getRootNode());
     }
 
     /**
-     * Sets the root node for the encoded object. This must be called prior to any of the
-     * encodeXXX() methods. In order to use the encoder to encoder more than one object,
-     * this method should be called again.
-     * 
-     * @param xmlTag The name of the XML root element.
-     * @param type The fully specified class name of the encoded object.
+     * Resets the encoder to process a new object tree.
      */
-    public void setRoot(String xmlTag, String type) {
-        root = new Element(xmlTag);
-        root.setAttribute("type", type);
+    void initDocument(String rootTag, String type) {
+        this.document = XMLUtil.newBuilder().newDocument();
+        this.parent = document;
+
+        // create a "synthetic" root
+        Element root = push(rootTag);
+        if (type != null) {
+            root.setAttribute("type", type);
+        }
+
+        inProgress = true;
     }
 
     /**
-     * Returns the root JDOM element of the encoded object.
-     * 
-     * @return The root JDOM element.
+     * Returns a root DOM node of the encoder.
      */
-    protected Element getRoot() {
+    Node getRootNode() {
+        if (document == null) {
+            return null;
+        }
+
+        // if synthetic root has a single child, use child as a root
+        Node root = document.getDocumentElement();
+        if (root.getChildNodes().getLength() == 1) {
+            root = root.getFirstChild();
+        }
+
         return root;
     }
 
-    /**
-     * Encodes an object's property value to XML.
-     * 
-     * @param xmlTag The name of the XML element used to represent the property.
-     * @param property The object's property value to encode.
-     */
-    public void encodeProperty(String xmlTag, Object property) {
-        
-        // If there's nothing to encode, simply return.
-        if (null == property) {
-            return;
+    String nodeToString(Node rootNode) {
+
+        StringWriter out = new StringWriter();
+        Result result = new StreamResult(out);
+
+        Source source = new DOMSource(rootNode);
+
+        try {
+            Transformer xformer = TransformerFactory.newInstance().newTransformer();
+            xformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            xformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            xformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            xformer.transform(source, result);
         }
-        
-        Element temp;
-
-        if (property instanceof XMLSerializable) {
-            XMLSerializable element = (XMLSerializable) property;
-
-            // Make a back-up copy of the root and then nullify it. This is done so we can
-            // recycle the encoder object.
-            Element rootCopy = root;
-            root = null;
-
-            // Use the current encoder object to encode the property.
-            element.encodeAsXML(this);
-
-            // Store a copy of the encoded property, which is currently stored in the
-            // root, since the encoder object was recycled.
-            temp = root;
-
-            // Only update the root tag for the encoded DataObject if the user provided a new name.
-            if (null != xmlTag) {
-                temp.setName(xmlTag);
-            }
-
-            // Restore the old root.
-            root = rootCopy;
-        }
-        // TODO This block operates differently from the others. Here, root can never be
-        // null and we need to add a list of items. Having two points of exit is not good.
-        else if (property instanceof Collection) {
-            Collection c = (Collection) property;
-            root.addContent(encodeCollection(xmlTag, c));
-
-            return;
-        }
-        else {
-            temp = new Element(xmlTag);
-
-            temp.setAttribute("type", property.getClass().getName());
-            temp.setText(property.toString());
+        catch (Exception e) {
+            throw new CayenneRuntimeException("XML transformation error", e);
         }
 
-        if (null != root) {
-            root.addContent(temp);
+        return out.toString().trim() + System.getProperty("line.separator");
+    }
+
+    void setRoot(String xmlTag, String type, boolean push) {
+
+        // all public methods must implicitly init the document
+        if (!inProgress) {
+            initDocument(xmlTag, type);
         }
-        else {
-            root = temp;
+
+        if (tagOverride != null) {
+            xmlTag = tagOverride;
+            tagOverride = null;
+        }
+
+        // new node will be a peer rather than a child of current parent.
+        if (!push) {
+            pop();
+        }
+
+        Element element = push(xmlTag);
+        if (type != null) {
+            element.setAttribute("type", type);
         }
     }
 
+    void encodeProperty(String xmlTag, Object value, boolean useType) {
+        // all public methods must be able to implicitly init the document
+        if (!inProgress) {
+            String type = (useType && value != null) ? value.getClass().getName() : null;
+            initDocument(xmlTag, type);
+        }
+
+        if (value == null) {
+            return;
+        }
+        else if (value instanceof XMLSerializable) {
+            encodeSerializable(xmlTag, (XMLSerializable) value);
+        }
+        else if (value instanceof Collection) {
+            encodeCollection(xmlTag, (Collection) value, useType);
+        }
+        else {
+            encodeSimple(xmlTag, value, useType);
+        }
+    }
+
+    void encodeSimple(String xmlTag, Object object, boolean useType) {
+
+        // simple properties will not call setRoot, so push manually
+        Element node = push(xmlTag);
+
+        if (useType) {
+            node.setAttribute("type", object.getClass().getName());
+        }
+
+        node.appendChild(document.createTextNode(object.toString()));
+        pop();
+    }
+
+    void encodeSerializable(String xmlTag, XMLSerializable object) {
+        // don't allow children to reset XML tag name ... unless they are at the root
+        // level
+        if (document.getDocumentElement() != parent) {
+            tagOverride = xmlTag;
+        }
+
+        object.encodeAsXML(this);
+
+        tagOverride = null;
+        pop();
+    }
+
     /**
-     * Encodes a collection of objects.
+     * Encodes a collection of objects, attaching them to the current root.
      * 
      * @param xmlTag The name of the root XML element for the encoded collection.
      * @param c The collection to encode.
-     * @return A flat list of the encoded objects (i.e., there is no root node).
      */
-    private List encodeCollection(String xmlTag, Collection c) {
-        // We need a root node to add content to, but we'll be tossing the root and return
-        // only its children. Thus, it really doesn't matter what we pass to setRoot()
-        // here.
-        XMLEncoder encoder = new XMLEncoder();
-        encoder.setRoot("root", "root");
+    void encodeCollection(String xmlTag, Collection c, boolean useType) {
 
-        // Encode each of the elements in the collection.
-        for (Iterator it = c.iterator(); it.hasNext();) {
-            encoder.encodeProperty(xmlTag, it.next());
+        Iterator it = c.iterator();
+        while (it.hasNext()) {
+            // encode collection without doing push/pop so that its elements are encoded
+            // without an intermediate grouping node.
+            encodeProperty(xmlTag, it.next(), useType);
         }
 
-        // Retrieve the list of encoded objects, removing their parent (the root) node.
-        List ret = encoder.getRoot().removeContent();
-
-        // If there was only a single element encoded, add the forceList attribute so that
-        // the decoder will know to treat this as a collection rather than as a single
-        // item.
-        if (1 == ret.size()) {
-            Element e = (Element) ret.get(0);
-
-            e.setAttribute("forceList", "YES");
+        if (c.size() == 1) {
+            ((Element) parent.getLastChild()).setAttribute("forceList", "YES");
         }
-
-        return ret;
     }
 
     /**
-     * Encodes a collection of objects. This intended to be used to encode a list of
-     * DataObjects returned from a query or relationship retrieval.
-     * 
-     * @param rootXmlTag The name of the root XML element for the encoded collection.
-     * @param dataObjects The List of DataObjects to encode.
-     * @return An XML string representing the encoded collection.
+     * Creates a new element, pushing it onto encoding stack.
      */
-    public static String encodeList(String rootXmlTag, List dataObjects) {
-        // It really doesn't matter what the root tag name is, but appending list
-        // to the name to be used for the elements seems like a sensible solution.
-        XMLEncoder encoder = new XMLEncoder();
-        encoder.setRoot(rootXmlTag, dataObjects.getClass().getName());
+    private Element push(String xmlTag) {
 
-        encoder.getRoot().addContent(encoder.encodeCollection(null, dataObjects));
-
-        return encoder.getXml();
+        Element child = document.createElement(xmlTag);
+        this.parent.appendChild(child);
+        this.parent = child;
+        return child;
     }
 
     /**
-     * Encodes a collection of objects. This intended to be used to encode a list of
-     * DataObjects returned from a query or relationship retrieval.
-     * 
-     * @param rootXmlTag The name of the root XML element for the encoded collection.
-     * @param dataObjects The List of DataObjects to encode.
-     * @param mappingUrl The mapping file that defines how the list elements should be
-     *            encoded.
-     * @return An XML string representing the encoded collection.
+     * Pops the top element from the encoding stack.
      */
-    public static String encodeList(String rootXmlTag, List dataObjects, String mappingUrl) {
-        // It really doesn't matter what the root tag name is, but appending list
-        // to the name to be used for the elements seems like a sensible solution.
-        XMLEncoder encoder = new XMLEncoder();
-        encoder.setRoot(rootXmlTag, dataObjects.getClass().getName());
-
-        Element tempRoot = encoder.root;
-
-        // This is a bit funky, but basically we're encoding each element individually
-        // using a new MappingUtils instance each time -- this may be a performance hit,
-        // we'll have to see, but it does allow straightforward code reuse.
-        for (Iterator it = dataObjects.iterator(); it.hasNext();) {
-            encoder.encode(it.next(), mappingUrl);
-            tempRoot.addContent(encoder.root);
-        }
-
-        encoder.root = tempRoot;
-
-        return encoder.getXml();
+    private Node pop() {
+        Node old = parent;
+        parent = parent.getParentNode();
+        return old;
     }
 }
