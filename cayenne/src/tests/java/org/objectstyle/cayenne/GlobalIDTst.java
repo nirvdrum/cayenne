@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne;
 
+import java.util.Collections;
+import java.util.Map;
+
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.opp.hessian.HessianUtil;
@@ -80,7 +83,7 @@ public class GlobalIDTst extends TestCase {
     public void testSerializabilityTemp() throws Exception {
         GlobalID temp1 = new GlobalID("e");
         GlobalID temp2 = (GlobalID) Util.cloneViaSerialization(temp1);
-        
+
         assertTrue(temp1.isTemporary());
         assertNotSame(temp1, temp2);
         assertEquals(temp1, temp2);
@@ -89,7 +92,7 @@ public class GlobalIDTst extends TestCase {
     public void testSerializabilityPerm() throws Exception {
         GlobalID perm1 = new GlobalID("e", "a", "b");
         GlobalID perm2 = (GlobalID) Util.cloneViaSerialization(perm1);
-       
+
         assertFalse(perm2.isTemporary());
         assertNotSame(perm1, perm2);
         assertEquals(perm1, perm2);
@@ -98,7 +101,7 @@ public class GlobalIDTst extends TestCase {
     public void testHessianSerializabilityTemp() throws Exception {
         GlobalID temp1 = new GlobalID("e");
         GlobalID temp2 = (GlobalID) HessianUtil.cloneViaHessianSerialization(temp1);
-        
+
         assertTrue(temp1.isTemporary());
         assertNotSame(temp1, temp2);
         assertEquals(temp1, temp2);
@@ -107,7 +110,19 @@ public class GlobalIDTst extends TestCase {
     public void testHessianSerializabilityPerm() throws Exception {
         GlobalID perm1 = new GlobalID("e", "a", "b");
         GlobalID perm2 = (GlobalID) HessianUtil.cloneViaHessianSerialization(perm1);
-        
+
+        assertFalse(perm2.isTemporary());
+        assertNotSame(perm1, perm2);
+        assertEquals(perm1, perm2);
+    }
+
+    public void testHessianSerializabilityPerm1() throws Exception {
+        // test serializing an id created with unmodifiable map
+
+        Map id = Collections.unmodifiableMap(Collections.singletonMap("a", "b"));
+        GlobalID perm1 = new GlobalID("e", id);
+        GlobalID perm2 = (GlobalID) HessianUtil.cloneViaHessianSerialization(perm1);
+
         assertFalse(perm2.isTemporary());
         assertNotSame(perm1, perm2);
         assertEquals(perm1, perm2);

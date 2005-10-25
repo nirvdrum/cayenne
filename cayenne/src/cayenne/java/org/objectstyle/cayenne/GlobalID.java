@@ -124,7 +124,10 @@ public class GlobalID implements Serializable {
      */
     public GlobalID(String entityName, Map idMap) {
         this.entityName = entityName;
-        this.idMap = idMap;
+
+        // we have to create a copy of the map, otherwise we may run into serialization
+        // problems with hessian
+        this.idMap = idMap != null && !idMap.isEmpty() ? new HashMap(idMap) : null;
     }
 
     public boolean isTemporary() {
