@@ -24,9 +24,9 @@
 	<classpathentry exported="true" kind="lib" path="otherlib/ejb-2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/forms-1.0.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/foundrylogic-vpp-2.2.1.jar"/>
-	<classpathentry exported="true" sourcepath="/cayenne-otherlib-src/hessian-3.0.8/src" kind="lib" path="otherlib/hessian-3.0.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/hsqldb-1.7.3.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="otherlib/pdf/itext-1.2.jar"/>
+	<classpathentry exported="true" sourcepath="/cayenne-otherlib-src/hessian-3.0.13/hessian-3.0.13-src.jar" kind="lib" path="otherlib/hessian-3.0.13.jar"/>
+	<classpathentry kind="lib" path="otherlib/pdf/itext-1.2.jar"/>
 	<classpathentry exported="true" sourcepath="/cayenne-otherlib-src/jdom-1.0/src" kind="lib" path="otherlib/jdom-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/jgroups-2.2.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/jms-1.0.2b.jar"/>

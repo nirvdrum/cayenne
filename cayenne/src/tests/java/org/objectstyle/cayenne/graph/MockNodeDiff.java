@@ -53,56 +53,17 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.opp;
+package org.objectstyle.cayenne.graph;
 
-import junit.framework.TestCase;
+public class MockNodeDiff extends NodeDiff {
 
-import org.objectstyle.cayenne.graph.CompoundDiff;
-import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.graph.NodeCreateOperation;
-import org.objectstyle.cayenne.opp.hessian.HessianConnection;
-
-public class SyncMessageTst extends TestCase {
-
-    public void testConstructor() {
-        Object source = new Object();
-        GraphDiff diff = new CompoundDiff();
-        SyncMessage message = new SyncMessage(source, SyncMessage.FLUSH_TYPE, diff);
-
-        assertSame(source, message.getSource());
-        assertEquals(SyncMessage.FLUSH_TYPE, message.getType());
-        assertSame(diff, message.getSenderChanges());
+    public MockNodeDiff(Object nodeId) {
+        super(nodeId);
     }
 
-    public void testHessianSerialization() throws Exception {
-        // id must be a serializable object; source doesn't have to be
-        Object source = new Object();
-        GraphDiff diff = new NodeCreateOperation("id-string");
-        SyncMessage message = new SyncMessage(source, SyncMessage.FLUSH_TYPE, diff);
-
-        Object d = HessianConnection.cloneViaHessianSerialization(message);
-        assertNotNull(d);
-        assertTrue(d instanceof SyncMessage);
-
-        SyncMessage ds = (SyncMessage) d;
-        assertNull(ds.getSource());
-        assertEquals(message.getType(), ds.getType());
-        assertNotNull(ds.getSenderChanges());
+    public void apply(GraphChangeHandler tracker) {
     }
 
-    public void testConstructorInvalid() {
-        Object source = new Object();
-        new SyncMessage(source, SyncMessage.FLUSH_TYPE, new CompoundDiff());
-        new SyncMessage(source, SyncMessage.COMMIT_TYPE, new CompoundDiff());
-        new SyncMessage(null, SyncMessage.ROLLBACK_TYPE, new CompoundDiff());
-
-        int bogusType = 45678;
-        try {
-            new SyncMessage(source, bogusType, new CompoundDiff());
-            fail("invalid type was allowed to go unnoticed...");
-        }
-        catch (IllegalArgumentException e) {
-
-        }
+    public void undo(GraphChangeHandler tracker) {
     }
 }

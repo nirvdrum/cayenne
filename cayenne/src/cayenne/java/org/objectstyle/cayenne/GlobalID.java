@@ -58,6 +58,7 @@ package org.objectstyle.cayenne;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -78,17 +79,17 @@ import org.objectstyle.cayenne.util.Util;
 public class GlobalID implements Serializable {
 
     protected String entityName;
-    protected Map objectIdKeys;
+    protected Map idMap;
 
     protected byte[] key;
-    
+
     // exists for deserialization with Hessian and similar
     private GlobalID() {
-        
+
     }
 
     /**
-     * Creates a TEMPORARY GlobalID. Assignes a generated unique key. 
+     * Creates a TEMPORARY GlobalID. Assignes a generated unique key.
      */
     // TODO: (Andrus 09/2005) this may be confusing - there is nothing in constructor that
     // hints that this is a temp id
@@ -110,15 +111,20 @@ public class GlobalID implements Serializable {
      * Creates a portable permanent GlobalID.
      */
     public GlobalID(String entityName, String key, Object value) {
-        this(entityName, Collections.singletonMap(key, value));
+        this.entityName = entityName;
+
+        // don't use Collections.singletonMap() as we need a mutable single level map
+        // internally (for things like Hessian serialization).
+        this.idMap = new HashMap(1);
+        idMap.put(key, value);
     }
 
     /**
      * Creates a portable permanent GlobalID.
      */
-    public GlobalID(String entityName, Map idKeys) {
+    public GlobalID(String entityName, Map idMap) {
         this.entityName = entityName;
-        this.objectIdKeys = Collections.unmodifiableMap(idKeys);
+        this.idMap = idMap;
     }
 
     public boolean isTemporary() {
@@ -133,8 +139,11 @@ public class GlobalID implements Serializable {
         return key;
     }
 
-    public Map getObjectIdKeys() {
-        return objectIdKeys;
+    /**
+     * Returns an unmodifiable Map of id keys. For temporary ids returns an empty map.
+     */
+    public Map getIdMap() {
+        return idMap != null ? Collections.unmodifiableMap(idMap) : Collections.EMPTY_MAP;
     }
 
     public boolean equals(Object object) {
@@ -149,43 +158,42 @@ public class GlobalID implements Serializable {
         GlobalID id = (GlobalID) object;
 
         if (isTemporary()) {
-            return new EqualsBuilder()
-                    .append(entityName, id.entityName)
-                    .append(key, id.key)
-                    .isEquals();
+            return new EqualsBuilder().append(entityName, id.entityName).append(
+                    key,
+                    id.key).isEquals();
         }
 
         if (!Util.nullSafeEquals(entityName, id.entityName)) {
             return false;
         }
 
-        if (id.objectIdKeys == null && objectIdKeys == null) {
+        if (id.idMap == null && idMap == null) {
             return true;
         }
 
-        if (id.objectIdKeys == null || objectIdKeys == null) {
+        if (id.idMap == null || idMap == null) {
             return false;
         }
 
-        if (id.objectIdKeys.size() != objectIdKeys.size()) {
+        if (id.idMap.size() != idMap.size()) {
             return false;
         }
 
         EqualsBuilder builder = new EqualsBuilder();
-        Iterator entries = objectIdKeys.entrySet().iterator();
+        Iterator entries = idMap.entrySet().iterator();
         while (entries.hasNext()) {
             Map.Entry entry = (Map.Entry) entries.next();
 
             Object key = entry.getKey();
             Object value = entry.getValue();
             if (value == null) {
-                if (id.objectIdKeys.get(key) != null || !id.objectIdKeys.containsKey(key)) {
+                if (id.idMap.get(key) != null || !id.idMap.containsKey(key)) {
                     return false;
                 }
             }
             else {
                 // takes care of comparing primitive arrays, such as byte[]
-                builder.append(value, id.objectIdKeys.get(key));
+                builder.append(value, id.idMap.get(key));
                 if (!builder.isEquals()) {
                     return false;
                 }
@@ -206,18 +214,18 @@ public class GlobalID implements Serializable {
             builder.append(key);
         }
 
-        if (objectIdKeys != null) {
-            int len = objectIdKeys.size();
+        if (idMap != null) {
+            int len = idMap.size();
 
             // handle cheap and most common case - single key
             if (len == 1) {
-                Iterator entries = objectIdKeys.entrySet().iterator();
+                Iterator entries = idMap.entrySet().iterator();
                 Map.Entry entry = (Map.Entry) entries.next();
                 builder.append(entry.getKey()).append(entry.getValue());
             }
             // handle multiple keys - must sort the keys to use with HashCodeBuilder
             else {
-                Object[] keys = objectIdKeys.keySet().toArray();
+                Object[] keys = idMap.keySet().toArray();
                 Arrays.sort(keys);
 
                 for (int i = 0; i < len; i++) {
@@ -226,7 +234,7 @@ public class GlobalID implements Serializable {
 
                     // also we don't have to append the key hashcode, its index will
                     // work
-                    builder.append(i).append(objectIdKeys.get(keys[i]));
+                    builder.append(i).append(idMap.get(keys[i]));
                 }
             }
         }
@@ -246,8 +254,8 @@ public class GlobalID implements Serializable {
         if (isTemporary()) {
             builder.append("key", key);
         }
-        else if (objectIdKeys != null) {
-            Iterator it = objectIdKeys.entrySet().iterator();
+        else if (idMap != null) {
+            Iterator it = idMap.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
                 builder.append(String.valueOf(entry.getKey()), entry.getValue());

@@ -158,7 +158,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
         Class objectClass = entity.getJavaClass();
         return (id.isTemporary())
                 ? new ObjectId(objectClass, id.getKey())
-                : new ObjectId(objectClass, id.getObjectIdKeys());
+                : new ObjectId(objectClass, id.getIdMap());
     }
 
     /**

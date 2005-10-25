@@ -117,7 +117,9 @@ public class ObjectContextChangeLogTst extends TestCase {
 
     public void testGetDiffsSerializableWithHessian() throws Exception {
         ObjectContextChangeLog recorder = new ObjectContextChangeLog();
-        recorder.addOperation(new NodeCreateOperation(new Object()));
+        
+        // id must be a serializable object
+        recorder.addOperation(new NodeCreateOperation("id-string"));
         CompoundDiff diff = (CompoundDiff) recorder.getDiffs();
 
         Object clone = HessianConnection.cloneViaHessianSerialization(diff);
