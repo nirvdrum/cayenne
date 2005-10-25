@@ -200,7 +200,13 @@
     <!-- ========================================== -->
     <!-- Handles dependent JARs.                    -->
     <!-- ========================================== -->
-    <target name="prepare-deps" depends="check-deps,unjar-deps"/>
+    <target name="prepare-deps" depends="check-deps,unjar-deps,copy-extensions"/>
+	
+	<target name="copy-extensions" description="Copies precompiled extensions" if="jdk.ext.exist">
+		<copy todir="${core.build}/classes">
+			<fileset dir="${ext.1_5}/build/ant" includes="**/*.class"/>
+		</copy>
+	</target>
 	
 	<target name="unjar-deps" unless="core.deps.exist"> 
 		<mkdir dir="${core.build.deps}"/>
@@ -238,6 +244,7 @@
     
     <target name="check-deps">
 		<available file="${core.build.deps}/org" type="dir" property="core.deps.exist"/>
+		<available file="${ext.1_5}/build/ant" type="dir" property="jdk.ext.exist"/>
     </target>
     
     

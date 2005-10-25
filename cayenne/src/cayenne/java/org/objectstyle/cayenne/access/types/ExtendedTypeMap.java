@@ -56,10 +56,13 @@
 
 package org.objectstyle.cayenne.access.types;
 
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Contains a map of ExtendedType objects, that serve as handlers for converting values
@@ -75,10 +78,24 @@ public class ExtendedTypeMap {
     protected Map typeMap = new HashMap();
     protected DefaultType defaultType = new DefaultType();
 
+    Constructor enumTypeConstructor;
+
     /**
      * Creates new ExtendedTypeMap, populating it with default JDBC-compatible types.
      */
     public ExtendedTypeMap() {
+        // see if we can support enums
+        try {
+            Class enumTypeClass = Util
+                    .getJavaClass("org.objectstyle.cayenne.access.types.EnumType");
+            this.enumTypeConstructor = enumTypeClass.getConstructor(new Class[] {
+                Class.class
+            });
+        }
+        catch (Throwable th) {
+            // no enums support... either Java 1.4 or Cayenne 1.5 extensions are absent
+        }
+
         this.initDefaultTypes();
     }
 
@@ -116,7 +133,20 @@ public class ExtendedTypeMap {
      */
     public ExtendedType getRegisteredType(String javaClassName) {
         ExtendedType type = (ExtendedType) typeMap.get(javaClassName);
-        return (type != null) ? type : defaultType;
+
+        if (type != null) {
+            return type;
+        }
+
+        type = getDefaultType(javaClassName);
+
+        if (type != null) {
+            // register to speed up future access
+            registerType(type);
+            return type;
+        }
+
+        return getDefaultType();
     }
 
     /**
@@ -135,8 +165,7 @@ public class ExtendedTypeMap {
             name = javaClass.getName();
         }
 
-        ExtendedType type = (ExtendedType) typeMap.get(name);
-        return (type != null) ? type : defaultType;
+        return getRegisteredType(name);
     }
 
     /**
@@ -161,5 +190,42 @@ public class ExtendedTypeMap {
         }
 
         return types;
+    }
+
+    /**
+     * Retruns default type for specific Java classes. This implementation supports
+     * dynamically loading EnumType handlers for concrete Enum classes (assuming the
+     * application runs under JDK1.5+).
+     * 
+     * @return a default type for a given class or null if a class has no default type
+     *         mapping.
+     * @since 1.2
+     */
+    protected ExtendedType getDefaultType(String javaClassName) {
+
+        if (javaClassName == null) {
+            return null;
+        }
+
+        // load enum type if possible
+        if (enumTypeConstructor == null) {
+            return null;
+        }
+
+        try {
+            Class enumClass = Util.getJavaClass(javaClassName);
+
+            // load EnumType via reflection as the source has to stay 1.4 compliant
+            ExtendedType type = (ExtendedType) enumTypeConstructor
+                    .newInstance(new Object[] {
+                        enumClass
+                    });
+
+            return type;
+        }
+        catch (Throwable th) {
+            // ignore exceptions...
+            return null;
+        }
     }
 }

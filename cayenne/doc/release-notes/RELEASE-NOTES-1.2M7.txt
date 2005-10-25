@@ -24,6 +24,8 @@ Changes/New Features:
   - web.xml configuration is simplified (see HessianService Javadocs for details). 
     WARINING: You must update your web.xml if you used HessianService with M6, check UPGRADE-NOTES for details.
 
+* Support for mapping int or character DB columns as JDK 1.5 Enums is now built in to Cayenne. No need 
+  to register special ExtendedTypes for your custom enums.
 * JDOM is no longer needed for XML (de)serialization - everything is done using JAXP classes 
   bundled with JDK.
 * No longer storing or relying on ClassLoader stored in Configuration. 
