@@ -53,63 +53,28 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.opp.hessian;
 
-import junit.framework.TestCase;
+import java.io.IOException;
 
-import org.objectstyle.cayenne.opp.hessian.HessianUtil;
-import org.objectstyle.cayenne.util.Util;
+import com.caucho.hessian.io.AbstractHessianOutput;
+import com.caucho.hessian.io.AbstractSerializer;
 
-public class GlobalIDTst extends TestCase {
+/**
+ * A Hessian serializer that enables serialization of JDK 1.5 Enums.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+class EnumSerializer extends AbstractSerializer {
 
-    public void testConstructor() {
-        GlobalID temp1 = new GlobalID("e");
-        assertEquals("e", temp1.getEntityName());
-        assertTrue(temp1.isTemporary());
-        assertNotNull(temp1.getKey());
+    public void writeObject(Object object, AbstractHessianOutput out) throws IOException {
+        if (out.addRef(object)) {
+            return;
+        }
 
-        byte[] key = new byte[] {
-                1, 2, 3
-        };
-        GlobalID temp2 = new GlobalID("e1", key);
-        assertEquals("e1", temp2.getEntityName());
-        assertTrue(temp2.isTemporary());
-        assertSame(key, temp2.getKey());
-    }
-
-    public void testSerializabilityTemp() throws Exception {
-        GlobalID temp1 = new GlobalID("e");
-        GlobalID temp2 = (GlobalID) Util.cloneViaSerialization(temp1);
-        
-        assertTrue(temp1.isTemporary());
-        assertNotSame(temp1, temp2);
-        assertEquals(temp1, temp2);
-    }
-
-    public void testSerializabilityPerm() throws Exception {
-        GlobalID perm1 = new GlobalID("e", "a", "b");
-        GlobalID perm2 = (GlobalID) Util.cloneViaSerialization(perm1);
-       
-        assertFalse(perm2.isTemporary());
-        assertNotSame(perm1, perm2);
-        assertEquals(perm1, perm2);
-    }
-
-    public void testHessianSerializabilityTemp() throws Exception {
-        GlobalID temp1 = new GlobalID("e");
-        GlobalID temp2 = (GlobalID) HessianUtil.cloneViaHessianSerialization(temp1);
-        
-        assertTrue(temp1.isTemporary());
-        assertNotSame(temp1, temp2);
-        assertEquals(temp1, temp2);
-    }
-
-    public void testHessianSerializabilityPerm() throws Exception {
-        GlobalID perm1 = new GlobalID("e", "a", "b");
-        GlobalID perm2 = (GlobalID) HessianUtil.cloneViaHessianSerialization(perm1);
-        
-        assertFalse(perm2.isTemporary());
-        assertNotSame(perm1, perm2);
-        assertEquals(perm1, perm2);
+        out.writeMapBegin(object.getClass().getName());
+        out.writeString(((Enum) object).name());
+        out.writeMapEnd();
     }
 }

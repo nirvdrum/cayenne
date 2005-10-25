@@ -60,7 +60,7 @@ import junit.framework.TestCase;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
-import org.objectstyle.cayenne.opp.hessian.HessianConnection;
+import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 
 public class SyncMessageTst extends TestCase {
 
@@ -80,7 +80,7 @@ public class SyncMessageTst extends TestCase {
         GraphDiff diff = new NodeCreateOperation("id-string");
         SyncMessage message = new SyncMessage(source, SyncMessage.FLUSH_TYPE, diff);
 
-        Object d = HessianConnection.cloneViaHessianSerialization(message);
+        Object d = HessianUtil.cloneViaHessianSerialization(message);
         assertNotNull(d);
         assertTrue(d instanceof SyncMessage);
 

@@ -61,7 +61,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.opp.hessian.HessianConnection;
+import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -86,7 +86,7 @@ public class DataMapTst extends TestCase {
 
     public void testSerializabilityWithHessian() throws Exception {
         DataMap m1 = new DataMap("abc");
-        DataMap d1 = (DataMap) HessianConnection.cloneViaHessianSerialization(m1);
+        DataMap d1 = (DataMap) HessianUtil.cloneViaHessianSerialization(m1);
         assertEquals(m1.getName(), d1.getName());
 
         ObjEntity oe1 = new ObjEntity("oe1");

@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.opp;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.event.EventBridge;
-import org.objectstyle.cayenne.opp.hessian.HessianConnection;
+import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -133,7 +133,7 @@ public class LocalConnection extends BaseConnection {
         try {
             switch (serializationPolicy) {
                 case HESSIAN_SERIALIZATION:
-                    processedMessage = (OPPMessage) HessianConnection
+                    processedMessage = (OPPMessage) HessianUtil
                             .cloneViaHessianSerialization(message);
                     break;
 

@@ -53,85 +53,59 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.access.types;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.opp.hessian.HessianUtil;
+import org.objectstyle.cayenne.util.Util;
 
-public class ClientEntityResolverTst extends TestCase {
+/**
+ * A test case checking Cayenne handling of 1.5 Enums.
+ * 
+ * @author Andrus Adamchik
+ */
+public class EnumTst extends TestCase {
 
-    public void testSerializabilityWithHessian() throws Exception {
-        ObjEntity entity = new ObjEntity("test_entity");
-        entity.setClassName("java.lang.String");
+    public void testSerializabilityWithHessianStandalone() throws Exception {
+        MockEnum before = MockEnum.a;
 
-        DataMap dataMap = new DataMap("test");
-        dataMap.addObjEntity(entity);
-        Collection entities = Collections.singleton(dataMap);
-        EntityResolver resolver = new EntityResolver(entities);
-
-        // simple case
-        Object c1 = HessianUtil.cloneViaHessianSerialization(resolver);
-
-        assertNotNull(c1);
-        assertTrue(c1 instanceof EntityResolver);
-        EntityResolver cr1 = (EntityResolver) c1;
-
-        assertNotSame(resolver, cr1);
-        assertEquals(1, cr1.getObjEntities().size());
-        assertNotNull(cr1.getObjEntity(entity.getName()));
-
-        // with descriptors resolved...
-        assertNotNull(entity.getClassDescriptor());
-
-        EntityResolver cr2 = (EntityResolver) HessianUtil
-                .cloneViaHessianSerialization(resolver);
-        assertNotNull(cr2);
-        assertEquals(1, cr2.getObjEntities().size());
-        assertNotNull(cr2.getObjEntity(entity.getName()));
-        assertNotNull(cr2.getObjEntity(entity.getName()).getClassDescriptor());
+        // test standalone
+        Object after = HessianUtil.cloneViaHessianSerialization(before);
+        assertNotNull(after);
+        assertSame(before, after);
     }
 
-    public void testConstructor() {
-        ObjEntity entity = new ObjEntity("test_entity");
-        entity.setClassName("java.lang.String");
-        DataMap dataMap = new DataMap("test");
-        dataMap.addObjEntity(entity);
-        Collection entities = Collections.singleton(dataMap);
-        EntityResolver resolver = new EntityResolver(entities);
+    public void testSerializabilityWithHessianInTheMap() throws Exception {
+        // test in the Map
+        Map<String, MockEnum> map = new HashMap<String, MockEnum>();
+        map.put("a", MockEnum.b);
 
-        assertSame(entity, resolver.lookupObjEntity(entity.getName()));
-        assertNotNull(resolver.lookupObjEntity(entity.getName()));
+        Map after = (Map) HessianUtil.cloneViaHessianSerialization((Serializable) map);
+        assertNotNull(map);
+        assertSame(MockEnum.b, after.get("a"));
+
     }
 
-    public void testInheritance() {
-        ObjEntity superEntity = new ObjEntity("super_entity");
-        superEntity.setClassName("java.lang.Object");
+    public void testSerializabilityWithHessianObjectProperty() throws Exception {
+        // test object property
+        MockEnumHolder object = new MockEnumHolder();
+        object.setMockEnum(MockEnum.b);
 
-        ObjEntity subEntity = new ObjEntity("sub_entity");
-        subEntity.setClassName("java.lang.String");
+        MockEnumHolder after = (MockEnumHolder) HessianUtil
+                .cloneViaHessianSerialization(object);
+        assertNotNull(after);
+        assertSame(MockEnum.b, after.getMockEnum());
+    }
 
-        subEntity.setSuperEntityName(superEntity.getName());
-
-        try {
-            subEntity.getSuperEntity();
-            fail("hmm... superentity can't possibly be resolved at this point.");
-        }
-        catch (CayenneRuntimeException e) {
-            // expected
-        }
-
-        DataMap dataMap = new DataMap("test");
-        dataMap.addObjEntity(superEntity);
-        dataMap.addObjEntity(subEntity);
-        Collection entities = Collections.singleton(dataMap);
-        new EntityResolver(entities);
-
-        // after registration with resolver super entity should resolve just fine
-        assertSame(superEntity, subEntity.getSuperEntity());
+    public void testSerializability() throws Exception {
+        MockEnum before = MockEnum.c;
+        Object object = Util.cloneViaSerialization(before);
+        assertNotNull(object);
+        assertSame(before, object);
     }
 }

@@ -55,10 +55,6 @@
  */
 package org.objectstyle.cayenne.opp.hessian;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Serializable;
-
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.event.EventBridge;
 import org.objectstyle.cayenne.opp.BaseConnection;
@@ -67,8 +63,6 @@ import org.objectstyle.cayenne.util.Util;
 
 import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.hessian.client.HessianRuntimeException;
-import com.caucho.hessian.io.HessianInput;
-import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.HessianProtocolException;
 
 /**
@@ -90,22 +84,6 @@ public class HessianConnection extends BaseConnection {
 
     protected HessianSession session;
     protected HessianService service;
-
-    /**
-     * A utility method that clones an object using Hessian serialization/deserialization
-     * mechanism which is different from default Java serialization.
-     */
-    public static Object cloneViaHessianSerialization(Serializable object)
-            throws Exception {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        HessianOutput out = new HessianOutput(bytes);
-        out.writeObject(object);
-
-        byte[] data = bytes.toByteArray();
-
-        HessianInput in = new HessianInput(new ByteArrayInputStream(data));
-        return in.readObject();
-    }
 
     /**
      * Creates HessianConnection that will establish dedicated session and will not use
@@ -155,7 +133,6 @@ public class HessianConnection extends BaseConnection {
         return password;
     }
 
-    
     public String getSharedSessionName() {
         return sharedSessionName;
     }

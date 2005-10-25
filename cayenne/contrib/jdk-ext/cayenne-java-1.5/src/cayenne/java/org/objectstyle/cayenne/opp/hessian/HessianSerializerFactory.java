@@ -53,63 +53,54 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.opp.hessian;
 
-import junit.framework.TestCase;
+import java.util.HashMap;
 
-import org.objectstyle.cayenne.opp.hessian.HessianUtil;
-import org.objectstyle.cayenne.util.Util;
+import com.caucho.hessian.io.AbstractSerializerFactory;
+import com.caucho.hessian.io.Deserializer;
+import com.caucho.hessian.io.HessianProtocolException;
+import com.caucho.hessian.io.Serializer;
 
-public class GlobalIDTst extends TestCase {
+/**
+ * A Hessian SerializerFactory extension that supports serializing Enums.
+ * <p>
+ * <i>Requires Java 1.5 or newer</i>
+ * </p>
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+class HessianSerializerFactory extends AbstractSerializerFactory {
 
-    public void testConstructor() {
-        GlobalID temp1 = new GlobalID("e");
-        assertEquals("e", temp1.getEntityName());
-        assertTrue(temp1.isTemporary());
-        assertNotNull(temp1.getKey());
+    private final EnumSerializer enumSerializer = new EnumSerializer();
+    private HashMap<Class, Deserializer> cachedDeserializerMap;
 
-        byte[] key = new byte[] {
-                1, 2, 3
-        };
-        GlobalID temp2 = new GlobalID("e1", key);
-        assertEquals("e1", temp2.getEntityName());
-        assertTrue(temp2.isTemporary());
-        assertSame(key, temp2.getKey());
+    public Serializer getSerializer(Class cl) throws HessianProtocolException {
+        return (cl.isEnum()) ? enumSerializer : null;
     }
 
-    public void testSerializabilityTemp() throws Exception {
-        GlobalID temp1 = new GlobalID("e");
-        GlobalID temp2 = (GlobalID) Util.cloneViaSerialization(temp1);
-        
-        assertTrue(temp1.isTemporary());
-        assertNotSame(temp1, temp2);
-        assertEquals(temp1, temp2);
-    }
+    public synchronized Deserializer getDeserializer(Class cl)
+            throws HessianProtocolException {
+        if (cl.isEnum()) {
+            Deserializer deserializer = null;
+            if (cachedDeserializerMap != null) {
+                deserializer = cachedDeserializerMap.get(cl);
+            }
 
-    public void testSerializabilityPerm() throws Exception {
-        GlobalID perm1 = new GlobalID("e", "a", "b");
-        GlobalID perm2 = (GlobalID) Util.cloneViaSerialization(perm1);
-       
-        assertFalse(perm2.isTemporary());
-        assertNotSame(perm1, perm2);
-        assertEquals(perm1, perm2);
-    }
+            if (deserializer == null) {
+                deserializer = new EnumDeserializer(cl);
 
-    public void testHessianSerializabilityTemp() throws Exception {
-        GlobalID temp1 = new GlobalID("e");
-        GlobalID temp2 = (GlobalID) HessianUtil.cloneViaHessianSerialization(temp1);
-        
-        assertTrue(temp1.isTemporary());
-        assertNotSame(temp1, temp2);
-        assertEquals(temp1, temp2);
-    }
+                if (cachedDeserializerMap == null) {
+                    cachedDeserializerMap = new HashMap<Class, Deserializer>();
+                }
 
-    public void testHessianSerializabilityPerm() throws Exception {
-        GlobalID perm1 = new GlobalID("e", "a", "b");
-        GlobalID perm2 = (GlobalID) HessianUtil.cloneViaHessianSerialization(perm1);
-        
-        assertFalse(perm2.isTemporary());
-        assertNotSame(perm1, perm2);
-        assertEquals(perm1, perm2);
+                cachedDeserializerMap.put(cl, deserializer);
+            }
+
+            return deserializer;
+        }
+
+        return null;
     }
 }

@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.graph;
 
-import org.objectstyle.cayenne.opp.hessian.HessianConnection;
+import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 
 import junit.framework.TestCase;
 
@@ -73,7 +73,7 @@ public class NodeDiffTst extends TestCase {
         String id = "abcd";
         NodeDiff diff = new MockNodeDiff(id);
 
-        Object d = HessianConnection.cloneViaHessianSerialization(diff);
+        Object d = HessianUtil.cloneViaHessianSerialization(diff);
         assertNotNull(d);
         assertNotNull(((NodeDiff) d).getNodeId());
         assertEquals(id, ((NodeDiff) d).getNodeId());

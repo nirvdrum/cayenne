@@ -60,7 +60,7 @@ import junit.framework.TestCase;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
-import org.objectstyle.cayenne.opp.hessian.HessianConnection;
+import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 import org.objectstyle.cayenne.util.Util;
 
 public class ObjectContextChangeLogTst extends TestCase {
@@ -122,7 +122,7 @@ public class ObjectContextChangeLogTst extends TestCase {
         recorder.addOperation(new NodeCreateOperation("id-string"));
         CompoundDiff diff = (CompoundDiff) recorder.getDiffs();
 
-        Object clone = HessianConnection.cloneViaHessianSerialization(diff);
+        Object clone = HessianUtil.cloneViaHessianSerialization(diff);
         assertNotNull(clone);
         assertTrue(clone instanceof CompoundDiff);
 

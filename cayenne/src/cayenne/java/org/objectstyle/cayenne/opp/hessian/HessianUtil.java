@@ -53,63 +53,75 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.opp.hessian;
 
-import junit.framework.TestCase;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
 
-import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 import org.objectstyle.cayenne.util.Util;
 
-public class GlobalIDTst extends TestCase {
+import com.caucho.hessian.io.AbstractSerializerFactory;
+import com.caucho.hessian.io.HessianInput;
+import com.caucho.hessian.io.HessianOutput;
 
-    public void testConstructor() {
-        GlobalID temp1 = new GlobalID("e");
-        assertEquals("e", temp1.getEntityName());
-        assertTrue(temp1.isTemporary());
-        assertNotNull(temp1.getKey());
+/**
+ * Hessian related utilities.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+public final class HessianUtil {
 
-        byte[] key = new byte[] {
-                1, 2, 3
-        };
-        GlobalID temp2 = new GlobalID("e1", key);
-        assertEquals("e1", temp2.getEntityName());
-        assertTrue(temp2.isTemporary());
-        assertSame(key, temp2.getKey());
+    private static AbstractSerializerFactory extendedSerializer;
+
+    static {
+        // configure serializer extensions...
+
+        // [JDK 1.5 indirection] only if JDK 1.5 is present, load Enum support
+        try {
+            Class.forName("java.lang.StringBuilder");
+
+            Class factoryClass = Util
+                    .getJavaClass("org.objectstyle.cayenne.opp.hessian.HessianSerializerFactory");
+            extendedSerializer = (AbstractSerializerFactory) factoryClass.newInstance();
+        }
+        catch (Throwable th) {
+            // ignore.. jdk 1.4
+        }
     }
 
-    public void testSerializabilityTemp() throws Exception {
-        GlobalID temp1 = new GlobalID("e");
-        GlobalID temp2 = (GlobalID) Util.cloneViaSerialization(temp1);
-        
-        assertTrue(temp1.isTemporary());
-        assertNotSame(temp1, temp2);
-        assertEquals(temp1, temp2);
+    /**
+     * A utility method that clones an object using Hessian serialization/deserialization
+     * mechanism, which is different from default Java serialization.
+     */
+    public static Object cloneViaHessianSerialization(Serializable object)
+            throws Exception {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        HessianOutput out = new HessianOutput(bytes);
+        configOutput(out);
+        out.writeObject(object);
+
+        byte[] data = bytes.toByteArray();
+
+        HessianInput in = new HessianInput(new ByteArrayInputStream(data));
+        configInput(in);
+        return in.readObject();
     }
 
-    public void testSerializabilityPerm() throws Exception {
-        GlobalID perm1 = new GlobalID("e", "a", "b");
-        GlobalID perm2 = (GlobalID) Util.cloneViaSerialization(perm1);
-       
-        assertFalse(perm2.isTemporary());
-        assertNotSame(perm1, perm2);
-        assertEquals(perm1, perm2);
+    private static void configOutput(HessianOutput out) {
+        if (extendedSerializer != null) {
+            out.getSerializerFactory().addFactory(extendedSerializer);
+        }
     }
 
-    public void testHessianSerializabilityTemp() throws Exception {
-        GlobalID temp1 = new GlobalID("e");
-        GlobalID temp2 = (GlobalID) HessianUtil.cloneViaHessianSerialization(temp1);
-        
-        assertTrue(temp1.isTemporary());
-        assertNotSame(temp1, temp2);
-        assertEquals(temp1, temp2);
+    private static void configInput(HessianInput in) {
+        if (extendedSerializer != null) {
+            in.getSerializerFactory().addFactory(extendedSerializer);
+        }
     }
 
-    public void testHessianSerializabilityPerm() throws Exception {
-        GlobalID perm1 = new GlobalID("e", "a", "b");
-        GlobalID perm2 = (GlobalID) HessianUtil.cloneViaHessianSerialization(perm1);
-        
-        assertFalse(perm2.isTemporary());
-        assertNotSame(perm1, perm2);
-        assertEquals(perm1, perm2);
+    private HessianUtil() {
+
     }
 }

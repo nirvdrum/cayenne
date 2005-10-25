@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.opp.hessian.HessianConnection;
+import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 import org.objectstyle.cayenne.util.Util;
 
 import junit.framework.TestCase;
@@ -82,7 +82,7 @@ public class ClientObjectRelationshipTst extends TestCase {
     public void testSerializabilityViaHessian() throws Exception {
 
         ClientObjRelationship r1 = new ClientObjRelationship("r1", "rr1", true, true);
-        ClientObjRelationship r2 = (ClientObjRelationship) HessianConnection
+        ClientObjRelationship r2 = (ClientObjRelationship) HessianUtil
                 .cloneViaHessianSerialization(r1);
         assertEquals(r1.getName(), r2.getName());
         assertEquals(r1.getReverseRelationship(), r2.getReverseRelationship());
@@ -90,7 +90,7 @@ public class ClientObjectRelationshipTst extends TestCase {
         assertEquals(r1.isReadOnly(), r2.isReadOnly());
 
         ClientObjRelationship r3 = new ClientObjRelationship("r3", null, false, false);
-        ClientObjRelationship r4 = (ClientObjRelationship) HessianConnection
+        ClientObjRelationship r4 = (ClientObjRelationship) HessianUtil
                 .cloneViaHessianSerialization(r3);
         assertEquals(r3.getName(), r4.getName());
         assertNull(r4.getReverseRelationship());

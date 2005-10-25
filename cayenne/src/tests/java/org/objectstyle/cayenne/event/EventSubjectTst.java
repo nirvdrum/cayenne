@@ -59,7 +59,7 @@ package org.objectstyle.cayenne.event;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.opp.hessian.HessianConnection;
+import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 import org.objectstyle.cayenne.util.Util;
 
 public class EventSubjectTst extends TestCase {
@@ -101,7 +101,7 @@ public class EventSubjectTst extends TestCase {
 
     public void testEqualityOfClonedSubjectsHessian() throws Exception {
         EventSubject s1 = EventSubject.getSubject(EventSubjectTst.class, "MySubject");
-        EventSubject s2 = (EventSubject) HessianConnection
+        EventSubject s2 = (EventSubject) HessianUtil
                 .cloneViaHessianSerialization(s1);
 
         assertNotSame(s1, s2);
