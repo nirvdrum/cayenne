@@ -74,6 +74,7 @@ class EnumDeserializer extends AbstractDeserializer {
 
     public Object readMap(AbstractHessianInput in) throws IOException {
         String name = in.readString();
+        in.readMapEnd();
         return name != null ? Enum.valueOf(enumClass, name) : null;
     }
 }

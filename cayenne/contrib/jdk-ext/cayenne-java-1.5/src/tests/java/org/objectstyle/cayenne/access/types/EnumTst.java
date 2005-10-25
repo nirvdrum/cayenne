@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.access.types;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -100,6 +101,29 @@ public class EnumTst extends TestCase {
                 .cloneViaHessianSerialization(object);
         assertNotNull(after);
         assertSame(MockEnum.b, after.getMockEnum());
+    }
+
+    public void testSerializabilityWithHessianObjectPropertyInAList() throws Exception {
+
+        // test that Enum properties are serialized properly...
+
+        MockEnumHolder o1 = new MockEnumHolder();
+        o1.setMockEnum(MockEnum.b);
+
+        MockEnumHolder o2 = new MockEnumHolder();
+        o2.setMockEnum(MockEnum.c);
+
+        ArrayList<MockEnumHolder> l = new ArrayList<MockEnumHolder>();
+        l.add(o1);
+        l.add(o2);
+
+        ArrayList ld = (ArrayList) HessianUtil.cloneViaHessianSerialization(l);
+        assertEquals(2, ld.size());
+
+        MockEnumHolder o1d = (MockEnumHolder) ld.get(0);
+        MockEnumHolder o2d = (MockEnumHolder) ld.get(1);
+        assertSame(MockEnum.b, o1d.getMockEnum());
+        assertSame(MockEnum.c, o2d.getMockEnum());
     }
 
     public void testSerializability() throws Exception {

@@ -69,10 +69,6 @@ import com.caucho.hessian.io.AbstractSerializer;
 class EnumSerializer extends AbstractSerializer {
 
     public void writeObject(Object object, AbstractHessianOutput out) throws IOException {
-        if (out.addRef(object)) {
-            return;
-        }
-
         out.writeMapBegin(object.getClass().getName());
         out.writeString(((Enum) object).name());
         out.writeMapEnd();
