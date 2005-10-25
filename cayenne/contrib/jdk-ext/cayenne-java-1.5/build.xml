@@ -12,6 +12,7 @@
 	
 	<path id="classpath">
 		<path path="${cayenne.base}/build/cayenne/classes"/>
+		<fileset dir="${cayenne.base}/otherlib" includes="*.jar"/>
 	</path>
 	
 	<target name="clean">
