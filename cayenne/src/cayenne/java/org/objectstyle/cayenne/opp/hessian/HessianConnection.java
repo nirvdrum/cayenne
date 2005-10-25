@@ -206,6 +206,7 @@ public class HessianConnection extends BaseConnection {
 
         // init service proxy...
         HessianProxyFactory factory = new HessianProxyFactory();
+        HessianUtil.configExtensions(factory.getSerializerFactory());
         factory.setUser(userName);
         factory.setPassword(password);
         try {

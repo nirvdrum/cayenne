@@ -58,21 +58,23 @@ package org.objectstyle.cayenne.opp.hessian;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
+import com.caucho.hessian.io.SerializerFactory;
+
 /**
  * An extension of the <code>com.caucho.hessian.server.HessianServlet</code> that
  * installs default Cayenne handlers, simplifying <code>web.xml</code> configuration.
  * Here is a sample configuration:
  * 
  * <pre>
- *    &lt;servlet&gt;
- *      &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *      &lt;servlet-class&gt;org.objectstyle.cayenne.opp.hessian.HessianServlet&lt;/servlet-class&gt;
- *    &lt;/servlet&gt;
- *        
- *    &lt;servlet-mapping&gt;
- *      &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *      &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
- *    &lt;/servlet-mapping&gt;
+ *      &lt;servlet&gt;
+ *        &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
+ *        &lt;servlet-class&gt;org.objectstyle.cayenne.opp.hessian.HessianServlet&lt;/servlet-class&gt;
+ *      &lt;/servlet&gt;
+ *          
+ *      &lt;servlet-mapping&gt;
+ *        &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
+ *        &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
+ *      &lt;/servlet-mapping&gt;
  * </pre>
  * 
  * @since 1.2
@@ -104,6 +106,11 @@ public class HessianServlet extends com.caucho.hessian.server.HessianServlet {
             handler.init(config);
             setHome(handler);
         }
+
+        // setup serializer factory
+        SerializerFactory serializer = new SerializerFactory();
+        HessianUtil.configExtensions(serializer);
+        setSerializerFactory(serializer);
 
         // proceed to super
         super.init(config);

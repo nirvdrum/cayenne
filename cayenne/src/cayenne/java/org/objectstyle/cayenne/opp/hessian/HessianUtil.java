@@ -61,9 +61,11 @@ import java.io.Serializable;
 
 import org.objectstyle.cayenne.util.Util;
 
+import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.hessian.io.AbstractSerializerFactory;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.io.SerializerFactory;
 
 /**
  * Hessian related utilities.
@@ -99,25 +101,19 @@ public final class HessianUtil {
             throws Exception {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         HessianOutput out = new HessianOutput(bytes);
-        configOutput(out);
+        configExtensions(out.getSerializerFactory());
         out.writeObject(object);
 
         byte[] data = bytes.toByteArray();
 
         HessianInput in = new HessianInput(new ByteArrayInputStream(data));
-        configInput(in);
+        configExtensions(in.getSerializerFactory());
         return in.readObject();
     }
 
-    private static void configOutput(HessianOutput out) {
+    static void configExtensions(SerializerFactory factory) {
         if (extendedSerializer != null) {
-            out.getSerializerFactory().addFactory(extendedSerializer);
-        }
-    }
-
-    private static void configInput(HessianInput in) {
-        if (extendedSerializer != null) {
-            in.getSerializerFactory().addFactory(extendedSerializer);
+            factory.addFactory(extendedSerializer);
         }
     }
 
