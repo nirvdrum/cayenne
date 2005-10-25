@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+ 
+<!-- ================================================= -->
+<!--            JDK1.5 extensions buildfile            -->
+<!-- ================================================= -->
+<project name="cayenne" default="compile">
+	
+	<!-- ============================================= -->
+	<!-- Loads properties from default locations.      -->
+	<!-- ============================================= -->
+	<property file="default.properties"/>
+	
+	<path id="classpath">
+		<path path="${cayenne.base}/build/cayenne/classes"/>
+	</path>
+	
+	<target name="clean">
+		<delete>
+			<fileset dir="${build}"/>
+		</delete>
+	</target>
+	
+	<!-- ========================================== -->
+	<!-- Compiles sources.   -->
+	<!-- ========================================== -->
+	<target name="compile">
+		<mkdir dir="${build}"/>
+		<javac srcdir="${src}" optimize="on" destdir="${build}" debug="on"
+			source="1.5" target="1.5" deprecation="on">
+			<classpath refid="classpath"/>
+		</javac>
+	</target>
+</project>
+
+
