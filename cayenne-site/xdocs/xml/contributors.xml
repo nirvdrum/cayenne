@@ -10,12 +10,9 @@
         <!-- Contributors section -->
         <section name="Cayenne Contributors">
 
-            <p>Committers are those who have "write" permissions to Cayenne CVS and do in fact check in code. 
-	There is also many other folks who helped in many different ways, including graphic design, testing, 
-	providing bug fixes, etc. We appreciate their help and would like to give them credit.
-	If you think this page is missing a name that should be mentioned, please send a note to cayenne-devel.</p>
-
             <subsection name="Committers">
+  	    <p>Committers are those who have "write" permissions to Cayenne CVS and do in fact check in code.</p>
+
             <table>
             <tr>
                 <th>Name</th>
@@ -70,6 +67,10 @@
             
             
             <subsection name="Other Contributors">
+
+	<p>These are the folks who helped in many different ways, including graphic design, testing, 
+	providing bug fix patches, etc. We really appreciate your help <i>(if you think this page is missing a name 
+	that should be mentioned, please send a note to cayenne-devel)</i>:</p>
 	<p>Arndt Brenschede (Arndt dot Brenschede at diamos dot com), Anna Drapeza (anna at ipm dot by),
        	Scott Finnery (scott at codefuey dot com), Nataliya Kholodna (nkholodna at mail dot ru),
 	Dirk Olmes (dirk dot olmes at gmx dot de), Anton Apolit (anton at logical dash process dot com), 
@@ -77,6 +78,19 @@
 	</p>
 	<p></p>
             </subsection>
+
+	<subsection name="Companies Who Granted Us Open Source Licenses">
+	<p><a href="http://www.atlassian.com/"><img src="images/sponsors/jira.gif" border="0"/> 
+		<img src="images/sponsors/confluence.gif" border="0"/></a> <br/>
+	Atlassian - Jira and Confluence licenses.</p>
+	<p> </p>
+	<p><a href="http://www.jetbrains.com/"><img src="images/sponsors/jetbrains.gif" border="0"/></a> <br/>
+	JetBrains - IntelliJ IDEA license.</p>
+	<p> </p>
+
+	<p><a href="http://www.yourkit.com/"><img src="images/sponsors/yourkit.gif" width="170" height="43" border="0"/></a> <br/>
+	YourKit - Java profiler license.</p>
+	</subsection>
         </section>
     </body>
 </document>
