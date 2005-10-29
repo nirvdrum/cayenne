@@ -341,13 +341,11 @@ public class DbLoader {
             dbEntity.setCatalog(table.getCatalog());
 
             // Create DbAttributes from column information --
-            logObj.warn("loading " + table.getCatalog() + "." + table.getSchema() + "." + table.getName());
             ResultSet rs = getMetaData().getColumns(
                     table.getCatalog(),
                     table.getSchema(),
                     table.getName(),
                     "%");
-            logObj.warn("...done.");
             
             try {
                 while (rs.next()) {
