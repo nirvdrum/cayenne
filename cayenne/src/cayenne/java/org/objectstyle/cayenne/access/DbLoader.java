@@ -271,6 +271,17 @@ public class DbLoader {
                 String cat = rs.getString("TABLE_CAT");
                 String schema = rs.getString("TABLE_SCHEM");
                 String name = rs.getString("TABLE_NAME");
+
+                // Oracle 9i and newer has a nifty recycle bin feature... but we don't
+                // want dropped tables to be included here; in fact they may even result
+                // in errors on reverse engineering as their names have special chars like
+                // "/", etc. So skip them all together
+                
+                // TODO: Andrus, 10/29/2005 - this type of filtering should be delegated to adapter
+                if(name == null || name.startsWith("BIN$")) {
+                    continue;
+                }
+
                 Table info = new Table(cat, schema, name);
                 tables.add(info);
             }
@@ -330,12 +341,14 @@ public class DbLoader {
             dbEntity.setCatalog(table.getCatalog());
 
             // Create DbAttributes from column information --
+            logObj.warn("loading " + table.getCatalog() + "." + table.getSchema() + "." + table.getName());
             ResultSet rs = getMetaData().getColumns(
                     table.getCatalog(),
                     table.getSchema(),
                     table.getName(),
                     "%");
-
+            logObj.warn("...done.");
+            
             try {
                 while (rs.next()) {
                     // for a reason not quiet apparent to me, Oracle sometimes

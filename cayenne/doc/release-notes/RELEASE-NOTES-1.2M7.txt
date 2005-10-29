@@ -39,4 +39,8 @@ Changes/New Features:
   and non-public classes will work. This is nice for implementing listener methods without exposing 
   them in the API (or using inner classes that didn't work before).
   
+
+  Bugs Fixed:
   
+  * Cayenne no longer includes Oracle "recycle bin" tables in reverse-engineering results (those are the 
+    tables with names like "BIN$04LhcpndanfgMAAAAAANPw==$0" that are "recycled" dropped tables.
