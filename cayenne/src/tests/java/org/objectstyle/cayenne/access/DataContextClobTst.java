@@ -121,21 +121,20 @@ public class DataContextClobTst extends CayenneTestCase {
         ctxt.commitChanges();
 
         // read the CLOB in the new context
-        DataContext ctxt2 = getDomain().createDataContext();
+        DataContext ctxt2 = createDataContext();
         List objects2 = ctxt2.performQuery(new SelectQuery(ClobTest.class));
         assertEquals(1, objects2.size());
 
         ClobTest clobObj2 = (ClobTest) objects2.get(0);
-        assertNull(
-            "Expected null, got: '" + clobObj2.getClobCol() + "'",
-            clobObj2.getClobCol());
+        assertNull("Expected null, got: '" + clobObj2.getClobCol() + "'", clobObj2
+                .getClobCol());
 
         // update and save Clob
         clobObj2.setClobCol("updated rather small clob...");
         ctxt2.commitChanges();
 
-        // read into yet another context and check for changes 
-        DataContext ctxt3 = getDomain().createDataContext();
+        // read into yet another context and check for changes
+        DataContext ctxt3 = createDataContext();
         List objects3 = ctxt3.performQuery(new SelectQuery(ClobTest.class));
         assertEquals(1, objects3.size());
 
@@ -162,7 +161,7 @@ public class DataContextClobTst extends CayenneTestCase {
         ctxt.commitChanges();
 
         // read the CLOB in the new context
-        DataContext ctxt2 = getDomain().createDataContext();
+        DataContext ctxt2 = createDataContext();
         List objects2 = ctxt2.performQuery(new SelectQuery(ClobTest.class));
         assertEquals(1, objects2.size());
 
@@ -173,8 +172,8 @@ public class DataContextClobTst extends CayenneTestCase {
         clobObj2.setClobCol("updated rather small clob...");
         ctxt2.commitChanges();
 
-        // read into yet another context and check for changes 
-        DataContext ctxt3 = getDomain().createDataContext();
+        // read into yet another context and check for changes
+        DataContext ctxt3 = createDataContext();
         List objects3 = ctxt3.performQuery(new SelectQuery(ClobTest.class));
         assertEquals(1, objects3.size());
 

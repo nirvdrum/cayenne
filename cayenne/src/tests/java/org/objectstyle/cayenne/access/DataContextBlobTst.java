@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DataContextBlobTst extends CayenneTestCase {
+
     protected DataContext ctxt;
 
     protected void setUp() throws Exception {
@@ -117,14 +118,16 @@ public class DataContextBlobTst extends CayenneTestCase {
             return;
         }
 
-        byte[] bytes2 = new byte[] { 'a', 'b', 'c', 'd' };
+        byte[] bytes2 = new byte[] {
+                'a', 'b', 'c', 'd'
+        };
 
         // insert new blob
         ctxt.createAndRegisterNewObject("BlobTest");
         ctxt.commitChanges();
 
         // read the BLOB in the new context
-        DataContext ctxt2 = getDomain().createDataContext();
+        DataContext ctxt2 = createDataContext();
         List objects2 = ctxt2.performQuery(new SelectQuery(BlobTest.class));
         assertEquals(1, objects2.size());
 
@@ -136,14 +139,13 @@ public class DataContextBlobTst extends CayenneTestCase {
         ctxt2.commitChanges();
 
         // read into yet another context and check for changes
-        DataContext ctxt3 = getDomain().createDataContext();
+        DataContext ctxt3 = createDataContext();
         List objects3 = ctxt3.performQuery(new SelectQuery(BlobTest.class));
         assertEquals(1, objects3.size());
 
         BlobTest blobObj3 = (BlobTest) objects3.get(0);
-        ByteArrayTypeTst.assertByteArraysEqual(
-            blobObj2.getBlobCol(),
-            blobObj3.getBlobCol());
+        ByteArrayTypeTst.assertByteArraysEqual(blobObj2.getBlobCol(), blobObj3
+                .getBlobCol());
     }
 
     protected void runWithBlobSize(int sizeBytes) throws Exception {
@@ -160,27 +162,27 @@ public class DataContextBlobTst extends CayenneTestCase {
         ctxt.commitChanges();
 
         // read the CLOB in the new context
-        DataContext ctxt2 = getDomain().createDataContext();
+        DataContext ctxt2 = createDataContext();
         List objects2 = ctxt2.performQuery(new SelectQuery(BlobTest.class));
         assertEquals(1, objects2.size());
 
         BlobTest blobObj2 = (BlobTest) objects2.get(0);
-        ByteArrayTypeTst.assertByteArraysEqual(
-            blobObj1.getBlobCol(),
-            blobObj2.getBlobCol());
+        ByteArrayTypeTst.assertByteArraysEqual(blobObj1.getBlobCol(), blobObj2
+                .getBlobCol());
 
         // update and save Clob
-        blobObj2.setBlobCol(new byte[] { '1', '2' });
+        blobObj2.setBlobCol(new byte[] {
+                '1', '2'
+        });
         ctxt2.commitChanges();
 
-        // read into yet another context and check for changes 
-        DataContext ctxt3 = getDomain().createDataContext();
+        // read into yet another context and check for changes
+        DataContext ctxt3 = createDataContext();
         List objects3 = ctxt3.performQuery(new SelectQuery(BlobTest.class));
         assertEquals(1, objects3.size());
 
         BlobTest blobObj3 = (BlobTest) objects3.get(0);
-        ByteArrayTypeTst.assertByteArraysEqual(
-            blobObj2.getBlobCol(),
-            blobObj3.getBlobCol());
+        ByteArrayTypeTst.assertByteArraysEqual(blobObj2.getBlobCol(), blobObj3
+                .getBlobCol());
     }
 }

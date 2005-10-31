@@ -57,6 +57,9 @@
 package org.objectstyle.cayenne.access.types;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -79,6 +82,7 @@ public class ExtendedTypeMap {
     protected DefaultType defaultType = new DefaultType();
 
     Constructor enumTypeConstructor;
+    Collection extendedTypeFactories;
 
     /**
      * Creates new ExtendedTypeMap, populating it with default JDBC-compatible types.
@@ -107,6 +111,49 @@ public class ExtendedTypeMap {
         Iterator it = DefaultType.defaultTypes();
         while (it.hasNext()) {
             registerType(new DefaultType((String) it.next()));
+        }
+    }
+
+    /**
+     * Returns ExtendedTypeFactories registered with this instance.
+     * 
+     * @since 1.2
+     */
+    public Collection getFactories() {
+        return extendedTypeFactories != null ? Collections
+                .unmodifiableCollection(extendedTypeFactories) : Collections.EMPTY_SET;
+    }
+
+    /**
+     * Adds an ExtendedTypeFactory that will be consulted if no direct mapping for a given
+     * class exists and factories regsitered earlier couldn't handle a type. This feature
+     * is normally used to map interfaces.
+     * 
+     * @since 1.2
+     */
+    public void addFactory(ExtendedTypeFactory factory) {
+        if (factory == null) {
+            throw new IllegalArgumentException("Attempt to add null factory");
+        }
+
+        if (extendedTypeFactories == null) {
+            extendedTypeFactories = new ArrayList();
+        }
+
+        extendedTypeFactories.add(factory);
+    }
+
+    /**
+     * Removes a factory from the regsitered factories if it was previosly added.
+     * 
+     * @since 1.2
+     */
+    public void removeFactory(ExtendedTypeFactory factory) {
+        if (factory != null && extendedTypeFactories != null) {
+            // nullify for consistency
+            if (extendedTypeFactories.remove(factory) && extendedTypeFactories.isEmpty()) {
+                extendedTypeFactories = null;
+            }
         }
     }
 
@@ -207,18 +254,50 @@ public class ExtendedTypeMap {
             return null;
         }
 
-        // load enum type if possible
+        // check what else that could possibly be...
+        ExtendedType type;
+
+        Class typeClass;
+
+        try {
+            typeClass = Util.getJavaClass(javaClassName);
+        }
+        catch (Throwable th) {
+            // ignore exceptions...
+            return null;
+        }
+
+        if (extendedTypeFactories != null) {
+
+            Iterator it = extendedTypeFactories.iterator();
+            while (it.hasNext()) {
+                ExtendedTypeFactory factory = (ExtendedTypeFactory) it.next();
+
+                type = factory.getType(typeClass);
+                if (type != null) {
+                    return type;
+                }
+            }
+        }
+
+        // TODO: Andrus, 10/30/2005 - make Enums use a factory just like everything else
+        return checkEnumType(typeClass);
+    }
+
+    /**
+     * @since 1.2
+     */
+    ExtendedType checkEnumType(Class typeClass) {
         if (enumTypeConstructor == null) {
             return null;
         }
 
         try {
-            Class enumClass = Util.getJavaClass(javaClassName);
 
             // load EnumType via reflection as the source has to stay 1.4 compliant
             ExtendedType type = (ExtendedType) enumTypeConstructor
                     .newInstance(new Object[] {
-                        enumClass
+                        typeClass
                     });
 
             return type;

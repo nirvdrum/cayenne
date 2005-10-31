@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,89 +55,17 @@
  */
 package org.objectstyle.cayenne.access.types;
 
-import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.validation.BeanValidationFailure;
-import org.objectstyle.cayenne.validation.ValidationResult;
-
 /**
- * A convenience superclass of ExtendedType implementations. Implements
- * {@link #setJdbcObject(PreparedStatement, Object, int, int, int)}in a generic fashion
- * by calling "setObject(..)" on PreparedStatement. Some adapters may need to override
- * this behavior as it doesn't work consistently across all JDBC drivers.
+ * ExtendedType factory interface.
  * 
- * @author Andrei Adamchik
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public abstract class AbstractType implements ExtendedType {
+public interface ExtendedTypeFactory {
 
     /**
-     * Helper method for ExtendedType implementors to check for null required values.
-     * 
-     * @since 1.2
+     * Returns ExtendedType instance that can handle a given object class. May return null
+     * indicating that the class can not be handled.
      */
-    public static boolean validateNull(
-            Object source,
-            String property,
-            Object value,
-            DbAttribute dbAttribute,
-            ValidationResult validationResult) {
-        if (dbAttribute.isMandatory() && value == null) {
-            validationResult.addFailure(new BeanValidationFailure(source, property, "'"
-                    + property
-                    + "' must be not null"));
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Calls "PreparedStatement.setObject(..)". Some DbAdapters may need to override this
-     * behavior for at least some of the object types, as it doesn't work consistently
-     * across all JDBC drivers.
-     */
-    public void setJdbcObject(
-            PreparedStatement st,
-            Object val,
-            int pos,
-            int type,
-            int precision) throws Exception {
-
-        if (precision != -1) {
-            st.setObject(pos, val, type, precision);
-        }
-        else {
-            st.setObject(pos, val, type);
-        }
-    }
-
-    public abstract String getClassName();
-
-    public abstract Object materializeObject(CallableStatement rs, int index, int type)
-            throws Exception;
-
-    public abstract Object materializeObject(ResultSet rs, int index, int type)
-            throws Exception;
-
-    /**
-     * Always returns true. Simplifies subclass implementation, as only some of the types
-     * can perform the validation.
-     */
-    public boolean validateProperty(
-            Object source,
-            String property,
-            Object value,
-            DbAttribute dbAttribute,
-            ValidationResult validationResult) {
-        return true;
-    }
-
-    public String toString() {
-        return new ToStringBuilder(this).append("className", getClassName()).toString();
-    }
-
+    ExtendedType getType(Class objectClass);
 }
