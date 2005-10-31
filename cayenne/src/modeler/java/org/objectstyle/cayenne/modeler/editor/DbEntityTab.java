@@ -170,7 +170,7 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
         customPKGeneratorLabel = CayenneWidgetFactory
                 .createLabel("Customize Primary key generation");
         customPKGeneratorNote = CayenneWidgetFactory
-                .createLabel("(currently ignored by all adapters except Oracle)");
+                .createLabel("(currently ignored by all adapters except Oracle and Postgres)");
         customPKGeneratorNote.setFont(customPKGeneratorNote.getFont().deriveFont(10));
         customPKGeneratorNameLabel = CayenneWidgetFactory
                 .createLabel("DB Object Name:");
