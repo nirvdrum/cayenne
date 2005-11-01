@@ -110,15 +110,12 @@ public class EnumType implements ExtendedType {
             DbAttribute dbAttribute,
             ValidationResult validationResult) {
 
-        if (dbAttribute.isMandatory() && value == null) {
-            validationResult.addFailure(new BeanValidationFailure(source, property, "'"
-                    + property
-                    + "' must be not null"));
-            return false;
-        }
-
-        return true;
-
+        return AbstractType.validateNull(
+                source,
+                property,
+                value,
+                dbAttribute,
+                validationResult);
     }
 
     public void setJdbcObject(
