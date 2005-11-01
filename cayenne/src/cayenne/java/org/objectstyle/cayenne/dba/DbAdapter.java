@@ -155,13 +155,13 @@ public interface DbAdapter {
      * Returns a SQL string that can be used to drop a database table corresponding to
      * <code>ent</code> parameter.
      */
-    public String dropTable(DbEntity ent);
+    public String dropTable(DbEntity entity);
 
     /**
      * Returns a SQL string that can be used to create database table corresponding to
      * <code>ent</code> parameter.
      */
-    public String createTable(DbEntity ent);
+    public String createTable(DbEntity entity);
 
     /**
      * Returns a DDL string to create a unique constraint over a set of columns.

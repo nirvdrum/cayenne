@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.dba.DbAdapterFactory;
  */
 public class SQLServerSniffer implements DbAdapterFactory {
 
-    public DbAdapter canHandleDatabase(DatabaseMetaData md) throws SQLException {
+    public DbAdapter createAdapter(DatabaseMetaData md) throws SQLException {
         String dbName = md.getDatabaseProductName();
         return dbName != null && dbName.toUpperCase().indexOf("MICROSOFT SQL SERVER") >= 0
                 ? new SQLServerAdapter()

@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,24 +53,24 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.postgres;
+package org.objectstyle.cayenne.dba;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.DbAdapterFactory;
+public class MockDbAdapterFactory implements DbAdapterFactory {
 
-/**
- * @since 1.2
- * @author Andrei Adamchik
- */
-public class PostgresSniffer implements DbAdapterFactory {
+    protected DbAdapter adapter;
+
+    public MockDbAdapterFactory() {
+
+    }
+
+    public MockDbAdapterFactory(DbAdapter adapter) {
+        this.adapter = adapter;
+    }
 
     public DbAdapter createAdapter(DatabaseMetaData md) throws SQLException {
-        String dbName = md.getDatabaseProductName();
-        return dbName != null && dbName.toUpperCase().indexOf("POSTGRESQL") >= 0
-                ? new PostgresAdapter()
-                : null;
+        return adapter;
     }
 }

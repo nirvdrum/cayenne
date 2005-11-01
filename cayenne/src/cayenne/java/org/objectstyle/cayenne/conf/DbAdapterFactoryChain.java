@@ -53,17 +53,19 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba;
+package org.objectstyle.cayenne.conf;
 
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
-import javax.sql.DataSource;
-
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.DbAdapterFactory;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.db2.DB2Sniffer;
 import org.objectstyle.cayenne.dba.hsqldb.HSQLDBSniffer;
 import org.objectstyle.cayenne.dba.mysql.MySQLSniffer;
@@ -74,84 +76,44 @@ import org.objectstyle.cayenne.dba.sqlserver.SQLServerSniffer;
 import org.objectstyle.cayenne.dba.sybase.SybaseSniffer;
 
 /**
- * Guesses correct DbAdapter for an unknown database. This implementation obtains
- * DatabaseMetaData object from the DataSource and passes it to a chain of conditional
- * factories. The first DbAdapterFactory in the chain that "recognizes" the database would
- * instantiate a DbAdapter that is returned to the user.
+ * A facade for a collection of DbAdapterFactories. Can be configured to autodetect all
+ * adapters known to Cayenne or can work with custom factories.
  * 
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-// TODO: how can custom adapters be autodetected? I.e. is there a way to plug a
-// custom factory into configuration loading process?
-public class DbAdapterDetector {
+// TODO, Andrus 11/01/2005, how can custom adapters be autodetected? I.e. is there a way
+// to plug a custom factory into configuration loading process? Of course users can simply
+// specify the adapter class in the modeler, so this may be a non-issue.
+class DbAdapterFactoryChain implements DbAdapterFactory {
 
-    private static Logger logObj = Logger.getLogger(DbAdapterDetector.class);
+    private static final Logger logObj = Logger.getLogger(DbAdapterFactoryChain.class);
 
-    protected List factories;
+    static final DbAdapterFactory[] DEFAULT_FACTORIES = new DbAdapterFactory[] {
+            new MySQLSniffer(), new PostgresSniffer(), new OracleSniffer(),
+            new SQLServerSniffer(), new HSQLDBSniffer(), new DB2Sniffer(),
+            new SybaseSniffer(), new OpenBaseSniffer()
+    };
 
-    public DbAdapterDetector() {
+    List factories;
+
+    /**
+     * Creates DbAdapterFactoryChain configured to handle adapters known to Cayenne.
+     */
+    DbAdapterFactoryChain() {
+        this(Arrays.asList(DEFAULT_FACTORIES));
+    }
+
+    DbAdapterFactoryChain(Collection factories) {
         this.factories = new ArrayList();
-
-        // configure known predicates
-        addFactory(new MySQLSniffer());
-        addFactory(new PostgresSniffer());
-        addFactory(new OracleSniffer());
-        addFactory(new SQLServerSniffer());
-        addFactory(new HSQLDBSniffer());
-        addFactory(new DB2Sniffer());
-        addFactory(new SybaseSniffer());
-        addFactory(new OpenBaseSniffer());
-    }
-
-    /**
-     * Removes all configured factories.
-     */
-    public void clearFactories() {
-        this.factories.clear();
-    }
-
-    public void addFactory(DbAdapterFactory factory) {
-        this.factories.add(factory);
-    }
-
-    public DbAdapter adapterForDataSource(DataSource ds) throws SQLException {
-
-        Connection c = ds.getConnection();
-
-        // exclude opening connection from timing autodetection...
-        long t0 = System.currentTimeMillis();
-
-        try {
-            return adapterForMetaData(c.getMetaData());
-        }
-        finally {
-            try {
-                c.close();
-            }
-            catch (SQLException e) {
-                // ignore...
-            }
-
-            if (logObj.isInfoEnabled()) {
-                long t1 = System.currentTimeMillis();
-                logObj.info("auto-detection took " + (t1 - t0) + " ms.");
-            }
-        }
-    }
-
-    /**
-     * Returns a default adapter that is used as a failover if autodetection fails.
-     */
-    protected DbAdapter createDefaultAdapter() {
-        return new JdbcAdapter();
+        this.factories.addAll(factories);
     }
 
     /**
      * Iterates through predicated factories, stopping when the first one returns non-null
      * DbAdapter. If none of the factories match the database, returns default adapter.
      */
-    protected DbAdapter adapterForMetaData(DatabaseMetaData md) throws SQLException {
+    public DbAdapter createAdapter(DatabaseMetaData md) throws SQLException {
 
         if (logObj.isInfoEnabled()) {
             logObj.info("DB name: " + md.getDatabaseProductName());
@@ -163,17 +125,34 @@ public class DbAdapterDetector {
         // default ones configured in constructor
         for (int i = factories.size() - 1; i >= 0; i--) {
             DbAdapterFactory factory = (DbAdapterFactory) factories.get(i);
-            DbAdapter adapter = factory.canHandleDatabase(md);
+            DbAdapter adapter = factory.createAdapter(md);
 
             if (adapter != null) {
                 return adapter;
             }
         }
 
-        logObj.info("Unrecognized database '"
-                + md.getDatabaseProductName()
-                + "', using default adapter.");
-
         return createDefaultAdapter();
+    }
+
+    /**
+     * Removes all configured factories.
+     */
+    void clearFactories() {
+        this.factories.clear();
+    }
+
+    /**
+     * Adds a new DbAdapterFactory to the factory chain.
+     */
+    void addFactory(DbAdapterFactory factory) {
+        this.factories.add(factory);
+    }
+
+    /**
+     * Returns a default adapter that is used as a failover if autodetection fails.
+     */
+    DbAdapter createDefaultAdapter() {
+        return new JdbcAdapter();
     }
 }

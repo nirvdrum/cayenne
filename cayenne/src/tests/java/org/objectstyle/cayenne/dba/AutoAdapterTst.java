@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -57,18 +57,29 @@ package org.objectstyle.cayenne.dba;
 
 import javax.sql.DataSource;
 
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import junit.framework.TestCase;
 
-/**
- * @author Andrei Adamchik
- */
-public class DbAdapterDetectorTst extends CayenneTestCase {
+import org.objectstyle.cayenne.access.DataNode;
 
-    public void testAdapterForDataSource() throws Exception {
-        DataSource ds = getNode().getDataSource();
-        DbAdapter detected = new DbAdapterDetector().adapterForDataSource(ds);
+import com.mockrunner.mock.jdbc.MockConnection;
+import com.mockrunner.mock.jdbc.MockDataSource;
 
-        assertNotNull(detected);
-        assertEquals(getNode().getAdapter().getClass(), detected.getClass());
+public class AutoAdapterTst extends TestCase {
+
+    public void testGetAdapter() {
+        MockDbAdapter realAdapter = new MockDbAdapter();
+        MockDbAdapterFactory factory = new MockDbAdapterFactory(realAdapter);
+
+        DataNode node = new DataNode() {
+
+            public DataSource getDataSource() {
+                MockDataSource dataSource = new MockDataSource();
+                dataSource.setupConnection(new MockConnection());
+                return dataSource;
+            }
+        };
+
+        AutoAdapter adapter = new AutoAdapter(factory, node);
+        assertSame(realAdapter, adapter.getAdapter());
     }
 }

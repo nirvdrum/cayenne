@@ -67,8 +67,8 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.ConfigurationException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.dba.AutoAdapter;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.xml.sax.InputSource;
@@ -296,28 +296,32 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
         }
 
         // load DbAdapter
-        if (adapter == null) {
-            adapter = JdbcAdapter.class.getName();
-        }
 
         DbAdapter dbAdapter = null;
-
-        try {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            Class dbAdapterClass = (cl != null) ? cl.loadClass(adapter) : Class
-                    .forName(adapter);
-            dbAdapter = (DbAdapter) dbAdapterClass.newInstance();
-        }
-        catch (Exception ex) {
-            logObj.info("instantiating adapter failed, using default adapter.", ex);
-            getStatus().addFailedAdapter(
-                    nodeName,
-                    adapter,
-                    "instantiating adapter failed - " + ex.getMessage());
-            dbAdapter = new JdbcAdapter();
+        if (adapter != null) {
+            try {
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                Class dbAdapterClass = (cl != null) ? cl.loadClass(adapter) : Class
+                        .forName(adapter);
+                dbAdapter = (DbAdapter) dbAdapterClass.newInstance();
+            }
+            catch (Exception ex) {
+                logObj.info("instantiating adapter failed", ex);
+                getStatus().addFailedAdapter(
+                        nodeName,
+                        adapter,
+                        "instantiating adapter failed - " + ex.getMessage());
+            }
         }
 
         DataNode node = new DataNode(nodeName);
+
+        if (dbAdapter == null) {
+            logObj
+                    .info("no adapter set, will use AutAdapter that detects the database type.");
+            dbAdapter = new AutoAdapter(new DbAdapterFactoryChain(), node);
+        }
+
         node.setAdapter(dbAdapter);
         node.setDataSourceFactory(factory);
         node.setDataSourceLocation(dataSource);

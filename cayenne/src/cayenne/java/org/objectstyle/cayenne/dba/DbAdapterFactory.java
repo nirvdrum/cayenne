@@ -64,13 +64,14 @@ import java.sql.SQLException;
  * database based on version information and other metadata.
  * 
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public interface DbAdapterFactory {
 
     /**
      * Returns an instance of DbAdapter if the factory detects that it knows how to handle
-     * the database. Returns null if the database is unknown to the factory.
+     * the database. Returns null if the database is not known to the factory, thus
+     * allowing multiple factories to be chained.
      */
-    DbAdapter canHandleDatabase(DatabaseMetaData md) throws SQLException;
+    DbAdapter createAdapter(DatabaseMetaData md) throws SQLException;
 }

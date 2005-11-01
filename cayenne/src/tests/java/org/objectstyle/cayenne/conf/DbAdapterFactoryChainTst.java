@@ -53,24 +53,43 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.postgres;
+package org.objectstyle.cayenne.conf;
 
-import java.sql.DatabaseMetaData;
+import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.sql.DataSource;
+
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.DbAdapterFactory;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
- * @since 1.2
  * @author Andrei Adamchik
  */
-public class PostgresSniffer implements DbAdapterFactory {
+public class DbAdapterFactoryChainTst extends CayenneTestCase {
 
-    public DbAdapter createAdapter(DatabaseMetaData md) throws SQLException {
-        String dbName = md.getDatabaseProductName();
-        return dbName != null && dbName.toUpperCase().indexOf("POSTGRESQL") >= 0
-                ? new PostgresAdapter()
-                : null;
+    public void testCreateAdapterWithCayenneAutoDetection() throws Exception {
+        DataSource ds = getNode().getDataSource();
+
+        Connection c = ds.getConnection();
+
+        try {
+
+            DbAdapter detected = new DbAdapterFactoryChain().createAdapter(ds
+                    .getConnection()
+                    .getMetaData());
+
+            assertNotNull(detected);
+            assertEquals(getNode().getAdapter().getClass(), detected.getClass());
+        }
+        finally {
+
+            try {
+                c.close();
+            }
+            catch (SQLException e) {
+
+            }
+        }
     }
 }

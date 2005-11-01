@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.dba.DbAdapterFactory;
  */
 public class DB2Sniffer implements DbAdapterFactory {
 
-    public DbAdapter canHandleDatabase(DatabaseMetaData md) throws SQLException {
+    public DbAdapter createAdapter(DatabaseMetaData md) throws SQLException {
         String dbName = md.getDatabaseProductName();
         return dbName != null && dbName.toUpperCase().indexOf("DB2") >= 0
                 ? new DB2Adapter()

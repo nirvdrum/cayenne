@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.dba.DbAdapterFactory;
  */
 public class OpenBaseSniffer implements DbAdapterFactory {
 
-    public DbAdapter canHandleDatabase(DatabaseMetaData md) throws SQLException {
+    public DbAdapter createAdapter(DatabaseMetaData md) throws SQLException {
         String dbName = md.getDatabaseProductName();
         return dbName != null && dbName.toUpperCase().indexOf("OPENBASE") >= 0
                 ? new OpenBaseAdapter()

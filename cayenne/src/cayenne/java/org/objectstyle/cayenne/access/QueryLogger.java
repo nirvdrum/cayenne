@@ -89,7 +89,7 @@ public class QueryLogger {
      * @deprecated unused since 1.2
      */
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
-    
+
     public static final int TRIM_VALUES_THRESHOLD = 300;
 
     /**
@@ -212,6 +212,15 @@ public class QueryLogger {
      */
     public static void setLoggingLevel(Level level) {
         logLevel.set(level);
+    }
+
+    /**
+     * @since 1.2 logs an arbitrary message using logging level setup for QueryLogger.
+     */
+    public static void log(String message) {
+        if (message != null) {
+            logObj.log(getLoggingLevel(), message);
+        }
     }
 
     /**
