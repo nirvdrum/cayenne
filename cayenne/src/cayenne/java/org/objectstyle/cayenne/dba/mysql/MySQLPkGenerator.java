@@ -71,6 +71,10 @@ import org.objectstyle.cayenne.map.DbEntity;
  */
 public class MySQLPkGenerator extends JdbcPkGenerator {
 
+    protected String dropAutoPkString() {
+        return "DROP TABLE IF EXISTS AUTO_PK_SUPPORT";
+    }
+
     /**
      * Overrides superclass's implementation to perform locking of the primary key lookup
      * table.

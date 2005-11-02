@@ -64,6 +64,7 @@ import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 
 /**
@@ -88,6 +89,10 @@ public class MySQLAdapter extends JdbcAdapter {
         this.setSupportsFkConstraints(false);
         this.setSupportsUniqueConstraints(true);
         this.setSupportsGeneratedKeys(true);
+    }
+    
+    public String dropTable(DbEntity entity) {
+        return "DROP TABLE IF EXISTS " + entity.getFullyQualifiedName();
     }
 
     /**
