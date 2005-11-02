@@ -55,18 +55,12 @@
  */
 package org.objectstyle.cayenne.unit;
 
-import java.sql.Connection;
-
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.firebird.FirebirdAdapter;
-import org.objectstyle.cayenne.map.DataMap;
 
 /**
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class FirebirdStackAdapter extends AccessStackAdapter {
-    Logger logObj = Logger.getLogger(FirebirdAdapter.class);
 
     public FirebirdStackAdapter(DbAdapter adapter) {
         super(adapter);
@@ -74,17 +68,5 @@ public class FirebirdStackAdapter extends AccessStackAdapter {
 
     public boolean supportsBinaryPK() {
         return false;
-    }
-
-    public void willCreateTables(Connection con, DataMap map) throws Exception {
-        logObj.warn(
-            "*** Firebird does not support binary PK. Corresponding test tables will be skipped.");
-
-        // modify DataMap
-
-//        map.removeDbEntity("BINARY_PK_TEST1", false);
-//        map.removeDbEntity("BINARY_PK_TEST2", false);
-
-        super.willCreateTables(con, map);
     }
 }
