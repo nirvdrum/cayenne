@@ -63,10 +63,7 @@ import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * Subclass of Configuration that uses the System CLASSPATH to locate resources. If
- * Cayenne classes are loaded using a different ClassLoader from the application classes,
- * this configuration needs to be bootstrapped by calling
- * {@link Configuration#bootstrapSharedConfiguration(Class)}</code>.
+ * Subclass of Configuration that uses the System CLASSPATH to locate resources.
  * 
  * @author Andrei Adamchik
  */

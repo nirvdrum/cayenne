@@ -318,8 +318,8 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
 
         if (dbAdapter == null) {
             logObj
-                    .info("no adapter set, will use AutAdapter that detects the database type.");
-            dbAdapter = new AutoAdapter(new DbAdapterFactoryChain(), node);
+                    .info("no adapter set, will use AutoAdapter that detects the database type.");
+            dbAdapter = new AutoAdapter(node);
         }
 
         node.setAdapter(dbAdapter);

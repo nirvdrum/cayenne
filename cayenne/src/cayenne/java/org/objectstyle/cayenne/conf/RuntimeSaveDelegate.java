@@ -64,6 +64,7 @@ import org.apache.commons.collections.Transformer;
 import org.apache.commons.collections.iterators.TransformIterator;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.dba.AutoAdapter;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 
@@ -73,6 +74,7 @@ import org.objectstyle.cayenne.map.DataMap;
  * @author Andrei Adamchik
  */
 public class RuntimeSaveDelegate implements ConfigSaverDelegate {
+
     protected Configuration config;
 
     public RuntimeSaveDelegate(Configuration config) {
@@ -99,13 +101,15 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
         DataDomain domain = findDomain(domainName);
         DataNode node = domain.getNode(nodeName);
         if (node == null) {
-            throw new IllegalArgumentException(
-                "Can't find DataNode: " + domainName + "." + nodeName);
+            throw new IllegalArgumentException("Can't find DataNode: "
+                    + domainName
+                    + "."
+                    + nodeName);
         }
 
         return node;
     }
-    
+
     /**
      * @since 1.1
      */
@@ -115,13 +119,14 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
 
     public Iterator domainNames() {
         Transformer tr = new Transformer() {
+
             public Object transform(Object input) {
                 return ((DataDomain) input).getName();
             }
         };
         return new TransformIterator(config.getDomains().iterator(), tr);
     }
-    
+
     /**
      * @since 1.1
      */
@@ -150,6 +155,7 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
 
     public Iterator mapNames(String domainName) {
         Transformer tr = new Transformer() {
+
             public Object transform(Object input) {
                 return ((DataMap) input).getName();
             }
@@ -161,7 +167,9 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
 
     public String nodeAdapterName(String domainName, String nodeName) {
         DbAdapter adapter = findNode(domainName, nodeName).getAdapter();
-        return (adapter != null) ? adapter.getClass().getName() : null;
+        return (adapter != null && adapter.getClass() != AutoAdapter.class) ? adapter
+                .getClass()
+                .getName() : null;
     }
 
     public String nodeDataSourceName(String domainName, String nodeName) {
@@ -174,6 +182,7 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
 
     public Iterator nodeNames(String domainName) {
         Transformer tr = new Transformer() {
+
             public Object transform(Object input) {
                 return ((DataNode) input).getName();
             }
@@ -185,6 +194,7 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
 
     public Iterator linkedMapNames(String domainName, String nodeName) {
         Transformer tr = new Transformer() {
+
             public Object transform(Object input) {
                 return ((DataMap) input).getName();
             }

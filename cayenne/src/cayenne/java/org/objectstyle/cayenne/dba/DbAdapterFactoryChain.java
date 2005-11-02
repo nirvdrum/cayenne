@@ -53,43 +53,74 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.conf;
+package org.objectstyle.cayenne.dba;
 
-import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-import javax.sql.DataSource;
-
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.apache.log4j.Logger;
 
 /**
- * @author Andrei Adamchik
+ * A facade for a collection of DbAdapterFactories. Can be configured to autodetect all
+ * adapters known to Cayenne or can work with custom factories.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public class DbAdapterFactoryChainTst extends CayenneTestCase {
+// TODO, Andrus 11/01/2005, how can custom adapters be autodetected? I.e. is there a way
+// to plug a custom factory into configuration loading process? Of course users can simply
+// specify the adapter class in the modeler, so this may be a non-issue.
+class DbAdapterFactoryChain implements DbAdapterFactory {
 
-    public void testCreateAdapterWithCayenneAutoDetection() throws Exception {
-        DataSource ds = getNode().getDataSource();
+    private static final Logger logObj = Logger.getLogger(DbAdapterFactoryChain.class);
 
-        Connection c = ds.getConnection();
+    List factories;
 
-        try {
+    DbAdapterFactoryChain(Collection factories) {
+        this.factories = new ArrayList();
+        this.factories.addAll(factories);
+    }
 
-            DbAdapter detected = new DbAdapterFactoryChain().createAdapter(ds
-                    .getConnection()
-                    .getMetaData());
+    /**
+     * Iterates through predicated factories, stopping when the first one returns non-null
+     * DbAdapter. If none of the factories match the database, returns null.
+     */
+    public DbAdapter createAdapter(DatabaseMetaData md) throws SQLException {
 
-            assertNotNull(detected);
-            assertEquals(getNode().getAdapter().getClass(), detected.getClass());
+        if (logObj.isInfoEnabled()) {
+            logObj.info("DB name: " + md.getDatabaseProductName());
         }
-        finally {
 
-            try {
-                c.close();
-            }
-            catch (SQLException e) {
+        // match against configured predicated factories
 
+        // iterate in reverse order to allow custom factories to take precedence over the
+        // default ones configured in constructor
+        for (int i = factories.size() - 1; i >= 0; i--) {
+            DbAdapterFactory factory = (DbAdapterFactory) factories.get(i);
+            DbAdapter adapter = factory.createAdapter(md);
+
+            if (adapter != null) {
+                return adapter;
             }
         }
+
+        return null;
+    }
+
+    /**
+     * Removes all configured factories.
+     */
+    void clearFactories() {
+        this.factories.clear();
+    }
+
+    /**
+     * Adds a new DbAdapterFactory to the factory chain.
+     */
+    void addFactory(DbAdapterFactory factory) {
+        this.factories.add(factory);
     }
 }

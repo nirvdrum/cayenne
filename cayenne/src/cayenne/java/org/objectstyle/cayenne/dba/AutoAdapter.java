@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.dba;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -68,6 +69,14 @@ import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.dba.db2.DB2Sniffer;
+import org.objectstyle.cayenne.dba.hsqldb.HSQLDBSniffer;
+import org.objectstyle.cayenne.dba.mysql.MySQLSniffer;
+import org.objectstyle.cayenne.dba.openbase.OpenBaseSniffer;
+import org.objectstyle.cayenne.dba.oracle.OracleSniffer;
+import org.objectstyle.cayenne.dba.postgres.PostgresSniffer;
+import org.objectstyle.cayenne.dba.sqlserver.SQLServerSniffer;
+import org.objectstyle.cayenne.dba.sybase.SybaseSniffer;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -77,13 +86,27 @@ import org.objectstyle.cayenne.query.SQLAction;
 
 /**
  * A DbAdapter that automatically detects the kind of database it is running on and
- * instantiates an appropraite DB-specific adapter, delegating all subsequent method calls
+ * instantiates an appropriate DB-specific adapter, delegating all subsequent method calls
  * to this adapter.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
 public class AutoAdapter implements DbAdapter {
+
+    static final DbAdapterFactory[] DEFAULT_FACTORIES = new DbAdapterFactory[] {
+            new MySQLSniffer(), new PostgresSniffer(), new OracleSniffer(),
+            new SQLServerSniffer(), new HSQLDBSniffer(), new DB2Sniffer(),
+            new SybaseSniffer(), new OpenBaseSniffer()
+    };
+
+    /**
+     * Returns a DbAdapterFactory configured to detect all databases officially supported
+     * by Cayenne.
+     */
+    public static DbAdapterFactory getDefaultFactory() {
+        return new DbAdapterFactoryChain(Arrays.asList(DEFAULT_FACTORIES));
+    }
 
     protected DbAdapterFactory adapterFactory;
     protected DataNode dataNode;
@@ -92,6 +115,13 @@ public class AutoAdapter implements DbAdapter {
      * The actual adapter that is delegated method execution.
      */
     DbAdapter adapter;
+
+    /**
+     * Creates an AutoAdapter that can detect adapters known to Cayenne.
+     */
+    public AutoAdapter(DataNode dataNode) {
+        this(getDefaultFactory(), dataNode);
+    }
 
     public AutoAdapter(DbAdapterFactory adapterFactory, DataNode dataNode) {
         this.adapterFactory = adapterFactory;

@@ -91,17 +91,19 @@ import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * Describes a single physical data source. This can be a database server, LDAP server,
- * etc. When the underlying connection layer is based on JDBC, DataNode works as a Cayenne
- * wrapper of javax.sql.DataSource.
+ * etc.
  * <p>
  * <i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide. </a> </i>
  * </p>
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class DataNode implements QueryEngine {
 
+    /**
+     * @deprecated since 1.2 unused.
+     */
     public static final Class DEFAULT_ADAPTER_CLASS = JdbcAdapter.class;
 
     protected String name;
@@ -111,13 +113,7 @@ public class DataNode implements QueryEngine {
     protected String dataSourceFactory;
     protected EntityResolver entityResolver;
     protected EntitySorter entitySorter;
-
-    // ====================================================
-    // DataMaps
-    // ====================================================
-    protected Map dataMaps = new HashMap();
-    private Collection dataMapsValuesRef = Collections.unmodifiableCollection(dataMaps
-            .values());
+    protected Map dataMaps;
 
     /**
      * Creates a new unnamed DataNode.
@@ -131,6 +127,7 @@ public class DataNode implements QueryEngine {
      */
     public DataNode(String name) {
         this.name = name;
+        this.dataMaps = new HashMap();
 
         // since 1.2 we always implement entity sorting, regardless of the underlying DB
         // as the right order is needed for deferred PK propagation (and maybe other
@@ -138,7 +135,9 @@ public class DataNode implements QueryEngine {
         this.entitySorter = new AshwoodEntitySorter(Collections.EMPTY_LIST);
     }
 
-    /** Returns node "name" property. */
+    /**
+     * Returns node name. Name is used to uniquely identify DataNode within a DataDomain.
+     */
     public String getName() {
         return name;
     }
@@ -147,7 +146,10 @@ public class DataNode implements QueryEngine {
         this.name = name;
     }
 
-    /** Returns a location of DataSource of this node. */
+    /**
+     * Returns a location of DataSource of this node. Depending on how this node was
+     * created, location is either a JNDI name, or a location of node XML file, etc.
+     */
     public String getDataSourceLocation() {
         return dataSourceLocation;
     }
@@ -156,7 +158,9 @@ public class DataNode implements QueryEngine {
         this.dataSourceLocation = dataSourceLocation;
     }
 
-    /** Returns a name of DataSourceFactory class for this node. */
+    /**
+     * Returns a name of DataSourceFactory class for this node.
+     */
     public String getDataSourceFactory() {
         return dataSourceFactory;
     }
@@ -169,7 +173,7 @@ public class DataNode implements QueryEngine {
      * Returns an unmodifiable collection of DataMaps handled by this DataNode.
      */
     public Collection getDataMaps() {
-        return dataMapsValuesRef;
+        return Collections.unmodifiableCollection(dataMaps.values());
     }
 
     public void setDataMaps(Collection dataMaps) {

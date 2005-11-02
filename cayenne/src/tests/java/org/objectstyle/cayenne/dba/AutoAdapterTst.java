@@ -57,14 +57,13 @@ package org.objectstyle.cayenne.dba;
 
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 import com.mockrunner.mock.jdbc.MockConnection;
 import com.mockrunner.mock.jdbc.MockDataSource;
 
-public class AutoAdapterTst extends TestCase {
+public class AutoAdapterTst extends CayenneTestCase {
 
     public void testGetAdapter() {
         MockDbAdapter realAdapter = new MockDbAdapter();
@@ -81,5 +80,14 @@ public class AutoAdapterTst extends TestCase {
 
         AutoAdapter adapter = new AutoAdapter(factory, node);
         assertSame(realAdapter, adapter.getAdapter());
+    }
+
+    public void testGetDefaultAdapter() throws Exception {
+
+        AutoAdapter adapter = new AutoAdapter(getNode());
+        DbAdapter detected = adapter.getAdapter();
+
+        assertNotNull(detected);
+        assertEquals(getNode().getAdapter().getClass(), detected.getClass());
     }
 }
