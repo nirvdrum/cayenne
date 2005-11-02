@@ -274,6 +274,11 @@ public class ObjEntityAttributeTab extends JPanel implements ObjEntityDisplayLis
             return;
         }
 
+        if (!(table.getModel() instanceof ObjAttributeTableModel)) {
+            // probably means this panel hasn't been loaded yet...
+            return;
+        }
+
         ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
         if (model.getDbEntity() != ((ObjEntity) e.getEntity()).getDbEntity()) {
             model.resetDbEntity();
