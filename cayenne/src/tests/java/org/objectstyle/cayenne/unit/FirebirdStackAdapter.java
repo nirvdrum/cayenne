@@ -82,8 +82,8 @@ public class FirebirdStackAdapter extends AccessStackAdapter {
 
         // modify DataMap
 
-        map.removeDbEntity("BINARY_PK_TEST1", false);
-        map.removeDbEntity("BINARY_PK_TEST2", false);
+//        map.removeDbEntity("BINARY_PK_TEST1", false);
+//        map.removeDbEntity("BINARY_PK_TEST2", false);
 
         super.willCreateTables(con, map);
     }

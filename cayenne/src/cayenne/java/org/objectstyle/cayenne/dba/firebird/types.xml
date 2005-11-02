@@ -6,11 +6,15 @@ Firebird types mapping.
 
 <types>
    <jdbc-type name="ARRAY"/>
-   <jdbc-type name="BIGINT"/>
+   <jdbc-type name="BIGINT">
+       <db-type name="INT64"/>
+   </jdbc-type>
    <jdbc-type name="BINARY">
        <db-type name="blob sub_type 0"/>
    </jdbc-type>
-   <jdbc-type name="BIT"/>
+   <jdbc-type name="BIT">
+       <db-type name="char(1)"/>
+   </jdbc-type>
    <jdbc-type name="BLOB">
        <db-type name="blob sub_type 0"/>
    </jdbc-type>
