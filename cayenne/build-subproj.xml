@@ -49,11 +49,6 @@
 		<pathelement path="build/tests/deps"/>
     </path>
     
-    <path id="classpath-performance">
-		<path refid="classpath-tests"/>
-		<pathelement path="build/tests/classes"/>
-    </path>
-    
 	<path id="javacc-classpath">
 		<fileset dir="${otherlib.dir}">
 			<include name="javacc*.jar"/>

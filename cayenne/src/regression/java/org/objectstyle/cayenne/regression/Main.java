@@ -113,7 +113,7 @@ public class Main {
 
     protected DataDomain createDomain() throws Exception {
         ClassLoader loader = new DOStubClassLoader();
-        Configuration.bootstrapSharedConfiguration(loader.loadClass("Table"));
+        Thread.currentThread().setContextClassLoader(loader);
         Configuration conf = new FileConfiguration(prefs.getCayenneProject());
         return conf.getDomain();
     }

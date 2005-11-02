@@ -64,10 +64,11 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
-import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.AutoAdapter;
 
 /**
  * Runs regression test based on a set of properties
+ * 
  * @author Andrei Adamchik
  */
 public class AntMain extends Main {
@@ -82,7 +83,8 @@ public class AntMain extends Main {
 
         try {
             prefs = new TestPreferences(System.getProperties());
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             System.out.println("Fatal Error: " + ex.getMessage());
             System.exit(1);
             return;
@@ -104,29 +106,19 @@ public class AntMain extends Main {
 
     protected DataDomain createDomain() throws Exception {
         ClassLoader loader = new DOStubClassLoader();
-        Configuration.bootstrapSharedConfiguration(loader.loadClass("Table"));
+        Thread.currentThread().setContextClassLoader(loader);
 
         DataSourceInfo info = ((TestPreferences) prefs).getConnectionInfo();
 
         // data source
-        PoolDataSource poolDS =
-            new PoolDataSource(info.getJdbcDriver(), info.getDataSourceUrl());
-        DataSource ds =
-            new PoolManager(
-                poolDS,
-                1,
-                1,
-                info.getUserName(),
-                info.getPassword());
+        PoolDataSource poolDS = new PoolDataSource(info.getJdbcDriver(), info
+                .getDataSourceUrl());
+        DataSource ds = new PoolManager(poolDS, 1, 1, info.getUserName(), info
+                .getPassword());
 
-        Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
-
-        if (info.getAdapterClassName() != null) {
-            adapterClass = Class.forName(info.getAdapterClassName());
-        }
-        
+   
         DataNode node = new DataNode("node");
-        node.setAdapter((DbAdapter) adapterClass.newInstance());
+        node.setAdapter(new AutoAdapter(node));
         node.setDataSource(ds);
 
         // domain

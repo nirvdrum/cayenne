@@ -42,10 +42,9 @@
      *  9. jjtree       - updates any code generated via JJTree. 
      * 10. test         - runs JUnit tests
      * 11. testcoverage - runs JUnit test coverage analysis
-     * 12. performance  - runs performance tests
-     * 13. regression   - runs regression test application
-	 * 14. pdf          - builds PDF documentation
-     * 15. help         - prints this message
+     * 12. regression   - runs regression test application
+	 * 13. pdf          - builds PDF documentation
+     * 14. help         - prints this message
      *
      *
      * ENVIRONMENT:
@@ -105,15 +104,6 @@
     </target>
 
     <!-- ========================================== -->
-    <!-- Runs Cayenne Performance Tests             -->
-    <!-- ========================================== -->
-    <target name="performance" description="runs performance tests">
-    	<!-- Cayenne must be fully built -->
-		<ant antfile="build-cayenne.xml" target="dist-bin"/>
-		<ant antfile="build-performance.xml" target="test"/>
-    </target>
-    
-    <!-- ========================================== -->
     <!-- Runs Cayenne Regression Tests              -->
     <!-- ========================================== -->
     <target name="regression" description="runs regression test application">
@@ -131,7 +121,6 @@
 		<ant antfile="build-modeler.xml" target="dist-bin"/>
 		<ant antfile="build-dvmodeler.xml" target="dist-bin"/>
 		<ant antfile="build-tests.xml" target="dist-bin"/>
-		<ant antfile="build-performance.xml" target="dist-bin"/>
 		<ant antfile="build-tutorials.xml" target="dist-bin"/>
 		<ant antfile="build-regression.xml" target="dist-bin"/>
     </target>
@@ -144,7 +133,6 @@
 		<ant antfile="build-modeler.xml" target="compile"/>
 		<ant antfile="build-dvmodeler.xml" target="compile"/>
 		<ant antfile="build-tests.xml" target="compile"/>
-		<ant antfile="build-performance.xml" target="compile"/>
 		<ant antfile="build-tutorials.xml" target="compile"/>
 		<ant antfile="build-regression.xml" target="compile"/>
     </target>
