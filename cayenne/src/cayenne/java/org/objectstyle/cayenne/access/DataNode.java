@@ -267,6 +267,12 @@ public class DataNode implements QueryEngine {
                     "No transaction associated with the queries.");
         }
 
+        // do this meaningless inexpensive operation to
+        // trigger AutoAdapter lazy initialization before opening a connection...
+        // otherwise we may end up with two connections open simultaneously, possibly
+        // hitting connection pool upper limit.
+        getAdapter().getExtendedTypes();
+
         Connection connection = null;
 
         try {
