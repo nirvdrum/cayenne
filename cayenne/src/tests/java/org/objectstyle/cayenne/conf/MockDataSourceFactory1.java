@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,73 +55,22 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import javax.sql.DataSource;
 
-import junit.framework.Assert;
+import org.apache.log4j.Level;
 
-/**
- * Test setup for a certain domain configuration.
- */
-public class ConfigLoaderCase {
+import com.mockrunner.mock.jdbc.MockDataSource;
 
-    protected int failedMaps;
-    protected int failedDataSources;
-    protected int failedAdapters;
-    protected int failedMapRefs;
-    protected int totalDomains;
-    protected String configInfo;
+public class MockDataSourceFactory1 implements DataSourceFactory {
 
-    /** Evaluates test case built from this object state. */
-    public void test(ConfigLoader loader) throws Exception {
-        InputStream in = new ByteArrayInputStream(configInfo.getBytes());
-        loader.loadDomains(in);
-        RuntimeLoadDelegate delegate = (RuntimeLoadDelegate) loader.getDelegate();
-        Assert.assertEquals(totalDomains, delegate.getDomains().size());
-        Assert.assertEquals(failedMaps, delegate.getStatus().getFailedMaps().size());
-        Assert.assertEquals(failedDataSources, delegate
-                .getStatus()
-                .getFailedDataSources()
-                .size());
-        Assert.assertEquals(failedAdapters, delegate
-                .getStatus()
-                .getFailedAdapters()
-                .size());
-        Assert
-                .assertEquals(failedMapRefs, delegate
-                        .getStatus()
-                        .getFailedMapRefs()
-                        .size());
+    public void initializeWithParentConfiguration(Configuration conf) {
     }
 
-    public void setTotalDomains(int totalDomains) {
-        this.totalDomains = totalDomains;
+    public DataSource getDataSource(String location) throws Exception {
+        return null;
     }
 
-    public void setConfigInfo(String configInfo) {
-        this.configInfo = configInfo;
-    }
-
-    public void setFailedMaps(int failedMaps) {
-        this.failedMaps = failedMaps;
-    }
-
-    public void setFailedDataSources(int failedDataSources) {
-        this.failedDataSources = failedDataSources;
-    }
-
-    public void setFailedAdapters(int failedAdapters) {
-        this.failedAdapters = failedAdapters;
-    }
-
-    public void setFailedMapRefs(int failedMapRefs) {
-        this.failedMapRefs = failedMapRefs;
-    }
-
-    public String toString() {
-        StringBuffer buf = new StringBuffer();
-        buf.append("\n===== DomainHelperCase ====\n").append(configInfo);
-
-        return buf.toString();
+    public DataSource getDataSource(String location, Level logLevel) throws Exception {
+        return new MockDataSource();
     }
 }

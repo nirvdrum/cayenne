@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,22 +55,22 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.sql.DataSource;
 
-/** Runs multiple domain config cases. */
-public abstract class ConfigLoaderSuite {
+import org.apache.log4j.Level;
 
-    protected List cases = new ArrayList();
+import com.mockrunner.mock.jdbc.MockDataSource;
 
-    public ConfigLoaderSuite() {
-        buildCases();
+public class MockDataSourceFactory implements DataSourceFactory {
+
+    public void initializeWithParentConfiguration(Configuration conf) {
     }
 
-    public List getCases() {
-        return cases;
+    public DataSource getDataSource(String location) throws Exception {
+        return null;
     }
 
-    /** Populate 'cases' list with DomainHelperCase objects. */
-    protected abstract void buildCases();
+    public DataSource getDataSource(String location, Level logLevel) throws Exception {
+        return new MockDataSource();
+    }
 }

@@ -53,7 +53,6 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
 package org.objectstyle.cayenne.conf;
 
 import java.io.IOException;

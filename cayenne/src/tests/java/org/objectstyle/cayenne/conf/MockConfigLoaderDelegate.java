@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,73 +55,47 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.util.Map;
 
-import junit.framework.Assert;
+public class MockConfigLoaderDelegate implements ConfigLoaderDelegate {
 
-/**
- * Test setup for a certain domain configuration.
- */
-public class ConfigLoaderCase {
-
-    protected int failedMaps;
-    protected int failedDataSources;
-    protected int failedAdapters;
-    protected int failedMapRefs;
-    protected int totalDomains;
-    protected String configInfo;
-
-    /** Evaluates test case built from this object state. */
-    public void test(ConfigLoader loader) throws Exception {
-        InputStream in = new ByteArrayInputStream(configInfo.getBytes());
-        loader.loadDomains(in);
-        RuntimeLoadDelegate delegate = (RuntimeLoadDelegate) loader.getDelegate();
-        Assert.assertEquals(totalDomains, delegate.getDomains().size());
-        Assert.assertEquals(failedMaps, delegate.getStatus().getFailedMaps().size());
-        Assert.assertEquals(failedDataSources, delegate
-                .getStatus()
-                .getFailedDataSources()
-                .size());
-        Assert.assertEquals(failedAdapters, delegate
-                .getStatus()
-                .getFailedAdapters()
-                .size());
-        Assert
-                .assertEquals(failedMapRefs, delegate
-                        .getStatus()
-                        .getFailedMapRefs()
-                        .size());
+    public void startedLoading() {
     }
 
-    public void setTotalDomains(int totalDomains) {
-        this.totalDomains = totalDomains;
+    public void finishedLoading() {
     }
 
-    public void setConfigInfo(String configInfo) {
-        this.configInfo = configInfo;
+    public void shouldLoadProjectVersion(String version) {
     }
 
-    public void setFailedMaps(int failedMaps) {
-        this.failedMaps = failedMaps;
+    public void shouldLoadDataDomain(String name) {
     }
 
-    public void setFailedDataSources(int failedDataSources) {
-        this.failedDataSources = failedDataSources;
+    public void shouldRegisterDataView(String name, String location) {
     }
 
-    public void setFailedAdapters(int failedAdapters) {
-        this.failedAdapters = failedAdapters;
+    public void shouldLoadDataMaps(String domainName, Map locations) {
     }
 
-    public void setFailedMapRefs(int failedMapRefs) {
-        this.failedMapRefs = failedMapRefs;
+    public void shouldLoadDataDomainProperties(String domainName, Map properties) {
     }
 
-    public String toString() {
-        StringBuffer buf = new StringBuffer();
-        buf.append("\n===== DomainHelperCase ====\n").append(configInfo);
+    public void shouldLoadDataNode(
+            String domainName,
+            String nodeName,
+            String dataSource,
+            String adapter,
+            String factory) {
+    }
 
-        return buf.toString();
+    public void shouldLinkDataMap(String domainName, String nodeName, String mapName) {
+    }
+
+    public boolean loadError(Throwable th) {
+        return false;
+    }
+
+    public ConfigStatus getStatus() {
+        return new ConfigStatus();
     }
 }
