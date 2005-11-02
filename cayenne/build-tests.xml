@@ -142,9 +142,9 @@
 
 			<jvmarg value="-Xms64m"/>
 			<jvmarg value="-Xmx64m"/>
-
+			<sysproperty key="java.library.path" value="${java.library.path}"/>
 			<sysproperty key="cayenne.test.config" value="${cayenne.test.config}"/>
-    		<sysproperty key="cayenne.test.connection" value="${cayenne.test.connection}"/>
+			<sysproperty key="cayenne.test.connection" value="${cayenne.test.connection}"/>
 			<sysproperty key="cayenne.test.report" value="${cayenne.test.report}"/>
 			<sysproperty key="ant.home" value="${ant.home}"/>
 			<sysproperty key="dist" value="${dist}"/>
