@@ -15,34 +15,20 @@
 Configuration conf = Configuration.getSharedConfiguration();
 </source>
 <p>DefaultConfiguration will expect <code>cayenne.xml</code> file to be located 
-              in the CLASSPATH. The same is true for datamaps referenced in <code>cayenne.xml</code>.
+              in the CLASSPATH. The same is true for DataMaps referenced in <code>cayenne.xml</code>.
               Their location is resolved relative to CLASSPATH as well. To make these files available to
               Cayenne, you can simply include them in the root of your application jar file (read 
 				<a href="custom.html">Chapter 12.3.2</a> on how to change that). 
               </p>
               
-              <p>The location of the datasource files referenced in <code>cayenne.xml</code>
-              depends on what factory was assigned to each datasource in <code>cayenne.xml</code>.
-              Normally this would be a <a href=
+              <p>The location of the data source files referenced in <code>cayenne.xml</code>
+              is interpreted by the factory that was assigned to each datasource in <code>cayenne.xml</code>.
+              Default factory is <a href=
                "../../api/cayenne/org/objectstyle/cayenne/conf/DriverDataSourceFactory.html"
-               >org.objectstyle.cayenne.conf.DriverDataSourceFactory</a>. It would use
-               the following lookup order to resolve locations:
-               
-               <ul>
-                  <li>Location is assumed to be a file relative to the user HOME 
-                  directory (as defined by <code>user.home</code> system property).</li>
-                  <li>Location is assumed to be a file relative to the current directory
-                  from which the application was started.</li>
-                  <li>Location is assumed to be a resource relative to CLASSPATH.</li>
-               </ul>
-               
-               This lookup order makes configuration very flexible in that it separates
-               datasource configuration files from the application distribution (jar file).
-               A compiled application can be deployed as a jar file containing <code>cayenne.xml</code>
-               and datamap files, without any datasource files.  This way a user wouldn't
-               need to rebuild a jar for each of the target environments that has a 
-               different database server or user id (also check out <a href="cdeploy.html">"cdeploy" 
-				Ant task</a> for cleaner ways to configure deployment database settings).
+               >DriverDataSourceFactory</a>. It will rely on its parent configuration to 
+		       find the data source file (i.e. locating data source files will be no different from the DataMap files). 
+				Depending on the application needs, programmers may implement custom factories that collect database 
+			   information interactively by showing a login dialog, etc. 
                </p>
 				</subsection>
 
