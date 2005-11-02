@@ -59,22 +59,20 @@ package org.objectstyle.cayenne.util;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 // TODO: Merge with ModelerStrings (avoid code duplication). Allow
 // customizable bundle location.
 
 /**
- * Provides access to various modeler resources (mainly strings)
- * obtained via a ResourceBundle.
+ * Provides access to various modeler resources (mainly strings) obtained via a
+ * ResourceBundle.
  * 
  * @author Andrei Adamchik
  */
 public class LocalizedStringsHandler {
-    static final Logger logObj = Logger.getLogger(LocalizedStringsHandler.class);
 
-    public static final String DEFAULT_MESSAGE_BUNDLE =
-        "org.objectstyle.cayenne.cayenne-strings";
+    public static final String DEFAULT_MESSAGE_BUNDLE = "org.objectstyle.cayenne.cayenne-strings";
 
     protected static ResourceBundle bundle;
 
@@ -90,7 +88,6 @@ public class LocalizedStringsHandler {
             return getBundle().getString(key);
         }
         catch (Throwable e) {
-            logObj.info("Error getting resource: " + key, e);
             return "";
         }
     }
@@ -101,7 +98,8 @@ public class LocalizedStringsHandler {
                 bundle = ResourceBundle.getBundle(DEFAULT_MESSAGE_BUNDLE);
             }
             catch (MissingResourceException e) {
-                logObj.error("Can't load properties: " + DEFAULT_MESSAGE_BUNDLE, e);
+                throw new CayenneRuntimeException("Can't load properties: "
+                        + DEFAULT_MESSAGE_BUNDLE, e);
             }
         }
         return bundle;

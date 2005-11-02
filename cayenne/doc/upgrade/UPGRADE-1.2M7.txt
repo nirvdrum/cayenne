@@ -62,3 +62,7 @@ UPGRADE FROM 1.1:
   If you were using EventManager.getDefaultManager() to communicate or receive Cayenne stack 
   events, you'll have to switch to Configuration.getEventManager(). Otherwise default manager
   can be accessed as before.
+
+* Query.setLoggingLevel/getLoggingLevel methods are removed from the interface and AbstractQuery
+  implementor. As multi-tier Cayenne doesn't use Log4J, it was no longer possible to keep these methods 
+  deprecated.

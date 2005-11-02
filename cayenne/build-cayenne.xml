@@ -89,12 +89,6 @@
 				<include name=".cayenne/**"/>
             	<include name="dotemplates/**"/>
 			</fileset>
-			
-			<!-- 
-				include a single dependency - org.apache.log4j.Level and Priority
-				TODO: remove this once deprecated log levels are removed from the code
-			-->
-			<fileset dir="${core.build.deps}" includes="org/apache/log4j/Level.class,org/apache/log4j/Priority.class"/>
             
             <metainf dir="doc/licenses" includes="LICENSE"/>
             <manifest>
@@ -121,6 +115,8 @@
 				<exclude name="org/objectstyle/cayenne/DataObject.class"/>
 			-->
 				<exclude name="org/objectstyle/cayenne/CayenneDataObject.class"/>
+				<exclude name="org/objectstyle/cayenne/util/ResourceLocator.class"/>
+				<exclude name="org/objectstyle/cayenne/util/WebApplicationResourceLocator.class"/>
 				<exclude name="org/objectstyle/cayenne/access/**"/>
 				<exclude name="org/objectstyle/cayenne/conf/**"/>
 				<exclude name="org/objectstyle/cayenne/conn/**"/>
@@ -134,12 +130,6 @@
 				<exclude name="org/objectstyle/cayenne/opp/hessian/HessianServlet.class"/>
 				<exclude name="org/objectstyle/cayenne/opp/hessian/HessianServiceHandler.class"/>
 			</fileset>
-			
-			<!-- 
-				include a single dependency - org.apache.log4j.Level and Priority
-				TODO: remove this once deprecated log levels are removed from the code
-			-->
-			<fileset dir="${core.build.deps}" includes="org/apache/log4j/Level.class,org/apache/log4j/Priority.class"/>
 			
 			<fileset dir="${core.build.properties}">
 				<include name="**/*.properties"/>

@@ -94,17 +94,17 @@ public class ResourceLocator {
         logObj = new PredicateLogger(ResourceLocator.class, p);
     }
 
-    /** properties for enabling/disabling certain lookup strategies */
+    // properties for enabling/disabling certain lookup strategies
     protected boolean skipAbsolutePath;
     protected boolean skipClasspath;
     protected boolean skipCurrentDirectory;
     protected boolean skipHomeDirectory;
 
-    /** additional lookup paths (as Strings) */
+    // additional lookup paths (as Strings) 
     protected List additionalClassPaths;
     protected List additionalFilesystemPaths;
 
-    /** ClassLoader used for resource loading */
+    // ClassLoader used for resource loading
     protected ClassLoader classLoader;
 
     /**

@@ -59,7 +59,6 @@ package org.objectstyle.cayenne.query;
 import java.io.IOException;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -105,25 +104,6 @@ public abstract class AbstractQuery implements Query {
      */
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * Returns the <code>logLevel</code> property of this query. Log level is a hint to
-     * QueryEngine that performs this query to log execution with a certain priority.
-     * 
-     * @deprecated since 1.2
-     */
-    public Level getLoggingLevel() {
-        return Level.INFO;
-    }
-
-    /**
-     * Sets the <code>logLevel</code> property.
-     * 
-     * @deprecated since 1.2
-     */
-    public void setLoggingLevel(Level logLevel) {
-        // noop
     }
 
     /**

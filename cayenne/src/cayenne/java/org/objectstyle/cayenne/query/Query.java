@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.query;
 
-import org.apache.log4j.Level;
 
 /**
  * An interface of a generic query that can be executed via Cayenne.
@@ -63,11 +62,6 @@ import org.apache.log4j.Level;
  * @author Andrei Adamchik
  */
 public interface Query extends QueryExecutionPlan {
-
-    /**
-     * @deprecated Unused since 1.2
-     */
-    public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
 
     /**
      * Returns a symbolic name of the query.
@@ -82,16 +76,6 @@ public interface Query extends QueryExecutionPlan {
      * @since 1.1
      */
     void setName(String name);
-
-    /**
-     * @deprecated Unused since 1.2
-     */
-    Level getLoggingLevel();
-
-    /**
-     * @deprecated Unused since 1.2
-     */
-    void setLoggingLevel(Level level);
 
     /**
      * Returns the root object of the query.

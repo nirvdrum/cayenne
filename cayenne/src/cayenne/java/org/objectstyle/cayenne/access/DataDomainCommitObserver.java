@@ -174,7 +174,7 @@ class DataDomainCommitObserver implements OperationObserver {
      * @deprecated Unused since 1.2
      */
     public Level getLoggingLevel() {
-        return Query.DEFAULT_LOG_LEVEL;
+        return Level.INFO;
     }
 
     public boolean isIteratedResult() {
