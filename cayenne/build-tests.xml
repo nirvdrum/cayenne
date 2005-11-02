@@ -30,6 +30,7 @@
 	
 	<path id="agnostic-classpath">
 		<fileset dir="${otherlib.dir}">
+			<include name="${hsqldb.jar}"/>
 			<include name="${vpp.jar}"/>
 			<include name="${ant-junit.jar}"/>
 			<include name="${emma.jar}"/>
