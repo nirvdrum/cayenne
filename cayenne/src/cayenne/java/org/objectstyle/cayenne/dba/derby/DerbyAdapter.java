@@ -70,59 +70,64 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 
 /**
- * DbAdapter implementation for the <a
- * href="http://incubator.apache.org/derby/"> Derby RDBMS </a>. Sample <a
- * target="_top"
- * href="../../../../../../../developerguide/unit-tests.html">connection
- * settings </a> to use with Derby are shown below:
+ * DbAdapter implementation for the <a href="http://incubator.apache.org/derby/"> Derby
+ * RDBMS </a>. Sample <a target="_top"
+ * href="../../../../../../../developerguide/unit-tests.html">connection settings </a> to
+ * use with Derby are shown below:
  * 
  * <pre>
- *    test-derby.cayenne.adapter = org.objectstyle.cayenne.dba.derby.DerbyAdapter
- *    test-derby.jdbc.url = jdbc:derby:testdb;create=true
- *    test-derby.jdbc.driver = org.apache.derby.jdbc.EmbeddedDriver
+ *             test-derby.cayenne.adapter = org.objectstyle.cayenne.dba.derby.DerbyAdapter
+ *             test-derby.jdbc.url = jdbc:derby:testdb;create=true
+ *             test-derby.jdbc.driver = org.apache.derby.jdbc.EmbeddedDriver
  * </pre>
- *  
  */
 public class DerbyAdapter extends JdbcAdapter {
 
+    static final String FOR_BIT_DATA_SUFFIX = " FOR BIT DATA";
+
     /**
-     * Installs appropriate ExtendedTypes as converters for passing values
-     * between JDBC and Java layers.
+     * Installs appropriate ExtendedTypes as converters for passing values between JDBC
+     * and Java layers.
      */
     protected void configureExtendedTypes(ExtendedTypeMap map) {
         super.configureExtendedTypes(map);
 
         // create specially configured CharType handler
         map.registerType(new CharType(true, false));
-        
+
         // address Derby driver inability to handle java.lang.Short and java.lang.Byte
         map.registerType(new ShortType(true));
         map.registerType(new ByteType(true));
     }
 
     /**
-     * Appends SQL for column creation to CREATE TABLE buffer.
-     * 
-     * Only change for Derby is that " NULL" is not supported.
+     * Appends SQL for column creation to CREATE TABLE buffer. Only change for Derby is
+     * that " NULL" is not supported.
      * 
      * @since 1.2
      */
     protected void createTableAppendColumn(StringBuffer sqlBuffer, DbAttribute column) {
+
         String[] types = externalTypesForJdbcType(column.getType());
         if (types == null || types.length == 0) {
-            String entityName = column.getEntity() != null ? ((DbEntity) column.getEntity())
-                    .getFullyQualifiedName() : "<null>";
-            throw new CayenneRuntimeException("Undefined type for attribute '" + entityName + "."
-                    + column.getName() + "': " + column.getType());
+            String entityName = column.getEntity() != null ? ((DbEntity) column
+                    .getEntity()).getFullyQualifiedName() : "<null>";
+            throw new CayenneRuntimeException("Undefined type for attribute '"
+                    + entityName
+                    + "."
+                    + column.getName()
+                    + "': "
+                    + column.getType());
         }
 
         String type = types[0];
-        sqlBuffer.append(column.getName()).append(' ').append(type);
 
-        // append size and precision (if applicable)
+        String length = "";
         if (TypesMapping.supportsLength(column.getType())) {
             int len = column.getMaxLength();
-            int prec = TypesMapping.isDecimal(column.getType()) ? column.getPrecision() : -1;
+            int prec = TypesMapping.isDecimal(column.getType())
+                    ? column.getPrecision()
+                    : -1;
 
             // sanity check
             if (prec > len) {
@@ -130,17 +135,31 @@ public class DerbyAdapter extends JdbcAdapter {
             }
 
             if (len > 0) {
-                sqlBuffer.append('(').append(len);
+                length = " (" + len;
 
                 if (prec >= 0) {
-                    sqlBuffer.append(", ").append(prec);
+                    length += ", " + prec;
                 }
 
-                sqlBuffer.append(')');
+                length += ")";
             }
         }
 
-        //sqlBuffer.append(column.isMandatory() ? " NOT NULL" : " NULL");
+        // assemble...
+        // note that max length for types like XYZ FOR BIT DATA must be entered in the
+        // middle of type name, e.g. VARCHAR (100) FOR BIT DATA.
+
+        sqlBuffer.append(column.getName()).append(' ');
+        if (length.length() > 0 && type.endsWith(FOR_BIT_DATA_SUFFIX)) {
+            sqlBuffer.append(type.substring(0, type.length()
+                    - FOR_BIT_DATA_SUFFIX.length()));
+            sqlBuffer.append(length);
+            sqlBuffer.append(FOR_BIT_DATA_SUFFIX);
+        }
+        else {
+            sqlBuffer.append(type).append(length);
+        }
+
         if (column.isMandatory()) {
             sqlBuffer.append(" NOT NULL");
         }
