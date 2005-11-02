@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,74 +53,53 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.project.validator;
+package org.objectstyle.cayenne.conf;
 
-import java.util.Iterator;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-import org.objectstyle.cayenne.access.DataDomain;
+import javax.sql.DataSource;
+
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
-import org.objectstyle.cayenne.project.ProjectPath;
-import org.objectstyle.cayenne.util.Util;
 
 /**
- * @author Andrei Adamchik
+ * A DataSource wrapper around Cayenne DataNode. Helpful for lazy initialization, i.e.
+ * when node's DataSource is needed to initialize some other object BEFORE it is
+ * initialized itself.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public class DataNodeValidator extends TreeNodeValidator {
+class NodeDataSource implements DataSource {
 
-    /**
-     * Constructor for DataNodeValidator.
-     */
-    public DataNodeValidator() {
-        super();
+    DataNode node;
+
+    NodeDataSource(DataNode node) {
+        this.node = node;
     }
 
-    public void validateObject(ProjectPath path, Validator validator) {
-        DataNode node = (DataNode) path.getObject();
-        validateName(node, path, validator);
-        validateConnection(node, path, validator);
+    public Connection getConnection() throws SQLException {
+        return node.getDataSource().getConnection();
     }
 
-    protected void validateConnection(DataNode node, ProjectPath path, Validator validator) {
-        String factory = node.getDataSourceFactory();
-
-        // If direct factory, make sure the location is a valid file name.
-        if (Util.isEmptyString(factory)) {
-            validator.registerError("No DataSource factory.", path);
-        }
-        else if (!DriverDataSourceFactory.class.getName().equals(factory)) {
-            String location = node.getDataSourceLocation();
-            if (Util.isEmptyString(location)) {
-                validator.registerError("DataNode has no location parameter.", path);
-            }
-        }
+    public Connection getConnection(String username, String password) throws SQLException {
+        return node.getDataSource().getConnection(username, password);
     }
 
-    protected void validateName(DataNode node, ProjectPath path, Validator validator) {
-        String name = node.getName();
+    public PrintWriter getLogWriter() throws SQLException {
+        return node.getDataSource().getLogWriter();
+    }
 
-        if (Util.isEmptyString(name)) {
-            validator.registerError("Unnamed DataNode.", path);
-            return;
-        }
+    public void setLogWriter(PrintWriter out) throws SQLException {
+        node.getDataSource().setLogWriter(out);
+    }
 
-        DataDomain domain = (DataDomain) path.getObjectParent();
-        if (domain == null) {
-            return;
-        }
+    public void setLoginTimeout(int seconds) throws SQLException {
+        node.getDataSource().setLoginTimeout(seconds);
+    }
 
-        // check for duplicate names in the parent context
-        Iterator it = domain.getDataNodes().iterator();
-        while (it.hasNext()) {
-            DataNode otherNode = (DataNode) it.next();
-            if (otherNode == node) {
-                continue;
-            }
-
-            if (name.equals(otherNode.getName())) {
-                validator.registerError("Duplicate DataNode name: " + name + ".", path);
-                break;
-            }
-        }
+    public int getLoginTimeout() throws SQLException {
+        return node.getDataSource().getLoginTimeout();
     }
 }

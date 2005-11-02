@@ -61,6 +61,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 
+import javax.sql.DataSource;
+
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationObserver;
@@ -94,6 +96,7 @@ import org.objectstyle.cayenne.query.SQLAction;
  */
 public class AutoAdapter implements DbAdapter {
 
+    // hardcoded factories for adapters that we know how to auto-detect
     static final DbAdapterFactory[] DEFAULT_FACTORIES = new DbAdapterFactory[] {
             new MySQLSniffer(), new PostgresSniffer(), new OracleSniffer(),
             new SQLServerSniffer(), new HSQLDBSniffer(), new DB2Sniffer(),
@@ -109,7 +112,7 @@ public class AutoAdapter implements DbAdapter {
     }
 
     protected DbAdapterFactory adapterFactory;
-    protected DataNode dataNode;
+    protected DataSource dataSource;
 
     /**
      * The actual adapter that is delegated method execution.
@@ -119,17 +122,26 @@ public class AutoAdapter implements DbAdapter {
     /**
      * Creates an AutoAdapter that can detect adapters known to Cayenne.
      */
-    public AutoAdapter(DataNode dataNode) {
-        this(getDefaultFactory(), dataNode);
+    public AutoAdapter(DataSource dataSource) {
+        this(getDefaultFactory(), dataSource);
     }
 
-    public AutoAdapter(DbAdapterFactory adapterFactory, DataNode dataNode) {
+    public AutoAdapter(DbAdapterFactory adapterFactory, DataSource dataSource) {
+        // sanity check
+        if (adapterFactory == null) {
+            throw new CayenneRuntimeException("Null adapterFactory");
+        }
+
+        if (dataSource == null) {
+            throw new CayenneRuntimeException("Null dataSource");
+        }
+
         this.adapterFactory = adapterFactory;
-        this.dataNode = dataNode;
+        this.dataSource = dataSource;
     }
 
     /**
-     * Returns a proxied DbAdapter, creating it on first invocation.
+     * Returns a proxied DbAdapter, lazily creating it on first invocation.
      */
     protected DbAdapter getAdapter() {
         if (adapter == null) {
@@ -150,7 +162,7 @@ public class AutoAdapter implements DbAdapter {
         DbAdapter adapter = null;
 
         try {
-            Connection c = dataNode.getDataSource().getConnection();
+            Connection c = dataSource.getConnection();
 
             try {
                 adapter = adapterFactory.createAdapter(c.getMetaData());

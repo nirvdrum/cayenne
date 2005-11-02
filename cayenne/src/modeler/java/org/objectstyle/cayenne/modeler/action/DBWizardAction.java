@@ -83,6 +83,9 @@ public abstract class DBWizardAction extends CayenneAction {
         DBConnectionInfo nodeInfo = new DBConnectionInfo();
 
         nodeInfo.copyFrom(((ProjectDataSource) node.getDataSource()).getDataSourceInfo());
+
+        // by default use auto-adapter
+        nodeInfo.setDbAdapter(null);
         if (node.getAdapter() != null) {
             nodeInfo.setDbAdapter(node.getAdapter().getClass().getName());
         }

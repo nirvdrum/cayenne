@@ -118,7 +118,7 @@ public class AntMain extends Main {
 
    
         DataNode node = new DataNode("node");
-        node.setAdapter(new AutoAdapter(node));
+        node.setAdapter(new AutoAdapter(ds));
         node.setDataSource(ds);
 
         // domain

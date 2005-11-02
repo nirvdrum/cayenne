@@ -95,7 +95,6 @@ public class DBConnectionInfoEditor extends CayenneController {
 
         DefaultComboBoxModel adapterModel = new DefaultComboBoxModel(DbAdapterInfo
                 .getStandardAdapters());
-        adapterModel.insertElementAt("", 0);
         view.getAdapters().setModel(adapterModel);
         view.getAdapters().setSelectedIndex(0);
 
@@ -104,19 +103,21 @@ public class DBConnectionInfoEditor extends CayenneController {
                 this);
 
         bindings = new ObjectBinding[5];
-        bindings[0] = builder.bindToComboSelection(
-                view.getAdapters(),
-                "connectionInfo.dbAdapter");
-        bindings[1] = builder.bindToTextField(
+
+        bindings[0] = builder.bindToTextField(
                 view.getUserName(),
                 "connectionInfo.userName");
-        bindings[2] = builder.bindToTextField(
+        bindings[1] = builder.bindToTextField(
                 view.getPassword(),
                 "connectionInfo.password");
-        bindings[3] = builder.bindToTextField(
+        bindings[2] = builder.bindToTextField(
                 view.getDriver(),
                 "connectionInfo.jdbcDriver");
-        bindings[4] = builder.bindToTextField(view.getUrl(), "connectionInfo.url");
+        bindings[3] = builder.bindToTextField(view.getUrl(), "connectionInfo.url");
+
+        bindings[4] = builder.bindToComboSelection(
+                view.getAdapters(),
+                "connectionInfo.dbAdapter", "Automatic");
     }
 
     public DBConnectionInfo getConnectionInfo() {

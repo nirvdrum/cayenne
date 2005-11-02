@@ -71,8 +71,8 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DBCPDataSourceFactory;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.conf.JNDIDataSourceFactory;
+import org.objectstyle.cayenne.dba.AutoAdapter;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.pref.PreferenceDialog;
@@ -155,14 +155,13 @@ public class DataNodeEditor extends CayenneController {
     }
 
     public String getAdapterName() {
-        // fix no adapter case... does it ever happen now? (it used to when an empty
-        // string
-        // was typed)
-        if (node != null && node.getAdapter() == null) {
-            node.setAdapter(new JdbcAdapter());
+        if (node != null) {
+            return (node.getAdapter() != null && node.getAdapter().getClass() != AutoAdapter.class)
+                    ? node.getAdapter().getClass().getName()
+                    : null;
         }
 
-        return (node != null) ? node.getAdapter().getClass().getName() : null;
+        return null;
     }
 
     public void setAdapterName(String name) {
@@ -170,8 +169,11 @@ public class DataNodeEditor extends CayenneController {
             return;
         }
 
+        // null will result in using AutoAdapter
         if (name == null) {
-            // simply ignore null name
+            if (getAdapterName() != null) {
+                node.setAdapter(new AutoAdapter(node.getDataSource()));
+            }
             return;
         }
 
@@ -294,7 +296,10 @@ public class DataNodeEditor extends CayenneController {
         bindings = new ObjectBinding[3];
         bindings[0] = builder.bindToTextField(view.getDataNodeName(), "nodeName");
         bindings[1] = builder.bindToComboSelection(view.getFactories(), "factoryName");
-        bindings[2] = builder.bindToComboSelection(view.getAdapters(), "adapterName");
+        bindings[2] = builder.bindToComboSelection(
+                view.getAdapters(),
+                "adapterName",
+                "Automatic");
 
         // one way bindings
         builder

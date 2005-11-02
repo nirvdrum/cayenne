@@ -61,6 +61,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
+import org.objectstyle.cayenne.dba.AutoAdapter;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
@@ -128,8 +129,10 @@ public class CreateNodeAction extends CayenneAction {
                 DataNode.class,
                 domain,
                 domain.getName() + "Node");
+
         ProjectDataSource src = new ProjectDataSource(new DataSourceInfo());
         node.setDataSource(src);
+        node.setAdapter(new AutoAdapter(src));
 
         // by default create JDBC Node
         node.setDataSourceFactory(DriverDataSourceFactory.class.getName());

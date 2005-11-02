@@ -99,11 +99,11 @@ public class DBConnectionInfoEditorView extends JPanel {
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
-        labels.add(builder.append("Adapter:", adapters));
         labels.add(builder.append("JDBC Driver:", driver));
         labels.add(builder.append("DB URL:", url));
         labels.add(builder.append("User Name:", userName));
         labels.add(builder.append("Password:", password));
+        labels.add(builder.append("Adapter (optional):", adapters));
 
         this.setLayout(new BorderLayout());
         this.add(builder.getPanel(), BorderLayout.CENTER);

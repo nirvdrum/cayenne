@@ -40,22 +40,34 @@ import javax.sql.DataSource;
 
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.DriverDataSource;
+import org.objectstyle.cayenne.dba.AutoAdapter;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.modeler.ClassLoadingService;
 import org.objectstyle.cayenne.util.Util;
 
 public class DBConnectionInfo extends _DBConnectionInfo {
 
+    public void setDbAdapter(String dbAdapter) {
+        if (AutoAdapter.class.getName().equals(dbAdapter)) {
+            dbAdapter = null;
+        }
+        
+        super.setDbAdapter(dbAdapter);
+    }
+
     /**
      * Creates a DbAdapter based on configured values.
      */
     public DbAdapter makeAdapter(ClassLoadingService classLoader) throws Exception {
-        if (getDbAdapter() == null) {
-            throw new Exception("No DbAdapter set.");
+        String adapterClassName = getDbAdapter();
+
+        if (adapterClassName == null
+                || AutoAdapter.class.getName().equals(adapterClassName)) {
+            return new AutoAdapter(makeDataSource(classLoader));
         }
 
         try {
-            return (DbAdapter) classLoader.loadClass(getDbAdapter()).newInstance();
+            return (DbAdapter) classLoader.loadClass(adapterClassName).newInstance();
         }
         catch (Throwable th) {
             th = Util.unwindException(th);
@@ -187,4 +199,3 @@ public class DBConnectionInfo extends _DBConnectionInfo {
         return updated;
     }
 }
-

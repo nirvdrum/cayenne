@@ -88,6 +88,13 @@ public class ComboSelectionBinding extends BindingBase {
         this.comboBox = comboBox;
         this.noSelectionValue = noSelectionValue;
 
+        // insert no selection value as first item in the combobox if it is not there
+        if (noSelectionValue != null
+                && (comboBox.getItemCount() == 0 || comboBox.getItemAt(0) != noSelectionValue)) {
+
+            comboBox.insertItemAt(noSelectionValue, 0);
+        }
+
         comboBox.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
