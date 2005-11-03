@@ -67,24 +67,24 @@ import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**
- * A panel for DataNode configuration.
+ * A view for the main DataNode editor tab.
+ * 
+ * @author Andrus Adamchik
  */
-public class DataNodeView extends JPanel {
+public class MainDataNodeView extends JPanel {
 
     protected JTextField dataNodeName;
     protected JComboBox factories;
     protected JPanel dataSourceDetail;
     protected CardLayout dataSourceDetailLayout;
-    protected JComboBox adapters;
     protected JComboBox localDataSources;
     protected JButton configLocalDataSources;
 
-    public DataNodeView() {
+    public MainDataNodeView() {
 
         // create widgets
         this.dataNodeName = new JTextField();
         this.factories = new JComboBox();
-        this.adapters = new JComboBox();
         this.localDataSources = new JComboBox();
 
         this.dataSourceDetailLayout = new CardLayout();
@@ -102,7 +102,6 @@ public class DataNodeView extends JPanel {
 
         topPanelBuilder.appendSeparator("DataNode Configuration");
         topPanelBuilder.append("DataNode Name:", dataNodeName, 3);
-        topPanelBuilder.append("DB Adapter:", adapters, 3);
         topPanelBuilder.append(
                 "Local DataSource (opt.):",
                 localDataSources,
@@ -112,10 +111,6 @@ public class DataNodeView extends JPanel {
         setLayout(new BorderLayout());
         add(topPanelBuilder.getPanel(), BorderLayout.NORTH);
         add(dataSourceDetail, BorderLayout.CENTER);
-    }
-
-    public JComboBox getAdapters() {
-        return adapters;
     }
 
     public JTextField getDataNodeName() {

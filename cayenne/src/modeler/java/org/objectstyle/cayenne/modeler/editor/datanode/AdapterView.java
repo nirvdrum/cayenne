@@ -55,29 +55,36 @@
  */
 package org.objectstyle.cayenne.modeler.editor.datanode;
 
-import java.awt.Component;
+import java.awt.BorderLayout;
 
-import javax.swing.JTabbedPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
-import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.modeler.util.CayenneController;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
-/**
- * @author Andrus Adamchik
- */
-public class DataNodeEditor extends CayenneController {
+public class AdapterView extends JPanel {
 
-    protected JTabbedPane view;
+    protected JTextField customAdapter;
 
-    public DataNodeEditor(ProjectController parent) {
-        super(parent);
+    public AdapterView() {
+        this.customAdapter = new JTextField();
 
-        this.view = new JTabbedPane();
-        view.addTab("Main", new MainDataNodeEditor(parent).getView());
-        view.addTab("Adapter", new AdapterEditor(parent).getView());
+        // assemble
+
+        DefaultFormBuilder topPanelBuilder = new DefaultFormBuilder(new FormLayout(
+                "right:80dlu, 3dlu, fill:200dlu",
+                ""));
+        topPanelBuilder.setDefaultDialogBorder();
+
+        topPanelBuilder.appendSeparator("DbAdapter Configuration");
+        topPanelBuilder.append("Custom Adapter (optional):", customAdapter);
+
+        setLayout(new BorderLayout());
+        add(topPanelBuilder.getPanel(), BorderLayout.CENTER);
     }
 
-    public Component getView() {
-        return view;
+    public JTextField getCustomAdapter() {
+        return customAdapter;
     }
 }

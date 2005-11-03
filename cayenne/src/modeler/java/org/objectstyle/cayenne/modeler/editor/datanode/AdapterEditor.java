@@ -56,28 +56,110 @@
 package org.objectstyle.cayenne.modeler.editor.datanode;
 
 import java.awt.Component;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
-import javax.swing.JTabbedPane;
-
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.dba.AutoAdapter;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
+import org.objectstyle.cayenne.swing.BindingBuilder;
+import org.objectstyle.cayenne.swing.ObjectBinding;
+import org.objectstyle.cayenne.validation.ValidationException;
 
 /**
  * @author Andrus Adamchik
  */
-public class DataNodeEditor extends CayenneController {
+public class AdapterEditor extends CayenneController {
 
-    protected JTabbedPane view;
+    protected AdapterView view;
+    protected DataNode node;
+    protected ObjectBinding adapterNameBinding;
 
-    public DataNodeEditor(ProjectController parent) {
+    public AdapterEditor(CayenneController parent) {
         super(parent);
 
-        this.view = new JTabbedPane();
-        view.addTab("Main", new MainDataNodeEditor(parent).getView());
-        view.addTab("Adapter", new AdapterEditor(parent).getView());
+        this.view = new AdapterView();
+        initController();
+    }
+
+    protected void initController() {
+        // init bindings
+        BindingBuilder builder = new BindingBuilder(
+                getApplication().getBindingFactory(),
+                this);
+
+        adapterNameBinding = builder.bindToTextField(
+                view.getCustomAdapter(),
+                "adapterName");
+
+        // init listeners
+        ((ProjectController) getParent())
+                .addDataNodeDisplayListener(new DataNodeDisplayListener() {
+
+                    public void currentDataNodeChanged(DataNodeDisplayEvent e) {
+                        refreshView(e.getDataNode());
+                    }
+                });
+
+        getView().addComponentListener(new ComponentAdapter() {
+
+            public void componentShown(ComponentEvent e) {
+                refreshView(node != null ? node : ((ProjectController) getParent())
+                        .getCurrentDataNode());
+            }
+        });
+    }
+
+    protected void refreshView(DataNode node) {
+        this.node = node;
+
+        if (node == null) {
+            getView().setVisible(false);
+            return;
+        }
+
+        adapterNameBinding.updateView();
     }
 
     public Component getView() {
         return view;
+    }
+
+    public String getAdapterName() {
+        if (node != null) {
+            return (node.getAdapter() != null && node.getAdapter().getClass() != AutoAdapter.class)
+                    ? node.getAdapter().getClass().getName()
+                    : null;
+        }
+
+        return null;
+    }
+
+    public void setAdapterName(String name) {
+        if (node == null) {
+            return;
+        }
+
+        // null will result in using AutoAdapter
+        if (name == null) {
+            if (getAdapterName() != null) {
+                node.setAdapter(new AutoAdapter(node.getDataSource()));
+            }
+            return;
+        }
+
+        try {
+            Class adapterClass = getApplication()
+                    .getClassLoadingService()
+                    .loadClass(name);
+            node.setAdapter((DbAdapter) adapterClass.newInstance());
+        }
+        catch (Throwable ex) {
+            throw new ValidationException("Unknown DbAdapter: " + name);
+        }
     }
 }
