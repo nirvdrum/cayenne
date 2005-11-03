@@ -61,11 +61,11 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.property.PropertyUtils;
 
 /**
- * ValidationFailure implementation that described a failure of a single
- * named property of a Java Bean object.
+ * ValidationFailure implementation that described a failure of a single named property of
+ * a Java Bean object.
  * 
  * @author Fabricio Voznika
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  * @since 1.1
  */
 public class BeanValidationFailure extends SimpleValidationFailure {
@@ -79,35 +79,33 @@ public class BeanValidationFailure extends SimpleValidationFailure {
     }
 
     /**
-     * Returns a ValidationFailure if a collection attribute
-     * of an object is null or empty.
+     * Returns a ValidationFailure if a collection attribute of an object is null or
+     * empty.
      */
     public static ValidationFailure validateNotEmpty(
-        Object bean,
-        String attribute,
-        Collection value) {
+            Object bean,
+            String attribute,
+            Collection value) {
 
         if (value == null) {
-            return new BeanValidationFailure(
-                bean,
-                attribute,
-                validationMessage(attribute, " is required."));
+            return new BeanValidationFailure(bean, attribute, validationMessage(
+                    attribute,
+                    " is required."));
         }
 
         if (value.isEmpty()) {
-            return new BeanValidationFailure(
-                bean,
-                attribute,
-                validationMessage(attribute, " can not be empty."));
+            return new BeanValidationFailure(bean, attribute, validationMessage(
+                    attribute,
+                    " can not be empty."));
         }
 
         return null;
     }
 
     public static ValidationFailure validateMandatory(
-        Object bean,
-        String attribute,
-        Object value) {
+            Object bean,
+            String attribute,
+            Object value) {
 
         if (value instanceof String) {
             return validateNotEmpty(bean, attribute, (String) value);
@@ -128,40 +126,90 @@ public class BeanValidationFailure extends SimpleValidationFailure {
             return validateMandatory(bean, attribute, result);
         }
         catch (Exception ex) {
-            throw new CayenneRuntimeException(
-                "Error validationg bean property: "
+            throw new CayenneRuntimeException("Error validationg bean property: "
                     + bean.getClass().getName()
                     + "."
-                    + attribute,
-                ex);
+                    + attribute, ex);
         }
     }
 
     public static ValidationFailure validateNotNull(
-        Object bean,
-        String attribute,
-        Object value) {
+            Object bean,
+            String attribute,
+            Object value) {
 
         if (value == null) {
-            return new BeanValidationFailure(
-                bean,
-                attribute,
-                validationMessage(attribute, " is required."));
+            return new BeanValidationFailure(bean, attribute, validationMessage(
+                    attribute,
+                    " is required."));
         }
 
         return null;
     }
 
+    /**
+     * A utility methid that returns a ValidationFailure if a string is either null or has
+     * a length of zero; otherwise returns null.
+     */
     public static ValidationFailure validateNotEmpty(
-        Object bean,
-        String attribute,
-        String value) {
+            Object bean,
+            String attribute,
+            String value) {
+
         if (value == null || value.length() == 0) {
-            return new BeanValidationFailure(
-                bean,
-                attribute,
-                validationMessage(attribute, " is a required field."));
+            return new BeanValidationFailure(bean, attribute, validationMessage(
+                    attribute,
+                    " is a required field."));
         }
+        return null;
+    }
+
+    /**
+     * A utility method that checked that a given string is a valid Java identifier.
+     * 
+     * @since 1.2
+     */
+    public static ValidationFailure validateJavaClassName(
+            Object bean,
+            String attribute,
+            String identifier) {
+
+        ValidationFailure emptyFailure = validateNotEmpty(bean, attribute, identifier);
+        if (emptyFailure != null) {
+            return emptyFailure;
+        }
+
+        char c = identifier.charAt(0);
+        if (!Character.isJavaIdentifierStart(c)) {
+            return new BeanValidationFailure(bean, attribute, validationMessage(
+                    attribute,
+                    " starts with invalid character: " + c));
+        }
+
+        boolean wasDot = false;
+        for (int i = 1; i < identifier.length(); i++) {
+            c = identifier.charAt(i);
+
+            if (c == '.') {
+                if (wasDot || i + 1 == identifier.length()) {
+                    return new BeanValidationFailure(bean, attribute, validationMessage(
+                            attribute,
+                            " is not a valid Java Class Name: " + identifier));
+                }
+
+                wasDot = true;
+                continue;
+            }
+
+            if (!Character.isJavaIdentifierPart(c)) {
+                return new BeanValidationFailure(bean, attribute, validationMessage(
+                        attribute,
+                        " contains invalid character: " + c));
+            }
+
+            wasDot = false;
+        }
+
         return null;
     }
 
@@ -172,7 +220,8 @@ public class BeanValidationFailure extends SimpleValidationFailure {
         super(source, error);
 
         if (source == null && property != null) {
-            throw new IllegalArgumentException("ValidationFailure cannot have 'property' when 'source' is null.");
+            throw new IllegalArgumentException(
+                    "ValidationFailure cannot have 'property' when 'source' is null.");
         }
 
         this.property = property;
@@ -200,7 +249,7 @@ public class BeanValidationFailure extends SimpleValidationFailure {
         else {
             String property = getProperty();
             buffer.append(source.getClass().getName()).append('.').append(
-                (property == null ? "[General]" : property));
+                    (property == null ? "[General]" : property));
         }
         buffer.append(": ");
         buffer.append(getDescription());

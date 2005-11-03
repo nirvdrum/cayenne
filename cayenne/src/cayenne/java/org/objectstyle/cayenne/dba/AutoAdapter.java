@@ -126,21 +126,31 @@ public class AutoAdapter implements DbAdapter {
      * Creates an AutoAdapter that can detect adapters known to Cayenne.
      */
     public AutoAdapter(DataSource dataSource) {
-        this(getDefaultFactory(), dataSource);
+        this(null, dataSource);
     }
 
+    /**
+     * Creates an AutoAdapter with specified adapter factory and DataSource. If
+     * adapterFactory is null, default factory is used.
+     */
     public AutoAdapter(DbAdapterFactory adapterFactory, DataSource dataSource) {
         // sanity check
-        if (adapterFactory == null) {
-            throw new CayenneRuntimeException("Null adapterFactory");
-        }
-
         if (dataSource == null) {
             throw new CayenneRuntimeException("Null dataSource");
         }
 
-        this.adapterFactory = adapterFactory;
+        this.adapterFactory = adapterFactory != null
+                ? adapterFactory
+                : createDefaultFactory();
         this.dataSource = dataSource;
+    }
+
+    /**
+     * Called from constructor to initialize factory in case no factory was specified by
+     * the object creator.
+     */
+    protected DbAdapterFactory createDefaultFactory() {
+        return getDefaultFactory();
     }
 
     /**
