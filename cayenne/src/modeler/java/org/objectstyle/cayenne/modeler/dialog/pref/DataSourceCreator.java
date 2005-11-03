@@ -63,8 +63,8 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-import org.objectstyle.cayenne.modeler.AdapterMapping;
 import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
+import org.objectstyle.cayenne.modeler.util.AdapterMapping;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
 import org.objectstyle.cayenne.pref.Domain;

@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.modeler;
+package org.objectstyle.cayenne.modeler.util;
 
 import java.util.HashMap;
 import java.util.Map;

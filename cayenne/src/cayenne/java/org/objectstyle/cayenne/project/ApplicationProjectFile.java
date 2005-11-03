@@ -63,41 +63,41 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.RuntimeSaveDelegate;
 
 /**
- * ApplicationProjectFile is a ProjectFile abstraction of the 
- * main project file in a Cayenne project. Right now Cayenne 
- * projects can not be renamed, so all the name tracking functionality 
- * is pretty much noop.
+ * ApplicationProjectFile is a ProjectFile abstraction of the main project file in a
+ * Cayenne project. Right now Cayenne projects can not be renamed, so all the name
+ * tracking functionality is pretty much noop.
  * 
  * @author Andrei Adamchik
  */
 public class ApplicationProjectFile extends ProjectFile {
+
     protected ConfigSaverDelegate saveDelegate;
 
-	private String objectName = null;
+    private String objectName = null;
 
     private ApplicationProjectFile() {
-    	super();
+        super();
     }
 
-	/**
-	 * Constructor for default ApplicationProjectFile.
-	 */
-	public ApplicationProjectFile(Project project) {
-		this(project, Configuration.DEFAULT_DOMAIN_FILE);
-	}
-
-	/**
-	 * Constructor for ApplicationProjectFile with an existing file.
-	 */
-	public ApplicationProjectFile(Project project, String fileName) {
-		super(project, fileName);
-		this.objectName = fileName.substring(0, fileName.lastIndexOf(this.getLocationSuffix()));
-	}
+    /**
+     * Constructor for default ApplicationProjectFile.
+     */
+    public ApplicationProjectFile(Project project) {
+        this(project, Configuration.DEFAULT_DOMAIN_FILE);
+    }
 
     /**
-     * Returns suffix to append to object name when 
-     * creating a file name. Default implementation 
-     * returns empty string.
+     * Constructor for ApplicationProjectFile with an existing file.
+     */
+    public ApplicationProjectFile(Project project, String fileName) {
+        super(project, fileName);
+        this.objectName = fileName.substring(0, fileName.lastIndexOf(this
+                .getLocationSuffix()));
+    }
+
+    /**
+     * Returns suffix to append to object name when creating a file name. Default
+     * implementation returns empty string.
      */
     public String getLocationSuffix() {
         return ".xml";
@@ -118,19 +118,20 @@ public class ApplicationProjectFile extends ProjectFile {
     }
 
     public void save(PrintWriter out) throws Exception {
-        ConfigSaverDelegate localDelegate =
-            (saveDelegate != null)
+        ConfigSaverDelegate localDelegate = (saveDelegate != null)
                 ? saveDelegate
-                : new RuntimeSaveDelegate(((ApplicationProject) projectObj).getConfiguration());
+                : new RuntimeSaveDelegate(((ApplicationProject) projectObj)
+                        .getConfiguration());
         new ConfigSaver(localDelegate).storeDomains(out);
     }
 
     public boolean canHandle(Object obj) {
         return obj instanceof ApplicationProject;
     }
-    
+
     /**
      * Returns the saveDelegate.
+     * 
      * @return ConfigSaverDelegate
      */
     public ConfigSaverDelegate getSaveDelegate() {
@@ -139,6 +140,7 @@ public class ApplicationProjectFile extends ProjectFile {
 
     /**
      * Sets the saveDelegate.
+     * 
      * @param saveDelegate The saveDelegate to set
      */
     public void setSaveDelegate(ConfigSaverDelegate saveDelegate) {

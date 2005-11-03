@@ -56,15 +56,10 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.objectstyle.cayenne.ConfigurationException;
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.conf.FileConfiguration;
-import org.objectstyle.cayenne.conf.RuntimeLoadDelegate;
 import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
@@ -92,9 +87,6 @@ public class ProjectConfiguration extends FileConfiguration {
         locator.setSkipClasspath(true);
         locator.setSkipCurrentDirectory(true);
         locator.setSkipHomeDirectory(true);
-
-        // install custom loader
-        setLoaderDelegate(new ProjectLoader());
     }
 
     /**
@@ -134,49 +126,4 @@ public class ProjectConfiguration extends FileConfiguration {
             throw new ProjectException("Error creating DataSourceFactory.", e);
         }
     }
-
-    final class ProjectLoader extends RuntimeLoadDelegate {
-
-        public ProjectLoader() {
-            super(ProjectConfiguration.this, ProjectConfiguration.this.getLoadStatus());
-        }
-
-        public void shouldLoadDataDomain(String domainName) {
-            super.shouldLoadDataDomain(domainName);
-
-            try {
-                // disable class indexing
-                findDomain(domainName).getEntityResolver().setIndexedByClass(false);
-            }
-            catch (Exception ex) {
-                throw new ConfigurationException("Domain is not loaded: " + domainName);
-            }
-        }
-
-        public void shouldLoadDataDomainProperties(String domainName, Map properties) {
-
-            // remove factory property to avoid instatiation attempts for unknown/invalid
-            // classes
-
-            Map propertiesClone = new HashMap(properties);
-            Object dataContextFactory = propertiesClone
-                    .remove(DataDomain.DATA_CONTEXT_FACTORY_PROPERTY);
-
-            super.shouldLoadDataDomainProperties(domainName, propertiesClone);
-
-            // stick property back in...
-            if (dataContextFactory != null) {
-                try {
-                    findDomain(domainName).getProperties().put(
-                            DataDomain.DATA_CONTEXT_FACTORY_PROPERTY,
-                            dataContextFactory);
-                }
-                catch (Exception ex) {
-                    throw new ConfigurationException("Domain is not loaded: "
-                            + domainName);
-                }
-            }
-        }
-    }
-
 }

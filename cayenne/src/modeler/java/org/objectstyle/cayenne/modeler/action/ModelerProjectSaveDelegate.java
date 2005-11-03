@@ -55,65 +55,33 @@
  */
 package org.objectstyle.cayenne.modeler.action;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.KeyStroke;
-
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.CayenneModelerController;
-import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
-import org.objectstyle.cayenne.project.ApplicationProject;
-import org.objectstyle.cayenne.project.NamedObjectFactory;
-import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.conf.RuntimeSaveDelegate;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.modeler.util.ModelerDbAdapter;
 
 /**
- * @author Andrei Adamchik
+ * A custom SaveDelegate that adds some special handling when saving is done from the
+ * Modeler.
+ * 
+ * @author Andrus Adamchik
  */
-public class NewProjectAction extends ProjectAction {
+class ModelerProjectSaveDelegate extends RuntimeSaveDelegate {
 
-    public static String getActionName() {
-        return "New Project";
+    ModelerProjectSaveDelegate(Configuration config) {
+        super(config);
     }
 
-    public NewProjectAction(Application application) {
-        super(getActionName(), application);
-    }
-
-    public String getIconName() {
-        return "icon-new.gif";
-    }
-
-    public KeyStroke getAcceleratorKey() {
-        return KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK);
-    }
-
-    public void performAction(ActionEvent e) {
-
-        CayenneModelerController controller = Application
-                .getInstance()
-                .getFrameController();
-        // Save and close (if needed) currently open project.
-        if (getCurrentProject() != null && !closeProject()) {
-            return;
+    /**
+     * Handles saving adapter name for CustomDbAdapter that is only used within Modeler.
+     */
+    public String nodeAdapterName(String domainName, String nodeName) {
+        DbAdapter adapter = findNode(domainName, nodeName).getAdapter();
+        if (adapter instanceof ModelerDbAdapter) {
+            ModelerDbAdapter customAdapter = (ModelerDbAdapter) adapter;
+            return customAdapter.getAdapterClassName();
         }
 
-        Configuration config = buildProjectConfiguration(null);
-        Project project = new ApplicationProject(null, config);
-
-        // stick a DataDomain
-        DataDomain domain = (DataDomain) NamedObjectFactory.createObject(
-                DataDomain.class,
-                config);
-        domain.getEntityResolver().setIndexedByClass(false);
-        config.addDomain(domain);
-
-        controller.projectOpenedAction(project);
-
-        // select default domain
-        getProjectController().fireDomainDisplayEvent(
-                new DomainDisplayEvent(this, domain));
+        return super.nodeAdapterName(domainName, nodeName);
     }
 }

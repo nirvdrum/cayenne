@@ -56,14 +56,20 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.ConfigurationException;
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.ConfigStatus;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
+import org.objectstyle.cayenne.conf.RuntimeLoadDelegate;
 import org.objectstyle.cayenne.map.DataMap;
 
 /**
@@ -72,9 +78,10 @@ import org.objectstyle.cayenne.map.DataMap;
  * @author Andrei Adamchik
  */
 public class ApplicationProject extends Project {
+
     private static Logger logObj = Logger.getLogger(ApplicationProject.class);
 
-    protected ProjectConfiguration configuration;
+    protected Configuration configuration;
 
     /**
      * Constructor for ApplicationProject.
@@ -82,7 +89,41 @@ public class ApplicationProject extends Project {
      * @param projectFile
      */
     public ApplicationProject(File projectFile) {
-        super(projectFile);
+        this(projectFile, null);
+    }
+
+    /**
+     * @since 1.2
+     */
+    public ApplicationProject(File projectFile, Configuration configuration) {
+
+        if (configuration == null) {
+
+            // normalize project file...
+            if (projectFile != null) {
+
+                if (projectFile.isDirectory()) {
+                    projectFile = new File(projectFile.getPath()
+                            + File.separator
+                            + Configuration.DEFAULT_DOMAIN_FILE);
+                }
+
+                try {
+                    projectFile = projectFile.getCanonicalFile();
+                }
+                catch (IOException e) {
+                    throw new ProjectException("Bad project file: " + projectFile);
+                }
+            }
+
+            configuration = new ProjectConfiguration(projectFile);
+            configuration.setLoaderDelegate(new ProjectLoader(configuration));
+        }
+
+        this.configuration = configuration;
+
+        initialize(projectFile);
+        postInitialize(projectFile);
     }
 
     /**
@@ -98,70 +139,63 @@ public class ApplicationProject extends Project {
     protected void postInitialize(File projectFile) {
         logObj.debug("postInitialize: " + projectFile);
 
-        try {
-            // if the projectFile is real..
-            if (projectFile != null) {
-                // see whether it's a directory
-                if (projectFile.isDirectory()) {
-                    // if so, create a new default file with full path
-                    projectFile =
-                        new File(
-                            projectFile.getPath()
-                                + File.separator
-                                + Configuration.DEFAULT_DOMAIN_FILE);
-                }
-
-                projectFile = projectFile.getCanonicalFile();
-            }
-
-            loadProject(projectFile);
-        }
-        catch (Exception e) {
-            throw new ProjectException("Error creating ApplicationProject.", e);
-        }
-
+        loadProject();
         super.postInitialize(projectFile);
     }
 
     /**
      * @since 1.1
+     * @deprecated since 1.2
      */
     protected void loadProject(File projectFile) throws Exception {
-        ProjectConfiguration conf = new ProjectConfiguration(projectFile);
-
-        // try to initialize configuration
-        if (conf.canInitialize()) {
-            conf.initialize();
-            conf.didInitialize();
-        }
-        
-        // set default version 
-        if (conf.getProjectVersion() == null) {
-            conf.setProjectVersion(
-                ApplicationUpgradeHandler.sharedHandler().supportedVersion());
-        }
-
-        this.configuration = conf;
+        loadProject();
     }
 
     /**
-    * Returns Cayenne configuration object associated with this project. 
-    */
+     * @since 1.2
+     */
+    protected void loadProject() {
+
+        // try to initialize configuration
+        if (configuration.canInitialize()) {
+
+            try {
+                configuration.initialize();
+            }
+            catch (Exception e) {
+                throw new ProjectException(
+                        "Error initializaing project configuration.",
+                        e);
+            }
+            configuration.didInitialize();
+        }
+
+        // set default version
+        if (configuration.getProjectVersion() == null) {
+            configuration.setProjectVersion(ApplicationUpgradeHandler
+                    .sharedHandler()
+                    .supportedVersion());
+        }
+    }
+
+    /**
+     * Returns Cayenne configuration object associated with this project.
+     */
     public Configuration getConfiguration() {
         return configuration;
     }
 
     /**
-    * Sets Cayenne configuration object associated with this project. 
-    */
+     * Sets Cayenne configuration object associated with this project.
+     */
     public void setConfiguration(ProjectConfiguration config) {
         this.configuration = config;
     }
 
     public void checkForUpgrades() {
         ApplicationUpgradeHandler.sharedHandler().checkForUpgrades(
-            configuration,
-            upgradeMessages);
+                configuration,
+                upgradeMessages);
     }
 
     /**
@@ -172,15 +206,18 @@ public class ApplicationProject extends Project {
     }
 
     /**
-    * Returns appropriate ProjectFile or null if object does not require 
-    * a file of its own. In case of ApplicationProject, the nodes 
-    * that require separate filed are: the project itself, each DataMap, each 
-    * driver DataNode.
-    */
+     * Returns appropriate ProjectFile or null if object does not require a file of its
+     * own. In case of ApplicationProject, the nodes that require separate filed are: the
+     * project itself, each DataMap, each driver DataNode.
+     */
     public ProjectFile projectFileForObject(Object obj) {
         if (requiresProjectFile(obj)) {
             String domainFileName = this.getConfiguration().getDomainConfigurationName();
-            return new ApplicationProjectFile(this, domainFileName);
+            ApplicationProjectFile file = new ApplicationProjectFile(this, domainFileName);
+
+            // inject save delegate...
+            file.setSaveDelegate(configuration.getSaverDelegate());
+            return file;
         }
         else if (requiresMapFile(obj)) {
             return new DataMapFile(this, (DataMap) obj);
@@ -205,10 +242,8 @@ public class ApplicationProject extends Project {
             DataNode node = (DataNode) obj;
 
             // only driver datasource factory requires a file
-            if (DriverDataSourceFactory
-                .class
-                .getName()
-                .equals(node.getDataSourceFactory())) {
+            if (DriverDataSourceFactory.class.getName().equals(
+                    node.getDataSourceFactory())) {
                 return true;
             }
         }
@@ -218,7 +253,51 @@ public class ApplicationProject extends Project {
 
     public ConfigStatus getLoadStatus() {
         return (configuration != null)
-            ? configuration.getLoadStatus()
-            : new ConfigStatus();
+                ? configuration.getLoadStatus()
+                : new ConfigStatus();
+    }
+
+    final class ProjectLoader extends RuntimeLoadDelegate {
+
+        public ProjectLoader(Configuration config) {
+            super(config, config.getLoadStatus());
+        }
+
+        public void shouldLoadDataDomain(String domainName) {
+            super.shouldLoadDataDomain(domainName);
+
+            try {
+                // disable class indexing
+                findDomain(domainName).getEntityResolver().setIndexedByClass(false);
+            }
+            catch (Exception ex) {
+                throw new ConfigurationException("Domain is not loaded: " + domainName);
+            }
+        }
+
+        public void shouldLoadDataDomainProperties(String domainName, Map properties) {
+
+            // remove factory property to avoid instatiation attempts for unknown/invalid
+            // classes
+
+            Map propertiesClone = new HashMap(properties);
+            Object dataContextFactory = propertiesClone
+                    .remove(DataDomain.DATA_CONTEXT_FACTORY_PROPERTY);
+
+            super.shouldLoadDataDomainProperties(domainName, propertiesClone);
+
+            // stick property back in...
+            if (dataContextFactory != null) {
+                try {
+                    findDomain(domainName).getProperties().put(
+                            DataDomain.DATA_CONTEXT_FACTORY_PROPERTY,
+                            dataContextFactory);
+                }
+                catch (Exception ex) {
+                    throw new ConfigurationException("Domain is not loaded: "
+                            + domainName);
+                }
+            }
+        }
     }
 }

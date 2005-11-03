@@ -28,9 +28,10 @@ Changes/New Features:
   to register special ExtendedTypes for your custom enums.
 * JDOM is no longer needed for XML (de)serialization - everything is done using JAXP classes 
   bundled with JDK.
-* AutoAdapter is introduced. If you are using one of the DbAdapters shipped with Cayenne,
-  it no longer needs to be specified explicitly. Cayenne will automatically guess the right adapter 
-  from the database metadata.
+* AutoAdapter is introduced. If you are using one of the standard DbAdapters shipped with Cayenne,
+  it is no longer needed to enter it in the Modeler. Cayenne will automatically guess the right adapter 
+  from the database metadata in runtime. In CayenneModeler adapter field is moved to a separate tab, 
+  as now it doesn't have to be configured in most cases.
 * No longer storing or relying on ClassLoader stored in Configuration. 
   Thread.currentThread().getContextClassLoader() is what Cayenne now uses internally.
 * Auto-sorted relationship list - org.objectstyle.cayenne.util.IndexPropertyList. 

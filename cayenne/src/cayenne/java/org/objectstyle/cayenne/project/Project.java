@@ -68,17 +68,17 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.project.validator.Validator;
 
 /**
- * Describes a model of Cayenne project. Project is a set of 
- * files in the filesystem describing storing Cayenne DataMaps,
- * DataNodes and other information.
- * 
- * <p>Project has a project directory, which is a canonical directory. 
- * All project files are relative to the project directory.
+ * Describes a model of Cayenne project. Project is a set of files in the filesystem
+ * describing storing Cayenne DataMaps, DataNodes and other information.
+ * <p>
+ * Project has a project directory, which is a canonical directory. All project files are
+ * relative to the project directory.
  * </p>
  * 
  * @author Andrei Adamchik
  */
 public abstract class Project {
+
     private static final Logger logObj = Logger.getLogger(Project.class);
 
     public static final String CURRENT_PROJECT_VERSION = "1.1";
@@ -92,26 +92,41 @@ public abstract class Project {
      * Factory method to create the right project type given project file.
      */
     public static Project createProject(File projectFile) {
-		logObj.debug("createProject: " + projectFile);
+        logObj.debug("createProject: " + projectFile);
         String fileName = projectFile.getName();
 
         if (fileName.endsWith(Configuration.DEFAULT_DOMAIN_FILE)) {
             return new ApplicationProject(projectFile);
-        } else if (fileName.endsWith(DataMapFile.LOCATION_SUFFIX)) {
+        }
+        else if (fileName.endsWith(DataMapFile.LOCATION_SUFFIX)) {
             return new DataMapProject(projectFile);
-        } else {
-            throw new ProjectException(
-                "Unsupported project file: " + projectFile);
+        }
+        else {
+            throw new ProjectException("Unsupported project file: " + projectFile);
         }
     }
 
     /**
-     * Constructor for Project. <code>projectFile</code> must denote 
-     * a file (existent or non-existent) in an existing directory. 
-     * If projectFile has no parent directory, current directory is assumed.
+     * @since 1.2
+     */
+    protected Project() {
+
+    }
+
+    /**
+     * Constructor for Project. <code>projectFile</code> must denote a file (existent or
+     * non-existent) in an existing directory. If projectFile has no parent directory,
+     * current directory is assumed.
      */
     public Project(File projectFile) {
+        initialize(projectFile);
+        postInitialize(projectFile);
+    }
 
+    /**
+     * @since 1.2
+     */
+    protected void initialize(File projectFile) {
         if (projectFile != null) {
             File parent = projectFile.getParentFile();
             if (parent == null) {
@@ -120,27 +135,25 @@ public abstract class Project {
 
             if (!parent.isDirectory()) {
                 throw new ProjectException(
-                    "Project directory does not exist or is not a directory: "
-                        + parent);
+                        "Project directory does not exist or is not a directory: "
+                                + parent);
             }
 
             try {
                 projectDir = parent.getCanonicalFile();
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 throw new ProjectException("Error creating project.", e);
             }
         }
-
-        postInitialize(projectFile);
     }
 
-    /** 
-     * Finished project initialization. Called
-     * from constructor. Default implementation builds a file list
-     * and checks for upgrades.
+    /**
+     * Finished project initialization. Called from constructor. Default implementation
+     * builds a file list and checks for upgrades.
      */
     protected void postInitialize(File projectFile) {
-		logObj.debug("postInitialize with: " + projectFile);
+        logObj.debug("postInitialize with: " + projectFile);
         // take a snapshot of files used by the project
         files = Collections.synchronizedList(buildFileList());
         upgradeMessages = Collections.synchronizedList(new ArrayList());
@@ -148,8 +161,8 @@ public abstract class Project {
     }
 
     /**
-     * Returns true if project location is not defined. For instance,
-     * when project was created in memory and is not tied to a file yet.
+     * Returns true if project location is not defined. For instance, when project was
+     * created in memory and is not tied to a file yet.
      */
     public boolean isLocationUndefined() {
         return getMainFile() == null;
@@ -163,16 +176,15 @@ public abstract class Project {
     }
 
     /**
-      * Returns a list of upgrade messages.
-      */
+     * Returns a list of upgrade messages.
+     */
     public List getUpgradeMessages() {
         return upgradeMessages;
     }
 
     /**
-     * Returns true is project has renamed files.
-     * This is useful when converting from older versions
-     * of the modeler projects.
+     * Returns true is project has renamed files. This is useful when converting from
+     * older versions of the modeler projects.
      */
     public boolean hasRenamedFiles() {
         if (files == null) {
@@ -219,16 +231,16 @@ public abstract class Project {
     }
 
     /**
-     * Looks up and returns a file wrapper for a project
-     * object. Returns null if no file exists.
+     * Looks up and returns a file wrapper for a project object. Returns null if no file
+     * exists.
      */
     public ProjectFile findFile(Object obj) {
         if (obj == null) {
             return null;
         }
 
-        // to avoid full scan, a map may be a better 
-        // choice of collection here, 
+        // to avoid full scan, a map may be a better
+        // choice of collection here,
         // though normally projects have very few files...
         synchronized (files) {
             Iterator it = files.iterator();
@@ -253,7 +265,8 @@ public abstract class Project {
                 symbolicName = symbolicName.replace('/', File.separatorChar);
             }
             return new File(projectDir, symbolicName).getCanonicalFile();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             // error converting path
             logObj.info("Can't convert to canonical form.", e);
             return null;
@@ -261,22 +274,21 @@ public abstract class Project {
     }
 
     /**
-      * Returns a "symbolic" name of a file. Returns null if file 
-      * is invalid. Symbolic name is a string path of a file relative
-      * to the project directory. It is built in a platform independent
-      * fashion.
-      */
+     * Returns a "symbolic" name of a file. Returns null if file is invalid. Symbolic name
+     * is a string path of a file relative to the project directory. It is built in a
+     * platform independent fashion.
+     */
     public String resolveSymbolicName(File file) {
         String symbolicName = null;
         try {
-            // accept absolute files only when 
+            // accept absolute files only when
             // they are in the project directory
             String otherPath = file.getCanonicalFile().getPath();
             String thisPath = projectDir.getPath();
 
             // invalid absolute pathname, can't continue
             if (otherPath.length() + 1 <= thisPath.length()
-                || !otherPath.startsWith(thisPath)) {
+                    || !otherPath.startsWith(thisPath)) {
                 return null;
             }
 
@@ -289,16 +301,16 @@ public abstract class Project {
 
             return symbolicName;
 
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             // error converting path
             logObj.info("Can't convert to canonical form.", e);
             return null;
         }
     }
 
-    /** 
-     * Returns project directory. This is a directory where
-     * project file is located.
+    /**
+     * Returns project directory. This is a directory where project file is located.
      */
     public File getProjectDirectory() {
         return projectDir;
@@ -333,9 +345,8 @@ public abstract class Project {
     public abstract List getChildren();
 
     /**
-     * Determines whether the project needs to be upgraded.
-     * Populates internal list of upgrade messages with discovered
-     * information.
+     * Determines whether the project needs to be upgraded. Populates internal list of
+     * upgrade messages with discovered information.
      */
     public abstract void checkForUpgrades();
 
@@ -343,21 +354,17 @@ public abstract class Project {
      * Returns an Iterator over project tree of objects.
      */
     public Iterator treeNodes() {
-        return FlatProjectView
-            .getInstance()
-            .flattenProjectTree(this)
-            .iterator();
+        return FlatProjectView.getInstance().flattenProjectTree(this).iterator();
     }
-    
+
     /**
      * @since 1.1
      */
     public abstract void upgrade() throws ProjectException;
 
-    /** 
-     * Saves project. All currently existing files are updated,
-     * without checking for modifications. New files are created
-     * as needed, unused files are deleted.
+    /**
+     * Saves project. All currently existing files are updated, without checking for
+     * modifications. New files are created as needed, unused files are deleted.
      */
     public void save() throws ProjectException {
 
@@ -398,12 +405,12 @@ public abstract class Project {
             upgradeMessages.clear();
         }
 
-        // update state 
+        // update state
         setModified(false);
     }
 
     protected void prepareSave(List filesToSave, List wrappedObjects)
-        throws ProjectException {
+            throws ProjectException {
         Iterator nodes = treeNodes();
         while (nodes.hasNext()) {
             ProjectPath nodePath = (ProjectPath) nodes.next();
@@ -417,7 +424,8 @@ public abstract class Project {
                 if (newFile != null) {
                     filesToSave.add(newFile);
                 }
-            } else if (existingFile.canHandleObject()) {
+            }
+            else if (existingFile.canHandleObject()) {
                 wrappedObjects.add(existingFile.getObject());
                 filesToSave.add(existingFile);
             }
@@ -447,7 +455,8 @@ public abstract class Project {
 
                 f.saveTemp();
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             logObj.info("*** Project save failed, reverting.", ex);
 
             // revert
@@ -457,9 +466,7 @@ public abstract class Project {
                 f.saveUndo();
             }
 
-            throw new ProjectException(
-                "Project save failed and was canceled.",
-                ex);
+            throw new ProjectException("Project save failed and was canceled.", ex);
         }
     }
 
@@ -473,7 +480,7 @@ public abstract class Project {
                 File file = f.resolveOldFile();
 
                 // this check is needed, since a file can reuse the name
-                // of a recently deleted file, and we don't want to delete 
+                // of a recently deleted file, and we don't want to delete
                 // new file by mistake
                 if (file == null || savedFiles.contains(file)) {
                     continue;
@@ -483,20 +490,23 @@ public abstract class Project {
                 if (f.isRenamed()) {
                     delete = true;
                     logObj.info("File renamed, deleting old version: " + file);
-                } else if (f.getObject() == null) {
+                }
+                else if (f.getObject() == null) {
                     delete = true;
                     logObj.info("Null internal object, deleting file: " + file);
-                } else if (!existingObjects.contains(f.getObject())) {
+                }
+                else if (!existingObjects.contains(f.getObject())) {
                     delete = true;
-                    logObj.info(
-                        "Object deleted from the project, deleting file: "
-                            + file);
-                } else if (!f.canHandleObject()) {
+                    logObj
+                            .info("Object deleted from the project, deleting file: "
+                                    + file);
+                }
+                else if (!f.canHandleObject()) {
                     // this happens too - node can start using JNDI for instance
                     delete = true;
-                    logObj.info(
-                        "Can no longer handle the object, deleting file: "
-                            + file);
+                    logObj
+                            .info("Can no longer handle the object, deleting file: "
+                                    + file);
                 }
 
                 if (delete) {

@@ -66,9 +66,9 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
+import org.objectstyle.cayenne.modeler.util.ModelerDbAdapter;
 import org.objectstyle.cayenne.swing.BindingBuilder;
 import org.objectstyle.cayenne.swing.ObjectBinding;
-import org.objectstyle.cayenne.validation.ValidationException;
 
 /**
  * @author Andrus Adamchik
@@ -130,13 +130,28 @@ public class AdapterEditor extends CayenneController {
     }
 
     public String getAdapterName() {
-        if (node != null) {
-            return (node.getAdapter() != null && node.getAdapter().getClass() != AutoAdapter.class)
-                    ? node.getAdapter().getClass().getName()
-                    : null;
+        if (node == null) {
+            return null;
         }
 
-        return null;
+        DbAdapter adapter = node.getAdapter();
+
+        // TODO, Andrus, 11/3/2005 - to simplify this logic, it would be nice to
+        // consistently load CustomDbAdapter... this would require an ability to set a
+        // load delegate in OpenProjectAction
+        if (adapter == null) {
+            return null;
+        }
+        else if (adapter instanceof ModelerDbAdapter) {
+            return ((ModelerDbAdapter) adapter).getAdapterClassName();
+        }
+        // don't do "instanceof" here, as we maybe dealing with a custom subclass...
+        else if (adapter.getClass() == AutoAdapter.class) {
+            return null;
+        }
+        else {
+            return adapter.getClass().getName();
+        }
     }
 
     public void setAdapterName(String name) {
@@ -144,22 +159,8 @@ public class AdapterEditor extends CayenneController {
             return;
         }
 
-        // null will result in using AutoAdapter
-        if (name == null) {
-            if (getAdapterName() != null) {
-                node.setAdapter(new AutoAdapter(node.getDataSource()));
-            }
-            return;
-        }
-
-        try {
-            Class adapterClass = getApplication()
-                    .getClassLoadingService()
-                    .loadClass(name);
-            node.setAdapter((DbAdapter) adapterClass.newInstance());
-        }
-        catch (Throwable ex) {
-            throw new ValidationException("Unknown DbAdapter: " + name);
-        }
+        ModelerDbAdapter adapter = new ModelerDbAdapter(name, node.getDataSource());
+        adapter.validate();
+        node.setAdapter(adapter);
     }
 }

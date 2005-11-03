@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,67 +53,84 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.action;
+package org.objectstyle.cayenne.modeler.util;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 
-import javax.swing.KeyStroke;
+import javax.sql.DataSource;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.CayenneModelerController;
-import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
-import org.objectstyle.cayenne.project.ApplicationProject;
-import org.objectstyle.cayenne.project.NamedObjectFactory;
-import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.dba.AutoAdapter;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.DbAdapterFactory;
+import org.objectstyle.cayenne.validation.BeanValidationFailure;
+import org.objectstyle.cayenne.validation.ValidationException;
+import org.objectstyle.cayenne.validation.ValidationFailure;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
- * @author Andrei Adamchik
+ * A DbAdapter wrapper used in CayenneModeler.
+ * 
+ * @author Andrus Adamchik
  */
-public class NewProjectAction extends ProjectAction {
+public class ModelerDbAdapter extends AutoAdapter {
 
-    public static String getActionName() {
-        return "New Project";
+    protected String adapterClassName;
+
+    public ModelerDbAdapter(DataSource dataSource) {
+        this(null, dataSource);
     }
 
-    public NewProjectAction(Application application) {
-        super(getActionName(), application);
+    public ModelerDbAdapter(String adapterClassName, DataSource dataSource) {
+        super(dataSource);
+        this.adapterClassName = adapterClassName;
     }
 
-    public String getIconName() {
-        return "icon-new.gif";
-    }
+    /**
+     * Validates DbAdapter name, throwing an exception in case it is invalid.
+     */
+    public void validate() throws ValidationException {
+        if (adapterClassName != null) {
+            ValidationFailure failure = BeanValidationFailure.validateJavaClassName(
+                    this,
+                    "adapterClassName",
+                    adapterClassName);
 
-    public KeyStroke getAcceleratorKey() {
-        return KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK);
-    }
-
-    public void performAction(ActionEvent e) {
-
-        CayenneModelerController controller = Application
-                .getInstance()
-                .getFrameController();
-        // Save and close (if needed) currently open project.
-        if (getCurrentProject() != null && !closeProject()) {
-            return;
+            if (failure != null) {
+                ValidationResult result = new ValidationResult();
+                result.addFailure(failure);
+                throw new ValidationException(failure.getDescription(), result);
+            }
         }
+    }
 
-        Configuration config = buildProjectConfiguration(null);
-        Project project = new ApplicationProject(null, config);
+    public String getAdapterClassName() {
+        return adapterClassName;
+    }
 
-        // stick a DataDomain
-        DataDomain domain = (DataDomain) NamedObjectFactory.createObject(
-                DataDomain.class,
-                config);
-        domain.getEntityResolver().setIndexedByClass(false);
-        config.addDomain(domain);
+    protected DbAdapterFactory createDefaultFactory() {
+        return new AdapterFactory();
+    }
 
-        controller.projectOpenedAction(project);
+    class AdapterFactory implements DbAdapterFactory {
 
-        // select default domain
-        getProjectController().fireDomainDisplayEvent(
-                new DomainDisplayEvent(this, domain));
+        public DbAdapter createAdapter(DatabaseMetaData md) throws SQLException {
+
+            if (adapterClassName == null) {
+                return AutoAdapter.getDefaultFactory().createAdapter(md);
+            }
+
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+            try {
+                Class adapterClass = Class.forName(adapterClassName, true, loader);
+                return (DbAdapter) adapterClass.newInstance();
+            }
+            catch (Exception ex) {
+                throw new CayenneRuntimeException("Can't load DbAdapter class: "
+                        + adapterClassName);
+            }
+        }
     }
 }

@@ -56,12 +56,15 @@
 package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
+import java.io.File;
 
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerController;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.UnsavedChangesDialog;
 import org.objectstyle.cayenne.modeler.util.CayenneAction;
+import org.objectstyle.cayenne.project.ProjectConfiguration;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
@@ -91,6 +94,18 @@ public class ProjectAction extends CayenneAction {
      */
     public void performAction(ActionEvent e) {
         closeProject();
+    }
+
+    /**
+     * Creates a configuration suitable for use in the Modeler. Used mainly by subclasses.
+     * 
+     * @since 1.2
+     */
+    protected Configuration buildProjectConfiguration(File projectFile) {
+        ProjectConfiguration config = new ProjectConfiguration(projectFile);
+        config.setLoaderDelegate(new ModelerProjectLoadDelegate(config));
+        config.setSaverDelegate(new ModelerProjectSaveDelegate(config));
+        return config;
     }
 
     /** Returns true if successfully closed project, false otherwise. */

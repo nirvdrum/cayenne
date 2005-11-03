@@ -111,13 +111,16 @@ public abstract class Configuration {
         }
     };
 
-    /** Lookup map that stores DataDomains with names as keys. */
+    /**
+     * Lookup map that stores DataDomains with names as keys.
+     */
     protected CayenneMap dataDomains = new CayenneMap(this);
     protected DataSourceFactory overrideFactory;
     protected ConfigStatus loadStatus = new ConfigStatus();
     protected String domainConfigurationName = DEFAULT_DOMAIN_FILE;
     protected boolean ignoringLoadFailures;
     protected ConfigLoaderDelegate loaderDelegate;
+    protected ConfigSaverDelegate saverDelegate;
     protected ConfigurationShutdownHook configurationShutdownHook = new ConfigurationShutdownHook();
     protected Map dataViewLocations = new HashMap();
     protected String projectVersion;
@@ -549,10 +552,23 @@ public abstract class Configuration {
 
     /**
      * @since 1.1
-     * @param loaderDelegate
      */
     public void setLoaderDelegate(ConfigLoaderDelegate loaderDelegate) {
         this.loaderDelegate = loaderDelegate;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public ConfigSaverDelegate getSaverDelegate() {
+        return saverDelegate;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setSaverDelegate(ConfigSaverDelegate saverDelegate) {
+        this.saverDelegate = saverDelegate;
     }
 
     /**

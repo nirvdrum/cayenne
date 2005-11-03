@@ -295,34 +295,8 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             }
         }
 
-        // load DbAdapter
-
-        DbAdapter dbAdapter = null;
-        if (adapter != null) {
-            try {
-                ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                Class dbAdapterClass = (cl != null) ? cl.loadClass(adapter) : Class
-                        .forName(adapter);
-                dbAdapter = (DbAdapter) dbAdapterClass.newInstance();
-            }
-            catch (Exception ex) {
-                logObj.info("instantiating adapter failed", ex);
-                getStatus().addFailedAdapter(
-                        nodeName,
-                        adapter,
-                        "instantiating adapter failed - " + ex.getMessage());
-            }
-        }
-
         DataNode node = new DataNode(nodeName);
 
-        if (dbAdapter == null) {
-            logObj
-                    .info("no adapter set, using automatic adapter.");
-            dbAdapter = new AutoAdapter(new NodeDataSource(node));
-        }
-
-        node.setAdapter(dbAdapter);
         node.setDataSourceFactory(factory);
         node.setDataSourceLocation(dataSource);
 
@@ -356,6 +330,8 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
                     "DataSource load failed - " + ex.getMessage());
         }
 
+        initAdapter(node, adapter);
+
         try {
             findDomain(domainName).addNode(node);
         }
@@ -366,6 +342,33 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
                     nodeName,
                     "can't load node, unknown domain: " + domainName);
         }
+    }
+
+    /**
+     * Intializes DataNode adapter.
+     * 
+     * @since 1.2
+     */
+    protected void initAdapter(DataNode node, String adapterName) {
+
+        if (adapterName != null) {
+            try {
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                Class dbAdapterClass = Class.forName(adapterName, true, cl);
+                node.setAdapter((DbAdapter) dbAdapterClass.newInstance());
+                return;
+            }
+            catch (Exception ex) {
+                logObj.info("instantiating adapter failed", ex);
+                getStatus().addFailedAdapter(
+                        node.getName(),
+                        adapterName,
+                        "instantiating adapter failed - " + ex.getMessage());
+            }
+        }
+
+        logObj.info("no adapter set, using automatic adapter.");
+        node.setAdapter(new AutoAdapter(new NodeDataSource(node)));
     }
 
     public void shouldLinkDataMap(String domainName, String nodeName, String mapName) {

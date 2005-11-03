@@ -8,6 +8,7 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
 import org.objectstyle.cayenne.modeler.pref.DataNodeDefaults;
 import org.objectstyle.cayenne.modeler.util.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.ModelerDbAdapter;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 
 /**
@@ -84,10 +85,10 @@ public abstract class DBWizardAction extends CayenneAction {
 
         nodeInfo.copyFrom(((ProjectDataSource) node.getDataSource()).getDataSourceInfo());
 
-        // by default use auto-adapter
         nodeInfo.setDbAdapter(null);
-        if (node.getAdapter() != null) {
-            nodeInfo.setDbAdapter(node.getAdapter().getClass().getName());
+        if (node.getAdapter() instanceof ModelerDbAdapter) {
+            nodeInfo.setDbAdapter(((ModelerDbAdapter) node.getAdapter())
+                    .getAdapterClassName());
         }
 
         return nodeInfo;

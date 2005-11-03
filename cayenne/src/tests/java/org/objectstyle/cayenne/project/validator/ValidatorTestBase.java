@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.project.validator;
 import java.io.File;
 import java.sql.Types;
 
+import junit.framework.TestCase;
+
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -66,20 +68,17 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.project.ApplicationProject;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-public class ValidatorTestBase extends CayenneTestCase {
+public class ValidatorTestBase extends TestCase {
+
     protected static int counter = 1;
 
     protected Validator validator;
     protected ApplicationProject project;
 
-    /**
-      * @see junit.framework.TestCase#setUp()
-      */
     protected void setUp() throws Exception {
         super.setUp();
         project = new ApplicationProject(new File(System.getProperty("user.dir")));

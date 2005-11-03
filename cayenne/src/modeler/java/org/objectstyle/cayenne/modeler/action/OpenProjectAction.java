@@ -63,9 +63,11 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenuItem;
+import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectException;
 
@@ -140,7 +142,8 @@ public class OpenProjectAction extends ProjectAction {
             getApplication().getFrameController().addToLastProjListAction(
                     file.getAbsolutePath());
 
-            Project project = Project.createProject(file);
+            Configuration config = buildProjectConfiguration(file);
+            Project project = new ApplicationProject(file, config);
             getProjectController().setProject(project);
 
             // if upgrade was canceled

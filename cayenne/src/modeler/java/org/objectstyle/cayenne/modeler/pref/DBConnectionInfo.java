@@ -47,14 +47,6 @@ import org.objectstyle.cayenne.util.Util;
 
 public class DBConnectionInfo extends _DBConnectionInfo {
 
-    public void setDbAdapter(String dbAdapter) {
-        if (AutoAdapter.class.getName().equals(dbAdapter)) {
-            dbAdapter = null;
-        }
-        
-        super.setDbAdapter(dbAdapter);
-    }
-
     /**
      * Creates a DbAdapter based on configured values.
      */
