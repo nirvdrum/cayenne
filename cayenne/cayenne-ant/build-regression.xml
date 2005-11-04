@@ -12,7 +12,7 @@
 	<property environment="regression.env"/>
     
     <path id="agnostic-classpath">
-    	<fileset dir="${otherlib.dir}">
+    	<fileset dir="${lib.dir}">
 			<include name="${bcel.jar}"/>
 		</fileset>
 		<fileset dir="${dist}/lib">
@@ -29,7 +29,7 @@
 	    <property name="cayenne.test.connection" value="internal_embedded_datasource"/>
         <path id="classpath">
             <path refid="agnostic-classpath"/>
-            <fileset dir="${otherlib.dir}">
+            <fileset dir="${lib.dir}">
     			<include name="${hsqldb.jar}"/>
     		</fileset>
         </path>
@@ -119,7 +119,7 @@
             
             <path id="classpathPlusVpp">
                 <path refid="classpath"/>
-                <fileset dir="${otherlib.dir}">
+                <fileset dir="${lib.dir}">
     			    <include name="${vpp.jar}"/>
     		    </fileset>
             </path>
@@ -229,7 +229,7 @@
 	</target>
 
 	<target name="dist-bin" depends="jar">
-        <copy file="${otherlib.dir}/${bcel.jar}" todir="${dist}/lib/regression"/>
+        <copy file="${lib.dir}/${bcel.jar}" todir="${dist}/lib/regression"/>
 	</target>
 	
 	

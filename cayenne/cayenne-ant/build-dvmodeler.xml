@@ -17,9 +17,8 @@
     <!-- ========================================== -->
 	
 	<target name="compile">
-		<ant antfile="build-subproj.xml" target="compile">
-			<property name="subproj" value="dvmodeler"/>
-		</ant>
+		<compile-1_4 destdir="${build}/dvmodeler/classes"
+			srcref="srcpath-dvmodeler" classpathref="classpath-cayenne-lib"/>
 	</target>
 	
 	<target name="dist-src" depends="dist-bin">
@@ -40,7 +39,7 @@
         </chmod>
 
         <copy todir="${dist}/lib/dvmodeler">
-            <fileset dir="${otherlib.dir}">
+            <fileset dir="${lib.dir}">
                 <include name="${jdom.jar}"/>
                 <include name="${jgoodies.forms.jar}"/>
                 <include name="${jgoodies.forms-extras.jar}"/>

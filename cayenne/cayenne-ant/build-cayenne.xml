@@ -5,13 +5,12 @@
 <!-- ========================================== -->
 <project default="compile">
 	<property name="core.dist.src" value="${dist}/src/cayenne"/>
-	<property name="core.build" value="build/cayenne"/>
+	<property name="core.build" value="${build}/cayenne"/>
 	<property name="core.build.deps" value="${core.build}/deps"/>
-	<property name="core.build.properties" value="${core.build}/properties"/>
-	<property name="core.src" value="src/cayenne/java"/>
-	<property name="core.bin" value="src/cayenne/bin"/>
-	<property name="core.resources" value="src/cayenne/resources"/>
-	
+	<property name="core.src" value="${cayenne.java}/src/cayenne/java"/>
+	<property name="core.src.1_5" value="${cayenne.java.1_5}/src/cayenne/java"/>
+	<property name="core.bin" value="${cayenne.java}/src/cayenne/bin"/>
+
 	<property name="parser.dir.plist" value="${core.src}/org/objectstyle/cayenne/wocompat/parser"/>
 	<property name="parser.base.plist" value="Parser"/>
 
@@ -22,9 +21,8 @@
 	<!-- Build targets.                             -->
 	<!-- ========================================== -->
 	<target name="api">
-		<ant antfile="build-subproj.xml" target="api">
-			<property name="subproj" value="cayenne"/>
-		</ant>
+		<api destdir="${dist}/doc/api/cayenne" srcref="srcpath-cayenne-all"
+			classpathref="classpath-lib"/>
 	</target>
 	
 	<target name="javacc">
@@ -49,9 +47,22 @@
 	</target>
 
 	<target name="compile">
-		<ant antfile="build-subproj.xml" target="compile">
-			<property name="subproj" value="cayenne"/>
-		</ant>
+		<compile-1_4 destdir="${build}/cayenne-1_4/classes"
+			srcref="srcpath-cayenne-1_4" classpathref="classpath-lib"/>
+		
+		<copy todir="${build}/cayenne-1_4/classes">
+			<fileset dir="${cayenne.java}/src/cayenne/java">
+				<include name="**/*.properties"/>
+			</fileset>
+			
+			<fileset dir="${cayenne.java}/src/cayenne/resources">
+				<include name=".cayenne/**"/>
+				<include name="dotemplates/**"/>
+			</fileset>
+		</copy>
+		
+		<compile-1_5 destdir="${build}/cayenne-1_5/classes"
+			srcref="srcpath-cayenne-1_5" classpathref="classpath-cayenne-1_4"/>
 	</target>
 	
 	<target name="dist-src" depends="dist-bin,api">
@@ -104,7 +115,6 @@
 		
 		<!-- client jar -->
 		<jar jarfile="${dist}/lib/cayenne-client-nodeps.jar">
-			
 			<!-- 
 				exclude server-side packages
 				TODO: be more precise - 
@@ -135,7 +145,6 @@
 				<include name="**/*.properties"/>
 			</fileset>
 		
-            
             <metainf dir="doc/licenses" includes="LICENSE"/>
             <manifest>
                <attribute name="Built-By" value="${user.name}"/>
@@ -200,12 +209,12 @@
 	
 	<target name="unjar-deps" unless="core.deps.exist"> 
 		<mkdir dir="${core.build.deps}"/>
-        <unjar src="${otherlib.dir}/${velocity.jar}" dest="${core.build.deps}"/>
-        <unjar src="${otherlib.dir}/${log4j.jar}" dest="${core.build.deps}"/>
-        <unjar src="${otherlib.dir}/${commons.logging.jar}" dest="${core.build.deps}"/>
-        <unjar src="${otherlib.dir}/${commons.collections.jar}" dest="${core.build.deps}"/>
-        <unjar src="${otherlib.dir}/${commons.lang.jar}" dest="${core.build.deps}"/>
-        <unjar src="${otherlib.dir}/${ashwood.jar}" dest="${core.build.deps}"/>
+        <unjar src="${lib.dir}/${velocity.jar}" dest="${core.build.deps}"/>
+        <unjar src="${lib.dir}/${log4j.jar}" dest="${core.build.deps}"/>
+        <unjar src="${lib.dir}/${commons.logging.jar}" dest="${core.build.deps}"/>
+        <unjar src="${lib.dir}/${commons.collections.jar}" dest="${core.build.deps}"/>
+        <unjar src="${lib.dir}/${commons.lang.jar}" dest="${core.build.deps}"/>
+        <unjar src="${lib.dir}/${ashwood.jar}" dest="${core.build.deps}"/>
         
         <!-- clean up unused classes -->
         <delete includeEmptyDirs="true">

@@ -7,8 +7,8 @@
 <project default="doc">	  
     <path id="classpath">
     	<pathelement path="${ant.home}/lib/ant.jar"/>
-    	<pathelement path="${otherlib.dir}/${velocity.jar}"/>
-        <fileset dir="${otherlib.dir}/compat" includes="**/*.jar"/>
+    	<pathelement path="${lib.dir}/${velocity.jar}"/>
+        <fileset dir="${lib.dir}/compat" includes="**/*.jar"/>
     </path>
 
     <!-- ========================================== -->

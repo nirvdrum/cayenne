@@ -16,9 +16,8 @@
     <!-- Build targets.                             -->
     <!-- ========================================== -->
 	<target name="compile">
-		<ant antfile="build-subproj.xml" target="compile">
-			<property name="subproj" value="modeler"/>
-		</ant>
+		<compile-1_4 destdir="${build}/modeler/classes" srcref="srcpath-modeler"
+			classpathref="classpath-cayenne-lib"/>
 	</target>
 	
 	<target name="dist-src" depends="dist-bin">
@@ -40,7 +39,7 @@
         </chmod>        
         
         <copy todir="${dist}/lib/modeler">
-            <fileset dir="${otherlib.dir}">
+            <fileset dir="${lib.dir}">
                 <include name="${scope.jar}"/>
                 <include name="${hsqldb.jar}"/>
                 <include name="${ognl.jar}"/>
