@@ -25,27 +25,26 @@ FOLDER AND IGNORE THE INSTRUCTIONS BELOW.
      
            This file explaining how to setup Eclipse.
 
-2. /cayenne-ant         
-
-           Eclipse project with Ant build files to build the entire Cayenne workspace. 
-           Needed if you are planning to build Cayenne with Ant outside of Eclipse
-           (i.e. to create JAR files or run a test suite).
-
-3. /cayenne-java
+2. /cayenne-java
 
            Eclipse project containing main Cayenne source and library folders. Source 
            and binary compatibility must be set to JDK 1.4.
 
-4. /cayenne-java-1.5    
+3. /cayenne-java-1.5    
 
            Eclipse project containing Cayenne JDK 1.5 specific code. Requires "cayenne-java"
            project to be present in workspace. Source and binary compatibility must be set to 
            JDK 1.5.
 
-5. /cayenne-other
+4. /cayenne-other
 
            Optional Eclipse project that contains Cayenne documentation, contrib folders and such.
 
-    
+5. /cayenne-ant         
+
+           Eclipse project with Ant build files to build the entire Cayenne workspace. 
+           Needed if you are planning to build Cayenne with Ant outside of Eclipse
+           (i.e. to create JAR files or run a test suite).
+
 
 
