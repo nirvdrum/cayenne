@@ -3,6 +3,6 @@
 	<classpathentry kind="src" path="src/cayenne/java"/>
 	<classpathentry kind="src" path="src/tests/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/cayenne"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/cayenne-java"/>
 	<classpathentry kind="output" path="build/eclipse"/>
 </classpath>
