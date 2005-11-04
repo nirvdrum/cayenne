@@ -142,7 +142,7 @@ public class AboutDialog extends CayenneDialog {
             try {
                 InputStream licenseIn =
                     AboutDialog.class.getClassLoader().getResourceAsStream(
-                        "META-INF/LICENSE");
+                        "META-INF/LICENSE.txt");
 
                 if (licenseIn != null) {
                     in = new BufferedReader(new InputStreamReader(licenseIn));
