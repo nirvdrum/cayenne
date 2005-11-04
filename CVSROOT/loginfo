@@ -26,4 +26,4 @@
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
 
 CVSROOT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail %{sVv} andrus@objectstyle.org
-DEFAULT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail -u %{sVv} cayenne-cvs@objectstyle.org
+#DEFAULT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail -u %{sVv} cayenne-cvs@objectstyle.org
