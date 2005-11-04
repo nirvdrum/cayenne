@@ -2,7 +2,7 @@
 <!-- ================================================= -->
 <!-- Builds PDF Cayenne documentation. -->
 <!-- ================================================= -->
-<project default="pdf">
+<project default="...">
 	<property name="tool.src" value="src/pdf/java"/>
 	<property name="tool.build" value="build/pdf/classes"/>
 	<property name="xdocs" value="xdocs"/>

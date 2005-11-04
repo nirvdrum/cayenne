@@ -4,14 +4,15 @@
 <!--            Cayenne master build file.             -->
 <!-- Serves as a facade to a set of private buildfiles.-->
 <!-- ================================================= -->
-<project name="cayenne" default="jar">
+<project name="cayenne" default="dist-bin">
 
     <!-- ============================================= -->
 	<!-- Prepare the environment: load properties,     -->
-	<!-- init imports, cretae derived properties.      -->
+	<!-- init imports, create derived properties.      -->
     <!-- ============================================= -->
     <property file="default.properties"/>
 	<property name="dist" value="${dist.base}/${project.name}-${project.version}"/>
+	<property name="build" value="${build.base}/ant"/>
 	<property name="license.dir" value="${cayenne.other}/licenses"/>
 	<property name="notes.dir" value="${cayenne.other}/release-notes"/>
 	
@@ -25,7 +26,7 @@
         <echo>BUILD TARGETS:
 ==============     
      
-       jar        - (DEFAULT) builds all subproject JAR files.
+       dist-bin     - (DEFAULT) builds all subproject JAR files and installs scripts.
        release      - creates a full Cayenne distribution.
        compile      - compiles all subprojects source files.
        clean        - cleans temporary build and distribution directories
@@ -79,7 +80,6 @@ ENVIRONMENT:
     <target name="test" description="runs JUnit tests">
 		<ant antfile="build-cayenne.xml" target="dist-bin"/>
 		<ant antfile="build-modeler.xml" target="dist-bin"/>
-		
 		<ant antfile="build-tests.xml" target="test"/>
     </target>
 
@@ -94,12 +94,11 @@ ENVIRONMENT:
     <!-- ========================================== -->
     <!-- Builds all Cayenne Java subproject JARS.   -->
     <!-- ========================================== -->
-    <target name="jar">
-		<ant antfile="build-cayenne.xml" target="dist-bin"/>
-		<ant antfile="build-modeler.xml" target="dist-bin"/>
-		<ant antfile="build-dvmodeler.xml" target="dist-bin"/>
-		<ant antfile="build-tests.xml" target="dist-bin"/>
-    </target>
+	<target name="dist-bin">
+		<ant antfile="build-cayenne.xml" target="jar" inheritrefs="true"/>
+		<ant antfile="build-modeler.xml" target="dist-bin" inheritrefs="true"/>
+		<ant antfile="build-dvmodeler.xml" target="dist-bin" inheritrefs="true"/>
+	</target>
     
     <!-- ========================================== -->
     <!-- Compiles all Cayenne Java subprojects.     -->
@@ -122,11 +121,9 @@ ENVIRONMENT:
     <!-- ========================================== -->
     <!-- Cleans compiled Java sources.              -->
     <!-- ========================================== -->    
-    <target name="clean-java">
-		<delete includeemptydirs="true">
-			<fileset dir="${build}"/>
-        </delete>
-    </target>
+	<target name="clean-java">
+		<delete includeemptydirs="true" dir="${build.base}"/>
+	</target>
 	
     <!-- ========================================== -->
     <!-- Runs Cayenne Regression Tests              -->

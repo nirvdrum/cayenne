@@ -3,7 +3,7 @@
 <!-- ================================================= -->
 <!-- Regression Test Application subproject buildfile. -->
 <!-- ================================================= -->
-<project default="compile">
+<project default="...">
     <property name="resources.test.classgeneration" value="src/tests/resources/test-resources/ClassGeneration"/>
     <property name="testrun.classgeneration" value="testrun/regression/ClassGeneration"/>
 	<property name="regression.dist.src" value="${dist}/src/regression"/>

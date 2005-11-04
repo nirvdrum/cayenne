@@ -4,7 +4,7 @@
 <!--         Cayenne documentation buildfile.          -->
 <!--             (called from build.xml)               -->
 <!-- ================================================= -->
-<project default="doc">	  
+<project default="...">	  
     <path id="classpath">
     	<pathelement path="${ant.home}/lib/ant.jar"/>
     	<pathelement path="${lib.dir}/${velocity.jar}"/>

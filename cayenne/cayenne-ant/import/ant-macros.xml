@@ -92,4 +92,43 @@
 				client="@{client}"/>
 		</sequential>
 	</macrodef>
+	
+	<!-- ============================================= -->
+	<!-- Copy property files from a source,            -->
+	<!-- doing default token substitution.             -->
+	<!-- ============================================= -->
+	<macrodef name="copy-properties">
+		
+		<attribute name="destdir"/>
+		<attribute name="srcdir"/>
+		
+		<sequential>
+			<tstamp/>
+			<copy todir="@{destdir}" overwrite="yes">
+				<fileset dir="@{srcdir}" includes="**/*.properties"/>
+				<filterset>
+					<filter token="CAYENNE_BUILD_DATE" value="${TODAY}"/>
+					<filter token="CAYENNE_VERSION" value="${project.version}"/>
+				</filterset>
+			</copy>
+		</sequential>
+	</macrodef>
+	
+	<!-- ============================================= -->
+	<!-- Copies script files in the common bin dir.    -->
+	<!-- ============================================= -->
+	<macrodef name="copy-scripts">
+		
+		<attribute name="srcdir"/>
+		
+		<sequential>
+			<copy todir="${dist}/bin">
+				<fileset dir="@{srcdir}" includes="*.bat,*.sh,*.pl,*.ico"/>
+			</copy>
+			
+			<chmod perm="ugo+rx">
+				<fileset dir="${dist}/bin" includes="**/*.sh,**/*.pl"/>
+			</chmod>
+		</sequential>
+	</macrodef>
 </project>

@@ -8,9 +8,7 @@
 <!-- - javacc.dir                                      -->
 <!-- - javacc.grammar                                  -->
 <!-- ================================================= -->
-<project default="compile">
-	
-	
+<project default="...">
 	
 	<target name="prepare" depends="nosubproj">
 		<tstamp/>
