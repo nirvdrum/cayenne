@@ -25,7 +25,7 @@ FOLDER AND IGNORE THE INSTRUCTIONS BELOW.
      
            This file explaining how to setup Eclipse.
 
-2. /cayenne-build              
+2. /cayenne-ant         
 
            Eclipse project with Ant build files to build the entire Cayenne workspace. 
            Needed if you are planning to build Cayenne with Ant outside of Eclipse
