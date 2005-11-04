@@ -17,6 +17,8 @@ Changes/New Features:
   - commit/rollback renamed to look like DataContext ones - commitChanges/rollbackChanges
   - new revertChanges and flushChanges methods.
   - Runtime-customizable ClassDescriptors.
+  - Auto-sorted relationship list - org.objectstyle.cayenne.util.IndexPropertyList. Currently
+  	supported in ObjectContext only, but should be easy to extend to DataContext.
   
 * Multi Tier API:
   - support for shared sessions (peer ObjectContexts controlled by different users share the same parent)
@@ -24,7 +26,7 @@ Changes/New Features:
   - web.xml configuration is simplified (see HessianService Javadocs for details). 
     WARINING: You must update your web.xml if you used HessianService with M6, check UPGRADE-NOTES for details.
 
-* Support for mapping int or character DB columns as JDK 1.5 Enums is now built in to Cayenne. No need 
+* Built in support for mapping int or character DB columns as JDK 1.5 Enums. No need 
   to register special ExtendedTypes for your custom enums.
 * JDOM is no longer needed for XML (de)serialization - everything is done using JAXP classes 
   bundled with JDK.
@@ -34,15 +36,13 @@ Changes/New Features:
   as now it doesn't have to be configured in most cases.
 * No longer storing or relying on ClassLoader stored in Configuration. 
   Thread.currentThread().getContextClassLoader() is what Cayenne now uses internally.
-* Auto-sorted relationship list - org.objectstyle.cayenne.util.IndexPropertyList. 
-  Supported for ObjectContext only for now, but should be easy to extend to DataContext.
 * Cayenne stack events are no longer sent via a shared "default" EventManager. Instead
   an EventManager instance is assigned to Configuration.
 * EventBridge supports multiple local EventSubjects.
 * Listener methods registered with EventManager no longer have to be public. Any non-public methods 
   and non-public classes will work. This is nice for implementing listener methods without exposing 
   them in the API (or using inner classes that didn't work before).
-* Support for ExtendedTypeFactory that anong other things enables mapping of interface properties.
+* Support for ExtendedTypeFactory that among other things enables mapping of interface properties.
   
 
   Bugs Fixed:
