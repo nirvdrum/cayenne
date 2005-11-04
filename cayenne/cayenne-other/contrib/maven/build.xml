@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+ 
+<!-- ================================================= -->
+<!--            Maven Bundle Buildfile                 -->
+<!-- ================================================= -->
+<project name="cayenne-maven" default="all" basedir="../..">
+	
+	<property file="default.properties"/>
+	
+	<property name="dist"
+		value="${dist.base}/${project.name}-${project.version}"/>
+	
+	<target name="all" depends="build-cayenne">
+		
+		<antcall target="bundle">
+			<param name="stage" value="${build}/maven/cayenne"/>
+			<param name="base.name" value="${project.name}"/>
+			<param name="cayenne.jar" value="cayenne.jar"/>
+		</antcall>
+		
+		<antcall target="bundle">
+			<param name="stage" value="${build}/maven/cayenne-nodeps"/>
+			<param name="base.name" value="${project.name}-nodeps"/>
+			<param name="cayenne.jar" value="cayenne-nodeps.jar"/>
+		</antcall>
+	</target>
+	
+	<target name="clean">
+		<delete includeemptydirs="true">
+			<fileset dir="${build}" includes="maven/**"/>
+		</delete>
+		
+		<delete>
+			<fileset dir="${dist.base}" includes="*-bundle.jar"/>
+		</delete>
+	</target>
+	
+	<target name="bundle">
+		
+		<mkdir dir="${stage}"/>
+		
+		<copy file="contrib/maven/${base.name}.pom" tofile="${stage}/project.xml">
+			<filterset>
+				<filter token="PROJECT-VERSION" value="${project.version}"/>
+			</filterset>
+		</copy>
+		
+		<copy file="doc/licenses/LICENSE" tofile="${stage}/LICENSE.txt"/>
+		<copy
+			file="${dist.base}/${project.name}-${project.version}/lib/${cayenne.jar}"
+			tofile="${stage}/${base.name}-${project.version}.jar"/>
+		
+		<jar jarfile="${dist.base}/${base.name}-${project.version}-bundle.jar">
+			<fileset dir="${stage}"/>
+		</jar>
+	</target>
+	
+	<target name="build-cayenne">
+		<ant antfile="build.xml" target="build"/>
+	</target>	
+</project>

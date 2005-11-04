@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!-- ================================================= -->
+<!-- Builds PDF Cayenne documentation. -->
+<!-- ================================================= -->
+<project default="pdf">
+	<property name="tool.src" value="src/pdf/java"/>
+	<property name="tool.build" value="build/pdf/classes"/>
+	<property name="xdocs" value="xdocs"/>
+	<property name="pdf.out" value="${dist}/doc"/>
+
+	<path id="tool.classpath">
+		<fileset dir="otherlib" includes="**/*.jar"/>
+	</path>
+	
+	<target name="prepare">
+		<mkdir dir="${tool.build}"/>
+		<mkdir dir="${pdf.out}"/>	
+	</target>
+	
+	<!-- Compiles java.org.objectstyle.pdf.pdfDoc.java.PDFBuilder tool -->
+	<target name="compile" depends="prepare">
+		<javac destdir="${tool.build}" srcdir="${tool.src}">
+			<classpath refid="tool.classpath"/>
+		</javac>
+	</target>
+
+    <!-- Builds PDF documentation. -->
+	<target name="pdf" depends="prepare,compile">
+        <java classname="PDFBuilder" failonerror="true">
+			<arg value="${xdocs}/modelerguide/"/>
+			<arg value="CayenneModeler Guide"/>
+			<arg value="${pdf.out}/modelerguide.pdf"/>
+			<classpath>
+				<path refid="tool.classpath"/>
+				<path location="${tool.build}"/>
+			</classpath>
+		</java>
+		
+		<java classname="PDFBuilder" failonerror="true">
+			<arg value="${xdocs}/userguide/"/>
+			<arg value="User Guide"/>
+			<arg value="${pdf.out}/userguide.pdf"/>
+			<classpath>
+				<path refid="tool.classpath"/>
+				<path location="${tool.build}"/>
+			</classpath>
+		</java>
+
+	</target>
+</project>

@@ -1,0 +1,95 @@
+<document>
+	<title>User Guide - Deployment</title>
+	<toc name="toc-user-guide" chapter="12. Deployment" 
+		subchapter="12.2 Web Applications"/>
+	<body>
+		<section name="12. Deployment">
+			<subsection name="12.2 Web Applications">
+				<panel name="Shared Locations Warning:"> We advise against 
+					putting either cayenne.jar or cayenne XML files in any of 
+					the shared locations of the web container. This confuses 
+					nested application ClassLoader and actually requires 
+					special "bootstrapping" code to make it work. Recommended 
+					location for cayenne.jar is "mywebapp/WEB-INF/lib/". 
+					Recommended location for cayenne.xml is one of the 
+					following: "mywebapp/WEB-INF/classes/", 
+					"mywebapp/WEB-INF/lib/mywebapp.jar" or 
+					"mywebapp/WEB-INF/".</panel>
+				<p>When deploying an application in a web container it is 
+					possible to use the procedure described earlier for the 
+					standalone applications, as long as all Cayenne project XML 
+					files are placed in the location accessible to the 
+					application ClassLoader (e.g. "mywebapp/WEB-INF/classes/"). 
+					Session DataContext still can be obtained via 
+					ServletUtil, <a href="../datactxt/create.html">as 
+					described earlier</a>.</p>
+				<p>In addition Cayenne provides a number of configuration 
+					features that take advantage of the standard web container 
+					environment lifecycle events. These features make Cayenne 
+					use with web applications easier and more consistent. </p>
+				<ul>
+					<li><strong>Storing cayenne.xml and other project files in 
+						WEB-INF/ directory.</strong> "mywebapp/WEB-INF/" or its 
+						subdirectories are often used to store web application 
+						configuration files. Letting Cayenne use this location 
+						instead of CLASSPATH ensures consistency of the 
+						configuration.</li>
+					<li><strong>Automatic creation of a session DataContext and 
+						binding it to an HttpSession.</strong> As DataContext 
+						usually has a session scope, Cayenne can be configured 
+						via a web application deployment descriptor (web.xml) 
+						to create a session DataContext automatically, making 
+						it accessible as a session attribute.</li>
+					<li><strong>Binding of a session DataContext to the request 
+						thread.</strong> Some object persistence code may be 
+						written to be intentionally unaware of the web 
+						environment, with the goal of being reused in both web 
+						and standalone applications. At the same time it is 
+						nice to be able to provide an appropriate DataContext 
+						to such code without explicitly passing DataContext 
+						refrence around. To solve this problem, Cayenne can be 
+						configured via web.xml to bind a session DataContext to 
+						the current request thread. Thread-bound DataContext 
+						can be retrieved at any time by persistence code 
+						without knowing anything about the environment. </li>
+				</ul>
+				<p>Further we will discuss in detail four interchangeable ways 
+					to configure Cayenne in a web application. For your 
+					application you should choose only one of them. Things to 
+					consider when making such choice are:</p>
+				<ul>
+					<li>A version of the servlet specification supported by 
+						your servlet container. Some techniques rely on the 
+						features defined in the servlet specification 2.3 and 
+						2.4 and will not work with older containers. The 
+						easiest way to determine specification version your 
+						application adheres to is to look for the DTD version 
+						in the beginning of the "web.xml" file.</li>
+					<li>Whether you care about extras provided by the 
+						integration, such as non-classpath cayenne.xml 
+						locations or thread-bound DataContext.</li>
+				</ul>
+				<p>Quiet often it is simply a matter of personal preference 
+					whether you choose between an initialization servlet, a filter 
+					or a listener. The following techniques are supported:</p>
+				<ul>
+					<li>
+						<a href="init-servlet.html">Initialization Servlet</a>
+					</li>
+					<li>
+						<a href="webapplicationlistener.html"> 
+							Servlet 2.3 Listener: WebApplicationListener</a>
+					</li>
+					<li>
+						<a href="webapplicationcontextprovider.html"> 
+							Servlet 2.4 Listener: WebApplicationContextProvider</a>
+					</li>
+					<li>
+						<a href="webapplicationcontextfilter.html"> 
+							Servlet 2.3 Filter WebApplicationContextFilter</a>
+					</li>
+				</ul>
+			</subsection>
+		</section>
+	</body>
+</document>

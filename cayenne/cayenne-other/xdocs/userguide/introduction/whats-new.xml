@@ -1,0 +1,14 @@
+<document>
+	<title>User Guide - Introduction</title>
+	<toc name="toc-user-guide" chapter="1. Introduction"/>
+	<body>
+		<section name="1. Introduction">
+			<subsection name="1.1 Guide to 1.2 Features">
+				<p>1.2 release evolves rapidly and the User Guide may not always be
+					up-to-date on the latest feature. We suggest to check
+					<a href="http://objectstyle.org/confluence/display/CAY/1.2+User+Guide">
+						this Wiki page</a> for more 1.2 information.</p>
+			</subsection>
+		</section>
+	</body>
+</document>

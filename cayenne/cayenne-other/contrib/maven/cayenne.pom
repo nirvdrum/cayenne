@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.objectstyle.cayenne</groupId>
+	<artifactId>cayenne</artifactId>
+	<name>Cayenne</name>
+	<version>@PROJECT-VERSION@</version>
+	
+	<organization>
+		<name>ObjectStyle Group</name>
+		<url>http://www.objectstyle.org/</url>
+		<logo>/images/os_logo.gif</logo>
+	</organization>
+	
+	<inceptionYear>2001</inceptionYear>
+	<package>org.objectstyle.cayenne</package>
+	
+	<shortDescription>Cayenne Object Persistence Framework</shortDescription>
+	<description>Cayenne is a powerful, full-featured framework for lightweight object
+		persistence.
+	</description>
+	<url>http://objectstyle.org/cayenne/</url>
+	<issueTrackingUrl>
+		http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000</issueTrackingUrl>
+	<siteAddress>objectstyle.org</siteAddress>
+	<siteDirectory>/cayenne</siteDirectory>
+	<distributionSite>objectstyle.org</distributionSite>
+	<distributionDirectory>/cayenne</distributionDirectory>
+	<repository>
+		<connection>
+			scm:cvs:pserver:anonymous@cvs.sourceforge.net:/cvsroot/cayenne</connection>
+		<url>http://cvs.sourceforge.net/viewcvs.py/cayenne/</url>
+	</repository>
+	
+	<mailingLists>
+		<mailingList>
+			<name>Cayenne Users and Developers</name>
+			<subscribe>
+				http://objectstyle.org/cayenne/lists.html</subscribe>
+			<unsubscribe>
+				http://objectstyle.org/cayenne/lists.html</unsubscribe>
+			<archive>http://objectstyle.org/cayenne/lists.html</archive>
+		</mailingList>
+	</mailingLists>
+</project>

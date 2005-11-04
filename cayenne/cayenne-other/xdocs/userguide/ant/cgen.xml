@@ -1,0 +1,214 @@
+<document>
+	<title>User Guide - Ant Tasks</title>
+	<toc name="toc-user-guide" chapter="13. Ant Tasks"/>
+	<body>
+		<section name="13. Ant Tasks">
+			<subsection name="13.1 cgen: Java Class Generator">
+ 
+			<h3>Description</h3>
+			
+			<p><code>Cgen</code> is an Ant task that generates and maintains DataObjects
+			source files based on Cayenne DataMap. If "makepairs" is set to "true" (default), this task
+			will generate a pair of classes (superclass/subclass) for each ObjEntity in the
+			DataMap. Superclasses should not be changed manually, since they are always 
+			overwritten. Subclasses are never overwritten and may be later customized by the user.
+			If "makepairs" is set to "false", a single class will be generated for each ObjEntity.
+			</p>
+            <p>By creating custom templates, <code>Cgen</code> can also be used to generate other output (such as web pages, reports, specialized code templates) based on DataMap information.</p>
+			<h3>Parameters</h3>
+			
+			<table border="1" cellpadding="2" cellspacing="0">
+				<tr>
+					<th valign="top"><b>Attribute</b></th>
+					<th valign="top"><b>Description</b></th>
+					<th align="center" valign="top"><b>Required</b></th>
+				</tr>
+				<tr>
+					<td valign="top">map</td>
+					<td valign="top">DataMap XML file to use as a base for class generation.</td>
+					<td valign="top" align="center">Yes</td>
+				</tr>
+				<tr>
+					<td valign="top">additionalMaps</td>
+					<td valign="top">Path to additional DataMap XML files to use for class generation.</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">destDir</td>
+					<td valign="top">Destination directory for Java classes
+					<i>(ignoring their package names)</i>.</td>
+					<td valign="top" align="center">Yes</td>
+				</tr>
+				<tr>
+					<td valign="top">overwrite</td>
+					<td valign="top">If set to "true", will overwrite older versions of
+					generated classes. Ignored unless makepairs is set to "false".</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">makepairs</td>
+					<td valign="top">If set to "true", will generate subclass/superclass
+					pairs, with all generated code included in superclass
+					<i>(default is "true")</i>.</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">template</td>
+					<td valign="top">Location of Velocity template file for Java class
+					generation. If omitted, default template is used.</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">supertemplate</td>
+					<td valign="top">Location of Velocity template file for Java superclass 
+					generation. Ignored unless "makepairs" set to "true".
+					If omitted, default template is used.</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">superpkg</td>
+					<td valign="top">Java package name of generated superclasses.
+					Ignored unless "makepairs" set to "true". If omitted,
+					each superclass will be assigned the same package as subclass.
+					<i>Note that having superclass in a different package
+					would only make sense when "usepkgpath" is set to "true". 
+					Otherwise classes from different packages will end up in the same 
+					directory.</i></td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">usepkgpath</td>
+					<td valign="top">If set to "true" (default), 
+					a directory tree will be generated
+					in "destDir" corresponding to the class package structure,
+					if set to "false", classes will be generated in "destDir"
+					ignoring their package.</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">encoding</td>
+					<td valign="top">Specify generated file encoding 
+						if different from the default on current platform. 
+						Target encoding must be supported by the JVM running 
+						Ant build. Standard encodings supported by Java on all 
+						platforms are US-ASCII, ISO-8859-1, UTF-8, UTF-16BE, 
+						UTF-16LE, UTF-16. See Sun Java Docs for 
+						java.nio.charset.Charset for more information. </td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">version</td>
+					<td valign="top">Specifies template location and generator behavior.   "1.1" is the old behavior, with templates located in "dotemplates" and "classgen" as the only velocity context attribute.
+					"1.2" is the new behavior, with templates located in "dotemplates/v1.2" and "objEntity", "entityUtils", "stringUtils", and "importUtils" in the velocity context. (Default is "1.1")</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">excludeEntities</td>
+					<td valign="top">Entities (expressed as a perl5 regex) to exclude from template generation. (Default is to include all entities in the DataMap)</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">includeEntities</td>
+					<td valign="top">Entities (expressed as a perl5 regex) to include in template generation. (Default is to include all entities in the DataMap)</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">outputPattern</td>
+					<td valign="top">Name of file for generated output. (Default is "*.java")</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">mode</td>
+					<td valign="top">Specifies generator iteration target.   "entity" performs one iteration for each selected entity.
+					"datamap" performs one iteration per datamap (This is always one iteration since cgen currently supports specifying one-and-only-one datamap). (Default is "entity")</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+			</table>
+			
+			<h3>Parameters specified as nested elements</h3>
+			<h4>config</h4>
+			<p><code>CGen</code> with version="1.2" also supports <a href="http://vpp.sourceforge.net/">VPP</a>
+			<code>config</code>
+			nested elements for configuring the velocity template engine and adding objects to the velocity template. 
+			You can also reference a <code>vppconfig</code> element declared outside of the <code>CGen</code> task,
+			but you'll need to insure that both <code>vppconfig</code> and <code>CGen</code> have been loaded with
+			the same classloader by using the same ant <code>taskdef loaderRef</code> value for both tasks.
+			See the <a href="http://vpp.sourceforge.net/manual/vppconfig.html">VPP VPPConfig Manual page</a>
+			for complete information.</p>
+			
+			<h3>Examples:</h3>
+			<p>Here is an example of using <code>CGen</code> to generate DataObject
+			subclass/superclass pairs from DataMap located in "src/datamap.xml". All generated
+			subclasses and superclasses will be saved in the same directory "src/java/dobj" regardless
+			of their package names:</p>
+<source>
+&amp;lt;taskdef name="cgen" classname="org.objectstyle.cayenne.tools.CayenneGenerator"&amp;gt;
+    &amp;lt;classpath refid="classpath"/&amp;gt;
+&amp;lt;/taskdef&amp;gt;
+&amp;lt;cgen map="src/datamap.xml" destDir="src/java/dobj" usepkgpath="false"/&amp;gt;
+</source>
+			<p>Here is an example of using <code>CGen</code> to generate html pages for all entities starting with "Artist" in the DataMap:</p>
+<source>
+&amp;lt;taskdef name="cgen" classname="org.objectstyle.cayenne.tools.CayenneGenerator"&amp;gt;
+    &amp;lt;classpath refid="classpath"/&amp;gt;
+&amp;lt;/taskdef&amp;gt;
+&amp;lt;cgen map="src/datamap.xml" destDir="src/doc/web" makepairs="false" usepkgpath="false"
+    template="EntityReport.vm" includeEntities="Artist*" outputPattern="*Report.html"/&amp;gt;
+</source>
+			<p>Here is an example of using <code>CGen</code> with a nested <code>config</code> element:</p>
+<source>
+&amp;lt;typedef
+    resource="org/objectstyle/cayenne/tools/antlib.xml"&amp;gt;
+    &amp;lt;classpath refid="aclasspath"/&amp;gt;
+&amp;lt;/typedef&amp;gt;
+
+&amp;lt;cgen map="src/datamap.xml"
+    destDir="src/doc/web"
+    makepairs="false"
+    usepkgpath="false"
+    template="EntityReport.vm"
+    includeEntities="Artist*"
+    outputPattern="*Report.html"&amp;gt;
+    &amp;lt;config&amp;gt;
+        &amp;lt;context&amp;gt;
+            &amp;lt;property key="myPropertyName" value="myPropertyValue" /&amp;gt;
+            &amp;lt;tool key="myToolName" className="org.myDomain.MyTool" /&amp;gt;
+        &amp;lt;/context&amp;gt;
+    &amp;lt;/config&amp;gt;
+&amp;lt;/cgen&amp;gt;
+</source>
+			<p>Here is an example of using <code>CGen</code> with <code>vppconfig</code>:</p>
+<source>
+&amp;lt;typedef
+    resource="org/objectstyle/cayenne/tools/antlib.xml"&amp;gt;
+    loaderref="aclasspathloader"
+    &amp;lt;classpath refid="aclasspath"/&amp;gt;
+&amp;lt;/typedef&amp;gt;
+
+&amp;lt;typedef name="vppconfig"
+    classname="foundrylogic.vpp.VPPConfig"
+    loaderref="aclasspathloader"&amp;gt;
+    &amp;lt;classpath refid="aclasspath"/&amp;gt;
+&amp;lt;/typedef&amp;gt;
+
+&amp;lt;vppconfig id="myconfig"&amp;gt;
+    &amp;lt;context&amp;gt;
+        &amp;lt;property key="myPropertyName" value="myPropertyValue" /&amp;gt;
+        &amp;lt;tool key="myToolName" className="org.myDomain.MyTool" /&amp;gt;
+    &amp;lt;/context&amp;gt;
+&amp;lt;/vppconfig&amp;gt;
+
+&amp;lt;cgen map="src/datamap.xml"
+    destDir="src/doc/web"
+    makepairs="false"
+    usepkgpath="false"
+    template="EntityReport.vm"
+    includeEntities="Artist*"
+    outputPattern="*Report.html"&amp;gt;
+    &amp;lt;config refid="myconfig" /&amp;gt;
+&amp;lt;/cgen&amp;gt;
+</source>
+			</subsection>
+		</section>
+	</body>
+</document>
