@@ -88,7 +88,7 @@
 		<pathelement path="${cayenne.env.CLASSPATH}"/>
 	</path>
 	
-	<path id="javacc-classpath">
+	<path id="classpath-javacc">
 		<fileset dir="${cayenne.java}/lib" includes="javacc*.jar"/>
 	</path>
 </project>

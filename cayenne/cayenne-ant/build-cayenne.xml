@@ -29,21 +29,21 @@
 	</target>
 	
 	<target name="javacc">
-		<ant antfile="build-subproj.xml" target="javacc">
+		<ant antfile="import/parser-tasks.xml" target="javacc" inheritrefs="true">
 			<property name="parser.dir" value="${parser.dir.plist}"/>
 			<property name="parser.base" value="${parser.base.plist}"/>
 		</ant>
 	</target>
 	
 	<target name="jjtree">
-		<ant antfile="build-subproj.xml" target="jjtree">
+		<ant antfile="import/parser-tasks.xml" target="jjtree" inheritrefs="true">
 			<property name="parser.dir" value="${parser.dir.exp}"/>
 			<property name="parser.base" value="${parser.base.exp}"/>
 		</ant>
 	</target>
 	
 	<target name="jjdoc">
-		<ant antfile="build-subproj.xml" target="jjdoc">
+		<ant antfile="import/parser-tasks.xml" target="jjdoc" inheritrefs="true">
 			<property name="parser.dir" value="${parser.dir.exp}"/>
 			<property name="parser.base" value="${parser.base.exp}"/>
 		</ant>

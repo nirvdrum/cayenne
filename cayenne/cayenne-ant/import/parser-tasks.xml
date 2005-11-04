@@ -1,29 +1,22 @@
 <?xml version="1.0"?>
 
 <!-- ================================================= -->
-<!--  Helper build file to compile subprojects.        -->
-<!--                                                   -->
-<!-- Depends on externally defined set of properties:  -->
-<!-- - subproj                                         -->
-<!-- - javacc.dir                                      -->
-<!-- - javacc.grammar                                  -->
+<!--  Parser Build Tasks                               -->
 <!-- ================================================= -->
 <project default="...">
 	
-	<target name="prepare" depends="nosubproj">
-		<tstamp/>
-		<mkdir dir="${build}/${subproj}/properties"/>
-		<mkdir dir="${build}/${subproj}/deps"/>
-		<mkdir dir="${build}/${subproj}/classes"/>
-		<mkdir dir="${dist}/src/${subproj}"/>
-		<mkdir dir="${dist}/lib"/>
-		<mkdir dir="${dist}/bin"/>
+	<target name="javacc" depends="javacc-nodir,javacc-nogrammar">
+		<java dir="${basedir}" fork="true" classname="javacc" failonerror="true">
+			<classpath refid="classpath-javacc"/>
+			<arg value="-OUTPUT_DIRECTORY:${parser.dir}"/>
+			<arg value="${parser.dir}/${parser.base}.jj"/>
+		</java>
 	</target>
 	
 	<target name="jjtree" depends="javacc-nodir,javacc-nogrammar,jjtree-uptodate"
 		unless="jj.uptodate">
 		<java dir="${basedir}" fork="true" classname="jjtree" failonerror="true">
-			<classpath refid="javacc-classpath"/>
+			<classpath refid="classpath-javacc"/>
 			<arg value="-OUTPUT_DIRECTORY:${parser.dir}"/>
 			<arg value="${parser.dir}/${parser.base}.jjt"/>
 		</java>
@@ -41,7 +34,7 @@
 		<!-- this property may be reset by the caller. -->
 		<property name="parser.doc.dir" value="${parser.dir}"/>
 		<java dir="${basedir}" fork="true" classname="jjdoc" failonerror="true">
-			<classpath refid="javacc-classpath"/>
+			<classpath refid="classpath-javacc"/>
 			<arg value="-OUTPUT_FILE:${parser.doc.dir}/${parser.base}.html"/>
 			<arg value="${parser.dir}/${parser.base}.jj"/>
 		</java>
@@ -59,14 +52,6 @@
 			srcfile="${parser.dir}/${parser.base}.jj"/>
 	</target>
 	
-	<target name="javacc" depends="javacc-nodir,javacc-nogrammar">
-		<java dir="${basedir}" fork="true" classname="javacc" failonerror="true">
-			<classpath refid="javacc-classpath"/>
-			<arg value="-OUTPUT_DIRECTORY:${parser.dir}"/>
-			<arg value="${parser.dir}/${parser.base}.jj"/>
-		</java>
-	</target>
-	
 	<target name="javacc-nodir" unless="parser.dir">
 		<fail>"parser.dir" is undefined.</fail>
 	</target>
@@ -75,7 +60,4 @@
 		<fail>"parser.base" is undefined.</fail>
 	</target>
 	
-	<target name="nosubproj" unless="subproj">
-		<fail>"subproj" is undefined.</fail>
-	</target>
 </project>
