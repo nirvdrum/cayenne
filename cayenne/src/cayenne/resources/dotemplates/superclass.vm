@@ -2,7 +2,7 @@
 package ${classGen.packageName};
 
 #end
-#if( ${classGen.isContainingListProperties()} )
+#if( ${classGen.isContainingDeclaredListProperties()} )
 import java.util.List;
 
 #end

@@ -219,6 +219,27 @@ public class ClassGenerationInfo {
     }
 
     /**
+     * Returns true if current entity contains at least one Declared List property.
+     * 
+     * @since 1.2
+     */
+    public boolean isContainingDeclaredListProperties() {
+        if (entity == null) {
+            return false;
+        }
+        
+        Iterator it = entity.getDeclaredRelationships().iterator();
+        while(it.hasNext()) {
+            Relationship r = (Relationship) it.next();
+            if(r.isToMany()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Returns true if current entity contains at least one List property.
      * 
      * @since 1.1
