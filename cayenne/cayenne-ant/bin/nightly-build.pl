@@ -67,18 +67,18 @@ get_source();
 # build
 chdir "$cayenne_src/cayenne/cayenne-ant" or die_with_email("Can't change to $cayenne_src/cayenne/cayenne-ant: $!\n");
 
-set_release_label();
+my $version = release_label();
 
 my $status = run_command("$ant clean");
 die_with_email("Build failed, return status: $status\n") if $status;
 
-$status = run_command("$ant release");
+$status = run_command("$ant release -Dproject.version=$version");
 die_with_email("Build failed, return status: $status\n") if $status;
 
 
 # unit tests - ant
 $status = 
-  run_command("$ant test -Dcayenne.test.connection=nightly-test -Dcayenne.test.report=true");
+  run_command("$ant test -Dproject.version=$version -Dcayenne.test.connection=nightly-test -Dcayenne.test.report=true");
 my $test_failure = $status; 
 
 # upload
@@ -156,33 +156,26 @@ sub get_source() {
 	}
 }
 
-sub set_release_label() {
+sub release_label() {
 	open(DEFAULT_PROPS, "< default.properties") or die_with_email("Can't open default.properties: $!\n");
-        open(LABELED_PROPS, "> build.properties") or die_with_email("Can't open build.properties: $!\n"); 
 	while(<DEFAULT_PROPS>) {
 		chomp;
 		if(/^project\.version\s*=\s*(.+)$/) {
-                        my $version = "$1-$label"; 
-			
-			# copy RELEASE-NOTES
-			copy("doc/release-notes/RELEASE-NOTES-$1.txt", 
-                             "doc/release-notes/RELEASE-NOTES-$version.txt") 
-                             or die_with_email("Can't copy RELEASE-NOTES: $!\n");	
-			# copy UPGRADE
-			copy("doc/upgrade/UPGRADE-$1.txt", 
-                             "doc/upgrade/UPGRADE-$version.txt") 
-                             or die_with_email("Can't copy UPGRADE: $!\n");	
 
-
-			print LABELED_PROPS "project.version = $version\n";
-		}
-		else {
-			print LABELED_PROPS "$_\n";
+			# make sure RELEASE-NOTES with the right version exist
+                       copy("../cayenne-other/release-notes/RELEASE-NOTES-$1.txt", 
+                             "../cayenne-other/release-notes/RELEASE-NOTES-$1-$label.txt") 
+                             or die_with_email("Can't copy RELEASE-NOTES: $!\n");
+                       # copy UPGRADE
+                       copy("../cayenne-other/release-notes/UPGRADE-$1.txt", 
+                             "../cayenne-other/release-notes/UPGRADE-$1-$label.txt") 
+                             or die_with_email("Can't copy UPGRADE: $!\n");
+                        return "$1-$label"; 
 		}
 	}
 
 	close(DEFAULT_PROPS);
-	close(LABELED_PROPS);
+	die "Can't find 'project.version' in default.properties";
 }
 
 sub run_command() {
