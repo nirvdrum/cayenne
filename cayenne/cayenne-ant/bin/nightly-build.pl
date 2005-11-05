@@ -6,11 +6,10 @@
 # as well as upload successful builds to the download server. Used primarily for
 # nightly builds. Requires:
 # 
-#   1. A UNIX box with Perl 
-#   2. Ant 1.5
-#   3. JDK 1.4
+#   1. A UNIX box with Perl and mail
+#   2. Ant 1.6
+#   3. JDK 1.4 and JDK 1.5
 #   4. cvs
-#   5. qmail
 #   6. Entry in $HOME/.cayenne/connection.properties for "nightly-test"
 #
 # Command line:
@@ -31,11 +30,6 @@ use Getopt::Std;
 use Cwd;
 
 
-# These must be defined as environment variables
-# (May need to modify script to make this configurable on the command line)
-$ENV{'JAVA_HOME'} = "/opt/java";
-$ENV{'ANT_HOME'} = "/opt/ant/current";
-
 our ($opt_u, $opt_m, $opt_n, $opt_d);
 getopts('unm:d:');
 
@@ -48,10 +42,18 @@ my $label = "$year-$mon-$mday";
 my $out_file = "/tmp/cayenne-nightly-$label.txt";
 unlink $out_file if -f $out_file;
 
-die_with_email("No JDK1.5 installation at $ENV{'JAVA_HOME'}") unless -d $ENV{'JAVA_HOME'};
+# Find JDK 1.5 and 1.4 installations...
+my $jdk_15 = "/opt/java";
+my $jdk_14 = "/opt/java-1.4";
+
+die_with_email("No JDK1.5 installation at $jdk_15") unless -d $jdk_15;
+die_with_email("No JDK1.4 installation at $jdk_14") unless -d $jdk_14;
 
 my $cayenne_src = "/tmp/cayenne/build";
+
+$ENV{'ANT_HOME'} = "/opt/ant/current";
 my $ant = "$ENV{'ANT_HOME'}/bin/ant";
+
 die_with_email("No Ant installation at $ant") unless -f $ant;
 
 # Upload path on the server
@@ -69,17 +71,26 @@ chdir "$cayenne_src/cayenne/cayenne-ant" or die_with_email("Can't change to $cay
 
 my $version = release_label();
 
-my $status = run_command("$ant clean");
+#
+# Do JDK 1.4 Regression Testing
+# -----------------------------
+$ENV{'JAVA_HOME'} = $jdk_14;
+my $status = run_command("$ant -v clean");
+$status = run_command("$ant test-1_4");
+die_with_email("JDK 1.4 Build failed, return status: $status\n") if $status;
+
+#
+# Build for real with JDK 1.5
+# -----------------------------
+$ENV{'JAVA_HOME'} = $jdk_15;
+$status = run_command("$ant -v clean");
 die_with_email("Build failed, return status: $status\n") if $status;
-
-$status = run_command("$ant release -Dproject.version=$version");
-die_with_email("Build failed, return status: $status\n") if $status;
-
-
-# unit tests - ant
 $status = 
   run_command("$ant test -Dproject.version=$version -Dcayenne.test.connection=nightly-test -Dcayenne.test.report=true");
 my $test_failure = $status; 
+
+$status = run_command("$ant release -Dproject.version=$version");
+die_with_email("Build failed, return status: $status\n") if $status;
 
 # upload
 if($opt_u) {
@@ -112,8 +123,6 @@ if($opt_u) {
 	$status = 
 	run_command("scp $gz_files[0] $upload_dir/");
 	die_with_email("Can't upload release, return status: $status\n") if $status;
-
-	# 
 }
 
 die_with_email("Unit tests failed, return status: $status\n") if $test_failure;
