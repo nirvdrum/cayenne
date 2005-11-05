@@ -56,14 +56,14 @@
 package org.objectstyle.cayenne.unit;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.ConnectionProperties;
@@ -88,7 +88,7 @@ public class CayenneTestResources implements BeanFactoryAware {
 
     private static Logger logObj = Logger.getLogger(CayenneTestResources.class);
 
-    public static final String CONFIG_KEY = "cayenne.test.config";
+    public static final String TEST_RESOURCES_DESCRIPTOR = "spring-test-resources.xml";
 
     public static final String CONNECTION_NAME_KEY = "cayenne.test.connection";
     public static final String TEST_DIR_KEY = "cayenne.test.dir";
@@ -98,45 +98,26 @@ public class CayenneTestResources implements BeanFactoryAware {
 
     private static CayenneTestResources resources;
 
-    static {
+    static CayenneTestResources loadResources() {
         Configuration.configureCommonLogging();
 
-        // bootstrap shared CayenneTestResources
+        InputStream in = Thread
+                .currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream(TEST_RESOURCES_DESCRIPTOR);
 
-        String testResourcesPath = System.getProperty(CONFIG_KEY);
-        File testResources = null;
-
-        if (testResourcesPath != null) {
-            File altResources = new File(testResourcesPath);
-            if (altResources.isFile()) {
-                testResources = altResources;
-            }
+        if (in == null) {
+            logObj.error("Can't locate resource");
+            throw new RuntimeException(
+                    "Can't locate resource descriptor in the ClassLoader: "
+                            + TEST_RESOURCES_DESCRIPTOR);
         }
 
-        if (testResources == null) {
-            File testDir = new File(
-                    new File(new File(new File("build"), "tests"), "deps"),
-                    "test-resources");
-            testResources = new File(testDir, "spring-test-resources.xml");
-        }
-
-        // configure shared resources instance with Spring
-        logObj.info("== Loading test configuration from " + testResources);
-        logObj.info("== To override set property '" + CONFIG_KEY + "'");
-        InputStream in = null;
-        try {
-            in = new FileInputStream(testResources);
-        }
-        catch (IOException ioex) {
-            logObj.error("Can't open test resources..." + testResources, ioex);
-            throw new RuntimeException("Error loading", ioex);
-        }
         BeanFactory factory = new XmlBeanFactory(new InputStreamResource(in));
-        resources = (CayenneTestResources) factory.getBean(
+        CayenneTestResources resources = (CayenneTestResources) factory.getBean(
                 "TestResources",
                 CayenneTestResources.class);
 
-        // must finish config manually
         resources.setConnectionKey(System.getProperty(CONNECTION_NAME_KEY));
 
         try {
@@ -146,10 +127,11 @@ public class CayenneTestResources implements BeanFactoryAware {
             logObj.error("Error generating schema...", ex);
             throw new RuntimeException("Error generating schema");
         }
+
+        return resources;
     }
 
     protected File testDir;
-    protected File testResourcesDir;
     protected DataSourceInfo connectionInfo;
     protected DataSource dataSource;
     protected BeanFactory beanFactory;
@@ -161,7 +143,50 @@ public class CayenneTestResources implements BeanFactoryAware {
      * @return CayenneTestResources
      */
     public static CayenneTestResources getResources() {
+        if (resources == null) {
+            resources = loadResources();
+        }
         return resources;
+    }
+
+    /**
+     * Copies resources to a file, thus making it available to the caller as File.
+     */
+    public static void copyResourceToFile(String resourceName, File file) {
+        URL in = getResourceURL(resourceName);
+
+        if (!Util.copy(in, file)) {
+            throw new CayenneRuntimeException("Error copying resource to file : " + file);
+        }
+    }
+
+    /**
+     * Returns a guaranteed non-null resource for a given name.
+     */
+    public static URL getResourceURL(String name) {
+        URL in = Thread.currentThread().getContextClassLoader().getResource(name);
+
+        if (in == null) {
+            throw new CayenneRuntimeException("Resource not found: " + name);
+        }
+
+        return in;
+    }
+
+    /**
+     * Returns a guaranteed non-null resource for a given name.
+     */
+    public static InputStream getResource(String name) {
+        InputStream in = Thread
+                .currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream(name);
+
+        if (in == null) {
+            throw new CayenneRuntimeException("Resource not found: " + name);
+        }
+
+        return in;
     }
 
     public CayenneTestResources(Map adapterMap) {
@@ -173,7 +198,7 @@ public class CayenneTestResources implements BeanFactoryAware {
     /**
      * Completely rebuilds test schema.
      */
-    public void rebuildSchema() throws Exception {
+    void rebuildSchema() throws Exception {
         // generate schema using a special AccessStack that
         // combines all DataMaps that require schema support
         // schema generation is done like that instead of
@@ -191,7 +216,7 @@ public class CayenneTestResources implements BeanFactoryAware {
         if (connectionKey == null) {
             throw new RuntimeException("Null connection key.");
         }
-        
+
         connectionInfo = ConnectionProperties.getInstance().getConnectionInfo(
                 connectionKey);
 
@@ -253,14 +278,6 @@ public class CayenneTestResources implements BeanFactoryAware {
      */
     public File getTestDir() {
         return testDir;
-    }
-
-    public File getTestResourcesDir() {
-        return testResourcesDir;
-    }
-
-    public void setTestResourcesDir(File dir) {
-        this.testResourcesDir = dir;
     }
 
     /**

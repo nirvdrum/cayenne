@@ -67,6 +67,7 @@ import org.apache.tools.ant.Location;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.FileList;
 import org.apache.tools.ant.types.Path;
+import org.objectstyle.cayenne.unit.CayenneTestResources;
 
 public class CayenneGeneratorv1_2Tst extends TestCase {
 
@@ -84,24 +85,29 @@ public class CayenneGeneratorv1_2Tst extends TestCase {
 
     /** Test pairs generation with a cross-DataMap relationship (v1.1). */
     public void testCrossDataMapRelationships_v1_1() throws Exception {
+
         // prepare destination directory
-        File map = new File("src/tests/resources/test-resources/testmap-dependent.map.xml");
+
         File destDir = new File("testrun/cgen11");
         // prepare destination directory
         if (!destDir.exists()) {
             assertTrue(destDir.mkdirs());
         }
 
+        File map = new File(destDir, "testmap-dependent.map.xml");
+        CayenneTestResources.copyResourceToFile("testmap-dependent.map.xml", map);
+
         File additionalMaps[] = new File[1];
-        additionalMaps[0] = new File("src/tests/resources/test-resources/testmap.map.xml");
-        
+        additionalMaps[0] = new File(destDir, "testmap.map.xml");
+        CayenneTestResources.copyResourceToFile("testmap.map.xml", additionalMaps[0]);
+
         FileList additionalMapsFilelist = new FileList();
         additionalMapsFilelist.setDir(additionalMaps[0].getParentFile());
         additionalMapsFilelist.setFiles(additionalMaps[0].getName());
 
         Path additionalMapsPath = new Path(task.getProject());
         additionalMapsPath.addFilelist(additionalMapsFilelist);
-            
+
         // setup task
         task.setMap(map);
         task.setAdditionalMaps(additionalMapsPath);
@@ -113,7 +119,7 @@ public class CayenneGeneratorv1_2Tst extends TestCase {
         task.setDestDir(destDir);
         task.setSuperpkg("org.objectstyle.art2.auto");
         task.setUsepkgpath(true);
- 
+
         // run task
         task.execute();
 
@@ -122,9 +128,15 @@ public class CayenneGeneratorv1_2Tst extends TestCase {
         assertTrue(a.isFile());
         assertContents(a, "MyArtGroup", "org.objectstyle.art2", "_MyArtGroup");
 
-        File _a = new File(destDir, convertPath("org/objectstyle/art2/auto/_MyArtGroup.java"));
+        File _a = new File(
+                destDir,
+                convertPath("org/objectstyle/art2/auto/_MyArtGroup.java"));
         assertTrue(_a.exists());
-        assertContents(_a, "_MyArtGroup", "org.objectstyle.art2.auto", "CayenneDataObject");
+        assertContents(
+                _a,
+                "_MyArtGroup",
+                "org.objectstyle.art2.auto",
+                "CayenneDataObject");
         assertContents(_a, "org.objectstyle.art.ArtGroup getToParentGroup()");
         assertContents(_a, "setToParentGroup(org.objectstyle.art.ArtGroup toParentGroup)");
     }
@@ -132,23 +144,27 @@ public class CayenneGeneratorv1_2Tst extends TestCase {
     /** Test pairs generation with a cross-DataMap relationship. */
     public void testCrossDataMapRelationships() throws Exception {
         // prepare destination directory
-        File map = new File("src/tests/resources/test-resources/testmap-dependent.map.xml");
+
         File destDir = new File("testrun/cgen12");
         // prepare destination directory
         if (!destDir.exists()) {
             assertTrue(destDir.mkdirs());
         }
 
+        File map = new File(destDir, "testmap-dependent.map.xml");
+        CayenneTestResources.copyResourceToFile("testmap-dependent.map.xml", map);
+
         File additionalMaps[] = new File[1];
-        additionalMaps[0] = new File("src/tests/resources/test-resources/testmap.map.xml");
-        
+        additionalMaps[0] = new File(destDir, "testmap.map.xml");
+        CayenneTestResources.copyResourceToFile("testmap.map.xml", additionalMaps[0]);
+
         FileList additionalMapsFilelist = new FileList();
         additionalMapsFilelist.setDir(additionalMaps[0].getParentFile());
         additionalMapsFilelist.setFiles(additionalMaps[0].getName());
 
         Path additionalMapsPath = new Path(task.getProject());
         additionalMapsPath.addFilelist(additionalMapsFilelist);
-            
+
         // setup task
         task.setMap(map);
         task.setAdditionalMaps(additionalMapsPath);
@@ -160,7 +176,7 @@ public class CayenneGeneratorv1_2Tst extends TestCase {
         task.setDestDir(destDir);
         task.setSuperpkg("org.objectstyle.art2.auto");
         task.setUsepkgpath(true);
- 
+
         // run task
         task.execute();
 
@@ -169,9 +185,15 @@ public class CayenneGeneratorv1_2Tst extends TestCase {
         assertTrue(a.isFile());
         assertContents(a, "MyArtGroup", "org.objectstyle.art2", "_MyArtGroup");
 
-        File _a = new File(destDir, convertPath("org/objectstyle/art2/auto/_MyArtGroup.java"));
+        File _a = new File(
+                destDir,
+                convertPath("org/objectstyle/art2/auto/_MyArtGroup.java"));
         assertTrue(_a.exists());
-        assertContents(_a, "_MyArtGroup", "org.objectstyle.art2.auto", "CayenneDataObject");
+        assertContents(
+                _a,
+                "_MyArtGroup",
+                "org.objectstyle.art2.auto",
+                "CayenneDataObject");
         assertContents(_a, "import org.objectstyle.art.ArtGroup;");
         assertContents(_a, " ArtGroup getToParentGroup()");
         assertContents(_a, "setToParentGroup(ArtGroup toParentGroup)");
@@ -181,9 +203,7 @@ public class CayenneGeneratorv1_2Tst extends TestCase {
         return unixPath.replace('/', File.separatorChar);
     }
 
-    private void assertContents(
-            File f,
-            String content) throws Exception {
+    private void assertContents(File f, String content) throws Exception {
 
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(
                 f)));
@@ -191,7 +211,8 @@ public class CayenneGeneratorv1_2Tst extends TestCase {
         try {
             String s = null;
             while ((s = in.readLine()) != null) {
-                if (s.indexOf(content) >= 0)  return;
+                if (s.indexOf(content) >= 0)
+                    return;
             }
 
             fail("<" + content + "> not found in " + f.getAbsolutePath() + ".");

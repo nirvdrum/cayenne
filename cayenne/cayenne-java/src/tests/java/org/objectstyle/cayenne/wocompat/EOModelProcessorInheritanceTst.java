@@ -70,7 +70,7 @@ public class EOModelProcessorInheritanceTst extends BasicTestCase {
     }
 
     public void testLoadAbstractEntity() throws Exception {
-        DataMap map = processor.loadEOModel("test-resources/inheritance.eomodeld");
+        DataMap map = processor.loadEOModel("inheritance.eomodeld");
 
         ObjEntity abstractE = map.getObjEntity("AbstractEntity");
         assertNotNull(abstractE);
@@ -79,7 +79,7 @@ public class EOModelProcessorInheritanceTst extends BasicTestCase {
     }
 
     public void testLoadConcreteEntity() throws Exception {
-        DataMap map = processor.loadEOModel("test-resources/inheritance.eomodeld");
+        DataMap map = processor.loadEOModel("inheritance.eomodeld");
 
         ObjEntity concreteE = map.getObjEntity("ConcreteEntityOne");
         assertNotNull(concreteE);

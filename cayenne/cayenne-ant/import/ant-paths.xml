@@ -69,9 +69,8 @@
 	</path>
 	
 	<path id="classpath-tests-1_4">
-		<path refid="classpath-cayenne-lib"/>
+		<path refid="classpath-cayenne-lib-tools"/>
 		<pathelement path="${build}/tests-1_4/classes"/>
-		<pathelement path="build/tests-1_4/deps"/>
 	</path>
 	
 	<path id="classpath-tests">
@@ -80,11 +79,14 @@
 	</path>
 	
 	<path id="classpath-tests-run">
-		<path refid="classpath-tests"/>
+		<!-- Include Ant libs from the environment before project Ant jars -->
 		
 		<!-- Exclude any XML parsers Ant might bundle...rely on JAXP instead -->
 		<fileset dir="${ant.home}/lib" includes="*.jar"
 			excludes="*xalan*,*xerces*,*xml-api*"/>
+		
+		<path refid="classpath-tests"/>
+		<pathelement path="${cayenne.java}/src/tests/resources"/>
 		<pathelement path="${cayenne.env.CLASSPATH}"/>
 	</path>
 	

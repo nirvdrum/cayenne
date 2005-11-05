@@ -97,13 +97,13 @@ public class DeploymentConfiguratorTst extends CayenneTestCase {
         locator.setSkipCurrentDirectory(true);
         locator.setSkipHomeDirectory(true);
 
-        URL url1 = locator.findResource("test-resources/cdeploy/cdeploy-test.jar");
+        URL url1 = locator.findResource("cdeploy/cdeploy-test.jar");
         Util.copy(url1, src);
 
-        URL url2 = locator.findResource("test-resources/cdeploy/alt-cayenne.xml");
+        URL url2 = locator.findResource("cdeploy/alt-cayenne.xml");
         Util.copy(url2, altFile);
 
-        URL url3 = locator.findResource("test-resources/cdeploy/alt-node1.xml");
+        URL url3 = locator.findResource("cdeploy/alt-node1.xml");
         Util.copy(url3, altNodeFile);
     }
 

@@ -69,9 +69,9 @@ public class CayenneGeneratorTst extends CayenneTestCase {
         locator.setSkipCurrentDirectory(true);
         locator.setSkipHomeDirectory(true);
 
-        URL url1 = locator.findResource("test-resources/testmap.map.xml");
+        URL url1 = locator.findResource("testmap.map.xml");
         Util.copy(url1, map);
-        URL url2 = locator.findResource("test-resources/testtemplate.vm");
+        URL url2 = locator.findResource("testtemplate.vm");
         Util.copy(url2, template);
     }
 

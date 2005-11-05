@@ -55,19 +55,21 @@
  */
 package org.objectstyle.cayenne.xml;
 
-import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.unit.CayenneTestResources;
+
 /**
  * @author Andrei Adamchik
  */
 public class XMLDecoderTst extends TestCase {
 
-    static final String XML_DATA_DIR = "src/tests/resources/test-resources/xmlcoding/";
+    static final String XML_DATA_DIR = "xmlcoding/";
     protected XMLDecoder decoder;
 
     public void setUp() {
@@ -75,7 +77,8 @@ public class XMLDecoderTst extends TestCase {
     }
 
     public void testDecode() throws Exception {
-        Reader xml = new FileReader(XML_DATA_DIR + "encoded-object.xml");
+        Reader xml = new InputStreamReader(CayenneTestResources.getResource(XML_DATA_DIR
+                + "encoded-object.xml"));
         Object object = decoder.decode(xml);
 
         assertTrue(object instanceof TestObject);
@@ -91,8 +94,10 @@ public class XMLDecoderTst extends TestCase {
      * @throws Exception
      */
     public void testDecodeMapping() throws Exception {
-        Reader xml = new FileReader(XML_DATA_DIR + "simple-mapped.xml");
-        Object object = decoder.decode(xml, XML_DATA_DIR + "simple-mapping.xml");
+        Reader xml = new InputStreamReader(CayenneTestResources.getResource(XML_DATA_DIR
+                + "simple-mapped.xml"));
+        Object object = decoder.decode(xml, CayenneTestResources.getResourceURL(
+                XML_DATA_DIR + "simple-mapping.xml").toExternalForm());
 
         assertTrue(object instanceof TestObject);
         TestObject decoded = (TestObject) object;
@@ -102,8 +107,10 @@ public class XMLDecoderTst extends TestCase {
     }
 
     public void testDecodeMappingCollection() throws Exception {
-        Reader xml = new FileReader(XML_DATA_DIR + "collection-mapped.xml");
-        Object object = decoder.decode(xml, XML_DATA_DIR + "collection-mapping.xml");
+        Reader xml = new InputStreamReader(CayenneTestResources.getResource(XML_DATA_DIR
+                + "collection-mapped.xml"));
+        Object object = decoder.decode(xml, CayenneTestResources.getResourceURL(
+                XML_DATA_DIR + "collection-mapping.xml").toExternalForm());
 
         assertTrue(object instanceof TestObject);
         TestObject decoded = (TestObject) object;
@@ -133,7 +140,8 @@ public class XMLDecoderTst extends TestCase {
     }
 
     public void testDecodeCollection() throws Exception {
-        Reader xml = new FileReader(XML_DATA_DIR + "encoded-simple-collection.xml");
+        Reader xml = new InputStreamReader(CayenneTestResources.getResource(XML_DATA_DIR
+                + "encoded-simple-collection.xml"));
         Object object = decoder.decode(xml);
 
         assertTrue(object instanceof TestObject);
@@ -150,7 +158,8 @@ public class XMLDecoderTst extends TestCase {
     }
 
     public void testDecodeComplexCollection() throws Exception {
-        Reader xml = new FileReader(XML_DATA_DIR + "encoded-complex-collection.xml");
+        Reader xml = new InputStreamReader(CayenneTestResources.getResource(XML_DATA_DIR
+                + "encoded-complex-collection.xml"));
         Object object = decoder.decode(xml);
 
         assertTrue(object instanceof TestObject);
@@ -181,7 +190,8 @@ public class XMLDecoderTst extends TestCase {
     }
 
     public void testDecodePrimitives() throws Exception {
-        Reader xml = new FileReader(XML_DATA_DIR + "encoded-object-primitives.xml");
+        Reader xml = new InputStreamReader(CayenneTestResources.getResource(XML_DATA_DIR
+                + "encoded-object-primitives.xml"));
         Object object = decoder.decode(xml);
 
         assertTrue(object instanceof TestObject);
@@ -198,7 +208,8 @@ public class XMLDecoderTst extends TestCase {
         dataObjects.add(new TestObject("Mary", 28, false));
         dataObjects.add(new TestObject("Joe", 31, true));
 
-        Reader xml = new FileReader(XML_DATA_DIR + "data-objects-encoded.xml");
+        Reader xml = new InputStreamReader(CayenneTestResources.getResource(XML_DATA_DIR
+                + "data-objects-encoded.xml"));
         final List decoded = XMLDecoder.decodeList(xml);
 
         assertEquals(dataObjects, decoded);
@@ -211,8 +222,11 @@ public class XMLDecoderTst extends TestCase {
         dataObjects.add(new TestObject("Mary", 28, false));
         dataObjects.add(new TestObject("Joe", 31, true));
 
-        Reader xml = new FileReader(XML_DATA_DIR + "data-objects-mapped.xml");
-        final List decoded = XMLDecoder.decodeList(xml, XML_DATA_DIR + "simple-mapping.xml");
+        Reader xml = new InputStreamReader(CayenneTestResources.getResource(XML_DATA_DIR
+                + "data-objects-mapped.xml"));
+        final List decoded = XMLDecoder.decodeList(xml, CayenneTestResources
+                .getResourceURL(XML_DATA_DIR + "simple-mapping.xml")
+                .toExternalForm());
 
         assertEquals(dataObjects, decoded);
     }

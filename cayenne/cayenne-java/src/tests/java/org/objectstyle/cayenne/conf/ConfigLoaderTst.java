@@ -104,7 +104,7 @@ public class ConfigLoaderTst extends CayenneTestCase {
                 .append("<?xml version='1.0' encoding='utf-8'?>")
                 .append("\n<domains>")
                 .append("\n   <domain name='domain1'>")
-                .append("\n   <map name='m1' location='test-resources/testmap.map.xml'/>")
+                .append("\n   <map name='m1' location='testmap.map.xml'/>")
                 .append("\n   </domain>")
                 .append("\n </domains>");
 
@@ -121,7 +121,7 @@ public class ConfigLoaderTst extends CayenneTestCase {
                 .append("\n<domains>")
                 .append("\n   <domain name='domain1'>")
                 .append(
-                        "\n        <map name='m1' location='test-resources/testmap.map.xml'/>")
+                        "\n        <map name='m1' location='testmap.map.xml'/>")
                 .append("\n        <node name='db1' datasource='node.xml'")
                 .append(
                         "\n              factory='org.objectstyle.cayenne.conf.DriverDataSourceFactory'")
@@ -145,7 +145,7 @@ public class ConfigLoaderTst extends CayenneTestCase {
                 .append("\n<domains>")
                 .append("\n   <domain name='domain1'>")
                 .append(
-                        "\n        <map name='m1' location='test-resources/testmap.map.xml'/>")
+                        "\n        <map name='m1' location='testmap.map.xml'/>")
                 .append("\n        <node name='db1' datasource='node.xml'")
                 .append(
                         "\n              factory='org.objectstyle.cayenne.conf.DriverDataSourceFactory'")
@@ -169,12 +169,12 @@ public class ConfigLoaderTst extends CayenneTestCase {
                 .append("<?xml version='1.0' encoding='utf-8'?>")
                 .append("\n<domains>")
                 .append("\n   <domain name='domain1'>")
-                .append("\n   <map name='m1' location='test-resources/testmap.map.xml'/>")
+                .append("\n   <map name='m1' location='testmap.map.xml'/>")
                 .append("\n   </domain>")
                 .append(
-                        "\n   <view name='v1' location='test-resources/testview1.view.xml'/>")
+                        "\n   <view name='v1' location='testview1.view.xml'/>")
                 .append(
-                        "\n   <view name='v2' location='test-resources/testview2.view.xml'/>")
+                        "\n   <view name='v2' location='testview2.view.xml'/>")
                 .append("\n </domains>");
 
         ConfigLoaderCase aCase = new ConfigLoaderCase();

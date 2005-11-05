@@ -56,7 +56,10 @@
 
 package org.objectstyle.cayenne.unit;
 
-import java.io.File;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -74,7 +77,6 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.Procedure;
-import org.objectstyle.cayenne.util.Util;
 
 /**
  * Defines API and a common superclass for testing various database features. Different
@@ -128,11 +130,8 @@ public class AccessStackAdapter {
                 while (cit.hasNext()) {
                     Object constraint = cit.next();
                     StringBuffer drop = new StringBuffer();
-                    drop
-                            .append("ALTER TABLE ")
-                            .append(tableName)
-                            .append(" DROP CONSTRAINT ")
-                            .append(constraint);
+                    drop.append("ALTER TABLE ").append(tableName).append(
+                            " DROP CONSTRAINT ").append(constraint);
                     executeDDL(conn, drop.toString());
                 }
             }
@@ -203,21 +202,48 @@ public class AccessStackAdapter {
         }
     }
 
-    protected void executeDDL(Connection con, File sourceFile) throws Exception {
-        // not sure if all JDBC adapters will like multiline statements
-        // separated with '\n'. Oracle & Sybase seem OK, though
-        // joining with space is probably safer, though produces ugly code
-        String ddl = Util.stringFromFile(sourceFile, "\n");
-        executeDDL(con, ddl);
+    protected void executeDDL(Connection con, String database, String name)
+            throws Exception {
+        executeDDL(con, ddlString(database, name));
     }
 
     /**
      * Returns a file under test resources DDL directory for the specified database.
      */
-    protected File ddlFile(String database, String name) {
-        return new File(new File(new File(CayenneTestResources
-                .getResources()
-                .getTestResourcesDir(), "ddl"), database), name);
+    String ddlString(String database, String name) {
+        StringBuffer location = new StringBuffer();
+        location.append("ddl/").append(database).append("/").append(name);
+
+        InputStream resource = Thread
+                .currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream(location.toString());
+
+        if (resource == null) {
+            throw new CayenneRuntimeException("Can't find DDL file: " + location);
+        }
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(resource));
+        StringBuffer buf = new StringBuffer();
+        try {
+            String line = null;
+            while ((line = in.readLine()) != null) {
+                buf.append(line).append('\n');
+            }
+        }
+        catch (IOException e) {
+            throw new CayenneRuntimeException("Error reading DDL file: " + location);
+        }
+        finally {
+
+            try {
+                in.close();
+            }
+            catch (IOException e) {
+
+            }
+        }
+        return buf.toString();
     }
 
     public boolean handlesNullVsEmptyLOBs() {

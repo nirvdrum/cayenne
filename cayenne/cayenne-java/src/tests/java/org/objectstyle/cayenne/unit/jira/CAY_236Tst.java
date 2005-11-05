@@ -80,7 +80,7 @@ public class CAY_236Tst extends BasicTestCase {
 
         // the idea here is to avoid passing the reader to the loader, and make sure the
         // loader does the right thing (i.e. loads UTF-8 encoded file) itself.
-        DataMap map = loader.loadDataMap("test-resources/i18n/by/DataMap.map.xml");
+        DataMap map = loader.loadDataMap("i18n/by/DataMap.map.xml");
         assertNotNull(map.getDbEntity(TABLE1_BY));
     }
 
@@ -89,7 +89,7 @@ public class CAY_236Tst extends BasicTestCase {
 
         // the idea here is to avoid passing the reader to the loader, and make sure the
         // loader does the right thing (i.e. loads UTF-8 encoded file) itself.
-        DataMap map = loader.loadDataMap("test-resources/i18n/by/DataMap.map.xml");
+        DataMap map = loader.loadDataMap("i18n/by/DataMap.map.xml");
 
         File mapFile = new File(getTestDir(), "CAY_236Map.map.xml");
         TestProjectFile file = new TestProjectFile(map, "DataMap", mapFile);

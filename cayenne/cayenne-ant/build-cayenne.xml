@@ -52,7 +52,7 @@
 	<!-- ============================================= -->
 	<!-- Compiles 1.4 and 1.5 sources.                 -->
 	<!-- ============================================= -->
-	<target name="compile">
+	<target name="compile" depends="prepare-deps">
 		
 		<!-- compile 1.4 sources -->
 		<compile-1_4 destdir="${core.build}" srcref="srcpath-cayenne-1_4"

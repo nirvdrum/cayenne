@@ -70,8 +70,7 @@ import org.objectstyle.cayenne.unit.BasicTestCase;
 public class EOModelPrototypesTst extends BasicTestCase {
 
     public void testSkipPrototypes() throws Exception {
-        DataMap map = new EOModelProcessor()
-                .loadEOModel("test-resources/prototypes.eomodeld");
+        DataMap map = new EOModelProcessor().loadEOModel("prototypes.eomodeld");
 
         assertNotNull(map.getObjEntity("Document"));
         assertNull(map.getObjEntity("EOPrototypes"));
@@ -79,8 +78,7 @@ public class EOModelPrototypesTst extends BasicTestCase {
     }
 
     public void testDbAttributeType() throws Exception {
-        DataMap map = new EOModelProcessor()
-                .loadEOModel("test-resources/prototypes.eomodeld");
+        DataMap map = new EOModelProcessor().loadEOModel("prototypes.eomodeld");
 
         DbEntity dbe = map.getDbEntity("DOCUMENT");
         assertNotNull(dbe);
@@ -102,8 +100,7 @@ public class EOModelPrototypesTst extends BasicTestCase {
     // nothing
     // to do with prototypes...
     public void testSameColumnMapping() throws Exception {
-        DataMap map = new EOModelProcessor()
-                .loadEOModel("test-resources/prototypes.eomodeld");
+        DataMap map = new EOModelProcessor().loadEOModel("prototypes.eomodeld");
 
         ObjEntity estimateOE = map.getObjEntity("Estimate");
         ObjEntity invoiceOE = map.getObjEntity("Invoice");
@@ -126,8 +123,7 @@ public class EOModelPrototypesTst extends BasicTestCase {
     // TODO: move this test to EOModelProcessorInheritanceTst. The original problem had
     // nothing to do with prototypes...
     public void testOverridingAttributes() throws Exception {
-        DataMap map = new EOModelProcessor()
-                .loadEOModel("test-resources/prototypes.eomodeld");
+        DataMap map = new EOModelProcessor().loadEOModel("prototypes.eomodeld");
 
         ObjEntity documentOE = map.getObjEntity("Document");
         ObjEntity estimateOE = map.getObjEntity("Estimate");

@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.unit;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 
 import org.springframework.beans.factory.BeanFactory;
@@ -80,7 +78,10 @@ public class SpringResourceFactory implements FactoryBean {
 
     public Object getObject() throws Exception {
         if (factory == null) {
-            InputStream in = new FileInputStream(new File(location));
+            InputStream in = Thread
+                    .currentThread()
+                    .getContextClassLoader()
+                    .getResourceAsStream(location);
             this.factory = new XmlBeanFactory(new InputStreamResource(in));
         }
         return factory;

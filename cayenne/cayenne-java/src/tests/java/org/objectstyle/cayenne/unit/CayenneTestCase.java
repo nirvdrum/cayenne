@@ -71,31 +71,33 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unit.util.SQLTemplateCustomizer;
 
 /**
- * Superclass of Cayenne test cases. Provides access to shared
- * connection resources.
+ * Superclass of Cayenne test cases. Provides access to shared connection resources.
  * 
  * @author Andrei Adamchik
  */
 public abstract class CayenneTestCase extends BasicTestCase {
+
     public static final String TEST_ACCESS_STACK = "TestStack";
     public static final String MULTI_TIER_ACCESS_STACK = "MultiTierStack";
 
     static {
         // create dummy shared config
         Configuration config = new DefaultConfiguration() {
+
             public void initialize() {
             }
         };
 
         Configuration.initializeSharedConfiguration(config);
 
-        // make sure CayenneTestResources is loaded
-        CayenneTestResources.class.getName();
     }
 
     protected AccessStack accessStack;
 
     public CayenneTestCase() {
+        // make sure CayenneTestResources shared instance is loaded
+        CayenneTestResources.getResources();
+        
         this.accessStack = buildAccessStack();
     }
 
@@ -120,8 +122,9 @@ public abstract class CayenneTestCase extends BasicTestCase {
     }
 
     protected SQLTemplateCustomizer getSQLTemplateBuilder() {
-        SQLTemplateCustomizer customizer =
-            CayenneTestResources.getResources().getSQLTemplateCustomizer();
+        SQLTemplateCustomizer customizer = CayenneTestResources
+                .getResources()
+                .getSQLTemplateCustomizer();
 
         // make sure adapter is correct
         customizer.setAdapter(getAccessStackAdapter().getAdapter());
@@ -129,8 +132,8 @@ public abstract class CayenneTestCase extends BasicTestCase {
     }
 
     /**
-     * Creates test data via a mechanism preconfigured in the access stack.
-     * Default mechanism is loading test data DML from XML file. 
+     * Creates test data via a mechanism preconfigured in the access stack. Default
+     * mechanism is loading test data DML from XML file.
      */
     protected void createTestData(String testName) throws Exception {
         accessStack.createTestData(this.getClass(), testName);
@@ -145,7 +148,8 @@ public abstract class CayenneTestCase extends BasicTestCase {
     }
 
     /**
-     * Creates a DataContext that uses shared snapshot cache and is based on default test domain.
+     * Creates a DataContext that uses shared snapshot cache and is based on default test
+     * domain.
      */
     protected DataContext createDataContextWithSharedCache() {
         // remove listeners for snapshot events
@@ -164,14 +168,15 @@ public abstract class CayenneTestCase extends BasicTestCase {
     }
 
     /**
-     * Creates a DataContext that uses local snapshot cache and is based on default test domain.
+     * Creates a DataContext that uses local snapshot cache and is based on default test
+     * domain.
      */
     protected DataContext createDataContextWithLocalCache() {
         DataContext context = getDomain().createDataContext(false);
 
-        assertNotSame(
-            getDomain().getSharedSnapshotCache(),
-            context.getObjectStore().getDataRowCache());
+        assertNotSame(getDomain().getSharedSnapshotCache(), context
+                .getObjectStore()
+                .getDataRowCache());
 
         return context;
     }
@@ -186,7 +191,7 @@ public abstract class CayenneTestCase extends BasicTestCase {
     protected void deleteTestData() throws Exception {
         accessStack.deleteTestData();
     }
-    
+
     protected DbEntity getDbEntity(String dbEntityName) {
         // retrieve DbEntity the hard way, bypassing the resolver...
         Iterator it = getDomain().getDataMaps().iterator();
@@ -203,7 +208,7 @@ public abstract class CayenneTestCase extends BasicTestCase {
 
         throw new CayenneRuntimeException("No DbEntity found: " + dbEntityName);
     }
-    
+
     protected ObjEntity getObjEntity(String objEntityName) {
         // retrieve ObjEntity the hard way, bypassing the resolver...
         Iterator it = getDomain().getDataMaps().iterator();

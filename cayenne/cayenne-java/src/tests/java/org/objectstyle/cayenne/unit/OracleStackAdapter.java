@@ -79,6 +79,7 @@ public class OracleStackAdapter extends AccessStackAdapter {
 
     /**
      * Constructor for OracleDelegate.
+     * 
      * @param adapter
      */
     public OracleStackAdapter(DbAdapter adapter) {
@@ -89,20 +90,21 @@ public class OracleStackAdapter extends AccessStackAdapter {
         return true;
     }
 
-    public void willDropTables(Connection conn, DataMap map, Collection tablesToDrop) throws Exception {
-        // avoid dropping constraints...  
+    public void willDropTables(Connection conn, DataMap map, Collection tablesToDrop)
+            throws Exception {
+        // avoid dropping constraints...
     }
 
     /**
-     * Oracle 8i does not support more then 1 "LONG xx" column per table
-     * PAINTING_INFO need to be fixed.
+     * Oracle 8i does not support more then 1 "LONG xx" column per table PAINTING_INFO
+     * need to be fixed.
      */
     public void willCreateTables(Connection con, DataMap map) {
         DbEntity paintingInfo = map.getDbEntity("PAINTING_INFO");
 
         if (paintingInfo != null) {
-            DbAttribute textReview =
-                (DbAttribute) paintingInfo.getAttribute("TEXT_REVIEW");
+            DbAttribute textReview = (DbAttribute) paintingInfo
+                    .getAttribute("TEXT_REVIEW");
             textReview.setType(Types.VARCHAR);
             textReview.setMaxLength(255);
         }
@@ -110,10 +112,10 @@ public class OracleStackAdapter extends AccessStackAdapter {
 
     public void createdTables(Connection con, DataMap map) throws Exception {
         if (map.getProcedureMap().containsKey("cayenne_tst_select_proc")) {
-            executeDDL(con, super.ddlFile("oracle", "create-types-pkg.sql"));
-            executeDDL(con, super.ddlFile("oracle", "create-select-sp.sql"));
-            executeDDL(con, super.ddlFile("oracle", "create-update-sp.sql"));
-            executeDDL(con, super.ddlFile("oracle", "create-out-sp.sql"));
+            executeDDL(con, "oracle", "create-types-pkg.sql");
+            executeDDL(con, "oracle", "create-select-sp.sql");
+            executeDDL(con, "oracle", "create-update-sp.sql");
+            executeDDL(con, "oracle", "create-out-sp.sql");
         }
     }
 
@@ -123,15 +125,12 @@ public class OracleStackAdapter extends AccessStackAdapter {
 
     public void tweakProcedure(Procedure proc) {
         if (DataContextProcedureQueryTst.SELECT_STORED_PROCEDURE.equals(proc.getName())
-            && proc.getCallParameters().size() == 2) {
+                && proc.getCallParameters().size() == 2) {
             List params = new ArrayList(proc.getCallParameters());
 
             proc.clearCallParameters();
-            proc.addCallParameter(
-                new ProcedureParameter(
-                    "result",
-                    OracleAdapter.getOracleCursorType(),
-                    ProcedureParameter.OUT_PARAMETER));
+            proc.addCallParameter(new ProcedureParameter("result", OracleAdapter
+                    .getOracleCursorType(), ProcedureParameter.OUT_PARAMETER));
             Iterator it = params.iterator();
             while (it.hasNext()) {
                 ProcedureParameter param = (ProcedureParameter) it.next();
@@ -141,5 +140,4 @@ public class OracleStackAdapter extends AccessStackAdapter {
             proc.setReturningValue(true);
         }
     }
-
 }

@@ -55,9 +55,6 @@
  */
 package org.objectstyle.cayenne.unit;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
@@ -65,6 +62,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.Query;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
@@ -76,9 +74,10 @@ import org.springframework.core.io.InputStreamResource;
  * @author Andrei Adamchik
  */
 public class XMLDataSetFactory implements DataSetFactory {
+
     private static Logger logObj = Logger.getLogger(XMLDataSetFactory.class);
 
-    protected File baseDir;
+    protected String location;
     protected Map dataSets;
 
     public XMLDataSetFactory() {
@@ -109,8 +108,7 @@ public class XMLDataSetFactory implements DataSetFactory {
             return Collections.singleton(object);
         }
         else {
-            throw new RuntimeException(
-                "Invalid object type for name '"
+            throw new RuntimeException("Invalid object type for name '"
                     + testName
                     + "': "
                     + object.getClass().getName());
@@ -118,6 +116,10 @@ public class XMLDataSetFactory implements DataSetFactory {
     }
 
     protected BeanFactory getFactory(Class testCase) {
+
+        if (testCase == null) {
+            throw new CayenneRuntimeException("Null test case");
+        }
 
         // lookup BeanFactory in the class hierarchy...
         BeanFactory factory = null;
@@ -127,6 +129,12 @@ public class XMLDataSetFactory implements DataSetFactory {
             aClass = aClass.getSuperclass();
         }
 
+        if (factory == null) {
+            logObj.error("DataSet resource not found: " + testCase.getName());
+            throw new CayenneRuntimeException("DataSet resource not found: "
+                    + testCase.getName());
+        }
+
         return factory;
     }
 
@@ -134,26 +142,30 @@ public class XMLDataSetFactory implements DataSetFactory {
         BeanFactory factory = (BeanFactory) dataSets.get(testCase);
 
         if (factory == null) {
-            String name = testCase.getName();
+            StringBuffer resourceName = new StringBuffer();
 
-            // figure file name
+            if (location != null) {
+                resourceName.append(location);
+                if (!location.endsWith("/")) {
+                    resourceName.append("/");
+                }
+            }
+
+            String name = testCase.getName();
             // strip "org.objectstyle.cayenne"
             if (name.startsWith("org.objectstyle.cayenne.")) {
                 name = name.substring("org.objectstyle.cayenne.".length());
             }
 
-            File file = new File(baseDir, name + ".xml");
-            if (!file.isFile()) {
-                return null;
-            }
+            resourceName.append(name).append(".xml");
 
-            InputStream in = null;
-            try {
-                in = new FileInputStream(file);
-            }
-            catch (IOException ioex) {
-                logObj.error("Can't open test resources...", ioex);
-                throw new RuntimeException("Error loading");
+            InputStream in = Thread
+                    .currentThread()
+                    .getContextClassLoader()
+                    .getResourceAsStream(resourceName.toString());
+
+            if (in == null) {
+                return null;
             }
 
             factory = new XmlBeanFactory(new InputStreamResource(in));
@@ -163,11 +175,12 @@ public class XMLDataSetFactory implements DataSetFactory {
         return factory;
     }
 
-    public File getBaseDir() {
-        return baseDir;
+    public String getLocation() {
+        return location;
     }
 
-    public void setBaseDir(File file) {
-        baseDir = file;
+    public void setLocation(String location) {
+        this.location = location;
     }
+
 }

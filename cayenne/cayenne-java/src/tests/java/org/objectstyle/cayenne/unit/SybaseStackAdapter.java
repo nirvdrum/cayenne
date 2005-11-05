@@ -87,9 +87,9 @@ public class SybaseStackAdapter extends AccessStackAdapter {
     public void createdTables(Connection con, DataMap map) throws Exception {
         Procedure proc = map.getProcedure("cayenne_tst_select_proc");
         if (proc != null && proc.getDataMap() == map) {
-            executeDDL(con, super.ddlFile("sybase", "create-select-sp.sql"));
-            executeDDL(con, super.ddlFile("sybase", "create-update-sp.sql"));
-            executeDDL(con, super.ddlFile("sybase", "create-out-sp.sql"));
+            executeDDL(con, "sybase", "create-select-sp.sql");
+            executeDDL(con, "sybase", "create-update-sp.sql");
+            executeDDL(con, "sybase", "create-out-sp.sql");
         }
     }
 
@@ -99,9 +99,9 @@ public class SybaseStackAdapter extends AccessStackAdapter {
 
         Procedure proc = map.getProcedure("cayenne_tst_select_proc");
         if (proc != null && proc.getDataMap() == map) {
-            executeDDL(con, super.ddlFile("sybase", "drop-select-sp.sql"));
-            executeDDL(con, super.ddlFile("sybase", "drop-update-sp.sql"));
-            executeDDL(con, super.ddlFile("sybase", "drop-out-sp.sql"));
+            executeDDL(con, "sybase", "drop-select-sp.sql");
+            executeDDL(con, "sybase", "drop-update-sp.sql");
+            executeDDL(con, "sybase", "drop-out-sp.sql");
         }
     }
 

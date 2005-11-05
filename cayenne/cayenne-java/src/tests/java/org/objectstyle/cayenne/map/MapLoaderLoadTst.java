@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.xml.sax.InputSource;
 
 public class MapLoaderLoadTst extends TestCase {
+
     protected MapLoader mapLoader;
     private String testDataMap;
 
@@ -73,10 +74,7 @@ public class MapLoaderLoadTst extends TestCase {
         super.setUp();
 
         mapLoader = new MapLoader();
-        testDataMap =
-            ClassLoader
-                .getSystemResource("test-resources/testmap.map.xml")
-                .toExternalForm();
+        testDataMap = ClassLoader.getSystemResource("testmap.map.xml").toExternalForm();
     }
 
     public void testLoadDataMap() throws Exception {
@@ -107,9 +105,10 @@ public class MapLoaderLoadTst extends TestCase {
         assertNotNull(a1.getParams());
         assertEquals(1, a1.getParams().size());
 
-        //test super class name
-        //We expect the artist entity to have a super class name... test map should be set up in that way.
-        //No other assertions can be made (the actual super class may change)
+        // test super class name
+        // We expect the artist entity to have a super class name... test map should be
+        // set up in that way.
+        // No other assertions can be made (the actual super class may change)
         ObjEntity ent = map.getObjEntity("Painting");
         assertNotNull(ent.getSuperClassName());
 
@@ -144,8 +143,9 @@ public class MapLoaderLoadTst extends TestCase {
         assertTrue(queryWithPrefetch.getRoot() instanceof ObjEntity);
         assertEquals("Gallery", ((Entity) queryWithPrefetch.getRoot()).getName());
         assertEquals(1, queryWithPrefetch.getPrefetches().size());
-        assertEquals(
-            Gallery.PAINTING_ARRAY_PROPERTY,
-            queryWithPrefetch.getPrefetches().iterator().next());
+        assertEquals(Gallery.PAINTING_ARRAY_PROPERTY, queryWithPrefetch
+                .getPrefetches()
+                .iterator()
+                .next());
     }
 }

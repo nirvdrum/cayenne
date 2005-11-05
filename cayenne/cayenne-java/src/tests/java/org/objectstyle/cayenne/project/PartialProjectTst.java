@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.net.URL;
 
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -65,12 +66,13 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class PartialProjectTst extends CayenneTestCase {
+
     protected File testProjectFile;
     protected PartialProject project;
 
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         // create new test directory, copy cayenne.xml in there
         File baseDir = super.getTestDir();
         for (int i = 1; i < 100; i++) {
@@ -86,7 +88,8 @@ public class PartialProjectTst extends CayenneTestCase {
         }
 
         // copy cayenne.xml
-        File src = new File(getTestResourcesDir(), "lightweight-cayenne.xml");
+        URL src = Thread.currentThread().getContextClassLoader().getResource(
+                "lightweight-cayenne.xml");
         if (!Util.copy(src, testProjectFile)) {
             throw new Exception("Can't copy from " + src);
         }
@@ -95,26 +98,22 @@ public class PartialProjectTst extends CayenneTestCase {
     }
 
     public void testParentFile() throws Exception {
-        assertEquals(
-            testProjectFile.getParentFile().getCanonicalFile(),
-            project.getProjectDirectory().getCanonicalFile());
+        assertEquals(testProjectFile.getParentFile().getCanonicalFile(), project
+                .getProjectDirectory()
+                .getCanonicalFile());
     }
 
     public void testProjectFile() throws Exception {
         ProjectFile f = project.findFile(project);
         assertNotNull(f);
         assertTrue(
-            "Wrong main file type: " + f.getClass().getName(),
-            f instanceof ApplicationProjectFile);
-        assertNotNull(
-            "Null delegate",
-            ((ApplicationProjectFile) f).getSaveDelegate());
+                "Wrong main file type: " + f.getClass().getName(),
+                f instanceof ApplicationProjectFile);
+        assertNotNull("Null delegate", ((ApplicationProjectFile) f).getSaveDelegate());
     }
 
     public void testMainFile() throws Exception {
-        assertEquals(
-            project.findFile(project).resolveFile(),
-            project.getMainFile());
+        assertEquals(project.findFile(project).resolveFile(), project.getMainFile());
     }
 
     public void testDomains() throws Exception {
@@ -122,23 +121,23 @@ public class PartialProjectTst extends CayenneTestCase {
     }
 
     public void testNodes() throws Exception {
-        PartialProject.DomainMetaData d2 =
-            (PartialProject.DomainMetaData) project.domains.get("d2");
+        PartialProject.DomainMetaData d2 = (PartialProject.DomainMetaData) project.domains
+                .get("d2");
         assertNotNull(d2);
         assertEquals(2, d2.nodes.size());
     }
-    
+
     public void testSave() throws Exception {
-    	if(!testProjectFile.delete()) {
-    		throw new Exception("Can't delete project file: " + testProjectFile);
-    	}
-    	
-    	PartialProject old = project;
-    	old.save();
-    	
-    	assertTrue(testProjectFile.exists());
-    	
-    	// reinit shared project and run one of the other tests
+        if (!testProjectFile.delete()) {
+            throw new Exception("Can't delete project file: " + testProjectFile);
+        }
+
+        PartialProject old = project;
+        old.save();
+
+        assertTrue(testProjectFile.exists());
+
+        // reinit shared project and run one of the other tests
         project = new PartialProject(testProjectFile);
         testNodes();
     }

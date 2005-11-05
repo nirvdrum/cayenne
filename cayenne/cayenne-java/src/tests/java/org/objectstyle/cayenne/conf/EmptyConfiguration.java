@@ -64,10 +64,6 @@ import org.objectstyle.cayenne.access.DataDomain;
 public class EmptyConfiguration extends DefaultConfiguration {
 
     public EmptyConfiguration() {
-        super();
-
-        // add "test-resources" directory to CLASSPATH
-        this.addClassPath("test-resources");
 
         // ignore any loading failures
         this.setIgnoringLoadFailures(true);

@@ -86,7 +86,7 @@ public class PostgresStackAdapter extends AccessStackAdapter {
     public boolean supportsStoredProcedures() {
         return true;
     }
-    
+
     public boolean canMakeObjectsOutOfProcedures() {
         // we are a victim of CAY-148 - column capitalization...
         return false;
@@ -94,9 +94,9 @@ public class PostgresStackAdapter extends AccessStackAdapter {
 
     public void createdTables(Connection con, DataMap map) throws Exception {
         if (map.getProcedureMap().containsKey("cayenne_tst_select_proc")) {
-            executeDDL(con, super.ddlFile("postgresql", "create-select-sp.sql"));
-            executeDDL(con, super.ddlFile("postgresql", "create-update-sp.sql"));
-            executeDDL(con, super.ddlFile("postgresql", "create-out-sp.sql"));
+            executeDDL(con, "postgresql", "create-select-sp.sql");
+            executeDDL(con, "postgresql", "create-update-sp.sql");
+            executeDDL(con, "postgresql", "create-out-sp.sql");
         }
     }
 

@@ -62,59 +62,58 @@ import java.io.InputStream;
 import junit.framework.TestCase;
 
 public class ResourceLocatorTst extends TestCase {
-	private File fTmpFileInCurrentDir;
-	private String fTmpFileName;
 
-	protected void setUp() throws java.lang.Exception {
-		fTmpFileName = System.currentTimeMillis() + ".tmp";
-		fTmpFileInCurrentDir = new File("." + File.separator + fTmpFileName);
+    private File fTmpFileInCurrentDir;
+    private String fTmpFileName;
 
-		// right some garbage to the temp file, so that it is not empty
-		FileWriter fout = new FileWriter(fTmpFileInCurrentDir);
-		fout.write("This is total garbage..");
-		fout.close();
-	}
+    protected void setUp() throws java.lang.Exception {
+        fTmpFileName = System.currentTimeMillis() + ".tmp";
+        fTmpFileInCurrentDir = new File("." + File.separator + fTmpFileName);
 
-	protected void tearDown() throws java.lang.Exception {
-		if (!fTmpFileInCurrentDir.delete())
-			throw new Exception("Error deleting temporary file: " + fTmpFileInCurrentDir);
-	}
+        // right some garbage to the temp file, so that it is not empty
+        FileWriter fout = new FileWriter(fTmpFileInCurrentDir);
+        fout.write("This is total garbage..");
+        fout.close();
+    }
 
-	public void testFindResourceInCurrentDirectory() throws java.lang.Exception {
-		InputStream in = ResourceLocator.findResourceInFileSystem(fTmpFileName);
-		try {
-			assertNotNull(in);
-		}
-		finally {
-			in.close();
-		}
-	}
+    protected void tearDown() throws java.lang.Exception {
+        if (!fTmpFileInCurrentDir.delete())
+            throw new Exception("Error deleting temporary file: " + fTmpFileInCurrentDir);
+    }
 
-	public void testClassBaseUrl() throws java.lang.Exception {
-		String me = ResourceLocator.classBaseUrl(this.getClass());
-		assertNotNull(me);
-		assertTrue("Expected 'jar:' or 'file:' URL, got " + me,
-					me.startsWith("jar:") || me.startsWith("file:"));
-	}
+    public void testFindResourceInCurrentDirectory() throws java.lang.Exception {
+        InputStream in = ResourceLocator.findResourceInFileSystem(fTmpFileName);
+        try {
+            assertNotNull(in);
+        }
+        finally {
+            in.close();
+        }
+    }
 
-	public void testFindResourceInClasspath() throws java.lang.Exception {
-		InputStream in =
-			ResourceLocator.findResourceInClasspath("test-resources/testfile1.txt");
-		try {
-			assertNotNull(in);
-		}
-		finally {
-			in.close();
-		}
-	}
+    public void testClassBaseUrl() throws java.lang.Exception {
+        String me = ResourceLocator.classBaseUrl(this.getClass());
+        assertNotNull(me);
+        assertTrue("Expected 'jar:' or 'file:' URL, got " + me, me.startsWith("jar:")
+                || me.startsWith("file:"));
+    }
 
-	public void testFindResourceWithCustomClassPath() throws java.lang.Exception {
-		ResourceLocator l = new ResourceLocator();
-		l.setSkipAbsolutePath(true);
-		l.setSkipCurrentDirectory(true);
-		l.setSkipHomeDirectory(true);
-		l.addClassPath("test-resources");
-		assertNotNull(l.findResource("testfile1.txt"));
-	}
+    public void testFindResourceInClasspath() throws java.lang.Exception {
+        InputStream in = ResourceLocator.findResourceInClasspath("testfile1.txt");
+        try {
+            assertNotNull(in);
+        }
+        finally {
+            in.close();
+        }
+    }
+
+    public void testFindResourceWithCustomClassPath() throws java.lang.Exception {
+        ResourceLocator l = new ResourceLocator();
+        l.setSkipAbsolutePath(true);
+        l.setSkipCurrentDirectory(true);
+        l.setSkipHomeDirectory(true);
+        assertNotNull(l.findResource("testfile1.txt"));
+    }
 
 }

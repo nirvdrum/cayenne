@@ -56,7 +56,7 @@ public class EOModelProcessorTst extends BasicTestCase {
     }
 
     public void testLoadModel() throws Exception {
-        DataMap map = processor.loadEOModel("test-resources/wotests/art.eomodeld");
+        DataMap map = processor.loadEOModel("wotests/art.eomodeld");
         assertLoaded("art", map);
         assertLoadedQueries(map);
         assertOneWayRelationships(map);
@@ -65,7 +65,7 @@ public class EOModelProcessorTst extends BasicTestCase {
 
     public void testLoadModelWithDependencies() throws Exception {
         DataMap map = processor
-                .loadEOModel("test-resources/wotests/cross-model-relationships.eomodeld");
+                .loadEOModel("wotests/cross-model-relationships.eomodeld");
 
         ObjEntity entity = map.getObjEntity("CrossModelRelTest");
         assertNotNull(entity);
@@ -84,7 +84,7 @@ public class EOModelProcessorTst extends BasicTestCase {
     }
 
     public void testLoadBrokenModel() throws Exception {
-        DataMap map = processor.loadEOModel("test-resources/art-with-errors.eomodeld");
+        DataMap map = processor.loadEOModel("art-with-errors.eomodeld");
         assertLoaded("art-with-errors", map);
     }
 

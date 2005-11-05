@@ -73,10 +73,6 @@ public abstract class BasicTestCase extends TestCase {
         Configuration.configureCommonLogging();
     }
 
-    protected File getTestResourcesDir() {
-        return CayenneTestResources.getResources().getTestResourcesDir();
-    }
-
     /**
      * Returns directory that should be used by all test cases that perform file
      * operations.

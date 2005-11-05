@@ -5,82 +5,52 @@
 <!-- ========================================== -->
 <project default="...">
 	
-	<property file="default.properties"/>
 	<property name="test.dist.src" value="${dist}/src/tests"/>
-	<property name="test.build" value="${build}/tests"/>
+	<property name="test.build" value="${build}/tests-1_4/classes"/>
+	<property name="test.build.1_5" value="${build}/tests-1_5/classes"/>
+	<property name="test.coverage" value="${build}/tests/coverage"/>
 	<property name="test.src" value="${cayenne.java}/src/tests/java"/>
 	<property name="test.src.1_5" value="${cayenne.java.1_5}/src/tests/java"/>
-	<property name="test.bin" value="src/tests/bin"/>
-	<property name="test.resources" value="${cayenne.java}/src/tests/resources"/>
-	<property name="test.output"
-		value="${test.build}/out/${cayenne.test.connection}"/>
-	<property name="test.report"
-		value="${test.build}/report/${cayenne.test.connection}"/>
 	<property name="test.filter" value="**/*Tst.class"/>
 	
+	<!-- ============================================= -->
+	<!-- Compiles test source code.                    -->
+	<!-- ============================================= -->
 	<target name="compile">
-		<cgen-tests map="${test.resources}/multi-tier.map.xml"
+		
+		<!-- generate test classes in case mapping has changed -->
+		<cgen-tests map="${cayenne.java}/src/tests/resources/multi-tier.map.xml"
 			destDir="${test.src}"
 			superpkg="org.objectstyle.cayenne.testdo.mt.auto"/>
-		<cgen-tests map="${test.resources}/multi-tier.map.xml"
+		<cgen-tests map="${cayenne.java}/src/tests/resources/multi-tier.map.xml"
 			destDir="${test.src}"
 			superpkg="org.objectstyle.cayenne.testdo.mt.auto" client="true"/>
 		
-		<compile-1_4 destdir="${build}/tests-1_4/classes"
-			srcref="srcpath-tests-1_4"
+		<!-- compile -->
+		<compile-1_4 destdir="${test.build}" srcref="srcpath-tests-1_4"
 			classpathref="classpath-cayenne-lib-tools"/>
 		
-		<compile-1_5 destdir="${build}/tests-1_5/classes"
-			srcref="srcpath-tests-1_5"
+		<compile-1_5 destdir="${test.build.1_5}" srcref="srcpath-tests-1_5"
 			classpathref="classpath-cayenne-lib-tools"/>
-	</target>
-	
-	<target name="dist-src" depends="dist-bin">
-		<copy todir="${test.dist.src}">
-			<fileset dir="${test.src}"/>
-			<fileset dir="${test.resources}"/>
-		</copy>
-	</target>
-	
-	<target name="dist-bin" depends="jar">
-		<!-- JUnit JAR is required for the tests to run. -->
-		<copy file="${lib.dir}/${junit.jar}" todir="${dist}/lib"/>
-	</target>
-	
-	<!-- ========================================== -->
-	<!-- Builds tests JAR file.                     -->
-	<!-- ========================================== -->
-	<target name="jar" depends="compile">
-		<jar jarfile="${dist}/lib/cayenne-tests.jar"
-			manifest="src/tests/MANIFEST.MF">
-			<fileset dir="${test.build}/classes"/>
-			<fileset dir="${test.resources}"/>
-			<metainf dir="doc" includes="LICENSE"/>
-		</jar>
 	</target>
 	
 	<!-- ============================================= -->
 	<!-- Runs and reports on tests.                    -->
 	<!-- ============================================= -->
 	<target name="test" depends="check-connection,compile">
+		
 		<!-- emma code coverage -->
-		<property name="coverage.dir" value="${test.build}/coverage"/>
 		<taskdef resource="emma_ant.properties"
 			classpathref="classpath-tests-run"/>
 		
-		<!-- Run Java on itself to avoid classloader weirdness in JUnit -->
+		<!-- Fork for test run to avoid classloader weirdness in JUnit -->
 		<emmajava enabled="${coverage.enabled}" verbosity="quiet" fork="true"
 			libclasspathref="classpath-tests-run"
 			classname="org.apache.tools.ant.Main" failonerror="true">
 			
-			<!-- sources to include -->
-			<sourcepath>
-				<pathelement path="src/cayenne/java"/>
-			</sourcepath>
-			
 			<!-- put the coverage report into a connection-specific subdir -->
 			<html
-				outfile="${coverage.dir}/${cayenne.test.connection}/coverage.html"
+				outfile="${test.coverage}/${cayenne.test.connection}/coverage.html"
 				sort="+name, +line"/>
 			
 			<!-- do not instrument test classes -->
@@ -89,8 +59,8 @@
 				excludes="*Tst*,*Test*,*test*,org.objectstyle.cayenne.unit.*"/>
 			
 			<arg value="-f"/>
-			<arg value="build-tests.xml"/>
-			<arg value="unit-test-run"/>
+			<arg value="build-tests-run.xml"/>
+			<arg value="test-run"/>
 			
 			<jvmarg value="-Xms64m"/>
 			<jvmarg value="-Xmx64m"/>
@@ -102,77 +72,11 @@
 			<sysproperty key="cayenne.test.report"
 				value="${cayenne.test.report}"/>
 			<sysproperty key="ant.home" value="${ant.home}"/>
-			<sysproperty key="dist" value="${dist}"/>
+			<sysproperty key="build" value="${build}"/>
 			<sysproperty key="test.filter" value="${test.filter}"/>
 			<sysproperty key="test.exclude" value="${test.exclude}"/>
 			<classpath refid="classpath-tests-run"/>
 		</emmajava>
-		
-	</target>
-	
-	<!-- ============================================= -->
-	<!-- Defines testing sequence                      -->
-	<!-- ============================================= -->
-	<target name="unit-test-run"
-		depends="unit-test,unit-test-report-needed,unit-test-report">
-		<fail
-			message="Cayenne tests failed, see files in ${test.output} for details."
-			if="cayenne.test.failure"/>
-	</target>
-	
-	<!-- ============================================= -->
-	<!-- Runs Unit tests.                              -->
-	<!-- ============================================= -->
-	<target name="unit-test">
-		<delete>
-			<fileset dir="${basedir}">
-				<include name="${test.output}/**"/>
-				<include name="${test.report}/**"/>
-			</fileset>
-		</delete>
-		
-		<mkdir dir="${test.output}"/>
-		<mkdir dir="${test.report}"/>
-		
-		<copy todir="build/tests/deps">
-			<fileset dir="src/tests/resources"/>
-		</copy>
-		
-		<junit fork="false" haltonfailure="no" errorProperty="cayenne.test.failure"
-			failureProperty="cayenne.test.failure">
-			
-			<formatter type="xml" usefile="true"/>
-			<batchtest todir="${test.output}">
-				<fileset dir="${test.build}/classes" includes="${test.filter}"
-					excludes="${test.exclude}"/>
-			</batchtest>
-		</junit>
-		
-	</target>
-	
-	<!-- ============================================= -->
-	<!-- Reports failures.                             -->
-	<!-- ============================================= -->
-	<target name="unit-test-report" depends="unit-test"
-		if="cayenne.test.report.needed">
-		<!-- HTML report is only generated on failures for speed -->
-		<junitreport todir="${test.report}">
-			<fileset dir="${test.output}">
-				<include name="TEST-*.xml"/>
-			</fileset>
-			<report format="frames" todir="${test.report}"/>
-		</junitreport>
-	</target>
-	
-	<target name="unit-test-report-needed">
-		<!-- In case of failures, always run report,  -->
-		<!-- in case of success, only when asked.     -->
-		<condition property="cayenne.test.report.needed">
-			<or>
-				<isset property="cayenne.test.failure"/>
-				<istrue value="${cayenne.test.report}"/>
-			</or>
-		</condition>
 	</target>
 	
 	<target name="use-embedded-hsqldb" unless="cayenne.test.connection">
@@ -181,9 +85,7 @@
 			value="internal_embedded_datasource"/>
 		<path id="classpath">
 			<path refid="classpath-tests-run"/>
-			<fileset dir="${lib.dir}">
-				<include name="${hsqldb.jar}"/>
-			</fileset>
+			<fileset dir="${cayenne.java}/lib" includes="${hsqldb.jar}"/>
 		</path>
 	</target>
 	

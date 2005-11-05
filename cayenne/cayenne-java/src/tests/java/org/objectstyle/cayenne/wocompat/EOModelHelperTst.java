@@ -74,7 +74,7 @@ public class EOModelHelperTst extends BasicTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        helper = new EOModelHelper("test-resources/wotests/art.eomodeld");
+        helper = new EOModelHelper("wotests/art.eomodeld");
     }
 
     public void testModelNames() throws Exception {

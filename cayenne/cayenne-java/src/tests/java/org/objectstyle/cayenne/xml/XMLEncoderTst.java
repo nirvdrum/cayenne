@@ -57,8 +57,11 @@ package org.objectstyle.cayenne.xml;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.objectstyle.cayenne.unit.CayenneTestResources;
 
 import junit.framework.TestCase;
 
@@ -67,7 +70,7 @@ import junit.framework.TestCase;
  */
 public class XMLEncoderTst extends TestCase {
 
-    static final String XML_DATA_DIR = "src/tests/resources/test-resources/xmlcoding/";
+    static final String XML_DATA_DIR = "xmlcoding/";
 
     public void testObjectWithNullProperties() throws Exception {
         XMLEncoder encoder = new XMLEncoder();
@@ -87,9 +90,9 @@ public class XMLEncoderTst extends TestCase {
         encoder.setRoot("Test", test.getClass().getName());
         encoder.encodeProperty("children", test.getChildren());
         String result = encoder.nodeToString(encoder.getRootNode());
-        
-        BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
-                + "encoded-simple-collection.xml"));
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(CayenneTestResources
+                .getResource(XML_DATA_DIR + "encoded-simple-collection.xml")));
         StringBuffer comp = new StringBuffer();
         while (in.ready()) {
             comp.append(in.readLine()).append("\n");
@@ -112,8 +115,8 @@ public class XMLEncoderTst extends TestCase {
 
         String result = encoder.encode("TestObjects", obj1);
 
-        BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
-                + "encoded-complex-collection.xml"));
+        BufferedReader in = new BufferedReader(new InputStreamReader(CayenneTestResources
+                .getResource(XML_DATA_DIR + "encoded-complex-collection.xml")));
         StringBuffer comp = new StringBuffer();
         while (in.ready()) {
             comp.append(in.readLine()).append("\n");
@@ -123,7 +126,8 @@ public class XMLEncoderTst extends TestCase {
     }
 
     public void testSimpleMapping() throws Exception {
-        XMLEncoder encoder = new XMLEncoder(XML_DATA_DIR + "simple-mapping.xml");
+        XMLEncoder encoder = new XMLEncoder(CayenneTestResources.getResourceURL(
+                XML_DATA_DIR + "simple-mapping.xml").toExternalForm());
         TestObject test = new TestObject();
         test.setAge(57);
         test.setName("George");
@@ -131,8 +135,8 @@ public class XMLEncoderTst extends TestCase {
 
         String result = encoder.encode(test);
 
-        BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
-                + "simple-mapped.xml"));
+        BufferedReader in = new BufferedReader(new InputStreamReader(CayenneTestResources
+                .getResource(XML_DATA_DIR + "simple-mapped.xml")));
         StringBuffer comp = new StringBuffer();
         while (in.ready()) {
             comp.append(in.readLine()).append("\n");
@@ -141,7 +145,8 @@ public class XMLEncoderTst extends TestCase {
     }
 
     public void testCollectionMapping() throws Exception {
-        XMLEncoder encoder = new XMLEncoder(XML_DATA_DIR + "collection-mapping.xml");
+        XMLEncoder encoder = new XMLEncoder(CayenneTestResources.getResourceURL(
+                XML_DATA_DIR + "collection-mapping.xml").toExternalForm());
         TestObject george = new TestObject();
         george.setName("George");
         george.addChild(new TestObject("Bill", 34, true));
@@ -152,8 +157,8 @@ public class XMLEncoderTst extends TestCase {
 
         String result = encoder.encode(george);
 
-        BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
-                + "collection-mapped.xml"));
+        BufferedReader in = new BufferedReader(new InputStreamReader(CayenneTestResources
+                .getResource(XML_DATA_DIR + "collection-mapped.xml")));
         StringBuffer comp = new StringBuffer();
         while (in.ready()) {
             comp.append(in.readLine()).append("\n");
@@ -171,8 +176,8 @@ public class XMLEncoderTst extends TestCase {
 
         String xml = new XMLEncoder().encode("EncodedTestList", dataObjects);
 
-        BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
-                + "data-objects-encoded.xml"));
+        BufferedReader in = new BufferedReader(new InputStreamReader(CayenneTestResources
+                .getResource(XML_DATA_DIR + "data-objects-encoded.xml")));
         StringBuffer comp = new StringBuffer();
         while (in.ready()) {
             comp.append(in.readLine()).append("\n");
@@ -188,12 +193,13 @@ public class XMLEncoderTst extends TestCase {
         dataObjects.add(new TestObject("Mary", 28, false));
         dataObjects.add(new TestObject("Joe", 31, true));
 
-        String xml = new XMLEncoder(XML_DATA_DIR + "simple-mapping.xml").encode(
+        String xml = new XMLEncoder(CayenneTestResources.getResourceURL(
+                XML_DATA_DIR + "simple-mapping.xml").toExternalForm()).encode(
                 "EncodedTestList",
                 dataObjects);
 
-        BufferedReader in = new BufferedReader(new FileReader(XML_DATA_DIR
-                + "data-objects-mapped.xml"));
+        BufferedReader in = new BufferedReader(new InputStreamReader(CayenneTestResources
+                .getResource(XML_DATA_DIR + "data-objects-mapped.xml")));
         StringBuffer comp = new StringBuffer();
         while (in.ready()) {
             comp.append(in.readLine()).append("\n");

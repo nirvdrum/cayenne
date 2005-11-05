@@ -144,7 +144,7 @@ public class UtilTst extends TestCase {
     }
 
     public void testCopyJarUrl() throws Exception {
-        URL fileInJar = ClassLoader.getSystemResource("test-resources/testfile1.txt");
+        URL fileInJar = ClassLoader.getSystemResource("testfile1.txt");
         assertNotNull(fileInJar);
 
         // skipping test if file not in jar

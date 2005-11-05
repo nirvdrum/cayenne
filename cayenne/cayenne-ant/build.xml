@@ -78,18 +78,18 @@ ENVIRONMENT:
     <!-- Runs Cayenne Unit Tests                    -->
     <!-- ========================================== -->
     <target name="test" description="runs JUnit tests">
-		<ant antfile="build-cayenne.xml" target="dist-bin"/>
-		<ant antfile="build-modeler.xml" target="dist-bin"/>
-		<ant antfile="build-tests.xml" target="test"/>
+		<ant antfile="build-cayenne.xml" target="compile" inheritrefs="true"/>
+		<ant antfile="build-modeler.xml" target="compile" inheritrefs="true"/>
+		<ant antfile="build-tests.xml" target="test" inheritrefs="true"/>
     </target>
 
     <!-- ========================================== -->
     <!-- Runs Unit Test Coverage Analysis           -->
     <!-- ========================================== -->
-    <target name="testcoverage" description="create JUnit test coverage report">
+	<target name="testcoverage" description="create JUnit test coverage report">
 		<property name="coverage.enabled" value="true"/>
 		<antcall target="test"/>
-    </target>
+	</target>
 
     <!-- ========================================== -->
     <!-- Builds all Cayenne Java subproject JARS.   -->
@@ -115,6 +115,7 @@ ENVIRONMENT:
     <!-- ========================================== -->
     <target name="clean" depends="clean-java">
         <delete dir="${dist.base}"/>
+		<delete dir="testrun"/>
         <delete file="velocity.log" failonerror="false"/>
     </target>
 	
@@ -129,9 +130,9 @@ ENVIRONMENT:
     <!-- Runs Cayenne Regression Tests              -->
     <!-- ========================================== -->
     <target name="regression" description="runs regression test application">
-		<ant antfile="build-cayenne.xml" target="dist-bin"/>
-		<ant antfile="build-tests.xml" target="dist-bin"/>
-		<ant antfile="build-regression.xml" target="test"/>
+		<ant antfile="build-cayenne.xml" target="dist-bin" inheritrefs="true"/>
+		<ant antfile="build-tests.xml" target="dist-bin" inheritrefs="true"/>
+		<ant antfile="build-regression.xml" target="test" inheritrefs="true"/>
     </target>
     
     <!-- ========================================== -->
@@ -152,8 +153,8 @@ ENVIRONMENT:
     <!-- Builds Cayenne documentation.             -->
     <!-- ========================================== -->
     <target name="doc">
-        <ant antfile="build-doc.xml" target="doc"/>
-        <ant antfile="build-tutorials.xml" target="doc"/>
+        <ant antfile="build-doc.xml" target="doc" inheritrefs="true"/>
+        <ant antfile="build-tutorials.xml" target="doc" inheritrefs="true"/>
     </target>
 
 
@@ -170,7 +171,7 @@ ENVIRONMENT:
     <!-- ========================================== -->
     <target name="pdf" description="builds PDF documentation.">
 		<!-- copy images first -->
-		<ant antfile="build-doc.xml" target="doc-img"/>
-		<ant antfile="build-pdf.xml"/>
+		<ant antfile="build-doc.xml" target="doc-img" inheritrefs="true"/>
+		<ant antfile="build-pdf.xml" inheritrefs="true"/>
     </target> 
 </project>
