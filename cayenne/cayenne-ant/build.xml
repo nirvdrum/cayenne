@@ -159,8 +159,6 @@ ENVIRONMENT:
     <!-- Builds PDF documenatation.                 -->
     <!-- ========================================== -->
     <target name="pdf" description="builds PDF documentation.">
-		<!-- copy images first -->
-		<ant antfile="ant/doc.xml" target="doc-img" inheritrefs="true"/>
-		<ant antfile="ant/pdf.xml" target="pdf" inheritrefs="true"/>
+		<ant antfile="ant/doc.xml" target="pdf" inheritrefs="true"/>
     </target> 
 </project>

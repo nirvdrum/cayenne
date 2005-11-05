@@ -44,6 +44,10 @@
 		<path refid="srcpath-tests-1_5"/>
 	</path>
 	
+	<path id="srcpath-pdf-builder">
+		<pathelement path="${cayenne.other}/src/pdf/java"/>
+	</path>
+	
 	<!-- ============================================= -->
 	<!-- Class Paths.                                  -->
 	<!-- ============================================= -->
@@ -101,5 +105,10 @@
 		
 		<fileset dir="${cayenne.other}/lib" includes="*.jar"/>
 		<fileset dir="${cayenne.java}/lib" includes="${velocity.jar}"/>
-	</path>	
+	</path>
+	
+	<path id="classpath-pdf">
+		<fileset dir="${cayenne.other}/lib" includes="itext*.jar"/>
+		<path refid="classpath-lib"/>
+	</path>
 </project>

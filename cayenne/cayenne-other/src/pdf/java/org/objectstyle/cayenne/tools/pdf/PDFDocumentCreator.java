@@ -53,6 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.tools.pdf;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;

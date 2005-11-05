@@ -54,9 +54,12 @@
  * <http://objectstyle.org/>.
  */
 
+package org.objectstyle.cayenne.tools.pdf;
+
+import java.awt.Color;
+
 import com.lowagie.text.Font;
 import com.lowagie.text.FontFactory;
-import java.awt.*;
 
 /**
  * A set of fonts which document use.
@@ -65,61 +68,78 @@ import java.awt.*;
  */
 public interface PDFFonts {
 
-    public static final Font sectionFont = FontFactory.getFont("Arial",
+    public static final Font sectionFont = FontFactory.getFont(
+            "Arial",
             20,
             Font.BOLD,
             new Color(0, 0, 0));
-    public static final Font subsectionFont = FontFactory.getFont("Arial",
+    public static final Font subsectionFont = FontFactory.getFont(
+            "Arial",
             14,
             Font.BOLD,
             new Color(0, 0, 0));
-    public static final Font regularFont = FontFactory.getFont(FontFactory.TIMES,
+    public static final Font regularFont = FontFactory.getFont(
+            FontFactory.TIMES,
             12,
             Font.NORMAL,
             new Color(0, 0, 0));
-    public static final Font boldFont = FontFactory.getFont(FontFactory.TIMES,
+    public static final Font boldFont = FontFactory.getFont(
+            FontFactory.TIMES,
             12,
             Font.BOLD,
             new Color(0, 0, 0));
-    public static final Font italicFont = FontFactory.getFont(FontFactory.TIMES,
+    public static final Font italicFont = FontFactory.getFont(
+            FontFactory.TIMES,
             12,
             Font.ITALIC,
             new Color(0, 0, 0));
-    public static final Font titleFont = FontFactory.getFont(FontFactory.TIMES,
+    public static final Font titleFont = FontFactory.getFont(
+            FontFactory.TIMES,
             48,
             Font.BOLD,
             new Color(0, 0, 0));
-    public static final Font copyrightFont = FontFactory.getFont(FontFactory.TIMES,
+    public static final Font copyrightFont = FontFactory.getFont(
+            FontFactory.TIMES,
             16,
             Font.NORMAL,
             new Color(0, 0, 0));
-    public static final Font errorFont = FontFactory.getFont(FontFactory.TIMES,
+    public static final Font errorFont = FontFactory.getFont(
+            FontFactory.TIMES,
             12,
             Font.NORMAL,
             new Color(255, 0, 0));
-    public static final Font sourceFont = FontFactory.getFont(FontFactory.COURIER,
+    public static final Font sourceFont = FontFactory.getFont(
+            FontFactory.COURIER,
             10,
             Font.NORMAL,
             new Color(0, 0, 0));
-    public static final Font sourceItalicFont = FontFactory.getFont(FontFactory.COURIER,
+    public static final Font sourceItalicFont = FontFactory.getFont(
+            FontFactory.COURIER,
             10,
             Font.ITALIC,
             new Color(0, 0, 0));
-    public static final Font sourceBoldFont = FontFactory.getFont(FontFactory.COURIER,
+    public static final Font sourceBoldFont = FontFactory.getFont(
+            FontFactory.COURIER,
             10,
             Font.BOLD,
             new Color(0, 0, 0));
-    public static final Font sourceBoldItalicFont = FontFactory
-            .getFont(FontFactory.COURIER, 10, Font.BOLDITALIC, new Color(0, 0, 0));
-    public static final Font panelBoldFont = FontFactory.getFont(FontFactory.TIMES,
+    public static final Font sourceBoldItalicFont = FontFactory.getFont(
+            FontFactory.COURIER,
+            10,
+            Font.BOLDITALIC,
+            new Color(0, 0, 0));
+    public static final Font panelBoldFont = FontFactory.getFont(
+            FontFactory.TIMES,
             11,
             Font.BOLD,
             new Color(0, 0, 0));
-    public static final Font invisibleFont = FontFactory.getFont(FontFactory.TIMES,
+    public static final Font invisibleFont = FontFactory.getFont(
+            FontFactory.TIMES,
             1,
             Font.NORMAL,
             new Color(255, 255, 255));
-    public static final Font boldItalicFont = FontFactory.getFont(FontFactory.TIMES,
+    public static final Font boldItalicFont = FontFactory.getFont(
+            FontFactory.TIMES,
             12,
             Font.BOLDITALIC,
             new Color(0, 0, 0));

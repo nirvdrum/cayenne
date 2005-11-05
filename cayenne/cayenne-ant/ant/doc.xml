@@ -8,13 +8,14 @@
 	<!-- can't use common build folder, as Anakia requires relative path -->
 	<property name="build.suffix" value="build/ant/docs"/>
 	<property name="build.docs" value="${cayenne.other}/${build.suffix}"/>
+	<property name="build.pdf" value="${build.docs}/classes"/>
 	<property name="xdocs" value="${cayenne.other}/xdocs"/>
 	<property name="parser.dir.exp"
 		value="${cayenne.java}/src/cayenne/java/org/objectstyle/cayenne/exp/parser"/>
 	<property name="parser.base.exp" value="ExpressionParser"/>
 	
 	<!-- ========================================== -->
-	<!-- Builds Cayenne documenatation.             -->
+	<!-- Builds Cayenne documentation.              -->
 	<!-- ========================================== -->
 	<target name="doc" depends="doc-img,grammars">
 		
@@ -104,6 +105,40 @@
 				<include name="**/*.jpg"/>
 			</fileset>
 		</copy>
+	</target>
+	
+	<!-- ========================================== -->
+	<!-- Builds PDF documentation                   -->
+	<!-- ========================================== -->
+	<target name="pdf" depends="doc-img">
+		
+		<!-- Compile PDF Builder -->
+		<compile-1_5 destdir="${build.pdf}" srcref="srcpath-pdf-builder"
+			classpathref="classpath-pdf"/>
+		
+		<java classname="org.objectstyle.cayenne.tools.pdf.PDFBuilder"
+			failonerror="true" fork="true" dir="${cayenne.other}">
+			<arg value="xdocs/modelerguide/"/>
+			<arg value="CayenneModeler Guide"/>
+			<arg value="${dist}/doc/modelerguide.pdf"/>
+			<classpath>
+				<path refid="classpath-pdf"/>
+				<path location="${build.pdf}"/>
+			</classpath>
+		</java>
+		
+		<java classname="org.objectstyle.cayenne.tools.pdf.PDFBuilder"
+			failonerror="true" fork="true" dir="${cayenne.other}">
+			
+			<arg value="xdocs/userguide/"/>
+			<arg value="User Guide"/>
+			<arg value="${dist}/doc/userguide.pdf"/>
+			<classpath>
+				<path refid="classpath-pdf"/>
+				<path location="${build.pdf}"/>
+			</classpath>
+		</java>
+		
 	</target>
 </project>
 
