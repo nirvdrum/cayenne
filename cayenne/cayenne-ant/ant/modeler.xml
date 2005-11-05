@@ -4,6 +4,7 @@
 <!-- CayenneModeler subproject buildfile.-->
 <!-- ========================================== -->
 <project default="...">
+	<property name="modeler.dist.src" value="${dist}/src/modeler"/>
 	<property name="modeler.build" value="${build}/modeler/classes"/>
 	<property name="modeler.src" value="${cayenne.java}/src/modeler/java"/>
 	<property name="modeler.resources"

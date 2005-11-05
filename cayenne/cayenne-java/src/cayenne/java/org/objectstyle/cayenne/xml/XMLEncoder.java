@@ -146,7 +146,7 @@ public class XMLEncoder {
      * that the object must call "setRoot" prior to encoding its properties.
      * 
      * @param xmlTag The name of the XML element used to represent the property.
-     * @param property The object's property value to encode.
+     * @param value The object's property value to encode.
      */
     public void encodeProperty(String xmlTag, Object value) {
         encodeProperty(xmlTag, value, true);

@@ -143,9 +143,6 @@ public interface ObjectContext extends Serializable {
 
     /**
      * Performs a cascading commit of changes made in this ObjectContext and its parents.
-     * 
-     * @return GraphDiff that contains changes made to objects during commit. This
-     *         includes things like generated ids, etc.
      */
     void commitChanges();
 

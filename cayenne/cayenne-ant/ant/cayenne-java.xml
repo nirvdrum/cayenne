@@ -74,7 +74,7 @@
 	<target name="dist-src" depends="jar,api">
 		<copy todir="${core.dist.src}">
 			<fileset dir="${core.src}"/>
-			<fileset dir="${core.resources}">
+			<fileset dir="${cayenne.java}/src/cayenne/resources">
 				<include name=".cayenne/**"/>
 				<include name="dotemplates/**"/>
 			</fileset>

@@ -207,7 +207,6 @@ public class ImportUtils {
     
     /**
      * Generate package and list of import statements based on the registered types.
-     * @return
      */
     public String generate()
     {
