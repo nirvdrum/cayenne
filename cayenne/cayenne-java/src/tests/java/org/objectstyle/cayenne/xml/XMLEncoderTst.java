@@ -56,14 +56,13 @@
 package org.objectstyle.cayenne.xml;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.objectstyle.cayenne.unit.CayenneTestResources;
-
 import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.unit.CayenneTestResources;
 
 /**
  * @author Kevin J. Menard, Jr.
@@ -122,6 +121,17 @@ public class XMLEncoderTst extends TestCase {
             comp.append(in.readLine()).append("\n");
         }
 
+        // there are differences in attribute order encoding, so there can be more than
+        // one valid output depending on the parser used...
+
+        if (!comp.toString().equals(result)) {
+            in = new BufferedReader(new InputStreamReader(CayenneTestResources
+                    .getResource(XML_DATA_DIR + "encoded-complex-collection-alt1.xml")));
+            comp = new StringBuffer();
+            while (in.ready()) {
+                comp.append(in.readLine()).append("\n");
+            }
+        }
         assertEquals(comp.toString(), result);
     }
 
