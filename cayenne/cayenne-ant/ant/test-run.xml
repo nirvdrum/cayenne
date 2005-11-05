@@ -19,6 +19,12 @@
 			if="cayenne.test.failure"/>
 	</target>
 	
+	<target name="test-run-1_4" depends="clean,test-1_4,test-report">
+		<fail
+			message="Cayenne tests failed, see files in ${test.output} for details."
+			if="cayenne.test.failure"/>
+	</target>
+	
 	<target name="clean">
 		<delete dir="${test.output}"/>
 		<delete dir="${test.report}"/>
@@ -39,6 +45,22 @@
 				<fileset dir="${build}/tests-1_4/classes"
 					includes="${test.filter}" excludes="${test.exclude}"/>
 				<fileset dir="${build}/tests-1_5/classes"
+					includes="${test.filter}" excludes="${test.exclude}"/>
+			</batchtest>
+		</junit>
+		
+	</target>
+	
+	<target name="test-1_4">
+		
+		<mkdir dir="${test.output}"/>
+		
+		<junit fork="false" haltonfailure="no" errorProperty="cayenne.test.failure"
+			failureProperty="cayenne.test.failure">
+			
+			<formatter type="xml" usefile="true"/>
+			<batchtest todir="${test.output}">
+				<fileset dir="${build}/tests-1_4/classes"
 					includes="${test.filter}" excludes="${test.exclude}"/>
 			</batchtest>
 		</junit>

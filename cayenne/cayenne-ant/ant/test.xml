@@ -17,8 +17,13 @@
 	<!-- ============================================= -->
 	<!-- Compiles test source code.                    -->
 	<!-- ============================================= -->
-	<target name="compile">
+	<target name="compile" depends="compile-1_4">
 		
+		<compile-1_5 destdir="${test.build.1_5}" srcref="srcpath-tests-1_5"
+			classpathref="classpath-cayenne-lib-tools"/>
+	</target>
+	
+	<target name="compile-1_4">
 		<!-- generate test classes in case mapping has changed -->
 		<cgen-tests map="${cayenne.java}/src/tests/resources/multi-tier.map.xml"
 			destDir="${test.src}"
@@ -30,16 +35,24 @@
 		<!-- compile -->
 		<compile-1_4 destdir="${test.build}" srcref="srcpath-tests-1_4"
 			classpathref="classpath-cayenne-lib-tools"/>
-		
-		<compile-1_5 destdir="${test.build.1_5}" srcref="srcpath-tests-1_5"
-			classpathref="classpath-cayenne-lib-tools"/>
 	</target>
 	
 	<!-- ============================================= -->
 	<!-- Runs and reports on tests.                    -->
 	<!-- ============================================= -->
 	<target name="test" depends="check-connection,compile">
-		
+		<antcall target="test-run" inheritrefs="true">
+			<param name="test.target" value="test-run"/>
+		</antcall>
+	</target>
+	
+	<target name="test-1_4" depends="check-connection,compile-1_4">
+		<antcall target="test-run" inheritrefs="true">
+			<param name="test.target" value="test-run-1_4"/>
+		</antcall>
+	</target>
+	
+	<target name="test-run">
 		<!-- emma code coverage -->
 		<taskdef resource="emma_ant.properties"
 			classpathref="classpath-tests-run"/>
@@ -65,7 +78,7 @@
 			
 			<arg value="-f"/>
 			<arg value="${basedir}/ant/test-run.xml"/>
-			<arg value="test-run"/>
+			<arg value="${test.target}"/>
 			
 			<jvmarg value="-Xms64m"/>
 			<jvmarg value="-Xmx64m"/>

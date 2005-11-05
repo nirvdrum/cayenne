@@ -47,15 +47,16 @@
 	<!-- ============================================= -->
 	<!-- Compiles 1.4 and 1.5 sources.                 -->
 	<!-- ============================================= -->
-	<target name="compile" depends="prepare-deps">
-		
-		<!-- compile 1.4 sources -->
-		<compile-1_4 destdir="${core.build}" srcref="srcpath-cayenne-1_4"
-			classpathref="classpath-lib"/>
-		
+	<target name="compile" depends="prepare-deps,compile-1_4">
 		<!-- compile 1.5 sources -->
 		<compile-1_5 destdir="${core.build.1_5}" srcref="srcpath-cayenne-1_5"
 			classpathref="classpath-cayenne-1_4"/>
+	</target>
+	
+	<target name="compile-1_4" depends="prepare-deps">
+		<!-- compile 1.4 sources -->
+		<compile-1_4 destdir="${core.build}" srcref="srcpath-cayenne-1_4"
+			classpathref="classpath-lib"/>
 		
 		<!-- copy resources; copy property files with token substitution -->
 		<copy-properties destdir="${core.build}" srcdir="${core.src}"/>
