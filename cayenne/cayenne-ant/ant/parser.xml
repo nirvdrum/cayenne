@@ -22,7 +22,7 @@
 		</java>
 		
 		<java dir="${basedir}" fork="true" classname="javacc" failonerror="true">
-			<classpath refid="javacc-classpath"/>
+			<classpath refid="classpath-javacc"/>
 			<arg value="-OUTPUT_DIRECTORY:${parser.dir}"/>
 			<arg value="${parser.dir}/${parser.base}.jj"/>
 		</java>

@@ -8,7 +8,8 @@
 	<property name="test.dist.src" value="${dist}/src/tests"/>
 	<property name="test.build" value="${build}/tests-1_4/classes"/>
 	<property name="test.build.1_5" value="${build}/tests-1_5/classes"/>
-	<property name="test.coverage" value="${build}/tests/coverage"/>
+	<property name="test.coverage" value="${build}/tests-coverage"/>
+	<property name="test.run" value="${build}/tests-run"/>
 	<property name="test.src" value="${cayenne.java}/src/tests/java"/>
 	<property name="test.src.1_5" value="${cayenne.java.1_5}/src/tests/java"/>
 	<property name="test.filter" value="**/*Tst.class"/>
@@ -43,10 +44,14 @@
 		<taskdef resource="emma_ant.properties"
 			classpathref="classpath-tests-run"/>
 		
+		<delete dir="${test.run}"/>
+		<mkdir dir="${test.run}"/>
+		
 		<!-- Fork for test run to avoid classloader weirdness in JUnit -->
 		<emmajava enabled="${coverage.enabled}" verbosity="quiet" fork="true"
 			libclasspathref="classpath-tests-run"
-			classname="org.apache.tools.ant.Main" failonerror="true">
+			classname="org.apache.tools.ant.Main" dir="${test.run}"
+			failonerror="true">
 			
 			<!-- put the coverage report into a connection-specific subdir -->
 			<html
@@ -59,7 +64,7 @@
 				excludes="*Tst*,*Test*,*test*,org.objectstyle.cayenne.unit.*"/>
 			
 			<arg value="-f"/>
-			<arg value="build-tests-run.xml"/>
+			<arg value="${basedir}/ant/test-run.xml"/>
 			<arg value="test-run"/>
 			
 			<jvmarg value="-Xms64m"/>

@@ -93,4 +93,13 @@
 	<path id="classpath-javacc">
 		<fileset dir="${cayenne.java}/lib" includes="javacc*.jar"/>
 	</path>
+	
+	<path id="classpath-anakia">
+		<!-- Exclude any XML parsers Ant might bundle...rely on JAXP instead -->
+		<fileset dir="${ant.home}/lib" includes="*.jar"
+			excludes="*xalan*,*xerces*,*xml-api*"/>
+		
+		<fileset dir="${cayenne.other}/lib" includes="*.jar"/>
+		<fileset dir="${cayenne.java}/lib" includes="${velocity.jar}"/>
+	</path>	
 </project>

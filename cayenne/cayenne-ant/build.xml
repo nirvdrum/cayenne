@@ -11,13 +11,13 @@
 	<!-- init imports, create derived properties.      -->
     <!-- ============================================= -->
     <property file="default.properties"/>
-	<property name="dist" value="${dist.base}/${project.name}-${project.version}"/>
-	<property name="build" value="${build.base}/ant"/>
+	<property name="dist" value="${basedir}/${dist.base}/${project.name}-${project.version}"/>
+	<property name="build" value="${basedir}/${build.base}/ant"/>
 	<property name="license.dir" value="${cayenne.other}/licenses"/>
 	<property name="notes.dir" value="${cayenne.other}/release-notes"/>
 	
-	<import file="import/ant-macros.xml"/>
-	<import file="import/ant-paths.xml"/>
+	<import file="ant/import/macros.xml"/>
+	<import file="ant/import/paths.xml"/>
     
     <!-- ============================================= -->
     <!-- Prints help message describing build.xml use. -->
@@ -26,9 +26,10 @@
         <echo>BUILD TARGETS:
 ==============     
      
+       help         - prints this message
+			
        dist-bin     - (DEFAULT) builds all subproject JAR files and installs scripts.
        release      - creates a full Cayenne distribution.
-       compile      - compiles all subprojects source files.
        clean        - cleans temporary build and distribution directories
        clean-java   - cleans all build directories, preserving the docs and eclipse build
        doc          - builds Cayenne documentation, excluding Javadocs
@@ -39,8 +40,7 @@
        testcoverage - runs JUnit test coverage analysis
        regression   - runs regression test application
 	   pdf          - builds PDF documentation
-       help         - prints this message
-     
+
 ENVIRONMENT:
 ============== 
 			
@@ -52,11 +52,11 @@ ENVIRONMENT:
     <!-- Creates a full release of Cayenne.            -->
     <!-- ============================================= -->
     <target name="release" description="creates a full Cayenne distribution.">
-		<ant antfile="build-cayenne.xml" target="dist-src"/>
-		<ant antfile="build-modeler.xml" target="dist-src"/>
-		<ant antfile="build-dvmodeler.xml" target="dist-src"/>
-		<ant antfile="build-tutorials.xml" target="dist-src"/>
-		<ant antfile="build-doc.xml" target="dist-src"/>
+		<ant antfile="ant/cayenne-java.xml" target="dist-src"/>
+		<ant antfile="ant/modeler.xml" target="dist-src"/>
+		<ant antfile="ant/dvmodeler.xml" target="dist-src"/>
+		<ant antfile="ant/tutorials.xml" target="dist-src"/>
+		<ant antfile="ant/doc.xml" target="doc"/>
 		
 		<copy tofile="${dist}/RELEASE-NOTES.txt" file="${notes.dir}/RELEASE-NOTES-${project.version}.txt"/>
 		<copy tofile="${dist}/UPGRADE.txt" file="${notes.dir}/UPGRADE-${project.version}.txt"/>
@@ -78,9 +78,9 @@ ENVIRONMENT:
     <!-- Runs Cayenne Unit Tests                    -->
     <!-- ========================================== -->
     <target name="test" description="runs JUnit tests">
-		<ant antfile="build-cayenne.xml" target="compile" inheritrefs="true"/>
-		<ant antfile="build-modeler.xml" target="compile" inheritrefs="true"/>
-		<ant antfile="build-tests.xml" target="test" inheritrefs="true"/>
+		<ant antfile="ant/cayenne-java.xml" target="compile" inheritrefs="true"/>
+		<ant antfile="ant/modeler.xml" target="compile" inheritrefs="true"/>
+		<ant antfile="ant/test.xml" target="test" inheritrefs="true"/>
     </target>
 
     <!-- ========================================== -->
@@ -95,27 +95,16 @@ ENVIRONMENT:
     <!-- Builds all Cayenne Java subproject JARS.   -->
     <!-- ========================================== -->
 	<target name="dist-bin">
-		<ant antfile="build-cayenne.xml" target="jar" inheritrefs="true"/>
-		<ant antfile="build-modeler.xml" target="dist-bin" inheritrefs="true"/>
-		<ant antfile="build-dvmodeler.xml" target="dist-bin" inheritrefs="true"/>
+		<ant antfile="ant/cayenne-java.xml" target="jar" inheritrefs="true"/>
+		<ant antfile="ant/modeler.xml" target="dist-bin" inheritrefs="true"/>
+		<ant antfile="ant/dvmodeler.xml" target="dist-bin" inheritrefs="true"/>
 	</target>
-    
-    <!-- ========================================== -->
-    <!-- Compiles all Cayenne Java subprojects.     -->
-    <!-- ========================================== -->
-    <target name="compile">
-		<ant antfile="build-cayenne.xml" target="compile" inheritrefs="true"/>
-		<ant antfile="build-modeler.xml" target="compile" inheritrefs="true"/>
-		<ant antfile="build-dvmodeler.xml" target="compile" inheritrefs="true"/>
-		<ant antfile="build-tests.xml" target="compile" inheritrefs="true"/>
-    </target>
 
     <!-- ========================================== -->
     <!-- Cleans distribution files and subprojects. -->
     <!-- ========================================== -->
     <target name="clean" depends="clean-java">
         <delete dir="${dist.base}"/>
-		<delete dir="testrun"/>
         <delete file="velocity.log" failonerror="false"/>
     </target>
 	
@@ -130,31 +119,31 @@ ENVIRONMENT:
     <!-- Runs Cayenne Regression Tests              -->
     <!-- ========================================== -->
     <target name="regression" description="runs regression test application">
-		<ant antfile="build-cayenne.xml" target="dist-bin" inheritrefs="true"/>
-		<ant antfile="build-tests.xml" target="dist-bin" inheritrefs="true"/>
-		<ant antfile="build-regression.xml" target="test" inheritrefs="true"/>
+		<ant antfile="ant/cayenne-java.xml" target="dist-bin" inheritrefs="true"/>
+		<ant antfile="ant/test.xml" target="dist-bin" inheritrefs="true"/>
+		<ant antfile="ant/regression.xml" target="test" inheritrefs="true"/>
     </target>
     
     <!-- ========================================== -->
     <!-- Updates any code generated by JavaCC.      -->
     <!-- ========================================== -->
     <target name="javacc" description="Updates any code generated by JavaCC">
-        <ant antfile="build-cayenne.xml" target="javacc" inheritrefs="true"/>
+        <ant antfile="ant/cayenne-java.xml" target="javacc" inheritrefs="true"/>
     </target>
 
     <!-- ========================================== -->
     <!-- Updates any code generated via JJTree.     -->
     <!-- ========================================== -->
     <target name="jjtree" description="Updates any code generated via JJTree">
-        <ant antfile="build-cayenne.xml" target="jjtree" inheritrefs="true"/>
+        <ant antfile="ant/cayenne-java.xml" target="jjtree" inheritrefs="true"/>
     </target>
 
     <!-- ========================================== -->
     <!-- Builds Cayenne documentation.             -->
     <!-- ========================================== -->
     <target name="doc">
-        <ant antfile="build-doc.xml" target="doc" inheritrefs="true"/>
-        <ant antfile="build-tutorials.xml" target="doc" inheritrefs="true"/>
+        <ant antfile="ant/doc.xml" target="doc" inheritrefs="true"/>
+        <ant antfile="ant/tutorials.xml" target="doc" inheritrefs="true"/>
     </target>
 
 
@@ -162,7 +151,7 @@ ENVIRONMENT:
     <!-- Builds API documenatation.                 -->
     <!-- ========================================== -->
 	<target name="api">
-		<ant antfile="build-cayenne.xml" target="api" inheritrefs="true"/>
+		<ant antfile="ant/cayenne-java.xml" target="api" inheritrefs="true"/>
 	</target>
 	
 	
@@ -171,7 +160,7 @@ ENVIRONMENT:
     <!-- ========================================== -->
     <target name="pdf" description="builds PDF documentation.">
 		<!-- copy images first -->
-		<ant antfile="build-doc.xml" target="doc-img" inheritrefs="true"/>
-		<ant antfile="build-pdf.xml" inheritrefs="true"/>
+		<ant antfile="ant/doc.xml" target="doc-img" inheritrefs="true"/>
+		<ant antfile="ant/pdf.xml" target="pdf" inheritrefs="true"/>
     </target> 
 </project>

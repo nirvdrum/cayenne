@@ -184,14 +184,6 @@
     	<item name="10. Modeling Tips"  href="/modelerguide/modeling-tips.html"/>
     </toc-modeler-guide>
     
-    
-    <toc-developer-guide name="Developer Guide  - version 1.1"  href="/developerguide/index.html">
-        <item name="1. CVS Access"  href="/developerguide/cvs.html"/>
-        <item name="2. Compiling Cayenne"  href="/developerguide/compile.html"/>
-        <item name="3. Unit Tests"  href="/developerguide/unit-tests.html"/>
-        <item name="4. Using Eclipse IDE"  href="/developerguide/eclipse.html"/>
-    </toc-developer-guide>
-    
     <toc-examples name="Examples"  href="/examples/index.html">
     	<item name="1. Tapestry Blog"  href="/examples/blog-tapestry/index.html"/>
     	<item name="2. HRDataView"  href="/examples/hr-dataview/index.html"/>

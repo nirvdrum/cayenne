@@ -15,8 +15,8 @@
         <item name="Home" href="http://objectstyle.org/cayenne/"/>
         <item name="Download" href="http://objectstyle.org/cayenne/download.html"/>
         <item name="Bugs and Features" href="http://objectstyle.org/cayenne/bugs-features.html"/>
-		 <item name="Wiki and Blog" href="http://objectstyle.org/confluence/display/CAY/Home"/>
-		 <item name="Examples" href="http://objectstyle.org/confluence/display/CAY/Cayenne+Examples"/>
+		<item name="Wiki and Blog" href="http://objectstyle.org/confluence/display/CAY/Home"/>
+		<item name="Examples" href="http://objectstyle.org/confluence/display/CAY/Cayenne+Examples"/>
         <item name="Commercial Support" href="http://objectstyle.org/cayenne/cayenne-commercial-support.html"/>
     </menu>
     
