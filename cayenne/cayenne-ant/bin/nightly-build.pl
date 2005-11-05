@@ -75,15 +75,17 @@ my $version = release_label();
 # Do JDK 1.4 Regression Testing
 # -----------------------------
 $ENV{'JAVA_HOME'} = $jdk_14;
-my $status = run_command("$ant -v clean");
-$status = run_command("$ant test-1_4");
+run_command("$ant help");
+run_command("$ant clean");
+my $status = run_command("$ant test-1_4");
 die_with_email("JDK 1.4 Build failed, return status: $status\n") if $status;
 
 #
 # Build for real with JDK 1.5
 # -----------------------------
 $ENV{'JAVA_HOME'} = $jdk_15;
-$status = run_command("$ant -v clean");
+run_command("$ant help");
+$status = run_command("$ant clean");
 die_with_email("Build failed, return status: $status\n") if $status;
 $status = 
   run_command("$ant test -Dproject.version=$version -Dcayenne.test.connection=nightly-test -Dcayenne.test.report=true");
