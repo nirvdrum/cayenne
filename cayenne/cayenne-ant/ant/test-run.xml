@@ -70,7 +70,7 @@
 	<!-- ============================================= -->
 	<!-- Reports failures.                             -->
 	<!-- ============================================= -->
-	<target name="test-report" depends="test,test-report-needed"
+	<target name="test-report" depends="test-report-needed"
 		if="cayenne.test.report.needed">
 		
 		<mkdir dir="${test.report}"/>
