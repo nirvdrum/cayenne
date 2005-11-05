@@ -48,7 +48,7 @@ my $label = "$year-$mon-$mday";
 my $out_file = "/tmp/cayenne-nightly-$label.txt";
 unlink $out_file if -f $out_file;
 
-die_with_email("No JDK1.4 installation at $ENV{'JAVA_HOME'}") unless -d $ENV{'JAVA_HOME'};
+die_with_email("No JDK1.5 installation at $ENV{'JAVA_HOME'}") unless -d $ENV{'JAVA_HOME'};
 
 my $cayenne_src = "/tmp/cayenne/build";
 my $ant = "$ENV{'ANT_HOME'}/bin/ant";
@@ -65,7 +65,7 @@ print_line("Nightly build: $label\n");
 get_source();
 
 # build
-chdir "$cayenne_src/cayenne" or die_with_email("Can't change to $cayenne_src/cayenne: $!\n");
+chdir "$cayenne_src/cayenne/cayenne-ant" or die_with_email("Can't change to $cayenne_src/cayenne/cayenne-ant: $!\n");
 
 set_release_label();
 
@@ -88,7 +88,7 @@ if($opt_u) {
 	die_with_email("Can't create release directory, return status: $status\n") if $status;
 	
 	# Upload test results no matter what
-	my $test_reports = "build/tests/report/nightly-test";
+	my $test_reports = "build/ant/tests-report/nightly-test";
         my $upload_dir = "www.objectstyle.org:$rel_path/$year-$mon-$mday";
 	run_command("chmod -R 755 $test_reports");
 	run_command("rsync -rltp -e ssh --delete --exclude='*.xml' $test_reports/ $upload_dir/reports");
