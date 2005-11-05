@@ -72,7 +72,8 @@
 	<target name="grammars">
 		<mkdir dir="${dist}/doc/grammar"/>
 		
-		<ant antfile="ant/parser.xml" target="jjdoc" inheritrefs="true">
+		<ant antfile="${basedir}/ant/parser.xml" target="jjdoc" inheritrefs="true"
+			dir="${cayenne.java}">
 			<property name="parser.dir" value="${parser.dir.exp}"/>
 			<property name="parser.base" value="${parser.base.exp}"/>
 			<property name="parser.doc.dir" value="${dist}/doc/grammar"/>

@@ -6,7 +6,7 @@
 <project default="...">
 	
 	<target name="javacc" depends="javacc-nodir,javacc-nogrammar">
-		<java dir="${basedir}" fork="true" classname="javacc" failonerror="true">
+		<java fork="true" classname="javacc" failonerror="true">
 			<classpath refid="classpath-javacc"/>
 			<arg value="-OUTPUT_DIRECTORY:${parser.dir}"/>
 			<arg value="${parser.dir}/${parser.base}.jj"/>
@@ -15,13 +15,13 @@
 	
 	<target name="jjtree" depends="javacc-nodir,javacc-nogrammar,jjtree-uptodate"
 		unless="jj.uptodate">
-		<java dir="${basedir}" fork="true" classname="jjtree" failonerror="true">
+		<java fork="true" classname="jjtree" failonerror="true">
 			<classpath refid="classpath-javacc"/>
 			<arg value="-OUTPUT_DIRECTORY:${parser.dir}"/>
 			<arg value="${parser.dir}/${parser.base}.jjt"/>
 		</java>
 		
-		<java dir="${basedir}" fork="true" classname="javacc" failonerror="true">
+		<java fork="true" classname="javacc" failonerror="true">
 			<classpath refid="classpath-javacc"/>
 			<arg value="-OUTPUT_DIRECTORY:${parser.dir}"/>
 			<arg value="${parser.dir}/${parser.base}.jj"/>
@@ -33,7 +33,7 @@
 		unless="jjdoc.uptodate">
 		<!-- this property may be reset by the caller. -->
 		<property name="parser.doc.dir" value="${parser.dir}"/>
-		<java dir="${basedir}" fork="true" classname="jjdoc" failonerror="true">
+		<java fork="true" classname="jjdoc" failonerror="true">
 			<classpath refid="classpath-javacc"/>
 			<arg value="-OUTPUT_FILE:${parser.doc.dir}/${parser.base}.html"/>
 			<arg value="${parser.dir}/${parser.base}.jj"/>

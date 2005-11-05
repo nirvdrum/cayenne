@@ -20,7 +20,7 @@
 			<mkdir dir="@{destdir}"/>
 			<javadoc packagenames="org.objectstyle.*" destdir="@{destdir}"
 				sourcepathref="@{srcref}" classpathref="@{classpathref}"
-				author="true" use="true"
+				author="true" use="false"
 				stylesheetfile="${cayenne.other}/javadoc/objectstyle-javadoc.css"
 				splitindex="true" windowtitle="Cayenne API Documentation"
 				overview="${cayenne.other}/javadoc/overview.html">

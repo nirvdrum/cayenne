@@ -77,6 +77,7 @@
 			<sysproperty key="cayenne.test.report"
 				value="${cayenne.test.report}"/>
 			<sysproperty key="ant.home" value="${ant.home}"/>
+			<sysproperty key="project.version" value="${project.version}"/>
 			<sysproperty key="build" value="${build}"/>
 			<sysproperty key="test.filter" value="${test.filter}"/>
 			<sysproperty key="test.exclude" value="${test.exclude}"/>
