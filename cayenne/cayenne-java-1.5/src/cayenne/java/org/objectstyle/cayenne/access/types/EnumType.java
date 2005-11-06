@@ -62,7 +62,6 @@ import java.sql.ResultSet;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.validation.BeanValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
