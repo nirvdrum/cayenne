@@ -70,6 +70,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
+import org.apache.commons.lang.SystemUtils;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.modeler.action.AboutAction;
 import org.objectstyle.cayenne.modeler.action.ConfigurePreferencesAction;
@@ -166,10 +167,12 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         JMenu toolMenu = new JMenu("Tools");
         JMenu helpMenu = new JMenu("Help");
 
-		fileMenu.setMnemonic(KeyEvent.VK_F);
-		projectMenu.setMnemonic(KeyEvent.VK_P);
-		toolMenu.setMnemonic(KeyEvent.VK_T);
-		helpMenu.setMnemonic(KeyEvent.VK_H);
+        if (!SystemUtils.IS_OS_MAC_OSX) {
+            fileMenu.setMnemonic(KeyEvent.VK_F);
+            projectMenu.setMnemonic(KeyEvent.VK_P);
+            toolMenu.setMnemonic(KeyEvent.VK_T);
+            helpMenu.setMnemonic(KeyEvent.VK_H);
+        }
 
         fileMenu.add(getAction(NewProjectAction.getActionName()).buildMenu());
         fileMenu.add(getAction(OpenProjectAction.getActionName()).buildMenu());
@@ -376,7 +379,7 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         getAction(CreateAttributeAction.getActionName()).setEnabled(true);
         getAction(CreateRelationshipAction.getActionName()).setEnabled(true);
         getAction(DbEntitySyncAction.getActionName()).setEnabled(true);
-        
+
         if (controller.getProjectController().getCurrentDbEntity() instanceof DerivedDbEntity) {
             getAction(DerivedEntitySyncAction.getActionName()).setEnabled(true);
         }

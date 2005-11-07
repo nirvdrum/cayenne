@@ -65,6 +65,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Layout;
 import org.apache.log4j.Logger;
@@ -164,7 +165,8 @@ public class Main {
     }
 
     protected void configureMacOSX() {
-        if (System.getProperty("os.name").toLowerCase().indexOf("mac") < 0) {
+        
+        if (!SystemUtils.IS_OS_MAC_OSX) {
             return;
         }
 
