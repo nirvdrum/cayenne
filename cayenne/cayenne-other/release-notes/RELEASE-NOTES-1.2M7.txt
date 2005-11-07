@@ -52,5 +52,12 @@ Changes/New Features:
 
   Bugs Fixed:
   
-  * Cayenne no longer includes Oracle "recycle bin" tables in reverse-engineering results (those are the 
+* Cayenne no longer includes Oracle "recycle bin" tables in reverse-engineering results (those are the 
     tables with names like "BIN$04LhcpndanfgMAAAAAANPw==$0" that are "recycled" dropped tables.
+* CAY-392	ConfigurationException on context reload in Tomcat
+* CAY-396	1.2M6, nodeps & log4j trouble
+* CAY-397	Update Java Package causes error dialog
+* CAY-372	MySQL should drop tables "if exists"
+* CAY-353	Keyboard navigation
+* CAY-393	Change cgen Velocity singleton to VelocityEngine instances
+* CAY-398	Compiler warnings in generated auto classes when using inheritance
