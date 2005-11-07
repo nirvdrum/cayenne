@@ -399,8 +399,7 @@ public class DataRowStore implements Serializable {
      * and then resends the event to local listeners.
      */
     public void processRemoteEvent(SnapshotEvent event) {
-        if (event.getPostedBy() == this
-                || event.getSource() != remoteNotificationsHandler) {
+        if (event.getSource() != remoteNotificationsHandler) {
             return;
         }
 
@@ -601,8 +600,8 @@ public class DataRowStore implements Serializable {
                 || (indirectlyModifiedIds != null && !indirectlyModifiedIds.isEmpty())) {
 
             SnapshotEvent event = new SnapshotEvent(
-                    source,
                     this,
+                    source,
                     diffs,
                     deletedSnapshotIDs,
                     invalidatedSnapshotIDs,
@@ -612,9 +611,7 @@ public class DataRowStore implements Serializable {
                 logObj.debug("postSnapshotsChangeEvent: " + event);
             }
 
-            // notify listeners
-
-            // send synchronously, relying on listeners to
+            // synchronously notify listeners; leaving it up to the listeners to
             // register as "non-blocking" if needed.
             eventManager.postEvent(event, getSnapshotEventSubject());
         }

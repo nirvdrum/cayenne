@@ -26,6 +26,11 @@ Changes/New Features:
   - web.xml configuration is simplified (see HessianService Javadocs for details). 
     WARINING: You must update your web.xml if you used HessianService with M6, check UPGRADE-NOTES for details.
 
+*  CAY-395 - The meaning of SnapshotEvent "source" and "postedBy" attributes is reversed per CAY-395 for
+   better efficiency. If you implemented custom listeners of SnapshotEvents, you may need to 
+   doublecheck their logic. From now on events use DataRowStore as source, and EventBridge or
+   ObjectStore as postedBy, depending on whether this was a local or a remote event. I.e. the 
+   new structure is the opposite to what we used in 1.1.
 * Built in support for mapping int or character DB columns as JDK 1.5 Enums. No need 
   to register special ExtendedTypes for your custom enums.
 * JDOM is no longer needed for XML (de)serialization - everything is done using JAXP classes 

@@ -61,7 +61,6 @@ import java.io.Serializable;
 
 import org.objectstyle.cayenne.util.Util;
 
-import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.hessian.io.AbstractSerializerFactory;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;

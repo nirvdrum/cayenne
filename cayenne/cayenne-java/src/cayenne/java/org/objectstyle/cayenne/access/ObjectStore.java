@@ -234,7 +234,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     this,
                     "snapshotsChanged",
                     SnapshotEvent.class,
-                    dataRowCache.getSnapshotEventSubject());
+                    dataRowCache.getSnapshotEventSubject(),
+                    dataRowCache);
         }
     }
 
@@ -879,7 +880,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      */
     public void snapshotsChanged(SnapshotEvent event) {
         // filter events that we should not process
-        if (event.getPostedBy() != this.dataRowCache || event.getSource() == this) {
+        if (event.getPostedBy() == this || event.getSource() != this.dataRowCache) {
             return;
         }
 

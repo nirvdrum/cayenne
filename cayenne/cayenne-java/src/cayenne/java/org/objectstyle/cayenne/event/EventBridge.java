@@ -114,7 +114,8 @@ public abstract class EventBridge implements EventListener {
     protected Collection localSubjects;
     protected EventManager eventManager;
     protected int mode;
-    protected Object postAs;
+
+    protected Object externalEventSource;
 
     // keeps all listeners so that they are not deallocated
     Collection listeners;
@@ -201,48 +202,89 @@ public abstract class EventBridge implements EventListener {
         return eventManager;
     }
 
+    /**
+     * Returns an object used as a source of local events posted in response to remote
+     * events. If externalEventSource wasn't setup during bridge startup (or if the bridge
+     * is not started), returns this object.
+     * 
+     * @since 1.2
+     */
+    public Object getExternalEventSource() {
+        return externalEventSource != null ? externalEventSource : this;
+    }
+
+    /**
+     * Returns true if the bridge is configured to receive local events from its internal
+     * EventManager.
+     */
     public boolean receivesLocalEvents() {
         return mode == RECEIVE_LOCAL_EXTERNAL || mode == RECEIVE_LOCAL;
     }
 
+    /**
+     * Returns true if the bridge is configured to receive external events.
+     */
     public boolean receivesExternalEvents() {
         return mode == RECEIVE_LOCAL_EXTERNAL || mode == RECEIVE_EXTERNAL;
     }
 
     /**
-     * Starts an EventBridge in the specified mode.
+     * Starts EventBridge in the specified mode and locally listening to all event sources
+     * that post on a preconfigured subject. Remote events reposted locally will have this
+     * EventBridge as their source.
+     * 
+     * @param eventManager EventManager used to send and receive local events.
+     * @param mode One of the possible modes of operation - RECEIVE_EXTERNAL,
+     *            RECEIVE_LOCAL, RECEIVE_LOCAL_EXTERNAL.
      */
     public void startup(EventManager eventManager, int mode) throws Exception {
         this.startup(eventManager, mode, null);
     }
 
     /**
-     * Starts an EventBridge in the specified mode.
+     * Starts EventBridge in the specified mode and locally listening to a specified event
+     * source. Remote events reposted locally will have this EventBridge as their source.
+     * 
+     * @param eventManager EventManager used to send and receive local events.
+     * @param mode One of the possible modes of operation - RECEIVE_EXTERNAL,
+     *            RECEIVE_LOCAL, RECEIVE_LOCAL_EXTERNAL.
+     * @param localEventSource If not null, only events originating from localEventSource
+     *            object will be processed by this bridge.
      */
     public void startup(EventManager eventManager, int mode, Object localEventSource)
             throws Exception {
-        startup(eventManager, mode, localEventSource, this);
+        startup(eventManager, mode, localEventSource, null);
     }
-    
+
     /**
-     * Starts EventBridge with the specified local and remote event sources.
+     * Starts EventBridge in the specified mode.
      * 
-     * @since 1.2 
+     * @param eventManager EventManager used to send and receive local events.
+     * @param mode One of the possible modes of operation - RECEIVE_EXTERNAL,
+     *            RECEIVE_LOCAL, RECEIVE_LOCAL_EXTERNAL.
+     * @param localEventSource If not null, only events originating from localEventSource
+     *            object will be processed by this bridge.
+     * @param externalEventSource If not null, externalEventSource object will be used as
+     *            source of local events posted by this EventBridge in response to remote
+     *            events.
+     * @since 1.2
      */
-    // TODO (Andrus, 10/18/2005) see CAY-395 - we will likely swap postedBy and source.
-    public void startup(EventManager eventManager, int mode, Object localEventSource, Object remoteEventSource)
-    throws Exception {
+    public void startup(
+            EventManager eventManager,
+            int mode,
+            Object localEventSource,
+            Object remoteEventSource) throws Exception {
+
+        if (eventManager == null) {
+            throw new IllegalArgumentException("'eventManager' can't be null.");
+        }
 
         // uninstall old event manager
         if (this.eventManager != null) {
             shutdown();
         }
 
-        if (eventManager == null) {
-            throw new NullPointerException("'eventManager' can't be null.");
-        }
-
-        this.postAs = remoteEventSource;
+        this.externalEventSource = remoteEventSource;
         this.eventManager = eventManager;
         this.mode = mode;
 
@@ -270,7 +312,7 @@ public abstract class EventBridge implements EventListener {
     }
 
     /**
-     * Starts the external interface of the EventBridge.
+     * Starts an external interface of the EventBridge.
      */
     protected abstract void startupExternal() throws Exception;
 
@@ -279,7 +321,7 @@ public abstract class EventBridge implements EventListener {
      */
     public void shutdown() throws Exception {
 
-        this.postAs = null;
+        this.externalEventSource = null;
 
         if (listeners != null && eventManager != null) {
 
@@ -317,13 +359,8 @@ public abstract class EventBridge implements EventListener {
                 return;
             }
 
-            // initialize event sources
-
-            event.setPostedBy(postAs != null ? postAs : this);
-
-            if (event.getSource() == null) {
-                event.setSource(this);
-            }
+            event.setSource(getExternalEventSource());
+            event.setPostedBy(this);
 
             // inject external eveny to the event manager queue.. leave it up to the
             // listeners to figure out correct synchronization.
@@ -343,7 +380,7 @@ public abstract class EventBridge implements EventListener {
      * @deprecated Unused since 1.2, as event dispatch is done via internal listeners.
      */
     public void onLocalEvent(CayenneEvent event) throws Exception {
-        if (event.getSource() != this) {
+        if (event.getSource() != getExternalEventSource()) {
             sendExternalEvent(event);
         }
     }
@@ -362,7 +399,9 @@ public abstract class EventBridge implements EventListener {
         }
 
         void onLocalEvent(CayenneEvent event) throws Exception {
-            if (event.getSource() != EventBridge.this) {
+
+            // ignore events posted by this Bridge...
+            if (event.getSource() != getExternalEventSource()) {
 
                 // make sure external event has the right subject, if not make a clone
                 // with the right one...

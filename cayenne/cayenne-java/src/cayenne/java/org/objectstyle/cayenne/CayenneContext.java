@@ -156,10 +156,10 @@ public class CayenneContext implements ObjectContext {
             if (eventManager != null) {
                 this.mergeHandler = new ObjectContextMergeHandler(this);
 
-                // listen to ALL channel events, not just our channel... we have to reset
-                // listener on channel switch, as there is no guarantee that a new channel
-                // uses the same EventManager.
-                ObjectContextUtils.listenForChannelEvents(eventManager, mergeHandler);
+                // listen to our channel events...
+                // note that we must reset listener on channel switch, as there is no
+                // guarantee that a new channel uses the same EventManager.
+                ObjectContextUtils.listenForChannelEvents(channel, mergeHandler);
             }
         }
     }

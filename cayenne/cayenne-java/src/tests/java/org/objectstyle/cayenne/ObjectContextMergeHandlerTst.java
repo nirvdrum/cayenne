@@ -78,27 +78,27 @@ public class ObjectContextMergeHandlerTst extends CayenneTestCase {
         ObjectContextMergeHandler handler = new ObjectContextMergeHandler(context);
 
         // 1. Our context initiated the sync:
-        // src == context && postedBy == channel
-        GraphEvent e1 = new GraphEvent(context, channel, null);
+        // src == channel && postedBy == context
+        GraphEvent e1 = new GraphEvent(channel, context, null);
         assertFalse(handler.shouldProcessEvent(e1));
 
         // 2. Another context initiated the sync:
-        // src != context && postedBy == channel
-        GraphEvent e2 = new GraphEvent(new MockObjectContext(), channel, null);
+        // postedBy != context && source == channel
+        GraphEvent e2 = new GraphEvent(channel, new MockObjectContext(), null);
         assertTrue(handler.shouldProcessEvent(e2));
 
         // 2.1 Another object initiated the sync:
-        // src != context && postedBy == channel
-        GraphEvent e21 = new GraphEvent(new Object(), channel, null);
+        // postedBy != context && source == channel
+        GraphEvent e21 = new GraphEvent(channel, new Object(), null);
         assertTrue(handler.shouldProcessEvent(e21));
 
         // 3. Another channel initiated the sync:
-        // src == ? && postedBy != channel
-        GraphEvent e3 = new GraphEvent(new Object(), new MockOPPChannel(), null);
+        // postedBy == ? && source != channel
+        GraphEvent e3 = new GraphEvent(new MockOPPChannel(), new Object(), null);
         assertFalse(handler.shouldProcessEvent(e3));
 
         // 4. inactive
-        GraphEvent e4 = new GraphEvent(new MockObjectContext(), channel, null);
+        GraphEvent e4 = new GraphEvent(channel, new MockObjectContext(), null);
         handler.active = false;
         assertFalse(handler.shouldProcessEvent(e4));
     }

@@ -259,7 +259,7 @@ final class ObjectContextGraphManager extends GraphMap {
                 .getEventManager() : null;
 
         if (manager != null) {
-            GraphEvent e = new GraphEvent(eventSource, context, diff);
+            GraphEvent e = new GraphEvent(context, eventSource, diff);
             manager.postEvent(e, subject);
         }
     }

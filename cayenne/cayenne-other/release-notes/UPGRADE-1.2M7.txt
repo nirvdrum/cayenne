@@ -39,7 +39,7 @@ UPGRADE FROM 1.1:
    If you are still on 1.3, upgrade your JDK if you can. If you can not, consider staying on 
    Cayenne 1.1. 
 
-*  1.2 no longer requires Jakarta BeanUtils.
+*  1.2 no longer needs Jakarta BeanUtils.
 
 *  1.2 no longer relies on ClassLoader provided by Configuration (this API is deprecated as 
    a matter of fact). Current code uses Thread.currentThread().getContextClassLoader().
@@ -54,6 +54,12 @@ UPGRADE FROM 1.1:
    they will contain "oid". The easiest way to migrate your mapping (if you don't want to
    change the DB) is to remap all bytea columns as LONGVARBINARY DbAttributes instead of BLOB.
     
+*  The meaning of SnapshotEvent "source" and "postedBy" attributes is reversed per CAY-395 for
+   better efficiency. If you implemented custom listeners of SnapshotEvents, you may need to 
+   doublecheck their logic. From now on events use DataRowStore as source, and EventBridge or
+   ObjectStore as postedBy, depending on whether this was a local or a remote event. I.e. the 
+   new structure is the opposite to what we used in 1.1.
+ 
 *  TempObjectId is deprecated and is no longer used by Cayenne internally. If you were 
    referencing TempObjectId explicitly in your code (e.g. if(id instanceof TempObjectId) ... ), 
    you will need to modify the code and use "isTemporary()" superclass method.
