@@ -12,7 +12,7 @@
     <!-- ============================================= -->
     <property file="default.properties"/>
 	<property name="dist" value="${basedir}/${dist.base}/${project.name}-${project.version}"/>
-	<property name="build" value="${basedir}/${build.base}/ant"/>
+	<property name="build" value="${basedir}/${build.base}"/>
 	<property name="license.dir" value="${cayenne.other}/licenses"/>
 	<property name="notes.dir" value="${cayenne.other}/release-notes"/>
 	

@@ -6,9 +6,9 @@
 <project default="...">
 	
 	<property name="test.output"
-		value="${build}/tests-out/${cayenne.test.connection}"/>
+		value="${build}/tests-xml-${cayenne.test.connection}"/>
 	<property name="test.report"
-		value="${build}/tests-report/${cayenne.test.connection}"/>
+		value="${build}/tests-report-${cayenne.test.connection}"/>
 	
 	<!-- ============================================= -->
 	<!-- Defines testing sequence                      -->
