@@ -77,6 +77,7 @@
 	<target name="dist-src" depends="jar,api">
 		<copy todir="${core.dist.src}">
 			<fileset dir="${core.src}"/>
+			<fileset dir="${core.src.1_5}"/>
 			<fileset dir="${cayenne.java}/src/cayenne/resources">
 				<include name=".cayenne/**"/>
 				<include name="dotemplates/**"/>
@@ -94,6 +95,7 @@
 		<!-- server nodeps jar -->
 		<jar jarfile="${dist}/lib/cayenne-nodeps.jar">
 			<fileset dir="${core.build}"/>
+			<fileset dir="${core.build.1_5}"/>
 			
 			<metainf dir="${license.dir}" includes="LICENSE.txt"/>
 			<manifest>
@@ -143,6 +145,10 @@
 				<exclude name="dotemplates/**"/>
 			</fileset>
 			
+			<fileset dir="${core.build.1_5}">
+				<exclude name="org/objectstyle/cayenne/access/**"/>
+			</fileset>
+			
 			<metainf dir="${license.dir}" includes="LICENSE.txt"/>
 			<manifest>
 				<attribute name="Built-By" value="${user.name}"/>
@@ -160,6 +166,8 @@
 		<!-- Server JAR with dependencies -->
 		<jar jarfile="${dist}/lib/cayenne.jar">
 			<fileset dir="${core.build}"/>
+			<fileset dir="${core.build.1_5}"/>
+			
 			<fileset dir="${core.src}">
 				<include name="**/*.xml"/>
 				<include name="**/*.gif"/>
