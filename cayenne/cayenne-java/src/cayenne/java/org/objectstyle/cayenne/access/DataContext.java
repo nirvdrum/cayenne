@@ -68,6 +68,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.Factory;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -168,6 +169,7 @@ public class DataContext implements QueryEngine, Serializable {
      * 
      * @since 1.1
      */
+    // TODO: Andrus, 11/7/2005 - shouldn't we use InheritableThreadLocal instead?
     protected static final ThreadLocal threadDataContext = new ThreadLocal();
 
     // event posting default for new DataContexts
@@ -317,23 +319,6 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Initializes parent if deserialization left it uninitialized.
-     */
-    private final void awakeFromDeserialization() {
-        if (parent == null && lazyInitParentDomainName != null) {
-
-            DataDomain domain = Configuration.getSharedConfiguration().getDomain(
-                    lazyInitParentDomainName);
-
-            this.parent = domain;
-
-            if (isUsingSharedSnapshotCache() && domain != null) {
-                this.objectStore.setDataRowCache(domain.getSharedSnapshotCache());
-            }
-        }
-    }
-
-    /**
      * Returns a map of user-defined properties associated with this DataContext.
      * 
      * @since 1.2
@@ -431,7 +416,6 @@ public class DataContext implements QueryEngine, Serializable {
      * Returns ObjectStore associated with this DataContext.
      */
     public ObjectStore getObjectStore() {
-        awakeFromDeserialization();
         return objectStore;
     }
 
@@ -1268,80 +1252,6 @@ public class DataContext implements QueryEngine, Serializable {
                 refresh);
     }
 
-    // serialization support
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-
-        // If the "parent" of this datacontext is a DataDomain, then just write the
-        // name of it. Then when deserialization happens, we can get back the DataDomain
-        // by name,
-        // from the shared configuration (which will either load it if need be, or return
-        // an existing one.
-
-        if (this.parent == null && this.lazyInitParentDomainName != null) {
-            out.writeObject(lazyInitParentDomainName);
-        }
-        else if (this.parent instanceof DataDomain) {
-            DataDomain domain = (DataDomain) this.parent;
-            out.writeObject(domain.getName());
-        }
-        else {
-            // Hope that whatever this.parent is, that it is Serializable
-            out.writeObject(this.parent);
-        }
-
-        // Serialize local snapshots cache
-        if (!isUsingSharedSnapshotCache()) {
-            out.writeObject(objectStore.getDataRowCache());
-        }
-    }
-
-    // serialization support
-    private void readObject(ObjectInputStream in) throws IOException,
-            ClassNotFoundException {
-
-        // 1. read non-transient properties
-        in.defaultReadObject();
-
-        // 2. read parent or its name
-        Object value = in.readObject();
-        if (value instanceof QueryEngine) {
-            // A real QueryEngine object - use it
-            this.parent = (QueryEngine) value;
-        }
-        else if (value instanceof String) {
-            // The name of a DataDomain - use it
-            this.lazyInitParentDomainName = (String) value;
-        }
-        else {
-            throw new CayenneRuntimeException(
-                    "Parent attribute of DataContext was neither a QueryEngine nor "
-                            + "the name of a valid DataDomain:"
-                            + value);
-        }
-
-        // 3. Deserialize local snapshots cache
-        if (!isUsingSharedSnapshotCache()) {
-            DataRowStore cache = (DataRowStore) in.readObject();
-            objectStore.setDataRowCache(cache);
-        }
-
-        // CayenneDataObjects have a transient datacontext
-        // because at deserialize time the datacontext may need to be different
-        // than the one at serialize time (for programmer defined reasons).
-        // So, when a dataobject is resurrected because it's datacontext was
-        // serialized, it will then set the objects datacontext to the correctone
-        // If deserialized "otherwise", it will not have a datacontext (good)
-
-        synchronized (getObjectStore()) {
-            Iterator it = objectStore.getObjectIterator();
-            while (it.hasNext()) {
-                DataObject object = (DataObject) it.next();
-                object.setDataContext(this);
-            }
-        }
-    }
-
     /**
      * Returns EntityResolver object used to resolve and route queries.
      */
@@ -1401,7 +1311,7 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     public Collection getDataMaps() {
-        return (parent != null) ? parent.getDataMaps() : Collections.EMPTY_LIST;
+        return (getParent() != null) ? getParent().getDataMaps() : Collections.EMPTY_LIST;
     }
 
     void fireWillCommit() {
@@ -1431,6 +1341,105 @@ public class DataContext implements QueryEngine, Serializable {
             getObjectStore().getEventManager().postEvent(
                     commitChangesEvent,
                     DataContext.DID_COMMIT);
+        }
+    }
+
+    // ---------------------------------------------
+    // Serialization Support
+    // ---------------------------------------------
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+
+        // If the "parent" of this datacontext is a DataDomain, then just write the
+        // name of it. Then when deserialization happens, we can get back the DataDomain
+        // by name, from the shared configuration (which will either load it if need be,
+        // or return an existing one.
+
+        if (this.parent == null && this.lazyInitParentDomainName != null) {
+            out.writeObject(lazyInitParentDomainName);
+        }
+        else if (this.parent instanceof DataDomain) {
+            DataDomain domain = (DataDomain) this.parent;
+            out.writeObject(domain.getName());
+        }
+        else {
+            // Hope that whatever this.parent is, that it is Serializable
+            out.writeObject(this.parent);
+        }
+
+        // Serialize local snapshots cache
+        if (!isUsingSharedSnapshotCache()) {
+            out.writeObject(objectStore.getDataRowCache());
+        }
+    }
+
+    // serialization support
+    private void readObject(ObjectInputStream in) throws IOException,
+            ClassNotFoundException {
+
+        // 1. read non-transient properties
+        in.defaultReadObject();
+
+        // 2. read parent or its name
+        Object value = in.readObject();
+        if (value instanceof QueryEngine) {
+            // A real QueryEngine object - use it
+            this.parent = (QueryEngine) value;
+        }
+        else if (value instanceof String) {
+            // The name of a DataDomain - use it
+            this.lazyInitParentDomainName = (String) value;
+        }
+        else {
+            throw new CayenneRuntimeException(
+                    "Parent attribute of DataContext was neither a QueryEngine nor "
+                            + "the name of a valid DataDomain:"
+                            + value);
+        }
+
+        // 3. Deserialize local snapshots cache
+        if (!isUsingSharedSnapshotCache()) {
+            DataRowStore cache = (DataRowStore) in.readObject();
+            objectStore.setDataRowCache(cache);
+        }
+        else {
+            // configure ObjectStore to do deferred initialization
+            objectStore.setDataRowCacheFactory(new Factory() {
+
+                public Object create() {
+                    DataDomain domain = getParentDataDomain();
+                    return (domain != null) ? domain.getSharedSnapshotCache() : null;
+                }
+            });
+        }
+
+        // CayenneDataObjects have a transient datacontext
+        // because at deserialize time the datacontext may need to be different
+        // than the one at serialize time (for programmer defined reasons).
+        // So, when a dataobject is resurrected because it's datacontext was
+        // serialized, it will then set the objects datacontext to the correctone
+        // If deserialized "otherwise", it will not have a datacontext (good)
+
+        synchronized (getObjectStore()) {
+            Iterator it = objectStore.getObjectIterator();
+            while (it.hasNext()) {
+                DataObject object = (DataObject) it.next();
+                object.setDataContext(this);
+            }
+        }
+    }
+
+    // Re-attaches itself to the parent domain with previously stored name.
+    //
+    // TODO: Andrus 11/7/2005 - this is one of the places where Cayenne
+    // serialization relies on shared config... This is bad. We need some
+    // sort of thread-local solution that would allow to use an alternative configuration.
+    //
+    private final void awakeFromDeserialization() {
+        if (parent == null && lazyInitParentDomainName != null) {
+            this.parent = Configuration.getSharedConfiguration().getDomain(
+                    lazyInitParentDomainName);
         }
     }
 }

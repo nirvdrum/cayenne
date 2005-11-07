@@ -64,6 +64,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.Factory;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
@@ -122,6 +123,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * </p>
      */
     protected transient DataRowStore dataRowCache;
+
+    // a factory that can be set by DataContext to defer attaching of DataRowStore on
+    // deserialization.
+    transient Factory dataRowCacheFactory;
 
     public ObjectStore() {
     }
@@ -203,6 +208,20 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * Returns a DataRowStore associated with this ObjectStore.
      */
     public DataRowStore getDataRowCache() {
+
+        // perform deferred initialization...
+
+        // Andrus, 11/7/2005 - potential problem with on-demand deferred initialization is
+        // that deserialized context won't receive any events... which maybe ok, since it
+        // didn't while it was stored in serialized form.
+        if (dataRowCache == null && dataRowCacheFactory != null) {
+            synchronized (this) {
+                if (dataRowCache == null && dataRowCacheFactory != null) {
+                    setDataRowCache((DataRowStore) dataRowCacheFactory.create());
+                }
+            }
+        }
+
         return dataRowCache;
     }
 
@@ -214,9 +233,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         if (dataRowCache == this.dataRowCache) {
             return;
         }
-
-        // IMPORTANT: listen for all senders on a given EventSubject,
-        // filtering of events will be done in the handler method.
 
         if (this.dataRowCache != null && dataRowCache.getEventManager() != null) {
             dataRowCache.getEventManager().removeListener(
@@ -246,6 +262,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         if (objects.isEmpty()) {
             return;
         }
+
+        // dataRowCache maybe initialized lazily, so ensure the local instance is resolved
+        DataRowStore dataRowCache = getDataRowCache();
 
         Collection ids = new ArrayList(objects.size());
         Iterator it = objects.iterator();
@@ -289,6 +308,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         if (objects.isEmpty()) {
             return;
         }
+
+        // dataRowCache maybe initialized lazily, so ensure the local instance is resolved
+        DataRowStore dataRowCache = getDataRowCache();
 
         Iterator it = objects.iterator();
         while (it.hasNext()) {
@@ -489,6 +511,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         List deletedIds = null;
         Map modifiedSnapshots = null;
 
+        // dataRowCache maybe initialized lazily, so ensure the local instance is resolved
+        DataRowStore dataRowCache = getDataRowCache();
+
         Iterator entries = objectMap.entrySet().iterator();
         List modifiedIds = null;
 
@@ -688,6 +713,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             return;
         }
 
+        // dataRowCache maybe initialized lazily, so ensure the local instance is resolved
+        DataRowStore dataRowCache = getDataRowCache();
+
         Iterator it = newObjectMap.values().iterator();
 
         while (it.hasNext()) {
@@ -880,7 +908,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      */
     public void snapshotsChanged(SnapshotEvent event) {
         // filter events that we should not process
-        if (event.getPostedBy() == this || event.getSource() != this.dataRowCache) {
+        if (event.getPostedBy() == this || event.getSource() != this.getDataRowCache()) {
             return;
         }
 
@@ -1287,5 +1315,19 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
     List getFlattenedDeletes() {
         return flattenedDeletes;
+    }
+
+    /**
+     * @since 1.2
+     */
+    void setDataRowCacheFactory(Factory dataRowCacheFactory) {
+        this.dataRowCacheFactory = dataRowCacheFactory;
+    }
+
+    /**
+     * @since 1.2
+     */
+    Factory getDataRowCacheFactory() {
+        return dataRowCacheFactory;
     }
 }

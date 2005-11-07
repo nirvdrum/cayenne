@@ -95,6 +95,7 @@ public class CayenneTestResources implements BeanFactoryAware {
 
     public static final String SCHEMA_SETUP_STACK = "SchemaSetupStack";
     public static final String SQL_TEMPLATE_CUSTOMIZER = "SQLTemplateCustomizer";
+    public static final String DEFAULT_CONNECTION_KEY = "internal_embedded_datasource";
 
     private static CayenneTestResources resources;
 
@@ -118,7 +119,16 @@ public class CayenneTestResources implements BeanFactoryAware {
                 "TestResources",
                 CayenneTestResources.class);
 
-        resources.setConnectionKey(System.getProperty(CONNECTION_NAME_KEY));
+        String connectionKey = System.getProperty(CONNECTION_NAME_KEY);
+        if (connectionKey == null) {
+            logObj.info("No connection key property set '"
+                    + CONNECTION_NAME_KEY
+                    + "', using default: "
+                    + DEFAULT_CONNECTION_KEY);
+            connectionKey = DEFAULT_CONNECTION_KEY;
+        }
+        
+        resources.setConnectionKey(connectionKey);
 
         try {
             resources.rebuildSchema();
@@ -214,7 +224,7 @@ public class CayenneTestResources implements BeanFactoryAware {
 
     public void setConnectionKey(String connectionKey) {
         if (connectionKey == null) {
-            throw new RuntimeException("Null connection key.");
+            throw new RuntimeException("Null connection key");
         }
 
         connectionInfo = ConnectionProperties.getInstance().getConnectionInfo(

@@ -112,7 +112,7 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         Artist altArtist = (Artist) altContext.getObjectStore().getObject(
                 artist.getObjectId());
         assertNotNull(altArtist);
-        assertFalse(altArtist == artist);
+        assertNotSame(altArtist, artist);
         assertEquals(artist.getArtistName(), altArtist.getArtistName());
         assertEquals(PersistenceState.COMMITTED, altArtist.getPersistenceState());
 

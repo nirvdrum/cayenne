@@ -151,7 +151,7 @@ public class OracleAdapter extends JdbcAdapter {
 
         }
         catch (Throwable th) {
-            logObj.info("Error getting Oracle driver information, ignoring. "
+            logObj.debug("Error getting Oracle driver information, ignoring. "
                     + "Note that certain adapter features will be disabled.", Util
                     .unwindException(th));
         }
