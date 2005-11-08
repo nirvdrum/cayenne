@@ -43,6 +43,7 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.TestCaseDataFactory;
 
 public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
 

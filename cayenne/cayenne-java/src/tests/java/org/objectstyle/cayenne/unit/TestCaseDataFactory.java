@@ -53,19 +53,15 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.unit;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
-import org.objectstyle.cayenne.unit.CayenneTestResources;
-
 public class TestCaseDataFactory {
 
-    private static void createArtist(Connection conn, String artistName)
-        throws Exception {
-        String insertArtist =
-            "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
+    private static void createArtist(Connection conn, String artistName) throws Exception {
+        String insertArtist = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
         PreparedStatement stmt = conn.prepareStatement(insertArtist);
         long dateBase = System.currentTimeMillis();
 
@@ -80,8 +76,10 @@ public class TestCaseDataFactory {
 
     public static void createArtist(String artistName) throws Exception {
 
-        Connection conn =
-            CayenneTestResources.getResources().getDataSource().getConnection();
+        Connection conn = CayenneTestResources
+                .getResources()
+                .getDataSource()
+                .getConnection();
 
         try {
             conn.setAutoCommit(false);
@@ -93,20 +91,20 @@ public class TestCaseDataFactory {
     }
 
     public static void createArtistWithPainting(
-        String artistName,
-        String[] paintingNames,
-        boolean paintingInfo)
-        throws Exception {
+            String artistName,
+            String[] paintingNames,
+            boolean paintingInfo) throws Exception {
 
-        Connection conn =
-            CayenneTestResources.getResources().getDataSource().getConnection();
+        Connection conn = CayenneTestResources
+                .getResources()
+                .getDataSource()
+                .getConnection();
 
         try {
             conn.setAutoCommit(false);
             createArtist(conn, artistName);
 
-            String insertPt =
-                "INSERT INTO PAINTING (PAINTING_ID, ARTIST_ID, ESTIMATED_PRICE, PAINTING_TITLE) VALUES (?,?,?,?)";
+            String insertPt = "INSERT INTO PAINTING (PAINTING_ID, ARTIST_ID, ESTIMATED_PRICE, PAINTING_TITLE) VALUES (?,?,?,?)";
             PreparedStatement stmt = conn.prepareStatement(insertPt);
 
             int len = paintingNames.length;
@@ -122,8 +120,7 @@ public class TestCaseDataFactory {
                 conn.commit();
 
                 if (paintingInfo) {
-                    String insertPtI =
-                        "INSERT INTO PAINTING_INFO (PAINTING_ID, TEXT_REVIEW) VALUES (?,?)";
+                    String insertPtI = "INSERT INTO PAINTING_INFO (PAINTING_ID, TEXT_REVIEW) VALUES (?,?)";
                     stmt = conn.prepareStatement(insertPtI);
                     for (int i = 0; i < len; i++) {
                         stmt.setInt(1, i + 1);
@@ -143,18 +140,18 @@ public class TestCaseDataFactory {
     }
 
     public static void createArtistBelongingToGroups(
-        String artistName,
-        String[] groupNames)
-        throws Exception {
-        Connection conn =
-            CayenneTestResources.getResources().getDataSource().getConnection();
+            String artistName,
+            String[] groupNames) throws Exception {
+        Connection conn = CayenneTestResources
+                .getResources()
+                .getDataSource()
+                .getConnection();
 
         try {
             conn.setAutoCommit(false);
             createArtist(conn, artistName);
             String insertGroup = "INSERT INTO ARTGROUP (GROUP_ID, NAME) VALUES (?,?)";
-            String insertLink =
-                "INSERT INTO ARTIST_GROUP (GROUP_ID, ARTIST_ID) VALUES (?,?)";
+            String insertLink = "INSERT INTO ARTIST_GROUP (GROUP_ID, ARTIST_ID) VALUES (?,?)";
             PreparedStatement groupStmt = conn.prepareStatement(insertGroup);
             PreparedStatement linkStmt = conn.prepareStatement(insertLink);
 
@@ -165,8 +162,8 @@ public class TestCaseDataFactory {
                     groupStmt.setString(2, groupNames[i]);
                     groupStmt.executeUpdate();
 
-                    linkStmt.setInt(1, i + 1); //group id
-                    linkStmt.setInt(2, 1); //artist id
+                    linkStmt.setInt(1, i + 1); // group id
+                    linkStmt.setInt(2, 1); // artist id
                     linkStmt.executeUpdate();
                 }
                 groupStmt.close();
@@ -180,8 +177,10 @@ public class TestCaseDataFactory {
     }
 
     public static void createUnconnectedGroup(String groupName) throws Exception {
-        Connection conn =
-            CayenneTestResources.getResources().getDataSource().getConnection();
+        Connection conn = CayenneTestResources
+                .getResources()
+                .getDataSource()
+                .getConnection();
 
         try {
             conn.setAutoCommit(false);

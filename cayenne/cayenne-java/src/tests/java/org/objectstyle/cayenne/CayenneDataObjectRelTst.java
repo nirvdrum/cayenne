@@ -65,6 +65,7 @@ import org.objectstyle.art.PaintingInfo;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unit.TestCaseDataFactory;
 
 public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 

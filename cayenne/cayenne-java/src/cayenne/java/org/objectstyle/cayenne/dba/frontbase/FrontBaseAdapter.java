@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,18 +53,13 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.postgres;
+package org.objectstyle.cayenne.dba.frontbase;
 
-import java.sql.PreparedStatement;
 import java.sql.Types;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.trans.QualifierTranslator;
-import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
-import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
@@ -72,85 +67,38 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SQLAction;
 
 /**
- * DbAdapter implementation for <a href="http://www.postgresql.org">PostgreSQL RDBMS </a>.
+ * DbAdapter implementation for <a href="http://www.frontbase.com/">FrontBase RDBMS</a>.
  * Sample <a target="_top"
- * href="../../../../../../../developerguide/unit-tests.html">connection settings </a> to
- * use with PostgreSQL are shown below:
+ * href="../../../../../../../developerguide/unit-tests.html">connection settings</a> to
+ * use with FrontBase are shown below:
  * 
  * <pre>
- *   
- *     test-postgresql.cayenne.adapter = org.objectstyle.cayenne.dba.postgres.PostgresAdapter
- *     test-postgresql.jdbc.username = test
- *     test-postgresql.jdbc.password = secret
- *     test-postgresql.jdbc.url = jdbc:postgresql://serverhostname/cayenne
- *     test-postgresql.jdbc.driver = org.postgresql.Driver
- *    
+ *            fb.cayenne.adapter = org.objectstyle.cayenne.dba.frontbase.FrontBaseAdapter
+ *            fb.jdbc.username = _system
+ *            fb.jdbc.password = secret
+ *            fb.jdbc.url = jdbc:FrontBase://localhost/cayenne/
+ *            fb.jdbc.driver = jdbc.FrontBase.FBJDriver
  * </pre>
  * 
- * @author Dirk Olmes
- * @author Holger Hoffstaette
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class PostgresAdapter extends JdbcAdapter {
+public class FrontBaseAdapter extends JdbcAdapter {
 
-    /**
-     * Uses PostgresActionBuilder to create the right action.
-     * 
-     * @since 1.2
-     */
-    public SQLAction getAction(Query query, DataNode node) {
-        return query.createSQLAction(new PostgresActionBuilder(this, node
-                .getEntityResolver()));
+    public String tableTypeForTable() {
+        return "BASE TABLE";
     }
 
-    /**
-     * Installs appropriate ExtendedTypes as converters for passing values between JDBC
-     * and Java layers.
-     */
     protected void configureExtendedTypes(ExtendedTypeMap map) {
-        
         super.configureExtendedTypes(map);
         
-        map.registerType(new CharType(true, false));
-        map.registerType(new PostgresByteArrayType(true, true));
+        map.registerType(new ByteArrayType(false, false));
     }
-
-    public DbAttribute buildAttribute(
-            String name,
-            String typeName,
-            int type,
-            int size,
-            int precision,
-            boolean allowNulls) {
-
-        // "bytea" maps to pretty much any binary type, so
-        // it is up to us to select the most sensible default.
-        // And the winner is LONGVARBINARY
-        if ("bytea".equalsIgnoreCase(typeName)) {
-            type = Types.LONGVARBINARY;
-        }
-        // oid is returned as INTEGER, need to make it BLOB
-        else if("oid".equals(typeName)) {
-            type = Types.BLOB;
-        }
-        // somehow the driver reverse-engineers "text" as VARCHAR, must be CLOB
-        else if ("text".equalsIgnoreCase(typeName)) {
-            type = Types.CLOB;
-        }
-
-        return super.buildAttribute(name, typeName, type, size, precision, allowNulls);
-    }
-
+    
     /**
-     * Customizes table creating procedure for PostgreSQL. One difference with generic
-     * implementation is that "bytea" type has no explicit length unlike similar binary
-     * types in other databases.
-     * 
-     * @since 1.0.2
+     * Customizes table creating procedure for FrontBase.
      */
     public String createTable(DbEntity ent) {
 
@@ -200,8 +148,13 @@ public class PostgresAdapter extends JdbcAdapter {
             String type = types[0];
             buf.append(at.getName()).append(' ').append(type);
 
-            // append size and precision (if applicable)
-            if (typeSupportsLength(at.getType())) {
+            // Mapping LONGVARCHAR without length creates a column with lenght "1" which
+            // is defintely not what we want...so just use something very large (1Gb seems
+            // to be the limit for FB)
+            if (at.getType() == Types.LONGVARCHAR && at.getMaxLength() <= 0) {
+                buf.append("(1073741824)");
+            }
+            else if (TypesMapping.supportsLength(at.getType())) {
                 int len = at.getMaxLength();
                 int prec = TypesMapping.isDecimal(at.getType()) ? at.getPrecision() : -1;
 
@@ -224,9 +177,7 @@ public class PostgresAdapter extends JdbcAdapter {
             if (at.isMandatory()) {
                 buf.append(" NOT NULL");
             }
-            else {
-                buf.append(" NULL");
-            }
+            // else: don't appen NULL for FrontBase:
         }
 
         // primary key clause
@@ -254,69 +205,14 @@ public class PostgresAdapter extends JdbcAdapter {
         return buf.toString();
     }
 
-    private boolean typeSupportsLength(int type) {
-        // "bytea" type does not support length
-        String[] externalTypes = externalTypesForJdbcType(type);
-        if (externalTypes != null && externalTypes.length > 0) {
-            for (int i = 0; i < externalTypes.length; i++) {
-                if ("bytea".equalsIgnoreCase(externalTypes[i])) {
-                    return false;
-                }
-            }
-        }
-
-        return TypesMapping.supportsLength(type);
-    }
-
     /**
      * Adds the CASCADE option to the DROP TABLE clause.
-     * 
-     * @see JdbcAdapter#dropTable(DbEntity)
      */
     public String dropTable(DbEntity ent) {
         return super.dropTable(ent) + " CASCADE";
     }
 
-    /**
-     * Returns a trimming translator.
-     */
-    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
-        return new PostgresQualifierTranslator(queryAssembler);
-    }
-
-    /**
-     * @see JdbcAdapter#createPkGenerator()
-     */
     protected PkGenerator createPkGenerator() {
-        return new PostgresPkGenerator();
-    }
-
-    /**
-     * PostgresByteArrayType is a byte[] type handler that patches the problem with
-     * PostgreSQL JDBC driver. Namely the fact that for some misterious reason PostgreSQL
-     * JDBC driver (as of 7.3.5) completely ignores the existence of LONGVARBINARY type.
-     * 
-     * @since 1.0.4
-     */
-    class PostgresByteArrayType extends ByteArrayType {
-
-        public PostgresByteArrayType(boolean trimmingBytes, boolean usingBlobs) {
-            super(trimmingBytes, usingBlobs);
-        }
-
-        public void setJdbcObject(
-                PreparedStatement st,
-                Object val,
-                int pos,
-                int type,
-                int precision) throws Exception {
-
-            // patch PGSQL driver LONGVARBINARY ignorance
-            if (type == Types.LONGVARBINARY) {
-                type = Types.VARBINARY;
-            }
-
-            super.setJdbcObject(st, val, pos, type, precision);
-        }
+        return new FrontBasePkGenerator();
     }
 }

@@ -15,6 +15,7 @@
 	<bean id="DB2Adapter" class="org.objectstyle.cayenne.dba.db2.DB2Adapter"/>
 	<bean id="HSQLDBAdapter" class="org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter"/>
 	<bean id="DerbyAdapter" class="org.objectstyle.cayenne.dba.derby.DerbyAdapter"/>
+	<bean id="FrontBaseAdapter" class="org.objectstyle.cayenne.dba.frontbase.FrontBaseAdapter"/>
 
 	<!-- ======================================= -->
 	<!-- Access Stack Adapters -->
@@ -48,6 +49,9 @@
 	</bean>
 	<bean id="DerbyStackAdapter" class="org.objectstyle.cayenne.unit.DerbyStackAdapter">
 		<constructor-arg><ref bean="DerbyAdapter"/></constructor-arg>
+	</bean>
+	<bean id="FrontBaseStackAdapter" class="org.objectstyle.cayenne.unit.FrontBaseStackAdapter">
+		<constructor-arg><ref bean="FrontBaseAdapter"/></constructor-arg>
 	</bean>
 	
 	<!-- ======================================= -->
@@ -157,6 +161,7 @@
 				<entry key="org.objectstyle.cayenne.dba.db2.DB2Adapter"><ref bean="DB2StackAdapter"/></entry>
 				<entry key="org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter"><ref bean="HSQLDBStackAdapter"/></entry>
 				<entry key="org.objectstyle.cayenne.dba.derby.DerbyAdapter"><ref bean="DerbyStackAdapter"/></entry>
+				<entry key="org.objectstyle.cayenne.dba.frontbase.FrontBaseAdapter"><ref bean="FrontBaseStackAdapter"/></entry>
 			</map>
 		</constructor-arg>
 	</bean>
