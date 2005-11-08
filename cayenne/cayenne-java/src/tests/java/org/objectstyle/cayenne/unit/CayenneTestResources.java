@@ -108,7 +108,7 @@ public class CayenneTestResources implements BeanFactoryAware {
                 .getResourceAsStream(TEST_RESOURCES_DESCRIPTOR);
 
         if (in == null) {
-            logObj.error("Can't locate resource");
+            logObj.error("Can't locate resource: " + TEST_RESOURCES_DESCRIPTOR);
             throw new RuntimeException(
                     "Can't locate resource descriptor in the ClassLoader: "
                             + TEST_RESOURCES_DESCRIPTOR);

@@ -1,18 +1,6 @@
-Cayenne Upgrade Information 1.2 M7 milestone
+Cayenne Upgrade Information 1.2 M8 milestone
 Date: 
 ============================================
-
-UPGRADE FROM M6:
-
-* If you were using multi-tier features, note that web.xml configuration has changed 
-  (in fact it is simplified). See HessianService Javadocs for details. In short, use 
-  a different servlet, remove "api-class" and "service-class" parameters:
-  
-  <servlet>
-    <servlet-name>cayenne</servlet-name>
-    <servlet-class>org.objectstyle.cayenne.opp.hessian.HessianServlet</servlet-class>
-  </servlet>
-
 
 
 GENERAL UPGRADE NOTES:

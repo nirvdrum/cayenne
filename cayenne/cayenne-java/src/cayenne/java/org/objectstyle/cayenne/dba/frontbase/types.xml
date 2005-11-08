@@ -11,7 +11,7 @@ FrontBase types mapping
        <db-type name="LONGINT"/>
    </jdbc-type>
    <jdbc-type name="BINARY">
-		<db-type name="BYTE"/>
+		<db-type name="BIT"/>
    </jdbc-type>
    <jdbc-type name="BIT">
        <db-type name="BIT"/>
@@ -76,10 +76,10 @@ FrontBase types mapping
        <db-type name="TIMESTAMP"/>
    </jdbc-type>
    <jdbc-type name="TINYINT">
-       <db-type name="BOOLEAN"/>
+       <db-type name="SMALLINT"/>
    </jdbc-type>
    <jdbc-type name="VARBINARY">
-       <db-type name="BYTE"/>
+       <db-type name="BIT VARYING"/>
    </jdbc-type>
    <jdbc-type name="VARCHAR">
        <db-type name="CHAR VARYING"/>

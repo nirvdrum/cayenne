@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -198,9 +198,9 @@ public class JointPrefetchTst extends CayenneTestCase {
         SQLTemplate artistSQL = new SQLTemplate(
                 Artist.class,
                 "insert into ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
-                        + "values (33001, 'a1', #bind($date 'TIMESTAMP'))",
+                        + "values (33001, 'a1', #bind($date 'DATE'))",
                 false);
-        artistSQL.setParameters(Collections.singletonMap("date", new Timestamp(System
+        artistSQL.setParameters(Collections.singletonMap("date", new Date(System
                 .currentTimeMillis())));
         SQLTemplate paintingSQL = new SQLTemplate(
                 Painting.class,
@@ -219,7 +219,7 @@ public class JointPrefetchTst extends CayenneTestCase {
         ObjEntity artistE = getObjEntity("Artist");
         ObjAttribute dateOfBirth = (ObjAttribute) artistE.getAttribute("dateOfBirth");
         assertEquals("java.util.Date", dateOfBirth.getType());
-        dateOfBirth.setType("java.sql.Timestamp");
+        dateOfBirth.setType("java.sql.Date");
         try {
             List objects = context.performQuery(q);
             assertEquals(1, objects.size());
@@ -230,7 +230,7 @@ public class JointPrefetchTst extends CayenneTestCase {
                 Artist a = p.getToArtist();
                 assertNotNull(a);
                 assertNotNull(a.getDateOfBirth());
-                assertTrue(Timestamp.class.isAssignableFrom(a.getDateOfBirth().getClass()));
+                assertTrue(Date.class.isAssignableFrom(a.getDateOfBirth().getClass()));
             }
         }
         finally {

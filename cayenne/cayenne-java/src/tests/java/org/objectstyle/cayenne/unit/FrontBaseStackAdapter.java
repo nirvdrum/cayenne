@@ -74,4 +74,23 @@ public class FrontBaseStackAdapter extends AccessStackAdapter {
             throws Exception {
         // avoid dropping constraints...
     }
+
+    public boolean supportsBatchPK() {
+        return false;
+    }
+
+    public boolean supportsHaving() {
+        // FrontBase DOES support HAVING, however it doesn't support aggegate expressions
+        // in HAVING, and requires using column aliases instead. As HAVING is used for old
+        // and ugly derived DbEntities, no point in implementing special support at the
+        // adapter level.
+        return false;
+    }
+
+    public boolean supportsCaseInsensitiveOrder() {
+        // TODO, Andrus 11/8/2005: FrontBase does support UPPER() in ordering clause, however it does not
+        // support table aliases inside UPPER... Not sure what to do about it.
+
+        return false;
+    }
 }

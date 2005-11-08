@@ -189,6 +189,10 @@ public class AccessStackAdapter {
     public boolean supportsCaseInsensitiveOrder() {
         return true;
     }
+    
+    public boolean supportsBatchPK() {
+        return true;
+    }
 
     protected void executeDDL(Connection con, String ddl) throws Exception {
         logObj.info(ddl);

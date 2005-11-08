@@ -53,74 +53,35 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba;
+package org.objectstyle.cayenne.dba.frontbase;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.PreparedStatement;
+import java.sql.Types;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.access.types.ByteArrayType;
 
-public class PkGeneratorTst extends CayenneTestCase {
+/**
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+class FrontBaseByteArrayType extends ByteArrayType {
 
-    protected PkGenerator pkGen;
-    protected DataNode node;
-    protected DbEntity paintEnt;
-
-    protected void setUp() throws Exception {
-        deleteTestData();
-        node = (DataNode) getDomain().getDataNodes().iterator().next();
-        pkGen = node.getAdapter().getPkGenerator();
-        paintEnt = getDbEntity("PAINTING");
-        List list = new ArrayList();
-        list.add(paintEnt);
-        pkGen.createAutoPk(node, list);
-        pkGen.reset();
+    FrontBaseByteArrayType() {
+        super(false, true);
     }
 
-    public void testGeneratePkForDbEntity() throws Exception {
-        List pkList = new ArrayList();
+    public void setJdbcObject(
+            PreparedStatement st,
+            Object val,
+            int pos,
+            int type,
+            int precision) throws Exception {
 
-        int testSize =
-            (pkGen instanceof JdbcPkGenerator)
-                ? ((JdbcPkGenerator) pkGen).getPkCacheSize() * 2
-                : 25;
-        if (testSize < 25) {
-            testSize = 25;
+        // handle LONGVARBINARY as blob
+        if (type == Types.LONGVARBINARY) {
+            type = Types.BLOB;
         }
 
-        for (int i = 0; i < testSize; i++) {
-            Object pk = pkGen.generatePkForDbEntity(node, paintEnt);
-            assertNotNull(pk);
-            assertTrue(pk instanceof Number);
-
-            // check that the number is continuous
-            // of course this assumes a single-threaded test
-            if (getAccessStackAdapter().supportsBatchPK() && pkList.size() > 0) {
-                Number last = (Number) pkList.get(pkList.size() - 1);
-                assertEquals(last.intValue() + 1, ((Number) pk).intValue());
-            }
-
-            pkList.add(pk);
-        }
-    }
-
-    public void testBinaryPK1() throws Exception {
-        if (!(pkGen instanceof JdbcPkGenerator)) {
-            return;
-        }
-
-        DbEntity artistEntity = getDbEntity("ARTIST");
-        assertNull(((JdbcPkGenerator) pkGen).binaryPK(artistEntity));
-    }
-
-    public void testBinaryPK2() throws Exception {
-        if (!(pkGen instanceof JdbcPkGenerator)) {
-            return;
-        }
-
-        DbEntity binPKEntity = getDbEntity("BINARY_PK_TEST1");
-        assertNotNull(((JdbcPkGenerator) pkGen).binaryPK(binPKEntity));
+        super.setJdbcObject(st, val, pos, type, precision);
     }
 }

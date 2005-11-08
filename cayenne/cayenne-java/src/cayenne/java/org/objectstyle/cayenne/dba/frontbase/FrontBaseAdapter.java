@@ -59,7 +59,6 @@ import java.sql.Types;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
@@ -75,16 +74,22 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
  * use with FrontBase are shown below:
  * 
  * <pre>
- *            fb.cayenne.adapter = org.objectstyle.cayenne.dba.frontbase.FrontBaseAdapter
- *            fb.jdbc.username = _system
- *            fb.jdbc.password = secret
- *            fb.jdbc.url = jdbc:FrontBase://localhost/cayenne/
- *            fb.jdbc.driver = jdbc.FrontBase.FBJDriver
+ *      fb.cayenne.adapter = org.objectstyle.cayenne.dba.frontbase.FrontBaseAdapter
+ *      fb.jdbc.username = _system
+ *      fb.jdbc.password = secret
+ *      fb.jdbc.url = jdbc:FrontBase://localhost/cayenne/
+ *      fb.jdbc.driver = jdbc.FrontBase.FBJDriver
  * </pre>
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
+// TODO, Andrus 11/8/2005:
+// Limitations (also see FrontBaseStackAdapter in unit tests):
+//
+// 1. Case insensitive ordering (i.e. UPPER in the ORDER BY clause) is supported by
+// FrontBase, however aliases don't work ( ORDER BY UPPER(t0.ARTIST_NAME)) ... not sure
+// what to do about it.
 public class FrontBaseAdapter extends JdbcAdapter {
 
     public String tableTypeForTable() {
@@ -93,10 +98,10 @@ public class FrontBaseAdapter extends JdbcAdapter {
 
     protected void configureExtendedTypes(ExtendedTypeMap map) {
         super.configureExtendedTypes(map);
-        
-        map.registerType(new ByteArrayType(false, false));
+
+        map.registerType(new FrontBaseByteArrayType());
     }
-    
+
     /**
      * Customizes table creating procedure for FrontBase.
      */
@@ -151,8 +156,17 @@ public class FrontBaseAdapter extends JdbcAdapter {
             // Mapping LONGVARCHAR without length creates a column with lenght "1" which
             // is defintely not what we want...so just use something very large (1Gb seems
             // to be the limit for FB)
-            if (at.getType() == Types.LONGVARCHAR && at.getMaxLength() <= 0) {
-                buf.append("(1073741824)");
+            if (at.getType() == Types.LONGVARCHAR) {
+
+                int len = at.getMaxLength() > 0 ? at.getMaxLength() : 1073741824;
+                buf.append("(" + len + ")");
+            }
+            else if (at.getType() == Types.VARBINARY || at.getType() == Types.BINARY) {
+
+                // use a BIT column with size * 8
+                int len = at.getMaxLength() > 0 ? at.getMaxLength() : 1073741824;
+                len *= 8;
+                buf.append("(" + len + ")");
             }
             else if (TypesMapping.supportsLength(at.getType())) {
                 int len = at.getMaxLength();
