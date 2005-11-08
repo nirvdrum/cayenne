@@ -12,14 +12,15 @@
         </p>
         </section>
         
-
         <section name="Project News">
 
-	<p><u><i>[October 6, 2005]</i></u> <strong>Cayenne 1.2M6 Released</strong></p>
-		<p>A new M6 milestone of Cayenne 1.2 is available. It features DataContextFactory, a first usable version 
-		of <a href="http://objectstyle.org/confluence/display/CAY/Multi+Tier">multi-tier Cayenne</a>, a number of bug fixes and 
+	<p><u><i>[November 7, 2005]</i></u> <strong>Cayenne 1.2M7 Released</strong></p>
+		<p>A new M7 milestone of Cayenne 1.2 is available. It features greatly extended
+		<a href="http://objectstyle.org/confluence/display/CAY/Multi+Tier">multi-tier API</a> (including
+		peer-to-peer comminication), auto-detection of
+		DbAdapter, native support for JDK 1.5 enums, a number of bug fixes and 
 		more. Check out
-		<a href="http://objectstyle.org/confluence/display/CAY/2005/10/06/">full release announcement</a> on our blog.</p>
+		<a href="http://objectstyle.org/confluence/display/CAY/2005/11/07/M7+Released">full release announcement</a> on our blog.</p>
 
 
 	<p><u><i>[Sep 4, 2005]</i></u> <strong>More Cayenne Success Stories</strong></p>
