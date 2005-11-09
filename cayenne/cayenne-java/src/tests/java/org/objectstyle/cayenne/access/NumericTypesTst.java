@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.art.BitTest;
+import org.objectstyle.art.BooleanTest;
 import org.objectstyle.art.DecimalPKTest;
 import org.objectstyle.art.DecimalPKTest1;
 import org.objectstyle.art.SmallintTest;
@@ -158,6 +159,43 @@ public class NumericTypesTst extends CayenneTestCase {
         // CAY-320. Simplifying the use of booleans to allow identity comparison.
         assertNotSame(falseRefetched, falseObject);
         assertSame(Boolean.FALSE, falseRefetched.getBitColumn());
+    }
+    
+    public void testBooleanBoolean() throws Exception {
+
+        // populate (testing insert as well)
+        BooleanTest trueObject = (BooleanTest) context.createAndRegisterNewObject("BooleanTest");
+        trueObject.setBooleanColumn(Boolean.TRUE);
+        BooleanTest falseObject = (BooleanTest) context.createAndRegisterNewObject("BooleanTest");
+        falseObject.setBooleanColumn(Boolean.FALSE);
+        context.commitChanges();
+
+        // this will clear cache as a side effect
+        context = createDataContext();
+
+        // fetch true...
+        Expression trueQ = ExpressionFactory.matchExp("booleanColumn", Boolean.TRUE);
+        List trueResult = context.performQuery(new SelectQuery(BooleanTest.class, trueQ));
+        assertEquals(1, trueResult.size());
+
+        BooleanTest trueRefetched = (BooleanTest) trueResult.get(0);
+        assertEquals(Boolean.TRUE, trueRefetched.getBooleanColumn());
+
+        // CAY-320. Simplifying the use of booleans to allow identity comparison.
+        assertNotSame(trueRefetched, trueObject);
+        assertSame(Boolean.TRUE, trueRefetched.getBooleanColumn());
+
+        // fetch false
+        Expression falseQ = ExpressionFactory.matchExp("booleanColumn", Boolean.FALSE);
+        List falseResult = context.performQuery(new SelectQuery(BooleanTest.class, falseQ));
+        assertEquals(1, falseResult.size());
+
+        BooleanTest falseRefetched = (BooleanTest) falseResult.get(0);
+        assertEquals(Boolean.FALSE, falseRefetched.getBooleanColumn());
+
+        // CAY-320. Simplifying the use of booleans to allow identity comparison.
+        assertNotSame(falseRefetched, falseObject);
+        assertSame(Boolean.FALSE, falseRefetched.getBooleanColumn());
     }
 
     public void testDecimalPK() throws Exception {

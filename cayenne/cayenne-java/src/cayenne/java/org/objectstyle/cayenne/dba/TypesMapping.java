@@ -86,6 +86,12 @@ public class TypesMapping {
     public static final String SQL_BINARY = "BINARY";
     public static final String SQL_BIT = "BIT";
     public static final String SQL_BLOB = "BLOB";
+    
+    /**
+     * @since 1.2
+     */
+    public static final String SQL_BOOLEAN = "BOOLEAN";
+    
     public static final String SQL_CLOB = "CLOB";
     public static final String SQL_CHAR = "CHAR";
     public static final String SQL_DATE = "DATE";
@@ -143,6 +149,7 @@ public class TypesMapping {
         sqlStringType.put(SQL_BINARY, new Integer(Types.BINARY));
         sqlStringType.put(SQL_BIT, new Integer(Types.BIT));
         sqlStringType.put(SQL_BLOB, new Integer(Types.BLOB));
+        sqlStringType.put(SQL_BOOLEAN, new Integer(Types.BOOLEAN));
         sqlStringType.put(SQL_CLOB, new Integer(Types.CLOB));
         sqlStringType.put(SQL_CHAR, new Integer(Types.CHAR));
         sqlStringType.put(SQL_DATE, new Integer(Types.DATE));
@@ -166,6 +173,7 @@ public class TypesMapping {
         sqlEnumType.put(new Integer(Types.BIGINT), SQL_BIGINT);
         sqlEnumType.put(new Integer(Types.BINARY), SQL_BINARY);
         sqlEnumType.put(new Integer(Types.BIT), SQL_BIT);
+        sqlEnumType.put(new Integer(Types.BOOLEAN), SQL_BOOLEAN);
         sqlEnumType.put(new Integer(Types.BLOB), SQL_BLOB);
         sqlEnumType.put(new Integer(Types.CLOB), SQL_CLOB);
         sqlEnumType.put(new Integer(Types.CHAR), SQL_CHAR);
@@ -189,6 +197,7 @@ public class TypesMapping {
         sqlEnumJava.put(new Integer(Types.BIGINT), JAVA_LONG);
         sqlEnumJava.put(new Integer(Types.BINARY), JAVA_BYTES);
         sqlEnumJava.put(new Integer(Types.BIT), JAVA_BOOLEAN);
+        sqlEnumJava.put(new Integer(Types.BOOLEAN), JAVA_BOOLEAN);
         sqlEnumJava.put(new Integer(Types.BLOB), JAVA_BYTES);
         sqlEnumJava.put(new Integer(Types.CLOB), JAVA_STRING);
         sqlEnumJava.put(new Integer(Types.CHAR), JAVA_STRING);

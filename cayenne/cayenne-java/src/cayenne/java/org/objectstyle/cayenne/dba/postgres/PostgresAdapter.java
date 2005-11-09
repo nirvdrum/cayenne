@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.dba.postgres;
 
-import java.sql.PreparedStatement;
 import java.sql.Types;
 import java.util.Iterator;
 
@@ -63,7 +62,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
-import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -289,34 +287,5 @@ public class PostgresAdapter extends JdbcAdapter {
      */
     protected PkGenerator createPkGenerator() {
         return new PostgresPkGenerator();
-    }
-
-    /**
-     * PostgresByteArrayType is a byte[] type handler that patches the problem with
-     * PostgreSQL JDBC driver. Namely the fact that for some misterious reason PostgreSQL
-     * JDBC driver (as of 7.3.5) completely ignores the existence of LONGVARBINARY type.
-     * 
-     * @since 1.0.4
-     */
-    class PostgresByteArrayType extends ByteArrayType {
-
-        public PostgresByteArrayType(boolean trimmingBytes, boolean usingBlobs) {
-            super(trimmingBytes, usingBlobs);
-        }
-
-        public void setJdbcObject(
-                PreparedStatement st,
-                Object val,
-                int pos,
-                int type,
-                int precision) throws Exception {
-
-            // patch PGSQL driver LONGVARBINARY ignorance
-            if (type == Types.LONGVARBINARY) {
-                type = Types.VARBINARY;
-            }
-
-            super.setJdbcObject(st, val, pos, type, precision);
-        }
     }
 }

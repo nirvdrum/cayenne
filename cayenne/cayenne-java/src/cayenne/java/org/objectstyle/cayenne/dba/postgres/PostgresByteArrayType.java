@@ -53,43 +53,24 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.types;
+package org.objectstyle.cayenne.dba.postgres;
 
-import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.Types;
 
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.validation.ValidationResult;
+import org.objectstyle.cayenne.access.types.ByteArrayType;
 
 /**
- * A Boolean type handler. One of the features of this handler is that it ensures that
- * "materialize" methods return either Boolean.TRUE or Boolean.FALSE, instead of creating
- * new Boolean instances using contructor. Therefore it makes possible identity comparison
- * such as <code>object.getBooleanProperty() == Boolean.TRUE</code>.
+ * PostgresByteArrayType is a byte[] type handler that patches the problem with PostgreSQL
+ * JDBC driver. Namely the fact that for some misterious reason PostgreSQL JDBC driver (as
+ * of 7.3.5) completely ignores the existence of LONGVARBINARY type.
  * 
  * @since 1.2
- * @author Andrei Adamchik
  */
-public class BooleanType implements ExtendedType {
+class PostgresByteArrayType extends ByteArrayType {
 
-    public String getClassName() {
-        return Boolean.class.getName();
-    }
-
-    public boolean validateProperty(
-            Object source,
-            String property,
-            Object value,
-            DbAttribute dbAttribute,
-            ValidationResult validationResult) {
-        return AbstractType.validateNull(
-                source,
-                property,
-                value,
-                dbAttribute,
-                validationResult);
+    public PostgresByteArrayType(boolean trimmingBytes, boolean usingBlobs) {
+        super(trimmingBytes, usingBlobs);
     }
 
     public void setJdbcObject(
@@ -99,26 +80,11 @@ public class BooleanType implements ExtendedType {
             int type,
             int precision) throws Exception {
 
-        if (val == null) {
-            st.setNull(pos, type);
+        // patch PGSQL driver LONGVARBINARY ignorance
+        if (type == Types.LONGVARBINARY) {
+            type = Types.VARBINARY;
         }
-        else if (type == Types.BIT || type == Types.BOOLEAN) {
-            boolean flag = Boolean.TRUE.equals(val);
-            st.setBoolean(pos, flag);
-        }
-        else {
-            st.setObject(pos, val, type);
-        }
-    }
 
-    public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
-        boolean b = rs.getBoolean(index);
-        return (rs.wasNull()) ? null : b ? Boolean.TRUE : Boolean.FALSE;
-    }
-
-    public Object materializeObject(CallableStatement st, int index, int type)
-            throws Exception {
-        boolean b = st.getBoolean(index);
-        return (st.wasNull()) ? null : b ? Boolean.TRUE : Boolean.FALSE;
+        super.setJdbcObject(st, val, pos, type, precision);
     }
 }
