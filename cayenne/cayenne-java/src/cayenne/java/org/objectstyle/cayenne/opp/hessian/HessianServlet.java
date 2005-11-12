@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.opp.hessian;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
+import org.objectstyle.cayenne.opp.OPPRemoteService;
+
 import com.caucho.hessian.io.SerializerFactory;
 
 /**
@@ -97,12 +99,12 @@ public class HessianServlet extends com.caucho.hessian.server.HessianServlet {
         // init defaults
         if (config.getInitParameter(API_CLASS_PARAMETER) == null
                 && config.getInitParameter(HOME_API_PARAMETER) == null) {
-            setHomeAPI(HessianService.class);
+            setHomeAPI(OPPRemoteService.class);
         }
 
         if (config.getInitParameter(SERVICE_CLASS_PARAMETER) == null
                 && config.getInitParameter(HOME_CLASS_PARAMETER) == null) {
-            HessianServiceHandler handler = new HessianServiceHandler();
+            HessianService handler = new HessianService();
             handler.init(config);
             setHome(handler);
         }

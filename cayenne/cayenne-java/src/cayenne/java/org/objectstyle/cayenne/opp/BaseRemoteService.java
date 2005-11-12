@@ -53,41 +53,33 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.opp.hessian;
+package org.objectstyle.cayenne.opp;
 
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
-import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.OPPMessage;
 import org.objectstyle.cayenne.service.ClientServerChannel;
 import org.objectstyle.cayenne.util.IDUtil;
 import org.objectstyle.cayenne.util.Util;
 
-import com.caucho.services.server.Service;
-
 /**
- * A default implementation of HessianService service protocol. Supports client sessions.
- * For more info on Hessian see http://www.caucho.com/resin-3.0/protocols/hessian.xtp.
+ * A generic implementation of an OPPRemoteService. Subclasses can be customized to work
+ * with different remoting mechanisms, such as Hessian or JAXRPC.
  * 
- * @see org.objectstyle.cayenne.opp.hessian.HessianServlet
- * @see org.objectstyle.cayenne.opp.hessian.HessianService
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class HessianServiceHandler implements HessianService, Service {
+public class BaseRemoteService implements OPPRemoteService {
 
-    private static final Logger logObj = Logger.getLogger(HessianServiceHandler.class);
+    private static final Logger logObj = Logger.getLogger(BaseRemoteService.class);
+
+    public static final String EVENT_BRIDGE_FACTORY_PROPERTY = "cayenne.OPPRemoteService.EventBridge.factory";
 
     protected Map sessionChannels;
     protected Map sharedSessions;
@@ -107,52 +99,54 @@ public class HessianServiceHandler implements HessianService, Service {
     }
 
     /**
-     * Hessian service lifecycle method that performs Cayenne initialization.
+     * A method that sets up a service, initializing Cayenne stack. Should be invoked by
+     * subclasses from their appropriate service lifecycle methods.
      */
-    public void init(ServletConfig config) throws ServletException {
+    protected void initService(Map properties) throws CayenneRuntimeException {
 
         // start Cayenne service
-        logObj.debug("HessianServiceHandler is starting");
+        logObj.debug(this.getClass().getName() + " is starting");
 
-        initDomain(config);
-        initEventBridgeParameters(config);
+        initCayenneStack(properties);
+        initEventBridgeParameters(properties);
 
         this.sessionChannels = new HashMap();
         this.sharedSessions = new HashMap();
 
-        logObj.debug("HessianServiceHandler started");
+        logObj.debug(getClass().getName() + " started");
     }
 
     /**
-     * Hessian Service lifecycle method.
+     * Shuts down this service. Should be invoked by subclasses from their appropriate
+     * service lifecycle methods.
      */
-    public void destroy() {
+    protected void destroyService() {
         this.sessionChannels = null;
         this.sharedSessions = null;
 
-        logObj.debug("HessianServiceHandler destroyed");
+        logObj.debug(getClass().getName() + " destroyed");
     }
 
-    public HessianSession establishSession() {
+    public OPPRemoteSession establishSession() {
         logObj.debug("Session requested by client");
 
-        HessianSession session = createSession(false);
+        OPPRemoteSession session = createSession(false);
 
         logObj.debug("Established client session: " + session);
         return session;
     }
 
-    public HessianSession establishSharedSession(String name) {
+    public OPPRemoteSession establishSharedSession(String name) {
         logObj.debug("Shared session requested by client. Group name: " + name);
 
         if (name == null) {
             throw new CayenneRuntimeException("Invalid shared session name: " + name);
         }
 
-        HessianSession session;
+        OPPRemoteSession session;
 
         synchronized (sessionChannels) {
-            session = (HessianSession) sharedSessions.get(name);
+            session = (OPPRemoteSession) sharedSessions.get(name);
 
             if (session == null || sessionChannels.get(session.getSessionId()) == null) {
                 session = createSession(true);
@@ -193,15 +187,15 @@ public class HessianServiceHandler implements HessianService, Service {
         }
     }
 
-    HessianSession createSession(boolean enableEvents) {
+    OPPRemoteSession createSession(boolean enableEvents) {
 
         // do not add EventBridge to the session if 'enableEvents' is false
 
         String id = makeId();
-        HessianSession session = (enableEvents) ? new HessianSession(
+        OPPRemoteSession session = (enableEvents) ? new OPPRemoteSession(
                 id,
                 eventBridgeFactoryName,
-                eventBridgeParameters) : new HessianSession(id);
+                eventBridgeParameters) : new OPPRemoteSession(id);
 
         // block server-side channel events - clients will communicate their changes in a
         // peer-to-peer fashion.
@@ -239,7 +233,10 @@ public class HessianServiceHandler implements HessianService, Service {
         return buffer.toString();
     }
 
-    protected void initDomain(ServletConfig config) throws ServletException {
+    /**
+     * Sets up Cayenne stack.
+     */
+    protected void initCayenneStack(Map properties) {
         Configuration cayenneConfig = new DefaultConfiguration(
                 Configuration.DEFAULT_DOMAIN_FILE);
 
@@ -248,7 +245,7 @@ public class HessianServiceHandler implements HessianService, Service {
             cayenneConfig.didInitialize();
         }
         catch (Exception ex) {
-            throw new ServletException("Error starting Cayenne", ex);
+            throw new CayenneRuntimeException("Error starting Cayenne", ex);
         }
 
         // TODO (Andrus 10/15/2005) this assumes that mapping has a single domain...
@@ -256,21 +253,20 @@ public class HessianServiceHandler implements HessianService, Service {
         this.domain = cayenneConfig.getDomain();
     }
 
-    protected void initEventBridgeParameters(ServletConfig config)
-            throws ServletException {
-        String eventBridgeFactoryName = config
-                .getInitParameter(HessianService.EVENT_BRIDGE_FACTORY_PROPERTY);
+    /**
+     * Initializes EventBridge parameters for remote clients peer-to-peer communications.
+     */
+    protected void initEventBridgeParameters(Map properties) {
+        String eventBridgeFactoryName = (String) properties
+                .get(BaseRemoteService.EVENT_BRIDGE_FACTORY_PROPERTY);
 
         if (eventBridgeFactoryName != null) {
-            Map parameters = new HashMap();
-            Enumeration en = config.getInitParameterNames();
-            while (en.hasMoreElements()) {
-                String key = (String) en.nextElement();
-                parameters.put(key, config.getInitParameter(key));
-            }
+
+            Map eventBridgeParameters = new HashMap(properties);
+            eventBridgeParameters.remove(BaseRemoteService.EVENT_BRIDGE_FACTORY_PROPERTY);
 
             this.eventBridgeFactoryName = eventBridgeFactoryName;
-            this.eventBridgeParameters = parameters;
+            this.eventBridgeParameters = eventBridgeParameters;
         }
     }
 }

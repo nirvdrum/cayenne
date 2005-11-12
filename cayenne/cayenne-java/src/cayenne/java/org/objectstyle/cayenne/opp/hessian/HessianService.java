@@ -55,67 +55,44 @@
  */
 package org.objectstyle.cayenne.opp.hessian;
 
-import org.objectstyle.cayenne.opp.OPPMessage;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+
+import org.objectstyle.cayenne.opp.BaseRemoteService;
+
+import com.caucho.services.server.Service;
 
 /**
- * Service interface needed for server-side deployment with HessianConnector. A mapping in
- * <code>web.xml</code> may look like this:
+ * An implementation of OPPRemoteService using binary Hessian protocol. For more info on
+ * Hessian see http://www.caucho.com/resin-3.0/protocols/hessian.xtp.
  * 
- * <pre>
- *   &lt;servlet&gt;
- *     &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *     &lt;servlet-class&gt;org.objectstyle.cayenne.opp.hessian.HessianServlet&lt;/servlet-class&gt;
- *   &lt;/servlet&gt;            
- *   &lt;servlet-mapping&gt;
- *     &lt;servlet-name&gt;cayenne&lt;/servlet-name&gt;
- *     &lt;url-pattern&gt;/cayenne&lt;/url-pattern&gt;
- *   &lt;/servlet-mapping&gt;
- * </pre>
- * 
- * To deploy with XMPP event bridge that allows clients to receive server events you will
- * need to add a few more "init-params" to the "servlet" section:
- * 
- * <pre>
- *     &lt;init-param&gt;
- *        &lt;param-name&gt;cayenne.HessianService.EventBridge.factory&lt;/param-name&gt;
- *        &lt;param-value&gt;org.objectstyle.cayenne.event.XMPPBridgeFactory&lt;/param-value&gt;
- *     &lt;/init-param&gt;
- *     &lt;init-param&gt;
- *        &lt;param-name&gt;cayenne.XMPPBridge.xmppHost&lt;/param-name&gt;
- *        &lt;param-value&gt;my-xmpp-server.com&lt;/param-value&gt;
- *     &lt;/init-param&gt;
- *     &lt;init-param&gt;
- *        &lt;param-name&gt;cayenne.XMPPBridge.xmppPort&lt;/param-name&gt;
- *        &lt;param-value&gt;3333&lt;/param-value&gt;
- *     &lt;/init-param&gt;
- *     &lt;init-param&gt;
- *        &lt;param-name&gt;cayenne.XMPPBridge.xmppChatService&lt;/param-name&gt;
- *        &lt;param-value&gt;conferencelt;/param-value&gt;
- *     &lt;/init-param&gt;
- * </pre>
- * 
- * <i>Parameters above will likely be configurable via the Modeler in the future.</i>
- * 
+ * @see org.objectstyle.cayenne.opp.hessian.HessianServlet
+ * @see org.objectstyle.cayenne.opp.OPPRemoteService
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface HessianService {
-
-    public static final String EVENT_BRIDGE_FACTORY_PROPERTY = "cayenne.HessianService.EventBridge.factory";
+public class HessianService extends BaseRemoteService implements Service {
 
     /**
-     * Establishes a dedicated session with Cayenne OPPChannel, returning session id.
+     * Extracts parameters from ServletConfig and initializes the service.
      */
-    HessianSession establishSession();
+    public void init(ServletConfig config) throws ServletException {
+        Map properties = new HashMap();
 
-    /**
-     * Creates a new session with the specified or joins an existing one. This method is
-     * used to bootstrap collaborating clients of a single "group chat".
-     */
-    HessianSession establishSharedSession(String name);
+        Enumeration en = config.getInitParameterNames();
+        while (en.hasMoreElements()) {
+            String name = (String) en.nextElement();
+            properties.put(name, config.getInitParameter(name));
+        }
 
-    /**
-     * Processes message on a remote server, returning the result of such processing.
-     */
-    Object processMessage(String sessionId, OPPMessage message) throws Throwable;
+        initService(properties);
+    }
+
+    public void destroy() {
+        destroyService();
+    }
 }

@@ -58,7 +58,9 @@ package org.objectstyle.cayenne.opp.hessian;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.event.EventBridge;
 import org.objectstyle.cayenne.opp.BaseConnection;
+import org.objectstyle.cayenne.opp.OPPRemoteService;
 import org.objectstyle.cayenne.opp.OPPMessage;
+import org.objectstyle.cayenne.opp.OPPRemoteSession;
 import org.objectstyle.cayenne.util.Util;
 
 import com.caucho.hessian.client.HessianProxyFactory;
@@ -82,8 +84,8 @@ public class HessianConnection extends BaseConnection {
     protected String password;
     protected String sharedSessionName;
 
-    protected HessianSession session;
-    protected HessianService service;
+    protected OPPRemoteSession session;
+    protected OPPRemoteService service;
 
     /**
      * Creates HessianConnection that will establish dedicated session and will not use
@@ -210,7 +212,7 @@ public class HessianConnection extends BaseConnection {
         factory.setUser(userName);
         factory.setPassword(password);
         try {
-            this.service = (HessianService) factory.create(HessianService.class, url);
+            this.service = (OPPRemoteService) factory.create(OPPRemoteService.class, url);
         }
         catch (Throwable th) {
             th = unwindThrowable(th);

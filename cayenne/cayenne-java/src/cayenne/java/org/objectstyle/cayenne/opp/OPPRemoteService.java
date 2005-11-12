@@ -53,84 +53,34 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.opp.hessian;
+package org.objectstyle.cayenne.opp;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
-import junit.framework.TestCase;
+/**
+ * Interface of an OPP service.
+ * 
+ * @since 1.2
+ * @see org.objectstyle.cayenne.opp.hessian.HessianServlet
+ * @author Andrus Adamchik
+ */
+public interface OPPRemoteService extends Remote {
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.event.MockEventBridgeFactory;
-import org.objectstyle.cayenne.opp.OPPRemoteSession;
+    /**
+     * Establishes a dedicated session with Cayenne OPPChannel, returning session id.
+     */
+    OPPRemoteSession establishSession() throws RemoteException;
 
-import com.mockrunner.mock.web.MockServletConfig;
+    /**
+     * Creates a new session with the specified or joins an existing one. This method is
+     * used to bootstrap collaborating clients of a single "group chat".
+     */
+    OPPRemoteSession establishSharedSession(String name) throws RemoteException;
 
-public class HessianServiceHandlerTst extends TestCase {
-
-    public void testInit() throws Exception {
-        MockServletConfig config = new MockServletConfig();
-        config.setInitParameter(
-                HessianService.EVENT_BRIDGE_FACTORY_PROPERTY,
-                MockEventBridgeFactory.class.getName());
-
-        HessianService handler = new HessianService() {
-
-            public void initDomain(ServletConfig config) throws ServletException {
-                this.domain = new DataDomain("test");
-            }
-        };
-
-        handler.init(config);
-        assertEquals(MockEventBridgeFactory.class.getName(), handler
-                .getEventBridgeFactoryName());
-    }
-
-    public void testEstablishSession() throws Exception {
-        MockServletConfig config = new MockServletConfig();
-        config.setInitParameter(
-                HessianService.EVENT_BRIDGE_FACTORY_PROPERTY,
-                MockEventBridgeFactory.class.getName());
-
-        HessianService handler = new HessianService() {
-
-            public void initDomain(ServletConfig config) throws ServletException {
-                this.domain = new DataDomain("test");
-            }
-        };
-
-        handler.init(config);
-
-        OPPRemoteSession session = handler.establishSession();
-        assertNotNull(session);
-        assertFalse(session.isServerEventsEnabled());
-
-        OPPRemoteSession session2 = handler.establishSession();
-        assertNotNull(session2);
-        assertNotSame(session, session2);
-    }
-
-    public void testEstablishSharedSession() throws Exception {
-        MockServletConfig config = new MockServletConfig();
-        config.setInitParameter(
-                HessianService.EVENT_BRIDGE_FACTORY_PROPERTY,
-                MockEventBridgeFactory.class.getName());
-
-        HessianService handler = new HessianService() {
-
-            public void initDomain(ServletConfig config) throws ServletException {
-                this.domain = new DataDomain("test");
-            }
-        };
-
-        handler.init(config);
-
-        OPPRemoteSession session = handler.establishSharedSession("shared");
-        assertNotNull(session);
-        assertTrue(session.isServerEventsEnabled());
-
-        OPPRemoteSession session2 = handler.establishSharedSession("shared");
-        assertNotNull(session2);
-        assertSame(session, session2);
-    }
+    /**
+     * Processes message on a remote server, returning the result of such processing.
+     */
+    Object processMessage(String sessionId, OPPMessage message) throws RemoteException,
+            Throwable;
 }

@@ -55,27 +55,27 @@
  */
 package org.objectstyle.cayenne.opp.hessian;
 
-import org.objectstyle.cayenne.opp.hessian.HessianSession;
+import org.objectstyle.cayenne.opp.OPPRemoteSession;
 
 import junit.framework.TestCase;
 
 public class HessianSessionTst extends TestCase {
 
     public void testConstructor1() {
-        HessianSession descriptor = new HessianSession("abc");
+        OPPRemoteSession descriptor = new OPPRemoteSession("abc");
         assertEquals("abc", descriptor.getSessionId());
         assertFalse(descriptor.isServerEventsEnabled());
     }
 
     public void testConstructor2() {
-        HessianSession descriptor = new HessianSession("abc", "factory", null);
+        OPPRemoteSession descriptor = new OPPRemoteSession("abc", "factory", null);
         assertEquals("abc", descriptor.getSessionId());
         assertTrue(descriptor.isServerEventsEnabled());
     }
 
     public void testHashCode() {
-        HessianSession d1 = new HessianSession("1");
-        HessianSession d2 = new HessianSession("1");
+        OPPRemoteSession d1 = new OPPRemoteSession("1");
+        OPPRemoteSession d2 = new OPPRemoteSession("1");
 
         assertEquals(d1.hashCode(), d1.hashCode());
         assertEquals(d1.hashCode(), d2.hashCode());
@@ -83,7 +83,7 @@ public class HessianSessionTst extends TestCase {
         d2.setName("some name");
         assertEquals(d1.hashCode(), d2.hashCode());
 
-        HessianSession d3 = new HessianSession("2");
+        OPPRemoteSession d3 = new OPPRemoteSession("2");
         assertFalse(d1.hashCode() == d3.hashCode());
     }
 }

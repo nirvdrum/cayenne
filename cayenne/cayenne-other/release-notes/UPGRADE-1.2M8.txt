@@ -2,6 +2,12 @@ Cayenne Upgrade Information 1.2 M8 milestone
 Date: 
 ============================================
 
+UPGRADING FROM M7:
+
+If you were using EventBridge for remote clients peer-to-peer communications, note that
+the name of the factory parameter in web.xml has changed from 'cayenne.HessianService.EventBridge.factory' 
+to 'cayenne.OPPRemoteService.EventBridge.factory'.
+
 
 GENERAL UPGRADE NOTES:
 

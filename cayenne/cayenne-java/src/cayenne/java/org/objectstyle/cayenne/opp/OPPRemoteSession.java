@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.opp.hessian;
+package org.objectstyle.cayenne.opp;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -66,7 +66,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.event.EventBridge;
 import org.objectstyle.cayenne.event.EventBridgeFactory;
-import org.objectstyle.cayenne.opp.OPPChannel;
 
 /**
  * A descriptor passed from HessianService to the caller when a session is established. It
@@ -76,7 +75,7 @@ import org.objectstyle.cayenne.opp.OPPChannel;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class HessianSession implements Serializable {
+public class OPPRemoteSession implements Serializable {
 
     static final Collection SUBJECTS = Arrays.asList(new Object[] {
             OPPChannel.GRAPH_CHANGED_SUBJECT, OPPChannel.GRAPH_COMMITTED_SUBJECT,
@@ -90,14 +89,14 @@ public class HessianSession implements Serializable {
     protected Map eventBridgeParameters;
 
     // private constructor used by hessian deserialization mechanism
-    private HessianSession() {
+    private OPPRemoteSession() {
 
     }
 
     /**
      * Creates a HessianServiceDescriptor without server events support.
      */
-    public HessianSession(String sessionId) {
+    public OPPRemoteSession(String sessionId) {
         this(sessionId, null, null);
     }
 
@@ -105,7 +104,7 @@ public class HessianSession implements Serializable {
      * Creates a HessianServiceDescriptor. If <code>eventBridgeFactory</code> argument
      * is not null, session will support server events.
      */
-    public HessianSession(String sessionId, String eventBridgeFactory,
+    public OPPRemoteSession(String sessionId, String eventBridgeFactory,
             Map eventBridgeParameters) {
 
         if (sessionId == null) {
