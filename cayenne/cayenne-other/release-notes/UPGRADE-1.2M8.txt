@@ -29,7 +29,7 @@ GENERAL UPGRADE NOTES:
    
 UPGRADE FROM 1.1:
 
-*  1.2 REQUIRES JDK 1.4 or higher for both tools and runtime. It won't work on JDK 1.3. 
+*  Cayenne tools and runtime now REQUIRE at least JDK 1.4 (or higher). They won't work on JDK 1.3. 
    If you are still on 1.3, upgrade your JDK if you can. If you can not, consider staying on 
    Cayenne 1.1. 
 
