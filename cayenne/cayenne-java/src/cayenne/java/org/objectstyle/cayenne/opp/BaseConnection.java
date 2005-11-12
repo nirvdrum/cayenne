@@ -60,7 +60,7 @@ import org.apache.commons.logging.LogFactory;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
- * A convenience superlcass simplifing concrete OPPConnection implmenetations. Provides
+ * A convenience superlcass simplifing concrete OPPConnection implmentations. Provides
  * common message logging functionality.
  * 
  * @since 1.2
