@@ -55,8 +55,7 @@
  */
 package org.objectstyle.cayenne.opp.hessian;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -66,7 +65,7 @@ import org.objectstyle.cayenne.opp.OPPRemoteSession;
 
 import com.mockrunner.mock.web.MockServletConfig;
 
-public class HessianServiceHandlerTst extends TestCase {
+public class HessianServiceTst extends TestCase {
 
     public void testInit() throws Exception {
         MockServletConfig config = new MockServletConfig();
@@ -76,7 +75,7 @@ public class HessianServiceHandlerTst extends TestCase {
 
         HessianService handler = new HessianService() {
 
-            public void initDomain(ServletConfig config) throws ServletException {
+            protected void initCayenneStack(Map properties) {
                 this.domain = new DataDomain("test");
             }
         };
@@ -94,7 +93,7 @@ public class HessianServiceHandlerTst extends TestCase {
 
         HessianService handler = new HessianService() {
 
-            public void initDomain(ServletConfig config) throws ServletException {
+            protected void initCayenneStack(Map properties) {
                 this.domain = new DataDomain("test");
             }
         };
@@ -118,7 +117,7 @@ public class HessianServiceHandlerTst extends TestCase {
 
         HessianService handler = new HessianService() {
 
-            public void initDomain(ServletConfig config) throws ServletException {
+            protected void initCayenneStack(Map properties) {
                 this.domain = new DataDomain("test");
             }
         };
