@@ -481,39 +481,46 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     }
 
     /**
-     * Returns a collection of joint prefetches.
+     * Returns a collection of prefetches.
      * 
      * @since 1.2
      */
-    public Collection getJointPrefetches() {
-        return selectProperties.getJointPrefetches();
+    public Collection getPrefetches() {
+        return selectProperties.getPrefetches();
     }
 
     /**
-     * Adds a joint prefetch.
+     * Adds a prefetch.
      * 
      * @since 1.2
      */
-    public void addJointPrefetch(String relationshipPath) {
-        selectProperties.addJointPrefetch(relationshipPath);
+    public void addPrefetch(String prefetchPath) {
+        addPrefetch(new Prefetch(prefetchPath, Prefetch.JOINT_PREFETCH_SEMANTICS));
     }
 
     /**
-     * Adds all joint prefetches from a provided collection.
-     * 
      * @since 1.2
      */
-    public void addJointPrefetches(Collection relationshipPaths) {
-        selectProperties.addJointPrefetches(relationshipPaths);
+    public void addPrefetch(Prefetch prefetch) {
+        selectProperties.addPrefetch(prefetch);
     }
 
     /**
-     * Clears all joint prefetches.
+     * Adds all prefetches from a provided collection.
      * 
      * @since 1.2
      */
-    public void clearJointPrefetches() {
-        selectProperties.clearJointPrefetches();
+    public void addPrefetches(Collection prefetches) {
+        selectProperties.addPrefetches(prefetches);
+    }
+
+    /**
+     * Clears all prefetches.
+     * 
+     * @since 1.2
+     */
+    public void clearPrefetches() {
+        selectProperties.clearPrefetches();
     }
 
     /**
@@ -521,7 +528,14 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * 
      * @since 1.2
      */
-    public void removeJointPrefetch(String relationshipPath) {
-        selectProperties.removeJointPrefetch(relationshipPath);
+    public void removePrefetch(String prefetchPath) {
+        selectProperties.removePrefetch(new Prefetch(prefetchPath));
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void removePrefetch(Prefetch prefetch) {
+        selectProperties.removePrefetch(prefetch);
     }
 }

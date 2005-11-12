@@ -53,6 +53,7 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.Ordering;
+import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -64,8 +65,9 @@ public class SelectTranslatorTst extends CayenneTestCase {
      */
     public void testCreateSqlString1() throws Exception {
         // query with qualifier and ordering
-        SelectQuery q = new SelectQuery(Artist.class, ExpressionFactory
-                .likeExp("artistName", "a%"));
+        SelectQuery q = new SelectQuery(Artist.class, ExpressionFactory.likeExp(
+                "artistName",
+                "a%"));
         q.addOrdering("dateOfBirth", Ordering.ASC);
 
         Template test = new Template() {
@@ -117,8 +119,9 @@ public class SelectTranslatorTst extends CayenneTestCase {
         Artist a1 = (Artist) createDataContext().registeredObject(id);
 
         // query with qualifier and ordering
-        SelectQuery q = new SelectQuery(ArtistAssets.class, ExpressionFactory
-                .matchExp("toArtist", a1));
+        SelectQuery q = new SelectQuery(ArtistAssets.class, ExpressionFactory.matchExp(
+                "toArtist",
+                a1));
 
         Template test = new Template() {
 
@@ -150,7 +153,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
         SelectQuery q = new SelectQuery(ArtistAssets.class);
         q.setParentObjEntityName("Painting");
         q.setParentQualifier(ExpressionFactory.matchExp("toArtist.artistName", "abc"));
-        q.andParentQualifier(ExpressionFactory.greaterOrEqualExp("estimatedPrice",
+        q.andParentQualifier(ExpressionFactory.greaterOrEqualExp(
+                "estimatedPrice",
                 new BigDecimal(1)));
         q.setQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(3)));
 
@@ -198,8 +202,9 @@ public class SelectTranslatorTst extends CayenneTestCase {
         // query with qualifier and ordering
         SelectQuery q = new SelectQuery(ArtistExhibit.class);
         q.setQualifier(ExpressionFactory.likeExp("toArtist.artistName", "a%"));
-        q.andQualifier(ExpressionFactory
-                .likeExp("toExhibit.toGallery.paintingArray.toArtist.artistName", "a%"));
+        q.andQualifier(ExpressionFactory.likeExp(
+                "toExhibit.toGallery.paintingArray.toArtist.artistName",
+                "a%"));
 
         Template test = new Template() {
 
@@ -240,7 +245,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
         // query with qualifier and ordering
         SelectQuery q = new SelectQuery(ArtistExhibit.class);
         q.setQualifier(ExpressionFactory.likeExp("toArtist.artistName", "a%"));
-        q.andQualifier(ExpressionFactory.likeExp("toArtist.paintingArray.paintingTitle",
+        q.andQualifier(ExpressionFactory.likeExp(
+                "toArtist.paintingArray.paintingTitle",
                 "p%"));
 
         Template test = new Template() {
@@ -403,7 +409,9 @@ public class SelectTranslatorTst extends CayenneTestCase {
     public void testCreateSqlString10() throws Exception {
         // query with to-many joint prefetches
         SelectQuery q = new SelectQuery(Artist.class);
-        q.addJointPrefetch(Artist.PAINTING_ARRAY_PROPERTY);
+        q.addPrefetch(new Prefetch(
+                Artist.PAINTING_ARRAY_PROPERTY,
+                Prefetch.JOINT_PREFETCH_SEMANTICS));
 
         Template test = new Template() {
 
@@ -437,7 +445,9 @@ public class SelectTranslatorTst extends CayenneTestCase {
         // query with joint prefetches and other joins
         SelectQuery q = new SelectQuery(Artist.class, Expression
                 .fromString("paintingArray.paintingTitle = 'a'"));
-        q.addJointPrefetch(Artist.PAINTING_ARRAY_PROPERTY);
+        q.addPrefetch(new Prefetch(
+                Artist.PAINTING_ARRAY_PROPERTY,
+                Prefetch.JOINT_PREFETCH_SEMANTICS));
 
         Template test = new Template() {
 
@@ -456,7 +466,9 @@ public class SelectTranslatorTst extends CayenneTestCase {
     public void testCreateSqlString12() throws Exception {
         // query with to-one joint prefetches
         SelectQuery q = new SelectQuery(Painting.class);
-        q.addJointPrefetch(Painting.TO_ARTIST_PROPERTY);
+        q.addPrefetch(new Prefetch(
+                Painting.TO_ARTIST_PROPERTY,
+                Prefetch.JOINT_PREFETCH_SEMANTICS));
 
         Template test = new Template() {
 
@@ -489,7 +501,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
     public void testCreateSqlString13() throws Exception {
         // query with invalid joint prefetches
         SelectQuery q = new SelectQuery(Painting.class);
-        q.addJointPrefetch("invalid.invalid");
+        q.addPrefetch(new Prefetch("invalid.invalid", Prefetch.JOINT_PREFETCH_SEMANTICS));
 
         Template test = new Template() {
 
@@ -500,7 +512,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
                     fail("Invalid jointPrefetch must have thrown...");
                 }
                 catch (ExpressionException e) {
-                    //expected
+                    // expected
                 }
             }
         };
@@ -533,7 +545,9 @@ public class SelectTranslatorTst extends CayenneTestCase {
      */
     public void testBuildResultColumns2() throws Exception {
         SelectQuery q = new SelectQuery(Painting.class);
-        q.addJointPrefetch("toArtist");
+        q.addPrefetch(new Prefetch(
+                Painting.TO_ARTIST_PROPERTY,
+                Prefetch.JOINT_PREFETCH_SEMANTICS));
         SelectTranslator tr = makeTranslator(q);
 
         List columns = tr.buildResultColumns();

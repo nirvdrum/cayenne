@@ -65,67 +65,63 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.objectstyle.art.Artist;
-import org.objectstyle.art.ArtistExhibit;
-import org.objectstyle.art.Exhibit;
-import org.objectstyle.art.Gallery;
-import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.exp.ExpressionParameter;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-public class SelectQueryBasicsTst extends CayenneTestCase {
+public class SelectQueryBasicsTst extends TestCase {
 
-    public void testAddJointPrefetch() {
+    public void testAddPrefetch() {
         SelectQuery q = new SelectQuery();
 
-        String path = "a.b.c";
-        q.addJointPrefetch(path);
-        assertEquals(1, q.getJointPrefetches().size());
-        assertSame(path, q.getJointPrefetches().iterator().next());
+        Prefetch prefetch = new Prefetch("a.b.c");
+        q.addPrefetch(prefetch);
+        assertEquals(1, q.getPrefetches().size());
+        assertSame(prefetch, q.getPrefetches().iterator().next());
+    }
+
+    public void testAddPrefetchDuplicates() {
+        SelectQuery q = new SelectQuery();
+
+        Prefetch p1 = new Prefetch("a.b.c");
+        q.addPrefetch(p1);
+
+        Prefetch p2 = new Prefetch("a.b.c");
+        q.addPrefetch(p2);
+
+        assertEquals(1, q.getPrefetches().size());
+        assertEquals(p1, q.getPrefetches().iterator().next());
     }
 
     public void testAddJointPrefetches() {
         SelectQuery q = new SelectQuery();
 
         Collection prefetches = Arrays.asList(new Object[] {
-                "abc", "123", "rrr"
+                new Prefetch("abc"), new Prefetch("123"), new Prefetch("rrr")
         });
 
-        q.addJointPrefetches(prefetches);
-        assertEquals(prefetches.size(), q.getJointPrefetches().size());
-        assertEquals(new HashSet(prefetches), q.getJointPrefetches());
+        q.addPrefetches(prefetches);
+        assertEquals(prefetches.size(), q.getPrefetches().size());
+        assertEquals(new HashSet(prefetches), q.getPrefetches());
     }
 
-    public void testClearJointPrefetches() {
-        SelectQuery q = new SelectQuery();
-
-        q.addJointPrefetch("abc");
-        q.addJointPrefetch("xyz");
-        assertFalse(q.getJointPrefetches().isEmpty());
-
-        q.clearJointPrefetches();
-        assertTrue(q.getJointPrefetches().isEmpty());
-    }
-
-    public void testAddPrefetch() {
+    public void testAddPrefetchPath() {
         SelectQuery q = new SelectQuery();
 
         String path = "a.b.c";
         q.addPrefetch(path);
         assertEquals(1, q.getPrefetches().size());
-        assertSame(path, q.getPrefetches().iterator().next());
+        assertEquals(new Prefetch(path), q.getPrefetches().iterator().next());
     }
 
-    public void testAddPrefetches() {
+    public void testAddPrefetchesPaths() {
         SelectQuery q = new SelectQuery();
 
         Collection prefetches = Arrays.asList(new Object[] {
-                "abc", "123", "rrr"
+                new Prefetch("abc"), new Prefetch("123"), new Prefetch("rrr")
         });
 
         q.addPrefetches(prefetches);
@@ -298,107 +294,5 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
         assertEquals("name", q.getName());
         assertNotNull(q1.getName());
         assertFalse(q.getName().equals(q1.getName()));
-    }
-
-    /**
-     * Tests that all queries specified in prefetch are executed in a more complex
-     * prefetch scenario.
-     */
-    public void testRouteWithPrefetches() {
-        EntityResolver resolver = getDomain().getEntityResolver();
-        MockQueryRouter router = new MockQueryRouter();
-
-        SelectQuery q = new SelectQuery(Artist.class, ExpressionFactory.matchExp(
-                "artistName",
-                "a"));
-
-        q.route(router, resolver);
-        assertEquals(1, router.getQueryCount());
-
-        q.addPrefetch("paintingArray");
-        router.reset();
-        q.route(router, resolver);
-        assertEquals(2, router.getQueryCount());
-
-        q.addPrefetch("paintingArray.toGallery");
-        router.reset();
-        q.route(router, resolver);
-        assertEquals(3, router.getQueryCount());
-
-        q.addPrefetch("artistExhibitArray.toExhibit");
-        router.reset();
-        q.route(router, resolver);
-        assertEquals(4, router.getQueryCount());
-
-        q.removePrefetch("paintingArray");
-        router.reset();
-        q.route(router, resolver);
-        assertEquals(3, router.getQueryCount());
-    }
-
-    /**
-     * Tests that all queries specified in prefetch are executed in a more complex
-     * prefetch scenario with no reverse obj relationships.
-     */
-    public void testRouteQueryWithPrefetchesNoReverse() {
-
-        EntityResolver resolver = getDomain().getEntityResolver();
-        ObjEntity paintingEntity = resolver.lookupObjEntity(Painting.class);
-        ObjEntity galleryEntity = resolver.lookupObjEntity(Gallery.class);
-        ObjEntity artistExhibitEntity = resolver.lookupObjEntity(ArtistExhibit.class);
-        ObjEntity exhibitEntity = resolver.lookupObjEntity(Exhibit.class);
-        ObjRelationship paintingToArtistRel = (ObjRelationship) paintingEntity
-                .getRelationship("toArtist");
-        paintingEntity.removeRelationship("toArtist");
-
-        ObjRelationship galleryToPaintingRel = (ObjRelationship) galleryEntity
-                .getRelationship("paintingArray");
-        galleryEntity.removeRelationship("paintingArray");
-
-        ObjRelationship artistExhibitToArtistRel = (ObjRelationship) artistExhibitEntity
-                .getRelationship("toArtist");
-        artistExhibitEntity.removeRelationship("toArtist");
-
-        ObjRelationship exhibitToArtistExhibitRel = (ObjRelationship) exhibitEntity
-                .getRelationship("artistExhibitArray");
-        exhibitEntity.removeRelationship("artistExhibitArray");
-
-        Expression e = ExpressionFactory.matchExp("artistName", "artist1");
-        SelectQuery q = new SelectQuery("Artist", e);
-        q.addPrefetch("paintingArray");
-        q.addPrefetch("paintingArray.toGallery");
-        q.addPrefetch("artistExhibitArray.toExhibit");
-
-        try {
-            MockQueryRouter router = new MockQueryRouter();
-            q.route(router, resolver);
-            assertEquals(4, router.getQueryCount());
-        }
-        finally {
-            paintingEntity.addRelationship(paintingToArtistRel);
-            galleryEntity.addRelationship(galleryToPaintingRel);
-            artistExhibitEntity.addRelationship(artistExhibitToArtistRel);
-            exhibitEntity.addRelationship(exhibitToArtistExhibitRel);
-        }
-    }
-
-    /**
-     * Test prefetching with qualifier on the root query being the path to the prefetch.
-     */
-    public void testRouteQueryWithPrefetchesPrefetchExpressionPath() {
-
-        // find the painting not matching the artist (this is the case where such prefetch
-        // at least makes sense)
-        Expression exp = ExpressionFactory.noMatchExp("toArtist", new Object());
-
-        SelectQuery q = new SelectQuery(Painting.class, exp);
-        q.addPrefetch("toArtist");
-
-        // test how prefetches are resolved in this case - this was a stumbling block for
-        // a while
-        EntityResolver resolver = getDomain().getEntityResolver();
-        MockQueryRouter router = new MockQueryRouter();
-        q.route(router, resolver);
-        assertEquals(2, router.getQueryCount());
     }
 }

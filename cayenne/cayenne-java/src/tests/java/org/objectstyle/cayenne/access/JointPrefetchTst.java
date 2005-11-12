@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -93,7 +94,9 @@ public class JointPrefetchTst extends CayenneTestCase {
         SelectQuery q = new SelectQuery(Painting.class);
         q.addOrdering("db:PAINTING_ID", true);
         q.setFetchingDataRows(true);
-        q.addJointPrefetch(Painting.TO_ARTIST_PROPERTY);
+        q.addPrefetch(new Prefetch(
+                Painting.TO_ARTIST_PROPERTY,
+                Prefetch.JOINT_PREFETCH_SEMANTICS));
 
         DataContext context = createDataContext();
 
@@ -138,7 +141,9 @@ public class JointPrefetchTst extends CayenneTestCase {
                         + "FROM ARTIST t0, PAINTING t1 "
                         + "WHERE t0.ARTIST_ID = t1.ARTIST_ID",
                 true);
-        q.addJointPrefetch(Artist.PAINTING_ARRAY_PROPERTY);
+        q.addPrefetch(new Prefetch(
+                Artist.PAINTING_ARRAY_PROPERTY,
+                Prefetch.JOINT_PREFETCH_SEMANTICS));
         q.setFetchingDataRows(false);
 
         DataContext context = createDataContext();
@@ -174,7 +179,9 @@ public class JointPrefetchTst extends CayenneTestCase {
         // query with to-many joint prefetches
         SelectQuery q = new SelectQuery(Painting.class);
         q.addOrdering("db:PAINTING_ID", true);
-        q.addJointPrefetch(Painting.TO_ARTIST_PROPERTY);
+        q.addPrefetch(new Prefetch(
+                Painting.TO_ARTIST_PROPERTY,
+                Prefetch.JOINT_PREFETCH_SEMANTICS));
 
         DataContext context = createDataContext();
 
@@ -214,7 +221,9 @@ public class JointPrefetchTst extends CayenneTestCase {
 
         // test
         SelectQuery q = new SelectQuery(Painting.class);
-        q.addJointPrefetch(Painting.TO_ARTIST_PROPERTY);
+        q.addPrefetch(new Prefetch(
+                Painting.TO_ARTIST_PROPERTY,
+                Prefetch.JOINT_PREFETCH_SEMANTICS));
 
         ObjEntity artistE = getObjEntity("Artist");
         ObjAttribute dateOfBirth = (ObjAttribute) artistE.getAttribute("dateOfBirth");
@@ -243,7 +252,9 @@ public class JointPrefetchTst extends CayenneTestCase {
 
         // query with to-many joint prefetches
         SelectQuery q = new SelectQuery(Artist.class);
-        q.addJointPrefetch(Artist.PAINTING_ARRAY_PROPERTY);
+        q.addPrefetch(new Prefetch(
+                Artist.PAINTING_ARRAY_PROPERTY,
+                Prefetch.JOINT_PREFETCH_SEMANTICS));
 
         DataContext context = createDataContext();
 
@@ -276,7 +287,9 @@ public class JointPrefetchTst extends CayenneTestCase {
 
         // query with to-many joint prefetches
         SelectQuery q = new SelectQuery(Artist.class);
-        q.addJointPrefetch(Artist.PAINTING_ARRAY_PROPERTY);
+        q.addPrefetch(new Prefetch(
+                Artist.PAINTING_ARRAY_PROPERTY,
+                Prefetch.JOINT_PREFETCH_SEMANTICS));
         q.setQualifier(Expression.fromString("paintingArray.paintingTitle like 'P%'"));
 
         DataContext context = createDataContext();
@@ -302,17 +315,15 @@ public class JointPrefetchTst extends CayenneTestCase {
 
         // query with to-many joint prefetches
         SelectQuery q = new SelectQuery(Artist.class);
-        q.addJointPrefetch(Artist.PAINTING_ARRAY_PROPERTY
+        q.addPrefetch(new Prefetch(Artist.PAINTING_ARRAY_PROPERTY
                 + "."
-                + Painting.TO_GALLERY_PROPERTY);
+                + Painting.TO_GALLERY_PROPERTY, Prefetch.JOINT_PREFETCH_SEMANTICS));
 
         DataContext context = createDataContext();
 
         // sanity check...
-        DataObject g1 = context.getObjectStore().getObject(new ObjectId(
-                Gallery.class,
-                Gallery.GALLERY_ID_PK_COLUMN,
-                33001));
+        DataObject g1 = context.getObjectStore().getObject(
+                new ObjectId(Gallery.class, Gallery.GALLERY_ID_PK_COLUMN, 33001));
         assertNull(g1);
 
         List objects = context.performQuery(q);
@@ -332,16 +343,12 @@ public class JointPrefetchTst extends CayenneTestCase {
         }
 
         // however both galleries must be in memory...
-        g1 = context.getObjectStore().getObject(new ObjectId(
-                Gallery.class,
-                Gallery.GALLERY_ID_PK_COLUMN,
-                33001));
+        g1 = context.getObjectStore().getObject(
+                new ObjectId(Gallery.class, Gallery.GALLERY_ID_PK_COLUMN, 33001));
         assertNotNull(g1);
         assertEquals(PersistenceState.COMMITTED, g1.getPersistenceState());
-        DataObject g2 = context.getObjectStore().getObject(new ObjectId(
-                Gallery.class,
-                Gallery.GALLERY_ID_PK_COLUMN,
-                33002));
+        DataObject g2 = context.getObjectStore().getObject(
+                new ObjectId(Gallery.class, Gallery.GALLERY_ID_PK_COLUMN, 33002));
         assertNotNull(g2);
         assertEquals(PersistenceState.COMMITTED, g2.getPersistenceState());
     }

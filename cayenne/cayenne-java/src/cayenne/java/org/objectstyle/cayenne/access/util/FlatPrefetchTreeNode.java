@@ -83,6 +83,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.Prefetch;
 
 /**
  * Converts DataRows representing a cartesian product of one or more tables into a tree of
@@ -313,8 +314,8 @@ class FlatPrefetchTreeNode {
         // assemble tree...
         Iterator it = jointPrefetchKeys.iterator();
         while (it.hasNext()) {
-            String prefetchPath = (String) it.next();
-            addChildWithPath(prefetchPath, qualifierDBKeys);
+            Prefetch prefetch = (Prefetch) it.next();
+            addChildWithPath(prefetch.getPath(), qualifierDBKeys);
         }
 
         // tree is complete; now create descriptors of non-phantom nodes

@@ -58,11 +58,9 @@ package org.objectstyle.cayenne.query;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -91,12 +89,12 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
 
     protected List customDbAttributes;
     protected List orderings;
-    protected Set prefetches;
     protected boolean distinct;
 
     protected Expression parentQualifier;
     protected String parentObjEntityName;
-    protected SelectExecutionProperties selectProperties = new SelectExecutionProperties();
+
+    SelectExecutionProperties selectProperties = new SelectExecutionProperties();
 
     /** Creates an empty SelectQuery. */
     public SelectQuery() {
@@ -201,15 +199,15 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
             // as slow!!!
             if (resolver.lookupObjEntity(rootClass) == null) {
 
-                ObjEntity entity = resolver.getClientEntityResolver()
-						.lookupObjEntity(rootClass);
+                ObjEntity entity = resolver.getClientEntityResolver().lookupObjEntity(
+                        rootClass);
 
-				if (null == entity) {
-					throw new CayenneRuntimeException(
-							"No entity mapped for class: " + rootClass);
-				}
+                if (null == entity) {
+                    throw new CayenneRuntimeException("No entity mapped for class: "
+                            + rootClass);
+                }
 
-				String entityName = entity.getName();
+                String entityName = entity.getName();
 
                 SelectQuery replacement = queryWithParameters(Collections.EMPTY_MAP, true);
                 replacement.setRoot(entityName);
@@ -231,21 +229,25 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         // route self
         super.route(router, resolver);
 
-        // create and route prefetch queries if any
+        // create and route disjoint prefetch queries if any
         if (!isFetchingDataRows()) {
 
             Iterator prefetchIt = getPrefetches().iterator();
             while (prefetchIt.hasNext()) {
-                String prefetchKey = (String) prefetchIt.next();
+                Prefetch prefetch = (Prefetch) prefetchIt.next();
+                
+                // include disjoint and unknowm prefetches
+                if(prefetch.isJointPrefetch()) {
+                    continue;
+                }
 
                 // TODO: with routing API, PrefetchSelectQuery no longer needs
                 // EntityResolver to be passed in constructor, as it is passed during
-                // routing.
-                // should refactor PrefetchSelectQuery
+                // routing. should refactor PrefetchSelectQuery
                 PrefetchSelectQuery prefetchQuery = new PrefetchSelectQuery(
                         resolver,
                         this,
-                        prefetchKey);
+                        prefetch.getPath());
                 prefetchQuery.route(router, resolver);
             }
         }
@@ -351,23 +353,6 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
             }
         }
 
-        // encode prefetches
-        if (prefetches != null && !prefetches.isEmpty()) {
-            Iterator it = prefetches.iterator();
-            while (it.hasNext()) {
-                String prefetch = (String) it.next();
-
-                // currently prefetch is a String, but DTD
-                // treats it as a path expression... I guess for now
-                // it will be an overkill to wrap it in "<![CDATA[.."
-                encoder.print("<prefetch>");
-                encoder.print(prefetch);
-                encoder.println("</prefetch>");
-            }
-        }
-
-        // TODO: encode join prefetches...
-
         encoder.indent(-1);
         encoder.println("</query>");
     }
@@ -418,10 +403,6 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
                     + name
                     + "__"
                     + parametersHash.toHashCode());
-        }
-
-        if (prefetches != null) {
-            query.addPrefetches(prefetches);
         }
 
         if (orderings != null) {
@@ -567,119 +548,45 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     }
 
     /**
-     * Returns a list that internally stores custom db attributes, creating it on demand.
-     * 
-     * @since 1.2
-     */
-    List nonNullCustomDbAttributes() {
-        if (customDbAttributes == null) {
-            customDbAttributes = new ArrayList();
-        }
-
-        return customDbAttributes;
-    }
-
-    /**
-     * Returns a list that internally stores orderings, creating it on demand.
-     * 
-     * @since 1.2
-     */
-    List nonNullOrderings() {
-        if (orderings == null) {
-            orderings = new ArrayList();
-        }
-
-        return orderings;
-    }
-
-    /**
-     * Returns a collection that internally stores prefetches, creating such collection on
-     * demand.
-     * 
-     * @since 1.2
-     */
-    Collection nonNullPrefetches() {
-        if (prefetches == null) {
-            prefetches = new HashSet();
-        }
-
-        return prefetches;
-    }
-
-    /**
-     * Returns a collection of joint prefetches.
-     * 
-     * @since 1.2
-     */
-    public Collection getJointPrefetches() {
-        return selectProperties.getJointPrefetches();
-    }
-
-    /**
-     * Adds a joint prefetch.
-     * 
-     * @since 1.2
-     */
-    public void addJointPrefetch(String relationshipPath) {
-        selectProperties.addJointPrefetch(relationshipPath);
-    }
-
-    /**
-     * Adds all joint prefetches from a provided collection.
-     * 
-     * @since 1.2
-     */
-    public void addJointPrefetches(Collection relationshipPaths) {
-        selectProperties.addJointPrefetches(relationshipPaths);
-    }
-
-    /**
-     * Clears all joint prefetches.
-     * 
-     * @since 1.2
-     */
-    public void clearJointPrefetches() {
-        selectProperties.clearJointPrefetches();
-    }
-
-    /**
-     * Removes joint prefetch.
-     * 
-     * @since 1.2
-     */
-    public void removeJointPrefetch(String relationshipPath) {
-        selectProperties.removeJointPrefetch(relationshipPath);
-    }
-
-    /**
      * Returns a collection of String paths indicating relationships to objects that are
      * prefetched together with this query.
+     * <p>
+     * <i>Note that since 1.2 this method returns a Collection of <em>Prefetch</em>
+     * objects instead of Strings.</i>
+     * </p>
      */
     public Collection getPrefetches() {
-        return (prefetches != null) ? prefetches : Collections.EMPTY_SET;
+        return selectProperties.getPrefetches();
     }
 
     /**
-     * Adds a relationship path to the internal collection of paths that should be
-     * prefetched when the query is executed.
+     * Adds a prefetch with specified relationship path to the query.
      */
-    public void addPrefetch(String relationshipPath) {
-        nonNullPrefetches().add(relationshipPath);
+    public void addPrefetch(String prefetchPath) {
+        addPrefetch(new Prefetch(prefetchPath));
     }
 
     /**
-     * Adds all relationship paths in a collection to the internal collection of
-     * prefetched paths.
+     * Adds Prefetch with the specified semantics to the internal set of prefetches.
+     * 
+     * @since 1.2
      */
-    public void addPrefetches(Collection relationshipPaths) {
-        nonNullPrefetches().addAll(relationshipPaths);
+    public void addPrefetch(Prefetch prefetch) {
+        selectProperties.addPrefetch(prefetch);
+    }
+
+    /**
+     * Adds all prefetches to the internal prefetch set.
+     */
+    public void addPrefetches(Collection prefetches) {
+        selectProperties.addPrefetches(prefetches);
     }
 
     /**
      * Clears all stored prefetch paths.
      */
     public void clearPrefetches() {
-        prefetches.clear();
+        selectProperties.clearPrefetches();
     }
 
     /**
@@ -687,10 +594,15 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * 
      * @since 1.1
      */
-    public void removePrefetch(String prefetch) {
-        if (prefetches != null) {
-            prefetches.remove(prefetch);
-        }
+    public void removePrefetch(String prefetchPath) {
+        selectProperties.removePrefetch(new Prefetch(prefetchPath));
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void removePrefetch(Prefetch prefetch) {
+        selectProperties.removePrefetch(prefetch);
     }
 
     /**
@@ -860,5 +772,31 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      */
     public void setResolvingInherited(boolean b) {
         selectProperties.setResolvingInherited(b);
+    }
+
+    /**
+     * Returns a list that internally stores custom db attributes, creating it on demand.
+     * 
+     * @since 1.2
+     */
+    List nonNullCustomDbAttributes() {
+        if (customDbAttributes == null) {
+            customDbAttributes = new ArrayList();
+        }
+
+        return customDbAttributes;
+    }
+
+    /**
+     * Returns a list that internally stores orderings, creating it on demand.
+     * 
+     * @since 1.2
+     */
+    List nonNullOrderings() {
+        if (orderings == null) {
+            orderings = new ArrayList();
+        }
+
+        return orderings;
     }
 }

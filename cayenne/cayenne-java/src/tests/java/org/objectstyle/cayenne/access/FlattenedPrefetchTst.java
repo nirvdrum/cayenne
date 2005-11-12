@@ -62,6 +62,7 @@ import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -76,39 +77,26 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
         deleteTestData();
     }
 
-  /*  public void testNormalManyToMany() throws Exception {
-        createTestData("testPrefetch1");
+    /*
+     * public void testNormalManyToMany() throws Exception {
+     * createTestData("testPrefetch1"); SelectQuery q = new SelectQuery(Artist.class);
+     * q.addPrefetch(Artist.GROUP_ARRAY_PROPERTY); DataContext context =
+     * createDataContext(); List objects = context.performQuery(q); assertEquals(3,
+     * objects.size()); Iterator it = objects.iterator(); while (it.hasNext()) { Artist a =
+     * (Artist) it.next(); ToManyList list = (ToManyList) a.getGroupArray();
+     * assertNotNull(list); assertFalse("artist's groups not resolved: " + a,
+     * list.needsFetch()); assertTrue(list.size() > 0); Iterator children =
+     * list.iterator(); while (children.hasNext()) { ArtGroup g = (ArtGroup)
+     * children.next(); assertEquals(PersistenceState.COMMITTED, g.getPersistenceState()); } } }
+     */
 
-        SelectQuery q = new SelectQuery(Artist.class);
-        q.addPrefetch(Artist.GROUP_ARRAY_PROPERTY);
-
-        DataContext context = createDataContext();
-
-        List objects = context.performQuery(q);
-        assertEquals(3, objects.size());
-
-        Iterator it = objects.iterator();
-        while (it.hasNext()) {
-            Artist a = (Artist) it.next();
-            ToManyList list = (ToManyList) a.getGroupArray();
-
-            assertNotNull(list);
-            assertFalse("artist's groups not resolved: " + a, list.needsFetch());
-            assertTrue(list.size() > 0);
-
-            Iterator children = list.iterator();
-            while (children.hasNext()) {
-                ArtGroup g = (ArtGroup) children.next();
-                assertEquals(PersistenceState.COMMITTED, g.getPersistenceState());
-            }
-        }
-    } */
-    
     public void testJointManyToMany() throws Exception {
         createTestData("testPrefetch1");
 
         SelectQuery q = new SelectQuery(Artist.class);
-        q.addJointPrefetch(Artist.GROUP_ARRAY_PROPERTY);
+        q.addPrefetch(new Prefetch(
+                Artist.GROUP_ARRAY_PROPERTY,
+                Prefetch.JOINT_PREFETCH_SEMANTICS));
 
         DataContext context = createDataContext();
 
@@ -136,10 +124,12 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
         createTestData("testPrefetch2");
 
         SelectQuery q = new SelectQuery(Painting.class);
-        q.addJointPrefetch(Painting.TO_ARTIST_PROPERTY);
-        q.addJointPrefetch(Painting.TO_ARTIST_PROPERTY
+        q.addPrefetch(new Prefetch(
+                Painting.TO_ARTIST_PROPERTY,
+                Prefetch.JOINT_PREFETCH_SEMANTICS));
+        q.addPrefetch(new Prefetch(Painting.TO_ARTIST_PROPERTY
                 + '.'
-                + Artist.GROUP_ARRAY_PROPERTY);
+                + Artist.GROUP_ARRAY_PROPERTY, Prefetch.JOINT_PREFETCH_SEMANTICS));
 
         DataContext context = createDataContext();
 
@@ -151,7 +141,7 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
             Painting p = (Painting) it.next();
             Artist a = p.getToArtist();
             assertEquals(PersistenceState.COMMITTED, a.getPersistenceState());
-            
+
             ToManyList list = (ToManyList) a.getGroupArray();
             assertNotNull(list);
             assertFalse("artist's groups not resolved: " + a, list.needsFetch());

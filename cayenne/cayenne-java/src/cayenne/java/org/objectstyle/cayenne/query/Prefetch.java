@@ -55,58 +55,99 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.util.Collection;
+import java.io.Serializable;
+
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.util.Util;
 
 /**
+ * An object that defines a path and semantics of a single query prefetch. Note that
+ * semanticsHint properrty is just that - a hint. Cayenne may choose to use different
+ * prefetching strategy if the one configured in prefetch is not supported for any reason.
+ * 
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class MockGenericSelectQuery extends MockQuery implements GenericSelectQuery {
+public class Prefetch implements Serializable {
 
-    protected boolean fetchingDataRows;
+    public static final int UNDEFINED_SEMANTICS = 0;
+    public static final int JOINT_PREFETCH_SEMANTICS = 1;
+    public static final int DISJOINT_PREFETCH_SEMANTICS = 2;
 
-    public MockGenericSelectQuery() {
-        super();
+    protected String path;
+    protected int semanticsHint;
+
+    // keep private constructor for Hessian serialization
+    private Prefetch() {
+
     }
 
-    public MockGenericSelectQuery(boolean fetchingDataRows) {
-        super();
-
-        this.fetchingDataRows = fetchingDataRows;
+    /**
+     * Creates a new Prefetch object with semantics hint set to
+     * <em>Prefetch.UNDEFINED_SEMANTICS</em>, meaning that join semantics will be
+     * resolved during query execution.
+     */
+    public Prefetch(String path) {
+        this(path, UNDEFINED_SEMANTICS);
     }
 
-    public MockGenericSelectQuery(String name) {
-        super(name);
+    public Prefetch(String path, int semanticsHint) {
+        if (path == null) {
+            throw new IllegalArgumentException("Null 'path'");
+        }
+
+        this.path = path;
+        this.semanticsHint = semanticsHint;
     }
 
-    public String getCachePolicy() {
-        return null;
+    public String getPath() {
+        return path;
     }
 
-    public boolean isFetchingDataRows() {
-        return fetchingDataRows;
+    public boolean isMultiStep() {
+        return path.indexOf(Entity.PATH_SEPARATOR) > 0;
     }
 
-    public boolean isRefreshingObjects() {
-        return false;
+    public int getSemanticsHint() {
+        return semanticsHint;
     }
 
-    public boolean isResolvingInherited() {
-        return false;
+    public boolean isJointPrefetch() {
+        return semanticsHint == JOINT_PREFETCH_SEMANTICS;
     }
 
-    public int getPageSize() {
-        return 0;
+    public boolean isDisjointPrefetch() {
+        return semanticsHint == DISJOINT_PREFETCH_SEMANTICS;
     }
 
-    public int getFetchLimit() {
-        return 0;
+    /**
+     * Implements checking for object equality. Two prefetches are considered equal if
+     * their paths are equals, semantics hint is ignored in comparison.
+     */
+    public boolean equals(Object object) {
+        if (object == this) {
+            return true;
+        }
+
+        if (!(object instanceof Prefetch)) {
+            return false;
+        }
+
+        return Util.nullSafeEquals(path, ((Prefetch) object).getPath());
     }
 
-    public Collection getPrefetches() {
-        return null;
-    }
+    /**
+     * Overrides super hashCode implementation to return hashCode compatible with
+     * 'equals'.
+     */
+    public int hashCode() {
+        HashCodeBuilder builder = new HashCodeBuilder(43, 47);
 
-    public void setFetchingDataRows(boolean fetchingDataRows) {
-        this.fetchingDataRows = fetchingDataRows;
+        if (path != null) {
+            builder.append(path);
+        }
+
+        return builder.toHashCode();
     }
 }

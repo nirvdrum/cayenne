@@ -55,58 +55,41 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.util.Collection;
+import junit.framework.TestCase;
 
-/**
- * @author Andrus Adamchik
- */
-public class MockGenericSelectQuery extends MockQuery implements GenericSelectQuery {
+public class PrefetchTst extends TestCase {
 
-    protected boolean fetchingDataRows;
-
-    public MockGenericSelectQuery() {
-        super();
+    public void testConstructor() {
+        Prefetch p = new Prefetch("aa", Prefetch.JOINT_PREFETCH_SEMANTICS);
+        assertEquals("aa", p.getPath());
+        assertTrue(p.isJointPrefetch());
+        assertFalse(p.isDisjointPrefetch());
     }
 
-    public MockGenericSelectQuery(boolean fetchingDataRows) {
-        super();
+    public void testEquals() {
 
-        this.fetchingDataRows = fetchingDataRows;
+        Prefetch p1 = new Prefetch("aa", Prefetch.JOINT_PREFETCH_SEMANTICS);
+        assertTrue(p1.equals(p1));
+
+        Prefetch p2 = new Prefetch("bb", Prefetch.JOINT_PREFETCH_SEMANTICS);
+        assertFalse(p1.equals(p2));
+
+        // equals should ignore semantics hint as there can't be two prefetches with the
+        // same path in a query...
+        Prefetch p3 = new Prefetch("aa", Prefetch.DISJOINT_PREFETCH_SEMANTICS);
+        assertTrue(p1.equals(p3));
     }
 
-    public MockGenericSelectQuery(String name) {
-        super(name);
-    }
+    public void testHashCode() {
+        Prefetch p1 = new Prefetch("aa", Prefetch.JOINT_PREFETCH_SEMANTICS);
+        assertTrue(p1.hashCode() == p1.hashCode());
 
-    public String getCachePolicy() {
-        return null;
-    }
+        Prefetch p2 = new Prefetch("bb", Prefetch.JOINT_PREFETCH_SEMANTICS);
+        assertFalse(p1.hashCode() == p2.hashCode());
 
-    public boolean isFetchingDataRows() {
-        return fetchingDataRows;
-    }
-
-    public boolean isRefreshingObjects() {
-        return false;
-    }
-
-    public boolean isResolvingInherited() {
-        return false;
-    }
-
-    public int getPageSize() {
-        return 0;
-    }
-
-    public int getFetchLimit() {
-        return 0;
-    }
-
-    public Collection getPrefetches() {
-        return null;
-    }
-
-    public void setFetchingDataRows(boolean fetchingDataRows) {
-        this.fetchingDataRows = fetchingDataRows;
+        // hashCode should ignore semantics hint as there can't be two prefetches with the
+        // same path in a query...
+        Prefetch p3 = new Prefetch("aa", Prefetch.DISJOINT_PREFETCH_SEMANTICS);
+        assertTrue(p1.hashCode() == p3.hashCode());
     }
 }

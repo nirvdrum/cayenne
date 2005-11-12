@@ -48,6 +48,8 @@ UPGRADE FROM 1.1:
    they will contain "oid". The easiest way to migrate your mapping (if you don't want to
    change the DB) is to remap all bytea columns as LONGVARBINARY DbAttributes instead of BLOB.
     
+*  "SelectQuery.getPrefetches()" returns a collection of Prefetch objects, not Strings.
+
 *  The meaning of SnapshotEvent "source" and "postedBy" attributes is reversed per CAY-395 for
    better efficiency. If you implemented custom listeners of SnapshotEvents, you may need to 
    doublecheck their logic. From now on events use DataRowStore as source, and EventBridge or

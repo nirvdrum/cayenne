@@ -10,6 +10,7 @@ import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
@@ -19,7 +20,7 @@ public class FlatPrefetchTreeNodeTst extends CayenneTestCase {
 
     public void testBuildPrefix1() {
         Collection prefetches = Arrays.asList(new Object[] {
-            "toArtist"
+            new Prefetch("toArtist")
         });
 
         DataContext context = createDataContext();
@@ -38,7 +39,7 @@ public class FlatPrefetchTreeNodeTst extends CayenneTestCase {
 
     public void testBuildPrefix2() {
         Collection prefetches = Arrays.asList(new Object[] {
-                "toArtist", "toArtist.groupArray"
+                new Prefetch("toArtist"), new Prefetch("toArtist.groupArray")
         });
 
         DataContext context = createDataContext();
@@ -61,14 +62,13 @@ public class FlatPrefetchTreeNodeTst extends CayenneTestCase {
                 .iterator()
                 .next();
 
-        assertEquals("toArtist.artistGroupArray.toGroup.", groupNode
-                .buildPrefix(new StringBuffer())
-                .toString());
+        assertEquals("toArtist.artistGroupArray.toGroup.", groupNode.buildPrefix(
+                new StringBuffer()).toString());
     }
 
     public void testSourceForTarget() {
         Collection prefetches = Arrays.asList(new Object[] {
-            "toArtist"
+            new Prefetch("toArtist")
         });
 
         DataContext context = createDataContext();
@@ -89,7 +89,7 @@ public class FlatPrefetchTreeNodeTst extends CayenneTestCase {
 
     public void testTreeAssembly() {
         Collection prefetches = Arrays.asList(new Object[] {
-            "toArtist"
+            new Prefetch("toArtist")
         });
 
         DataContext context = createDataContext();
@@ -109,7 +109,7 @@ public class FlatPrefetchTreeNodeTst extends CayenneTestCase {
 
     public void testPrefetchBlocking1() {
         Collection prefetches = Arrays.asList(new Object[] {
-                "toArtist", "toArtist.groupArray"
+                new Prefetch("toArtist"), new Prefetch("toArtist.groupArray")
         });
 
         DataContext context = createDataContext();
@@ -128,7 +128,7 @@ public class FlatPrefetchTreeNodeTst extends CayenneTestCase {
 
     public void testPrefetchBlocking2() {
         Collection prefetches = Arrays.asList(new Object[] {
-                "paintingArray", "paintingArray.toPaintingInfo"
+                new Prefetch("paintingArray"), new Prefetch("paintingArray.toPaintingInfo")
         });
 
         DataContext context = createDataContext();

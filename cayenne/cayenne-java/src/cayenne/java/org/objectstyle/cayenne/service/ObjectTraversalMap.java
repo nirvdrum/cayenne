@@ -63,6 +63,7 @@ import org.apache.commons.collections.map.LinkedMap;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.Prefetch;
 
 /**
  * @since 1.2
@@ -74,13 +75,13 @@ class ObjectTraversalMap {
     private ObjEntity entity;
     ObjRelationship incoming;
 
-    ObjectTraversalMap(ObjEntity rootEntity, Collection pathSpecs) {
+    ObjectTraversalMap(ObjEntity rootEntity, Collection prefetches) {
 
         this.entity = rootEntity;
 
-        Iterator it = pathSpecs.iterator();
+        Iterator it = prefetches.iterator();
         while (it.hasNext()) {
-            addChildren((String) it.next());
+            addChildren((Prefetch) it.next());
         }
     }
 
@@ -127,8 +128,8 @@ class ObjectTraversalMap {
     /**
      * Creates and child node and all nodes in between, as specified by the path.
      */
-    ObjectTraversalMap addChildren(String path) {
-        Iterator it = entity.resolvePathComponents(path);
+    ObjectTraversalMap addChildren(Prefetch prefetch) {
+        Iterator it = entity.resolvePathComponents(prefetch.getPath());
 
         if (!it.hasNext()) {
             return null;

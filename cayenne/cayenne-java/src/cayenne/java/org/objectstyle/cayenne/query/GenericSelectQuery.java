@@ -210,12 +210,11 @@ public interface GenericSelectQuery extends Query {
      *         query
      */
     public int getFetchLimit();
-    
+
     /**
-     * Returns a collection of joint prefetches. Joint prefetches (unlike regular ones)
-     * are possible in all types of selecting queries.
+     * Returns a collection of prefetches.
      * 
      * @since 1.2
      */
-    public Collection getJointPrefetches();
+    public Collection getPrefetches();
 }

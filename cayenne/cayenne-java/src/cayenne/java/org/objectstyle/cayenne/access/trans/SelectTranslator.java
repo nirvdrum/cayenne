@@ -78,6 +78,7 @@ import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -364,18 +365,18 @@ public class SelectTranslator extends QueryAssembler {
     /**
      * Appends columns needed for object SelectQuery to the provided columns list.
      */
-    //  TODO: this whole method screams REFACTORING!!!
+    // TODO: this whole method screams REFACTORING!!!
     List appendQueryColumns(List columns, SelectQuery query) {
 
         Set attributes = new HashSet();
 
         // fetched attributes include attributes that are either:
         // 
-        //   * class properties
-        //   * PK
-        //   * FK used in relationships
-        //   * GROUP BY
-        //   * joined prefetch PK
+        // * class properties
+        // * PK
+        // * FK used in relationships
+        // * GROUP BY
+        // * joined prefetch PK
 
         ObjEntity oe = getRootEntity();
 
@@ -462,90 +463,83 @@ public class SelectTranslator extends QueryAssembler {
         }
 
         // handle joint prefetches
-        if (!query.getJointPrefetches().isEmpty()) {
-            Iterator jointPrefetches = query.getJointPrefetches().iterator();
-            while (jointPrefetches.hasNext()) {
-                String prefetch = (String) jointPrefetches.next();
+        Iterator jointPrefetches = query.getPrefetches().iterator();
+        while (jointPrefetches.hasNext()) {
+            Prefetch prefetch = (Prefetch) jointPrefetches.next();
+            if(!prefetch.isJointPrefetch()) {
+                continue;
+            }
 
-                // for each prefetch add all joins plus columns from the target entity
-                Expression prefetchExp = Expression.fromString(prefetch);
-                Expression dbPrefetch = oe.translateToDbPath(prefetchExp);
+            // for each prefetch add all joins plus columns from the target entity
+            Expression prefetchExp = Expression.fromString(prefetch.getPath());
+            Expression dbPrefetch = oe.translateToDbPath(prefetchExp);
 
-                // find target entity
-                Iterator it = table.resolvePathComponents(dbPrefetch);
+            // find target entity
+            Iterator it = table.resolvePathComponents(dbPrefetch);
 
-                DbRelationship r = null;
-                while (it.hasNext()) {
-                    r = (DbRelationship) it.next();
-                    dbRelationshipAdded(r);
+            DbRelationship r = null;
+            while (it.hasNext()) {
+                r = (DbRelationship) it.next();
+                dbRelationshipAdded(r);
+            }
+
+            if (r == null) {
+                throw new CayenneRuntimeException("Invalid joint prefetch '"
+                        + prefetch
+                        + "' for entity: "
+                        + oe.getName());
+            }
+
+            // add columns from the target entity, skipping those that are an FK to
+            // source entity
+
+            Collection skipColumns = Collections.EMPTY_LIST;
+            if (r.getSourceEntity() == table) {
+                skipColumns = new ArrayList(2);
+                Iterator joins = r.getJoins().iterator();
+                while (joins.hasNext()) {
+                    DbJoin join = (DbJoin) joins.next();
+                    if (attributes.contains(join.getSource())) {
+                        skipColumns.add(join.getTarget());
+                    }
                 }
+            }
 
-                if (r == null) {
-                    throw new CayenneRuntimeException("Invalid joint prefetch '"
-                            + prefetch
-                            + "' for entity: "
-                            + oe.getName());
-                }
+            // go via target OE to make sure that Java types are mapped correctly...
+            ObjRelationship targetRel = (ObjRelationship) prefetchExp.evaluate(oe);
+            Iterator targetObjAttrs = targetRel
+                    .getTargetEntity()
+                    .getAttributes()
+                    .iterator();
+            while (targetObjAttrs.hasNext()) {
+                ObjAttribute oa = (ObjAttribute) targetObjAttrs.next();
+                Iterator dbPathIterator = oa.getDbPathIterator();
+                while (dbPathIterator.hasNext()) {
+                    Object pathPart = dbPathIterator.next();
+                    if (pathPart instanceof DbRelationship) {
+                        DbRelationship rel = (DbRelationship) pathPart;
+                        dbRelationshipAdded(rel);
+                    }
+                    else if (pathPart instanceof DbAttribute) {
+                        DbAttribute attribute = (DbAttribute) pathPart;
+                        if (attribute == null) {
+                            throw new CayenneRuntimeException(
+                                    "ObjAttribute has no DbAttribute: " + oa.getName());
+                        }
 
-                // add columns from the target entity, skipping those that are an FK to
-                // source entity
-
-                Collection skipColumns = Collections.EMPTY_LIST;
-                if (r.getSourceEntity() == table) {
-                    skipColumns = new ArrayList(2);
-                    Iterator joins = r.getJoins().iterator();
-                    while (joins.hasNext()) {
-                        DbJoin join = (DbJoin) joins.next();
-                        if (attributes.contains(join.getSource())) {
-                            skipColumns.add(join.getTarget());
+                        if (!skipColumns.contains(attribute)) {
+                            appendColumn(columns, oa, attribute, attributes, dbPrefetch);
                         }
                     }
                 }
+            }
 
-                // go via target OE to make sure that Java types are mapped correctly...
-                ObjRelationship targetRel = (ObjRelationship) prefetchExp.evaluate(oe);
-                Iterator targetObjAttrs = targetRel
-                        .getTargetEntity()
-                        .getAttributes()
-                        .iterator();
-                while (targetObjAttrs.hasNext()) {
-                    ObjAttribute oa = (ObjAttribute) targetObjAttrs.next();
-                    Iterator dbPathIterator = oa.getDbPathIterator();
-                    while (dbPathIterator.hasNext()) {
-                        Object pathPart = dbPathIterator.next();
-                        if (pathPart instanceof DbRelationship) {
-                            DbRelationship rel = (DbRelationship) pathPart;
-                            dbRelationshipAdded(rel);
-                        }
-                        else if (pathPart instanceof DbAttribute) {
-                            DbAttribute attribute = (DbAttribute) pathPart;
-                            if (attribute == null) {
-                                throw new CayenneRuntimeException(
-                                        "ObjAttribute has no DbAttribute: "
-                                                + oa.getName());
-                            }
-
-                            if (!skipColumns.contains(attribute)) {
-                                appendColumn(columns,
-                                        oa,
-                                        attribute,
-                                        attributes,
-                                        dbPrefetch);
-                            }
-                        }
-                    }
-                }
-
-                // append remaining target attributes such as keys
-                Iterator targetAttributes = r
-                        .getTargetEntity()
-                        .getAttributes()
-                        .iterator();
-                while (targetAttributes.hasNext()) {
-                    DbAttribute attribute = (DbAttribute) targetAttributes.next();
-                    if (!skipColumns.contains(attribute)) {
-                        appendColumn(columns, null, attribute, attributes, dbPrefetch);
-                    }
+            // append remaining target attributes such as keys
+            Iterator targetAttributes = r.getTargetEntity().getAttributes().iterator();
+            while (targetAttributes.hasNext()) {
+                DbAttribute attribute = (DbAttribute) targetAttributes.next();
+                if (!skipColumns.contains(attribute)) {
+                    appendColumn(columns, null, attribute, attributes, dbPrefetch);
                 }
             }
         }
@@ -610,7 +604,7 @@ public class SelectTranslator extends QueryAssembler {
     private void appendTable(StringBuffer queryBuf, int index) {
         DbEntity ent = (DbEntity) tableList.get(index);
         queryBuf.append(ent.getFullyQualifiedName());
-        //The alias should be the alias from the same index in aliasList, not that
+        // The alias should be the alias from the same index in aliasList, not that
         // returned by aliasForTable.
         queryBuf.append(' ').append((String) aliasList.get(index));
     }
@@ -634,14 +628,8 @@ public class SelectTranslator extends QueryAssembler {
                 andFlag = true;
             }
 
-            queryBuf
-                    .append(srcAlias)
-                    .append('.')
-                    .append(join.getSourceName())
-                    .append(" = ")
-                    .append(targetAlias)
-                    .append('.')
-                    .append(join.getTargetName());
+            queryBuf.append(srcAlias).append('.').append(join.getSourceName()).append(
+                    " = ").append(targetAlias).append('.').append(join.getTargetName());
         }
     }
 
@@ -699,9 +687,9 @@ public class SelectTranslator extends QueryAssembler {
         }
         else {
             StringBuffer msg = new StringBuffer();
-            msg.append("Alias not found, DbEntity: '").append(ent != null
-                    ? ent.getName()
-                    : "<null entity>").append("'\nExisting aliases:");
+            msg.append("Alias not found, DbEntity: '").append(
+                    ent != null ? ent.getName() : "<null entity>").append(
+                    "'\nExisting aliases:");
 
             int len = aliasList.size();
             for (int i = 0; i < len; i++) {

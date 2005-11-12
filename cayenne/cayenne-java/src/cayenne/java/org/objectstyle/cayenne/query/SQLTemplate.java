@@ -84,7 +84,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * </p>
  * 
  * <pre>
- *     SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
+ *               SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
  * </pre>
  * 
  * <p>
@@ -492,47 +492,62 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
     }
 
     /**
-     * Returns a collection of joint prefetches.
+     * Returns a collection of prefetches.
      * 
      * @since 1.2
      */
-    public Collection getJointPrefetches() {
-        return selectProperties.getJointPrefetches();
+    public Collection getPrefetches() {
+        return selectProperties.getPrefetches();
     }
 
     /**
-     * Adds a joint prefetch.
+     * Adds a prefetch.
      * 
      * @since 1.2
      */
-    public void addJointPrefetch(String relationshipPath) {
-        selectProperties.addJointPrefetch(relationshipPath);
+    public void addPrefetch(String prefetchPath) {
+        // by default use JOINT_PREFETCH_SEMANTICS
+        addPrefetch(new Prefetch(prefetchPath, Prefetch.JOINT_PREFETCH_SEMANTICS));
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public void addPrefetch(Prefetch prefetch) {
+        selectProperties.addPrefetch(prefetch);
     }
 
     /**
-     * Adds all joint prefetches from a provided collection.
-     * 
      * @since 1.2
      */
-    public void addJointPrefetches(Collection relationshipPaths) {
-        selectProperties.addJointPrefetches(relationshipPaths);
+    public void removePrefetch(Prefetch prefetch) {
+        selectProperties.removePrefetch(prefetch);
     }
 
     /**
-     * Clears all joint prefetches.
+     * Adds all prefetches from a provided collection.
      * 
      * @since 1.2
      */
-    public void clearJointPrefetches() {
-        selectProperties.clearJointPrefetches();
+    public void addPrefetches(Collection prefetches) {
+        selectProperties.addPrefetches(prefetches);
     }
 
     /**
-     * Removes joint prefetch.
+     * Clears all prefetches.
      * 
      * @since 1.2
      */
-    public void removeJointPrefetch(String relationshipPath) {
-        selectProperties.removeJointPrefetch(relationshipPath);
+    public void clearPrefetches() {
+        selectProperties.clearPrefetches();
+    }
+
+    /**
+     * Removes prefetch.
+     * 
+     * @since 1.2
+     */
+    public void removePrefetch(String prefetchPath) {
+        selectProperties.removePrefetch(new Prefetch(prefetchPath));
     }
 }

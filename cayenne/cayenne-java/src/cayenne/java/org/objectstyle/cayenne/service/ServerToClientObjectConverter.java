@@ -84,7 +84,7 @@ class ServerToClientObjectConverter {
     EntityResolver clientResolver;
 
     ServerToClientObjectConverter(List serverObjects, EntityResolver resolver,
-            Collection prefetchPaths) {
+            Collection prefetches) {
 
         this.clientObjectsByOID = new HashMap();
         this.converted = new ArrayList(serverObjects.size());
@@ -109,7 +109,7 @@ class ServerToClientObjectConverter {
 
             // create traversal map using the client entity
             new ObjectTraversalMap(clientResolver.lookupObjEntity(someServerEntity
-                    .getName()), prefetchPaths).traverse(serverObjects, this);
+                    .getName()), prefetches).traverse(serverObjects, this);
         }
     }
 

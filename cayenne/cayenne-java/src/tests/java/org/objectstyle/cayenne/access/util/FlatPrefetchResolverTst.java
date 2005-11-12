@@ -74,6 +74,7 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataContextObjectFactory;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
@@ -84,7 +85,7 @@ public class FlatPrefetchResolverTst extends CayenneTestCase {
     public void testResolveObjectTreeOneJoin() {
 
         Collection prefetches = Arrays.asList(new Object[] {
-            "toArtist"
+            new Prefetch("toArtist")
         });
 
         Date d1 = new Date();
@@ -126,8 +127,10 @@ public class FlatPrefetchResolverTst extends CayenneTestCase {
     public void testResolveObjectTreeMultiJoins() {
 
         Collection prefetches = Arrays.asList(new Object[] {
-                Painting.TO_ARTIST_PROPERTY,
-                Painting.TO_ARTIST_PROPERTY + '.' + Artist.GROUP_ARRAY_PROPERTY
+                new Prefetch(Painting.TO_ARTIST_PROPERTY),
+                new Prefetch(Painting.TO_ARTIST_PROPERTY
+                        + '.'
+                        + Artist.GROUP_ARRAY_PROPERTY)
         });
 
         Date d1 = new Date();

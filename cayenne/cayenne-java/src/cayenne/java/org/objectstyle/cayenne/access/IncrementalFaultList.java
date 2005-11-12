@@ -72,6 +72,7 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
@@ -187,7 +188,7 @@ public class IncrementalFaultList implements List {
 
                 Iterator it = select.getPrefetches().iterator();
                 while (it.hasNext()) {
-                    clone.removePrefetch((String) it.next());
+                    clone.removePrefetch((Prefetch) it.next());
                 }
 
                 query = clone;

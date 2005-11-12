@@ -62,10 +62,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.art.ArtistExhibit;
+import org.objectstyle.art.Exhibit;
+import org.objectstyle.art.Gallery;
+import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 
 public class SelectQueryTst extends SelectQueryBase {
+
     private static final int _artistCount = 20;
 
     public void testFetchLimit() throws Exception {
@@ -133,8 +141,9 @@ public class SelectQueryTst extends SelectQueryBase {
 
     public void testSelectNotLikeIgnoreCaseSingleWildcardMatch() throws Exception {
         query.setRoot(Artist.class);
-        Expression qual =
-            ExpressionFactory.notLikeIgnoreCaseExp("artistName", "aRtIsT11%");
+        Expression qual = ExpressionFactory.notLikeIgnoreCaseExp(
+                "artistName",
+                "aRtIsT11%");
         query.setQualifier(qual);
         performQuery();
 
@@ -223,9 +232,9 @@ public class SelectQueryTst extends SelectQueryBase {
         query.setRoot(Artist.class);
         Expression qual = Expression.fromString("artistName in $list");
         query.setQualifier(qual);
-        query =
-            query.queryWithParameters(
-                Collections.singletonMap("list", new Object[] { "artist1", "artist2" }));
+        query = query.queryWithParameters(Collections.singletonMap("list", new Object[] {
+                "artist1", "artist2"
+        }));
         performQuery();
 
         // check query results
@@ -247,9 +256,110 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(1, row.size());
     }
 
+    /**
+     * Tests that all queries specified in prefetch are executed in a more complex
+     * prefetch scenario.
+     */
+    public void testRouteWithPrefetches() {
+        EntityResolver resolver = getDomain().getEntityResolver();
+        MockQueryRouter router = new MockQueryRouter();
+
+        SelectQuery q = new SelectQuery(Artist.class, ExpressionFactory.matchExp(
+                "artistName",
+                "a"));
+
+        q.route(router, resolver);
+        assertEquals(1, router.getQueryCount());
+
+        q.addPrefetch("paintingArray");
+        router.reset();
+        q.route(router, resolver);
+        assertEquals(2, router.getQueryCount());
+
+        q.addPrefetch("paintingArray.toGallery");
+        router.reset();
+        q.route(router, resolver);
+        assertEquals(3, router.getQueryCount());
+
+        q.addPrefetch("artistExhibitArray.toExhibit");
+        router.reset();
+        q.route(router, resolver);
+        assertEquals(4, router.getQueryCount());
+
+        q.removePrefetch("paintingArray");
+        router.reset();
+        q.route(router, resolver);
+        assertEquals(3, router.getQueryCount());
+    }
+
+    /**
+     * Tests that all queries specified in prefetch are executed in a more complex
+     * prefetch scenario with no reverse obj relationships.
+     */
+    public void testRouteQueryWithPrefetchesNoReverse() {
+
+        EntityResolver resolver = getDomain().getEntityResolver();
+        ObjEntity paintingEntity = resolver.lookupObjEntity(Painting.class);
+        ObjEntity galleryEntity = resolver.lookupObjEntity(Gallery.class);
+        ObjEntity artistExhibitEntity = resolver.lookupObjEntity(ArtistExhibit.class);
+        ObjEntity exhibitEntity = resolver.lookupObjEntity(Exhibit.class);
+        ObjRelationship paintingToArtistRel = (ObjRelationship) paintingEntity
+                .getRelationship("toArtist");
+        paintingEntity.removeRelationship("toArtist");
+
+        ObjRelationship galleryToPaintingRel = (ObjRelationship) galleryEntity
+                .getRelationship("paintingArray");
+        galleryEntity.removeRelationship("paintingArray");
+
+        ObjRelationship artistExhibitToArtistRel = (ObjRelationship) artistExhibitEntity
+                .getRelationship("toArtist");
+        artistExhibitEntity.removeRelationship("toArtist");
+
+        ObjRelationship exhibitToArtistExhibitRel = (ObjRelationship) exhibitEntity
+                .getRelationship("artistExhibitArray");
+        exhibitEntity.removeRelationship("artistExhibitArray");
+
+        Expression e = ExpressionFactory.matchExp("artistName", "artist1");
+        SelectQuery q = new SelectQuery("Artist", e);
+        q.addPrefetch("paintingArray");
+        q.addPrefetch("paintingArray.toGallery");
+        q.addPrefetch("artistExhibitArray.toExhibit");
+
+        try {
+            MockQueryRouter router = new MockQueryRouter();
+            q.route(router, resolver);
+            assertEquals(4, router.getQueryCount());
+        }
+        finally {
+            paintingEntity.addRelationship(paintingToArtistRel);
+            galleryEntity.addRelationship(galleryToPaintingRel);
+            artistExhibitEntity.addRelationship(artistExhibitToArtistRel);
+            exhibitEntity.addRelationship(exhibitToArtistExhibitRel);
+        }
+    }
+
+    /**
+     * Test prefetching with qualifier on the root query being the path to the prefetch.
+     */
+    public void testRouteQueryWithPrefetchesPrefetchExpressionPath() {
+
+        // find the painting not matching the artist (this is the case where such prefetch
+        // at least makes sense)
+        Expression exp = ExpressionFactory.noMatchExp("toArtist", new Object());
+
+        SelectQuery q = new SelectQuery(Painting.class, exp);
+        q.addPrefetch("toArtist");
+
+        // test how prefetches are resolved in this case - this was a stumbling block for
+        // a while
+        EntityResolver resolver = getDomain().getEntityResolver();
+        MockQueryRouter router = new MockQueryRouter();
+        q.route(router, resolver);
+        assertEquals(2, router.getQueryCount());
+    }
+
     protected void populateTables() throws java.lang.Exception {
-        String insertArtist =
-            "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
+        String insertArtist = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
         Connection conn = getConnection();
 
         try {

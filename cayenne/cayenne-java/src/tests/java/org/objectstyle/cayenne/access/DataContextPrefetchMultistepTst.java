@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
@@ -161,7 +162,7 @@ public class DataContextPrefetchMultistepTst extends DataContextTestBase {
         Expression e = Expression.fromString("galleryName = $name");
         SelectQuery q = new SelectQuery(Gallery.class, e.expWithParameters(Collections
                 .singletonMap("name", "gallery2")));
-        q.addJointPrefetch("exhibitArray");
+        q.addPrefetch(new Prefetch("exhibitArray", Prefetch.JOINT_PREFETCH_SEMANTICS));
         q.addPrefetch("exhibitArray.artistExhibitArray");
 
         List galleries = context.performQuery(q);

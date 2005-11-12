@@ -56,8 +56,10 @@
 
 package org.objectstyle.cayenne.access.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -69,6 +71,7 @@ import org.objectstyle.cayenne.access.DataContextObjectFactory;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
@@ -203,8 +206,22 @@ public class SelectObserver extends DefaultOperationObserver {
         PrefetchResolver tree = new PrefetchResolver();
         tree.buildTree(rootEntity, rootQuery, results);
 
-        Collection jointPrefetches = rootQuery.getJointPrefetches();
-        if (!jointPrefetches.isEmpty()) {
+        // filter out joint prefetches
+        Collection jointPrefetches = null;
+        Iterator prefetches = rootQuery.getPrefetches().iterator();
+        while (prefetches.hasNext()) {
+
+            Prefetch object = (Prefetch) prefetches.next();
+            if (object.isJointPrefetch()) {
+                if (jointPrefetches == null) {
+                    jointPrefetches = new ArrayList();
+                }
+
+                jointPrefetches.add(object);
+            }
+        }
+
+        if (jointPrefetches != null) {
 
             // certain qualifiers conflict with joint prefetches, so we
             // might need to disable some prefetched to-many arrays from being

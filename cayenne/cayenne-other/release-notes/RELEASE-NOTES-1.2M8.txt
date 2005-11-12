@@ -11,5 +11,12 @@ http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
 
 Changes/New Features:
 
+* Prefetching:
+  - joint prefetch API (addJointPrefetch, etc.) is removed from SelectQuery, SQLTemplate, ProcedureQuery.
+    Instead Cayenne will try to guess prefetch strategy in runtime. Alternatively users can provide a hint 
+    about a desired strategy by setting prefetch using Prefetch object.
+  - WARNING: "SelectQuery.getPrefetches()" now returns a collection of Prefetch objects, not Strings.
+
 Bugs Fixed:
-  
+
+

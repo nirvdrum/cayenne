@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.query.Ordering;
+import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
@@ -102,7 +103,7 @@ public class SelectQueryValidator extends TreeNodeValidator {
             while (prefecthes.hasNext()) {
                 validatePrefetch(
                         root,
-                        (String) prefecthes.next(),
+                        ((Prefetch) prefecthes.next()).getPath(),
                         treeNodePath,
                         validator);
             }

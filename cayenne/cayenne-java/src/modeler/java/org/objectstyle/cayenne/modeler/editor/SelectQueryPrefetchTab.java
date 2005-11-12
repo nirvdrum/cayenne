@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Iterator;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -73,6 +74,7 @@ import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.EntityTreeModel;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
+import org.objectstyle.cayenne.query.Prefetch;
 
 /**
  * Subclass of the SelectQueryOrderingTab configured to work with prefetches.
@@ -130,7 +132,7 @@ public class SelectQueryPrefetchTab extends SelectQueryOrderingTab {
         }
 
         // check if such prefetch already exists
-        if (selectQuery.getPrefetches().contains(prefetch)) {
+        if (selectQuery.getPrefetches().contains(new Prefetch(prefetch))) {
             return;
         }
 
@@ -188,7 +190,11 @@ public class SelectQueryPrefetchTab extends SelectQueryOrderingTab {
         PrefetchModel() {
             if (selectQuery != null) {
                 prefetches = new String[selectQuery.getPrefetches().size()];
-                selectQuery.getPrefetches().toArray(prefetches);
+                
+                Iterator it = selectQuery.getPrefetches().iterator();
+                for(int i = 0; i < prefetches.length; i++) {
+                    prefetches[i] = ((Prefetch) it.next()).getPath();
+                }
             }
         }
 

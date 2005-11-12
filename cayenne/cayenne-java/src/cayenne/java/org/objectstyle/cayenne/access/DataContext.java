@@ -86,13 +86,13 @@ import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ParameterizedQuery;
+import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -1110,28 +1110,28 @@ public class DataContext implements QueryEngine, Serializable {
         ObjEntity entity = getEntityResolver().lookupObjEntity(query);
         Iterator prefetchesIt = prefetches.iterator();
         while (prefetchesIt.hasNext()) {
-            String prefetchKey = (String) prefetchesIt.next();
-            if (prefetchKey.indexOf(Entity.PATH_SEPARATOR) >= 0) {
+            Prefetch prefetch = (Prefetch) prefetchesIt.next();
+            if (prefetch.isMultiStep()) {
                 throw new CayenneRuntimeException("Only one-step relationships are "
                         + "supported at the moment, this will be fixed soon. "
                         + "Unsupported path : "
-                        + prefetchKey);
+                        + prefetch.getPath());
             }
 
             ObjRelationship relationship = (ObjRelationship) entity
-                    .getRelationship(prefetchKey);
+                    .getRelationship(prefetch.getPath());
             if (relationship == null) {
-                throw new CayenneRuntimeException("Invalid relationship: " + prefetchKey);
+                throw new CayenneRuntimeException("Invalid relationship: " + prefetch.getPath());
             }
 
             if (relationship.isToMany()) {
                 throw new CayenneRuntimeException(
                         "Only to-one relationships are supported at the moment. "
                                 + "Can't prefetch to-many: "
-                                + prefetchKey);
+                                + prefetch.getPath());
             }
 
-            PrefetchHelper.resolveToOneRelations(this, objects, prefetchKey);
+            PrefetchHelper.resolveToOneRelations(this, objects, prefetch.getPath());
         }
 
     }
