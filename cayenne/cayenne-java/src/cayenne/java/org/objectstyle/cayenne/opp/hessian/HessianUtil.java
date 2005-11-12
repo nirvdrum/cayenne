@@ -84,7 +84,7 @@ public final class HessianUtil {
             Class.forName("java.lang.StringBuilder");
 
             Class factoryClass = Util
-                    .getJavaClass("org.objectstyle.cayenne.opp.hessian.HessianSerializerFactory");
+                    .getJavaClass("org.objectstyle.cayenne.opp.hessian.EnumSerializerFactory");
             extendedSerializer = (AbstractSerializerFactory) factoryClass.newInstance();
         }
         catch (Throwable th) {
@@ -110,6 +110,9 @@ public final class HessianUtil {
         return in.readObject();
     }
 
+    /**
+     * Configures SerializerFactory to use Cayenne serializer extensions th
+     */
     static void configExtensions(SerializerFactory factory) {
         if (extendedSerializer != null) {
             factory.addFactory(extendedSerializer);

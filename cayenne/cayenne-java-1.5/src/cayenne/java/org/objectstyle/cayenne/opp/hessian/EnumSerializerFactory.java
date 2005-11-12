@@ -71,7 +71,7 @@ import com.caucho.hessian.io.Serializer;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class HessianSerializerFactory extends AbstractSerializerFactory {
+class EnumSerializerFactory extends AbstractSerializerFactory {
 
     private final EnumSerializer enumSerializer = new EnumSerializer();
     private HashMap<Class, Deserializer> cachedDeserializerMap;
@@ -80,22 +80,25 @@ class HessianSerializerFactory extends AbstractSerializerFactory {
         return (cl.isEnum()) ? enumSerializer : null;
     }
 
-    public synchronized Deserializer getDeserializer(Class cl)
-            throws HessianProtocolException {
+    public Deserializer getDeserializer(Class cl) throws HessianProtocolException {
         if (cl.isEnum()) {
             Deserializer deserializer = null;
-            if (cachedDeserializerMap != null) {
-                deserializer = cachedDeserializerMap.get(cl);
-            }
-
-            if (deserializer == null) {
-                deserializer = new EnumDeserializer(cl);
-
-                if (cachedDeserializerMap == null) {
-                    cachedDeserializerMap = new HashMap<Class, Deserializer>();
+            
+            synchronized (this) {
+                
+                if (cachedDeserializerMap != null) {
+                    deserializer = cachedDeserializerMap.get(cl);
                 }
 
-                cachedDeserializerMap.put(cl, deserializer);
+                if (deserializer == null) {
+                    deserializer = new EnumDeserializer(cl);
+
+                    if (cachedDeserializerMap == null) {
+                        cachedDeserializerMap = new HashMap<Class, Deserializer>();
+                    }
+
+                    cachedDeserializerMap.put(cl, deserializer);
+                }
             }
 
             return deserializer;
