@@ -18,7 +18,9 @@ Oracle types mapping
    <jdbc-type name="BLOB">
        <db-type name="BLOB"/>
    </jdbc-type>
-   <jdbc-type name="BOOLEAN"/>
+   <jdbc-type name="BOOLEAN">
+       <db-type name="INTEGER"/>
+   </jdbc-type>
    <jdbc-type name="CHAR">
        <db-type name="CHAR"/>
    </jdbc-type>
