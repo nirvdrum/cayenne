@@ -101,7 +101,7 @@ if($opt_u) {
 	die_with_email("Can't create release directory, return status: $status\n") if $status;
 	
 	# Upload test results no matter what
-	my $test_reports = "build/ant/tests-report-nightly-test";
+	my $test_reports = "build/tests-report-nightly-test";
         my $upload_dir = "www.objectstyle.org:$rel_path/$year-$mon-$mday";
 	run_command("chmod -R 755 $test_reports");
 	run_command("rsync -rltp -e ssh --delete --exclude='*.xml' $test_reports/ $upload_dir/reports");
