@@ -148,7 +148,7 @@ final class FlatPrefetchResolver {
 
             // categorization by parent needed even if an object is already there
             // (many-to-many case)
-            node.connectToParent(object, parentObject);
+            node.linkToParent(object, parentObject);
         }
 
         // recursively resolve for children

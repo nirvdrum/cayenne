@@ -104,6 +104,8 @@ class FlatPrefetchTreeNode {
     ObjRelationship incoming;
     Collection children;
     boolean phantom;
+
+    // set to "true" if incoming relationship is TO MANY
     boolean categorizeByParent;
 
     // column mapping
@@ -188,14 +190,6 @@ class FlatPrefetchTreeNode {
     }
 
     /**
-     * Finds
-     */
-    // TODO: there should be a better solution..
-    void disableNodesConflictingWithQualifier(Expression qualifier) {
-
-    }
-
-    /**
      * Returns whether this tree node is "phantom", i.e. query result is not expected to
      * provide data for it and it simply sits between two other nodes.
      */
@@ -238,7 +232,16 @@ class FlatPrefetchTreeNode {
         resolved.put(id, object);
     }
 
-    void connectToParent(DataObject object, DataObject parent) {
+    /**
+     * Creates an association between an object and its parent without modifying Cayenne
+     * relationship. Relationship modification is done later at the end of prefetch
+     * processing when all children are gathered.
+     * <p>
+     * Association is only established for to-many relationships from parent to children.
+     * To-one relationships are assumed to be handled automatically.
+     * </p>
+     */
+    void linkToParent(DataObject object, DataObject parent) {
         if (parent != null && categorizeByParent) {
             // TODO: this leaves a hole - duplicates
             List peers = (List) partitionedByParent.get(parent);
@@ -246,6 +249,11 @@ class FlatPrefetchTreeNode {
         }
     }
 
+    /**
+     * Sets up Cayenne parent-child relationship using the information gathered during
+     * traversal (see 'linkToParent'). Note that this processing only applies to
+     * one-to-many parent-child relationships.
+     */
     void connectToParents() {
         if (!isPhantom() && categorizeByParent) {
             Iterator it = partitionedByParent.entrySet().iterator();
