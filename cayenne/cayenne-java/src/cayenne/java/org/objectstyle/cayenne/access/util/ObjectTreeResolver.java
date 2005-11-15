@@ -77,8 +77,9 @@ import org.objectstyle.cayenne.query.PrefetchProcessor;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 
 /**
- * An object that resolves a number of joint and disjoint result sets to an object tree
- * according to a given prefetch tree.
+ * Processes a number of DataRow sets corresponding to a given prefetch tree, resolving
+ * DataRows to an object tree. Can process any combination of joint and disjoint sets, per
+ * prefetch tree.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -100,7 +101,7 @@ class ObjectTreeResolver {
 
         // create a copy of the tree using DecoratedPrefetchNodes and then traverse it
         // resolving objects...
-        DecoratedPrefetchNode decoratedTree = new TreeBuilder(
+        PrefetchProcessorNode decoratedTree = new TreeBuilder(
                 mainResultRows,
                 extraResultsByPath).buildTree(tree);
 
@@ -172,7 +173,7 @@ class ObjectTreeResolver {
     // subclasses that can carry extra info needed during traversal.
     final class TreeBuilder implements PrefetchProcessor {
 
-        DecoratedPrefetchNode root;
+        PrefetchProcessorNode root;
         LinkedList nodeStack;
 
         List mainResultRows;
@@ -185,7 +186,7 @@ class ObjectTreeResolver {
             this.helper = new JointPrefetchLookahead();
         }
 
-        DecoratedPrefetchNode buildTree(PrefetchTreeNode tree) {
+        PrefetchProcessorNode buildTree(PrefetchTreeNode tree) {
             // reset state
             this.nodeStack = new LinkedList();
             this.root = null;
@@ -207,7 +208,7 @@ class ObjectTreeResolver {
                 return startDisjointPrefetch(node);
             }
             else {
-                DecoratedPrefetchNode decorated = new DecoratedPrefetchNode(
+                PrefetchProcessorNode decorated = new PrefetchProcessorNode(
                         getParent(),
                         node.getSegmentPath());
 
@@ -220,10 +221,10 @@ class ObjectTreeResolver {
 
             // look ahead for joint children as joint children will require a different
             // node type.
-            DecoratedPrefetchNode decorated = helper.hasJointChildren(node)
-                    ? decorated = new DecoratedJointNode(getParent(), node
+            PrefetchProcessorNode decorated = helper.hasJointChildren(node)
+                    ? decorated = new PrefetchProcessorJointNode(getParent(), node
                             .getSegmentPath())
-                    : new DecoratedPrefetchNode(getParent(), node.getSegmentPath());
+                    : new PrefetchProcessorNode(getParent(), node.getSegmentPath());
             decorated.setPhantom(false);
 
             // semantics has to be "DISJOINT" even if the node is joint, as semantics
@@ -233,22 +234,23 @@ class ObjectTreeResolver {
         }
 
         public boolean startJointPrefetch(PrefetchTreeNode node) {
-            DecoratedJointNode decorated = new DecoratedJointNode(getParent(), node
-                    .getSegmentPath());
+            PrefetchProcessorJointNode decorated = new PrefetchProcessorJointNode(
+                    getParent(),
+                    node.getSegmentPath());
             decorated.setPhantom(false);
             decorated.setSemantics(PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
             boolean result = addNode(decorated);
 
             // set "jointChildren" flag on first non-phantom parent
-            DecoratedPrefetchNode parent = (DecoratedPrefetchNode) decorated.getParent();
+            PrefetchProcessorNode parent = (PrefetchProcessorNode) decorated.getParent();
             while (parent != null) {
                 parent.setJointChildren(true);
-                
+
                 if (!parent.isPhantom()) {
                     break;
                 }
 
-                parent = (DecoratedPrefetchNode) parent.getParent();
+                parent = (PrefetchProcessorNode) parent.getParent();
             }
 
             return result;
@@ -264,13 +266,13 @@ class ObjectTreeResolver {
             nodeStack.removeLast();
         }
 
-        boolean addNode(DecoratedPrefetchNode node) {
+        boolean addNode(PrefetchProcessorNode node) {
 
             List rows;
             ObjRelationship relationship;
             ObjEntity entity;
 
-            DecoratedPrefetchNode currentNode = getParent();
+            PrefetchProcessorNode currentNode = getParent();
 
             if (currentNode != null) {
                 rows = (List) extraResultsByPath.get(node.getPath());
@@ -311,8 +313,8 @@ class ObjectTreeResolver {
             return true;
         }
 
-        DecoratedPrefetchNode getParent() {
-            return (nodeStack.isEmpty()) ? null : (DecoratedPrefetchNode) nodeStack
+        PrefetchProcessorNode getParent() {
+            return (nodeStack.isEmpty()) ? null : (PrefetchProcessorNode) nodeStack
                     .getLast();
         }
     }
@@ -321,16 +323,16 @@ class ObjectTreeResolver {
 
         public boolean startDisjointPrefetch(PrefetchTreeNode node) {
 
-            DecoratedPrefetchNode decoNode = (DecoratedPrefetchNode) node;
+            PrefetchProcessorNode processorNode = (PrefetchProcessorNode) node;
 
             // this means something bad happened during fetch
-            if (decoNode.getDataRows() == null) {
+            if (processorNode.getDataRows() == null) {
                 return false;
             }
 
             // ... continue with processing even if the objects list is empty to handle
             // multi-step prefetches.
-            if (decoNode.getDataRows().isEmpty()) {
+            if (processorNode.getDataRows().isEmpty()) {
                 return true;
             }
 
@@ -338,21 +340,22 @@ class ObjectTreeResolver {
 
             // disjoint node that is an instance of DecoratedJointNode is a top
             // of a local joint prefetch "cluster"...
-            if (decoNode instanceof DecoratedJointNode) {
+            if (processorNode instanceof PrefetchProcessorJointNode) {
                 JointProcessor subprocessor = new JointProcessor(
-                        (DecoratedJointNode) decoNode);
-                Iterator it = decoNode.getDataRows().iterator();
+                        (PrefetchProcessorJointNode) processorNode);
+                Iterator it = processorNode.getDataRows().iterator();
                 while (it.hasNext()) {
                     subprocessor.setCurrentFlatRow((DataRow) it.next());
-                    decoNode.traverse(subprocessor);
+                    processorNode.traverse(subprocessor);
                 }
 
-                objects = decoNode.getObjects();
+                objects = processorNode.getObjects();
             }
             else {
-                objects = factory.objectsFromDataRows(decoNode.getEntity(), decoNode
-                        .getDataRows());
-                decoNode.setObjects(objects);
+                objects = factory.objectsFromDataRows(
+                        processorNode.getEntity(),
+                        processorNode.getDataRows());
+                processorNode.setObjects(objects);
             }
 
             // ... continue with processing even if the objects list is empty to handle
@@ -362,15 +365,15 @@ class ObjectTreeResolver {
             }
 
             // create temporary relationship mapping if needed...
-            if (decoNode.isPartitionedByParent()) {
+            if (processorNode.isPartitionedByParent()) {
 
-                Class sourceObjectClass = decoNode.getEntity().getJavaClass();
-                ObjRelationship reverseRelationship = decoNode
+                Class sourceObjectClass = processorNode.getEntity().getJavaClass();
+                ObjRelationship reverseRelationship = processorNode
                         .getIncoming()
                         .getReverseRelationship();
 
                 // Might be used later on... obtain and cast only once
-                DbRelationship dbRelationship = (DbRelationship) decoNode
+                DbRelationship dbRelationship = (DbRelationship) processorNode
                         .getIncoming()
                         .getDbRelationships()
                         .get(0);
@@ -404,7 +407,7 @@ class ObjectTreeResolver {
                     // don't attach to hollow objects
                     if (sourceObject != null
                             && sourceObject.getPersistenceState() != PersistenceState.HOLLOW) {
-                        decoNode.linkToParent(destinationObject, sourceObject);
+                        processorNode.linkToParent(destinationObject, sourceObject);
                     }
                 }
             }
@@ -436,9 +439,9 @@ class ObjectTreeResolver {
     final class JointProcessor implements PrefetchProcessor {
 
         DataRow currentFlatRow;
-        DecoratedPrefetchNode rootNode;
+        PrefetchProcessorNode rootNode;
 
-        JointProcessor(DecoratedJointNode rootNode) {
+        JointProcessor(PrefetchProcessorJointNode rootNode) {
             this.rootNode = rootNode;
         }
 
@@ -452,45 +455,44 @@ class ObjectTreeResolver {
         }
 
         public boolean startJointPrefetch(PrefetchTreeNode node) {
-            DecoratedJointNode decoNode = (DecoratedJointNode) node;
+            PrefetchProcessorJointNode processorNode = (PrefetchProcessorJointNode) node;
 
             DataObject object = null;
 
             // find existing object, if found skip further processing
-            Map id = decoNode.idFromFlatRow(currentFlatRow);
-            object = decoNode.getResolved(id);
+            Map id = processorNode.idFromFlatRow(currentFlatRow);
+            object = processorNode.getResolved(id);
 
             if (object == null) {
 
                 // TODO: this should be optimized - DataContext.objectsFromDataRows does
                 // some batching that we should do once instead of N * M times (e.g.
                 // synchronization blocks, etc.)
-                DataRow row = decoNode.rowFromFlatRow(currentFlatRow);
+                DataRow row = processorNode.rowFromFlatRow(currentFlatRow);
                 List objects = factory.objectsFromDataRows(
-                        decoNode.getEntity(),
+                        processorNode.getEntity(),
                         Collections.singletonList(row));
                 object = (DataObject) objects.get(0);
 
-                decoNode.putResolved(id, object);
-                decoNode.addObject(object);
+                processorNode.putResolved(id, object);
+                processorNode.addObject(object);
             }
 
             // categorization by parent needed even if an object is already there
             // (many-to-many case)
-            if (decoNode.isPartitionedByParent()) {
+            if (processorNode.isPartitionedByParent()) {
 
-                DecoratedPrefetchNode parent = (DecoratedPrefetchNode) decoNode
+                PrefetchProcessorNode parent = (PrefetchProcessorNode) processorNode
                         .getParent();
-                decoNode.linkToParent(object, parent.getLastResolved());
+                processorNode.linkToParent(object, parent.getLastResolved());
             }
 
-            decoNode.setLastResolved(object);
-            return decoNode.isJointChildren();
+            processorNode.setLastResolved(object);
+            return processorNode.isJointChildren();
         }
 
         public boolean startPhantomPrefetch(PrefetchTreeNode node) {
-            DecoratedPrefetchNode decoNode = (DecoratedPrefetchNode) node;
-            return decoNode.isJointChildren();
+            return ((PrefetchProcessorNode) node).isJointChildren();
         }
 
         public boolean startUnknownPrefetch(PrefetchTreeNode node) {
@@ -502,18 +504,20 @@ class ObjectTreeResolver {
         }
     }
 
+    // processor that converts temporary associations between DataObjects to Cayenne
+    // relationships.
     final class PostProcessor implements PrefetchProcessor {
 
         public void finishPrefetch(PrefetchTreeNode node) {
         }
 
         public boolean startDisjointPrefetch(PrefetchTreeNode node) {
-            ((DecoratedPrefetchNode) node).connectToParents();
+            ((PrefetchProcessorNode) node).connectToParents();
             return true;
         }
 
         public boolean startJointPrefetch(PrefetchTreeNode node) {
-            ((DecoratedPrefetchNode) node).connectToParents();
+            ((PrefetchProcessorNode) node).connectToParents();
             return true;
         }
 

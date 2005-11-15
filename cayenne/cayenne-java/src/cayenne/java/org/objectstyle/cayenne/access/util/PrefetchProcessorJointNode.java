@@ -77,19 +77,19 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 
 /**
- * A prefetch processing tree node corresponding to a joint prefetch.
+ * A specialized PrefetchTreeNode used for joint prefetch resolving.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class DecoratedJointNode extends DecoratedPrefetchNode {
+class PrefetchProcessorJointNode extends PrefetchProcessorNode {
 
     ColumnDescriptor[] columns;
     int[] idIndices;
     int rowCapacity;
     Map resolved;
 
-    DecoratedJointNode(PrefetchTreeNode parent, String segmentPath) {
+    PrefetchProcessorJointNode(PrefetchTreeNode parent, String segmentPath) {
         super(parent, segmentPath);
     }
 
@@ -173,7 +173,7 @@ class DecoratedJointNode extends DecoratedPrefetchNode {
         Map targetSource = new TreeMap();
 
         // build a DB path
-        DecoratedPrefetchNode root = (DecoratedPrefetchNode) getRoot();
+        PrefetchProcessorNode root = (PrefetchProcessorNode) getRoot();
 
         String prefix;
         if (root != this) {
@@ -200,10 +200,10 @@ class DecoratedJointNode extends DecoratedPrefetchNode {
             while (it.hasNext()) {
                 DbJoin join = (DbJoin) it.next();
 
-                DecoratedPrefetchNode parent = (DecoratedPrefetchNode) getParent();
+                PrefetchProcessorNode parent = (PrefetchProcessorNode) getParent();
                 String source;
-                if (parent instanceof DecoratedJointNode) {
-                    source = ((DecoratedJointNode) parent).sourceForTarget(join
+                if (parent instanceof PrefetchProcessorJointNode) {
+                    source = ((PrefetchProcessorJointNode) parent).sourceForTarget(join
                             .getSourceName());
                 }
                 else {

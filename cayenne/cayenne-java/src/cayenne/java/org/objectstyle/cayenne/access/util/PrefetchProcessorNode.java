@@ -69,10 +69,12 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 
 /**
+ * A specialized PrefetchTreeNode used for disjoint prefetch resolving.
+ * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class DecoratedPrefetchNode extends PrefetchTreeNode {
+class PrefetchProcessorNode extends PrefetchTreeNode {
 
     List dataRows;
     List objects;
@@ -85,7 +87,7 @@ class DecoratedPrefetchNode extends PrefetchTreeNode {
 
     DataObject lastResolved;
 
-    DecoratedPrefetchNode(PrefetchTreeNode parent, String segmentPath) {
+    PrefetchProcessorNode(PrefetchTreeNode parent, String segmentPath) {
         super(parent, segmentPath);
         this.partitionedByParent = false;
     }
@@ -132,7 +134,7 @@ class DecoratedPrefetchNode extends PrefetchTreeNode {
             // depending on whether parent is a "phantom" node,
             // use different strategy
 
-            DecoratedPrefetchNode parent = (DecoratedPrefetchNode) getParent();
+            PrefetchProcessorNode parent = (PrefetchProcessorNode) getParent();
 
             if (parent.getObjects() != null && parent.getObjects().size() > 0) {
                 connectToNodeParents(parent.getObjects());

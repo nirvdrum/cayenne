@@ -84,7 +84,7 @@ public class ObjectTreeResolver_TreeBuilderTst extends TestCase {
                 new MockObjectFactory());
         TreeBuilder builder = resolver.new TreeBuilder(dataRows, new HashMap());
 
-        DecoratedPrefetchNode processingTree = builder.buildTree(tree);
+        PrefetchProcessorNode processingTree = builder.buildTree(tree);
 
         assertTrue(processingTree.getChildren().isEmpty());
         assertFalse(processingTree.isPhantom());
@@ -161,30 +161,30 @@ public class ObjectTreeResolver_TreeBuilderTst extends TestCase {
         ObjectTreeResolver resolver = new ObjectTreeResolver(e1, new MockObjectFactory());
         TreeBuilder builder = resolver.new TreeBuilder(mainRows, extraRows);
 
-        DecoratedPrefetchNode n1 = builder.buildTree(tree);
+        PrefetchProcessorNode n1 = builder.buildTree(tree);
 
         assertSame(mainRows, n1.getDataRows());
         assertSame(e1, n1.getEntity());
 
-        DecoratedPrefetchNode n2 = (DecoratedPrefetchNode) n1.getNode("abc");
+        PrefetchProcessorNode n2 = (PrefetchProcessorNode) n1.getNode("abc");
         assertNotNull(n2);
         assertSame(e2, n2.getEntity());
         assertFalse(n2.isPhantom());
         assertTrue(n2.isPartitionedByParent());
 
-        DecoratedPrefetchNode n3 = (DecoratedPrefetchNode) n1.getNode("abc.def");
+        PrefetchProcessorNode n3 = (PrefetchProcessorNode) n1.getNode("abc.def");
         assertNotNull(n3);
         assertSame(e3, n3.getEntity());
         assertTrue(n3.isPhantom());
         assertFalse(n3.isPartitionedByParent());
 
-        DecoratedPrefetchNode n4 = (DecoratedPrefetchNode) n1.getNode("abc.def.mnk");
+        PrefetchProcessorNode n4 = (PrefetchProcessorNode) n1.getNode("abc.def.mnk");
         assertNotNull(n4);
         assertSame(e4, n4.getEntity());
         assertFalse(n4.isPhantom());
         assertFalse(n4.isPartitionedByParent());
 
-        DecoratedPrefetchNode n5 = (DecoratedPrefetchNode) n1.getNode("xyz");
+        PrefetchProcessorNode n5 = (PrefetchProcessorNode) n1.getNode("xyz");
         assertNotNull(n5);
         assertSame(e5, n5.getEntity());
         assertFalse(n5.isPhantom());
