@@ -55,99 +55,57 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.io.Serializable;
+import junit.framework.TestCase;
 
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.util.Util;
+public class PrefetchTreeNodeTst extends TestCase {
 
-/**
- * An object that defines a path and semantics of a single query prefetch. Note that
- * semanticsHint property is just that - a hint. Cayenne may choose to use different
- * prefetching strategy if the one configured in prefetch is not supported for any reason.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public class Prefetch implements Serializable {
+    public void testAddPath() {
+        PrefetchTreeNode tree = new PrefetchTreeNode();
+        tree.addPath("abc");
+        tree.addPath("abc.def.mnk");
+        tree.addPath("xyz");
 
-    public static final int UNDEFINED_SEMANTICS = 0;
-    public static final int JOINT_PREFETCH_SEMANTICS = 1;
-    public static final int DISJOINT_PREFETCH_SEMANTICS = 2;
+        assertTrue(tree.isPhantom());
 
-    protected String path;
-    protected int semanticsHint;
+        PrefetchTreeNode n1 = tree.getNode("abc");
+        assertNotNull(n1);
+        assertTrue(n1.isPhantom());
+        assertEquals("abc", n1.getSegmentPath());
 
-    // keep private constructor for Hessian serialization
-    private Prefetch() {
+        PrefetchTreeNode n2 = tree.getNode("abc.def");
+        assertNotNull(n2);
+        assertTrue(n2.isPhantom());
+        assertEquals("def", n2.getSegmentPath());
 
+        PrefetchTreeNode n3 = tree.getNode("abc.def.mnk");
+        assertNotNull(n3);
+        assertTrue(n3.isPhantom());
+        assertEquals("mnk", n3.getSegmentPath());
+
+        PrefetchTreeNode n4 = tree.getNode("xyz");
+        assertNotNull(n4);
+        assertTrue(n4.isPhantom());
+        assertEquals("xyz", n4.getSegmentPath());
     }
 
-    /**
-     * Creates a new Prefetch object with semantics hint set to
-     * <em>Prefetch.UNDEFINED_SEMANTICS</em>, meaning that join semantics will be
-     * resolved during query execution.
-     */
-    public Prefetch(String path) {
-        this(path, UNDEFINED_SEMANTICS);
-    }
+    public void testGetPath() {
+        PrefetchTreeNode tree = new PrefetchTreeNode();
+        tree.addPath("abc");
+        tree.addPath("abc.def.mnk");
+        tree.addPath("xyz");
 
-    public Prefetch(String path, int semanticsHint) {
-        if (path == null) {
-            throw new IllegalArgumentException("Null 'path'");
-        }
+        assertEquals("", tree.getPath());
 
-        this.path = path;
-        this.semanticsHint = semanticsHint;
-    }
+        PrefetchTreeNode n1 = tree.getNode("abc");
+        assertEquals("abc", n1.getPath());
 
-    public String getPath() {
-        return path;
-    }
+        PrefetchTreeNode n2 = tree.getNode("abc.def");
+        assertEquals("abc.def", n2.getPath());
 
-    public boolean isMultiStep() {
-        return path.indexOf(Entity.PATH_SEPARATOR) > 0;
-    }
+        PrefetchTreeNode n3 = tree.getNode("abc.def.mnk");
+        assertEquals("abc.def.mnk", n3.getPath());
 
-    public int getSemanticsHint() {
-        return semanticsHint;
-    }
-
-    public boolean isJointPrefetch() {
-        return semanticsHint == JOINT_PREFETCH_SEMANTICS;
-    }
-
-    public boolean isDisjointPrefetch() {
-        return semanticsHint == DISJOINT_PREFETCH_SEMANTICS;
-    }
-
-    /**
-     * Implements checking for object equality. Two prefetches are considered equal if
-     * their paths are equals, semantics hint is ignored in comparison.
-     */
-    public boolean equals(Object object) {
-        if (object == this) {
-            return true;
-        }
-
-        if (!(object instanceof Prefetch)) {
-            return false;
-        }
-
-        return Util.nullSafeEquals(path, ((Prefetch) object).getPath());
-    }
-
-    /**
-     * Overrides super hashCode implementation to return hashCode compatible with
-     * 'equals'.
-     */
-    public int hashCode() {
-        HashCodeBuilder builder = new HashCodeBuilder(43, 47);
-
-        if (path != null) {
-            builder.append(path);
-        }
-
-        return builder.toHashCode();
+        PrefetchTreeNode n4 = tree.getNode("xyz");
+        assertEquals("xyz", n4.getPath());
     }
 }

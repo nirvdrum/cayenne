@@ -187,7 +187,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("paintingArray");
 
         try {
-            CayenneDataObject a1 = (CayenneDataObject) context.performQuery(q).get(0);
+            List result = context.performQuery(q);
+            assertFalse(result.isEmpty());
+            CayenneDataObject a1 = (CayenneDataObject) result.get(0);
             ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
             assertNotNull(toMany);
             assertFalse(toMany.needsFetch());
@@ -217,7 +219,10 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("paintingArray");
 
         try {
-            CayenneDataObject a1 = (CayenneDataObject) context.performQuery(q).get(0);
+            List result = context.performQuery(q);
+            assertFalse(result.isEmpty());
+            
+            CayenneDataObject a1 = (CayenneDataObject) result.get(0);
             ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
             assertNotNull(toMany);
             assertFalse(toMany.needsFetch());
@@ -238,7 +243,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         SelectQuery q = new SelectQuery("Painting");
         q.addPrefetch("toArtist");
 
-        DataObject p1 = (DataObject) context.performQuery(q).get(0);
+        List result = context.performQuery(q);
+        assertFalse(result.isEmpty());
+        DataObject p1 = (DataObject) result.get(0);
 
         // resolving the fault must not result in extra queries, since
         // artist must have been prefetched

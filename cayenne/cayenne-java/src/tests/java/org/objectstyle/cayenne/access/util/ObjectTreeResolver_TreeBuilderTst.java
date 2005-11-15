@@ -1,0 +1,193 @@
+/* ====================================================================
+ * 
+ * The ObjectStyle Group Software License, version 1.1
+ * ObjectStyle Group - http://objectstyle.org/
+ * 
+ * Copyright (c) 2002-2005, Andrei (Andrus) Adamchik and individual authors
+ * of the software. All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 
+ * 3. The end-user documentation included with the redistribution, if any,
+ *    must include the following acknowlegement:
+ *    "This product includes software developed by independent contributors
+ *    and hosted on ObjectStyle Group web site (http://objectstyle.org/)."
+ *    Alternately, this acknowlegement may appear in the software itself,
+ *    if and wherever such third-party acknowlegements normally appear.
+ * 
+ * 4. The names "ObjectStyle Group" and "Cayenne" must not be used to endorse
+ *    or promote products derived from this software without prior written
+ *    permission. For written permission, email
+ *    "andrus at objectstyle dot org".
+ * 
+ * 5. Products derived from this software may not be called "ObjectStyle"
+ *    or "Cayenne", nor may "ObjectStyle" or "Cayenne" appear in their
+ *    names without prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * ====================================================================
+ * 
+ * This software consists of voluntary contributions made by many
+ * individuals and hosted on ObjectStyle Group web site.  For more
+ * information on the ObjectStyle Group, please see
+ * <http://objectstyle.org/>.
+ */
+package org.objectstyle.cayenne.access.util;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.MockObjectFactory;
+import org.objectstyle.cayenne.access.util.ObjectTreeResolver.TreeBuilder;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
+
+public class ObjectTreeResolver_TreeBuilderTst extends TestCase {
+
+    public void testBuildTreeNoPrefetches() {
+        ObjEntity entity = new ObjEntity("test");
+        List dataRows = new ArrayList();
+        dataRows.add(new DataRow(4));
+        dataRows.add(new DataRow(4));
+
+        PrefetchTreeNode tree = new PrefetchTreeNode();
+        ObjectTreeResolver resolver = new ObjectTreeResolver(
+                entity,
+                new MockObjectFactory());
+        TreeBuilder builder = resolver.new TreeBuilder(dataRows, new HashMap());
+
+        DecoratedPrefetchNode processingTree = builder.buildTree(tree);
+
+        assertTrue(processingTree.getChildren().isEmpty());
+        assertFalse(processingTree.isPhantom());
+        assertFalse(processingTree.isPartitionedByParent());
+        assertTrue(processingTree.isDisjointPrefetch());
+        assertSame(dataRows, processingTree.getDataRows());
+        assertSame(entity, processingTree.getEntity());
+        assertNull(processingTree.getIncoming());
+    }
+
+    public void testBuildTreeWithPrefetches() {
+        ObjEntity e1 = new ObjEntity("e1");
+        final ObjEntity e2 = new ObjEntity("e2");
+        final ObjEntity e3 = new ObjEntity("e3");
+        final ObjEntity e4 = new ObjEntity("e4");
+        final ObjEntity e5 = new ObjEntity("e5");
+
+        ObjRelationship r12 = new ObjRelationship("abc") {
+
+            public Entity getTargetEntity() {
+                return e2;
+            }
+
+            public boolean isSourceIndependentFromTargetChange() {
+                return true;
+            }
+        };
+        e1.addRelationship(r12);
+
+        ObjRelationship r23 = new ObjRelationship("def") {
+
+            public Entity getTargetEntity() {
+                return e3;
+            }
+
+            public boolean isSourceIndependentFromTargetChange() {
+                return false;
+            }
+        };
+        e2.addRelationship(r23);
+
+        ObjRelationship r34 = new ObjRelationship("mnk") {
+
+            public Entity getTargetEntity() {
+                return e4;
+            }
+
+            public boolean isSourceIndependentFromTargetChange() {
+                return false;
+            }
+        };
+        e3.addRelationship(r34);
+
+        ObjRelationship r15 = new ObjRelationship("xyz") {
+
+            public Entity getTargetEntity() {
+                return e5;
+            }
+
+            public boolean isSourceIndependentFromTargetChange() {
+                return false;
+            }
+        };
+        e1.addRelationship(r15);
+
+        List mainRows = new ArrayList();
+        Map extraRows = new HashMap();
+
+        PrefetchTreeNode tree = new PrefetchTreeNode();
+        tree.addPath("abc").setPhantom(false);
+        tree.addPath("abc.def.mnk").setPhantom(false);
+        tree.addPath("xyz").setPhantom(false);
+
+        ObjectTreeResolver resolver = new ObjectTreeResolver(e1, new MockObjectFactory());
+        TreeBuilder builder = resolver.new TreeBuilder(mainRows, extraRows);
+
+        DecoratedPrefetchNode n1 = builder.buildTree(tree);
+
+        assertSame(mainRows, n1.getDataRows());
+        assertSame(e1, n1.getEntity());
+
+        DecoratedPrefetchNode n2 = (DecoratedPrefetchNode) n1.getNode("abc");
+        assertNotNull(n2);
+        assertSame(e2, n2.getEntity());
+        assertFalse(n2.isPhantom());
+        assertTrue(n2.isPartitionedByParent());
+
+        DecoratedPrefetchNode n3 = (DecoratedPrefetchNode) n1.getNode("abc.def");
+        assertNotNull(n3);
+        assertSame(e3, n3.getEntity());
+        assertTrue(n3.isPhantom());
+        assertFalse(n3.isPartitionedByParent());
+
+        DecoratedPrefetchNode n4 = (DecoratedPrefetchNode) n1.getNode("abc.def.mnk");
+        assertNotNull(n4);
+        assertSame(e4, n4.getEntity());
+        assertFalse(n4.isPhantom());
+        assertFalse(n4.isPartitionedByParent());
+
+        DecoratedPrefetchNode n5 = (DecoratedPrefetchNode) n1.getNode("xyz");
+        assertNotNull(n5);
+        assertSame(e5, n5.getEntity());
+        assertFalse(n5.isPhantom());
+        assertFalse(n5.isPartitionedByParent());
+    }
+}

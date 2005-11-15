@@ -67,7 +67,6 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Prefetch;
@@ -279,34 +278,6 @@ public class JointPrefetchTst extends CayenneTestCase {
                 // make sure properties are not null..
                 assertNotNull(p.getPaintingTitle());
             }
-        }
-    }
-
-    public void testJointPrefetchToManyBlocking() throws Exception {
-        createTestData("testJointPrefetch1");
-
-        // query with to-many joint prefetches
-        SelectQuery q = new SelectQuery(Artist.class);
-        q.addPrefetch(new Prefetch(
-                Artist.PAINTING_ARRAY_PROPERTY,
-                Prefetch.JOINT_PREFETCH_SEMANTICS));
-        q.setQualifier(Expression.fromString("paintingArray.paintingTitle like 'P%'"));
-
-        DataContext context = createDataContext();
-
-        List objects = context.performQuery(q);
-
-        // without OUTER join we will get fewer objects...
-        assertEquals(2, objects.size());
-
-        Iterator it = objects.iterator();
-        while (it.hasNext()) {
-            Artist a = (Artist) it.next();
-            ToManyList list = (ToManyList) a.getPaintingArray();
-
-            assertNotNull(list);
-            assertTrue("'paintingArray' prefetch should've been blocked", list
-                    .needsFetch());
         }
     }
 

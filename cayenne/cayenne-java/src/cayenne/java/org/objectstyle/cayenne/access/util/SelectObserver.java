@@ -56,8 +56,6 @@
 
 package org.objectstyle.cayenne.access.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -68,12 +66,12 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectFactory;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataContextObjectFactory;
-import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Prefetch;
+import org.objectstyle.cayenne.query.PrefetchSelectQuery;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -200,55 +198,45 @@ public class SelectObserver extends DefaultOperationObserver {
                             + rootQuery);
         }
 
-        // prepare prefetch resolver ... it can be used in two different ways
-        // depending on whether we also have joint prefetches.
-        // TODO: this logic needs to be streamlined...
-        PrefetchResolver tree = new PrefetchResolver();
-        tree.buildTree(rootEntity, rootQuery, results);
+        List mainRows = getResults(rootQuery);
 
-        // filter out joint prefetches
-        Collection jointPrefetches = null;
-        Iterator prefetches = rootQuery.getPrefetches().iterator();
-        while (prefetches.hasNext()) {
+        // take a shortcut for no prefetces...
+        if (rootQuery.getPrefetches().isEmpty()) {
+            return factory.objectsFromDataRows(rootEntity, mainRows);
+        }
 
-            Prefetch object = (Prefetch) prefetches.next();
-            if (object.isJointPrefetch()) {
-                if (jointPrefetches == null) {
-                    jointPrefetches = new ArrayList();
+        // build prefetch tree and map results to prefetch paths
+        // TODO: Andrus, 11/15/2005 - tree will likely become a part of select query...
+        Map rowsByPath = new HashMap();
+        PrefetchTreeNode tree = new PrefetchTreeNode();
+
+        Iterator it = rootQuery.getPrefetches().iterator();
+        while (it.hasNext()) {
+            Prefetch p = (Prefetch) it.next();
+
+            PrefetchTreeNode node = tree.addPath(p.getPath());
+            node.setPhantom(false);
+            node.setSemantics(p.getSemanticsHint());
+
+            // find result set
+            Iterator resultsIt = results.entrySet().iterator();
+            while (resultsIt.hasNext()) {
+                Map.Entry entry = (Map.Entry) resultsIt.next();
+
+                if (entry.getKey() instanceof PrefetchSelectQuery) {
+                    PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) entry
+                            .getKey();
+                    if (p.getPath().equals(prefetchQuery.getPrefetchPath())) {
+                        rowsByPath.put(p.getPath(), entry.getValue());
+                        break;
+                    }
                 }
-
-                jointPrefetches.add(object);
-            }
-        }
-
-        if (jointPrefetches != null) {
-
-            // certain qualifiers conflict with joint prefetches, so we
-            // might need to disable some prefetched to-many arrays from being
-            // resolved. This is somewhat of a hack in search of a better solution.
-            Expression qualifier = null;
-            if (rootQuery instanceof SelectQuery) {
-                qualifier = ((SelectQuery) rootQuery).getQualifier();
             }
 
-            FlatPrefetchTreeNode flatPrefetchTree = new FlatPrefetchTreeNode(
-                    rootEntity,
-                    jointPrefetches,
-                    qualifier);
-
-            FlatPrefetchResolver flatPrefetchResolver = new FlatPrefetchResolver(factory);
-
-            List objects = flatPrefetchResolver.resolveObjectTree(
-                    flatPrefetchTree,
-                    getResults(rootQuery));
-
-            // attach normal prefetches to the list of main objects that is already
-            // resolved...
-            tree.resolveObjectTree(factory, objects, true);
-            return objects;
         }
 
-        return tree.resolveObjectTree(factory);
+        ObjectTreeResolver resolver = new ObjectTreeResolver(rootEntity, factory);
+        return resolver.resolveObjectTree(tree, mainRows, rowsByPath);
     }
 
     /**

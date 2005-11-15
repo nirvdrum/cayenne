@@ -55,99 +55,22 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.io.Serializable;
-
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.util.Util;
-
 /**
- * An object that defines a path and semantics of a single query prefetch. Note that
- * semanticsHint property is just that - a hint. Cayenne may choose to use different
- * prefetching strategy if the one configured in prefetch is not supported for any reason.
+ * A hierarchical visitor interface for traversing a tree of PrefetchTreeNodes. If any of
+ * the processing methods return false, node children won't be processed.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class Prefetch implements Serializable {
+public interface PrefetchProcessor {
 
-    public static final int UNDEFINED_SEMANTICS = 0;
-    public static final int JOINT_PREFETCH_SEMANTICS = 1;
-    public static final int DISJOINT_PREFETCH_SEMANTICS = 2;
+    boolean startPhantomPrefetch(PrefetchTreeNode node);
 
-    protected String path;
-    protected int semanticsHint;
+    boolean startDisjointPrefetch(PrefetchTreeNode node);
 
-    // keep private constructor for Hessian serialization
-    private Prefetch() {
+    boolean startJointPrefetch(PrefetchTreeNode node);
 
-    }
+    boolean startUnknownPrefetch(PrefetchTreeNode node);
 
-    /**
-     * Creates a new Prefetch object with semantics hint set to
-     * <em>Prefetch.UNDEFINED_SEMANTICS</em>, meaning that join semantics will be
-     * resolved during query execution.
-     */
-    public Prefetch(String path) {
-        this(path, UNDEFINED_SEMANTICS);
-    }
-
-    public Prefetch(String path, int semanticsHint) {
-        if (path == null) {
-            throw new IllegalArgumentException("Null 'path'");
-        }
-
-        this.path = path;
-        this.semanticsHint = semanticsHint;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public boolean isMultiStep() {
-        return path.indexOf(Entity.PATH_SEPARATOR) > 0;
-    }
-
-    public int getSemanticsHint() {
-        return semanticsHint;
-    }
-
-    public boolean isJointPrefetch() {
-        return semanticsHint == JOINT_PREFETCH_SEMANTICS;
-    }
-
-    public boolean isDisjointPrefetch() {
-        return semanticsHint == DISJOINT_PREFETCH_SEMANTICS;
-    }
-
-    /**
-     * Implements checking for object equality. Two prefetches are considered equal if
-     * their paths are equals, semantics hint is ignored in comparison.
-     */
-    public boolean equals(Object object) {
-        if (object == this) {
-            return true;
-        }
-
-        if (!(object instanceof Prefetch)) {
-            return false;
-        }
-
-        return Util.nullSafeEquals(path, ((Prefetch) object).getPath());
-    }
-
-    /**
-     * Overrides super hashCode implementation to return hashCode compatible with
-     * 'equals'.
-     */
-    public int hashCode() {
-        HashCodeBuilder builder = new HashCodeBuilder(43, 47);
-
-        if (path != null) {
-            builder.append(path);
-        }
-
-        return builder.toHashCode();
-    }
+    void finishPrefetch(PrefetchTreeNode node);
 }
