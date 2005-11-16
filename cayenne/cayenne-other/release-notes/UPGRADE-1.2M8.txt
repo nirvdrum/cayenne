@@ -4,9 +4,12 @@ Date:
 
 UPGRADING FROM M7:
 
-If you were using EventBridge for remote clients peer-to-peer communications, note that
-the name of the factory parameter in web.xml has changed from 'cayenne.HessianService.EventBridge.factory' 
-to 'cayenne.OPPRemoteService.EventBridge.factory'.
+* If you were using EventBridge for remote clients peer-to-peer communications, note that
+  the name of the factory parameter in web.xml has changed from 'cayenne.HessianService.EventBridge.factory' 
+  to 'cayenne.OPPRemoteService.EventBridge.factory'.
+
+* If you were using 1.2 joint prefetches, note that configuring prefetch semantics has changed. See
+  prefetching artcile of 1.2 user gude for details.
 
 
 GENERAL UPGRADE NOTES:
@@ -47,8 +50,6 @@ UPGRADE FROM 1.1:
    is still possible to use bytea, but watch for the Modeler-generated schema scripts -
    they will contain "oid". The easiest way to migrate your mapping (if you don't want to
    change the DB) is to remap all bytea columns as LONGVARBINARY DbAttributes instead of BLOB.
-    
-*  "SelectQuery.getPrefetches()" returns a collection of Prefetch objects, not Strings.
 
 *  The meaning of SnapshotEvent "source" and "postedBy" attributes is reversed per CAY-395 for
    better efficiency. If you implemented custom listeners of SnapshotEvents, you may need to 

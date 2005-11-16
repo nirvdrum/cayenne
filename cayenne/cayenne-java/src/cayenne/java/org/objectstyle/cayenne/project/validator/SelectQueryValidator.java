@@ -106,7 +106,7 @@ public class SelectQueryValidator extends TreeNodeValidator {
                         .iterator();
                 while (prefetches.hasNext()) {
                     validatePrefetch(root, ((PrefetchTreeNode) prefetches.next())
-                            .getSegmentPath(), treeNodePath, validator);
+                            .getName(), treeNodePath, validator);
                 }
             }
         }

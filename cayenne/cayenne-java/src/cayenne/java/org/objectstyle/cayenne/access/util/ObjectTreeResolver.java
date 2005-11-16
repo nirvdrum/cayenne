@@ -210,7 +210,7 @@ class ObjectTreeResolver {
             else {
                 PrefetchProcessorNode decorated = new PrefetchProcessorNode(
                         getParent(),
-                        node.getSegmentPath());
+                        node.getName());
 
                 decorated.setPhantom(true);
                 return addNode(decorated);
@@ -223,8 +223,8 @@ class ObjectTreeResolver {
             // node type.
             PrefetchProcessorNode decorated = helper.hasJointChildren(node)
                     ? decorated = new PrefetchProcessorJointNode(getParent(), node
-                            .getSegmentPath())
-                    : new PrefetchProcessorNode(getParent(), node.getSegmentPath());
+                            .getName())
+                    : new PrefetchProcessorNode(getParent(), node.getName());
             decorated.setPhantom(false);
 
             // semantics has to be "DISJOINT" even if the node is joint, as semantics
@@ -236,7 +236,7 @@ class ObjectTreeResolver {
         public boolean startJointPrefetch(PrefetchTreeNode node) {
             PrefetchProcessorJointNode decorated = new PrefetchProcessorJointNode(
                     getParent(),
-                    node.getSegmentPath());
+                    node.getName());
             decorated.setPhantom(false);
             decorated.setSemantics(PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
             boolean result = addNode(decorated);
@@ -277,11 +277,11 @@ class ObjectTreeResolver {
             if (currentNode != null) {
                 rows = (List) extraResultsByPath.get(node.getPath());
                 relationship = (ObjRelationship) currentNode.getEntity().getRelationship(
-                        node.getSegmentPath());
+                        node.getName());
 
                 if (relationship == null) {
                     throw new CayenneRuntimeException("No relationship with name '"
-                            + node.getSegmentPath()
+                            + node.getName()
                             + "' found in entity "
                             + currentNode.getEntity().getName());
                 }

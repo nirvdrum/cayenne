@@ -79,7 +79,7 @@ public class PrefetchTreeNode implements Serializable, XMLSerializable {
     public static final int JOINT_PREFETCH_SEMANTICS = 1;
     public static final int DISJOINT_PREFETCH_SEMANTICS = 2;
 
-    protected String segmentPath;
+    protected String name;
     protected boolean phantom;
     protected int semantics;
 
@@ -105,7 +105,7 @@ public class PrefetchTreeNode implements Serializable, XMLSerializable {
      */
     protected PrefetchTreeNode(PrefetchTreeNode parent, String segmentPath) {
         this.parent = parent;
-        this.segmentPath = segmentPath;
+        this.name = segmentPath;
         this.phantom = true;
         this.semantics = UNDEFINED_SEMANTICS;
     }
@@ -114,24 +114,30 @@ public class PrefetchTreeNode implements Serializable, XMLSerializable {
         traverse(new XMLEncoderOperation(encoder));
     }
 
+    /**
+     * Returns the root of the node tree. Root is the topmost parent node that itself has
+     * no parent set.
+     */
     public PrefetchTreeNode getRoot() {
         return (parent != null) ? parent.getRoot() : this;
     }
 
     /**
-     * Returns full prefetch path starting from root.
+     * Returns full prefetch path, that is a dot separated String of node names starting
+     * from root and up to and including this node. Note that root "name" is considered to
+     * be an empty string.
      */
     public String getPath() {
         if (parent == null) {
             return "";
         }
 
-        StringBuffer path = new StringBuffer(getSegmentPath());
+        StringBuffer path = new StringBuffer(getName());
         PrefetchTreeNode node = this.getParent();
 
         // root node has no path
         while (node.getParent() != null) {
-            path.insert(0, node.getSegmentPath() + ".");
+            path.insert(0, node.getName() + ".");
             node = node.getParent();
         }
 
@@ -259,7 +265,7 @@ public class PrefetchTreeNode implements Serializable, XMLSerializable {
                 break;
             }
 
-            String segment = node.getSegmentPath();
+            String segment = node.getName();
 
             node = node.getParent();
 
@@ -271,12 +277,12 @@ public class PrefetchTreeNode implements Serializable, XMLSerializable {
 
     public void addChild(PrefetchTreeNode child) {
 
-        if (Util.isEmptyString(child.getSegmentPath())) {
+        if (Util.isEmptyString(child.getName())) {
             throw new IllegalArgumentException("Child has no segmentPath: " + child);
         }
 
         if (child.getParent() != this) {
-            child.getParent().removeChild(child.getSegmentPath());
+            child.getParent().removeChild(child.getName());
             child.parent = this;
         }
 
@@ -309,7 +315,7 @@ public class PrefetchTreeNode implements Serializable, XMLSerializable {
             Iterator it = children.iterator();
             while (it.hasNext()) {
                 PrefetchTreeNode next = (PrefetchTreeNode) it.next();
-                if (segment.equals(next.getSegmentPath())) {
+                if (segment.equals(next.getName())) {
                     return next;
                 }
             }
@@ -334,8 +340,8 @@ public class PrefetchTreeNode implements Serializable, XMLSerializable {
         return children != null && !children.isEmpty();
     }
 
-    public String getSegmentPath() {
-        return segmentPath;
+    public String getName() {
+        return name;
     }
 
     public boolean isPhantom() {

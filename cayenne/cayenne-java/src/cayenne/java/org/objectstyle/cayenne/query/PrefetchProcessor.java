@@ -57,9 +57,10 @@ package org.objectstyle.cayenne.query;
 
 /**
  * A hierarchical visitor interface for traversing a tree of PrefetchTreeNodes. If any of
- * the processing methods return false, node children won't be processed.
+ * the processing methods return false, node's children will be skipped from traversal.
  * 
  * @since 1.2
+ * @see org.objectstyle.cayenne.query.PrefetchTreeNode#traverse(PrefetchProcessor)
  * @author Andrus Adamchik
  */
 public interface PrefetchProcessor {

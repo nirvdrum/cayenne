@@ -168,7 +168,7 @@ class PrefetchProcessorNode extends PrefetchTreeNode {
 
     private final void connect(DataObject object, List related) {
         if (incoming.isToMany()) {
-            ToManyList toManyList = (ToManyList) object.readProperty(getSegmentPath());
+            ToManyList toManyList = (ToManyList) object.readProperty(getName());
 
             // TODO, Andrus 11/15/2005 - if list is modified, shouldn't we attempt to
             // merge the changes instead of overwriting?
@@ -188,7 +188,7 @@ class PrefetchProcessorNode extends PrefetchTreeNode {
                 value = related.get(0);
             }
 
-            object.writeProperty(getSegmentPath(), value);
+            object.writeProperty(getName(), value);
         }
     }
 

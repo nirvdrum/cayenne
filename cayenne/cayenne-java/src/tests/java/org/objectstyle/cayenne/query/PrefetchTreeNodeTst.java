@@ -70,22 +70,22 @@ public class PrefetchTreeNodeTst extends TestCase {
         PrefetchTreeNode n1 = tree.getNode("abc");
         assertNotNull(n1);
         assertTrue(n1.isPhantom());
-        assertEquals("abc", n1.getSegmentPath());
+        assertEquals("abc", n1.getName());
 
         PrefetchTreeNode n2 = tree.getNode("abc.def");
         assertNotNull(n2);
         assertTrue(n2.isPhantom());
-        assertEquals("def", n2.getSegmentPath());
+        assertEquals("def", n2.getName());
 
         PrefetchTreeNode n3 = tree.getNode("abc.def.mnk");
         assertNotNull(n3);
         assertTrue(n3.isPhantom());
-        assertEquals("mnk", n3.getSegmentPath());
+        assertEquals("mnk", n3.getName());
 
         PrefetchTreeNode n4 = tree.getNode("xyz");
         assertNotNull(n4);
         assertTrue(n4.isPhantom());
-        assertEquals("xyz", n4.getSegmentPath());
+        assertEquals("xyz", n4.getName());
     }
 
     public void testGetPath() {
