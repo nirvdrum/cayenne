@@ -53,7 +53,7 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.Ordering;
-import org.objectstyle.cayenne.query.Prefetch;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -409,9 +409,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
     public void testCreateSqlString10() throws Exception {
         // query with to-many joint prefetches
         SelectQuery q = new SelectQuery(Artist.class);
-        q.addPrefetch(new Prefetch(
-                Artist.PAINTING_ARRAY_PROPERTY,
-                Prefetch.JOINT_PREFETCH_SEMANTICS));
+        q.addPrefetch(Artist.PAINTING_ARRAY_PROPERTY).setSemantics(
+                PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
 
         Template test = new Template() {
 
@@ -445,9 +444,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
         // query with joint prefetches and other joins
         SelectQuery q = new SelectQuery(Artist.class, Expression
                 .fromString("paintingArray.paintingTitle = 'a'"));
-        q.addPrefetch(new Prefetch(
-                Artist.PAINTING_ARRAY_PROPERTY,
-                Prefetch.JOINT_PREFETCH_SEMANTICS));
+        q.addPrefetch(Artist.PAINTING_ARRAY_PROPERTY).setSemantics(
+                PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
 
         Template test = new Template() {
 
@@ -466,9 +464,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
     public void testCreateSqlString12() throws Exception {
         // query with to-one joint prefetches
         SelectQuery q = new SelectQuery(Painting.class);
-        q.addPrefetch(new Prefetch(
-                Painting.TO_ARTIST_PROPERTY,
-                Prefetch.JOINT_PREFETCH_SEMANTICS));
+        q.addPrefetch(Painting.TO_ARTIST_PROPERTY).setSemantics(
+                PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
 
         Template test = new Template() {
 
@@ -501,7 +498,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
     public void testCreateSqlString13() throws Exception {
         // query with invalid joint prefetches
         SelectQuery q = new SelectQuery(Painting.class);
-        q.addPrefetch(new Prefetch("invalid.invalid", Prefetch.JOINT_PREFETCH_SEMANTICS));
+        q.addPrefetch("invalid.invalid").setSemantics(
+                PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
 
         Template test = new Template() {
 
@@ -545,9 +543,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
      */
     public void testBuildResultColumns2() throws Exception {
         SelectQuery q = new SelectQuery(Painting.class);
-        q.addPrefetch(new Prefetch(
-                Painting.TO_ARTIST_PROPERTY,
-                Prefetch.JOINT_PREFETCH_SEMANTICS));
+        q.addPrefetch(Painting.TO_ARTIST_PROPERTY).setSemantics(
+                PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
         SelectTranslator tr = makeTranslator(q);
 
         List columns = tr.buildResultColumns();

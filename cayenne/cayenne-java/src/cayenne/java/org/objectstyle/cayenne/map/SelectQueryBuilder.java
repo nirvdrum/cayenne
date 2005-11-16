@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.util.Iterator;
+
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -80,7 +82,10 @@ class SelectQueryBuilder extends QueryBuilder {
         }
 
         if (prefetches != null && !prefetches.isEmpty()) {
-            query.addPrefetches(prefetches);
+            Iterator it = prefetches.iterator();
+            while(it.hasNext()) {
+                query.addPrefetch((String) it.next());
+            }
         }
 
         // init properties

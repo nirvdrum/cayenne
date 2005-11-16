@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.util.Collection;
 
 /**
  * @author Andrus Adamchik
@@ -76,6 +75,10 @@ public class MockGenericSelectQuery extends MockQuery implements GenericSelectQu
 
     public MockGenericSelectQuery(String name) {
         super(name);
+    }
+
+    public PrefetchTreeNode getPrefetchTree() {
+        return null;
     }
 
     public String getCachePolicy() {
@@ -100,10 +103,6 @@ public class MockGenericSelectQuery extends MockQuery implements GenericSelectQu
 
     public int getFetchLimit() {
         return 0;
-    }
-
-    public Collection getPrefetches() {
-        return null;
     }
 
     public void setFetchingDataRows(boolean fetchingDataRows) {

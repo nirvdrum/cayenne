@@ -64,6 +64,8 @@ import java.util.StringTokenizer;
 
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.util.XMLEncoder;
+import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
  * Defines a node in a prefetch tree.
@@ -71,7 +73,7 @@ import org.objectstyle.cayenne.util.Util;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class PrefetchTreeNode implements Serializable {
+public class PrefetchTreeNode implements Serializable, XMLSerializable {
 
     public static final int UNDEFINED_SEMANTICS = 0;
     public static final int JOINT_PREFETCH_SEMANTICS = 1;
@@ -108,6 +110,10 @@ public class PrefetchTreeNode implements Serializable {
         this.semantics = UNDEFINED_SEMANTICS;
     }
 
+    public void encodeAsXML(XMLEncoder encoder) {
+        traverse(new XMLEncoderOperation(encoder));
+    }
+
     public PrefetchTreeNode getRoot() {
         return (parent != null) ? parent.getRoot() : this;
     }
@@ -132,6 +138,37 @@ public class PrefetchTreeNode implements Serializable {
         return path.toString();
     }
 
+    /**
+     * Returns a collection of PrefetchTreeNodes with joint semantics.
+     */
+    public Collection jointNodes() {
+        Collection c = new ArrayList();
+        traverse(new CollectionBuilderOperation(c, false, true, false, false));
+        return c;
+    }
+
+    /**
+     * Returns a collection of PrefetchTreeNodes with dijoint semantics.
+     */
+    public Collection disjointNodes() {
+        Collection c = new ArrayList();
+        traverse(new CollectionBuilderOperation(c, true, false, false, false));
+        return c;
+    }
+
+    /**
+     * Returns a collection of PrefetchTreeNodes that are not phantoms.
+     */
+    public Collection nonPhantomNodes() {
+        Collection c = new ArrayList();
+        traverse(new CollectionBuilderOperation(c, true, true, true, false));
+        return c;
+    }
+
+    /**
+     * Traverses the tree depth-first, invoking callback methods of the processor when
+     * passing through the nodes.
+     */
     public void traverse(PrefetchProcessor processor) {
 
         boolean result = false;
@@ -198,7 +235,7 @@ public class PrefetchTreeNode implements Serializable {
 
             PrefetchTreeNode child = node.getChild(segment);
             if (child == null) {
-                child = new PrefetchTreeNode(this, segment);
+                child = new PrefetchTreeNode(node, segment);
                 node.addChild(child);
             }
 
@@ -323,5 +360,100 @@ public class PrefetchTreeNode implements Serializable {
 
     public boolean isDisjointPrefetch() {
         return semantics == DISJOINT_PREFETCH_SEMANTICS;
+    }
+
+    // **** common tree operations
+
+    // An operation that encodes prefetch tree as XML.
+    class XMLEncoderOperation implements PrefetchProcessor {
+
+        XMLEncoder encoder;
+
+        XMLEncoderOperation(XMLEncoder encoder) {
+            this.encoder = encoder;
+        }
+
+        public boolean startPhantomPrefetch(PrefetchTreeNode node) {
+            // don't encode phantoms
+            return true;
+        }
+
+        public boolean startDisjointPrefetch(PrefetchTreeNode node) {
+            encoder.print("<prefetch type=\"disjoint\">");
+            encoder.print(node.getPath());
+            encoder.println("</prefetch>");
+            return true;
+        }
+
+        public boolean startJointPrefetch(PrefetchTreeNode node) {
+            encoder.print("<prefetch type=\"joint\">");
+            encoder.print(node.getPath());
+            encoder.println("</prefetch>");
+            return true;
+        }
+
+        public boolean startUnknownPrefetch(PrefetchTreeNode node) {
+            encoder.print("<prefetch>");
+            encoder.print(node.getPath());
+            encoder.println("</prefetch>");
+
+            return true;
+        }
+
+        public void finishPrefetch(PrefetchTreeNode node) {
+            // noop
+        }
+    }
+
+    // An operation that collects all nodes in a single collection.
+    class CollectionBuilderOperation implements PrefetchProcessor {
+
+        Collection nodes;
+        boolean includePhantom;
+        boolean includeDisjoint;
+        boolean includeJoint;
+        boolean includeUnknown;
+
+        CollectionBuilderOperation(Collection nodes, boolean includeDisjoint,
+                boolean includeJoint, boolean includeUnknown, boolean includePhantom) {
+            this.nodes = nodes;
+
+            this.includeDisjoint = includeDisjoint;
+            this.includeJoint = includeJoint;
+            this.includeUnknown = includeUnknown;
+            this.includePhantom = includePhantom;
+        }
+
+        public boolean startPhantomPrefetch(PrefetchTreeNode node) {
+            if (includePhantom) {
+                nodes.add(node);
+            }
+
+            return true;
+        }
+
+        public boolean startDisjointPrefetch(PrefetchTreeNode node) {
+            if (includeDisjoint) {
+                nodes.add(node);
+            }
+            return true;
+        }
+
+        public boolean startJointPrefetch(PrefetchTreeNode node) {
+            if (includeJoint) {
+                nodes.add(node);
+            }
+            return true;
+        }
+
+        public boolean startUnknownPrefetch(PrefetchTreeNode node) {
+            if (includeUnknown) {
+                nodes.add(node);
+            }
+            return true;
+        }
+
+        public void finishPrefetch(PrefetchTreeNode node) {
+        }
     }
 }

@@ -62,7 +62,6 @@ import junit.framework.TestCase;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.cayenne.query.Ordering;
-import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.xml.sax.InputSource;
 
@@ -143,10 +142,9 @@ public class MapLoaderLoadTst extends TestCase {
         assertNotNull(queryWithPrefetch);
         assertTrue(queryWithPrefetch.getRoot() instanceof ObjEntity);
         assertEquals("Gallery", ((Entity) queryWithPrefetch.getRoot()).getName());
-        assertEquals(1, queryWithPrefetch.getPrefetches().size());
-        assertEquals(new Prefetch(Gallery.PAINTING_ARRAY_PROPERTY), queryWithPrefetch
-                .getPrefetches()
-                .iterator()
-                .next());
+        assertNotNull(queryWithPrefetch.getPrefetchTree());
+        assertEquals(1, queryWithPrefetch.getPrefetchTree().nonPhantomNodes().size());
+        assertNotNull(queryWithPrefetch.getPrefetchTree().getNode(
+                Gallery.PAINTING_ARRAY_PROPERTY));
     }
 }

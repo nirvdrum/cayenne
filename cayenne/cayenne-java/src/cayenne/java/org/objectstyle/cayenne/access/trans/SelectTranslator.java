@@ -78,8 +78,8 @@ import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
@@ -463,83 +463,91 @@ public class SelectTranslator extends QueryAssembler {
         }
 
         // handle joint prefetches
-        Iterator jointPrefetches = query.getPrefetches().iterator();
-        while (jointPrefetches.hasNext()) {
-            Prefetch prefetch = (Prefetch) jointPrefetches.next();
-            if(!prefetch.isJointPrefetch()) {
-                continue;
-            }
+        if (query.getPrefetchTree() != null) {
+            Iterator jointPrefetches = query.getPrefetchTree().jointNodes().iterator();
+            while (jointPrefetches.hasNext()) {
+                PrefetchTreeNode prefetch = (PrefetchTreeNode) jointPrefetches.next();
 
-            // for each prefetch add all joins plus columns from the target entity
-            Expression prefetchExp = Expression.fromString(prefetch.getPath());
-            Expression dbPrefetch = oe.translateToDbPath(prefetchExp);
+                // for each prefetch add all joins plus columns from the target entity
+                Expression prefetchExp = Expression.fromString(prefetch.getPath());
+                Expression dbPrefetch = oe.translateToDbPath(prefetchExp);
 
-            // find target entity
-            Iterator it = table.resolvePathComponents(dbPrefetch);
+                // find target entity
+                Iterator it = table.resolvePathComponents(dbPrefetch);
 
-            DbRelationship r = null;
-            while (it.hasNext()) {
-                r = (DbRelationship) it.next();
-                dbRelationshipAdded(r);
-            }
-
-            if (r == null) {
-                throw new CayenneRuntimeException("Invalid joint prefetch '"
-                        + prefetch
-                        + "' for entity: "
-                        + oe.getName());
-            }
-
-            // add columns from the target entity, skipping those that are an FK to
-            // source entity
-
-            Collection skipColumns = Collections.EMPTY_LIST;
-            if (r.getSourceEntity() == table) {
-                skipColumns = new ArrayList(2);
-                Iterator joins = r.getJoins().iterator();
-                while (joins.hasNext()) {
-                    DbJoin join = (DbJoin) joins.next();
-                    if (attributes.contains(join.getSource())) {
-                        skipColumns.add(join.getTarget());
-                    }
+                DbRelationship r = null;
+                while (it.hasNext()) {
+                    r = (DbRelationship) it.next();
+                    dbRelationshipAdded(r);
                 }
-            }
 
-            // go via target OE to make sure that Java types are mapped correctly...
-            ObjRelationship targetRel = (ObjRelationship) prefetchExp.evaluate(oe);
-            Iterator targetObjAttrs = targetRel
-                    .getTargetEntity()
-                    .getAttributes()
-                    .iterator();
-            while (targetObjAttrs.hasNext()) {
-                ObjAttribute oa = (ObjAttribute) targetObjAttrs.next();
-                Iterator dbPathIterator = oa.getDbPathIterator();
-                while (dbPathIterator.hasNext()) {
-                    Object pathPart = dbPathIterator.next();
-                    if (pathPart instanceof DbRelationship) {
-                        DbRelationship rel = (DbRelationship) pathPart;
-                        dbRelationshipAdded(rel);
-                    }
-                    else if (pathPart instanceof DbAttribute) {
-                        DbAttribute attribute = (DbAttribute) pathPart;
-                        if (attribute == null) {
-                            throw new CayenneRuntimeException(
-                                    "ObjAttribute has no DbAttribute: " + oa.getName());
-                        }
+                if (r == null) {
+                    throw new CayenneRuntimeException("Invalid joint prefetch '"
+                            + prefetch
+                            + "' for entity: "
+                            + oe.getName());
+                }
 
-                        if (!skipColumns.contains(attribute)) {
-                            appendColumn(columns, oa, attribute, attributes, dbPrefetch);
+                // add columns from the target entity, skipping those that are an FK to
+                // source entity
+
+                Collection skipColumns = Collections.EMPTY_LIST;
+                if (r.getSourceEntity() == table) {
+                    skipColumns = new ArrayList(2);
+                    Iterator joins = r.getJoins().iterator();
+                    while (joins.hasNext()) {
+                        DbJoin join = (DbJoin) joins.next();
+                        if (attributes.contains(join.getSource())) {
+                            skipColumns.add(join.getTarget());
                         }
                     }
                 }
-            }
 
-            // append remaining target attributes such as keys
-            Iterator targetAttributes = r.getTargetEntity().getAttributes().iterator();
-            while (targetAttributes.hasNext()) {
-                DbAttribute attribute = (DbAttribute) targetAttributes.next();
-                if (!skipColumns.contains(attribute)) {
-                    appendColumn(columns, null, attribute, attributes, dbPrefetch);
+                // go via target OE to make sure that Java types are mapped correctly...
+                ObjRelationship targetRel = (ObjRelationship) prefetchExp.evaluate(oe);
+                Iterator targetObjAttrs = targetRel
+                        .getTargetEntity()
+                        .getAttributes()
+                        .iterator();
+                while (targetObjAttrs.hasNext()) {
+                    ObjAttribute oa = (ObjAttribute) targetObjAttrs.next();
+                    Iterator dbPathIterator = oa.getDbPathIterator();
+                    while (dbPathIterator.hasNext()) {
+                        Object pathPart = dbPathIterator.next();
+                        if (pathPart instanceof DbRelationship) {
+                            DbRelationship rel = (DbRelationship) pathPart;
+                            dbRelationshipAdded(rel);
+                        }
+                        else if (pathPart instanceof DbAttribute) {
+                            DbAttribute attribute = (DbAttribute) pathPart;
+                            if (attribute == null) {
+                                throw new CayenneRuntimeException(
+                                        "ObjAttribute has no DbAttribute: "
+                                                + oa.getName());
+                            }
+
+                            if (!skipColumns.contains(attribute)) {
+                                appendColumn(
+                                        columns,
+                                        oa,
+                                        attribute,
+                                        attributes,
+                                        dbPrefetch);
+                            }
+                        }
+                    }
+                }
+
+                // append remaining target attributes such as keys
+                Iterator targetAttributes = r
+                        .getTargetEntity()
+                        .getAttributes()
+                        .iterator();
+                while (targetAttributes.hasNext()) {
+                    DbAttribute attribute = (DbAttribute) targetAttributes.next();
+                    if (!skipColumns.contains(attribute)) {
+                        appendColumn(columns, null, attribute, attributes, dbPrefetch);
+                    }
                 }
             }
         }

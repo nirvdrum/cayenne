@@ -58,12 +58,11 @@ package org.objectstyle.cayenne.query;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
@@ -82,7 +81,7 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
     boolean refreshingObjects = GenericSelectQuery.REFRESHING_OBJECTS_DEFAULT;
     boolean resolvingInherited = GenericSelectQuery.RESOLVING_INHERITED_DEFAULT;
     String cachePolicy = GenericSelectQuery.CACHE_POLICY_DEFAULT;
-    Set prefetches;
+    PrefetchTreeNode prefetchTree;
 
     /**
      * Copies values of this object to another SelectQueryProperties object.
@@ -94,9 +93,9 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
         anotherProperties.refreshingObjects = this.refreshingObjects;
         anotherProperties.resolvingInherited = this.resolvingInherited;
         anotherProperties.cachePolicy = this.cachePolicy;
-        anotherProperties.prefetches = (this.prefetches != null)
-                ? new HashSet(prefetches)
-                : null;
+
+        // use a setter as it correctly clones the tree...
+        anotherProperties.setPrefetchTree(prefetchTree);
     }
 
     void initWithProperties(Map properties) {
@@ -175,21 +174,34 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
             encoder.printProperty(GenericSelectQuery.CACHE_POLICY_PROPERTY, cachePolicy);
         }
 
-        if (prefetches != null && !prefetches.isEmpty()) {
-            Iterator it = prefetches.iterator();
-            while (it.hasNext()) {
-                Prefetch prefetch = (Prefetch) it.next();
+        if (prefetchTree != null) {
+            prefetchTree.encodeAsXML(encoder);
+        }
+    }
 
-                // currently prefetch is a String, but DTD
-                // treats it as a path expression... I guess for now
-                // it will be an overkill to wrap it in "<![CDATA[.."
+    /**
+     * @since 1.2
+     */
+    PrefetchTreeNode getPrefetchTree() {
+        return prefetchTree;
+    }
 
-                // TODO, Andrus 11/12/2005: encode prefetch semantics hint
-                encoder.print("<prefetch>");
-                encoder.print(prefetch.getPath());
-                encoder.println("</prefetch>");
+    void setPrefetchTree(PrefetchTreeNode prefetchTree) {
+        if (prefetchTree != null) {
+            // make a clone
+            try {
+                prefetchTree = (PrefetchTreeNode) Util
+                        .cloneViaSerialization(prefetchTree);
+            }
+            catch (CayenneRuntimeException e) {
+                throw e;
+            }
+            catch (Exception e) {
+                throw new CayenneRuntimeException("Error cloning prefetch tree", e);
             }
         }
+
+        this.prefetchTree = prefetchTree;
     }
 
     String getCachePolicy() {
@@ -241,34 +253,19 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
     }
 
     /**
-     * Returns a collection that internally stores join prefetches, creating it on demand.
-     * 
-     * @since 1.2
-     */
-    Collection nonNullPrefetches() {
-        if (prefetches == null) {
-            prefetches = new HashSet();
-        }
-
-        return prefetches;
-    }
-
-    /**
-     * Returns a collection of joint prefetches.
-     * 
-     * @since 1.2
-     */
-    Collection getPrefetches() {
-        return (prefetches != null) ? prefetches : Collections.EMPTY_SET;
-    }
-
-    /**
      * Adds a joint prefetch.
      * 
      * @since 1.2
      */
-    void addPrefetch(Prefetch prefetch) {
-        nonNullPrefetches().add(prefetch);
+    PrefetchTreeNode addPrefetch(String path, int semantics) {
+        if (prefetchTree == null) {
+            prefetchTree = new PrefetchTreeNode();
+        }
+
+        PrefetchTreeNode node = prefetchTree.addPath(path);
+        node.setSemantics(semantics);
+        node.setPhantom(false);
+        return node;
     }
 
     /**
@@ -276,25 +273,14 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
      * 
      * @since 1.2
      */
-    void addPrefetches(Collection prefetches) {
+    void addPrefetches(Collection prefetches, int semantics) {
 
-        // for 1.1 compatibility convert Strings in collection to Prefetches on the fly
         if (prefetches != null && !prefetches.isEmpty()) {
-            Collection thisPrefetches = nonNullPrefetches();
 
             Iterator it = (Iterator) prefetches.iterator();
             while (it.hasNext()) {
-                Object prefetch = it.next();
-
-                if (prefetch instanceof Prefetch) {
-                    thisPrefetches.add(prefetch);
-                }
-                else if (prefetch instanceof String) {
-                    thisPrefetches.add(new Prefetch(prefetch.toString()));
-                }
-                else {
-                    throw new CayenneRuntimeException("Invalid prefetch: " + prefetch);
-                }
+                String prefetch = (String) it.next();
+                addPrefetch(prefetch, semantics);
             }
         }
     }
@@ -305,7 +291,7 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
      * @since 1.2
      */
     void clearPrefetches() {
-        prefetches = null;
+        prefetchTree = null;
     }
 
     /**
@@ -313,9 +299,9 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
      * 
      * @since 1.2
      */
-    void removePrefetch(Prefetch prefetch) {
-        if (prefetches != null) {
-            prefetches.remove(prefetch);
+    void removePrefetch(String prefetch) {
+        if (prefetchTree != null) {
+            prefetchTree.removePath(prefetch);
         }
     }
 }

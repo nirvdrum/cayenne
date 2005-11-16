@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.query.Ordering;
-import org.objectstyle.cayenne.query.Prefetch;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
@@ -99,13 +99,15 @@ public class SelectQueryValidator extends TreeNodeValidator {
                         validator);
             }
 
-            Iterator prefecthes = query.getPrefetches().iterator();
-            while (prefecthes.hasNext()) {
-                validatePrefetch(
-                        root,
-                        ((Prefetch) prefecthes.next()).getPath(),
-                        treeNodePath,
-                        validator);
+            if (query.getPrefetchTree() != null) {
+                Iterator prefetches = query
+                        .getPrefetchTree()
+                        .nonPhantomNodes()
+                        .iterator();
+                while (prefetches.hasNext()) {
+                    validatePrefetch(root, ((PrefetchTreeNode) prefetches.next())
+                            .getSegmentPath(), treeNodePath, validator);
+                }
             }
         }
     }
@@ -168,7 +170,7 @@ public class SelectQueryValidator extends TreeNodeValidator {
         }
 
         // check for duplicate names in the parent context
-        
+
         Iterator it = map.getQueries().iterator();
         while (it.hasNext()) {
             Query otherQuery = (Query) it.next();

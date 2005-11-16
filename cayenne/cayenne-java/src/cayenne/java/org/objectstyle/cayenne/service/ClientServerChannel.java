@@ -56,8 +56,6 @@
 package org.objectstyle.cayenne.service;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -74,7 +72,8 @@ import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SelectMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.opp.UpdateMessage;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
 
 /**
  * An OPPChannel adapter that connects client ObjectContext children to a server
@@ -219,18 +218,16 @@ public class ClientServerChannel implements OPPChannel {
             return new ArrayList(0);
         }
 
-        // detect prefetches... any way to do that without "instanceof"?
-        Collection prefetches;
-        if (message.getQueryPlan() instanceof SelectQuery) {
-            prefetches = ((SelectQuery) message.getQueryPlan()).getPrefetches();
-        }
-        else {
-            prefetches = Collections.EMPTY_LIST;
+        // detect prefetches...
+        PrefetchTreeNode prefetchTree = null;
+        if (message.getQueryPlan() instanceof GenericSelectQuery) {
+            prefetchTree = ((GenericSelectQuery) message.getQueryPlan())
+                    .getPrefetchTree();
         }
 
         try {
             return new ServerToClientObjectConverter(objects, serverContext
-                    .getEntityResolver(), prefetches).getConverted();
+                    .getEntityResolver(), prefetchTree).getConverted();
         }
         catch (Exception e) {
             throw new CayenneRuntimeException("Error converting to client objects: "

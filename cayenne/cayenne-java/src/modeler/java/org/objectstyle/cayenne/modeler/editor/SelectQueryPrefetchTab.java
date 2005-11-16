@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collection;
 import java.util.Iterator;
 
 import javax.swing.JButton;
@@ -74,7 +75,7 @@ import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.EntityTreeModel;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
-import org.objectstyle.cayenne.query.Prefetch;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
 
 /**
  * Subclass of the SelectQueryOrderingTab configured to work with prefetches.
@@ -132,7 +133,8 @@ public class SelectQueryPrefetchTab extends SelectQueryOrderingTab {
         }
 
         // check if such prefetch already exists
-        if (selectQuery.getPrefetches().contains(new Prefetch(prefetch))) {
+        if (selectQuery.getPrefetchTree() != null
+                && selectQuery.getPrefetchTree().getNode(prefetch) != null) {
             return;
         }
 
@@ -189,12 +191,20 @@ public class SelectQueryPrefetchTab extends SelectQueryOrderingTab {
 
         PrefetchModel() {
             if (selectQuery != null) {
-                prefetches = new String[selectQuery.getPrefetches().size()];
-                
-                Iterator it = selectQuery.getPrefetches().iterator();
-                for(int i = 0; i < prefetches.length; i++) {
-                    prefetches[i] = ((Prefetch) it.next()).getPath();
+
+                if (selectQuery.getPrefetchTree() == null) {
+                    prefetches = new String[0];
                 }
+                else {
+                    Collection c = selectQuery.getPrefetchTree().nonPhantomNodes();
+                    prefetches = new String[c.size()];
+
+                    Iterator it = c.iterator();
+                    for (int i = 0; i < prefetches.length; i++) {
+                        prefetches[i] = ((PrefetchTreeNode) it.next()).getPath();
+                    }
+                }
+
             }
         }
 

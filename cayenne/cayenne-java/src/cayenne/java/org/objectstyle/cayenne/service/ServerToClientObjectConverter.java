@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.service;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -71,6 +70,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.property.ArcProperty;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.property.Property;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
 
 /**
  * @since 1.2
@@ -84,7 +84,7 @@ class ServerToClientObjectConverter {
     EntityResolver clientResolver;
 
     ServerToClientObjectConverter(List serverObjects, EntityResolver resolver,
-            Collection prefetches) {
+            PrefetchTreeNode prefetchTree) {
 
         this.clientObjectsByOID = new HashMap();
         this.converted = new ArrayList(serverObjects.size());
@@ -109,7 +109,7 @@ class ServerToClientObjectConverter {
 
             // create traversal map using the client entity
             new ObjectTraversalMap(clientResolver.lookupObjEntity(someServerEntity
-                    .getName()), prefetches).traverse(serverObjects, this);
+                    .getName()), prefetchTree).traverse(serverObjects, this);
         }
     }
 

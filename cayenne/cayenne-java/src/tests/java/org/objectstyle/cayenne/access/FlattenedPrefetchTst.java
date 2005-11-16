@@ -62,7 +62,7 @@ import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.query.Prefetch;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -94,9 +94,8 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
         createTestData("testPrefetch1");
 
         SelectQuery q = new SelectQuery(Artist.class);
-        q.addPrefetch(new Prefetch(
-                Artist.GROUP_ARRAY_PROPERTY,
-                Prefetch.JOINT_PREFETCH_SEMANTICS));
+        q.addPrefetch(Artist.GROUP_ARRAY_PROPERTY).setSemantics(
+                PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
 
         DataContext context = createDataContext();
 
@@ -124,12 +123,12 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
         createTestData("testPrefetch2");
 
         SelectQuery q = new SelectQuery(Painting.class);
-        q.addPrefetch(new Prefetch(
-                Painting.TO_ARTIST_PROPERTY,
-                Prefetch.JOINT_PREFETCH_SEMANTICS));
-        q.addPrefetch(new Prefetch(Painting.TO_ARTIST_PROPERTY
-                + '.'
-                + Artist.GROUP_ARRAY_PROPERTY, Prefetch.JOINT_PREFETCH_SEMANTICS));
+        q.addPrefetch(Painting.TO_ARTIST_PROPERTY).setSemantics(
+                PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
+        q
+                .addPrefetch(
+                        Painting.TO_ARTIST_PROPERTY + '.' + Artist.GROUP_ARRAY_PROPERTY)
+                .setSemantics(PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
 
         DataContext context = createDataContext();
 

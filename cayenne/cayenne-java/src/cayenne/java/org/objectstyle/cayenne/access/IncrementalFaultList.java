@@ -72,7 +72,6 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
@@ -177,20 +176,15 @@ public class IncrementalFaultList implements List {
         if (!query.isFetchingDataRows() && (query instanceof SelectQuery)) {
             SelectQuery select = (SelectQuery) query;
 
-            this.internalQuery.addPrefetches(select.getPrefetches());
-
-            // prefetching will blow iterated result, so strip prefetches... this is
-            // a bit of a hack
-            if (!select.getPrefetches().isEmpty()) {
+            this.internalQuery.setPrefetchTree(select.getPrefetchTree());
+            
+            if (select.getPrefetchTree() != null) {
+                // prefetching will blow iterated result, so strip prefetches... this is
+                // a bit of a hack
                 SelectQuery clone = select.queryWithParameters(
                         Collections.EMPTY_MAP,
                         true);
-
-                Iterator it = select.getPrefetches().iterator();
-                while (it.hasNext()) {
-                    clone.removePrefetch((Prefetch) it.next());
-                }
-
+                clone.clearPrefetches();
                 query = clone;
             }
         }
@@ -199,7 +193,7 @@ public class IncrementalFaultList implements List {
     }
 
     private boolean resolvesFirstPage() {
-        return internalQuery.getPrefetches().isEmpty();
+        return internalQuery.getPrefetchTree() == null;
     }
 
     /**
@@ -376,7 +370,7 @@ public class IncrementalFaultList implements List {
                 query.setFetchingDataRows(fetchesDataRows);
 
                 if (!query.isFetchingDataRows()) {
-                    query.addPrefetches(internalQuery.getPrefetches());
+                    query.setPrefetchTree(internalQuery.getPrefetchTree());
                 }
 
                 objects.addAll(dataContext.performQuery(query));
@@ -863,7 +857,7 @@ public class IncrementalFaultList implements List {
                 Iterator it = id.entrySet().iterator();
 
                 while (it.hasNext()) {
-                	Map.Entry entry = (Map.Entry) it.next();
+                    Map.Entry entry = (Map.Entry) it.next();
                     Object key = entry.getKey();
                     Object value = entry.getValue();
                     if (!Util.nullSafeEquals(value, map.get(key))) {
@@ -889,7 +883,7 @@ public class IncrementalFaultList implements List {
             Iterator it = id.entrySet().iterator();
 
             while (it.hasNext()) {
-            	Map.Entry entry = (Map.Entry) it.next();
+                Map.Entry entry = (Map.Entry) it.next();
                 Object key = entry.getKey();
                 Object value = entry.getValue();
                 if (!Util.nullSafeEquals(value, map.get(key))) {

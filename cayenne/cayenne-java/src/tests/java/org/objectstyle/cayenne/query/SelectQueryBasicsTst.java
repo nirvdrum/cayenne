@@ -57,11 +57,8 @@
 package org.objectstyle.cayenne.query;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -77,56 +74,20 @@ public class SelectQueryBasicsTst extends TestCase {
     public void testAddPrefetch() {
         SelectQuery q = new SelectQuery();
 
-        Prefetch prefetch = new Prefetch("a.b.c");
-        q.addPrefetch(prefetch);
-        assertEquals(1, q.getPrefetches().size());
-        assertSame(prefetch, q.getPrefetches().iterator().next());
+        assertNull(q.getPrefetchTree());
+        q.addPrefetch("a.b.c");
+        assertNotNull(q.getPrefetchTree());
+        assertEquals(1, q.getPrefetchTree().nonPhantomNodes().size());
+        assertNotNull(q.getPrefetchTree().getNode("a.b.c"));
     }
 
     public void testAddPrefetchDuplicates() {
         SelectQuery q = new SelectQuery();
 
-        Prefetch p1 = new Prefetch("a.b.c");
-        q.addPrefetch(p1);
+        q.addPrefetch("a.b.c");
+        q.addPrefetch("a.b.c");
 
-        Prefetch p2 = new Prefetch("a.b.c");
-        q.addPrefetch(p2);
-
-        assertEquals(1, q.getPrefetches().size());
-        assertEquals(p1, q.getPrefetches().iterator().next());
-    }
-
-    public void testAddJointPrefetches() {
-        SelectQuery q = new SelectQuery();
-
-        Collection prefetches = Arrays.asList(new Object[] {
-                new Prefetch("abc"), new Prefetch("123"), new Prefetch("rrr")
-        });
-
-        q.addPrefetches(prefetches);
-        assertEquals(prefetches.size(), q.getPrefetches().size());
-        assertEquals(new HashSet(prefetches), q.getPrefetches());
-    }
-
-    public void testAddPrefetchPath() {
-        SelectQuery q = new SelectQuery();
-
-        String path = "a.b.c";
-        q.addPrefetch(path);
-        assertEquals(1, q.getPrefetches().size());
-        assertEquals(new Prefetch(path), q.getPrefetches().iterator().next());
-    }
-
-    public void testAddPrefetchesPaths() {
-        SelectQuery q = new SelectQuery();
-
-        Collection prefetches = Arrays.asList(new Object[] {
-                new Prefetch("abc"), new Prefetch("123"), new Prefetch("rrr")
-        });
-
-        q.addPrefetches(prefetches);
-        assertEquals(prefetches.size(), q.getPrefetches().size());
-        assertEquals(new HashSet(prefetches), q.getPrefetches());
+        assertEquals(1, q.getPrefetchTree().nonPhantomNodes().size());
     }
 
     public void testClearPrefetches() {
@@ -134,10 +95,10 @@ public class SelectQueryBasicsTst extends TestCase {
 
         q.addPrefetch("abc");
         q.addPrefetch("xyz");
-        assertFalse(q.getPrefetches().isEmpty());
+        assertNotNull(q.getPrefetchTree());
 
         q.clearPrefetches();
-        assertTrue(q.getPrefetches().isEmpty());
+        assertNull(q.getPrefetchTree());
     }
 
     public void testPageSize() throws Exception {

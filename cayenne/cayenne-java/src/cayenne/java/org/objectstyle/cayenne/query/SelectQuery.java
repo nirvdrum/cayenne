@@ -230,25 +230,24 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         super.route(router, resolver);
 
         // create and route disjoint prefetch queries if any
-        if (!isFetchingDataRows()) {
+        if (!isFetchingDataRows() && getPrefetchTree() != null) {
 
-            Iterator prefetchIt = getPrefetches().iterator();
-            while (prefetchIt.hasNext()) {
-                Prefetch prefetch = (Prefetch) prefetchIt.next();
-                
-                // include disjoint and unknowm prefetches
-                if(prefetch.isJointPrefetch()) {
-                    continue;
+            Iterator it = getPrefetchTree().nonPhantomNodes().iterator();
+            while (it.hasNext()) {
+                PrefetchTreeNode prefetch = (PrefetchTreeNode) it.next();
+
+                // route prefetches with unknown semantics as disjoint...
+                if (!prefetch.isJointPrefetch()) {
+
+                    // TODO: with routing API, PrefetchSelectQuery no longer needs
+                    // EntityResolver to be passed in constructor, as it is passed during
+                    // routing. should refactor PrefetchSelectQuery
+                    PrefetchSelectQuery prefetchQuery = new PrefetchSelectQuery(
+                            resolver,
+                            this,
+                            prefetch.getPath());
+                    prefetchQuery.route(router, resolver);
                 }
-
-                // TODO: with routing API, PrefetchSelectQuery no longer needs
-                // EntityResolver to be passed in constructor, as it is passed during
-                // routing. should refactor PrefetchSelectQuery
-                PrefetchSelectQuery prefetchQuery = new PrefetchSelectQuery(
-                        resolver,
-                        this,
-                        prefetch.getPath());
-                prefetchQuery.route(router, resolver);
             }
         }
     }
@@ -550,36 +549,57 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     /**
      * Returns a collection of String paths indicating relationships to objects that are
      * prefetched together with this query.
-     * <p>
-     * <i>Note that since 1.2 this method returns a Collection of <em>Prefetch</em>
-     * objects instead of Strings.</i>
-     * </p>
+     * 
+     * @deprecated since 1.2 use 'getPrefetchTree' to explore prefetches.
      */
     public Collection getPrefetches() {
-        return selectProperties.getPrefetches();
+        if (getPrefetchTree() != null) {
+
+            Collection nodes = getPrefetchTree().nonPhantomNodes();
+            Collection paths = new ArrayList(nodes.size());
+            Iterator it = nodes.iterator();
+            while (it.hasNext()) {
+                paths.add(((PrefetchTreeNode) it.next()).getPath());
+            }
+
+            return paths;
+        }
+
+        return Collections.EMPTY_LIST;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public PrefetchTreeNode getPrefetchTree() {
+        return selectProperties.getPrefetchTree();
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setPrefetchTree(PrefetchTreeNode prefetchTree) {
+        selectProperties.setPrefetchTree(prefetchTree);
     }
 
     /**
      * Adds a prefetch with specified relationship path to the query.
-     */
-    public void addPrefetch(String prefetchPath) {
-        addPrefetch(new Prefetch(prefetchPath));
-    }
-
-    /**
-     * Adds Prefetch with the specified semantics to the internal set of prefetches.
      * 
-     * @since 1.2
+     * @since 1.2 signature changed to return created PrefetchTreeNode.
      */
-    public void addPrefetch(Prefetch prefetch) {
-        selectProperties.addPrefetch(prefetch);
+    public PrefetchTreeNode addPrefetch(String prefetchPath) {
+        return selectProperties.addPrefetch(
+                prefetchPath,
+                PrefetchTreeNode.UNDEFINED_SEMANTICS);
     }
 
     /**
      * Adds all prefetches to the internal prefetch set.
+     * 
+     * @deprecated since 1.2
      */
     public void addPrefetches(Collection prefetches) {
-        selectProperties.addPrefetches(prefetches);
+        selectProperties.addPrefetches(prefetches, PrefetchTreeNode.UNDEFINED_SEMANTICS);
     }
 
     /**
@@ -595,14 +615,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.1
      */
     public void removePrefetch(String prefetchPath) {
-        selectProperties.removePrefetch(new Prefetch(prefetchPath));
-    }
-
-    /**
-     * @since 1.2
-     */
-    public void removePrefetch(Prefetch prefetch) {
-        selectProperties.removePrefetch(prefetch);
+        selectProperties.removePrefetch(prefetchPath);
     }
 
     /**

@@ -92,7 +92,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ParameterizedQuery;
-import org.objectstyle.cayenne.query.Prefetch;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -1101,7 +1101,9 @@ public class DataContext implements QueryEngine, Serializable {
      * </p>
      */
     public void prefetchRelationships(SelectQuery query, List objects) {
-        Collection prefetches = query.getPrefetches();
+        Collection prefetches = query.getPrefetchTree() != null ? query
+                .getPrefetchTree()
+                .nonPhantomNodes() : Collections.EMPTY_LIST;
 
         if (objects == null || objects.size() == 0 || prefetches.size() == 0) {
             return;
@@ -1110,30 +1112,29 @@ public class DataContext implements QueryEngine, Serializable {
         ObjEntity entity = getEntityResolver().lookupObjEntity(query);
         Iterator prefetchesIt = prefetches.iterator();
         while (prefetchesIt.hasNext()) {
-            Prefetch prefetch = (Prefetch) prefetchesIt.next();
-            if (prefetch.isMultiStep()) {
+            PrefetchTreeNode prefetch = (PrefetchTreeNode) prefetchesIt.next();
+            String path = prefetch.getPath();
+            if (path.indexOf('.') >= 0) {
                 throw new CayenneRuntimeException("Only one-step relationships are "
                         + "supported at the moment, this will be fixed soon. "
                         + "Unsupported path : "
-                        + prefetch.getPath());
+                        + path);
             }
 
-            ObjRelationship relationship = (ObjRelationship) entity
-                    .getRelationship(prefetch.getPath());
+            ObjRelationship relationship = (ObjRelationship) entity.getRelationship(path);
             if (relationship == null) {
-                throw new CayenneRuntimeException("Invalid relationship: " + prefetch.getPath());
+                throw new CayenneRuntimeException("Invalid relationship: " + path);
             }
 
             if (relationship.isToMany()) {
                 throw new CayenneRuntimeException(
                         "Only to-one relationships are supported at the moment. "
                                 + "Can't prefetch to-many: "
-                                + prefetch.getPath());
+                                + path);
             }
 
-            PrefetchHelper.resolveToOneRelations(this, objects, prefetch.getPath());
+            PrefetchHelper.resolveToOneRelations(this, objects, path);
         }
-
     }
 
     /**

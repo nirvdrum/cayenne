@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.util.Collection;
-
 /**
  * A query that returns result set. Concrete implementations can be object queries, raw
  * sql queries, stored procedure queries, etc. The most commonly used GenericSelectQueries
@@ -212,9 +210,10 @@ public interface GenericSelectQuery extends Query {
     public int getFetchLimit();
 
     /**
-     * Returns a collection of prefetches.
+     * Returns a root node of prefetch tree used by this query, or null of no prefetches
+     * are configured.
      * 
      * @since 1.2
      */
-    public Collection getPrefetches();
+    public PrefetchTreeNode getPrefetchTree();
 }

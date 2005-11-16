@@ -68,9 +68,7 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataContextObjectFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.Prefetch;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
-import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
@@ -174,7 +172,7 @@ public class SelectObserver extends DefaultOperationObserver {
      * argument is assumed to be the root query, and the rest are either independent
      * queries or queries prefetching relationships for the root query.
      * <p>
-     * If no results are found, an empty immutable list is returned. Most common case for
+     * If no results are found, an empty mutable list is returned. Most common case for
      * this is when a delegate has blocked the query from execution.
      * </p>
      * <p>
@@ -201,42 +199,30 @@ public class SelectObserver extends DefaultOperationObserver {
         List mainRows = getResults(rootQuery);
 
         // take a shortcut for no prefetces...
-        if (rootQuery.getPrefetches().isEmpty()) {
+        if (rootQuery.getPrefetchTree() == null) {
             return factory.objectsFromDataRows(rootEntity, mainRows);
         }
 
-        // build prefetch tree and map results to prefetch paths
-        // TODO: Andrus, 11/15/2005 - tree will likely become a part of select query...
+        // map results to prefetch paths
+
         Map rowsByPath = new HashMap();
-        PrefetchTreeNode tree = new PrefetchTreeNode();
 
-        Iterator it = rootQuery.getPrefetches().iterator();
-        while (it.hasNext()) {
-            Prefetch p = (Prefetch) it.next();
+        // find result set
+        Iterator resultsIt = results.entrySet().iterator();
+        while (resultsIt.hasNext()) {
+            Map.Entry entry = (Map.Entry) resultsIt.next();
 
-            PrefetchTreeNode node = tree.addPath(p.getPath());
-            node.setPhantom(false);
-            node.setSemantics(p.getSemanticsHint());
-
-            // find result set
-            Iterator resultsIt = results.entrySet().iterator();
-            while (resultsIt.hasNext()) {
-                Map.Entry entry = (Map.Entry) resultsIt.next();
-
-                if (entry.getKey() instanceof PrefetchSelectQuery) {
-                    PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) entry
-                            .getKey();
-                    if (p.getPath().equals(prefetchQuery.getPrefetchPath())) {
-                        rowsByPath.put(p.getPath(), entry.getValue());
-                        break;
-                    }
-                }
+            if (entry.getKey() instanceof PrefetchSelectQuery) {
+                PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) entry.getKey();
+                rowsByPath.put(prefetchQuery.getPrefetchPath(), entry.getValue());
             }
-
         }
 
         ObjectTreeResolver resolver = new ObjectTreeResolver(rootEntity, factory);
-        return resolver.resolveObjectTree(tree, mainRows, rowsByPath);
+        return resolver.resolveObjectTree(
+                rootQuery.getPrefetchTree(),
+                mainRows,
+                rowsByPath);
     }
 
     /**
