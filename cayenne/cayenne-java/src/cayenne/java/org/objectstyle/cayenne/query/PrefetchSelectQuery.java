@@ -65,15 +65,16 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
- * A SelectQuery to perform a prefetch based on another query. Used internally
- * by Cayenne and is normally never used directly.
+ * A SelectQuery to perform a prefetch based on another query. Used internally by Cayenne
+ * and is normally never used directly.
  * 
  * @author Craig Miskell, Andrei Adamchik
  */
 public class PrefetchSelectQuery extends SelectQuery {
+
     protected SelectQuery parentQuery;
 
-    /** 
+    /**
      * The relationship path from root objects to the objects being prefetched.
      */
     protected String prefetchPath;
@@ -88,17 +89,15 @@ public class PrefetchSelectQuery extends SelectQuery {
      * 
      * @since 1.1
      */
-    public PrefetchSelectQuery(
-        EntityResolver resolver,
-        SelectQuery parentQuery,
-        String prefetch) {
+    public PrefetchSelectQuery(EntityResolver resolver, SelectQuery parentQuery,
+            String prefetch) {
 
         setParentQuery(parentQuery);
         setPrefetchPath(prefetch);
 
         ObjEntity entity = resolver.lookupObjEntity(parentQuery);
         EntityInheritanceTree inheritanceTree = resolver.lookupInheritanceTree(entity);
-        
+
         Iterator it = entity.resolvePathComponents(prefetch);
 
         // find root entity
@@ -109,8 +108,10 @@ public class PrefetchSelectQuery extends SelectQuery {
         }
 
         if (r == null) {
-            throw new CayenneRuntimeException(
-                "Invalid prefetch '" + prefetch + "' for entity: " + entity.getName());
+            throw new CayenneRuntimeException("Invalid prefetch '"
+                    + prefetch
+                    + "' for entity: "
+                    + entity.getName());
         }
 
         setRoot(r.getTargetEntity());
@@ -118,16 +119,12 @@ public class PrefetchSelectQuery extends SelectQuery {
         // chain query and entity qualifiers
         Expression queryQualifier = parentQuery.getQualifier();
 
-        Expression entityQualifier =
-            (inheritanceTree != null)
-                ? inheritanceTree.qualifierForEntityAndSubclasses()
-                : entity.getDeclaredQualifier();
+        Expression entityQualifier = (inheritanceTree != null) ? inheritanceTree
+                .qualifierForEntityAndSubclasses() : entity.getDeclaredQualifier();
 
         if (entityQualifier != null) {
-            queryQualifier =
-                (queryQualifier != null)
-                    ? queryQualifier.andExp(entityQualifier)
-                    : entityQualifier;
+            queryQualifier = (queryQualifier != null) ? queryQualifier
+                    .andExp(entityQualifier) : entityQualifier;
         }
 
         setQualifier(entity.translateToRelatedEntity(queryQualifier, prefetchPath));
@@ -137,9 +134,19 @@ public class PrefetchSelectQuery extends SelectQuery {
         }
     }
 
- 
+    /**
+     * Overrides super implementation to suppress disjoint prefetch routing, as the parent
+     * query should take care of that.
+     * 
+     * @since 1.2
+     */
+    void routePrefetches(QueryRouter router, EntityResolver resolver) {
+        // noop - intentional.
+    }
+
     /**
      * Returns the prefetchPath.
+     * 
      * @return String
      */
     public String getPrefetchPath() {
@@ -148,6 +155,7 @@ public class PrefetchSelectQuery extends SelectQuery {
 
     /**
      * Sets the prefetchPath.
+     * 
      * @param prefetchPath The prefetchPath to set
      */
     public void setPrefetchPath(String prefetchPath) {

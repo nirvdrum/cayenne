@@ -117,58 +117,6 @@ class ObjectTreeResolver {
                 : new ArrayList(1);
     }
 
-    final class JointPrefetchLookahead implements PrefetchProcessor {
-
-        boolean hasJointChildren;
-        PrefetchTreeNode root;
-
-        boolean hasJointChildren(PrefetchTreeNode node) {
-            this.hasJointChildren = false;
-            this.root = node;
-
-            node.traverse(this);
-            return hasJointChildren;
-        }
-
-        public void finishPrefetch(PrefetchTreeNode node) {
-            // noop
-        }
-
-        public boolean startDisjointPrefetch(PrefetchTreeNode node) {
-            return processNode(node);
-        }
-
-        public boolean startJointPrefetch(PrefetchTreeNode node) {
-            return processNode(node);
-        }
-
-        public boolean startPhantomPrefetch(PrefetchTreeNode node) {
-            return processNode(node);
-        }
-
-        public boolean startUnknownPrefetch(PrefetchTreeNode node) {
-            return processNode(node);
-        }
-
-        boolean processNode(PrefetchTreeNode node) {
-            if (hasJointChildren) {
-                return false;
-            }
-
-            if (node == root) {
-                return true;
-            }
-
-            if (node.isJointPrefetch()) {
-                hasJointChildren = true;
-                return false;
-            }
-
-            return true;
-        }
-
-    }
-
     // A PrefetchProcessor that creates a replica of a PrefetchTree with node
     // subclasses that can carry extra info needed during traversal.
     final class TreeBuilder implements PrefetchProcessor {
@@ -178,12 +126,10 @@ class ObjectTreeResolver {
 
         List mainResultRows;
         Map extraResultsByPath;
-        JointPrefetchLookahead helper;
 
         TreeBuilder(List mainResultRows, Map extraResultsByPath) {
             this.mainResultRows = mainResultRows;
             this.extraResultsByPath = extraResultsByPath;
-            this.helper = new JointPrefetchLookahead();
         }
 
         PrefetchProcessorNode buildTree(PrefetchTreeNode tree) {
@@ -221,7 +167,10 @@ class ObjectTreeResolver {
 
             // look ahead for joint children as joint children will require a different
             // node type.
-            PrefetchProcessorNode decorated = helper.hasJointChildren(node)
+
+            // TODO, Andrus, 11/16/2005 - minor inefficiency: 'adjacentJointNodes' would
+            // grab ALL nodes, we just need to find first and stop...
+            PrefetchProcessorNode decorated = !node.adjacentJointNodes().isEmpty()
                     ? decorated = new PrefetchProcessorJointNode(getParent(), node
                             .getName())
                     : new PrefetchProcessorNode(getParent(), node.getName());
@@ -241,16 +190,11 @@ class ObjectTreeResolver {
             decorated.setSemantics(PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
             boolean result = addNode(decorated);
 
-            // set "jointChildren" flag on first non-phantom parent
-            PrefetchProcessorNode parent = (PrefetchProcessorNode) decorated.getParent();
-            while (parent != null) {
-                parent.setJointChildren(true);
-
-                if (!parent.isPhantom()) {
-                    break;
-                }
-
-                parent = (PrefetchProcessorNode) parent.getParent();
+            // set "jointChildren" flag on all nodes in the same "join group"
+            PrefetchProcessorNode groupNode = (PrefetchProcessorNode) decorated;
+            while (groupNode.getParent() != null && !groupNode.isDisjointPrefetch()) {
+                groupNode = (PrefetchProcessorNode) groupNode.getParent();
+                groupNode.setJointChildren(true);
             }
 
             return result;

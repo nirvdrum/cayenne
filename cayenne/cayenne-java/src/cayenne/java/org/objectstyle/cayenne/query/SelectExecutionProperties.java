@@ -188,7 +188,8 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
 
     void setPrefetchTree(PrefetchTreeNode prefetchTree) {
         if (prefetchTree != null) {
-            // make a clone
+            // importnat: make a clone to allow modification independent from the
+            // caller...
             try {
                 prefetchTree = (PrefetchTreeNode) Util
                         .cloneViaSerialization(prefetchTree);

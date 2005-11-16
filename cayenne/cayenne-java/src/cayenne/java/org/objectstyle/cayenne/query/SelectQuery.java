@@ -225,11 +225,19 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public void route(QueryRouter router, EntityResolver resolver) {
-
         // route self
         super.route(router, resolver);
 
-        // create and route disjoint prefetch queries if any
+        // create queries for DISJOINT prefetches
+        routePrefetches(router, resolver);
+    }
+
+    /**
+     * Routes disjoint prefetches.
+     * 
+     * @since 1.2
+     */
+    void routePrefetches(QueryRouter router, EntityResolver resolver) {
         if (!isFetchingDataRows() && getPrefetchTree() != null) {
 
             Iterator it = getPrefetchTree().nonPhantomNodes().iterator();
@@ -246,6 +254,10 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
                             resolver,
                             this,
                             prefetch.getPath());
+
+                    // pass prefetch subtree to enable joint prefetches...
+                    prefetchQuery.setPrefetchTree(prefetch);
+
                     prefetchQuery.route(router, resolver);
                 }
             }

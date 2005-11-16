@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.query;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -83,7 +84,8 @@ public class PrefetchTreeNode implements Serializable, XMLSerializable {
     protected boolean phantom;
     protected int semantics;
 
-    protected PrefetchTreeNode parent;
+    // transient parent allows cloning parts of the tree via serialization
+    protected transient PrefetchTreeNode parent;
 
     // Using Collection instead of Map for children storage (even though there cases of
     // lookup by segment) is a reasonable tradeoff considering that
@@ -128,7 +130,11 @@ public class PrefetchTreeNode implements Serializable, XMLSerializable {
      * be an empty string.
      */
     public String getPath() {
-        if (parent == null) {
+        return getPath(null);
+    }
+
+    public String getPath(PrefetchTreeNode upTillParent) {
+        if (parent == null || upTillParent == this) {
             return "";
         }
 
@@ -136,7 +142,7 @@ public class PrefetchTreeNode implements Serializable, XMLSerializable {
         PrefetchTreeNode node = this.getParent();
 
         // root node has no path
-        while (node.getParent() != null) {
+        while (node.getParent() != null && node != upTillParent) {
             path.insert(0, node.getName() + ".");
             node = node.getParent();
         }
@@ -145,7 +151,18 @@ public class PrefetchTreeNode implements Serializable, XMLSerializable {
     }
 
     /**
-     * Returns a collection of PrefetchTreeNodes with joint semantics.
+     * Returns a subset of nodes with "joint" semantics that are to be prefetched in the
+     * same query as the current node. Result excludes this node, regardless of its
+     * semantics.
+     */
+    public Collection adjacentJointNodes() {
+        Collection c = new ArrayList();
+        traverse(new AdjacentJoinsOperation(c));
+        return c;
+    }
+
+    /**
+     * Returns a collection of PrefetchTreeNodes in this tree with joint semantics.
      */
     public Collection jointNodes() {
         Collection c = new ArrayList();
@@ -154,7 +171,7 @@ public class PrefetchTreeNode implements Serializable, XMLSerializable {
     }
 
     /**
-     * Returns a collection of PrefetchTreeNodes with dijoint semantics.
+     * Returns a collection of PrefetchTreeNodes with disjoint semantics.
      */
     public Collection disjointNodes() {
         Collection c = new ArrayList();
@@ -368,6 +385,23 @@ public class PrefetchTreeNode implements Serializable, XMLSerializable {
         return semantics == DISJOINT_PREFETCH_SEMANTICS;
     }
 
+    // **** custom serialization that supports serializing subtrees...
+
+    // implementing 'readResolve' instead of 'readObject' so that this would work with
+    // hessian
+    private Object readResolve() throws ObjectStreamException {
+
+        if (hasChildren()) {
+            Iterator it = children.iterator();
+            while (it.hasNext()) {
+                PrefetchTreeNode child = (PrefetchTreeNode) it.next();
+                child.parent = this;
+            }
+        }
+
+        return this;
+    }
+
     // **** common tree operations
 
     // An operation that encodes prefetch tree as XML.
@@ -457,6 +491,37 @@ public class PrefetchTreeNode implements Serializable, XMLSerializable {
                 nodes.add(node);
             }
             return true;
+        }
+
+        public void finishPrefetch(PrefetchTreeNode node) {
+        }
+    }
+
+    class AdjacentJoinsOperation implements PrefetchProcessor {
+
+        Collection nodes;
+
+        AdjacentJoinsOperation(Collection nodes) {
+            this.nodes = nodes;
+        }
+
+        public boolean startPhantomPrefetch(PrefetchTreeNode node) {
+            return true;
+        }
+
+        public boolean startDisjointPrefetch(PrefetchTreeNode node) {
+            return node == PrefetchTreeNode.this;
+        }
+
+        public boolean startJointPrefetch(PrefetchTreeNode node) {
+            if (node != PrefetchTreeNode.this) {
+                nodes.add(node);
+            }
+            return true;
+        }
+
+        public boolean startUnknownPrefetch(PrefetchTreeNode node) {
+            return node == PrefetchTreeNode.this;
         }
 
         public void finishPrefetch(PrefetchTreeNode node) {

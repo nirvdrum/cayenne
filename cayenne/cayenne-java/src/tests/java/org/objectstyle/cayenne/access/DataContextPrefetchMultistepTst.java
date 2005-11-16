@@ -184,10 +184,44 @@ public class DataContextPrefetchMultistepTst extends DataContextTestBase {
         assertTrue(e1.readPropertyDirectly("artistExhibitArray") instanceof ToManyList);
         ToManyList aexhibits = (ToManyList) e1.readPropertyDirectly("artistExhibitArray");
         assertFalse(aexhibits.needsFetch());
-        assertEquals(1, exhibits.size());
+        assertEquals(2, aexhibits.size());
 
         ArtistExhibit ae1 = (ArtistExhibit) aexhibits.get(0);
         assertEquals(PersistenceState.COMMITTED, ae1.getPersistenceState());
     }
 
+    public void testMixedPrefetch2() {
+
+        Expression e = Expression.fromString("galleryName = $name");
+        SelectQuery q = new SelectQuery(Gallery.class, e.expWithParameters(Collections
+                .singletonMap("name", "gallery2")));
+
+        // reverse the order of prefetches compared to the previous test
+        q.addPrefetch("exhibitArray");
+        q.addPrefetch("exhibitArray.artistExhibitArray").setSemantics(
+                PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
+
+        List galleries = context.performQuery(q);
+        assertEquals(1, galleries.size());
+
+        Gallery g2 = (Gallery) galleries.get(0);
+
+        // this relationship should be resolved
+        assertTrue(g2.readPropertyDirectly("exhibitArray") instanceof ToManyList);
+        ToManyList exhibits = (ToManyList) g2.readPropertyDirectly("exhibitArray");
+        assertFalse(exhibits.needsFetch());
+        assertEquals(1, exhibits.size());
+
+        Exhibit e1 = (Exhibit) exhibits.get(0);
+        assertEquals(PersistenceState.COMMITTED, e1.getPersistenceState());
+
+        // this to-many must also be resolved
+        assertTrue(e1.readPropertyDirectly("artistExhibitArray") instanceof ToManyList);
+        ToManyList aexhibits = (ToManyList) e1.readPropertyDirectly("artistExhibitArray");
+        assertFalse(aexhibits.needsFetch());
+        assertEquals(2, aexhibits.size());
+
+        ArtistExhibit ae1 = (ArtistExhibit) aexhibits.get(0);
+        assertEquals(PersistenceState.COMMITTED, ae1.getPersistenceState());
+    }
 }

@@ -462,9 +462,12 @@ public class SelectTranslator extends QueryAssembler {
             }
         }
 
-        // handle joint prefetches
+        // handle joint prefetches directly attached to this query...
         if (query.getPrefetchTree() != null) {
-            Iterator jointPrefetches = query.getPrefetchTree().jointNodes().iterator();
+            Iterator jointPrefetches = query
+                    .getPrefetchTree()
+                    .adjacentJointNodes()
+                    .iterator();
             while (jointPrefetches.hasNext()) {
                 PrefetchTreeNode prefetch = (PrefetchTreeNode) jointPrefetches.next();
 

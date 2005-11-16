@@ -172,13 +172,18 @@ class PrefetchProcessorJointNode extends PrefetchProcessorNode {
     private void buildRowMapping() {
         Map targetSource = new TreeMap();
 
-        // build a DB path
-        PrefetchProcessorNode root = (PrefetchProcessorNode) getRoot();
+        // build a DB path .. find parent node that terminates the joint group...
+        PrefetchTreeNode jointRoot = this;
+        while (jointRoot.getParent() != null && !jointRoot.isDisjointPrefetch()) {
+            jointRoot = jointRoot.getParent();
+        }
 
         String prefix;
-        if (root != this) {
-            Expression objectPath = Expression.fromString(getPath());
-            ASTPath translated = (ASTPath) root.getEntity().translateToDbPath(objectPath);
+        if (jointRoot != this) {
+            Expression objectPath = Expression.fromString(getPath(jointRoot));
+            ASTPath translated = (ASTPath) ((PrefetchProcessorNode) jointRoot)
+                    .getEntity()
+                    .translateToDbPath(objectPath);
 
             // make sure we do not include "db:" prefix
             prefix = translated.getOperand(0) + ".";
