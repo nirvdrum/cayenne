@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ObjectStore;
-import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.PrefetchProcessor;
@@ -283,7 +283,7 @@ class ObjectTreeResolver {
             List objects;
 
             // disjoint node that is an instance of DecoratedJointNode is a top
-            // of a local joint prefetch "cluster"...
+            // of a local joint prefetch "group"...
             if (processorNode instanceof PrefetchProcessorJointNode) {
                 JointProcessor subprocessor = new JointProcessor(
                         (PrefetchProcessorJointNode) processorNode);
@@ -296,6 +296,7 @@ class ObjectTreeResolver {
                 objects = processorNode.getObjects();
             }
             else {
+
                 objects = factory.objectsFromDataRows(
                         processorNode.getEntity(),
                         processorNode.getDataRows());
@@ -311,42 +312,58 @@ class ObjectTreeResolver {
             // create temporary relationship mapping if needed...
             if (processorNode.isPartitionedByParent()) {
 
-                Class sourceObjectClass = processorNode.getEntity().getJavaClass();
-                ObjRelationship reverseRelationship = processorNode
-                        .getIncoming()
-                        .getReverseRelationship();
+                // resolve a few things used in the loop below:
 
-                // Used within the loop below.. obtain and cast only once
-                DbRelationship dbRelationship = (DbRelationship) processorNode
+                DbEntity sourceDbEntity = null;
+                Class sourceObjectClass = null;
+                String relatedIdPrefix = null;
+
+                // determine resolution strategy
+                ObjRelationship reverseRelationship = (!processorNode
                         .getIncoming()
-                        .getDbRelationships()
-                        .get(0);
+                        .isFlattened()) ? processorNode
+                        .getIncoming()
+                        .getReverseRelationship() : null;
+
+                // if null, prepare for manual matching
+                if (reverseRelationship == null) {
+                    relatedIdPrefix = processorNode
+                            .getIncoming()
+                            .getReverseDbRelationshipPath()
+                            + ".";
+
+                    ObjEntity sourceObjEntity = (ObjEntity) processorNode
+                            .getIncoming()
+                            .getSourceEntity();
+                    sourceDbEntity = sourceObjEntity.getDbEntity();
+                    sourceObjectClass = sourceObjEntity.getJavaClass();
+                }
 
                 Iterator it = objects.iterator();
                 while (it.hasNext()) {
                     DataObject destinationObject = (DataObject) it.next();
                     DataObject sourceObject = null;
-                    
+
                     if (reverseRelationship != null) {
                         sourceObject = (DataObject) destinationObject
                                 .readProperty(reverseRelationship.getName());
                     }
                     else {
-                        // Reverse relationship doesn't exist... match objects manually
                         DataContext context = destinationObject.getDataContext();
                         ObjectStore objectStore = context.getObjectStore();
 
-                        Map sourcePk = dbRelationship
-                                .srcPkSnapshotWithTargetSnapshot(objectStore.getSnapshot(
-                                        destinationObject.getObjectId(),
-                                        context));
+                        // prefetched snapshots contain parent ids prefixed with
+                        // relationship name.
 
-                        // If object does not exist yet, don't create it.
-                        // This likely happens due to the absent intermediate prefetch,
-                        // which is a totally valid situation
-                        sourceObject = objectStore.getObject(new ObjectId(
+                        DataRow snapshot = objectStore.getSnapshot(destinationObject
+                                .getObjectId(), context);
+
+                        ObjectId id = snapshot.createObjectId(
                                 sourceObjectClass,
-                                sourcePk));
+                                sourceDbEntity,
+                                relatedIdPrefix);
+
+                        sourceObject = objectStore.getObject(id);
                     }
 
                     // don't attach to hollow objects

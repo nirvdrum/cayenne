@@ -421,7 +421,7 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Reverses dbRelationship path.
+     * Returns a reversed dbRelationship path.
      * 
      * @since 1.2
      */

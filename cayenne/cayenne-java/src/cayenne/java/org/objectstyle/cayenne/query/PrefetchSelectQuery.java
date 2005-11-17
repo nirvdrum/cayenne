@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne.query;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -63,6 +66,7 @@ import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * A SelectQuery to perform a prefetch based on another query. Used internally by Cayenne
@@ -84,10 +88,18 @@ public class PrefetchSelectQuery extends SelectQuery {
      */
     protected ObjRelationship lastPrefetchHint;
 
+    // TODO, Andrus 11/17/2005 - i guess we should deprecate
+    // SelectQuery.customDbAttribute, replacing it with "resultPaths" mechanism.
+    protected Collection resultPaths;
+
     /**
      * Creates a prefetch query based on parent query.
      * 
      * @since 1.1
+     * @deprecated since 1.2 - passing EntityResolver in constructor is no longer needed,
+     *             as prefetch query configuration alogrithm is moved out of this class.
+     *             In fact this constructor will not correctly configure query to handle
+     *             flattened prefetches.
      */
     public PrefetchSelectQuery(EntityResolver resolver, SelectQuery parentQuery,
             String prefetch) {
@@ -135,6 +147,20 @@ public class PrefetchSelectQuery extends SelectQuery {
     }
 
     /**
+     * Creates a new disjoint prefetch select query.
+     * 
+     * @since 1.2
+     */
+    public PrefetchSelectQuery(SelectQuery parentQuery, String prefetchPath,
+            ObjRelationship lastPrefetchHint) {
+
+        setRoot(lastPrefetchHint.getTargetEntity());
+        this.parentQuery = parentQuery;
+        this.prefetchPath = prefetchPath;
+        this.lastPrefetchHint = lastPrefetchHint;
+    }
+
+    /**
      * Overrides super implementation to suppress disjoint prefetch routing, as the parent
      * query should take care of that.
      * 
@@ -177,6 +203,8 @@ public class PrefetchSelectQuery extends SelectQuery {
     }
 
     /**
+     * Retunrs last incoming ObjRelationship in the prefetch relationship chain.
+     * 
      * @since 1.1
      */
     public ObjRelationship getLastPrefetchHint() {
@@ -188,5 +216,57 @@ public class PrefetchSelectQuery extends SelectQuery {
      */
     public void setLastPrefetchHint(ObjRelationship relationship) {
         lastPrefetchHint = relationship;
+    }
+
+    /**
+     * Configures an "extra" path that will resolve to an extra column (or columns) in the
+     * result set.
+     * 
+     * @param path A valid path expression. E.g. "abc" or "db:ABC" or "abc.xyz".
+     * @since 1.2
+     */
+    public void addResultPath(String path) {
+        if (Util.isEmptyString(path)) {
+            throw new IllegalArgumentException("Invalid path: " + path);
+        }
+
+        nonNullResultPaths().add(path);
+    }
+
+    /**
+     * Removes an extra result path. Note that this method doesn't check for expression
+     * invariants, as it doesn't have a proper context to do so. E.g. for the purspose of
+     * this method "db:ARTIST_NAME" and "obj:artistName" are not the same, though both
+     * will resolve to the same column name.
+     */
+    public void removeResultPath(String path) {
+        if (resultPaths != null) {
+            resultPaths.remove(path);
+        }
+    }
+
+    /**
+     * Returns extra result paths.
+     * 
+     * @since 1.2
+     */
+    public Collection getResultPaths() {
+        return resultPaths != null
+                ? Collections.unmodifiableCollection(resultPaths)
+                : Collections.EMPTY_SET;
+    }
+
+    /**
+     * Returns a Collection that internally stores extra result paths, creating it on
+     * demand.
+     * 
+     * @since 1.2
+     */
+    Collection nonNullResultPaths() {
+        if (resultPaths == null) {
+            resultPaths = new HashSet();
+        }
+
+        return resultPaths;
     }
 }

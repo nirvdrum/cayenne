@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,35 +55,59 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.testdo.inherit.Department;
+import org.objectstyle.cayenne.testdo.inherit.Employee;
+import org.objectstyle.cayenne.testdo.inherit.Manager;
+import org.objectstyle.cayenne.unit.PeopleTestCase;
 
-import org.objectstyle.cayenne.access.MockQueryEngine;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.map.DataMap;
+public class SelectQueryPrefetchRouterActionQualifiedEntityTst extends PeopleTestCase {
 
-public class MockQueryRouter implements QueryRouter {
+    public void testPrefetchEmployee() throws Exception {
+        ObjEntity departmentEntity = getDomain().getEntityResolver().lookupObjEntity(
+                Department.class);
+        SelectQuery q = new SelectQuery(Employee.class, ExpressionFactory.matchExp(
+                "name",
+                "abc"));
 
-    protected List queries = new ArrayList();
+        q.addPrefetch(Employee.TO_DEPARTMENT_PROPERTY);
 
-    public void reset() {
-        this.queries = new ArrayList();
+        SelectQueryPrefetchRouterAction action = new SelectQueryPrefetchRouterAction();
+
+        MockQueryRouter router = new MockQueryRouter();
+        action.route(q, router, getDomain().getEntityResolver());
+        assertEquals(1, router.getQueryCount());
+
+        PrefetchSelectQuery prefetch = (PrefetchSelectQuery) router.getQueries().get(0);
+
+        assertSame(departmentEntity, prefetch.getRoot());
+        assertEquals(Expression.fromString("db:employees.NAME = 'abc' "
+                + "and (db:employees.PERSON_TYPE = 'EE' "
+                + "or db:employees.PERSON_TYPE = 'EM')"), prefetch.getQualifier());
     }
 
-    public List getQueries() {
-        return Collections.unmodifiableList(queries);
-    }
+    public void testPrefetchManager() throws Exception {
+        ObjEntity departmentEntity = getDomain().getEntityResolver().lookupObjEntity(
+                Department.class);
+        SelectQuery q = new SelectQuery(Manager.class, ExpressionFactory.matchExp(
+                "name",
+                "abc"));
 
-    public int getQueryCount() {
-        return queries.size();
-    }
+        q.addPrefetch(Employee.TO_DEPARTMENT_PROPERTY);
 
-    public void useEngineForQuery(QueryEngine engine, Query query) {
-        queries.add(query);
-    }
+        SelectQueryPrefetchRouterAction action = new SelectQueryPrefetchRouterAction();
 
-    public QueryEngine engineForDataMap(DataMap map) {
-        return new MockQueryEngine();
+        MockQueryRouter router = new MockQueryRouter();
+        action.route(q, router, getDomain().getEntityResolver());
+        assertEquals(1, router.getQueryCount());
+
+        PrefetchSelectQuery prefetch = (PrefetchSelectQuery) router.getQueries().get(0);
+        assertSame(departmentEntity, prefetch.getRoot());
+        assertEquals(
+                Expression
+                        .fromString("db:employees.NAME = 'abc' and db:employees.PERSON_TYPE = 'EM'"),
+                prefetch.getQualifier());
     }
 }

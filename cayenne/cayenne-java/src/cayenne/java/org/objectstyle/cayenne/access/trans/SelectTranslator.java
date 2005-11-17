@@ -439,37 +439,82 @@ public class SelectTranslator extends QueryAssembler {
         }
 
         // special handling of a disjoint query...
+
+        // TODO, Andrus 11/17/2005 - resultPath mechansim is generic and should probably
+        // be moved in the superclass (SelectQuery), replacing customDbAttributes.
+
         if (query instanceof PrefetchSelectQuery) {
 
-            // add FKs for Prefetch selects for to-many ObjRelationships with no reverse
-            PrefetchSelectQuery pq = (PrefetchSelectQuery) query;
-            ObjRelationship r = pq.getLastPrefetchHint();
-            if ((r != null) && (r.getReverseRelationship() == null)) {
+            Iterator extraPaths = ((PrefetchSelectQuery) query)
+                    .getResultPaths()
+                    .iterator();
 
-                // Prefetching a single step toMany relationship which
-                // has no reverse obj relationship. Add the FK attributes
-                // of the relationship (wouldn't otherwise be included)
+            // for each relationship path add closest FK or PK, for each attribute path,
+            // add specified column
+            while (extraPaths.hasNext()) {
 
-                // TODO: seems like a hack for srcPkSnapshotWithTargetSnapshot benefit;
-                // if we have a flat row with multiple joins, this will violate the naming
-                // conventions.
-                DbRelationship dbRel = (DbRelationship) r.getDbRelationships().get(0);
+                String path = (String) extraPaths.next();
+                Expression pathExp = oe.translateToDbPath(Expression.fromString(path));
 
-                List joins = dbRel.getJoins();
-                for (int j = 0; j < joins.size(); j++) {
-                    DbJoin join = (DbJoin) joins.get(j);
-                    DbAttribute target = join.getTarget();
-                    appendColumn(columns, null, target, attributes, null);
+                Iterator it = table.resolvePathComponents(pathExp);
+
+                // add joins and find terminating element
+                Object pathComponent = null;
+                while (it.hasNext()) {
+                    pathComponent = it.next();
+
+                    // do not add join for the last DB Rel
+                    if (it.hasNext() && pathComponent instanceof DbRelationship) {
+                        dbRelationshipAdded((DbRelationship) pathComponent);
+                    }
+                }
+
+                String labelPrefix = pathExp.toString().substring("db:".length());
+
+                // process terminating element
+                if (pathComponent instanceof DbAttribute) {
+
+                    // label prefix already includes relationship name
+                    appendColumn(
+                            columns,
+                            null,
+                            (DbAttribute) pathComponent,
+                            attributes,
+                            labelPrefix);
+                }
+                else if (pathComponent instanceof DbRelationship) {
+                    DbRelationship relationship = (DbRelationship) pathComponent;
+
+                    // add last join
+                    if (relationship.isToMany()) {
+                        dbRelationshipAdded(relationship);
+                    }
+
+                    Iterator joins = relationship.getJoins().iterator();
+                    while (joins.hasNext()) {
+                        DbJoin j = (DbJoin) joins.next();
+
+                        DbAttribute attribute = relationship.isToMany()
+                                ? j.getTarget()
+                                : j.getSource();
+
+                        // note that we my select a source attribute, but label it as
+                        // target for simplified snapshot processing
+                        appendColumn(columns, null, attribute, attributes, labelPrefix + '.'
+                                + j.getTargetName());
+                    }
                 }
             }
         }
 
         // handle joint prefetches directly attached to this query...
         if (query.getPrefetchTree() != null) {
+
             Iterator jointPrefetches = query
                     .getPrefetchTree()
                     .adjacentJointNodes()
                     .iterator();
+
             while (jointPrefetches.hasNext()) {
                 PrefetchTreeNode prefetch = (PrefetchTreeNode) jointPrefetches.next();
 
@@ -477,7 +522,6 @@ public class SelectTranslator extends QueryAssembler {
                 Expression prefetchExp = Expression.fromString(prefetch.getPath());
                 Expression dbPrefetch = oe.translateToDbPath(prefetchExp);
 
-                // find target entity
                 Iterator it = table.resolvePathComponents(dbPrefetch);
 
                 DbRelationship r = null;
@@ -514,6 +558,8 @@ public class SelectTranslator extends QueryAssembler {
                         .getTargetEntity()
                         .getAttributes()
                         .iterator();
+
+                String labelPrefix = dbPrefetch.toString().substring("db:".length());
                 while (targetObjAttrs.hasNext()) {
                     ObjAttribute oa = (ObjAttribute) targetObjAttrs.next();
                     Iterator dbPathIterator = oa.getDbPathIterator();
@@ -537,7 +583,7 @@ public class SelectTranslator extends QueryAssembler {
                                         oa,
                                         attribute,
                                         attributes,
-                                        dbPrefetch);
+                                        labelPrefix + '.' + attribute.getName());
                             }
                         }
                     }
@@ -551,7 +597,9 @@ public class SelectTranslator extends QueryAssembler {
                 while (targetAttributes.hasNext()) {
                     DbAttribute attribute = (DbAttribute) targetAttributes.next();
                     if (!skipColumns.contains(attribute)) {
-                        appendColumn(columns, null, attribute, attributes, dbPrefetch);
+                        appendColumn(columns, null, attribute, attributes, labelPrefix
+                                + '.'
+                                + attribute.getName());
                     }
                 }
             }
@@ -589,7 +637,7 @@ public class SelectTranslator extends QueryAssembler {
             ObjAttribute objAttribute,
             DbAttribute attribute,
             Set skipSet,
-            Expression dbPath) {
+            String label) {
 
         if (skipSet.add(attribute)) {
             String alias = aliasForTable((DbEntity) attribute.getEntity());
@@ -598,10 +646,8 @@ public class SelectTranslator extends QueryAssembler {
                     attribute,
                     alias) : new ColumnDescriptor(attribute, alias);
 
-            // used for joint prefetches
-            if (dbPath != null) {
-                String path = dbPath.toString().substring("db:".length());
-                column.setLabel(path + '.' + attribute.getName());
+            if (label != null) {
+                column.setLabel(label);
             }
 
             columns.add(column);

@@ -430,7 +430,10 @@ public class DbRelationship extends Relationship {
             Object val = targetSnapshot.get(join.getTargetName());
             if (val == null) {
                 throw new CayenneRuntimeException(
-                        "Some parts of FK are missing in snapshot, join: " + join);
+                        "Some parts of FK are missing in snapshot. Join: "
+                                + join
+                                + ", snapshot: "
+                                + targetSnapshot);
             }
 
             return Collections.singletonMap(join.getSourceName(), val);
@@ -444,7 +447,10 @@ public class DbRelationship extends Relationship {
             Object val = targetSnapshot.get(join.getTargetName());
             if (val == null) {
                 throw new CayenneRuntimeException(
-                        "Some parts of FK are missing in snapshot, join: " + join);
+                        "Some parts of FK are missing in snapshot. Join: "
+                                + join
+                                + ", snapshot: "
+                                + targetSnapshot);
             }
 
             idMap.put(join.getSourceName(), val);

@@ -53,7 +53,6 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
 package org.objectstyle.cayenne.query;
 
 import org.objectstyle.art.Artist;
@@ -64,42 +63,44 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-/**
- * @author Andrus Adamchik
- */
-public class PrefetchSelectQueryTst extends CayenneTestCase {
+public class SelectQueryPrefetchRouterActionTst extends CayenneTestCase {
 
-    /**
-     * @deprecated since 1.2
-     */
-    public void testPaintings1() throws Exception {
+    public void testPaintings1() {
         ObjEntity paintingEntity = getDomain().getEntityResolver().lookupObjEntity(
                 Painting.class);
         SelectQuery q = new SelectQuery(Artist.class, ExpressionFactory.matchExp(
                 "artistName",
                 "abc"));
+        q.addPrefetch(Artist.PAINTING_ARRAY_PROPERTY);
 
-        PrefetchSelectQuery prefetch = new PrefetchSelectQuery(getDomain()
-                .getEntityResolver(), q, "paintingArray");
+        SelectQueryPrefetchRouterAction action = new SelectQueryPrefetchRouterAction();
+
+        MockQueryRouter router = new MockQueryRouter();
+        action.route(q, router, getDomain().getEntityResolver());
+        assertEquals(1, router.getQueryCount());
+
+        PrefetchSelectQuery prefetch = (PrefetchSelectQuery) router.getQueries().get(0);
 
         assertSame(paintingEntity, prefetch.getRoot());
         assertEquals(Expression.fromString("db:toArtist.ARTIST_NAME = 'abc'"), prefetch
                 .getQualifier());
     }
 
-    /**
-     * @deprecated since 1.2
-     */
-    public void testPrefetchPaintings2() throws Exception {
+    public void testPrefetchPaintings2() {
         ObjEntity paintingEntity = getDomain().getEntityResolver().lookupObjEntity(
                 Painting.class);
 
         SelectQuery q = new SelectQuery(Artist.class, Expression
                 .fromString("artistName = 'abc' or artistName = 'xyz'"));
+        q.addPrefetch(Artist.PAINTING_ARRAY_PROPERTY);
 
-        PrefetchSelectQuery prefetch = new PrefetchSelectQuery(getDomain()
-                .getEntityResolver(), q, "paintingArray");
+        SelectQueryPrefetchRouterAction action = new SelectQueryPrefetchRouterAction();
 
+        MockQueryRouter router = new MockQueryRouter();
+        action.route(q, router, getDomain().getEntityResolver());
+        assertEquals(1, router.getQueryCount());
+
+        PrefetchSelectQuery prefetch = (PrefetchSelectQuery) router.getQueries().get(0);
         assertSame(paintingEntity, prefetch.getRoot());
         assertEquals(
                 Expression
@@ -107,23 +108,25 @@ public class PrefetchSelectQueryTst extends CayenneTestCase {
                 prefetch.getQualifier());
     }
 
-    /**
-     * @deprecated since 1.2
-     */
-    public void testGalleries() throws Exception {
+    public void testGalleries() {
         ObjEntity galleryEntity = getDomain().getEntityResolver().lookupObjEntity(
                 Gallery.class);
         SelectQuery q = new SelectQuery(Artist.class, ExpressionFactory.matchExp(
                 "artistName",
                 "abc"));
+        q.addPrefetch("paintingArray.toGallery");
 
-        PrefetchSelectQuery prefetch = new PrefetchSelectQuery(getDomain()
-                .getEntityResolver(), q, "paintingArray.toGallery");
+        SelectQueryPrefetchRouterAction action = new SelectQueryPrefetchRouterAction();
+
+        MockQueryRouter router = new MockQueryRouter();
+        action.route(q, router, getDomain().getEntityResolver());
+        assertEquals(1, router.getQueryCount());
+
+        PrefetchSelectQuery prefetch = (PrefetchSelectQuery) router.getQueries().get(0);
 
         assertSame(galleryEntity, prefetch.getRoot());
         assertEquals(Expression
                 .fromString("db:paintingArray.toArtist.ARTIST_NAME = 'abc'"), prefetch
                 .getQualifier());
     }
-
 }

@@ -78,9 +78,7 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
     }
 
 //    public void testManyToMany() throws Exception {
-//        // straight prefetch on a flattened relationship should be overwritten in runtime
-//        // to be joint...
-//
+//  
 //        createTestData("testPrefetch1");
 //
 //        SelectQuery q = new SelectQuery(Artist.class);

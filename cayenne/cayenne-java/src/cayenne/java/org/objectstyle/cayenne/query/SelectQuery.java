@@ -233,35 +233,12 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     }
 
     /**
-     * Analyzes the query, fixes prefetch semantics and routes disjoint prefetches.
+     * Creates and routes extra disjoint prefetch queries.
      * 
      * @since 1.2
      */
     void routePrefetches(QueryRouter router, EntityResolver resolver) {
-        if (!isFetchingDataRows() && getPrefetchTree() != null) {
-
-            Iterator it = getPrefetchTree().nonPhantomNodes().iterator();
-            while (it.hasNext()) {
-                PrefetchTreeNode prefetch = (PrefetchTreeNode) it.next();
-
-                // route prefetches with unknown semantics as disjoint...
-                if (!prefetch.isJointPrefetch()) {
-
-                    // TODO: with routing API, PrefetchSelectQuery no longer needs
-                    // EntityResolver to be passed in constructor, as it is passed during
-                    // routing. should refactor PrefetchSelectQuery
-                    PrefetchSelectQuery prefetchQuery = new PrefetchSelectQuery(
-                            resolver,
-                            this,
-                            prefetch.getPath());
-
-                    // pass prefetch subtree to enable joint prefetches...
-                    prefetchQuery.setPrefetchTree(prefetch);
-
-                    prefetchQuery.route(router, resolver);
-                }
-            }
-        }
+        new SelectQueryPrefetchRouterAction().route(this, router, resolver);
     }
 
     /**

@@ -168,42 +168,7 @@ public class DataRow extends HashMap {
     }
 
     public ObjectId createObjectId(Class objectClass, DbEntity entity) {
-
-        // ... handle special case - PK.size == 1
-        // use some not-so-significant optimizations...
-
-        List pk = entity.getPrimaryKey();
-        if (pk.size() == 1) {
-            DbAttribute attr = (DbAttribute) pk.get(0);
-            Object val = this.get(attr.getName());
-            if (val == null) {
-                throw new CayenneRuntimeException("Null value for '"
-                        + attr.getName()
-                        + "'. Snapshot: "
-                        + this);
-            }
-
-            return new ObjectId(objectClass, attr.getName(), val);
-        }
-
-        // ... handle generic case - PK.size > 1
-
-        Map idMap = new HashMap(pk.size() * 2);
-        Iterator it = pk.iterator();
-        while (it.hasNext()) {
-            DbAttribute attr = (DbAttribute) it.next();
-            Object val = this.get(attr.getName());
-            if (val == null) {
-                throw new CayenneRuntimeException("Null value for '"
-                        + attr.getName()
-                        + "'. Snapshot: "
-                        + this);
-            }
-
-            idMap.put(attr.getName(), val);
-        }
-
-        return new ObjectId(objectClass, idMap);
+        return createObjectId(objectClass, entity, null);
     }
 
     /**
@@ -219,6 +184,72 @@ public class DataRow extends HashMap {
 
         Map target = relationship.targetPkSnapshotWithSrcSnapshot(this);
         return (target != null) ? new ObjectId(targetClass, target) : null;
+    }
+
+    /**
+     * Extracts PK columns prefixed with some path. If namePrefix is null or empty, no
+     * prefixing is done.
+     * <p>
+     * Prefixing is useful when extracting an ObjectId of a target row from a row obtained
+     * via prefetching. namePrefix must omit the "db:" prefix and must end with ".", e.g.
+     * "TO_ARTIST.PAINTING_ARRAY."
+     * </p>
+     * 
+     * @since 1.2
+     */
+    public ObjectId createObjectId(Class objectClass, DbEntity entity, String namePrefix) {
+
+        boolean prefix = namePrefix != null && namePrefix.length() > 0;
+
+        // ... handle special case - PK.size == 1
+        // use some not-so-significant optimizations...
+
+        List pk = entity.getPrimaryKey();
+        if (pk.size() == 1) {
+            DbAttribute attribute = (DbAttribute) pk.get(0);
+
+            String key = (prefix) ? namePrefix + attribute.getName() : attribute
+                    .getName();
+
+            Object val = this.get(key);
+            if (val == null) {
+                throw new CayenneRuntimeException("Null value for '"
+                        + key
+                        + "'. Snapshot: "
+                        + this
+                        + ". Prefix: "
+                        + namePrefix);
+            }
+
+            // PUT without a prefix
+            return new ObjectId(objectClass, attribute.getName(), val);
+        }
+
+        // ... handle generic case - PK.size > 1
+
+        Map idMap = new HashMap(pk.size() * 2);
+        Iterator it = pk.iterator();
+        while (it.hasNext()) {
+            DbAttribute attribute = (DbAttribute) it.next();
+
+            String key = (prefix) ? namePrefix + attribute.getName() : attribute
+                    .getName();
+
+            Object val = this.get(key);
+            if (val == null) {
+                throw new CayenneRuntimeException("Null value for '"
+                        + key
+                        + "'. Snapshot: "
+                        + this
+                        + ". Prefix: "
+                        + namePrefix);
+            }
+
+            // PUT without a prefix
+            idMap.put(attribute.getName(), val);
+        }
+
+        return new ObjectId(objectClass, idMap);
     }
 
     public String toString() {

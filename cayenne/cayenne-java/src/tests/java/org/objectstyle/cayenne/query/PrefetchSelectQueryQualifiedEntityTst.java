@@ -68,37 +68,43 @@ import org.objectstyle.cayenne.unit.PeopleTestCase;
  * @author Andrei Adamchik
  */
 public class PrefetchSelectQueryQualifiedEntityTst extends PeopleTestCase {
-    public void testPrefetchEmployee() throws Exception {
-        ObjEntity departmentEntity =
-            getDomain().getEntityResolver().lookupObjEntity(Department.class);
-        SelectQuery q =
-            new SelectQuery(Employee.class, ExpressionFactory.matchExp("name", "abc"));
 
-        PrefetchSelectQuery prefetch =
-            new PrefetchSelectQuery(getDomain().getEntityResolver(), q, "toDepartment");
+    /**
+     * @deprecated since 1.2
+     */
+    public void testPrefetchEmployee() throws Exception {
+        ObjEntity departmentEntity = getDomain().getEntityResolver().lookupObjEntity(
+                Department.class);
+        SelectQuery q = new SelectQuery(Employee.class, ExpressionFactory.matchExp(
+                "name",
+                "abc"));
+
+        PrefetchSelectQuery prefetch = new PrefetchSelectQuery(getDomain()
+                .getEntityResolver(), q, "toDepartment");
 
         assertSame(departmentEntity, prefetch.getRoot());
-        assertEquals(
-            Expression.fromString(
-                "db:employees.NAME = 'abc' "
-                    + "and (db:employees.PERSON_TYPE = 'EE' "
-                    + "or db:employees.PERSON_TYPE = 'EM')"),
-            prefetch.getQualifier());
+        assertEquals(Expression.fromString("db:employees.NAME = 'abc' "
+                + "and (db:employees.PERSON_TYPE = 'EE' "
+                + "or db:employees.PERSON_TYPE = 'EM')"), prefetch.getQualifier());
     }
 
+    /**
+     * @deprecated since 1.2
+     */
     public void testPrefetchManager() throws Exception {
-        ObjEntity departmentEntity =
-            getDomain().getEntityResolver().lookupObjEntity(Department.class);
-        SelectQuery q =
-            new SelectQuery(Manager.class, ExpressionFactory.matchExp("name", "abc"));
+        ObjEntity departmentEntity = getDomain().getEntityResolver().lookupObjEntity(
+                Department.class);
+        SelectQuery q = new SelectQuery(Manager.class, ExpressionFactory.matchExp(
+                "name",
+                "abc"));
 
-        PrefetchSelectQuery prefetch =
-            new PrefetchSelectQuery(getDomain().getEntityResolver(), q, "toDepartment");
+        PrefetchSelectQuery prefetch = new PrefetchSelectQuery(getDomain()
+                .getEntityResolver(), q, "toDepartment");
 
         assertSame(departmentEntity, prefetch.getRoot());
         assertEquals(
-            Expression.fromString(
-                "db:employees.NAME = 'abc' and db:employees.PERSON_TYPE = 'EM'"),
-            prefetch.getQualifier());
+                Expression
+                        .fromString("db:employees.NAME = 'abc' and db:employees.PERSON_TYPE = 'EM'"),
+                prefetch.getQualifier());
     }
 }
