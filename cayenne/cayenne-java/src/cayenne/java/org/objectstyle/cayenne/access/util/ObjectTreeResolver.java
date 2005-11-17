@@ -316,7 +316,7 @@ class ObjectTreeResolver {
                         .getIncoming()
                         .getReverseRelationship();
 
-                // Might be used later on... obtain and cast only once
+                // Used within the loop below.. obtain and cast only once
                 DbRelationship dbRelationship = (DbRelationship) processorNode
                         .getIncoming()
                         .getDbRelationships()
@@ -326,6 +326,7 @@ class ObjectTreeResolver {
                 while (it.hasNext()) {
                     DataObject destinationObject = (DataObject) it.next();
                     DataObject sourceObject = null;
+                    
                     if (reverseRelationship != null) {
                         sourceObject = (DataObject) destinationObject
                                 .readProperty(reverseRelationship.getName());
@@ -340,9 +341,9 @@ class ObjectTreeResolver {
                                         destinationObject.getObjectId(),
                                         context));
 
-                        // if object does not exist yet, don't create it
-                        // the reason for its absense is likely due to the absent
-                        // intermediate prefetch
+                        // If object does not exist yet, don't create it.
+                        // This likely happens due to the absent intermediate prefetch,
+                        // which is a totally valid situation
                         sourceObject = objectStore.getObject(new ObjectId(
                                 sourceObjectClass,
                                 sourcePk));

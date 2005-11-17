@@ -63,7 +63,7 @@ import java.sql.ResultSet;
  * @author Andrei Adamchik
  * @deprecated Unused since 1.2. This interface is useless for queries with more than one
  *             ResultSet, also a reponsibility of creating ResultDescriptors
- *             (RowDescriptors in 1.2) was moved to actions.
+ *             (RowDescriptors in 1.2) is moved to actions.
  */
 public interface SelectQueryTranslator {
 

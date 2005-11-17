@@ -113,17 +113,28 @@ class PrefetchProcessorNode extends PrefetchTreeNode {
      */
     void linkToParent(DataObject object, DataObject parent) {
         if (parent != null) {
-            // TODO, andrus - 11/14/2005 - check for duplicates?
-            List peers = (List) partitionByParent.get(parent);
 
-            // wrap in a list even if relationship is to-one... will unwrap at the end of
-            // the processing cycle.
-            if (peers == null) {
-                peers = new ArrayList();
-                partitionByParent.put(parent, peers);
+            // if a relationship is to-one (i.e. flattened to-one), can connect right
+            // away....
+            if (!incoming.isToMany()) {
+                parent.writeProperty(getName(), object);
             }
+            else {
+                // TODO, andrus - 11/14/2005 - check for duplicates? Need to create a test
+                // case that doesn't place "DISTINCT" in query to check how duplicate
+                // processing is done.
+                List peers = (List) partitionByParent.get(parent);
 
-            peers.add(object);
+                // wrap in a list even if relationship is to-one... will unwrap at the end
+                // of
+                // the processing cycle.
+                if (peers == null) {
+                    peers = new ArrayList();
+                    partitionByParent.put(parent, peers);
+                }
+
+                peers.add(object);
+            }
         }
     }
 
@@ -175,20 +186,9 @@ class PrefetchProcessorNode extends PrefetchTreeNode {
             toManyList.setObjectList(related != null ? related : new ArrayList(1));
         }
         else {
-            Object value = null;
-
-            if (related == null || related.size() == 0) {
-                value = null;
-            }
-            else if (related.size() > 1) {
-                throw new CayenneRuntimeException("Expected one target object, got: "
-                        + related.size());
-            }
-            else {
-                value = related.get(0);
-            }
-
-            object.writeProperty(getName(), value);
+            // this should've been handled earlier in 'linkToParent'
+            throw new CayenneRuntimeException(
+                    "To-one relationship wasn't handled properly: " + incoming.getName());
         }
     }
 

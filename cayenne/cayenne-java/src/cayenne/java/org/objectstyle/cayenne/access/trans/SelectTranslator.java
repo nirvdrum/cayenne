@@ -438,8 +438,10 @@ public class SelectTranslator extends QueryAssembler {
             appendColumn(columns, null, dba, attributes, null);
         }
 
-        // add FKs for Prefetch selects for to-many ObjRelationships with no reverse
+        // special handling of a disjoint query...
         if (query instanceof PrefetchSelectQuery) {
+
+            // add FKs for Prefetch selects for to-many ObjRelationships with no reverse
             PrefetchSelectQuery pq = (PrefetchSelectQuery) query;
             ObjRelationship r = pq.getLastPrefetchHint();
             if ((r != null) && (r.getReverseRelationship() == null)) {

@@ -233,7 +233,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     }
 
     /**
-     * Routes disjoint prefetches.
+     * Analyzes the query, fixes prefetch semantics and routes disjoint prefetches.
      * 
      * @since 1.2
      */
