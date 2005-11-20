@@ -68,7 +68,6 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
-import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.dba.PkGenerator;
@@ -218,7 +217,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
         Level oldLevel = observerLogger.getLevel();
         observerLogger.setLevel(Level.ERROR);
         try {
-            context.performQueries(Collections.singletonList(q), new SelectObserver());
+            context.performQueries(Collections.singletonList(q), new QueryResult());
             fail("Query was invalid and was supposed to fail.");
         }
         catch (RuntimeException ex) {

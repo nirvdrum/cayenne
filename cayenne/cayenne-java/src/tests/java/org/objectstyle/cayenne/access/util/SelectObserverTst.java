@@ -60,16 +60,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.ObjectFactory;
-import org.objectstyle.cayenne.access.DataContextObjectFactory;
 import org.objectstyle.cayenne.access.DataContextTestBase;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * @author Andrei Adamchik
+ * @deprecated since 1.2 as SelectObserver is also deprecated.
  */
 public class SelectObserverTst extends DataContextTestBase {
 
@@ -96,22 +94,6 @@ public class SelectObserverTst extends DataContextTestBase {
         context.performQueries(Collections.singletonList(query), observer);
 
         List results = observer.getResultsAsObjects(context, query);
-        assertNotNull(results);
-        assertEquals(1, results.size());
-        assertTrue(results.get(0) instanceof Artist);
-    }
-
-    public void testResultsAsObjects() {
-        SelectObserver observer = new SelectObserver();
-        Expression qualifier = ExpressionFactory.matchExp("artistName", "artist2");
-        SelectQuery query = new SelectQuery(Artist.class, qualifier);
-        context.performQueries(Collections.singletonList(query), observer);
-
-        ObjectFactory factory = new DataContextObjectFactory(context, query
-                .isRefreshingObjects(), query.isResolvingInherited());
-        ObjEntity rootEntity = context.getEntityResolver().lookupObjEntity(query);
-
-        List results = observer.getResultsAsObjects(factory, rootEntity, query);
         assertNotNull(results);
         assertEquals(1, results.size());
         assertTrue(results.get(0) instanceof Artist);

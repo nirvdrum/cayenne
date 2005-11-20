@@ -53,35 +53,37 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.util;
+package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
+import org.objectstyle.art.Artist;
+import org.objectstyle.art.Gallery;
+import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.DataRow;
-import org.objectstyle.cayenne.MockObjectFactory;
-import org.objectstyle.cayenne.access.util.ObjectTreeResolver.TreeBuilder;
-import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.access.ObjectTreeResolver.TreeBuilder;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-public class ObjectTreeResolver_TreeBuilderTst extends TestCase {
+public class ObjectTreeResolver_TreeBuilderTst extends CayenneTestCase {
 
     public void testBuildTreeNoPrefetches() {
-        ObjEntity entity = new ObjEntity("test");
+
+        ObjEntity entity = getObjEntity("Artist");
         List dataRows = new ArrayList();
         dataRows.add(new DataRow(4));
         dataRows.add(new DataRow(4));
 
         PrefetchTreeNode tree = new PrefetchTreeNode();
         ObjectTreeResolver resolver = new ObjectTreeResolver(
+                createDataContext(),
                 entity,
-                new MockObjectFactory());
+                true,
+                true);
         TreeBuilder builder = resolver.new TreeBuilder(dataRows, new HashMap());
 
         PrefetchProcessorNode processingTree = builder.buildTree(tree);
@@ -91,103 +93,65 @@ public class ObjectTreeResolver_TreeBuilderTst extends TestCase {
         assertFalse(processingTree.isPartitionedByParent());
         assertTrue(processingTree.isDisjointPrefetch());
         assertSame(dataRows, processingTree.getDataRows());
-        assertSame(entity, processingTree.getEntity());
+        assertSame(entity, processingTree.getResolver().getEntity());
         assertNull(processingTree.getIncoming());
     }
 
     public void testBuildTreeWithPrefetches() {
-        ObjEntity e1 = new ObjEntity("e1");
-        final ObjEntity e2 = new ObjEntity("e2");
-        final ObjEntity e3 = new ObjEntity("e3");
-        final ObjEntity e4 = new ObjEntity("e4");
-        final ObjEntity e5 = new ObjEntity("e5");
 
-        ObjRelationship r12 = new ObjRelationship("abc") {
-
-            public Entity getTargetEntity() {
-                return e2;
-            }
-
-            public boolean isSourceIndependentFromTargetChange() {
-                return true;
-            }
-        };
-        e1.addRelationship(r12);
-
-        ObjRelationship r23 = new ObjRelationship("def") {
-
-            public Entity getTargetEntity() {
-                return e3;
-            }
-
-            public boolean isSourceIndependentFromTargetChange() {
-                return false;
-            }
-        };
-        e2.addRelationship(r23);
-
-        ObjRelationship r34 = new ObjRelationship("mnk") {
-
-            public Entity getTargetEntity() {
-                return e4;
-            }
-
-            public boolean isSourceIndependentFromTargetChange() {
-                return false;
-            }
-        };
-        e3.addRelationship(r34);
-
-        ObjRelationship r15 = new ObjRelationship("xyz") {
-
-            public Entity getTargetEntity() {
-                return e5;
-            }
-
-            public boolean isSourceIndependentFromTargetChange() {
-                return false;
-            }
-        };
-        e1.addRelationship(r15);
+        ObjEntity e1 = getObjEntity("Artist");
+        ObjEntity e2 = getObjEntity("Painting");
+        ObjEntity e3 = getObjEntity("Gallery");
+        ObjEntity e4 = getObjEntity("Exhibit");
+        ObjEntity e5 = getObjEntity("ArtistExhibit");
 
         List mainRows = new ArrayList();
         Map extraRows = new HashMap();
 
         PrefetchTreeNode tree = new PrefetchTreeNode();
-        tree.addPath("abc").setPhantom(false);
-        tree.addPath("abc.def.mnk").setPhantom(false);
-        tree.addPath("xyz").setPhantom(false);
+        tree.addPath(Artist.PAINTING_ARRAY_PROPERTY).setPhantom(false);
+        tree.addPath(
+                Artist.PAINTING_ARRAY_PROPERTY
+                        + "."
+                        + Painting.TO_GALLERY_PROPERTY
+                        + "."
+                        + Gallery.EXHIBIT_ARRAY_PROPERTY).setPhantom(false);
+        tree.addPath(Artist.ARTIST_EXHIBIT_ARRAY_PROPERTY).setPhantom(false);
 
-        ObjectTreeResolver resolver = new ObjectTreeResolver(e1, new MockObjectFactory());
+        ObjectTreeResolver resolver = new ObjectTreeResolver(
+                createDataContext(),
+                e1,
+                true,
+                true);
         TreeBuilder builder = resolver.new TreeBuilder(mainRows, extraRows);
 
         PrefetchProcessorNode n1 = builder.buildTree(tree);
 
         assertSame(mainRows, n1.getDataRows());
-        assertSame(e1, n1.getEntity());
+        assertSame(e1, n1.getResolver().getEntity());
 
-        PrefetchProcessorNode n2 = (PrefetchProcessorNode) n1.getNode("abc");
+        PrefetchProcessorNode n2 = (PrefetchProcessorNode) n1.getNode("paintingArray");
         assertNotNull(n2);
-        assertSame(e2, n2.getEntity());
+        assertSame(e2, n2.getResolver().getEntity());
         assertFalse(n2.isPhantom());
         assertTrue(n2.isPartitionedByParent());
 
-        PrefetchProcessorNode n3 = (PrefetchProcessorNode) n1.getNode("abc.def");
+        PrefetchProcessorNode n3 = (PrefetchProcessorNode) n1.getNode("paintingArray.toGallery");
         assertNotNull(n3);
-        assertSame(e3, n3.getEntity());
+        assertSame(e3, n3.getResolver().getEntity());
         assertTrue(n3.isPhantom());
         assertFalse(n3.isPartitionedByParent());
 
-        PrefetchProcessorNode n4 = (PrefetchProcessorNode) n1.getNode("abc.def.mnk");
+        PrefetchProcessorNode n4 = (PrefetchProcessorNode) n1.getNode("paintingArray.toGallery.exhibitArray");
         assertNotNull(n4);
-        assertSame(e4, n4.getEntity());
+        assertSame(e4, n4.getResolver().getEntity());
         assertFalse(n4.isPhantom());
-        assertFalse(n4.isPartitionedByParent());
+        assertTrue(n4.isPartitionedByParent());
 
-        PrefetchProcessorNode n5 = (PrefetchProcessorNode) n1.getNode("xyz");
+        PrefetchProcessorNode n5 = (PrefetchProcessorNode) n1.getNode("artistExhibitArray");
         assertNotNull(n5);
-        assertSame(e5, n5.getEntity());
+        assertSame(e5, n5.getResolver().getEntity());
         assertFalse(n5.isPhantom());
-        assertFalse(n5.isPartitionedByParent());
+        assertTrue(n5.isPartitionedByParent());
     }
 }

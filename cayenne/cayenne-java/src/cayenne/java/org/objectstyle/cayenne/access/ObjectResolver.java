@@ -62,41 +62,39 @@ import java.util.List;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
-import org.objectstyle.cayenne.ObjectFactory;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 /**
- * An ObjectFactory compatible with pre-ObjectContext DataContext.
+ * DataRows-to-objects converter for a specific ObjEntity.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-// TODO: had to make it public as SelectObserver needs to access this class
-// get rid of it all together until 1.2 goes beta.
-public class DataContextObjectFactory implements ObjectFactory {
+class ObjectResolver {
 
     DataContext context;
+    ObjEntity entity;
+    EntityInheritanceTree inheritanceTree;
     boolean refreshObjects;
     boolean resolveInheritance;
 
-    public DataContextObjectFactory(DataContext context, boolean refreshObjects,
-            boolean resolveInheritance) {
-        this.context = context;
-        this.refreshObjects = refreshObjects;
-        this.resolveInheritance = resolveInheritance;
+    ObjectResolver(DataContext context, GenericSelectQuery query) {
+        this(context, context.getEntityResolver().lookupObjEntity(query), query);
     }
 
-    public List objectsFromDataRows(ObjEntity entity, List rows) {
-        if (rows == null || rows.size() == 0) {
-            return new ArrayList(1);
-        }
+    ObjectResolver(DataContext context, ObjEntity entity, GenericSelectQuery query) {
+        this(context, entity, query.isRefreshingObjects(), query.isResolvingInherited());
+    }
 
-        // do a sanity check on ObjEntity... if it's DbEntity has no PK defined,
-        // we can't build a valid ObjectId
+    ObjectResolver(DataContext context, ObjEntity entity, boolean refresh,
+            boolean resolveInheritanceHierarchy) {
+
+        // sanity check
         DbEntity dbEntity = entity.getDbEntity();
         if (dbEntity == null) {
             throw new CayenneRuntimeException("ObjEntity '"
@@ -105,70 +103,45 @@ public class DataContextObjectFactory implements ObjectFactory {
         }
 
         if (dbEntity.getPrimaryKey().size() == 0) {
-            throw new CayenneRuntimeException("Can't create ObjectId for '"
+            throw new CayenneRuntimeException("Won't be able to create ObjectId for '"
                     + entity.getName()
                     + "'. Reason: DbEntity '"
                     + dbEntity.getName()
                     + "' has no Primary Key defined.");
         }
 
-        // check inheritance
-        EntityInheritanceTree tree = null;
-        if (resolveInheritance) {
-            tree = context.getEntityResolver().lookupInheritanceTree(entity);
+        this.context = context;
+        this.refreshObjects = refresh;
+        this.entity = entity;
+        this.inheritanceTree = context.getEntityResolver().lookupInheritanceTree(entity);
+        this.resolveInheritance = (inheritanceTree != null)
+                ? resolveInheritanceHierarchy
+                : false;
+    }
+
+    /**
+     * Processes a list of rows. This method does all needed internal snchronization and
+     * object store updates.
+     */
+    List objectsFromDataRows(List rows) {
+        if (rows == null || rows.size() == 0) {
+            return new ArrayList(1);
         }
 
         List results = new ArrayList(rows.size());
+
         Iterator it = rows.iterator();
 
         // must do double sync...
         synchronized (context.getObjectStore()) {
             synchronized (context.getObjectStore().getDataRowCache()) {
                 while (it.hasNext()) {
-                    DataRow dataRow = (DataRow) it.next();
-
-                    // determine entity to use
-                    ObjEntity objectEntity = entity;
-
-                    if (tree != null) {
-                        objectEntity = tree.entityMatchingRow(dataRow);
-
-                        // still null.... looks like inheritance qualifiers are messed up
-                        if (objectEntity == null) {
-                            objectEntity = entity;
-                        }
-                    }
-
-                    ObjectId anId = dataRow.createObjectId(objectEntity);
-
-                    // this will create a HOLLOW object if it is not registered yet
-                    DataObject object = context.registeredObject(anId);
-
-                    // deal with object state
-                    int state = object.getPersistenceState();
-                    switch (state) {
-                        case PersistenceState.COMMITTED:
-                        case PersistenceState.MODIFIED:
-                        case PersistenceState.DELETED:
-                            // process the above only if refresh is requested...
-                            if (!refreshObjects) {
-                                break;
-                            }
-                        case PersistenceState.HOLLOW:
-                            DataRowUtils.mergeObjectWithSnapshot(objectEntity,
-                                    object,
-                                    dataRow);
-                        default:
-                            break;
-                    }
-
-                    object.setSnapshotVersion(dataRow.getVersion());
-                    object.fetchFinished();
-                    results.add(object);
+                    results.add(objectFromDataRow((DataRow) it.next()));
                 }
 
                 // now deal with snapshots
-                context.getObjectStore().snapshotsUpdatedForObjects(results,
+                context.getObjectStore().snapshotsUpdatedForObjects(
+                        results,
                         rows,
                         refreshObjects);
             }
@@ -177,4 +150,51 @@ public class DataContextObjectFactory implements ObjectFactory {
         return results;
     }
 
+    /**
+     * Processes a single row. This method does not synchronize on ObjectStore and doesn't
+     * send snapshot updates. These are resposnibilities of the caller.
+     */
+    Object objectFromDataRow(DataRow row) {
+
+        // determine entity to use
+        ObjEntity objectEntity = entity;
+
+        if (resolveInheritance) {
+            objectEntity = inheritanceTree.entityMatchingRow(row);
+
+            // still null.... looks like inheritance qualifiers are messed up
+            if (objectEntity == null) {
+                objectEntity = entity;
+            }
+        }
+
+        ObjectId anId = row.createObjectId(objectEntity);
+
+        // this will create a HOLLOW object if it is not registered yet
+        DataObject object = context.registeredObject(anId);
+
+        // deal with object state
+        int state = object.getPersistenceState();
+        switch (state) {
+            case PersistenceState.COMMITTED:
+            case PersistenceState.MODIFIED:
+            case PersistenceState.DELETED:
+                // process the above only if refresh is requested...
+                if (!refreshObjects) {
+                    break;
+                }
+            case PersistenceState.HOLLOW:
+                DataRowUtils.mergeObjectWithSnapshot(objectEntity, object, row);
+            default:
+                break;
+        }
+
+        object.setSnapshotVersion(row.getVersion());
+        object.fetchFinished();
+        return object;
+    }
+
+    ObjEntity getEntity() {
+        return entity;
+    }
 }

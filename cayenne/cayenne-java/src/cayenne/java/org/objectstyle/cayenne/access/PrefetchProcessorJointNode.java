@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.util;
+package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -181,7 +181,7 @@ class PrefetchProcessorJointNode extends PrefetchProcessorNode {
         String prefix;
         if (jointRoot != this) {
             Expression objectPath = Expression.fromString(getPath(jointRoot));
-            ASTPath translated = (ASTPath) ((PrefetchProcessorNode) jointRoot)
+            ASTPath translated = (ASTPath) ((PrefetchProcessorNode) jointRoot).getResolver()
                     .getEntity()
                     .translateToDbPath(objectPath);
 
@@ -226,7 +226,7 @@ class PrefetchProcessorJointNode extends PrefetchProcessorNode {
         }
 
         // add class attributes
-        Iterator attributes = getEntity().getAttributes().iterator();
+        Iterator attributes = getResolver().getEntity().getAttributes().iterator();
         while (attributes.hasNext()) {
             ObjAttribute attribute = (ObjAttribute) attributes.next();
             String target = attribute.getDbAttributePath();
@@ -235,7 +235,7 @@ class PrefetchProcessorJointNode extends PrefetchProcessorNode {
         }
 
         // add relationships
-        Iterator relationships = entity.getRelationships().iterator();
+        Iterator relationships = getResolver().getEntity().getRelationships().iterator();
         while (relationships.hasNext()) {
             ObjRelationship rel = (ObjRelationship) relationships.next();
             DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
@@ -250,7 +250,7 @@ class PrefetchProcessorJointNode extends PrefetchProcessorNode {
         }
 
         // add unmapped PK
-        Iterator pks = getEntity().getDbEntity().getPrimaryKey().iterator();
+        Iterator pks = getResolver().getEntity().getDbEntity().getPrimaryKey().iterator();
         while (pks.hasNext()) {
             DbAttribute pk = (DbAttribute) pks.next();
             appendColumn(targetSource, pk.getName(), prefix + pk.getName());
@@ -280,7 +280,7 @@ class PrefetchProcessorJointNode extends PrefetchProcessorNode {
      */
     private void buildPKIndex() {
         // index PK
-        List pks = getEntity().getDbEntity().getPrimaryKey();
+        List pks = getResolver().getEntity().getDbEntity().getPrimaryKey();
         this.idIndices = new int[pks.size()];
 
         // this is needed for checking that a valid index is made

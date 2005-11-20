@@ -53,12 +53,13 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne.access;
 
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneContext;
 import org.objectstyle.cayenne.ValueHolder;
+import org.objectstyle.cayenne.access.ClientServerChannel;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.opp.OPPServerChannel;
 import org.objectstyle.cayenne.opp.LocalConnection;

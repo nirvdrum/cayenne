@@ -58,11 +58,11 @@ package org.objectstyle.cayenne;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.cayenne.access.ClientServerChannel;
 import org.objectstyle.cayenne.opp.OPPServerChannel;
 import org.objectstyle.cayenne.opp.LocalConnection;
 import org.objectstyle.cayenne.opp.OPPConnection;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
-import org.objectstyle.cayenne.service.ClientServerChannel;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;

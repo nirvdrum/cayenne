@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,57 +53,95 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne.access;
 
 import java.util.List;
 
-import org.objectstyle.cayenne.access.PersistenceContext;
-import org.objectstyle.cayenne.access.QueryResult;
-import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
- * An action that performs an updating query with a given persistence context.
+ * Executes non-selecting queries on behalf of DataDomain.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class PersistenceContextQueryAction {
+// Differences with DataContextSelectAction:
+// * shared cache handling is delegated to the underlying PersistenceContext.
+class ObjectDataContextSelectAction extends DataContextSelectAction {
 
-    EntityResolver resolver;
+    ObjectDataContext context;
 
-    public PersistenceContextQueryAction(EntityResolver resolver) {
-        this.resolver = resolver;
+    ObjectDataContextSelectAction(ObjectDataContext context) {
+        super(context);
+        this.context = context;
     }
 
-    QueryResult performMixed(PersistenceContext context, QueryExecutionPlan query) {
-        Query resolvedQuery = query.resolve(resolver);
+    List performQuery(QueryExecutionPlan queryPlan) {
+        GenericSelectQuery selectQuery = resolveQuery(queryPlan);
 
-        QueryResult resultCallback = new QueryResult();
-        context.performQuery(resolvedQuery, resultCallback);
-        return resultCallback;
+        // check if result pagination is requested
+        // let a list handle fetch in this case
+        if (selectQuery.getPageSize() > 0) {
+            return new IncrementalFaultList(context, selectQuery);
+        }
+
+        String cacheKey = selectQuery.getName();
+        boolean cacheResults = GenericSelectQuery.LOCAL_CACHE.equals(selectQuery
+                .getCachePolicy());
+
+        // get results from cache...
+        if (cacheResults) {
+
+            // sanity check
+            if (cacheKey == null) {
+                throw new CayenneRuntimeException(
+                        "Caching of unnamed queries is not supported.");
+            }
+
+            // results should have been stored as rows or objects when
+            // they were originally cached... do no conversions now
+            List results = context.getObjectStore().getCachedQueryResult(cacheKey);
+            if (results != null) {
+                return results;
+            }
+        }
+
+        // must fetch...
+        QueryResult observer = new QueryResult();
+        context.getParentContext().performQuery(selectQuery, observer);
+
+        List results;
+
+        if (selectQuery.isFetchingDataRows()) {
+            results = observer.getFirstRows(selectQuery);
+        }
+        else {
+            results = getResultsAsObjects(selectQuery, observer);
+        }
+
+        // cache results if needed
+        if (cacheResults) {
+            context.getObjectStore().cacheQueryResult(cacheKey, results);
+        }
+
+        return results;
     }
 
-    int[] performNonSelectingQuery(PersistenceContext context, QueryExecutionPlan query) {
+    /**
+     * Executes query resolving phase...
+     */
+    GenericSelectQuery resolveQuery(QueryExecutionPlan queryPlan) {
+        Query resolved = queryPlan.resolve(context.getEntityResolver());
 
-        Query resolvedQuery = query.resolve(resolver);
-
-        QueryResult resultCallback = new QueryResult();
-        context.performQuery(resolvedQuery, resultCallback);
-
-        List updateCounts = resultCallback.getUpdates(resolvedQuery);
-        if (updateCounts == null || updateCounts.isEmpty()) {
-            return new int[0];
+        if (!(resolved instanceof GenericSelectQuery)) {
+            throw new CayenneRuntimeException(
+                    "QueryExecutionPlan was resolved to a query that is not a GenericSelectQuery: "
+                            + resolved);
         }
 
-        int len = updateCounts.size();
-        int[] counts = new int[len];
-
-        for (int i = 0; i < len; i++) {
-            counts[i] = ((Number) updateCounts.get(i)).intValue();
-        }
-
-        return counts;
+        return (GenericSelectQuery) resolved;
     }
 }

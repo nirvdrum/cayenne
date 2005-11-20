@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne.access;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -64,8 +64,7 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.MockDataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.MockDataRowStore;
-import org.objectstyle.cayenne.access.MockPersistenceContext;
+import org.objectstyle.cayenne.access.ObjectDataContext;
 import org.objectstyle.cayenne.access.PersistenceContext;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.MockEntityResolver;

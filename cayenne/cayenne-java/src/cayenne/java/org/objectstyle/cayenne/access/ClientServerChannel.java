@@ -53,14 +53,13 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;

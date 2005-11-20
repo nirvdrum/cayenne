@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.util;
+package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,8 +63,6 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.access.ToManyList;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 
@@ -78,8 +76,9 @@ class PrefetchProcessorNode extends PrefetchTreeNode {
 
     List dataRows;
     List objects;
-    ObjEntity entity;
+
     ObjRelationship incoming;
+    ObjectResolver resolver;
 
     Map partitionByParent;
     boolean jointChildren;
@@ -97,6 +96,7 @@ class PrefetchProcessorNode extends PrefetchTreeNode {
      * all properties are initialized.
      */
     void afterInit() {
+
         partitionedByParent = !phantom
                 && incoming != null
                 && incoming.isSourceIndependentFromTargetChange();
@@ -200,12 +200,12 @@ class PrefetchProcessorNode extends PrefetchTreeNode {
         return objects;
     }
 
-    ObjEntity getEntity() {
-        return entity;
+    void setResolver(ObjectResolver resolver) {
+        this.resolver = resolver;
     }
 
-    void setEntity(ObjEntity entity) {
-        this.entity = entity;
+    ObjectResolver getResolver() {
+        return resolver;
     }
 
     ObjRelationship getIncoming() {

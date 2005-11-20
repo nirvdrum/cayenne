@@ -63,7 +63,7 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.util.SelectObserver;
+import org.objectstyle.cayenne.access.QueryResult;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.SQLTemplate;
@@ -141,10 +141,10 @@ public class FrontBasePkGenerator extends JdbcPkGenerator {
         String template = "SELECT #result('UNIQUE' 'int') FROM " + entity.getName();
 
         SQLTemplate query = new SQLTemplate(entity, template, true);
-        SelectObserver observer = new SelectObserver();
+        QueryResult observer = new QueryResult();
         node.performQueries(Collections.singleton(query), observer);
 
-        List results = observer.getResults(query);
+        List results = observer.getFirstRows(query);
         if (results.size() != 1) {
             throw new CayenneRuntimeException("Error fetching PK. Expected one row, got "
                     + results.size());

@@ -53,86 +53,107 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne.access;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.GlobalID;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.graph.GraphEvent;
-import org.objectstyle.cayenne.graph.NodeCreateOperation;
-import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SyncMessage;
-import org.objectstyle.cayenne.unit.AccessStack;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.CayenneTestResources;
+import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
+import org.objectstyle.cayenne.map.EntityResolver;
 
-public class ClientServerChannelEventsTst extends CayenneTestCase {
+/**
+ * Converts server-side commit GraphDiff to the client version, accumulating the result in
+ * an internal CompoundDiff.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+// TODO: currently only supports id change operations. When we can handle all operations,
+// this class can be used for pushing any type of synchronization diffs to the client...
+class ServerToClientDiffConverter implements GraphChangeHandler {
 
-    protected AccessStack buildAccessStack() {
-        return CayenneTestResources
-                .getResources()
-                .getAccessStack(MULTI_TIER_ACCESS_STACK);
+    EntityResolver resolver;
+    CompoundDiff clientDiff;
+
+    ServerToClientDiffConverter(EntityResolver resolver) {
+        this.resolver = resolver;
+        this.clientDiff = new CompoundDiff();
     }
 
-    public void testCommitEventSubject() {
-        CommitListener listener = new CommitListener();
-
-        ClientServerChannel channel = new ClientServerChannel(getDomain(), true);
-
-        channel.getEventManager().addListener(
-                listener,
-                "notificationPosted",
-                GraphEvent.class,
-                OPPChannel.GRAPH_COMMITTED_SUBJECT,
-                channel);
-
-        GraphDiff diff = new NodeCreateOperation(new GlobalID("MtTable1"));
-        channel.onSync(new SyncMessage(null, SyncMessage.COMMIT_TYPE, diff));
-
-        assertTrue(listener.notificationPosted);
+    GraphDiff getClientDiff() {
+        return clientDiff;
     }
 
-    public void testFlushEventSubject() {
-        CommitListener listener = new CommitListener();
-
-        ClientServerChannel channel = new ClientServerChannel(getDomain(), true);
-
-        channel.getEventManager().addListener(
-                listener,
-                "notificationPosted",
-                GraphEvent.class,
-                OPPChannel.GRAPH_CHANGED_SUBJECT,
-                channel);
-
-        GraphDiff diff = new NodeCreateOperation(new GlobalID("MtTable1"));
-        channel.onSync(new SyncMessage(null, SyncMessage.FLUSH_TYPE, diff));
-        assertTrue(listener.notificationPosted);
+    /**
+     * Does nothing.
+     */
+    public void graphCommitAborted() {
     }
 
-    public void testRollbackEventSubject() {
-        CommitListener listener = new CommitListener();
-
-        ClientServerChannel channel = new ClientServerChannel(getDomain(), true);
-
-        GraphDiff diff = new NodeCreateOperation(new GlobalID("MtTable1"));
-        channel.onSync(new SyncMessage(null, SyncMessage.FLUSH_TYPE, diff));
-
-        channel.getEventManager().addListener(
-                listener,
-                "notificationPosted",
-                GraphEvent.class,
-                OPPChannel.GRAPH_ROLLEDBACK_SUBJECT,
-                channel);
-
-        channel.onSync(new SyncMessage(null, SyncMessage.ROLLBACK_TYPE, null));
-        assertTrue(listener.notificationPosted);
+    /**
+     * Does nothing.
+     */
+    public void graphCommitStarted() {
     }
 
-    class CommitListener {
+    /**
+     * Does nothing.
+     */
+    public void graphCommitted() {
+    }
 
-        boolean notificationPosted;
+    /**
+     * Does nothing.
+     */
+    public void graphRolledback() {
+    }
 
-        void notificationPosted(GraphEvent e) {
-            notificationPosted = true;
+    public void nodeIdChanged(Object nodeId, Object newId) {
+        GlobalID nodeGlobalID = toGlobalID(nodeId);
+        GlobalID newGlobalID = toGlobalID(newId);
+        clientDiff.add(new NodeIdChangeOperation(nodeGlobalID, newGlobalID));
+    }
+
+    public void nodeCreated(Object nodeId) {
+        throw new CayenneRuntimeException("Unimplemented...");
+    }
+
+    public void nodeRemoved(Object nodeId) {
+        throw new CayenneRuntimeException("Unimplemented...");
+    }
+
+    public void nodePropertyChanged(
+            Object nodeId,
+            String property,
+            Object oldValue,
+            Object newValue) {
+        throw new CayenneRuntimeException("Unimplemented...");
+    }
+
+    public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
+        throw new CayenneRuntimeException("Unimplemented...");
+    }
+
+    public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
+        throw new CayenneRuntimeException("Unimplemented...");
+    }
+
+    GlobalID toGlobalID(Object nodeId) {
+        if (nodeId instanceof ObjectId) {
+            return resolver.convertToGlobalID((ObjectId) nodeId);
+        }
+        else if (nodeId instanceof GlobalID) {
+            return (GlobalID) nodeId;
+        }
+        else if (nodeId == null) {
+            throw new NullPointerException("Null ObjectId");
+        }
+        else {
+            throw new CayenneRuntimeException(
+                    "Server object identifier is expected to be ObjectId, got: " + nodeId);
         }
     }
 }

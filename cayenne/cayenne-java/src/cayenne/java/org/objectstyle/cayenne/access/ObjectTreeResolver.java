@@ -53,10 +53,9 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.util;
+package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,14 +64,12 @@ import java.util.Map;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
-import org.objectstyle.cayenne.ObjectFactory;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchProcessor;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 
@@ -86,12 +83,22 @@ import org.objectstyle.cayenne.query.PrefetchTreeNode;
  */
 class ObjectTreeResolver {
 
+    DataContext context;
     ObjEntity rootEntity;
-    ObjectFactory factory;
+    boolean refreshObjects;
+    boolean resolveInheritance;
 
-    ObjectTreeResolver(ObjEntity rootEntity, ObjectFactory factory) {
-        this.factory = factory;
+    ObjectTreeResolver(DataContext context, GenericSelectQuery rootQuery) {
+        this(context, context.getEntityResolver().lookupObjEntity(rootQuery), rootQuery
+                .isRefreshingObjects(), rootQuery.isResolvingInherited());
+    }
+
+    ObjectTreeResolver(DataContext context, ObjEntity rootEntity, boolean refresh,
+            boolean resolveInheritanceHierarchy) {
         this.rootEntity = rootEntity;
+        this.context = context;
+        this.refreshObjects = refresh;
+        this.resolveInheritance = resolveInheritanceHierarchy;
     }
 
     List resolveObjectTree(
@@ -220,14 +227,16 @@ class ObjectTreeResolver {
 
             if (currentNode != null) {
                 rows = (List) extraResultsByPath.get(node.getPath());
-                relationship = (ObjRelationship) currentNode.getEntity().getRelationship(
-                        node.getName());
+                relationship = (ObjRelationship) currentNode
+                        .getResolver()
+                        .getEntity()
+                        .getRelationship(node.getName());
 
                 if (relationship == null) {
                     throw new CayenneRuntimeException("No relationship with name '"
                             + node.getName()
                             + "' found in entity "
-                            + currentNode.getEntity().getName());
+                            + currentNode.getResolver().getEntity().getName());
                 }
 
                 entity = (ObjEntity) relationship.getTargetEntity();
@@ -239,7 +248,11 @@ class ObjectTreeResolver {
             }
 
             node.setDataRows(rows);
-            node.setEntity(entity);
+            node.setResolver(new ObjectResolver(
+                    context,
+                    entity,
+                    refreshObjects,
+                    resolveInheritance));
             node.setIncoming(relationship);
 
             if (currentNode != null) {
@@ -296,9 +309,7 @@ class ObjectTreeResolver {
                 objects = processorNode.getObjects();
             }
             else {
-
-                objects = factory.objectsFromDataRows(
-                        processorNode.getEntity(),
+                objects = processorNode.getResolver().objectsFromDataRows(
                         processorNode.getDataRows());
                 processorNode.setObjects(objects);
             }
@@ -427,14 +438,8 @@ class ObjectTreeResolver {
 
             if (object == null) {
 
-                // TODO: this should be optimized - DataContext.objectsFromDataRows does
-                // some batching that we should do once instead of N * M times (e.g.
-                // synchronization blocks, etc.)
                 DataRow row = processorNode.rowFromFlatRow(currentFlatRow);
-                List objects = factory.objectsFromDataRows(
-                        processorNode.getEntity(),
-                        Collections.singletonList(row));
-                object = (DataObject) objects.get(0);
+                object = (DataObject) processorNode.getResolver().objectFromDataRow(row);
 
                 processorNode.putResolved(id, object);
                 processorNode.addObject(object);
@@ -467,7 +472,7 @@ class ObjectTreeResolver {
     }
 
     // processor that converts temporary associations between DataObjects to Cayenne
-    // relationships.
+    // relationships and also fires snapshot update events
     final class PostProcessor implements PrefetchProcessor {
 
         public void finishPrefetch(PrefetchTreeNode node) {
@@ -475,6 +480,8 @@ class ObjectTreeResolver {
 
         public boolean startDisjointPrefetch(PrefetchTreeNode node) {
             ((PrefetchProcessorNode) node).connectToParents();
+            
+            
             return true;
         }
 
@@ -489,6 +496,17 @@ class ObjectTreeResolver {
 
         public boolean startUnknownPrefetch(PrefetchTreeNode node) {
             throw new CayenneRuntimeException("Unknown prefetch node: " + node);
+        }
+        
+        void postprocessNode(PrefetchProcessorNode node) {
+            node.connectToParents();
+            
+            if(!node.getObjects().isEmpty()) {
+                context.getObjectStore().snapshotsUpdatedForObjects(
+                        node.getObjects(),
+                        node.getDataRows(),
+                        refreshObjects);
+            }
         }
     }
 }

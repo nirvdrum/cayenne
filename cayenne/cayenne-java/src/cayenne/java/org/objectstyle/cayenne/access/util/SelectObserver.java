@@ -57,18 +57,14 @@
 package org.objectstyle.cayenne.access.util;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectFactory;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataContextObjectFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
@@ -88,7 +84,10 @@ import org.objectstyle.cayenne.util.Util;
  * target="_top">Cayenne User Guide. </a> </i>
  * </p>
  * 
+ * @deprecated since 1.2 SelectObserver is no longer used in Cayenne internally. Users
+ *             should switch to QueryResult.
  * @author Andrei Adamchik
+ * @see org.objectstyle.cayenne.access.QueryResult
  */
 public class SelectObserver extends DefaultOperationObserver {
 
@@ -150,7 +149,8 @@ public class SelectObserver extends DefaultOperationObserver {
 
     /**
      * @since 1.1
-     * @deprecated since 1.2 use ObjectFactory variety instead.
+     * @deprecated since 1.2. Note that this implementation no longer resolves prefetches
+     *             properly.
      */
     public List getResultsAsObjects(DataContext dataContext, Query rootQuery) {
 
@@ -160,69 +160,12 @@ public class SelectObserver extends DefaultOperationObserver {
         }
 
         GenericSelectQuery selectQuery = (GenericSelectQuery) rootQuery;
-
-        ObjectFactory factory = new DataContextObjectFactory(dataContext, selectQuery
-                .isRefreshingObjects(), selectQuery.isResolvingInherited());
         ObjEntity rootEntity = dataContext.getEntityResolver().lookupObjEntity(rootQuery);
-        return getResultsAsObjects(factory, rootEntity, selectQuery);
-    }
-
-    /**
-     * Returns results for a given query object as DataObjects. <code>rootQuery</code>
-     * argument is assumed to be the root query, and the rest are either independent
-     * queries or queries prefetching relationships for the root query.
-     * <p>
-     * If no results are found, an empty mutable list is returned. Most common case for
-     * this is when a delegate has blocked the query from execution.
-     * </p>
-     * <p>
-     * Side effect of this method call is that all data rows currently stored in this
-     * SelectObserver are loaded as objects to a given DataContext (thus resolving
-     * prefetched to-one relationships). Any to-many relationships for the root query are
-     * resolved as well.
-     * </p>
-     * 
-     * @since 1.2
-     */
-    public List getResultsAsObjects(
-            ObjectFactory factory,
-            ObjEntity rootEntity,
-            GenericSelectQuery rootQuery) {
-
-        // sanity check
-        if (rootEntity == null) {
-            throw new CayenneRuntimeException(
-                    "Can't instantiate DataObjects from resutls. ObjEntity is undefined for query: "
-                            + rootQuery);
-        }
-
-        List mainRows = getResults(rootQuery);
-
-        // take a shortcut for no prefetces...
-        if (rootQuery.getPrefetchTree() == null) {
-            return factory.objectsFromDataRows(rootEntity, mainRows);
-        }
-
-        // map results to prefetch paths
-
-        Map rowsByPath = new HashMap();
-
-        // find result set
-        Iterator resultsIt = results.entrySet().iterator();
-        while (resultsIt.hasNext()) {
-            Map.Entry entry = (Map.Entry) resultsIt.next();
-
-            if (entry.getKey() instanceof PrefetchSelectQuery) {
-                PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) entry.getKey();
-                rowsByPath.put(prefetchQuery.getPrefetchPath(), entry.getValue());
-            }
-        }
-
-        ObjectTreeResolver resolver = new ObjectTreeResolver(rootEntity, factory);
-        return resolver.resolveObjectTree(
-                rootQuery.getPrefetchTree(),
-                mainRows,
-                rowsByPath);
+        return dataContext.objectsFromDataRows(
+                rootEntity,
+                getResults(rootQuery),
+                selectQuery.isRefreshingObjects(),
+                selectQuery.isResolvingInherited());
     }
 
     /**

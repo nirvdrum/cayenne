@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne.access;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -64,8 +64,8 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.access.MockDataRowStore;
-import org.objectstyle.cayenne.access.MockPersistenceContext;
+import org.objectstyle.cayenne.access.ClientServerChannel;
+import org.objectstyle.cayenne.access.ObjectDataContext;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;

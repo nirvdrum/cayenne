@@ -57,13 +57,15 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectFactory;
-import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
@@ -149,19 +151,16 @@ class DataContextSelectAction {
         }
 
         // must fetch...
-        SelectObserver observer = new SelectObserver();
+        QueryResult observer = new QueryResult();
         context.performQueries(Collections.singletonList(query), observer);
 
         List results;
 
         if (query.isFetchingDataRows()) {
-            results = observer.getResults(query);
+            results = observer.getFirstRows(query);
         }
         else {
-            ObjectFactory factory = new DataContextObjectFactory(context, query
-                    .isRefreshingObjects(), query.isResolvingInherited());
-            ObjEntity rootEntity = context.getEntityResolver().lookupObjEntity(query);
-            results = observer.getResultsAsObjects(factory, rootEntity, query);
+            results = getResultsAsObjects(query, observer);
         }
 
         // cache results if needed
@@ -172,14 +171,50 @@ class DataContextSelectAction {
             else if (sharedCache) {
                 context.getObjectStore().getDataRowCache().cacheSnapshots(
                         cacheKey,
-                        observer.getResults(query));
+                        observer.getFirstRows(query));
             }
         }
 
         return results;
     }
-    
-    
+
+    List getResultsAsObjects(GenericSelectQuery rootQuery, QueryResult observer) {
+
+        List mainRows = observer.getFirstRows(rootQuery);
+
+        // take a shortcut when no prefetches exist...
+        if (rootQuery.getPrefetchTree() == null) {
+            return new ObjectResolver(context, rootQuery).objectsFromDataRows(mainRows);
+        }
+
+        // map results to prefetch paths
+        Map rowsByPath = new HashMap();
+
+        // find result set
+        Iterator it = observer.getQueries();
+
+        while (it.hasNext()) {
+            Query q = (Query) it.next();
+
+            if (q instanceof PrefetchSelectQuery) {
+                PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) q;
+                rowsByPath.put(prefetchQuery.getPrefetchPath(), observer.getFirstRows(q));
+            }
+        }
+
+        ObjectTreeResolver resolver = new ObjectTreeResolver(context, rootQuery);
+
+        // double-sync row processing
+        synchronized (context.getObjectStore()) {
+            synchronized (context.getObjectStore().getDataRowCache()) {
+                return resolver.resolveObjectTree(
+                        rootQuery.getPrefetchTree(),
+                        mainRows,
+                        rowsByPath);
+            }
+        }
+    }
+
     /**
      * Executes query resolving phase...
      */

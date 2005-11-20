@@ -53,22 +53,55 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.access;
 
 import java.util.List;
 
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
- * An interface for creating objects out of raw data.
+ * An action that performs an updating query with a given persistence context.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface ObjectFactory {
+class PersistenceContextQueryAction {
 
-    /**
-     * Returns a list of objects for a list of DataRows and a given entity.
-     */
-    List objectsFromDataRows(ObjEntity entity, List rows);
+    EntityResolver resolver;
+
+    public PersistenceContextQueryAction(EntityResolver resolver) {
+        this.resolver = resolver;
+    }
+
+    QueryResult performMixed(PersistenceContext context, QueryExecutionPlan query) {
+        Query resolvedQuery = query.resolve(resolver);
+
+        QueryResult resultCallback = new QueryResult();
+        context.performQuery(resolvedQuery, resultCallback);
+        return resultCallback;
+    }
+
+    int[] performNonSelectingQuery(PersistenceContext context, QueryExecutionPlan query) {
+
+        Query resolvedQuery = query.resolve(resolver);
+
+        QueryResult resultCallback = new QueryResult();
+        context.performQuery(resolvedQuery, resultCallback);
+
+        List updateCounts = resultCallback.getUpdates(resolvedQuery);
+        if (updateCounts == null || updateCounts.isEmpty()) {
+            return new int[0];
+        }
+
+        int len = updateCounts.size();
+        int[] counts = new int[len];
+
+        for (int i = 0; i < len; i++) {
+            counts[i] = ((Number) updateCounts.get(i)).intValue();
+        }
+
+        return counts;
+    }
 }

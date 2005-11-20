@@ -72,7 +72,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
-import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.event.EventBridge;
 import org.objectstyle.cayenne.event.EventBridgeFactory;
 import org.objectstyle.cayenne.event.EventManager;
@@ -333,9 +332,9 @@ public class DataRowStore implements Serializable {
 
         // TODO: replace this with SingleObjectQuery...
         Query select = new SingleObjectQuery(oid).resolve(engine.getEntityResolver());
-        SelectObserver observer = new SelectObserver();
+        QueryResult observer = new QueryResult();
         engine.performQueries(Collections.singletonList(select), observer);
-        List results = observer.getResults(select);
+        List results = observer.getFirstRows(select);
 
         if (results.size() > 1) {
             throw new CayenneRuntimeException("More than 1 object found for ObjectId "

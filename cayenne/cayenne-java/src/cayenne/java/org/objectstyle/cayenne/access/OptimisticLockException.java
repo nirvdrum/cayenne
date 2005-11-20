@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -124,9 +123,9 @@ public class OptimisticLockException extends CayenneRuntimeException {
 
         SelectQuery query = new SelectQuery(rootEntity, qualifier);
         query.setFetchingDataRows(true);
-        SelectObserver observer = new SelectObserver();
+        QueryResult observer = new QueryResult();
         engine.performQueries(Collections.singletonList(query), observer);
-        List results = observer.getResults(query);
+        List results = observer.getFirstRows(query);
 
         if (results == null || results.isEmpty()) {
             return null;

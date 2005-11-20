@@ -71,14 +71,13 @@ import org.objectstyle.cayenne.util.Util;
 
 /**
  * QueryResult encapsulates a result of execution of zero or more queries using
- * QueryEngine. QueryResult supporting queries with multiple mixed selects and updates,
- * such as ProcedureQueries.
+ * QueryEngine. QueryResult supports queries with multiple mixed selects and updates, such
+ * as ProcedureQueries.
  * 
  * @author Andrei Adamchik
  */
 public class QueryResult extends DefaultOperationObserver implements QueryResponse {
 
-    
     protected LinkedHashMap queries = new LinkedHashMap();
 
     /** Clears any previously collected information. */
@@ -92,7 +91,7 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
     public Iterator getQueries() {
         return queries.keySet().iterator();
     }
-    
+
     /**
      * Returns all results regardless of the query.
      * 
@@ -125,10 +124,10 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
     }
 
     /**
-    * Returns the first update count for the query. This is a shortcut for
-    * <code>(Integer)getUpdates(query).get(0)<code>, kind of like Google's "I'm feeling lucky".
-    * Returns -1 if no update count is found for the query.
-    */
+     * Returns the first update count for the query. This is a shortcut for
+     * <code>(Integer)getUpdates(query).get(0)<code>, kind of like Google's "I'm feeling lucky".
+     * Returns -1 if no update count is found for the query.
+     */
     public int getFirstUpdateCount(Query query) {
         List allResults = getResults(query);
         int size = allResults.size();
@@ -153,7 +152,8 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
         int size = allResults.size();
         if (size == 0) {
             return Collections.EMPTY_LIST;
-        } else {
+        }
+        else {
             Iterator it = allResults.iterator();
             while (it.hasNext()) {
                 Object obj = it.next();
@@ -167,9 +167,9 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
     }
 
     /**
-     * Returns a List that itself contains Lists of data rows for each ResultSet 
-     * returned by the query. ResultSets are returned in the oder they were obtained.
-     * Any updates that were performed are not included.
+     * Returns a List that itself contains Lists of data rows for each ResultSet returned
+     * by the query. ResultSets are returned in the oder they were obtained. Any updates
+     * that were performed are not included.
      */
     public List getRows(Query query) {
         List allResults = getResults(query);
@@ -192,8 +192,8 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
 
     /**
      * Returns a List that contains java.lang.Integer objects for each one of the update
-     * counts returned by the query. Update counts are returned in the order they were obtained.
-     * Data rows are not included.
+     * counts returned by the query. Update counts are returned in the order they were
+     * obtained. Data rows are not included.
      */
     public List getUpdates(Query query) {
         List allResults = getResults(query);
@@ -214,26 +214,20 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
         return list;
     }
 
-    /** 
-     * Overrides superclass implementation to rethrow an exception
-     * immediately. 
+    /**
+     * Overrides superclass implementation to rethrow an exception immediately.
      */
     public void nextQueryException(Query query, Exception ex) {
         super.nextQueryException(query, ex);
-        throw new CayenneRuntimeException(
-            "Query exception.",
-            Util.unwindException(ex));
+        throw new CayenneRuntimeException("Query exception.", Util.unwindException(ex));
     }
 
-    /** 
-     * Overrides superclass implementation to rethrow an exception
-     * immediately. 
+    /**
+     * Overrides superclass implementation to rethrow an exception immediately.
      */
     public void nextGlobalException(Exception ex) {
         super.nextGlobalException(ex);
-        throw new CayenneRuntimeException(
-            "Global exception.",
-            Util.unwindException(ex));
+        throw new CayenneRuntimeException("Global exception.", Util.unwindException(ex));
     }
 
     /**
@@ -274,8 +268,7 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
     }
 
     public void nextDataRows(Query q, ResultIterator it) {
-        throw new CayenneRuntimeException(
-            "Iterated results are not supported by "
+        throw new CayenneRuntimeException("Iterated results are not supported by "
                 + this.getClass().getName());
     }
 }

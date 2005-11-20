@@ -459,12 +459,10 @@ public class DataContext implements QueryEngine, Serializable {
     public DataObject registeredObject(ObjectId oid) {
         // must synchronize on ObjectStore since we must read and write atomically
         synchronized (getObjectStore()) {
-            DataObject obj = objectStore.getObject(oid);
-            if (obj == null) {
+            DataObject object = objectStore.getObject(oid);
+            if (object == null) {
                 try {
-                    // TODO: shouldn't we replace this with
-                    // oid.getObjectClass().newInstance()
-                    obj = DataContext.newDataObject(oid.getObjectClass().getName());
+                    object = (DataObject) oid.getObjectClass().newInstance();
                 }
                 catch (Exception ex) {
                     String entity = (oid != null) ? getEntityResolver().lookupObjEntity(
@@ -474,12 +472,12 @@ public class DataContext implements QueryEngine, Serializable {
                             ex);
                 }
 
-                obj.setObjectId(oid);
-                obj.setPersistenceState(PersistenceState.HOLLOW);
-                obj.setDataContext(this);
-                objectStore.addObject(obj);
+                object.setObjectId(oid);
+                object.setPersistenceState(PersistenceState.HOLLOW);
+                object.setDataContext(this);
+                objectStore.addObject(object);
             }
-            return obj;
+            return object;
         }
     }
 
@@ -633,8 +631,8 @@ public class DataContext implements QueryEngine, Serializable {
             boolean refresh,
             boolean resolveInheritanceHierarchy) {
 
-        return new DataContextObjectFactory(this, refresh, resolveInheritanceHierarchy)
-                .objectsFromDataRows(entity, dataRows);
+        return new ObjectResolver(this, entity, refresh, resolveInheritanceHierarchy)
+                .objectsFromDataRows(dataRows);
     }
 
     /**

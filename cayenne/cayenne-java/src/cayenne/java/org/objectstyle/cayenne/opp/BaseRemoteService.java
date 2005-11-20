@@ -61,10 +61,10 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.ClientServerChannel;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
-import org.objectstyle.cayenne.service.ClientServerChannel;
 import org.objectstyle.cayenne.util.IDUtil;
 import org.objectstyle.cayenne.util.Util;
 

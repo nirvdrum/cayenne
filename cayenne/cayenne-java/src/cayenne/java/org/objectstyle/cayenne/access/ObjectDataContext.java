@@ -54,7 +54,7 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.service;
+package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,13 +70,6 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataRowStore;
-import org.objectstyle.cayenne.access.ObjectStore;
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.PersistenceContext;
-import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.map.EntityResolver;
