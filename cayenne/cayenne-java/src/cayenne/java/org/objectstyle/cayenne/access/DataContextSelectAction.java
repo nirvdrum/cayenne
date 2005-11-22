@@ -184,7 +184,7 @@ class DataContextSelectAction {
 
         // take a shortcut when no prefetches exist...
         if (rootQuery.getPrefetchTree() == null) {
-            return new ObjectResolver(context, rootQuery).objectsFromDataRows(mainRows);
+            return new ObjectResolver(context, rootQuery).synchronizedObjectsFromDataRows(mainRows);
         }
 
         // map results to prefetch paths

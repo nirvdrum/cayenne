@@ -632,7 +632,7 @@ public class DataContext implements QueryEngine, Serializable {
             boolean resolveInheritanceHierarchy) {
 
         return new ObjectResolver(this, entity, refresh, resolveInheritanceHierarchy)
-                .objectsFromDataRows(dataRows);
+                .synchronizedObjectsFromDataRows(dataRows);
     }
 
     /**

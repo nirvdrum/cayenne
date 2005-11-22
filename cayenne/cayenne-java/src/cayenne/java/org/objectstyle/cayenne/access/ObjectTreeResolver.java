@@ -307,6 +307,11 @@ class ObjectTreeResolver {
                 }
 
                 objects = processorNode.getObjects();
+
+                context.getObjectStore().snapshotsUpdatedForObjects(
+                        objects,
+                        ((PrefetchProcessorJointNode) processorNode).getResolvedRows(),
+                        refreshObjects);
             }
             // disjoint prefetch on flattened relationships still requires manual matching
             else if (processorNode.getIncoming() != null
@@ -453,7 +458,7 @@ class ObjectTreeResolver {
                 object = (DataObject) processorNode.getResolver().objectFromDataRow(row);
 
                 processorNode.putResolved(id, object);
-                processorNode.addObject(object);
+                processorNode.addObject(object, row);
             }
 
             // categorization by parent needed even if an object is already there
@@ -491,12 +496,20 @@ class ObjectTreeResolver {
 
         public boolean startDisjointPrefetch(PrefetchTreeNode node) {
             ((PrefetchProcessorNode) node).connectToParents();
-
             return true;
         }
 
         public boolean startJointPrefetch(PrefetchTreeNode node) {
-            ((PrefetchProcessorNode) node).connectToParents();
+            PrefetchProcessorJointNode processorNode = (PrefetchProcessorJointNode) node;
+
+            if (!processorNode.getObjects().isEmpty()) {
+                context.getObjectStore().snapshotsUpdatedForObjects(
+                        processorNode.getObjects(),
+                        processorNode.getResolvedRows(),
+                        refreshObjects);
+                processorNode.connectToParents();
+            }
+
             return true;
         }
 
@@ -506,17 +519,6 @@ class ObjectTreeResolver {
 
         public boolean startUnknownPrefetch(PrefetchTreeNode node) {
             throw new CayenneRuntimeException("Unknown prefetch node: " + node);
-        }
-
-        void postprocessNode(PrefetchProcessorNode node) {
-            node.connectToParents();
-
-            if (!node.getObjects().isEmpty()) {
-                context.getObjectStore().snapshotsUpdatedForObjects(
-                        node.getObjects(),
-                        node.getDataRows(),
-                        refreshObjects);
-            }
         }
     }
 }

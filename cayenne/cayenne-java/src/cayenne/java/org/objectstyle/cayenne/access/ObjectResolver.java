@@ -120,8 +120,22 @@ class ObjectResolver {
     }
 
     /**
-     * Processes a list of rows allowing duplicates. This method does all needed internal
-     * synchronization and object store updates.
+     * Properly synchronized version of 'objectsFromDataRows'.
+     */
+    List synchronizedObjectsFromDataRows(List rows) {
+        synchronized (context.getObjectStore()) {
+            synchronized (context.getObjectStore().getDataRowCache()) {
+                return objectsFromDataRows(rows);
+            }
+        }
+    }
+
+    /**
+     * Converts rows to objects.
+     * <p>
+     * Synchronization note. This method requires EXTERNAL synchronization on ObjectStore
+     * and DataRowStore.
+     * </p>
      */
     List objectsFromDataRows(List rows) {
         if (rows == null || rows.size() == 0) {
@@ -129,23 +143,16 @@ class ObjectResolver {
         }
 
         List results = new ArrayList(rows.size());
-
         Iterator it = rows.iterator();
 
-        // must do double sync...
-        synchronized (context.getObjectStore()) {
-            synchronized (context.getObjectStore().getDataRowCache()) {
-                while (it.hasNext()) {
-                    results.add(objectFromDataRow((DataRow) it.next()));
-                }
-
-                // now deal with snapshots
-                context.getObjectStore().snapshotsUpdatedForObjects(
-                        results,
-                        rows,
-                        refreshObjects);
-            }
+        while (it.hasNext()) {
+            results.add(objectFromDataRow((DataRow) it.next()));
         }
+
+        // now deal with snapshots
+        context
+                .getObjectStore()
+                .snapshotsUpdatedForObjects(results, rows, refreshObjects);
 
         return results;
     }
@@ -156,8 +163,8 @@ class ObjectResolver {
      * Relationships are linked in this method, assuming that parent PK columns are
      * included in each row and are prefixed with DB relationship name.
      * <p>
-     * Synchronization note. This method does all needed internal synchronization and
-     * object store updates.
+     * Synchronization note. This method requires EXTERNAL synchronization on ObjectStore
+     * and DataRowStore.
      * </p>
      */
     List relatedObjectsFromDataRows(List rows, PrefetchProcessorNode node) {
@@ -173,40 +180,34 @@ class ObjectResolver {
         List results = new ArrayList(rows.size());
         Iterator it = rows.iterator();
 
-        // must do double sync...
-        synchronized (context.getObjectStore()) {
-            synchronized (context.getObjectStore().getDataRowCache()) {
-                while (it.hasNext()) {
+        while (it.hasNext()) {
 
-                    DataRow row = (DataRow) it.next();
-                    DataObject object = objectFromDataRow(row);
-                    results.add(object);
+            DataRow row = (DataRow) it.next();
+            DataObject object = objectFromDataRow(row);
+            results.add(object);
 
-                    // link with parent
+            // link with parent
 
-                    // The algorithm below of building an ID doesn't take inheritance into
-                    // account, so there maybe a miss...
-                    ObjectId id = row.createObjectId(
-                            parentObjectClass,
-                            parentDbEntity,
-                            relatedIdPrefix);
+            // The algorithm below of building an ID doesn't take inheritance into
+            // account, so there maybe a miss...
+            ObjectId id = row.createObjectId(
+                    parentObjectClass,
+                    parentDbEntity,
+                    relatedIdPrefix);
 
-                    DataObject parentObject = context.getObjectStore().getObject(id);
+            DataObject parentObject = context.getObjectStore().getObject(id);
 
-                    // don't attach to hollow objects
-                    if (parentObject != null
-                            && parentObject.getPersistenceState() != PersistenceState.HOLLOW) {
-                        node.linkToParent(object, parentObject);
-                    }
-                }
-
-                // now deal with snapshots
-                context.getObjectStore().snapshotsUpdatedForObjects(
-                        results,
-                        rows,
-                        refreshObjects);
+            // don't attach to hollow objects
+            if (parentObject != null
+                    && parentObject.getPersistenceState() != PersistenceState.HOLLOW) {
+                node.linkToParent(object, parentObject);
             }
         }
+
+        // now deal with snapshots
+        context
+                .getObjectStore()
+                .snapshotsUpdatedForObjects(results, rows, refreshObjects);
 
         return results;
     }

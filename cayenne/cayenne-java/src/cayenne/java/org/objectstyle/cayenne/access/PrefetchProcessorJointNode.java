@@ -88,6 +88,7 @@ class PrefetchProcessorJointNode extends PrefetchProcessorNode {
     int[] idIndices;
     int rowCapacity;
     Map resolved;
+    List resolvedRows;
 
     PrefetchProcessorJointNode(PrefetchTreeNode parent, String segmentPath) {
         super(parent, segmentPath);
@@ -106,13 +107,19 @@ class PrefetchProcessorJointNode extends PrefetchProcessorNode {
         }
 
         objects = new ArrayList(capacity);
-        resolved = new HashMap();
+        resolved = new HashMap(capacity);
+        resolvedRows = new ArrayList(capacity);
         buildRowMapping();
         buildPKIndex();
     }
+    
+    List getResolvedRows() {
+        return resolvedRows;
+    }
 
-    void addObject(DataObject object) {
+    void addObject(DataObject object, DataRow row) {
         objects.add(object);
+        resolvedRows.add(row);
     }
 
     /**
@@ -181,7 +188,8 @@ class PrefetchProcessorJointNode extends PrefetchProcessorNode {
         String prefix;
         if (jointRoot != this) {
             Expression objectPath = Expression.fromString(getPath(jointRoot));
-            ASTPath translated = (ASTPath) ((PrefetchProcessorNode) jointRoot).getResolver()
+            ASTPath translated = (ASTPath) ((PrefetchProcessorNode) jointRoot)
+                    .getResolver()
                     .getEntity()
                     .translateToDbPath(objectPath);
 
