@@ -339,18 +339,14 @@ class ObjectTreeResolver {
             if (processorNode.isPartitionedByParent()
                     && !processorNode.getIncoming().isFlattened()) {
 
-                // resolve a few things used in the loop below:
-
                 DbEntity sourceDbEntity = null;
                 Class sourceObjectClass = null;
                 String relatedIdPrefix = null;
 
                 // determine resolution strategy
-                ObjRelationship reverseRelationship = (!processorNode
+                ObjRelationship reverseRelationship = processorNode
                         .getIncoming()
-                        .isFlattened()) ? processorNode
-                        .getIncoming()
-                        .getReverseRelationship() : null;
+                        .getReverseRelationship();
 
                 // if null, prepare for manual matching
                 if (reverseRelationship == null) {
