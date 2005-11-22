@@ -99,6 +99,8 @@ public class JointPrefetchTst extends CayenneTestCase {
         DataContext context = createDataContext();
 
         List rows = context.performQuery(q);
+        // block further queries
+        context.setDelegate(new QueryBlockingDelegate());
         assertEquals(3, rows.size());
 
         // row should contain columns from both entities minus those duplicated in a
@@ -150,6 +152,8 @@ public class JointPrefetchTst extends CayenneTestCase {
         DataContext context = createDataContext();
 
         List objects = context.performQuery(q);
+        // block further queries
+        context.setDelegate(new QueryBlockingDelegate());
 
         // without OUTER join we will get fewer objects...
         assertEquals(2, objects.size());
@@ -186,6 +190,8 @@ public class JointPrefetchTst extends CayenneTestCase {
         DataContext context = createDataContext();
 
         List objects = context.performQuery(q);
+        // block further queries
+        context.setDelegate(new QueryBlockingDelegate());
         assertEquals(3, objects.size());
 
         Iterator it = objects.iterator();
@@ -230,6 +236,8 @@ public class JointPrefetchTst extends CayenneTestCase {
         dateOfBirth.setType("java.sql.Date");
         try {
             List objects = context.performQuery(q);
+            // block further queries
+            context.setDelegate(new QueryBlockingDelegate());
             assertEquals(1, objects.size());
 
             Iterator it = objects.iterator();
@@ -257,6 +265,8 @@ public class JointPrefetchTst extends CayenneTestCase {
         DataContext context = createDataContext();
 
         List objects = context.performQuery(q);
+        // block further queries
+        context.setDelegate(new QueryBlockingDelegate());
 
         // without OUTER join we will get fewer objects...
         assertEquals(2, objects.size());
@@ -300,6 +310,8 @@ public class JointPrefetchTst extends CayenneTestCase {
         assertNull(g1);
 
         List objects = context.performQuery(q);
+        // block further queries
+        context.setDelegate(new QueryBlockingDelegate());
 
         // without OUTER join we will get fewer objects...
         assertEquals(2, objects.size());
