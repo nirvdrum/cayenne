@@ -65,14 +65,12 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.CayenneDataObject;
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -96,6 +94,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("paintingArray");
 
         List artists = context.performQuery(q);
+        // block further queries
+        context.setDelegate(new QueryBlockingDelegate());
         assertEquals(2, artists.size());
 
         Artist a1 = (Artist) artists.get(0);
@@ -126,6 +126,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("paintingArray");
 
         List artists = context.performQuery(q);
+        // block further queries
+        context.setDelegate(new QueryBlockingDelegate());
         assertEquals(artistCount, artists.size());
 
         for (int i = 0; i < artistCount; i++) {
@@ -156,6 +158,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addOrdering(Artist.ARTIST_NAME_PROPERTY, Ordering.ASC);
 
         List artists = context.performQuery(q);
+        // block further queries
+        context.setDelegate(new QueryBlockingDelegate());
         assertEquals(artistCount, artists.size());
 
         Artist a1 = (Artist) artists.get(0);
@@ -188,6 +192,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
 
         try {
             List result = context.performQuery(q);
+            // block further queries
+            context.setDelegate(new QueryBlockingDelegate());
             assertFalse(result.isEmpty());
             CayenneDataObject a1 = (CayenneDataObject) result.get(0);
             ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
@@ -220,8 +226,10 @@ public class DataContextPrefetchTst extends DataContextTestBase {
 
         try {
             List result = context.performQuery(q);
+            // block further queries
+            context.setDelegate(new QueryBlockingDelegate());
             assertFalse(result.isEmpty());
-            
+
             CayenneDataObject a1 = (CayenneDataObject) result.get(0);
             ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
             assertNotNull(toMany);
@@ -244,22 +252,10 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("toArtist");
 
         List result = context.performQuery(q);
+        // block further queries
+        context.setDelegate(new QueryBlockingDelegate());
         assertFalse(result.isEmpty());
         DataObject p1 = (DataObject) result.get(0);
-
-        // resolving the fault must not result in extra queries, since
-        // artist must have been prefetched
-        DataContextDelegate delegate = new DefaultDataContextDelegate() {
-
-            public GenericSelectQuery willPerformSelect(
-                    DataContext context,
-                    GenericSelectQuery query) {
-                throw new CayenneRuntimeException("No query expected.. attempt to run: "
-                        + query);
-            }
-        };
-
-        p1.getDataContext().setDelegate(delegate);
 
         Object toOnePrefetch = p1.readNestedProperty("toArtist");
         assertNotNull(toOnePrefetch);
@@ -282,6 +278,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("toArtist");
 
         List results = context.performQuery(q);
+
         assertEquals(1, results.size());
     }
 
@@ -315,6 +312,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("toParentGroup");
 
         List results = context.performQuery(q);
+        // block further queries
+        context.setDelegate(new QueryBlockingDelegate());
         assertEquals(1, results.size());
 
         ArtGroup fetchedChild = (ArtGroup) results.get(0);
@@ -336,6 +335,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("toArtist");
 
         List results = context.performQuery(q);
+        // block further queries
+        context.setDelegate(new QueryBlockingDelegate());
         assertEquals(1, results.size());
 
         Painting painting = (Painting) results.get(0);
@@ -364,6 +365,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
 
         // run the query ... see that it doesn't blow
         List paintings = context.performQuery(q);
+        // block further queries
+        context.setDelegate(new QueryBlockingDelegate());
         assertEquals(24, paintings.size());
 
         // see that artists are resolved...
