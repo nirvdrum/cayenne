@@ -77,34 +77,34 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
         deleteTestData();
     }
 
-//    public void testManyToMany() throws Exception {
-//  
-//        createTestData("testPrefetch1");
-//
-//        SelectQuery q = new SelectQuery(Artist.class);
-//        q.addPrefetch(Artist.GROUP_ARRAY_PROPERTY);
-//
-//        DataContext context = createDataContext();
-//
-//        List objects = context.performQuery(q);
-//        assertEquals(3, objects.size());
-//
-//        Iterator it = objects.iterator();
-//        while (it.hasNext()) {
-//            Artist a = (Artist) it.next();
-//            ToManyList list = (ToManyList) a.getGroupArray();
-//
-//            assertNotNull(list);
-//            assertFalse("artist's groups not resolved: " + a, list.needsFetch());
-//            assertTrue(list.size() > 0);
-//
-//            Iterator children = list.iterator();
-//            while (children.hasNext()) {
-//                ArtGroup g = (ArtGroup) children.next();
-//                assertEquals(PersistenceState.COMMITTED, g.getPersistenceState());
-//            }
-//        }
-//    }
+    public void testManyToMany() throws Exception {
+  
+        createTestData("testPrefetch1");
+
+        SelectQuery q = new SelectQuery(Artist.class);
+        q.addPrefetch(Artist.GROUP_ARRAY_PROPERTY);
+
+        DataContext context = createDataContext();
+
+        List objects = context.performQuery(q);
+        assertEquals(3, objects.size());
+
+        Iterator it = objects.iterator();
+        while (it.hasNext()) {
+            Artist a = (Artist) it.next();
+            ToManyList list = (ToManyList) a.getGroupArray();
+
+            assertNotNull(list);
+            assertFalse("artist's groups not resolved: " + a, list.needsFetch());
+            assertTrue(list.size() > 0);
+
+            Iterator children = list.iterator();
+            while (children.hasNext()) {
+                ArtGroup g = (ArtGroup) children.next();
+                assertEquals(PersistenceState.COMMITTED, g.getPersistenceState());
+            }
+        }
+    }
 
     public void testJointManyToMany() throws Exception {
         createTestData("testPrefetch1");

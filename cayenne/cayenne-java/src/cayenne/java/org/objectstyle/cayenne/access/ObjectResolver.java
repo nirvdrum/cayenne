@@ -120,8 +120,8 @@ class ObjectResolver {
     }
 
     /**
-     * Processes a list of rows. This method does all needed internal snchronization and
-     * object store updates.
+     * Processes a list of rows allowing duplicates. This method does all needed internal
+     * synchronization and object store updates.
      */
     List objectsFromDataRows(List rows) {
         if (rows == null || rows.size() == 0) {
@@ -151,10 +151,71 @@ class ObjectResolver {
     }
 
     /**
-     * Processes a single row. This method does not synchronize on ObjectStore and doesn't
-     * send snapshot updates. These are resposnibilities of the caller.
+     * Processes a list of rows for a result set that has objects related to a set of
+     * parent objects via some relationship defined in PrefetchProcessorNode parameter.
+     * Relationships are linked in this method, assuming that parent PK columns are
+     * included in each row and are prefixed with DB relationship name.
+     * <p>
+     * Synchronization note. This method does all needed internal synchronization and
+     * object store updates.
+     * </p>
      */
-    Object objectFromDataRow(DataRow row) {
+    List relatedObjectsFromDataRows(List rows, PrefetchProcessorNode node) {
+        if (rows == null || rows.size() == 0) {
+            return new ArrayList(1);
+        }
+
+        ObjEntity sourceObjEntity = (ObjEntity) node.getIncoming().getSourceEntity();
+        DbEntity parentDbEntity = sourceObjEntity.getDbEntity();
+        Class parentObjectClass = sourceObjEntity.getJavaClass();
+        String relatedIdPrefix = node.getIncoming().getReverseDbRelationshipPath() + ".";
+
+        List results = new ArrayList(rows.size());
+        Iterator it = rows.iterator();
+
+        // must do double sync...
+        synchronized (context.getObjectStore()) {
+            synchronized (context.getObjectStore().getDataRowCache()) {
+                while (it.hasNext()) {
+
+                    DataRow row = (DataRow) it.next();
+                    DataObject object = objectFromDataRow(row);
+                    results.add(object);
+
+                    // link with parent
+
+                    // The algorithm below of building an ID doesn't take inheritance into
+                    // account, so there maybe a miss...
+                    ObjectId id = row.createObjectId(
+                            parentObjectClass,
+                            parentDbEntity,
+                            relatedIdPrefix);
+
+                    DataObject parentObject = context.getObjectStore().getObject(id);
+
+                    // don't attach to hollow objects
+                    if (parentObject != null
+                            && parentObject.getPersistenceState() != PersistenceState.HOLLOW) {
+                        node.linkToParent(object, parentObject);
+                    }
+                }
+
+                // now deal with snapshots
+                context.getObjectStore().snapshotsUpdatedForObjects(
+                        results,
+                        rows,
+                        refreshObjects);
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * Processes a single row. This method does not synchronize on ObjectStore and doesn't
+     * send snapshot updates. These are responsibilities of the caller.
+     */
+    DataObject objectFromDataRow(DataRow row) {
 
         // determine entity to use
         ObjEntity objectEntity = entity;

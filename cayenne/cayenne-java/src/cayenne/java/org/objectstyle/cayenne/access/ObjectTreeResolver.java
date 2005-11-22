@@ -308,6 +308,15 @@ class ObjectTreeResolver {
 
                 objects = processorNode.getObjects();
             }
+            // disjoint prefetch on flattened relationships still requires manual matching
+            else if (processorNode.getIncoming() != null
+                    && processorNode.getIncoming().isFlattened()) {
+
+                objects = processorNode.getResolver().relatedObjectsFromDataRows(
+                        processorNode.getDataRows(),
+                        processorNode);
+                processorNode.setObjects(objects);
+            }
             else {
                 objects = processorNode.getResolver().objectsFromDataRows(
                         processorNode.getDataRows());
@@ -320,8 +329,10 @@ class ObjectTreeResolver {
                 return true;
             }
 
-            // create temporary relationship mapping if needed...
-            if (processorNode.isPartitionedByParent()) {
+            // create temporary relationship mapping if needed..; flattened relationships
+            // are matched with parents during resolving phase, so skip them here.
+            if (processorNode.isPartitionedByParent()
+                    && !processorNode.getIncoming().isFlattened()) {
 
                 // resolve a few things used in the loop below:
 
@@ -480,8 +491,7 @@ class ObjectTreeResolver {
 
         public boolean startDisjointPrefetch(PrefetchTreeNode node) {
             ((PrefetchProcessorNode) node).connectToParents();
-            
-            
+
             return true;
         }
 
@@ -497,11 +507,11 @@ class ObjectTreeResolver {
         public boolean startUnknownPrefetch(PrefetchTreeNode node) {
             throw new CayenneRuntimeException("Unknown prefetch node: " + node);
         }
-        
+
         void postprocessNode(PrefetchProcessorNode node) {
             node.connectToParents();
-            
-            if(!node.getObjects().isEmpty()) {
+
+            if (!node.getObjects().isEmpty()) {
                 context.getObjectStore().snapshotsUpdatedForObjects(
                         node.getObjects(),
                         node.getDataRows(),
