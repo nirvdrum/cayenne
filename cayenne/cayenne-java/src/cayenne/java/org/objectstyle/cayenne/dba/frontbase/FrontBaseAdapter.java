@@ -74,11 +74,11 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
  * use with FrontBase are shown below:
  * 
  * <pre>
- *      fb.cayenne.adapter = org.objectstyle.cayenne.dba.frontbase.FrontBaseAdapter
- *      fb.jdbc.username = _system
- *      fb.jdbc.password = secret
- *      fb.jdbc.url = jdbc:FrontBase://localhost/cayenne/
- *      fb.jdbc.driver = jdbc.FrontBase.FBJDriver
+ *       fb.cayenne.adapter = org.objectstyle.cayenne.dba.frontbase.FrontBaseAdapter
+ *       fb.jdbc.username = _system
+ *       fb.jdbc.password = secret
+ *       fb.jdbc.url = jdbc:FrontBase://localhost/cayenne/
+ *       fb.jdbc.driver = jdbc.FrontBase.FBJDriver
  * </pre>
  * 
  * @since 1.2
@@ -100,6 +100,7 @@ public class FrontBaseAdapter extends JdbcAdapter {
         super.configureExtendedTypes(map);
 
         map.registerType(new FrontBaseByteArrayType());
+        map.registerType(new FrontBaseBooleanType());
     }
 
     /**
