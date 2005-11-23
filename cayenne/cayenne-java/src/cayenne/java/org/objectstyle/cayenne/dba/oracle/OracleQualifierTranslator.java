@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,55 +55,38 @@
  */
 package org.objectstyle.cayenne.dba.oracle;
 
-import org.objectstyle.cayenne.access.util.BatchQueryUtils;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.JdbcActionBuilder;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.BatchQuery;
-import org.objectstyle.cayenne.query.ProcedureQuery;
-import org.objectstyle.cayenne.query.SQLAction;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.access.trans.QueryAssembler;
+import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-class OracleActionBuilder extends JdbcActionBuilder {
+class OracleQualifierTranslator extends TrimmingQualifierTranslator {
 
-    OracleActionBuilder(DbAdapter adapter, EntityResolver resolver) {
-        super(adapter, resolver);
+    OracleQualifierTranslator(QueryAssembler queryAssembler) {
+        super(queryAssembler, OracleAdapter.TRIM_FUNCTION);
     }
 
-    public SQLAction batchAction(BatchQuery query) {
-
-        // special handling for LOB updates
-        if (OracleAdapter.isSupportsOracleLOB()
-                && BatchQueryUtils.updatesLOBColumns(query)) {
-
-            return new OracleLOBBatchAction(query, getAdapter());
-        }
-        else {
-
-            // optimistic locking is not supported in batches due to JDBC driver
-            // limitations
-            boolean useOptimisticLock = query.isUsingOptimisticLocking();
-            boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
-
-            OracleBatchAction action = new OracleBatchAction(
-                    query,
-                    getAdapter(),
-                    getEntityResolver());
-            action.setBatch(runningAsBatch);
-            return action;
+    protected Expression extractQualifier() {
+        Expression qualifier = super.extractQualifier();
+        if (qualifier == null) {
+            return null;
         }
 
-    }
+        // add LIMIT to translated qualifier
+        Query query = getQueryAssembler().getQuery();
+        if (query instanceof GenericSelectQuery) {
+            int limit = ((GenericSelectQuery) query).getFetchLimit();
+            if (limit > 0) {
+                qualifier = qualifier.andExp(Expression.fromString("db:ROWNUM <= "
+                        + limit));
+            }
+        }
 
-    public SQLAction procedureAction(ProcedureQuery query) {
-        return new OracleProcedureAction(query, getAdapter(), getEntityResolver());
-    }
-
-    public SQLAction objectSelectAction(SelectQuery query) {
-        return new OracleSelectAction(query, getAdapter(), getEntityResolver());
+        return qualifier;
     }
 }

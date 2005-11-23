@@ -69,7 +69,6 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
-import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.ByteType;
 import org.objectstyle.cayenne.access.types.CharType;
@@ -93,15 +92,15 @@ import org.objectstyle.cayenne.util.Util;
  * settings </a> to use with Oracle are shown below:
  * 
  * <pre>
- * 
  *  
- *   test-oracle.cayenne.adapter = org.objectstyle.cayenne.dba.oracle.OracleAdapter
- *   test-oracle.jdbc.username = test
- *   test-oracle.jdbc.password = secret
- *   test-oracle.jdbc.url = jdbc:oracle:thin:@192.168.0.20:1521:ora1 
- *   test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
  *   
- *  
+ *    test-oracle.cayenne.adapter = org.objectstyle.cayenne.dba.oracle.OracleAdapter
+ *    test-oracle.jdbc.username = test
+ *    test-oracle.jdbc.password = secret
+ *    test-oracle.jdbc.url = jdbc:oracle:thin:@192.168.0.20:1521:ora1 
+ *    test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
+ *    
+ *   
  * </pre>
  * 
  * @author Andrei Adamchik
@@ -140,13 +139,13 @@ public class OracleAdapter extends JdbcAdapter {
             Field cursorField = oraTypes.getField("CURSOR");
             oracleCursorType = cursorField.getInt(null);
 
-            outputStreamFromBlobMethod = Class
-                    .forName("oracle.sql.BLOB")
-                    .getMethod("getBinaryOutputStream", new Class[0]);
+            outputStreamFromBlobMethod = Class.forName("oracle.sql.BLOB").getMethod(
+                    "getBinaryOutputStream",
+                    new Class[0]);
 
-            writerFromClobMethod = Class
-                    .forName("oracle.sql.CLOB")
-                    .getMethod("getCharacterOutputStream", new Class[0]);
+            writerFromClobMethod = Class.forName("oracle.sql.CLOB").getMethod(
+                    "getCharacterOutputStream",
+                    new Class[0]);
             supportsOracleLOB = true;
 
         }
@@ -250,7 +249,8 @@ public class OracleAdapter extends JdbcAdapter {
             int precision,
             boolean allowNulls) {
 
-        DbAttribute attr = super.buildAttribute(name,
+        DbAttribute attr = super.buildAttribute(
+                name,
                 typeName,
                 type,
                 size,
@@ -296,9 +296,7 @@ public class OracleAdapter extends JdbcAdapter {
      * Returns a trimming translator.
      */
     public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
-        return new TrimmingQualifierTranslator(
-                queryAssembler,
-                OracleAdapter.TRIM_FUNCTION);
+        return new OracleQualifierTranslator(queryAssembler);
     }
 
     /**
@@ -307,7 +305,8 @@ public class OracleAdapter extends JdbcAdapter {
      * @since 1.2
      */
     public SQLAction getAction(Query query, DataNode node) {
-        return query.createSQLAction(new OracleActionBuilder(this, node.getEntityResolver()));
+        return query.createSQLAction(new OracleActionBuilder(this, node
+                .getEntityResolver()));
     }
 
     /**

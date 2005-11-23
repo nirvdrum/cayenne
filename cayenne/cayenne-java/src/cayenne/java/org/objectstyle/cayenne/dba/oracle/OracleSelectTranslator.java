@@ -80,6 +80,10 @@ public class OracleSelectTranslator extends SelectTranslator {
     private static final Object[] rowPrefetchArgs = new Object[] {
         new Integer(100)
     };
+    
+    public String createSqlString() throws Exception {
+        return super.createSqlString();
+    }
 
     /**
      * Determines if we can use Oracle optimizations. If yes, configure this object to use
