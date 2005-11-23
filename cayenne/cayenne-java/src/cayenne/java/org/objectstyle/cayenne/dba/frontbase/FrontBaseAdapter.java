@@ -74,11 +74,11 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
  * use with FrontBase are shown below:
  * 
  * <pre>
- *       fb.cayenne.adapter = org.objectstyle.cayenne.dba.frontbase.FrontBaseAdapter
- *       fb.jdbc.username = _system
- *       fb.jdbc.password = secret
- *       fb.jdbc.url = jdbc:FrontBase://localhost/cayenne/
- *       fb.jdbc.driver = jdbc.FrontBase.FBJDriver
+ *        fb.cayenne.adapter = org.objectstyle.cayenne.dba.frontbase.FrontBaseAdapter
+ *        fb.jdbc.username = _system
+ *        fb.jdbc.password = secret
+ *        fb.jdbc.url = jdbc:FrontBase://localhost/cayenne/
+ *        fb.jdbc.driver = jdbc.FrontBase.FBJDriver
  * </pre>
  * 
  * @since 1.2
@@ -91,6 +91,10 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
 // FrontBase, however aliases don't work ( ORDER BY UPPER(t0.ARTIST_NAME)) ... not sure
 // what to do about it.
 public class FrontBaseAdapter extends JdbcAdapter {
+
+    public FrontBaseAdapter() {
+        setSupportsBatchUpdates(true);
+    }
 
     public String tableTypeForTable() {
         return "BASE TABLE";
