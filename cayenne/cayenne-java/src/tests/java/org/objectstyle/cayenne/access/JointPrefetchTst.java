@@ -57,8 +57,10 @@ package org.objectstyle.cayenne.access;
 
 import java.sql.Date;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Gallery;
@@ -67,6 +69,8 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
@@ -288,6 +292,46 @@ public class JointPrefetchTst extends CayenneTestCase {
                 assertNotNull(p.getPaintingTitle());
             }
         }
+    }
+
+    public void testJointPrefetchToManyNonConflictingQualifier() throws Exception {
+        createTestData("testJointPrefetch1");
+
+        // query with to-many joint prefetches and qualifier that doesn't match
+        // prefetch....
+        Expression qualifier = ExpressionFactory.matchExp(
+                Artist.ARTIST_NAME_PROPERTY,
+                "artist1");
+        SelectQuery q = new SelectQuery(Artist.class, qualifier);
+        q.addPrefetch(Artist.PAINTING_ARRAY_PROPERTY).setSemantics(
+                PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
+
+        DataContext context = createDataContext();
+
+        List objects = context.performQuery(q);
+        // block further queries
+        context.setDelegate(new QueryBlockingDelegate());
+
+        assertEquals(1, objects.size());
+
+        Artist a = (Artist) objects.get(0);
+        ToManyList list = (ToManyList) a.getPaintingArray();
+
+        assertNotNull(list);
+        assertFalse(list.needsFetch());
+        assertEquals(2, list.size());
+
+        Iterator children = list.iterator();
+        while (children.hasNext()) {
+            Painting p = (Painting) children.next();
+            assertEquals(PersistenceState.COMMITTED, p.getPersistenceState());
+            // make sure properties are not null..
+            assertNotNull(p.getPaintingTitle());
+        }
+
+        // assert no duplicates
+        Set s = new HashSet(list);
+        assertEquals(s.size(), list.size());
     }
 
     public void testJointPrefetchMultiStep() throws Exception {
