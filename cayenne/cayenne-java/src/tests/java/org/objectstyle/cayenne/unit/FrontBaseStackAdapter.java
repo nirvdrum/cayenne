@@ -70,6 +70,14 @@ public class FrontBaseStackAdapter extends AccessStackAdapter {
         super(adapter);
     }
 
+    public boolean supportsLobs() {
+        return true;
+    }
+
+    public boolean supportsLobInsertsAsStrings() {
+        return false;
+    }
+
     public void willDropTables(Connection conn, DataMap map, Collection tablesToDrop)
             throws Exception {
         // avoid dropping constraints...
@@ -88,7 +96,8 @@ public class FrontBaseStackAdapter extends AccessStackAdapter {
     }
 
     public boolean supportsCaseInsensitiveOrder() {
-        // TODO, Andrus 11/8/2005: FrontBase does support UPPER() in ordering clause, however it does not
+        // TODO, Andrus 11/8/2005: FrontBase does support UPPER() in ordering clause,
+        // however it does not
         // support table aliases inside UPPER... Not sure what to do about it.
 
         return false;

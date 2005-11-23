@@ -168,6 +168,13 @@ public class AccessStackAdapter {
     }
 
     /**
+     * Returns whether LOBs can be inserted from test XML files.
+     */
+    public boolean supportsLobInsertsAsStrings() {
+        return supportsLobs();
+    }
+
+    /**
      * Returns true if the target database has support for large objects (BLOB, CLOB).
      */
     public boolean supportsLobs() {
@@ -189,7 +196,7 @@ public class AccessStackAdapter {
     public boolean supportsCaseInsensitiveOrder() {
         return true;
     }
-    
+
     public boolean supportsBatchPK() {
         return true;
     }

@@ -11,12 +11,13 @@ http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
 
 Changes/New Features:
 
-* Prefetching:
+* Prefetching... for details see this article - http://objectstyle.org/confluence/display/CAY/Prefetching 
   - Selecting queries store prefetches using PrefetchTreeNode.
   - joint prefetch API (addJointPrefetch, etc.) is removed from SelectQuery, SQLTemplate, ProcedureQuery.
     Instead Cayenne will try to guess prefetch strategy in runtime. Alternatively users can provide a hint 
     about a desired strategy by changing the semantics of desired PrefetchTreeNode.
-
+  
+* New FrontBaseAdapter, with support for BLOB/CLOB, batch updates, etc.
 
 Bugs Fixed:
 

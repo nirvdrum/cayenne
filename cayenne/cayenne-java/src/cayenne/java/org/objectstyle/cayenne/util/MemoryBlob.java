@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  * A Blob implementation that stores content in memory.
  * <p>
  * <i>This implementation is based on jdbcBlob from HSQLDB (copyright HSQL Development
- * Group) - thank you folks for the excellent DB and helpful libraries.</i>
+ * Group).</i>
  * </p>
  * 
  * @since 1.2

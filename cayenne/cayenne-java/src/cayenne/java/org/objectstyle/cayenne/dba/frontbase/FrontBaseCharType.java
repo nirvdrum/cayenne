@@ -53,62 +53,45 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit.jira;
+package org.objectstyle.cayenne.dba.frontbase;
 
-import java.util.List;
+import java.sql.Clob;
+import java.sql.PreparedStatement;
+import java.sql.Types;
 
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.testdo.relationship.ClobMaster;
-import org.objectstyle.cayenne.unit.RelationshipTestCase;
+import org.objectstyle.cayenne.access.types.CharType;
+import org.objectstyle.cayenne.util.MemoryClob;
 
 /**
- * @author Andrei Adamchik
+ * A char type that uses a real clob for insertion.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public class CAY_115Tst extends RelationshipTestCase {
+// TODO, Andrus 11/23/2005 - actually this is the way CLOBs must be handled by default ...
+// so move this stuff in the superclass.
+class FrontBaseCharType extends CharType {
 
-    protected void setUp() throws Exception {
-        super.setUp();
-        deleteTestData();
+    FrontBaseCharType() {
+        super(false, true);
     }
 
-    public void testDistinctClobFetch() throws Exception {
-        if (!getAccessStackAdapter().supportsLobInsertsAsStrings()) {
-            return;
+    public void setJdbcObject(
+            PreparedStatement st,
+            Object val,
+            int pos,
+            int type,
+            int precision) throws Exception {
+
+        if (type == Types.CLOB) {
+            st.setClob(pos, writeClob((String) val));
         }
-
-        createTestData("testDistinctClobFetch");
-
-        DataContext context = createDataContext();
-
-        SelectQuery noDistinct = new SelectQuery(ClobMaster.class);
-        noDistinct.addOrdering(ClobMaster.NAME_PROPERTY, true);
-
-        SelectQuery distinct = new SelectQuery(ClobMaster.class);
-        distinct.setDistinct(true);
-        distinct.addOrdering(ClobMaster.NAME_PROPERTY, true);
-
-        List noDistinctResult = context.performQuery(noDistinct);
-        List distinctResult = context.performQuery(distinct);
-
-        assertEquals(3, noDistinctResult.size());
-        assertEquals(noDistinctResult, distinctResult);
+        else {
+            super.setJdbcObject(st, val, pos, type, precision);
+        }
     }
 
-    public void testDistinctClobFetchWithToManyJoin() throws Exception {
-        if (!getAccessStackAdapter().supportsLobInsertsAsStrings()) {
-            return;
-        }
-
-        createTestData("testDistinctClobFetchWithToManyJoin");
-
-        DataContext context = createDataContext();
-
-        Expression qual = Expression.fromString("details.name like 'cd%'");
-        SelectQuery query = new SelectQuery(ClobMaster.class, qual);
-        List result = context.performQuery(query);
-
-        assertEquals(3, result.size());
+    Clob writeClob(String string) {
+        return string != null ? new MemoryClob(string) : null;
     }
 }

@@ -280,6 +280,16 @@ public abstract class AbstractAccessStack {
 
     protected void createPKSupport(DataNode node, DataMap map) throws Exception {
         List filteredEntities = dbEntitiesInInsertOrder(node, map);
+        
+        // remove derived...
+        Iterator it = filteredEntities.iterator();
+        while(it.hasNext()) {
+            DbEntity e  = (DbEntity) it.next();
+            if(e instanceof DerivedDbEntity) {
+                it.remove();
+            }
+        }
+        
         node.getAdapter().getPkGenerator().createAutoPk(node, filteredEntities);
     }
 
