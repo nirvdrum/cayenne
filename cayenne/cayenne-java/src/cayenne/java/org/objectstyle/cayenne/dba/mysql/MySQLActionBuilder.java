@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.postgres;
+package org.objectstyle.cayenne.dba.mysql;
 
 import java.sql.Connection;
 
@@ -62,29 +62,24 @@ import org.objectstyle.cayenne.access.trans.SelectTranslator;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcActionBuilder;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-class PostgresActionBuilder extends JdbcActionBuilder {
+class MySQLActionBuilder extends JdbcActionBuilder {
 
-    public PostgresActionBuilder(DbAdapter adapter, EntityResolver resolver) {
+    MySQLActionBuilder(DbAdapter adapter, EntityResolver resolver) {
         super(adapter, resolver);
-    }
-
-    public SQLAction procedureAction(ProcedureQuery query) {
-        return new PostgresProcedureAction(query, getAdapter(), getEntityResolver());
     }
 
     public SQLAction objectSelectAction(SelectQuery query) {
         return new SelectAction(query, adapter, entityResolver) {
 
             protected SelectTranslator createTranslator(Connection connection) {
-                SelectTranslator translator = new PostgresSelectTranslator();
+                SelectTranslator translator = new MySQLSelectTranslator();
                 translator.setQuery(query);
                 translator.setAdapter(adapter);
                 translator.setEntityResolver(getEntityResolver());

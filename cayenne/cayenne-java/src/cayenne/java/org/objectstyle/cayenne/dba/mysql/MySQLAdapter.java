@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.dba.mysql;
 import java.sql.Types;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
@@ -66,19 +67,21 @@ import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 
 /**
- * DbAdapter implementation for <a href="http://www.mysql.com">MySQL RDBMS</a>.
- * Sample <a target="_top" href="../../../../../../../developerguide/unit-tests.html">connection 
+ * DbAdapter implementation for <a href="http://www.mysql.com">MySQL RDBMS</a>. Sample <a
+ * target="_top" href="../../../../../../../developerguide/unit-tests.html">connection
  * settings</a> to use with MySQL are shown below:
  * 
-<pre>
-test-mysql.cayenne.adapter = org.objectstyle.cayenne.dba.mysql.MySQLAdapter
-test-mysql.jdbc.username = test
-test-mysql.jdbc.password = secret
-test-mysql.jdbc.url = jdbc:mysql://serverhostname/cayenne
-test-mysql.jdbc.driver = com.mysql.jdbc.Driver
-</pre>
+ * <pre>
+ *   test-mysql.cayenne.adapter = org.objectstyle.cayenne.dba.mysql.MySQLAdapter
+ *   test-mysql.jdbc.username = test
+ *   test-mysql.jdbc.password = secret
+ *   test-mysql.jdbc.url = jdbc:mysql://serverhostname/cayenne
+ *   test-mysql.jdbc.driver = com.mysql.jdbc.Driver
+ * </pre>
  * 
  * @author Andrei Adamchik
  */
@@ -90,14 +93,24 @@ public class MySQLAdapter extends JdbcAdapter {
         this.setSupportsUniqueConstraints(true);
         this.setSupportsGeneratedKeys(true);
     }
-    
+
+    /**
+     * Uses special action builder to create the right action.
+     * 
+     * @since 1.2
+     */
+    public SQLAction getAction(Query query, DataNode node) {
+        return query.createSQLAction(new MySQLActionBuilder(this, node
+                .getEntityResolver()));
+    }
+
     public String dropTable(DbEntity entity) {
         return "DROP TABLE IF EXISTS " + entity.getFullyQualifiedName();
     }
 
     /**
-     * Installs appropriate ExtendedTypes used as converters for passing values
-     * between JDBC and Java layers.
+     * Installs appropriate ExtendedTypes used as converters for passing values between
+     * JDBC and Java layers.
      */
     protected void configureExtendedTypes(ExtendedTypeMap map) {
         super.configureExtendedTypes(map);
@@ -105,18 +118,18 @@ public class MySQLAdapter extends JdbcAdapter {
         // must handle CLOBs as strings, otherwise there
         // are problems with NULL clobs that are treated
         // as empty strings... somehow this doesn't happen
-        //  for BLOBs (ConnectorJ v. 3.0.9)
+        // for BLOBs (ConnectorJ v. 3.0.9)
         map.registerType(new CharType(false, false));
         map.registerType(new ByteArrayType(false, false));
     }
 
     public DbAttribute buildAttribute(
-        String name,
-        String typeName,
-        int type,
-        int size,
-        int precision,
-        boolean allowNulls) {
+            String name,
+            String typeName,
+            int type,
+            int size,
+            int precision,
+            boolean allowNulls) {
 
         // all LOB types are returned by the driver as OTHER... must remap them manually
         // (at least on MySQL 3.23)
@@ -155,27 +168,26 @@ public class MySQLAdapter extends JdbcAdapter {
         throw new CayenneRuntimeException("FK constraints are not supported.");
     }
 
-    /** 
-     * Returns null, since views are not yet supported in MySQL. Views
-     * support is promised in MySQL 4.1.
+    /**
+     * Returns null, since views are not yet supported in MySQL. Views support is promised
+     * in MySQL 4.1.
      */
     public String tableTypeForView() {
         return null;
     }
 
     /**
-      * Creates and returns a primary key generator. Overrides superclass 
-      * implementation to return an
-      * instance of MySQLPkGenerator that does the correct table locking.
-      */
+     * Creates and returns a primary key generator. Overrides superclass implementation to
+     * return an instance of MySQLPkGenerator that does the correct table locking.
+     */
     protected PkGenerator createPkGenerator() {
         return new MySQLPkGenerator();
     }
-    
+
     protected void createTableAppendColumn(StringBuffer sqlBuffer, DbAttribute column) {
         super.createTableAppendColumn(sqlBuffer, column);
-        
-        if(column.isGenerated()) {
+
+        if (column.isGenerated()) {
             sqlBuffer.append(" AUTO_INCREMENT");
         }
     }

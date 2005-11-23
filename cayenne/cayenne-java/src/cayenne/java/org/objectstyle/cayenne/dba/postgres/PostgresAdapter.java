@@ -80,13 +80,13 @@ import org.objectstyle.cayenne.query.SQLAction;
  * use with PostgreSQL are shown below:
  * 
  * <pre>
- *   
- *     test-postgresql.cayenne.adapter = org.objectstyle.cayenne.dba.postgres.PostgresAdapter
- *     test-postgresql.jdbc.username = test
- *     test-postgresql.jdbc.password = secret
- *     test-postgresql.jdbc.url = jdbc:postgresql://serverhostname/cayenne
- *     test-postgresql.jdbc.driver = org.postgresql.Driver
  *    
+ *      test-postgresql.cayenne.adapter = org.objectstyle.cayenne.dba.postgres.PostgresAdapter
+ *      test-postgresql.jdbc.username = test
+ *      test-postgresql.jdbc.password = secret
+ *      test-postgresql.jdbc.url = jdbc:postgresql://serverhostname/cayenne
+ *      test-postgresql.jdbc.driver = org.postgresql.Driver
+ *     
  * </pre>
  * 
  * @author Dirk Olmes
@@ -94,7 +94,7 @@ import org.objectstyle.cayenne.query.SQLAction;
  * @author Andrus Adamchik
  */
 public class PostgresAdapter extends JdbcAdapter {
-    
+
     public PostgresAdapter() {
         setSupportsBatchUpdates(true);
     }
@@ -114,9 +114,9 @@ public class PostgresAdapter extends JdbcAdapter {
      * and Java layers.
      */
     protected void configureExtendedTypes(ExtendedTypeMap map) {
-        
+
         super.configureExtendedTypes(map);
-        
+
         map.registerType(new CharType(true, false));
         map.registerType(new PostgresByteArrayType(true, true));
     }
@@ -136,7 +136,7 @@ public class PostgresAdapter extends JdbcAdapter {
             type = Types.LONGVARBINARY;
         }
         // oid is returned as INTEGER, need to make it BLOB
-        else if("oid".equals(typeName)) {
+        else if ("oid".equals(typeName)) {
             type = Types.BLOB;
         }
         // somehow the driver reverse-engineers "text" as VARCHAR, must be CLOB

@@ -60,11 +60,14 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 
 /**
  * DbAdapter implementation for the <a href="http://hsqldb.sourceforge.net/"> HSQLDB RDBMS
@@ -73,18 +76,28 @@ import org.objectstyle.cayenne.map.DbRelationship;
  * use with HSQLDB are shown below:
  * 
  * <pre>
- * 
- *  test-hsqldb.cayenne.adapter = org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter
- *  test-hsqldb.jdbc.username = test
- *  test-hsqldb.jdbc.password = secret
- *  test-hsqldb.jdbc.url = jdbc:hsqldb:hsql://serverhostname
- *  test-hsqldb.jdbc.driver = org.hsqldb.jdbcDriver
  *  
+ *   test-hsqldb.cayenne.adapter = org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter
+ *   test-hsqldb.jdbc.username = test
+ *   test-hsqldb.jdbc.password = secret
+ *   test-hsqldb.jdbc.url = jdbc:hsqldb:hsql://serverhostname
+ *   test-hsqldb.jdbc.driver = org.hsqldb.jdbcDriver
+ *   
  * </pre>
  * 
  * @author Holger Hoffstaette
  */
 public class HSQLDBAdapter extends JdbcAdapter {
+
+    /**
+     * Uses special action builder to create the right action.
+     * 
+     * @since 1.2
+     */
+    public SQLAction getAction(Query query, DataNode node) {
+        return query
+                .createSQLAction(new HSQLActionBuilder(this, node.getEntityResolver()));
+    }
 
     /**
      * Returns a DDL string to create a unique constraint over a set of columns.
@@ -178,8 +191,7 @@ public class HSQLDBAdapter extends JdbcAdapter {
     }
 
     /**
-     * Returns a SQL string to drop a table corresponding
-     * to <code>ent</code> DbEntity.
+     * Returns a SQL string to drop a table corresponding to <code>ent</code> DbEntity.
      * 
      * @since 1.2
      */
@@ -189,8 +201,8 @@ public class HSQLDBAdapter extends JdbcAdapter {
     }
 
     /**
-     * Uses "CREATE CACHED TABLE" instead of "CREATE TABLE".
-     * Uses unqualified entity names.
+     * Uses "CREATE CACHED TABLE" instead of "CREATE TABLE". Uses unqualified entity
+     * names.
      * 
      * @since 1.2
      */
@@ -200,11 +212,14 @@ public class HSQLDBAdapter extends JdbcAdapter {
         if (sql != null && sql.toUpperCase().startsWith("CREATE TABLE ")) {
             sql = "CREATE CACHED TABLE " + sql.substring("CREATE TABLE ".length());
         }
- 
+
         // hsqldb doesn't support schema namespaces, so remove if found
         String fqnCreate = "CREATE CACHED TABLE " + ent.getFullyQualifiedName() + " (";
         if (sql != null && sql.toUpperCase().startsWith(fqnCreate)) {
-            sql = "CREATE CACHED TABLE " + ent.getName() + " (" + sql.substring(fqnCreate.length());
+            sql = "CREATE CACHED TABLE "
+                    + ent.getName()
+                    + " ("
+                    + sql.substring(fqnCreate.length());
         }
 
         return sql;

@@ -86,6 +86,18 @@ public class SelectQueryTst extends SelectQueryBase {
         assertNotNull(objects);
         assertEquals(7, objects.size());
     }
+    
+    public void testFetchLimitWithQualifier() throws Exception {
+        query.setRoot(Artist.class);
+        query.setQualifier(Expression.fromString("db:ARTIST_ID > 3"));
+        query.setFetchLimit(7);
+        performQuery();
+
+        // check query results
+        List objects = opObserver.rowsForQuery(query);
+        assertNotNull(objects);
+        assertEquals(7, objects.size());
+    }
 
     public void testSelectAllObjectsRootEntityName() throws Exception {
         query.setRoot(Artist.class);

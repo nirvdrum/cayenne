@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,44 +53,31 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.postgres;
+package org.objectstyle.cayenne.dba.hsqldb;
 
-import java.sql.Connection;
-
-import org.objectstyle.cayenne.access.jdbc.SelectAction;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.JdbcActionBuilder;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.ProcedureQuery;
-import org.objectstyle.cayenne.query.SQLAction;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 /**
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-class PostgresActionBuilder extends JdbcActionBuilder {
+class HSQLSelectTranslator extends SelectTranslator {
 
-    public PostgresActionBuilder(DbAdapter adapter, EntityResolver resolver) {
-        super(adapter, resolver);
-    }
+    static final String SELECT_PREFIX = "SELECT";
 
-    public SQLAction procedureAction(ProcedureQuery query) {
-        return new PostgresProcedureAction(query, getAdapter(), getEntityResolver());
-    }
+    public String createSqlString() throws Exception {
+        String sql = super.createSqlString();
 
-    public SQLAction objectSelectAction(SelectQuery query) {
-        return new SelectAction(query, adapter, entityResolver) {
+        // limit results
+        int limit = ((GenericSelectQuery) getQuery()).getFetchLimit();
+        if (limit > 0 && sql.startsWith(SELECT_PREFIX)) {
+            return SELECT_PREFIX
+                    + " TOP "
+                    + limit
+                    + sql.substring(SELECT_PREFIX.length());
+        }
 
-            protected SelectTranslator createTranslator(Connection connection) {
-                SelectTranslator translator = new PostgresSelectTranslator();
-                translator.setQuery(query);
-                translator.setAdapter(adapter);
-                translator.setEntityResolver(getEntityResolver());
-                translator.setConnection(connection);
-                return translator;
-            }
-        };
+        return sql;
     }
 }
