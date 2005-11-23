@@ -94,6 +94,10 @@ import org.objectstyle.cayenne.query.SQLAction;
  * @author Andrus Adamchik
  */
 public class PostgresAdapter extends JdbcAdapter {
+    
+    public PostgresAdapter() {
+        setSupportsBatchUpdates(true);
+    }
 
     /**
      * Uses PostgresActionBuilder to create the right action.

@@ -19,6 +19,8 @@ Changes/New Features:
   
 * New FrontBaseAdapter, with support for BLOB/CLOB, batch updates, etc.
 
+* Support for batch updates on PostgreSQL. I am seeing almost 2x increase in speed for large inserts!!
+
 Bugs Fixed:
 
 
