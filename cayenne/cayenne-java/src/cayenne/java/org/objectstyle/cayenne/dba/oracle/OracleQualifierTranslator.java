@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.dba.oracle;
 
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
-import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
@@ -71,19 +70,16 @@ class OracleQualifierTranslator extends TrimmingQualifierTranslator {
         super(queryAssembler, OracleAdapter.TRIM_FUNCTION);
     }
 
-    protected Expression extractQualifier() {
-        Expression qualifier = super.extractQualifier();
-        if (qualifier == null) {
-            return null;
-        }
+    public String doTranslation() {
+        String qualifier = super.doTranslation();
 
-        // add LIMIT to translated qualifier
         Query query = getQueryAssembler().getQuery();
         if (query instanceof GenericSelectQuery) {
             int limit = ((GenericSelectQuery) query).getFetchLimit();
             if (limit > 0) {
-                qualifier = qualifier.andExp(Expression.fromString("db:ROWNUM <= "
-                        + limit));
+                return (qualifier != null)
+                        ? qualifier + " AND rownum <= " + limit
+                        : "rownum <= " + limit;
             }
         }
 
