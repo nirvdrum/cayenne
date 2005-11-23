@@ -59,6 +59,7 @@ import java.sql.Types;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
@@ -66,6 +67,8 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 
 /**
  * DbAdapter implementation for <a href="http://www.frontbase.com/">FrontBase RDBMS</a>.
@@ -74,11 +77,11 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
  * use with FrontBase are shown below:
  * 
  * <pre>
- *         fb.cayenne.adapter = org.objectstyle.cayenne.dba.frontbase.FrontBaseAdapter
- *         fb.jdbc.username = _system
- *         fb.jdbc.password = secret
- *         fb.jdbc.url = jdbc:FrontBase://localhost/cayenne/
- *         fb.jdbc.driver = jdbc.FrontBase.FBJDriver
+ *          fb.cayenne.adapter = org.objectstyle.cayenne.dba.frontbase.FrontBaseAdapter
+ *          fb.jdbc.username = _system
+ *          fb.jdbc.password = secret
+ *          fb.jdbc.url = jdbc:FrontBase://localhost/cayenne/
+ *          fb.jdbc.driver = jdbc.FrontBase.FBJDriver
  * </pre>
  * 
  * @since 1.2
@@ -94,6 +97,14 @@ public class FrontBaseAdapter extends JdbcAdapter {
 
     public FrontBaseAdapter() {
         setSupportsBatchUpdates(true);
+    }
+
+    /**
+     * Uses special action builder to create the right action.
+     */
+    public SQLAction getAction(Query query, DataNode node) {
+        return query.createSQLAction(new FrontBaseActionBuilder(this, node
+                .getEntityResolver()));
     }
 
     public String tableTypeForTable() {

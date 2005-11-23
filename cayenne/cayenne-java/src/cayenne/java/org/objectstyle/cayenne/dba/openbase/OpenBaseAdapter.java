@@ -62,6 +62,7 @@ import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.types.CharType;
@@ -75,6 +76,8 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLAction;
 
 /**
  * DbAdapter implementation for <a href="http://www.openbase.com">OpenBase</a>.
@@ -100,6 +103,16 @@ public class OpenBaseAdapter extends JdbcAdapter {
     public OpenBaseAdapter() {
         // init defaults
         this.setSupportsUniqueConstraints(false);
+    }
+    
+    /**
+     * Uses special action builder to create the right action.
+     * 
+     * @since 1.2
+     */
+    public SQLAction getAction(Query query, DataNode node) {
+        return query.createSQLAction(new OpenBaseActionBuilder(this, node
+                .getEntityResolver()));
     }
 
     protected void configureExtendedTypes(ExtendedTypeMap map) {
