@@ -80,6 +80,8 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * performance tuning.
  * 
  * @author Arndt Brenschede
+ * @deprecated Since 1.2. This class has a number of limitations and keeping it in Cayenne
+ *             doesn't look like a wise idea.
  */
 public class PrefetchHelper {
 

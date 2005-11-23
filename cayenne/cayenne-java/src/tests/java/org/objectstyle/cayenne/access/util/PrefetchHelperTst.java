@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
+ * @deprecated as PrefetchHelper is deperected too.
  * @author Andrei Adamchik
  */
 public class PrefetchHelperTst extends CayenneTestCase {

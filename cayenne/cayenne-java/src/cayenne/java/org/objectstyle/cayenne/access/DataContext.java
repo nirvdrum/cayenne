@@ -1097,6 +1097,9 @@ public class DataContext implements QueryEngine, Serializable {
      * <i>WARNING: Currently supports only "one-step" to one relationships. This is an
      * arbitrary limitation and will be removed eventually. </i>
      * </p>
+     * 
+     * @deprecated Since 1.2. This is a utility method that handles a very specific case.
+     *             It shouldn't be in DataContext.
      */
     public void prefetchRelationships(SelectQuery query, List objects) {
         Collection prefetches = query.getPrefetchTree() != null ? query
