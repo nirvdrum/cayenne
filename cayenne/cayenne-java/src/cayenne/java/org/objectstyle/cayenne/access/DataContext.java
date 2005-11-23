@@ -79,7 +79,6 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
-import org.objectstyle.cayenne.access.util.PrefetchHelper;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.event.EventSubject;
@@ -1134,7 +1133,10 @@ public class DataContext implements QueryEngine, Serializable {
                                 + path);
             }
 
-            PrefetchHelper.resolveToOneRelations(this, objects, path);
+            org.objectstyle.cayenne.access.util.PrefetchHelper.resolveToOneRelations(
+                    this,
+                    objects,
+                    path);
         }
     }
 
