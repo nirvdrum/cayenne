@@ -5,22 +5,28 @@
     <body>        
          <section name="Cayenne: Professional Object Relational Mapping">
         <p>Cayenne is a powerful, full-featured Java Object Relational Mapping framework. It is open source
-        and completely free. One of the main Cayenne distinctions is that it comes with cross-platform 
-        modeling GUI tools. This places Cayenne in the league of its own, making it a very attractive
+        and completely free. Cayenne cross-platform modeling GUI tools place it in the league of its own, 
+        making it a very attractive
         choice over both closed source commercial products and traditional "edit your own XML" open 
         source solutions.
         </p>
+        
+        <p>Cayenne provides management of persistent Java objects mapped to relational databases, 
+        single method call queries and updates (including atomic updates of all modified objects), 
+        seamless integration of multiple databases into a single virtual data source. 
+        Cayenne is distributed with CayenneModeler - a complete GUI mapping tool. Cayenne has been successfully deployed in 
+        production environment on high volume sites and has a constantly growing international community.</p>
+        
+        <p>Cayenne is a true open source project drawing its strength from the developer and user community.</p>
         </section>
         
         <section name="Project News">
 
-	<p><u><i>[November 7, 2005]</i></u> <strong>Cayenne 1.2M7 Released</strong></p>
-		<p>A new M7 milestone of Cayenne 1.2 is available. It features greatly extended
-		<a href="http://objectstyle.org/confluence/display/CAY/Multi+Tier">multi-tier API</a> (including
-		peer-to-peer comminication), auto-detection of
-		DbAdapter, native support for JDK 1.5 enums, a number of bug fixes and 
-		more. Check out
-		<a href="http://objectstyle.org/confluence/display/CAY/2005/11/07/M7+Released">full release announcement</a> on our blog.</p>
+	<p><u><i>[November 24, 2005]</i></u> <strong>Cayenne 1.2M8 Released</strong></p>
+		<p>A new M8 milestone of Cayenne 1.2 is available. It features new
+		<a href="http://objectstyle.org/confluence/display/CAY/Prefetching">prefetching</a> algorithm, supporting flattened 
+		relationshios, FrontBaseAdapter and sevral JDBC performance enhancements. Check out
+		<a href="http://objectstyle.org/confluence/display/CAY/2005/11/24/M8+Milestone+Release">full release announcement</a> on our blog.</p>
 
 
 	<p><u><i>[Sep 4, 2005]</i></u> <strong>More Cayenne Success Stories</strong></p>
@@ -34,25 +40,18 @@
            
 
         <p><u><i>[Aug 30, 2004]</i></u> <strong>Cayenne on the Cover of JavaWorld Japan</strong></p>
-		<p><img align="left" hspace="3" src="images/other/javaworld-200409.gif"/>
+		<p><img align="left" hspace="3" height="80" src="images/other/javaworld-200409.gif"/>
 		Cayenne sure gets some press coverage in Japan lately. A September edition of JavaWorld Japan has 
 		a big article on Cayenne, including a sample Tapestry application
 		(pp. 94-112, Cayenne 1.0.7 is used). Big thanks to Manabu Yoneyama for sending me a copy of the magazine.
 		<br/><br/><br/><br/></p>
-		
-
-		<p><u><i>[June 12, 2004]</i></u> <strong>Cayenne vs. Hibernate</strong></p>
-		<p>Bill Dudney posted a <a target="_blank"  href="http://www.theserverside.com/blogs/showblog.tss?id=CayenneAndHibernate">Cayenne 
-		vs. Hibernate</a> entry in his blog. This ended up as a <a target="_blank"  href="http://www.theserverside.com/news/thread.tss?thread_id=26498">pretty 
-		long thread</a>  discussing the merits of GUI tools for ORM among other things.
-		</p>
-		
+				
         <p><u><i>[June 2, 2004]</i></u> <strong>Cayenne Article on TheServerSide.com</strong></p>
 		<p><img align="left" width="73" height="45" hspace="3" src="images/other/cayenne_tss.gif"/>  TheServerSide.com <a target="_blank" href="http://theserverside.com/articles/article.tss?l=Cayenne">published 
 		an article</a>  by Andrus Adamchik and Eric Schneider introducing
 		Cayenne and its productivity tools.  Discuss this article on <a target="_blank" 
 		href="http://theserverside.com/news/thread.tss?thread_id=26325">TheServerSide forum</a>.
-		<br/><br/><br/><br/></p>
+		<br/><br/></p>
 		
         <p><u><i>[May 1 2003]</i></u> <strong>National Hockey League Switches to Cayenne</strong></p>
         
@@ -66,24 +65,8 @@
         </p>
 <p> </p>
         
-        <p><a href="http://objectstyle.org/confluence/pages/viewrecentblogposts.action?key=CAY"><strong>other news...</strong></a></p>
-	<p><a href="http://objectstyle.org/confluence/display/CAY/Old+News+Archive"><strong>old news...</strong></a></p>
+        <p><a href="http://objectstyle.org/confluence/pages/viewrecentblogposts.action?key=CAY"><strong>all news...</strong></a></p>
         
         </section>
-        
-        <section name="About Cayenne">
-        <p>Cayenne provides management of persistent Java objects mapped to relational databases, 
-        single method call queries and updates (including atomic updates of all modified objects), 
-        seamless integration of multiple databases into a single virtual data source. 
-        Cayenne is distributed with CayenneModeler - a complete GUI mapping tool that supports 
-        reverse-engineering of RDBMS schema, working with database mappings and generation of 
-        Java source code for the persistent objects. Cayenne has been successfully deployed in 
-        production environment on high volume sites and has a constantly growing international community.</p>
-        
-        <p>Cayenne is an open source project and we encourage the 
-        community to participate in development, testing and writing documentation.
-        This way we can produce a better product that will benefit both contributors
-        and user community.</p>
-        </section>
-    </body>
+      </body>
 </document>
