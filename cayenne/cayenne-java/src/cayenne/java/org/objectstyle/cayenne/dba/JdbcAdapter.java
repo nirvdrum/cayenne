@@ -301,56 +301,58 @@ public class JdbcAdapter implements DbAdapter {
      * Returns a SQL string that can be used to create database table corresponding to
      * <code>ent</code> parameter.
      */
-    public String createTable(DbEntity ent) {
-        // later we may support view creation
-        // for derived DbEntities
-        if (ent instanceof DerivedDbEntity) {
+    public String createTable(DbEntity entity) {
+        if (entity instanceof DerivedDbEntity) {
             throw new CayenneRuntimeException("Can't create table for derived DbEntity '"
-                    + ent.getName()
+                    + entity.getName()
                     + "'.");
         }
 
         StringBuffer sqlBuffer = new StringBuffer();
-        sqlBuffer
-                .append("CREATE TABLE ")
-                .append(ent.getFullyQualifiedName())
-                .append(" (");
+        sqlBuffer.append("CREATE TABLE ").append(entity.getFullyQualifiedName()).append(
+                " (");
 
         // columns
-        Iterator it = ent.getAttributes().iterator();
-        boolean first = true;
-        while (it.hasNext()) {
-            if (first) {
-                first = false;
+        Iterator it = entity.getAttributes().iterator();
+        if (it.hasNext()) {
+            boolean first = true;
+            while (it.hasNext()) {
+                if (first) {
+                    first = false;
+                }
+                else {
+                    sqlBuffer.append(", ");
+                }
+
+                DbAttribute column = (DbAttribute) it.next();
+
+                // attribute may not be fully valid, do a simple check
+                if (column.getType() == TypesMapping.NOT_DEFINED) {
+                    throw new CayenneRuntimeException("Undefined type for attribute '"
+                            + entity.getFullyQualifiedName()
+                            + "."
+                            + column.getName()
+                            + "'.");
+                }
+
+                createTableAppendColumn(sqlBuffer, column);
             }
-            else {
-                sqlBuffer.append(", ");
-            }
 
-            DbAttribute column = (DbAttribute) it.next();
-
-            // attribute may not be fully valid, do a simple check
-            if (column.getType() == TypesMapping.NOT_DEFINED) {
-                throw new CayenneRuntimeException("Undefined type for attribute '"
-                        + ent.getFullyQualifiedName()
-                        + "."
-                        + column.getName()
-                        + "'.");
-            }
-
-            createTableAppendColumn(sqlBuffer, column);
-
+            
+            createTableAppendPKClause(sqlBuffer, entity);
         }
 
-        // primary key clause
-        Iterator pkit = ent.getPrimaryKey().iterator();
-        if (pkit.hasNext()) {
-            if (first)
-                first = false;
-            else
-                sqlBuffer.append(", ");
+        sqlBuffer.append(')');
+        return sqlBuffer.toString();
+    }
 
-            sqlBuffer.append("PRIMARY KEY (");
+    /**
+     * @since 1.2
+     */
+    protected void createTableAppendPKClause(StringBuffer sqlBuffer, DbEntity entity) {
+        Iterator pkit = entity.getPrimaryKey().iterator();
+        if (pkit.hasNext()) {
+            sqlBuffer.append(", PRIMARY KEY (");
             boolean firstPk = true;
             while (pkit.hasNext()) {
                 if (firstPk)
@@ -363,9 +365,6 @@ public class JdbcAdapter implements DbAdapter {
             }
             sqlBuffer.append(')');
         }
-        sqlBuffer.append(')');
-
-        return sqlBuffer.toString();
     }
 
     /**
@@ -428,10 +427,8 @@ public class JdbcAdapter implements DbAdapter {
 
         StringBuffer buf = new StringBuffer();
 
-        buf
-                .append("ALTER TABLE ")
-                .append(source.getFullyQualifiedName())
-                .append(" ADD UNIQUE (");
+        buf.append("ALTER TABLE ").append(source.getFullyQualifiedName()).append(
+                " ADD UNIQUE (");
 
         Iterator it = columns.iterator();
         DbAttribute first = (DbAttribute) it.next();
@@ -456,8 +453,9 @@ public class JdbcAdapter implements DbAdapter {
         StringBuffer buf = new StringBuffer();
         StringBuffer refBuf = new StringBuffer();
 
-        buf.append("ALTER TABLE ").append(((DbEntity) rel.getSourceEntity())
-                .getFullyQualifiedName()).append(" ADD FOREIGN KEY (");
+        buf.append("ALTER TABLE ").append(
+                ((DbEntity) rel.getSourceEntity()).getFullyQualifiedName()).append(
+                " ADD FOREIGN KEY (");
 
         Iterator jit = rel.getJoins().iterator();
         boolean first = true;
@@ -548,7 +546,8 @@ public class JdbcAdapter implements DbAdapter {
      * @since 1.2
      */
     public SQLAction getAction(Query query, DataNode node) {
-        return query.createSQLAction(new JdbcActionBuilder(this, node.getEntityResolver()));
+        return query
+                .createSQLAction(new JdbcActionBuilder(this, node.getEntityResolver()));
     }
 
     public void bindParameter(
@@ -562,8 +561,8 @@ public class JdbcAdapter implements DbAdapter {
             statement.setNull(pos, sqlType);
         }
         else {
-            ExtendedType typeProcessor = getExtendedTypes().getRegisteredType(object
-                    .getClass());
+            ExtendedType typeProcessor = getExtendedTypes().getRegisteredType(
+                    object.getClass());
             typeProcessor.setJdbcObject(statement, object, pos, sqlType, precision);
         }
     }

@@ -56,6 +56,11 @@
 package org.objectstyle.cayenne.dba.mysql;
 
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
@@ -76,11 +81,11 @@ import org.objectstyle.cayenne.query.SQLAction;
  * settings</a> to use with MySQL are shown below:
  * 
  * <pre>
- *   test-mysql.cayenne.adapter = org.objectstyle.cayenne.dba.mysql.MySQLAdapter
- *   test-mysql.jdbc.username = test
- *   test-mysql.jdbc.password = secret
- *   test-mysql.jdbc.url = jdbc:mysql://serverhostname/cayenne
- *   test-mysql.jdbc.driver = com.mysql.jdbc.Driver
+ *                    test-mysql.cayenne.adapter = org.objectstyle.cayenne.dba.mysql.MySQLAdapter
+ *                    test-mysql.jdbc.username = test
+ *                    test-mysql.jdbc.password = secret
+ *                    test-mysql.jdbc.url = jdbc:mysql://serverhostname/cayenne
+ *                    test-mysql.jdbc.driver = com.mysql.jdbc.Driver
  * </pre>
  * 
  * @author Andrei Adamchik
@@ -169,8 +174,8 @@ public class MySQLAdapter extends JdbcAdapter {
     }
 
     /**
-     * Returns null, since views are not yet supported in MySQL. Views support is promised
-     * in MySQL 4.1.
+     * Returns null, since views are not yet supported in MySQL. Views are available on
+     * newer versions of MySQL.
      */
     public String tableTypeForView() {
         return null;
@@ -184,11 +189,57 @@ public class MySQLAdapter extends JdbcAdapter {
         return new MySQLPkGenerator();
     }
 
+    /**
+     * Customizes table creation procedure to put generated columns first in the PK
+     * definition, preventing a crash on InnoDB tables.
+     * 
+     * @since 1.2
+     */
+    // See CAY-358 for details of the problem
+    protected void createTableAppendPKClause(StringBuffer sqlBuffer, DbEntity entity) {
+
+        List pkList = new ArrayList(entity.getPrimaryKey());
+        Collections.sort(pkList, new PKComparator());
+
+        // must move generated to the front...
+
+        Iterator pkit = pkList.iterator();
+        if (pkit.hasNext()) {
+
+            sqlBuffer.append(", PRIMARY KEY (");
+            boolean firstPk = true;
+            while (pkit.hasNext()) {
+                if (firstPk)
+                    firstPk = false;
+                else
+                    sqlBuffer.append(", ");
+
+                DbAttribute at = (DbAttribute) pkit.next();
+                sqlBuffer.append(at.getName());
+            }
+            sqlBuffer.append(')');
+        }
+    };
+
     protected void createTableAppendColumn(StringBuffer sqlBuffer, DbAttribute column) {
         super.createTableAppendColumn(sqlBuffer, column);
 
         if (column.isGenerated()) {
             sqlBuffer.append(" AUTO_INCREMENT");
+        }
+    }
+
+    final class PKComparator implements Comparator {
+
+        public int compare(Object o1, Object o2) {
+            DbAttribute a1 = (DbAttribute) o1;
+            DbAttribute a2 = (DbAttribute) o2;
+            if (a1.isGenerated() != a2.isGenerated()) {
+                return a1.isGenerated() ? -1 : 1;
+            }
+            else {
+                return a1.getName().compareTo(a2.getName());
+            }
         }
     }
 }
