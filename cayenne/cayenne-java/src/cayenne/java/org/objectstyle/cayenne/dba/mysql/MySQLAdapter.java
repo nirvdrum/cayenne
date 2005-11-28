@@ -81,11 +81,11 @@ import org.objectstyle.cayenne.query.SQLAction;
  * settings</a> to use with MySQL are shown below:
  * 
  * <pre>
- *                    test-mysql.cayenne.adapter = org.objectstyle.cayenne.dba.mysql.MySQLAdapter
- *                    test-mysql.jdbc.username = test
- *                    test-mysql.jdbc.password = secret
- *                    test-mysql.jdbc.url = jdbc:mysql://serverhostname/cayenne
- *                    test-mysql.jdbc.driver = com.mysql.jdbc.Driver
+ *                           test-mysql.cayenne.adapter = org.objectstyle.cayenne.dba.mysql.MySQLAdapter
+ *                           test-mysql.jdbc.username = test
+ *                           test-mysql.jdbc.password = secret
+ *                           test-mysql.jdbc.url = jdbc:mysql://serverhostname/cayenne
+ *                           test-mysql.jdbc.driver = com.mysql.jdbc.Driver
  * </pre>
  * 
  * @author Andrei Adamchik
@@ -190,18 +190,18 @@ public class MySQLAdapter extends JdbcAdapter {
     }
 
     /**
-     * Customizes table creation procedure to put generated columns first in the PK
-     * definition, preventing a crash on InnoDB tables.
+     * Customizes PK clause semantics to ensure that generated columns are in the
+     * beginning of the PK definition, as this seems to be a requirement for InnoDB
+     * tables.
      * 
      * @since 1.2
      */
-    // See CAY-358 for details of the problem
+    // See CAY-358 for details of the InnoDB problem
     protected void createTableAppendPKClause(StringBuffer sqlBuffer, DbEntity entity) {
 
+        // must move generated to the front...
         List pkList = new ArrayList(entity.getPrimaryKey());
         Collections.sort(pkList, new PKComparator());
-
-        // must move generated to the front...
 
         Iterator pkit = pkList.iterator();
         if (pkit.hasNext()) {
@@ -221,6 +221,9 @@ public class MySQLAdapter extends JdbcAdapter {
         }
     };
 
+    /**
+     * Appends AUTO_INCREMENT clause to the column definition for generated columns.
+     */
     protected void createTableAppendColumn(StringBuffer sqlBuffer, DbAttribute column) {
         super.createTableAppendColumn(sqlBuffer, column);
 

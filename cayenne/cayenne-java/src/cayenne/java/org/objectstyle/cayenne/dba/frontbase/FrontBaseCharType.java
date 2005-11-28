@@ -68,8 +68,8 @@ import org.objectstyle.cayenne.util.MemoryClob;
  * @since 1.2
  * @author Andrus Adamchik
  */
-// TODO, Andrus 11/23/2005 - actually this is the way CLOBs must be handled by default ...
-// so move this stuff in the superclass.
+// actually this is the way CLOBs must be handled by default, but there are still some
+// issues with other adapters, so we can't move this to a superclass yet.
 class FrontBaseCharType extends CharType {
 
     FrontBaseCharType() {
