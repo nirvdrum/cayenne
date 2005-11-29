@@ -68,6 +68,7 @@ import javax.swing.JSplitPane;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.ProjectTreeView;
 import org.objectstyle.cayenne.modeler.editor.datanode.DataNodeEditor;
+import org.objectstyle.cayenne.modeler.editor.dbentity.DbEntityTabbedView;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;

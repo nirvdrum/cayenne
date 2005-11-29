@@ -350,5 +350,4 @@ public class MainDataNodeEditor extends CayenneController {
         // display the right subview...
         view.getDataSourceDetailLayout().show(view.getDataSourceDetail(), factoryName);
     }
-
 }

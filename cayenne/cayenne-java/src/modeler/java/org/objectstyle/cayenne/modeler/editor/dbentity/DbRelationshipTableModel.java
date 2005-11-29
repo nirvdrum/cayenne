@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.editor;
+package org.objectstyle.cayenne.modeler.editor.dbentity;
 
 import java.util.ArrayList;
 

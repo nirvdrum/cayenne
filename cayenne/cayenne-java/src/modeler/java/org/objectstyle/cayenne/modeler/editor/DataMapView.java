@@ -140,7 +140,7 @@ public class DataMapView extends JPanel {
             }
         };
 
-        location = CayenneWidgetFactory.createLabel("");
+        location = new JLabel();
         nodeSelector = CayenneWidgetFactory.createComboBox();
         nodeSelector.setRenderer(CellRenderers.listRendererWithIcons());
 

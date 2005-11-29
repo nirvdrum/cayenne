@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.editor;
+package org.objectstyle.cayenne.modeler.editor.dbentity;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,7 +87,6 @@ public class DbAttributeTableModel extends CayenneTableModel {
     private static final int DB_ATTRIBUTE_MANDATORY = 3;
     private static final int DB_ATTRIBUTE_MAX = 4;
     private static final int DB_ATTRIBUTE_PRECISION = 5;
-    private static final int DB_ATTRIBUTE_GENERATED = 6;
 
     protected DbEntity entity;
 
@@ -125,7 +124,7 @@ public class DbAttributeTableModel extends CayenneTableModel {
      * Returns the number of columns in the table.
      */
     public int getColumnCount() {
-        return 7;
+        return 6;
     }
 
     public DbAttribute getAttribute(int row) {
@@ -148,8 +147,6 @@ public class DbAttributeTableModel extends CayenneTableModel {
                 return "Mandatory";
             case DB_ATTRIBUTE_MAX:
                 return "Max Length";
-            case DB_ATTRIBUTE_GENERATED:
-                return "Generated";
             default:
                 return "";
         }
@@ -159,7 +156,6 @@ public class DbAttributeTableModel extends CayenneTableModel {
         switch (col) {
             case DB_ATTRIBUTE_PRIMARY_KEY:
             case DB_ATTRIBUTE_MANDATORY:
-            case DB_ATTRIBUTE_GENERATED:
                 return Boolean.class;
             default:
                 return String.class;
@@ -186,8 +182,6 @@ public class DbAttributeTableModel extends CayenneTableModel {
                 return isMandatory(attr);
             case DB_ATTRIBUTE_MAX:
                 return getMaxLength(attr);
-            case DB_ATTRIBUTE_GENERATED:
-                return isGenerated(attr);
             default:
                 return "";
         }
@@ -204,8 +198,8 @@ public class DbAttributeTableModel extends CayenneTableModel {
         switch (col) {
             case DB_ATTRIBUTE_NAME:
                 e.setOldName(attr.getName());
-                attr.setName((String)newVal);
-                //setAttributeName((String) newVal, attr);
+                attr.setName((String) newVal);
+                // setAttributeName((String) newVal, attr);
                 fireTableCellUpdated(row, col);
                 break;
             case DB_ATTRIBUTE_TYPE:
@@ -221,9 +215,6 @@ public class DbAttributeTableModel extends CayenneTableModel {
                 break;
             case DB_ATTRIBUTE_MANDATORY:
                 setMandatory((Boolean) newVal, attr);
-                break;
-            case DB_ATTRIBUTE_GENERATED:
-                setGenerated((Boolean) newVal, attr);
                 break;
             case DB_ATTRIBUTE_MAX:
                 setMaxLength((String) newVal, attr);
@@ -311,8 +302,11 @@ public class DbAttributeTableModel extends CayenneTableModel {
 
         boolean flag = newVal.booleanValue();
 
-        // make sure "to-dep-pk" relationships are fixed when the primary key is unset.
+        // when PK is unset, we need to fix some derived flags
         if (!flag) {
+
+            attr.setGenerated(false);
+
             Collection relationships = ProjectUtil
                     .getRelationshipsUsingAttributeAsTarget(attr);
             relationships

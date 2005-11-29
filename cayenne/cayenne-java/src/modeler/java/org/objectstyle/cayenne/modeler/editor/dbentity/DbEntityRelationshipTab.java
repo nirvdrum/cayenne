@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.editor;
+package org.objectstyle.cayenne.modeler.editor.dbentity;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -91,6 +91,7 @@ import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
 import org.objectstyle.cayenne.modeler.action.DbEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.RemoveRelationshipAction;
 import org.objectstyle.cayenne.modeler.dialog.ResolveDbRelationshipDialog;
+import org.objectstyle.cayenne.modeler.editor.ExistingSelectionProcessor;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;

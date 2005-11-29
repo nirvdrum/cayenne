@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.editor;
+package org.objectstyle.cayenne.modeler.editor.dbentity;
 
 import java.awt.Component;
 
@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.action.RemoveAttributeAction;
 import org.objectstyle.cayenne.modeler.action.RemoveRelationshipAction;
+import org.objectstyle.cayenne.modeler.editor.ExistingSelectionProcessor;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DbAttributeDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;

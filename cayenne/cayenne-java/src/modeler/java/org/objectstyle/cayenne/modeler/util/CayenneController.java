@@ -81,7 +81,7 @@ import org.objectstyle.cayenne.util.Util;
 /**
  * A superclass of CayenneModeler controllers.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public abstract class CayenneController implements BoundComponent {
 

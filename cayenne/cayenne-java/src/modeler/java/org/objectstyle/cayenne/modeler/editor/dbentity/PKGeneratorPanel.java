@@ -53,99 +53,61 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.editor;
+package org.objectstyle.cayenne.modeler.editor.dbentity;
 
-import java.util.ArrayList;
+import java.util.Iterator;
+
+import javax.swing.JPanel;
 
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DerivedDbAttribute;
-import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 
-/**
- * @author Andrei Adamchik
- */
-public class DerivedAttributeParamsTableModel extends DbAttributeTableModel {
-	private static final int DB_ATTRIBUTE_NAME = 0;
-	private static final int DB_ATTRIBUTE_TYPE = 1;
+public abstract class PKGeneratorPanel extends JPanel {
 
-	protected DerivedDbAttribute derived;
+    protected ProjectController mediator;
 
-	/**
-	 * Constructor for DerivedAttributeParamsTableModel.
-	 */
-	public DerivedAttributeParamsTableModel(
-		DerivedDbAttribute derived,
-		ProjectController mediator,
-		Object eventSource) {
-
-		super(
-			((DerivedDbEntity) derived.getEntity()).getParentEntity(),
-			mediator,
-			eventSource,
-			new ArrayList(derived.getParams()));
-		this.derived = derived;
-	}
+    public PKGeneratorPanel(ProjectController mediator) {
+        this.mediator = mediator;
+    }
 
     /**
-     * Returns <code>null</code> to disable ordering.
+     * Called by parent when DbEntity changes, regardless of whether this panel is visible
+     * or not.
      */
-	public String getOrderingKey() {
-		return null;
-	}
-	
-    public DbEntity getParentEntity() {
-    	return ((DerivedDbEntity) derived.getEntity()).getParentEntity();
+    public abstract void setDbEntity(DbEntity entity);
+
+    /**
+     * Called by parent when the panel becomes visible.
+     */
+    public abstract void onInit(DbEntity entity);
+
+    protected void resetStrategy(
+            DbEntity entity,
+            boolean resetCustomSequence,
+            boolean resetDBGenerated) {
+
+        boolean hasChanges = false;
+
+        if (resetCustomSequence && entity.getPrimaryKeyGenerator() != null) {
+            entity.setPrimaryKeyGenerator(null);
+            hasChanges = true;
+        }
+
+        if (resetDBGenerated) {
+            Iterator it = entity.getPrimaryKey().iterator();
+            while (it.hasNext()) {
+                DbAttribute a = (DbAttribute) it.next();
+                if (a.isGenerated()) {
+                    a.setGenerated(false);
+                    hasChanges = true;
+                }
+            }
+        }
+
+        if (hasChanges) {
+            mediator.fireDbEntityEvent(new EntityEvent(this, entity));
+        }
     }
-    
-	/**
-	 * @see javax.swing.table.TableModel#getColumnCount()
-	 */
-	public int getColumnCount() {
-		return 2;
-	}
-
-	public String getColumnName(int col) {
-		switch(col) {
-			case DB_ATTRIBUTE_NAME: return "Name";
-			case DB_ATTRIBUTE_TYPE: return "Type";
-			default: return "";
-		}
-	}
-	
-	public Object getValueAt(int row, int column) {
-		DbAttribute attr = getAttribute(row);
-
-		if (attr == null) {
-			return "";
-		}
-
-		switch (column) {
-			case DB_ATTRIBUTE_NAME :
-				return getAttributeName(attr);
-			case DB_ATTRIBUTE_TYPE :
-				return getAttributeType(attr);
-			default :
-				return "";
-		}
-	}
-
-	public void setValueAt(Object newVal, int row, int col) {
-		if (col == nameColumnInd()) {
-			replaceParameter(row, (String)newVal);
-		}
-	}
-
-	/** Replaces parameter at index with the new attribute. */
-	protected void replaceParameter(int ind, String attrName) {
-		if (attrName != null) {
-			objectList.set(ind, getParentEntity().getAttribute(attrName));
-			fireTableDataChanged();
-		}
-	}
-
-	public boolean isCellEditable(int row, int col) {
-		return col == DB_ATTRIBUTE_NAME;
-	}
 }

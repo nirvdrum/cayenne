@@ -68,7 +68,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
@@ -136,10 +135,6 @@ public class CayenneWidgetFactory {
         initFormWidget(textField);
         initTextField(textField);
         return textField;
-    }
-
-    public static JLabel createLabel(String text) {
-        return new JLabel(text);
     }
 
     protected static void initTextField(final JTextField textField) {

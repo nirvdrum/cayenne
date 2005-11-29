@@ -70,7 +70,6 @@ import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
-import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.TextAdapter;
 import org.objectstyle.cayenne.util.Util;
@@ -120,8 +119,7 @@ public class ProcedureTab extends JPanel implements ProcedureDisplayListener,
 
         this.returnsValue = new JCheckBox();
 
-        JLabel returnValueHelp = CayenneWidgetFactory
-                .createLabel("(first parameter will be used as return value)");
+        JLabel returnValueHelp = new JLabel("(first parameter will be used as return value)");
         returnValueHelp.setFont(returnValueHelp.getFont().deriveFont(10));
 
         // assemble

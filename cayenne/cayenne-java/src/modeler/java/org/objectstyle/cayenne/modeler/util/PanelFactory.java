@@ -63,11 +63,11 @@ import java.awt.FlowLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
@@ -103,7 +103,7 @@ public class PanelFactory {
         Component[] components) {
         Component[] jlabels = new Component[labels.length];
         for (int i = 0; i < labels.length; i++) {
-            jlabels[i] = CayenneWidgetFactory.createLabel(labels[i]);
+            jlabels[i] = new JLabel(labels[i]);
         }
         return createForm(title, jlabels, components);
     }

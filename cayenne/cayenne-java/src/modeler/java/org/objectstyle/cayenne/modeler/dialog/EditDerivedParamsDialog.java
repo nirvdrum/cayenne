@@ -76,7 +76,7 @@ import org.objectstyle.cayenne.map.DerivedDbAttribute;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.editor.DerivedAttributeParamsTableModel;
+import org.objectstyle.cayenne.modeler.editor.dbentity.DerivedAttributeParamsTableModel;
 import org.objectstyle.cayenne.modeler.util.CayenneDialog;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
