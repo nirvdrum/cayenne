@@ -13,5 +13,9 @@ Changes/New Features:
 
 * Generated/Identity Columns
   - Derby support for generated columns
+  - Modeler now allows to specify generated columns for PK only. Non-pk column can't be generated.
+
+* Oracle DATE type is now reverse engineered by default as JDBC TIMESTAMP, as it can store both 
+  date and time info.
 
 Bugs Fixed

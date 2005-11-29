@@ -92,15 +92,15 @@ import org.objectstyle.cayenne.util.Util;
  * settings </a> to use with Oracle are shown below:
  * 
  * <pre>
- *  
  *   
- *    test-oracle.cayenne.adapter = org.objectstyle.cayenne.dba.oracle.OracleAdapter
- *    test-oracle.jdbc.username = test
- *    test-oracle.jdbc.password = secret
- *    test-oracle.jdbc.url = jdbc:oracle:thin:@192.168.0.20:1521:ora1 
- *    test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
  *    
- *   
+ *     test-oracle.cayenne.adapter = org.objectstyle.cayenne.dba.oracle.OracleAdapter
+ *     test-oracle.jdbc.username = test
+ *     test-oracle.jdbc.password = secret
+ *     test-oracle.jdbc.url = jdbc:oracle:thin:@192.168.0.20:1521:ora1 
+ *     test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
+ *     
+ *    
  * </pre>
  * 
  * @author Andrei Adamchik
@@ -272,6 +272,12 @@ public class OracleAdapter extends JdbcAdapter {
             }
             else if (ORACLE_CLOB.equals(typeName)) {
                 attr.setType(Types.CLOB);
+            }
+        }
+        else if (type == Types.DATE) {
+            // Oracle DATE can store JDBC TIMESTAMP
+            if ("DATE".equals(typeName)) {
+                attr.setType(Types.TIMESTAMP);
             }
         }
 
