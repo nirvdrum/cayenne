@@ -18,11 +18,7 @@
       	</ul>
 
 		<subsection name="JIRA Tips">
-		<ul>
-			<li><strong>JIRA Can Be Used as a Wiki Replacement.</strong> Each issue in JIRA can have comments by logged in users, 
-			and supports refactoring the main issue description. This allows to organize Wiki-like collaboration process, with complete change log.
-			<br/><br/></li>
-			
+		<ul>			
 			<li><strong>Who Should Register?</strong> Users are allowed to browse the database of Cayenne issues without 
 			logging in. But in order to submit, track, and vote on issues a user must register with JIRA.  Use the 
 			"Register.." link above to create an account.
