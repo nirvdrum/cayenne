@@ -7,7 +7,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 public class DBGeneratorDefaults extends _DBGeneratorDefaults {
 
     /**
-     * Updates its state to provide reasonable defaults for agiven adapter.
+     * Updates this object state to provide reasonable defaults for a given adapter.
      */
     public void adjustForAdapter(DbAdapter adapter) {
         if (!adapter.supportsFkConstraints()
@@ -48,4 +48,3 @@ public class DBGeneratorDefaults extends _DBGeneratorDefaults {
         return (b != null) ? b.booleanValue() : false;
     }
 }
-
