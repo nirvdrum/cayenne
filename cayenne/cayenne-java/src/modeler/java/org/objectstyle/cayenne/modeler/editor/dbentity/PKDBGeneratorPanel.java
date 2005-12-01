@@ -56,15 +56,17 @@
 package org.objectstyle.cayenne.modeler.editor.dbentity;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import java.awt.Component;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JList;
+import javax.swing.MutableComboBoxModel;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -72,47 +74,43 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 
-import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
 public class PKDBGeneratorPanel extends PKGeneratorPanel {
 
-    protected JPanel checkboxes;
+    private JComboBox attributes;
 
     public PKDBGeneratorPanel(ProjectController mediator) {
         super(mediator);
-
         initView();
     }
 
     private void initView() {
 
-        checkboxes = new JPanel();
+        attributes = new JComboBox();
+        attributes.setEditable(false);
+        attributes.setRenderer(new AttributeRenderer());
 
-        CellConstraints cc = new CellConstraints();
-        PanelBuilder builder = new PanelBuilder(new FormLayout(
+        DefaultFormBuilder builder = new DefaultFormBuilder(new FormLayout(
                 "right:70dlu, 3dlu, fill:200dlu",
-                "top:p"));
+                ""));
         builder.setDefaultDialogBorder();
-
-        builder.addLabel("Auto Incremented:", cc.xy(1, 1));
-        builder.add(checkboxes, cc.xy(3, 1));
+        builder.append("Auto Incremented:", attributes);
 
         setLayout(new BorderLayout());
         add(builder.getPanel(), BorderLayout.CENTER);
     }
 
     public void setDbEntity(DbEntity entity) {
+        // refresh only if this entity
         if (isVisible()) {
-            onInit(entity);
+            updateView(entity);
         }
     }
 
     public void onInit(DbEntity entity) {
         resetStrategy(entity, true, false);
-
-        checkboxes.removeAll();
 
         Collection pkAttributes = entity.getPrimaryKey();
 
@@ -125,36 +123,84 @@ public class PKDBGeneratorPanel extends PKGeneratorPanel {
             }
         }
 
+        updateView(entity);
+    }
+
+    void updateView(final DbEntity entity) {
+        ItemListener[] listeners = attributes.getItemListeners();
+        for (int i = 0; i < listeners.length; i++) {
+            attributes.removeItemListener(listeners[i]);
+        }
+
+        Collection pkAttributes = entity.getPrimaryKey();
         if (pkAttributes.isEmpty()) {
-            checkboxes.add(new JLabel("<Entity has no PK columns>"));
+            attributes.removeAllItems();
+            attributes.addItem("<Entity has no PK columns>");
+            attributes.setSelectedIndex(0);
+            attributes.setEnabled(false);
         }
         else {
-            checkboxes.setLayout(new GridLayout(pkAttributes.size(), 1));
+
+            attributes.setEnabled(true);
+            MutableComboBoxModel model = new DefaultComboBoxModel(pkAttributes.toArray());
+            String noSelection = "<Select Generated Column>";
+            model.insertElementAt(noSelection, 0);
+            model.setSelectedItem(noSelection);
+            attributes.setModel(model);
 
             Iterator it = pkAttributes.iterator();
             while (it.hasNext()) {
-                final DbAttribute a = (DbAttribute) it.next();
+                DbAttribute a = (DbAttribute) it.next();
+                if (a.isGenerated()) {
+                    model.setSelectedItem(a);
+                    break;
+                }
+            }
 
-                String type = TypesMapping.getSqlNameByType(a.getType());
+            // listen for selection changes of the new entity
+            attributes.addItemListener(new ItemListener() {
 
-                String name = a.getName() + " (" + (type != null ? type : "?") + ")";
-                final JCheckBox c = new JCheckBox(name, a.isGenerated());
-                c.addChangeListener(new ChangeListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    Object item = e.getItem();
+                    if (item instanceof DbAttribute) {
 
-                    public void stateChanged(ChangeEvent e) {
-                        if (a.isGenerated() != c.isSelected()) {
-                            a.setGenerated(c.isSelected());
-                            mediator.fireDbEntityEvent(new EntityEvent(this, a
-                                    .getEntity()));
+                        boolean generated = e.getStateChange() == ItemEvent.SELECTED;
+                        DbAttribute a = (DbAttribute) item;
+
+                        if (a.isGenerated() != generated) {
+                            a.setGenerated(generated);
+                            mediator.fireDbEntityEvent(new EntityEvent(this, entity));
                         }
                     }
-                });
-
-                checkboxes.add(c);
-            }
+                }
+            });
         }
 
         // revalidate as children layout has changed...
         revalidate();
+    }
+
+    class AttributeRenderer extends BasicComboBoxRenderer {
+
+        public Component getListCellRendererComponent(
+                JList list,
+                Object value,
+                int index,
+                boolean isSelected,
+                boolean cellHasFocus) {
+
+            if (value instanceof DbAttribute) {
+                DbAttribute a = (DbAttribute) value;
+                String type = TypesMapping.getSqlNameByType(a.getType());
+                value = a.getName() + " (" + (type != null ? type : "?") + ")";
+            }
+
+            return super.getListCellRendererComponent(
+                    list,
+                    value,
+                    index,
+                    isSelected,
+                    cellHasFocus);
+        }
     }
 }

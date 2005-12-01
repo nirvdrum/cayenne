@@ -1,4 +1,4 @@
-Cayenne Release Notes 1.2 M8 milestone
+Cayenne Release Notes 1.2 M9 milestone
 Date: 
 ============================================
 
@@ -11,11 +11,15 @@ http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
 
 Changes/New Features:
 
-* Generated/Identity Columns
+* Generated/Identity Columns - http://objectstyle.org/confluence/display/CAY/Generated+Columns
   - Derby support for generated columns
-  - Modeler now allows to specify generated columns for PK only. Non-pk column can't be generated.
+  - Modeler now allows to specify generated columns for PK only. Non-pk column can't be generated:
 
 * Oracle DATE type is now reverse engineered by default as JDBC TIMESTAMP, as it can store both 
   date and time info.
+  
+* DbRelationship.srcFkSnapshotWithTargetSnapshot(..) and DbRelationship.srcPkSnapshotWithTargetSnapshot
+  no longer throw an exception when null values are found in primary key snapshot, recognizing that key
+  generation may be deferred (case of DB-generated keys).
 
-Bugs Fixed
+Bugs Fixed:

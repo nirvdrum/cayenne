@@ -74,7 +74,8 @@ public abstract class PKGeneratorPanel extends JPanel {
 
     /**
      * Called by parent when DbEntity changes, regardless of whether this panel is visible
-     * or not.
+     * or not. Another case when this method is invoked is when entity tab changes and
+     * this panel may need a refresh.
      */
     public abstract void setDbEntity(DbEntity entity);
 
