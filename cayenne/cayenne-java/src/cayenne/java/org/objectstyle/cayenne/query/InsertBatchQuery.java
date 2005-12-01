@@ -81,11 +81,6 @@ public class InsertBatchQuery extends BatchQuery {
     protected List dbAttributes;
 
     /**
-     * @since 1.2
-     */
-    protected int batchIndex;
-
-    /**
      * Creates new InsertBatchQuery for a given DbEntity and estimated capacity.
      */
     public InsertBatchQuery(DbEntity entity, int batchCapacity) {
@@ -94,20 +89,6 @@ public class InsertBatchQuery extends BatchQuery {
         this.objectSnapshots = new ArrayList(batchCapacity);
         this.objectIds = new ArrayList(batchCapacity);
         this.dbAttributes = new ArrayList(getDbEntity().getAttributes());
-        this.batchIndex = -1;
-    }
-
-    /**
-     * Resets InsertBatchQuery so that a following call to "next" would start from the
-     * beginning of the batch.
-     */
-    public void reset() {
-        batchIndex = -1;
-    }
-
-    public boolean next() {
-        batchIndex++;
-        return size() > batchIndex;
     }
 
     public Object getValue(int dbAttributeIndex) {

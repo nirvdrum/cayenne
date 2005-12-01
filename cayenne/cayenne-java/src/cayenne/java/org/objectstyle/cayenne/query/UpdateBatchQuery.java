@@ -58,11 +58,9 @@ package org.objectstyle.cayenne.query;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.IteratorUtils;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -82,20 +80,12 @@ public class UpdateBatchQuery extends BatchQuery {
     protected List qualifierSnapshots;
     protected List updateSnapshots;
 
+    protected boolean usingOptimisticLocking;
+
     private List updatedAttributes;
     private List qualifierAttributes;
     private Collection nullQualifierNames;
-
     private List dbAttributes;
-
-    private Iterator qualifierIterator = IteratorUtils.EMPTY_ITERATOR;
-    private Iterator updateIterator = IteratorUtils.EMPTY_ITERATOR;
-    private Iterator objectIdIterator = IteratorUtils.EMPTY_ITERATOR;
-    private Map currentUpdate = Collections.EMPTY_MAP;
-    private Map currentQualifier = Collections.EMPTY_MAP;
-    private ObjectId currentId;
-
-    private boolean usingOptimisticLocking;
 
     /**
      * Creates new UpdateBatchQuery.
@@ -153,37 +143,14 @@ public class UpdateBatchQuery extends BatchQuery {
         this.usingOptimisticLocking = usingOptimisticLocking;
     }
 
-    public void reset() {
-        qualifierIterator = qualifierSnapshots.iterator();
-        updateIterator = updateSnapshots.iterator();
-        objectIdIterator = objectIds.iterator();
-        currentQualifier = Collections.EMPTY_MAP;
-        currentUpdate = Collections.EMPTY_MAP;
-    }
-
-    public boolean next() {
-        if (!qualifierIterator.hasNext()) {
-            return false;
-        }
-
-        currentQualifier = (Map) qualifierIterator.next();
-        currentQualifier = (currentQualifier != null)
-                ? currentQualifier
-                : Collections.EMPTY_MAP;
-        currentUpdate = (Map) updateIterator.next();
-        currentUpdate = (currentUpdate != null) ? currentUpdate : Collections.EMPTY_MAP;
-        currentId = (ObjectId) objectIdIterator.next();
-        return true;
-    }
-
     public Object getValue(int dbAttributeIndex) {
         DbAttribute attribute = (DbAttribute) dbAttributes.get(dbAttributeIndex);
 
         // take value either from updated values or id's,
         // depending on the index
-        return (dbAttributeIndex < updatedAttributes.size()) ? getValue(
-                currentUpdate,
-                attribute) : getValue(currentQualifier, attribute);
+        Object snapshot = (dbAttributeIndex < updatedAttributes.size()) ? updateSnapshots
+                .get(batchIndex) : qualifierSnapshots.get(batchIndex);
+        return getValue((Map) snapshot, attribute);
     }
 
     /**
@@ -232,7 +199,7 @@ public class UpdateBatchQuery extends BatchQuery {
      * @since 1.1
      */
     public Map getCurrentQualifier() {
-        return currentQualifier;
+        return (Map) qualifierSnapshots.get(batchIndex);
     }
 
     /**
@@ -243,6 +210,6 @@ public class UpdateBatchQuery extends BatchQuery {
      * @since 1.2
      */
     public ObjectId getObjectId() {
-        return currentId;
+        return (ObjectId) objectIds.get(batchIndex);
     }
 }

@@ -74,12 +74,18 @@ import org.objectstyle.cayenne.map.DbEntity;
  */
 public abstract class BatchQuery extends AbstractQuery {
 
+    /**
+     * @since 1.2
+     */
+    protected int batchIndex;
+
     public BatchQuery(DbEntity dbEntity) {
         setRoot(dbEntity);
+        batchIndex = -1;
     }
 
     /**
-     * Calls "makeBatchUpdate" on the visitor.
+     * Calls "batchAction" on the visitor.
      * 
      * @since 1.2
      */
@@ -140,14 +146,19 @@ public abstract class BatchQuery extends AbstractQuery {
     /**
      * Rewinds batch to the first parameter row.
      */
-    public abstract void reset();
+    public void reset() {
+        batchIndex = -1;
+    }
 
     /**
      * Repositions batch to the next object, so that subsequent calls to getObject(int)
      * would return the values of the next batch object. Returns <code>true</code> if
      * batch has more objects to iterate over, <code>false</code> otherwise.
      */
-    public abstract boolean next();
+    public boolean next() {
+        batchIndex++;
+        return size() > batchIndex;
+    }
 
     /**
      * @deprecated Since 1.2 renamed to "getValue()"
