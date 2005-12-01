@@ -91,7 +91,16 @@ public class GlobalIDTst extends TestCase {
 
     public void testSerializabilityPerm() throws Exception {
         GlobalID perm1 = new GlobalID("e", "a", "b");
+
+        // make sure hashcode is resolved
+        int h = perm1.hashCode();
+        assertEquals(h, perm1.hashCode);
+        assertTrue(perm1.hashCode > 0);
+
         GlobalID perm2 = (GlobalID) Util.cloneViaSerialization(perm1);
+
+        // make sure hashCode is reset to 0
+        assertTrue(perm2.hashCode == 0);
 
         assertFalse(perm2.isTemporary());
         assertNotSame(perm1, perm2);
@@ -100,7 +109,16 @@ public class GlobalIDTst extends TestCase {
 
     public void testHessianSerializabilityTemp() throws Exception {
         GlobalID temp1 = new GlobalID("e");
+
+        // make sure hashcode is resolved
+        int h = temp1.hashCode();
+        assertEquals(h, temp1.hashCode);
+        assertTrue(temp1.hashCode > 0);
+
         GlobalID temp2 = (GlobalID) HessianUtil.cloneViaHessianSerialization(temp1);
+
+        // make sure hashCode is reset to 0
+        assertTrue(temp2.hashCode == 0);
 
         assertTrue(temp1.isTemporary());
         assertNotSame(temp1, temp2);
@@ -109,7 +127,16 @@ public class GlobalIDTst extends TestCase {
 
     public void testHessianSerializabilityPerm() throws Exception {
         GlobalID perm1 = new GlobalID("e", "a", "b");
+
+        // make sure hashcode is resolved
+        int h = perm1.hashCode();
+        assertEquals(h, perm1.hashCode);
+        assertTrue(perm1.hashCode > 0);
+
         GlobalID perm2 = (GlobalID) HessianUtil.cloneViaHessianSerialization(perm1);
+
+        // make sure hashCode is reset to 0
+        assertTrue(perm2.hashCode == 0);
 
         assertFalse(perm2.isTemporary());
         assertNotSame(perm1, perm2);

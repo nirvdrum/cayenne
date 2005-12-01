@@ -70,12 +70,13 @@ import org.objectstyle.cayenne.util.IDUtil;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * A portable global identifier for persistent objects.
+ * A portable global identifier for persistent objects. A temporary GlobalID that stores
+ * object entity name and a pseudo-unique binary key is used to identify transient
+ * objects. Permamnent id stores persistent values
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-// TODO: this implementation is likely to change
 public class GlobalID implements Serializable {
 
     protected String entityName;
@@ -83,16 +84,18 @@ public class GlobalID implements Serializable {
 
     protected byte[] key;
 
+    protected Map replacementIdMap;
+
+    // hash code is transient to make sure id is portable across VM
+    transient int hashCode;
+
     // exists for deserialization with Hessian and similar
     private GlobalID() {
-
     }
 
     /**
      * Creates a TEMPORARY GlobalID. Assignes a generated unique key.
      */
-    // TODO: (Andrus 09/2005) this may be confusing - there is nothing in constructor that
-    // hints that this is a temp id
     public GlobalID(String entityName) {
         this.entityName = entityName;
         this.key = IDUtil.pseudoUniqueByteSequence16();
@@ -146,6 +149,11 @@ public class GlobalID implements Serializable {
      * Returns an unmodifiable Map of id keys. For temporary ids returns an empty map.
      */
     public Map getIdMap() {
+        if (isTemporary()) {
+            return (replacementIdMap == null) ? Collections.EMPTY_MAP : Collections
+                    .unmodifiableMap(replacementIdMap);
+        }
+
         return idMap != null ? Collections.unmodifiableMap(idMap) : Collections.EMPTY_MAP;
     }
 
@@ -208,43 +216,76 @@ public class GlobalID implements Serializable {
 
     public int hashCode() {
 
-        // TODO: cache hashCode the way ObjectId does
+        if (this.hashCode == 0) {
 
-        HashCodeBuilder builder = new HashCodeBuilder(3, 5);
-        builder.append(entityName.hashCode());
+            HashCodeBuilder builder = new HashCodeBuilder(3, 5);
+            builder.append(entityName.hashCode());
 
-        if (key != null) {
-            builder.append(key);
-        }
-
-        if (idMap != null) {
-            int len = idMap.size();
-
-            // handle cheap and most common case - single key
-            if (len == 1) {
-                Iterator entries = idMap.entrySet().iterator();
-                Map.Entry entry = (Map.Entry) entries.next();
-                builder.append(entry.getKey()).append(entry.getValue());
+            if (key != null) {
+                builder.append(key);
             }
-            // handle multiple keys - must sort the keys to use with HashCodeBuilder
-            else {
-                Object[] keys = idMap.keySet().toArray();
-                Arrays.sort(keys);
+            else if (idMap != null) {
+                int len = idMap.size();
 
-                for (int i = 0; i < len; i++) {
-                    // HashCodeBuilder will take care of processing object if it
-                    // happens to be a primitive array such as byte[]
+                // handle cheap and most common case - single key
+                if (len == 1) {
+                    Iterator entries = idMap.entrySet().iterator();
+                    Map.Entry entry = (Map.Entry) entries.next();
+                    builder.append(entry.getKey()).append(entry.getValue());
+                }
+                // handle multiple keys - must sort the keys to use with HashCodeBuilder
+                else {
+                    Object[] keys = idMap.keySet().toArray();
+                    Arrays.sort(keys);
 
-                    // also we don't have to append the key hashcode, its index will
-                    // work
-                    builder.append(i).append(idMap.get(keys[i]));
+                    for (int i = 0; i < len; i++) {
+                        // HashCodeBuilder will take care of processing object if it
+                        // happens to be a primitive array such as byte[]
+
+                        // also we don't have to append the key hashcode, its index will
+                        // work
+                        builder.append(i).append(idMap.get(keys[i]));
+                    }
                 }
             }
+
+            this.hashCode = builder.toHashCode();
         }
 
-        return builder.toHashCode();
+        return hashCode;
     }
 
+    /**
+     * Returns a non-null mutable map that can be used to append replacement id values.
+     * This allows to incrementally build a replacement GlobalID.
+     */
+    public Map getReplacementIdMap() {
+        if (replacementIdMap == null) {
+            replacementIdMap = new HashMap();
+        }
+
+        return replacementIdMap;
+    }
+
+    /**
+     * Creates and returns a replacement ObjectId. No validation of ID is done.
+     */
+    public GlobalID createReplacementId() {
+        return new GlobalID(getEntityName(), replacementIdMap);
+    }
+
+    /**
+     * Returns true if there is full or partial replacement id attached to this id. This
+     * method is preferrable to "!getReplacementIdMap().isEmpty()" as it avoids unneeded
+     * replacement id map creation.
+     */
+    public boolean isReplacementIdAttached() {
+        return replacementIdMap != null && !replacementIdMap.isEmpty();
+    }
+
+    /**
+     * A standard toString method used for debugging.
+     */
     public String toString() {
 
         ToStringBuilder builder = new ToStringBuilder(
