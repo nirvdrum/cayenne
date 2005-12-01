@@ -202,7 +202,14 @@ public final class DataObjectUtils {
             DataContext context,
             Class dataObjectClass,
             Map pk) {
-        return objectForPK(context, new ObjectId(dataObjectClass, pk));
+
+        ObjEntity entity = context.getEntityResolver().lookupObjEntity(dataObjectClass);
+        if (entity == null) {
+            throw new CayenneRuntimeException("Non-existent ObjEntity for class: "
+                    + dataObjectClass);
+        }
+
+        return objectForPK(context, new ObjectId(entity.getName(), pk));
     }
 
     /**
@@ -251,14 +258,7 @@ public final class DataObjectUtils {
             throw new IllegalArgumentException("Null ObjEntity name.");
         }
 
-        ObjEntity entity = context.getEntityResolver().getObjEntity(objEntityName);
-        if (entity == null) {
-            throw new CayenneRuntimeException("Non-existent ObjEntity: " + objEntityName);
-        }
-
-        Class dataObjectClass = entity.getJavaClass();
-
-        return objectForPK(context, new ObjectId(dataObjectClass, pk));
+        return objectForPK(context, new ObjectId(objEntityName, pk));
     }
 
     /**
@@ -282,8 +282,9 @@ public final class DataObjectUtils {
         // TODO: investigate moving this to the ObjectStore "getObject()" - this should
         // really be global...
 
-        ObjEntity entity = context.getEntityResolver().lookupObjEntity(
-                id.getObjectClass());
+        ObjEntity entity = context
+                .getEntityResolver()
+                .lookupObjEntity(id.getEntityName());
         EntityInheritanceTree inheritanceHandler = context
                 .getEntityResolver()
                 .lookupInheritanceTree(entity);
@@ -294,7 +295,7 @@ public final class DataObjectUtils {
                 Iterator it = children.iterator();
                 while (it.hasNext()) {
                     EntityInheritanceTree child = (EntityInheritanceTree) it.next();
-                    ObjectId childID = new ObjectId(child.getEntity().getJavaClass(), id
+                    ObjectId childID = new ObjectId(child.getEntity().getName(), id
                             .getIdSnapshot());
 
                     DataObject childObject = objectStore.getObject(childID);
@@ -309,10 +310,10 @@ public final class DataObjectUtils {
 
         // TODO: take inheritance into account...
         DataRow row = objectStore.getSnapshot(id, context);
-
-        return (row != null)
-                ? context.objectFromDataRow(id.getObjectClass(), row, false)
-                : null;
+        return (row != null) ? context.objectFromDataRow(
+                entity.getJavaClass(),
+                row,
+                false) : null;
     }
 
     static ObjectId buildId(DataContext context, String objEntityName, Object pk) {
@@ -343,7 +344,7 @@ public final class DataObjectUtils {
         }
 
         DbAttribute attr = (DbAttribute) pkAttributes.get(0);
-        return new ObjectId(entity.getJavaClass(), attr.getName(), pk);
+        return new ObjectId(objEntityName, attr.getName(), pk);
     }
 
     static ObjectId buildId(DataContext context, Class dataObjectClass, Object pk) {
@@ -375,7 +376,7 @@ public final class DataObjectUtils {
         }
 
         DbAttribute attr = (DbAttribute) pkAttributes.get(0);
-        return new ObjectId(dataObjectClass, attr.getName(), pk);
+        return new ObjectId(entity.getName(), attr.getName(), pk);
     }
 
     // not intended for instantiation

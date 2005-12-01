@@ -67,10 +67,6 @@ public interface DataObject extends Persistent {
 
     public static final long DEFAULT_VERSION = Long.MIN_VALUE;
 
-    ObjectId getObjectId();
-
-    void setObjectId(ObjectId id);
-
     /**
      * Returns a data context this object is registered with, or null if this object has
      * no associated DataContext.

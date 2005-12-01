@@ -59,9 +59,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.ClientServerChannel;
-import org.objectstyle.cayenne.opp.OPPServerChannel;
 import org.objectstyle.cayenne.opp.LocalConnection;
 import org.objectstyle.cayenne.opp.OPPConnection;
+import org.objectstyle.cayenne.opp.OPPServerChannel;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
@@ -81,7 +81,8 @@ public class PersistentObjectInContextTst extends CayenneTestCase {
 
     protected ObjectContext createObjectContext() {
         // wrap ClientServerChannel in LocalConnector to enable logging...
-        OPPConnection connector = new LocalConnection(new ClientServerChannel(getDomain()));
+        OPPConnection connector = new LocalConnection(
+                new ClientServerChannel(getDomain()));
         return new CayenneContext(new OPPServerChannel(connector));
     }
 
@@ -90,7 +91,7 @@ public class PersistentObjectInContextTst extends CayenneTestCase {
 
         ObjectContext context = createObjectContext();
 
-        GlobalID gid = new GlobalID(
+        ObjectId gid = new ObjectId(
                 "MtTable1",
                 MtTable1.TABLE1_ID_PK_COLUMN,
                 new Integer(1));

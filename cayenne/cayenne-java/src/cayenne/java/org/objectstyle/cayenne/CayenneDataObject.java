@@ -411,7 +411,7 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
     protected void setReverseRelationship(String relName, DataObject val) {
         ObjRelationship rel = (ObjRelationship) dataContext
                 .getEntityResolver()
-                .lookupObjEntity(objectId.getObjectClass())
+                .lookupObjEntity(objectId.getEntityName())
                 .getRelationship(relName);
         ObjRelationship revRel = rel.getReverseRelationship();
         if (revRel != null) {
@@ -427,14 +427,13 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
      * this object.
      */
     protected void unsetReverseRelationship(String relName, DataObject val) {
-        Class aClass = objectId.getObjectClass();
+
         EntityResolver resolver = dataContext.getEntityResolver();
-        ObjEntity entity = resolver.lookupObjEntity(aClass);
+        ObjEntity entity = resolver.lookupObjEntity(objectId.getEntityName());
 
         if (entity == null) {
-            String className = (aClass != null) ? aClass.getName() : "<null>";
-            throw new IllegalStateException("DataObject's class is unmapped: "
-                    + className);
+            throw new IllegalStateException("DataObject's entity is unmapped, objectId: "
+                    + objectId);
         }
 
         ObjRelationship rel = (ObjRelationship) entity.getRelationship(relName);
@@ -771,30 +770,6 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
             ObjAttribute att = (ObjAttribute) it.next();
             String name = att.getName();
             writeProperty(name, decoder.decodeObject(name));
-        }
-    }
-
-    /**
-     * Returns this object's ObjectId.
-     * 
-     * @since 1.2
-     */
-    public GlobalID getGlobalID() {
-        return (dataContext != null) ? dataContext.getEntityResolver().convertToGlobalID(
-                getObjectId()) : null;
-    }
-
-    /**
-     * Sets this object's ObjectId.
-     * 
-     * @since 1.2
-     */
-    public void setGlobalID(GlobalID globalID) {
-        if (globalID == null || getDataContext() == null) {
-            setObjectId(null);
-        }
-        else {
-            setObjectId(getDataContext().getEntityResolver().convertToObjectID(globalID));
         }
     }
 

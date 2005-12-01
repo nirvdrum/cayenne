@@ -191,18 +191,18 @@ public class IdentityColumnsTst extends CayenneTestCase {
 
             // check propagated id
             Number propagatedID2 = (Number) id2
-                    .getValueForAttribute(GeneratedColumnCompKey.PROPAGATED_PK_PK_COLUMN);
+                    .getIdSnapshot().get(GeneratedColumnCompKey.PROPAGATED_PK_PK_COLUMN);
             assertNotNull(propagatedID2);
             assertEquals(masterId, propagatedID2.intValue());
 
             // check Cayenne-generated ID
             Number cayenneGeneratedID2 = (Number) id2
-                    .getValueForAttribute(GeneratedColumnCompKey.AUTO_PK_PK_COLUMN);
+                    .getIdSnapshot().get(GeneratedColumnCompKey.AUTO_PK_PK_COLUMN);
             assertNotNull(cayenneGeneratedID2);
 
             // check DB-generated ID
             Number dbGeneratedID2 = (Number) id2
-                    .getValueForAttribute(GeneratedColumnCompKey.GENERATED_COLUMN_PK_COLUMN);
+                    .getIdSnapshot().get(GeneratedColumnCompKey.GENERATED_COLUMN_PK_COLUMN);
             assertNotNull(dbGeneratedID2);
 
             context.invalidateObjects(Arrays.asList(new Object[] {

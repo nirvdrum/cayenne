@@ -65,15 +65,15 @@ public class DataRowStoreTst extends CayenneTestCase {
         assertEquals(2, cache.maximumSize());
         assertEquals(0, cache.size());
 
-        ObjectId key1 = new ObjectId(Artist.class, Artist.ARTIST_ID_PK_COLUMN, 1);
+        ObjectId key1 = new ObjectId("Artist", Artist.ARTIST_ID_PK_COLUMN, 1);
         Map diff1 = new HashMap();
         diff1.put(key1, new DataRow(1));
 
-        ObjectId key2 = new ObjectId(Artist.class, Artist.ARTIST_ID_PK_COLUMN, 2);
+        ObjectId key2 = new ObjectId("Artist", Artist.ARTIST_ID_PK_COLUMN, 2);
         Map diff2 = new HashMap();
         diff2.put(key2, new DataRow(1));
 
-        ObjectId key3 = new ObjectId(Artist.class, Artist.ARTIST_ID_PK_COLUMN, 3);
+        ObjectId key3 = new ObjectId("Artist", Artist.ARTIST_ID_PK_COLUMN, 3);
         Map diff3 = new HashMap();
         diff3.put(key3, new DataRow(1));
 

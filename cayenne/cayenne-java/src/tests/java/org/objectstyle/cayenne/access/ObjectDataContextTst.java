@@ -96,7 +96,7 @@ public class ObjectDataContextTst extends TestCase {
 
         assertFalse(context.hasChanges());
 
-        ObjectId oid = new ObjectId(Object.class, "key", "value");
+        ObjectId oid = new ObjectId("T", "key", "value");
         DataObject object = new MockDataObject(context, oid, PersistenceState.MODIFIED);
         context.getObjectStore().addObject(object);
         cache.putSnapshot(oid, Collections.singletonMap("p1", "v1"));
@@ -118,7 +118,7 @@ public class ObjectDataContextTst extends TestCase {
         assertFalse(parent.isCommitChangesInContext());
 
         // introduce changes
-        ObjectId oid = new ObjectId(Object.class, "key", "value");
+        ObjectId oid = new ObjectId("T", "key", "value");
         DataObject object = new MockDataObject(context, oid, PersistenceState.MODIFIED);
         context.getObjectStore().addObject(object);
         cache.putSnapshot(oid, Collections.singletonMap("p1", "v1"));
@@ -163,16 +163,20 @@ public class ObjectDataContextTst extends TestCase {
                 new EntityResolver(),
                 new MockDataRowStore());
 
-        DataObject newObject = new MockDataObject(context, new ObjectId(
-                MockDataObject.class), PersistenceState.NEW);
+        DataObject newObject = new MockDataObject(
+                context,
+                new ObjectId("T"),
+                PersistenceState.NEW);
         context.getObjectStore().addObject(newObject);
         Collection uncommitted1 = context.uncommittedObjects();
         assertNotNull(uncommitted1);
         assertEquals(1, uncommitted1.size());
         assertTrue(uncommitted1.contains(newObject));
 
-        DataObject modifiedObject = new MockDataObject(context, new ObjectId(
-                MockDataObject.class), PersistenceState.MODIFIED);
+        DataObject modifiedObject = new MockDataObject(
+                context,
+                new ObjectId("T"),
+                PersistenceState.MODIFIED);
         context.getObjectStore().addObject(modifiedObject);
         Collection uncommitted2 = context.uncommittedObjects();
         assertNotNull(uncommitted2);
@@ -180,8 +184,10 @@ public class ObjectDataContextTst extends TestCase {
         assertTrue(uncommitted2.contains(newObject));
         assertTrue(uncommitted2.contains(modifiedObject));
 
-        DataObject deletedObject = new MockDataObject(context, new ObjectId(
-                MockDataObject.class), PersistenceState.DELETED);
+        DataObject deletedObject = new MockDataObject(
+                context,
+                new ObjectId("T"),
+                PersistenceState.DELETED);
         context.getObjectStore().addObject(deletedObject);
         Collection uncommitted3 = context.uncommittedObjects();
         assertNotNull(uncommitted3);
@@ -190,8 +196,10 @@ public class ObjectDataContextTst extends TestCase {
         assertTrue(uncommitted3.contains(modifiedObject));
         assertTrue(uncommitted3.contains(deletedObject));
 
-        DataObject committedObject = new MockDataObject(context, new ObjectId(
-                MockDataObject.class), PersistenceState.COMMITTED);
+        DataObject committedObject = new MockDataObject(
+                context,
+                new ObjectId("T"),
+                PersistenceState.COMMITTED);
         context.getObjectStore().addObject(committedObject);
         Collection uncommitted4 = context.uncommittedObjects();
         assertNotNull(uncommitted4);

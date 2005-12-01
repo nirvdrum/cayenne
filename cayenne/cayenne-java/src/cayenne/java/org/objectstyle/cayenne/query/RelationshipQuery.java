@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.query;
 
 import org.apache.commons.lang.StringUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -74,34 +73,14 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  * @since 1.2
  * @author Andrus Adamchik
  */
-// TODO: no need to inherit from AbstractQuery once DataContext starts supporting
-// QueryExecutionPlan.
 public class RelationshipQuery implements QueryExecutionPlan {
 
-    protected GlobalID globalID;
-    protected ObjectId objectID;
+    protected ObjectId objectId;
     protected String relationshipName;
 
     // exists for deserialization with Hessian
     private RelationshipQuery() {
 
-    }
-
-    /**
-     * Creates a RelationshipQuery based on source object GlobalID and relationship name.
-     */
-    public RelationshipQuery(GlobalID globalID, String relationshipName) {
-        if (globalID == null) {
-            throw new CayenneRuntimeException("Null globalID");
-        }
-
-        if (globalID.isTemporary()) {
-            throw new CayenneRuntimeException(
-                    "Temporary id can't be used in RelationshipQuery: " + globalID);
-        }
-
-        this.globalID = globalID;
-        this.relationshipName = relationshipName;
     }
 
     /**
@@ -117,16 +96,12 @@ public class RelationshipQuery implements QueryExecutionPlan {
                     "Temporary id can't be used in RelationshipQuery: " + objectID);
         }
 
-        this.objectID = objectID;
+        this.objectId = objectID;
         this.relationshipName = relationshipName;
     }
 
-    public GlobalID getGlobalID() {
-        return globalID;
-    }
-
-    public ObjectId getObjectID() {
-        return objectID;
+    public ObjectId getObjectId() {
+        return objectId;
     }
 
     public String getRelationshipName() {
@@ -159,15 +134,11 @@ public class RelationshipQuery implements QueryExecutionPlan {
 
     protected Query buildReplacementQuery(EntityResolver resolver) {
         // sanity check
-        if (objectID == null && globalID == null) {
-            throw new CayenneRuntimeException(
-                    "Can't resolve query - both objectID and globalID are null.");
+        if (objectId == null) {
+            throw new CayenneRuntimeException("Can't resolve query - objectID is null.");
         }
 
-        ObjectId id = (objectID != null) ? objectID : resolver
-                .convertToObjectID(globalID);
-
-        ObjEntity entity = resolver.lookupObjEntity(id.getObjectClass());
+        ObjEntity entity = resolver.lookupObjEntity(objectId.getEntityName());
         ObjRelationship relationship = (ObjRelationship) entity
                 .getRelationship(relationshipName);
 
@@ -177,12 +148,12 @@ public class RelationshipQuery implements QueryExecutionPlan {
                     + " found in entity "
                     + entity.getName()
                     + "; object id: "
-                    + id);
+                    + objectId);
         }
 
         // build executable select...
         Expression qualifier = ExpressionFactory.matchDbExp(relationship
-                .getReverseDbRelationshipPath(), id);
+                .getReverseDbRelationshipPath(), objectId);
 
         return new SelectQuery((ObjEntity) relationship.getTargetEntity(), qualifier);
     }

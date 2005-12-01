@@ -116,14 +116,14 @@ public class ObjectContextMergeHandlerTst extends CayenneTestCase {
         assertNull(o1.getGlobalAttribute1Direct());
 
         handler.nodePropertyChanged(
-                o1.getGlobalID(),
+                o1.getObjectId(),
                 ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY,
                 null,
                 "abc");
         assertEquals("abc", o1.getGlobalAttribute1Direct());
 
         handler.nodePropertyChanged(
-                o1.getGlobalID(),
+                o1.getObjectId(),
                 ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY,
                 "abc",
                 "xyz");
@@ -132,7 +132,7 @@ public class ObjectContextMergeHandlerTst extends CayenneTestCase {
 
         // block if old value is different
         handler.nodePropertyChanged(
-                o1.getGlobalID(),
+                o1.getObjectId(),
                 ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY,
                 "123",
                 "mnk");
@@ -140,7 +140,7 @@ public class ObjectContextMergeHandlerTst extends CayenneTestCase {
         assertEquals("xyz", o1.getGlobalAttribute1Direct());
 
         handler.nodePropertyChanged(
-                o1.getGlobalID(),
+                o1.getObjectId(),
                 ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY,
                 "xyz",
                 null);

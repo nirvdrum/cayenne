@@ -68,7 +68,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
  */
 public abstract class PersistentObject implements Persistent {
 
-    protected GlobalID globalID;
+    protected ObjectId objectId;
     protected int persistenceState;
     protected transient ObjectContext objectContext;
 
@@ -96,12 +96,12 @@ public abstract class PersistentObject implements Persistent {
         this.objectContext = objectContext;
     }
 
-    public GlobalID getGlobalID() {
-        return globalID;
+    public ObjectId getObjectId() {
+        return objectId;
     }
 
-    public void setGlobalID(GlobalID globalID) {
-        this.globalID = globalID;
+    public void setObjectId(ObjectId objectId) {
+        this.objectId = objectId;
     }
 
     public String toString() {
@@ -116,7 +116,7 @@ public abstract class PersistentObject implements Persistent {
                 + "@"
                 + System.identityHashCode(objectContext) : "null";
 
-        return builder.append("id", getGlobalID()).append("state", state).append(
+        return builder.append("id", getObjectId()).append("state", state).append(
                 "context",
                 context).toString();
     }

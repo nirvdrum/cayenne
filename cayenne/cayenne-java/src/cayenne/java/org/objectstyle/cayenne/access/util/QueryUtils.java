@@ -84,7 +84,7 @@ public class QueryUtils {
      * ObjectId.
      */
     public static SelectQuery selectObjectForId(ObjectId oid) {
-        return new SelectQuery(oid.getObjectClass(), ExpressionFactory.matchAllDbExp(oid
+        return new SelectQuery(oid.getEntityName(), ExpressionFactory.matchAllDbExp(oid
                 .getIdSnapshot(), Expression.EQUAL_TO));
     }
 
@@ -98,7 +98,7 @@ public class QueryUtils {
         }
 
         SelectQuery sel = new SelectQuery();
-        sel.setRoot(((ObjectId) oids.get(0)).getObjectClass());
+        sel.setRoot(((ObjectId) oids.get(0)).getEntityName());
 
         Iterator it = oids.iterator();
 

@@ -81,7 +81,7 @@ public class InsertTranslatorTst extends CayenneTestCase {
         org.objectstyle.cayenne.query.InsertQuery q = new org.objectstyle.cayenne.query.InsertQuery(
                 MeaningfulPKTest1.class);
         q.setObjectSnapshot(object);
-        q.setObjectId(new ObjectId(MeaningfulPKTest1.class, id));
+        q.setObjectId(new ObjectId("MeaningfulPKTest1", id));
 
         InsertTranslator transl = new InsertTranslator();
         transl.setEntityResolver(getNode().getEntityResolver());

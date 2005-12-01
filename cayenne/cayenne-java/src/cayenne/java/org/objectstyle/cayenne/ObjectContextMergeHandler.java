@@ -198,13 +198,13 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
 
             if (node instanceof Persistent) {
                 // inject new id
-                ((Persistent) node).setGlobalID((GlobalID) newId);
+                ((Persistent) node).setObjectId((ObjectId) newId);
             }
         }
     }
 
     public void nodeCreated(Object nodeId) {
-        context.createNewObject(entityForId(nodeId), (GlobalID) nodeId);
+        context.createNewObject(entityForId(nodeId), (ObjectId) nodeId);
     }
 
     public void nodeRemoved(Object nodeId) {
@@ -243,14 +243,14 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
 
         Object source = context.internalGraphManager().getNode(nodeId);
         if (source == null) {
-            source = context.createFault(entityForId(nodeId), (GlobalID) nodeId);
+            source = context.createFault(entityForId(nodeId), (ObjectId) nodeId);
         }
 
         Object target = context.internalGraphManager().getNode(targetNodeId);
         if (target == null) {
             target = context.createFault(
                     entityForId(targetNodeId),
-                    (GlobalID) targetNodeId);
+                    (ObjectId) targetNodeId);
         }
 
         // TODO (Andrus, 10/17/2005) - check for local modifications to avoid
@@ -280,14 +280,14 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
 
         Object source = context.internalGraphManager().getNode(nodeId);
         if (source == null) {
-            source = context.createFault(entityForId(nodeId), (GlobalID) nodeId);
+            source = context.createFault(entityForId(nodeId), (ObjectId) nodeId);
         }
 
         Object target = context.internalGraphManager().getNode(targetNodeId);
         if (target == null) {
             target = context.createFault(
                     entityForId(targetNodeId),
-                    (GlobalID) targetNodeId);
+                    (ObjectId) targetNodeId);
         }
 
         // (see "TODO" in 'arcCreated')
@@ -312,7 +312,7 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
 
     private ObjEntity entityForId(Object nodeId) {
         return context.getEntityResolver().lookupObjEntity(
-                ((GlobalID) nodeId).getEntityName());
+                ((ObjectId) nodeId).getEntityName());
     }
 
     // Returns true if this object is active; an event came from our channel, but did not

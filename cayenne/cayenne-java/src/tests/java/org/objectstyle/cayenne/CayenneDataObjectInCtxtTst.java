@@ -117,9 +117,9 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         DataContext context = createDataContext();
 
         DataObject o1 = context.registeredObject(new ObjectId(
-                Artist.class,
+                "Artist",
                 Artist.ARTIST_ID_PK_COLUMN,
-                234));
+                new Integer(234)));
 
         try {
             o1.resolveFault();
@@ -341,7 +341,10 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         assertEquals(PersistenceState.NEW, object.getPersistenceState());
 
         // do a manual id substitution
-        object.setObjectId(new ObjectId(Artist.class, Artist.ARTIST_ID_PK_COLUMN, 3));
+        object.setObjectId(new ObjectId(
+                "Artist",
+                Artist.ARTIST_ID_PK_COLUMN,
+                new Integer(3)));
 
         context.commitChanges();
         assertEquals(PersistenceState.COMMITTED, object.getPersistenceState());

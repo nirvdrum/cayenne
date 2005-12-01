@@ -173,8 +173,6 @@ class ObjectResolver {
         }
 
         ObjEntity sourceObjEntity = (ObjEntity) node.getIncoming().getSourceEntity();
-        DbEntity parentDbEntity = sourceObjEntity.getDbEntity();
-        Class parentObjectClass = sourceObjEntity.getJavaClass();
         String relatedIdPrefix = node.getIncoming().getReverseDbRelationshipPath() + ".";
 
         List results = new ArrayList(rows.size());
@@ -191,8 +189,8 @@ class ObjectResolver {
             // The algorithm below of building an ID doesn't take inheritance into
             // account, so there maybe a miss...
             ObjectId id = row.createObjectId(
-                    parentObjectClass,
-                    parentDbEntity,
+                    sourceObjEntity.getName(),
+                    sourceObjEntity.getDbEntity(),
                     relatedIdPrefix);
 
             DataObject parentObject = context.getObjectStore().getObject(id);

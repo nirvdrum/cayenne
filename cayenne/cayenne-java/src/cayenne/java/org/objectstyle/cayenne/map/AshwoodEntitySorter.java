@@ -83,15 +83,16 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.QueryEngine;
 
 /**
- * Implements dependency sorting algorithms for ObjEntities,
- * DbEntities and DataObjects. Presently it works for acyclic database 
- * schemas with possible multi-reflexive tables. The class uses topological 
- * sorting from <a href="http://objectstyle.org/ashwood/">ASHWOOD library</a>.
- *
+ * Implements dependency sorting algorithms for ObjEntities, DbEntities and DataObjects.
+ * Presently it works for acyclic database schemas with possible multi-reflexive tables.
+ * The class uses topological sorting from <a
+ * href="http://objectstyle.org/ashwood/">ASHWOOD library</a>.
+ * 
  * @author Andriy Shapochka, Andrei Adamchik
  * @since 1.1
  */
 public class AshwoodEntitySorter implements EntitySorter {
+
     protected Collection dataMaps;
     protected Map dbEntityToTableMap;
     protected Digraph referentialDigraph;
@@ -109,7 +110,7 @@ public class AshwoodEntitySorter implements EntitySorter {
     public AshwoodEntitySorter(Collection dataMaps) {
         setDataMaps(dataMaps);
     }
-    
+
     /**
      * Reindexes internal sorter.
      */
@@ -126,8 +127,8 @@ public class AshwoodEntitySorter implements EntitySorter {
             Iterator entitiesToConvert = map.getDbEntities().iterator();
             while (entitiesToConvert.hasNext()) {
                 DbEntity entity = (DbEntity) entitiesToConvert.next();
-                Table table =
-                    new Table(entity.getCatalog(), entity.getSchema(), entity.getName());
+                Table table = new Table(entity.getCatalog(), entity.getSchema(), entity
+                        .getName());
                 fillInMetadata(table, entity);
                 dbEntityToTableMap.put(entity, table);
                 tables.add(table);
@@ -135,14 +136,15 @@ public class AshwoodEntitySorter implements EntitySorter {
         }
         referentialDigraph = new MapDigraph(MapDigraph.HASHMAP_FACTORY);
         DbUtils.buildReferentialDigraph(referentialDigraph, tables);
-        StrongConnection contractor =
-            new StrongConnection(referentialDigraph, CollectionFactory.ARRAYLIST_FACTORY);
+        StrongConnection contractor = new StrongConnection(
+                referentialDigraph,
+                CollectionFactory.ARRAYLIST_FACTORY);
         contractedReferentialDigraph = new MapDigraph(MapDigraph.HASHMAP_FACTORY);
         contractor.contract(
-            contractedReferentialDigraph,
-            CollectionFactory.ARRAYLIST_FACTORY);
-        IndegreeTopologicalSort sorter =
-            new IndegreeTopologicalSort(contractedReferentialDigraph);
+                contractedReferentialDigraph,
+                CollectionFactory.ARRAYLIST_FACTORY);
+        IndegreeTopologicalSort sorter = new IndegreeTopologicalSort(
+                contractedReferentialDigraph);
         components = new HashMap(contractedReferentialDigraph.order());
         int componentIndex = 0;
         while (sorter.hasNext()) {
@@ -170,9 +172,9 @@ public class AshwoodEntitySorter implements EntitySorter {
     }
 
     /**
-      * Marks this instance as "dirty", so that it will be indexed lazily on
-      * the next invocation.
-      */
+     * Marks this instance as "dirty", so that it will be indexed lazily on the next
+     * invocation.
+     */
     public void indexSorter(QueryEngine queryEngine) {
         setDataMaps(queryEngine.getDataMaps());
     }
@@ -188,9 +190,9 @@ public class AshwoodEntitySorter implements EntitySorter {
     }
 
     public void sortObjectsForEntity(
-        ObjEntity objEntity,
-        List objects,
-        boolean deleteOrder) {
+            ObjEntity objEntity,
+            List objects,
+            boolean deleteOrder) {
 
         // don't forget to index the sorter
         _indexSorter();
@@ -207,10 +209,8 @@ public class AshwoodEntitySorter implements EntitySorter {
         String[] reflexiveRelNames = new String[reflexiveRels.size()];
         for (int i = 0; i < reflexiveRelNames.length; i++) {
             DbRelationship dbRel = (DbRelationship) reflexiveRels.get(i);
-            ObjRelationship objRel =
-                (dbRel != null
-                    ? objEntity.getRelationshipForDbRelationship(dbRel)
-                    : null);
+            ObjRelationship objRel = (dbRel != null ? objEntity
+                    .getRelationshipForDbRelationship(dbRel) : null);
             reflexiveRelNames[i] = (objRel != null ? objRel.getName() : null);
         }
 
@@ -229,17 +229,14 @@ public class AshwoodEntitySorter implements EntitySorter {
                     continue;
                 }
 
-                masters[k] =
-                    (reflexiveRelName != null)
-                        ? current.readProperty(reflexiveRelName)
-                        : null;
+                masters[k] = (reflexiveRelName != null) ? current
+                        .readProperty(reflexiveRelName) : null;
 
                 if (masters[k] == null) {
-                    masters[k] =
-                        findReflexiveMaster(
-                            current,
-                            (ObjRelationship) objEntity.getRelationship(reflexiveRelName),
-                            current.getObjectId().getObjectClass());
+                    masters[k] = findReflexiveMaster(current, (ObjRelationship) objEntity
+                            .getRelationship(reflexiveRelName), current
+                            .getObjectId()
+                            .getEntityName());
                 }
 
                 if (masters[k] != null) {
@@ -258,30 +255,29 @@ public class AshwoodEntitySorter implements EntitySorter {
                 for (int k = 0; k < masters.length; k++) {
                     if (masterCandidate.equals(masters[k])) {
                         objectDependencyGraph.putArc(
-                            masterCandidate,
-                            current,
-                            Boolean.TRUE);
+                                masterCandidate,
+                                current,
+                                Boolean.TRUE);
                         mastersFound++;
                     }
                 }
             }
         }
 
-        IndegreeTopologicalSort sorter =
-            new IndegreeTopologicalSort(objectDependencyGraph);
+        IndegreeTopologicalSort sorter = new IndegreeTopologicalSort(
+                objectDependencyGraph);
 
         while (sorter.hasNext()) {
             DataObject o = (DataObject) sorter.next();
             if (o == null)
-                throw new CayenneRuntimeException(
-                    "Sorting objects for "
+                throw new CayenneRuntimeException("Sorting objects for "
                         + objEntity.getClassName()
                         + " failed. Cycles found.");
             sorted.add(o);
         }
 
         // since API requires sorting within the same array,
-        // simply replace all objects with objects in the right order... 
+        // simply replace all objects with objects in the right order...
         // may come up with something cleaner later
         objects.clear();
         objects.addAll(sorted);
@@ -290,16 +286,16 @@ public class AshwoodEntitySorter implements EntitySorter {
             Collections.reverse(objects);
         }
     }
-    
+
     protected void fillInMetadata(Table table, DbEntity entity) {
-        //in this case quite a dummy
+        // in this case quite a dummy
         short keySequence = 1;
         Iterator i = entity.getRelationshipMap().values().iterator();
 
         while (i.hasNext()) {
             DbRelationship candidate = (DbRelationship) i.next();
             if ((!candidate.isToMany() && !candidate.isToDependentPK())
-                || candidate.isToMasterPK()) {
+                    || candidate.isToMasterPK()) {
                 DbEntity target = (DbEntity) candidate.getTargetEntity();
                 boolean newReflexive = entity.equals(target);
                 Iterator j = candidate.getJoins().iterator();
@@ -332,25 +328,27 @@ public class AshwoodEntitySorter implements EntitySorter {
     }
 
     protected DataObject findReflexiveMaster(
-        DataObject object,
-        ObjRelationship toOneRel,
-        Class targetClass) {
+            DataObject object,
+            ObjRelationship toOneRel,
+            String targetEntityName) {
         DbRelationship finalRel = (DbRelationship) toOneRel.getDbRelationships().get(0);
 
         DataRow snapshot = null;
 
-        // IMPORTANT: don't try to get snapshots for new objects, this will result in exception
+        // IMPORTANT: don't try to get snapshots for new objects, this will result in
+        // exception
         if (object.getPersistenceState() != PersistenceState.NEW) {
             DataContext context = object.getDataContext();
-            snapshot =
-                context.getObjectStore().getSnapshot(object.getObjectId(), context);
+            snapshot = context
+                    .getObjectStore()
+                    .getSnapshot(object.getObjectId(), context);
         }
 
         if (snapshot == null) {
             snapshot = object.getDataContext().currentSnapshot(object);
         }
 
-        ObjectId id = snapshot.createTargetObjectId(targetClass, finalRel);
+        ObjectId id = snapshot.createTargetObjectId(targetEntityName, finalRel);
         return (id != null) ? object.getDataContext().registeredObject(id) : null;
     }
 
@@ -383,6 +381,7 @@ public class AshwoodEntitySorter implements EntitySorter {
     }
 
     private final class DbEntityComparator implements Comparator {
+
         public int compare(Object o1, Object o2) {
             if (o1 == o2)
                 return 0;
@@ -393,6 +392,7 @@ public class AshwoodEntitySorter implements EntitySorter {
     }
 
     private final class ObjEntityComparator implements Comparator {
+
         public int compare(Object o1, Object o2) {
             if (o1 == o2)
                 return 0;
@@ -403,6 +403,7 @@ public class AshwoodEntitySorter implements EntitySorter {
     }
 
     private final class TableComparator implements Comparator {
+
         public int compare(Object o1, Object o2) {
             int result = 0;
             Table t1 = (Table) o1;
@@ -427,10 +428,12 @@ public class AshwoodEntitySorter implements EntitySorter {
     }
 
     private final static class ComponentRecord {
+
         ComponentRecord(int index, Collection component) {
             this.index = index;
             this.component = component;
         }
+
         int index;
         Collection component;
     }

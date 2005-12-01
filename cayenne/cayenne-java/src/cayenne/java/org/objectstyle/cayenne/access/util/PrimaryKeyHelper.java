@@ -241,8 +241,7 @@ public class PrimaryKeyHelper {
             Map targetKeyMap = targetKey.getIdSnapshot();
             if (targetKeyMap == null) {
                 throw new CayenneException(noMasterPkMsg(objEntity.getName(), targetKey
-                        .getObjectClass()
-                        .toString(), dbRel.getName()));
+                        .getEntityName(), dbRel.getName()));
             }
 
             // DbRelationship logic currently throws an exception when some key is

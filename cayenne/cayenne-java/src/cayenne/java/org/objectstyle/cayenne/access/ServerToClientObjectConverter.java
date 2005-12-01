@@ -63,7 +63,7 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.GlobalID;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -125,7 +125,7 @@ class ServerToClientObjectConverter {
 
         if (clientObject == null) {
 
-            GlobalID id = resolver.convertToGlobalID(object.getObjectId());
+            ObjectId id = object.getObjectId();
 
             // DO NOT USE NODE'S ENTITY TO LOOKUP DESCRIPTOR, as inheritance may be
             // involved and different objects may be of different class.
@@ -142,7 +142,7 @@ class ServerToClientObjectConverter {
 
             ClassDescriptor descriptor = entity.getClassDescriptor();
             clientObject = (Persistent) descriptor.createObject();
-            clientObject.setGlobalID(id);
+            clientObject.setObjectId(id);
 
             // copy attributes properties
             Iterator it = descriptor.getPropertyNames().iterator();

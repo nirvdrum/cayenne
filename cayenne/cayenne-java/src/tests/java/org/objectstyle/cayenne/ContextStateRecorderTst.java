@@ -86,10 +86,10 @@ public class ContextStateRecorderTst extends TestCase {
         assertTrue(recorder.dirtyNodes(PersistenceState.HOLLOW).isEmpty());
 
         MockPersistentObject modified = new MockPersistentObject();
-        modified.setGlobalID(new GlobalID("MockPersistentObject", "key", "value1"));
+        modified.setObjectId(new ObjectId("MockPersistentObject", "key", "value1"));
         modified.setPersistenceState(PersistenceState.MODIFIED);
-        map.registerNode(modified.getGlobalID(), modified);
-        recorder.nodePropertyChanged(modified.getGlobalID(), "a", "b", "c");
+        map.registerNode(modified.getObjectId(), modified);
+        recorder.nodePropertyChanged(modified.getObjectId(), "a", "b", "c");
 
         assertTrue(recorder.dirtyNodes(PersistenceState.MODIFIED).contains(modified));
         assertTrue(recorder.dirtyNodes(PersistenceState.COMMITTED).isEmpty());
@@ -99,10 +99,10 @@ public class ContextStateRecorderTst extends TestCase {
         assertTrue(recorder.dirtyNodes(PersistenceState.HOLLOW).isEmpty());
 
         MockPersistentObject deleted = new MockPersistentObject();
-        deleted.setGlobalID(new GlobalID("MockPersistentObject", "key", "value2"));
+        deleted.setObjectId(new ObjectId("MockPersistentObject", "key", "value2"));
         deleted.setPersistenceState(PersistenceState.DELETED);
-        map.registerNode(deleted.getGlobalID(), deleted);
-        recorder.nodeRemoved(deleted.getGlobalID());
+        map.registerNode(deleted.getObjectId(), deleted);
+        recorder.nodeRemoved(deleted.getObjectId());
 
         assertTrue(recorder.dirtyNodes(PersistenceState.MODIFIED).contains(modified));
         assertTrue(recorder.dirtyNodes(PersistenceState.COMMITTED).isEmpty());
@@ -121,10 +121,10 @@ public class ContextStateRecorderTst extends TestCase {
 
         // introduce a fake dirty object
         MockPersistentObject object = new MockPersistentObject();
-        object.setGlobalID(new GlobalID("MockPersistentObject", "key", "value"));
+        object.setObjectId(new ObjectId("MockPersistentObject", "key", "value"));
         object.setPersistenceState(PersistenceState.MODIFIED);
-        map.registerNode(object.getGlobalID(), object);
-        recorder.nodePropertyChanged(object.getGlobalID(), "a", "b", "c");
+        map.registerNode(object.getObjectId(), object);
+        recorder.nodePropertyChanged(object.getObjectId(), "a", "b", "c");
 
         assertTrue(recorder.dirtyNodes().contains(object));
 
@@ -141,9 +141,9 @@ public class ContextStateRecorderTst extends TestCase {
 
         // introduce a fake dirty object
         MockPersistentObject object = new MockPersistentObject();
-        object.setGlobalID(new GlobalID("MockPersistentObject", "key", "value"));
+        object.setObjectId(new ObjectId("MockPersistentObject", "key", "value"));
         object.setPersistenceState(PersistenceState.MODIFIED);
-        recorder.nodePropertyChanged(object.getGlobalID(), "xyz", "a", "b");
+        recorder.nodePropertyChanged(object.getObjectId(), "xyz", "a", "b");
 
         assertTrue(recorder.hasChanges());
 

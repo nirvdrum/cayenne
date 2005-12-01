@@ -177,7 +177,7 @@ public class IncrementalFaultList implements List {
             SelectQuery select = (SelectQuery) query;
 
             this.internalQuery.setPrefetchTree(select.getPrefetchTree());
-            
+
             if (select.getPrefetchTree() != null) {
                 // prefetching will blow iterated result, so strip prefetches... this is
                 // a bit of a hack
@@ -802,8 +802,7 @@ public class IncrementalFaultList implements List {
                 return true;
             }
 
-            if (!dataObj.getObjectId().getObjectClass().getName().equals(
-                    rootEntity.getClassName())) {
+            if (!dataObj.getObjectId().getEntityName().equals(rootEntity.getName())) {
                 return true;
             }
 

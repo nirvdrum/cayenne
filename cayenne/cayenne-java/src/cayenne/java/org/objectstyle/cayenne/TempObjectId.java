@@ -55,12 +55,6 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.Collections;
-import java.util.Map;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.objectstyle.cayenne.util.IDUtil;
 
 /**
  * An ObjectId for new objects that hasn't been committed to the external data store. On
@@ -83,71 +77,7 @@ public class TempObjectId extends ObjectId {
      * once a corresponding object is committed.
      */
     public TempObjectId(Class objectClass) {
-        super(objectClass, IDUtil.pseudoUniqueByteSequence16());
-    }
-
-    /**
-     * Create a TempObjectId with a binary unique key. This id is "portable" in that it
-     * can be used across virtual machines to identify the same object.
-     * 
-     * @since 1.2
-     */
-    public TempObjectId(Class objectClass, byte[] key) {
-        super(objectClass, key);
-    }
-
-    /**
-     * TempObjectId equality condition is based on object reference comparison. This is
-     * possible since each object in a "new" state is unique, and TempObjectId is only
-     * used for "new" objects.
-     */
-    public boolean equals(Object object) {
-        // non-portable id
-        if (key == null) {
-            return object == this;
-        }
-
-        if (this == object) {
-            return true;
-        }
-
-        if (!(object instanceof ObjectId)) {
-            return false;
-        }
-
-        ObjectId id = (ObjectId) object;
-        return new EqualsBuilder()
-                .append(objectClass.getName(), id.objectClass.getName())
-                .append(key, id.key)
-                .isEquals();
-    }
-
-    public int hashCode() {
-        if (this.hashCode == Integer.MIN_VALUE) {
-            // build and cache hashCode
-            HashCodeBuilder builder = new HashCodeBuilder(15, 37);
-
-            // use the class name because two ObjectId's should be equal
-            // even if their objClass'es were loaded by different class loaders.
-            builder.append(objectClass.getName().hashCode());
-
-            if (key != null) {
-                builder.append(key);
-            }
-
-            this.hashCode = builder.toHashCode();
-        }
-
-        return this.hashCode;
-    }
-
-    /**
-     * Returns an empty map if there is no replacement id available, or a snapshot of a
-     * replacement id otherwise. Note that if a replacement id map is returned there is no
-     * guarantee that it is complete and has all keys.
-     */
-    public Map getIdSnapshot() {
-        return (replacementIdMap == null) ? Collections.EMPTY_MAP : replacementIdMap;
+        super(objectClass);
     }
 
     /**

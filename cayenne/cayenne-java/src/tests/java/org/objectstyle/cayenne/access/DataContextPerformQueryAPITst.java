@@ -93,7 +93,7 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
         // fetch artist
         DataContext context = createDataContext();
         Artist a = (Artist) context.registeredObject(new ObjectId(
-                Artist.class,
+                "Artist",
                 Artist.ARTIST_ID_PK_COLUMN,
                 33018));
         Map parameters = Collections.singletonMap("artist", a);
@@ -109,8 +109,8 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
         if (!getAccessStackAdapter().supportsStoredProcedures()) {
             return;
         }
-        
-        if(!getAccessStackAdapter().canMakeObjectsOutOfProcedures()) {
+
+        if (!getAccessStackAdapter().canMakeObjectsOutOfProcedures()) {
             return;
         }
 
@@ -139,7 +139,7 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
         assertEquals(1, artists.size());
 
         Artist artist = (Artist) artists.get(0);
-        assertEquals(new Integer(33002), artist.getObjectId().getValueForAttribute(
+        assertEquals(new Integer(33002), artist.getObjectId().getIdSnapshot().get(
                 Artist.ARTIST_ID_PK_COLUMN));
     }
 
@@ -153,7 +153,7 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
         assertEquals(1, counts[0]);
 
         Painting p = (Painting) context.registeredObject(new ObjectId(
-                Painting.class,
+                "Painting",
                 Painting.PAINTING_ID_PK_COLUMN,
                 512));
         assertEquals("No Painting Like This", p.getPaintingTitle());
@@ -176,7 +176,7 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
         assertEquals(1, counts[0]);
 
         Painting p = (Painting) context.registeredObject(new ObjectId(
-                Painting.class,
+                "Painting",
                 Painting.PAINTING_ID_PK_COLUMN,
                 300));
         assertEquals("Go Figure", p.getPaintingTitle());

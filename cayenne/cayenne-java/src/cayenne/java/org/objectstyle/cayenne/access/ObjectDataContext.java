@@ -183,19 +183,18 @@ class ObjectDataContext extends DataContext implements ObjectContext {
     // --------------------------------------------------------------------------
 
     DataObject createAndRegisterNewObject(ObjectId id) {
-        if (id.getObjectClass() == null) {
-            throw new NullPointerException("DataObject class can't be null.");
+        if (id.getEntityName() == null) {
+            throw new NullPointerException("Null entity name in id " + id);
         }
 
-        ObjEntity entity = getEntityResolver().lookupObjEntity(id.getObjectClass());
+        ObjEntity entity = getEntityResolver().lookupObjEntity(id.getEntityName());
         if (entity == null) {
-            throw new IllegalArgumentException("Class is not mapped with Cayenne: "
-                    + id.getObjectClass().getName());
+            throw new IllegalArgumentException("Entity not mapped with Cayenne: " + id);
         }
 
         DataObject dataObject = null;
         try {
-            dataObject = (DataObject) id.getObjectClass().newInstance();
+            dataObject = (DataObject) entity.getJavaClass().newInstance();
         }
         catch (Exception ex) {
             throw new CayenneRuntimeException("Error instantiating object.", ex);

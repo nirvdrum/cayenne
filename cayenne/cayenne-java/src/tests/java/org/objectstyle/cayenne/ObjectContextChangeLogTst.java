@@ -104,7 +104,7 @@ public class ObjectContextChangeLogTst extends TestCase {
 
     public void testGetDiffsSerializable() throws Exception {
         ObjectContextChangeLog recorder = new ObjectContextChangeLog();
-        recorder.addOperation(new NodeCreateOperation(new GlobalID("test")));
+        recorder.addOperation(new NodeCreateOperation(new ObjectId("test")));
         CompoundDiff diff = (CompoundDiff) recorder.getDiffs();
 
         Object clone = Util.cloneViaSerialization(diff);

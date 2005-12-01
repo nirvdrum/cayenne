@@ -63,7 +63,6 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.util.Util;
@@ -172,14 +171,8 @@ public class NamedQuery implements QueryExecutionPlan {
                     Object value = entry.getValue();
                     Object substitute = null;
 
-                    if (value instanceof GlobalID) {
-                        substitute = resolver.convertToObjectID((GlobalID) value);
-                    }
-                    else if ((value instanceof Persistent)
-                            && !(value instanceof DataObject)) {
-
-                        substitute = resolver.convertToObjectID(((Persistent) value)
-                                .getGlobalID());
+                    if ((value instanceof Persistent) && !(value instanceof DataObject)) {
+                        substitute = ((Persistent) value).getObjectId();
                     }
 
                     if (substitute != null) {

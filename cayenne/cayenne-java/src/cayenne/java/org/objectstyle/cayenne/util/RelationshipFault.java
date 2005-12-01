@@ -125,7 +125,7 @@ public abstract class RelationshipFault {
         }
 
         List resolved = relationshipOwner.getObjectContext().performSelectQuery(
-                new RelationshipQuery(relationshipOwner.getGlobalID(), relationshipName));
+                new RelationshipQuery(relationshipOwner.getObjectId(), relationshipName));
 
         if (resolved.isEmpty()) {
             return resolved;
@@ -138,7 +138,7 @@ public abstract class RelationshipFault {
         EntityResolver resolver = ((CayenneContext) relationshipOwner
                 .getObjectContext()).getEntityResolver();
         ObjEntity sourceEntity = resolver.lookupObjEntity(relationshipOwner
-                .getGlobalID()
+                .getObjectId()
                 .getEntityName());
 
         ObjRelationship relationship = (ObjRelationship) sourceEntity

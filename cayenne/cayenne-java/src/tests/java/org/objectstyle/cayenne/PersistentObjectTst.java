@@ -79,13 +79,13 @@ public class PersistentObjectTst extends TestCase {
         assertEquals(PersistenceState.DELETED, object.getPersistenceState());
     }
 
-    public void testGlobalID() {
-        GlobalID id = new GlobalID("test");
+    public void testObjectID() {
+        ObjectId id = new ObjectId("test");
 
         PersistentObject object = new MockPersistentObject();
 
-        assertNull(object.getGlobalID());
-        object.setGlobalID(id);
-        assertSame(id, object.getGlobalID());
+        assertNull(object.getObjectId());
+        object.setObjectId(id);
+        assertSame(id, object.getObjectId());
     }
 }

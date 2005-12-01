@@ -67,8 +67,6 @@ import java.util.Map;
 import org.apache.commons.collections.collection.CompositeCollection;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.GlobalID;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 
@@ -121,44 +119,6 @@ public class EntityResolver implements MappingNamespace, Serializable {
         this();
         this.maps.addAll(dataMaps); // Take a copy
         this.constructCache();
-    }
-
-    /**
-     * Converts ObjectId to GlobalID.
-     * 
-     * @since 1.2
-     */
-    public GlobalID convertToGlobalID(ObjectId id) {
-        ObjEntity entity = lookupObjEntity(id.getObjectClass());
-        if (entity == null) {
-            throw new CayenneRuntimeException("Unmapped object class:"
-                    + id.getObjectClass().getName());
-        }
-
-        if (id.isTemporary()) {
-            return new GlobalID(entity.getName(), id.getKey());
-        }
-        else {
-            return new GlobalID(entity.getName(), id.getIdSnapshot());
-        }
-    }
-
-    /**
-     * Converts GlobalID to ObjectId.
-     * 
-     * @since 1.2
-     */
-    public ObjectId convertToObjectID(GlobalID id) {
-        ObjEntity entity = lookupObjEntity(id.getEntityName());
-
-        if (entity == null) {
-            throw new CayenneRuntimeException("Unknown entity:" + id.getEntityName());
-        }
-
-        Class objectClass = entity.getJavaClass();
-        return (id.isTemporary())
-                ? new ObjectId(objectClass, id.getKey())
-                : new ObjectId(objectClass, id.getIdMap());
     }
 
     /**

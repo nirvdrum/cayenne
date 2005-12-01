@@ -52,7 +52,7 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne;
 
 import junit.framework.TestCase;
@@ -61,56 +61,53 @@ import org.objectstyle.art.oneway.Artist;
 import org.objectstyle.cayenne.access.DataContext;
 
 public class CayenneDataObjectTst extends TestCase {
-    
+
     public void testSetObjectId() throws Exception {
         CayenneDataObject obj = new CayenneDataObject();
-        ObjectId oid = new ObjectId(String.class); //class is irrelevant
-        
+        ObjectId oid = new ObjectId("T");
+
         assertNull(obj.getObjectId());
-        
+
         obj.setObjectId(oid);
         assertSame(oid, obj.getObjectId());
     }
-    
-    
+
     public void testSetPersistenceState() throws Exception {
         CayenneDataObject obj = new CayenneDataObject();
         assertEquals(PersistenceState.TRANSIENT, obj.getPersistenceState());
-        
+
         obj.setPersistenceState(PersistenceState.COMMITTED);
         assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
     }
-    
-    
+
     public void testSetDataContext() throws Exception {
         CayenneDataObject obj = new CayenneDataObject();
         assertNull(obj.getDataContext());
-        
+
         DataContext c = new DataContext();
         obj.setDataContext(c);
         assertSame(c, obj.getDataContext());
     }
-    
+
     public void testReadNestedProperty1() throws Exception {
         Artist a = new Artist();
         assertNull(a.readNestedProperty("artistName"));
         a.setArtistName("aaa");
         assertEquals("aaa", a.readNestedProperty("artistName"));
     }
-    
+
     public void testReadNestedPropertyNotPersistentString() throws Exception {
         Artist a = new Artist();
         assertNull(a.readNestedProperty("someOtherProperty"));
         a.setSomeOtherProperty("aaa");
         assertEquals("aaa", a.readNestedProperty("someOtherProperty"));
     }
-    
-	public void testReadNestedPropertyNonPersistentNotString() throws Exception {
-		Artist a = new Artist();
-		Object object = new Object();
-		assertNull(a.readNestedProperty("someOtherObjectProperty"));
-		a.setSomeOtherObjectProperty(object);
-		assertSame(object, a.readNestedProperty("someOtherObjectProperty"));
-	}
-}
 
+    public void testReadNestedPropertyNonPersistentNotString() throws Exception {
+        Artist a = new Artist();
+        Object object = new Object();
+        assertNull(a.readNestedProperty("someOtherObjectProperty"));
+        a.setSomeOtherObjectProperty(object);
+        assertSame(object, a.readNestedProperty("someOtherObjectProperty"));
+    }
+}

@@ -64,10 +64,9 @@ package org.objectstyle.cayenne;
 public class MockPersistentObject extends PersistentObject {
 
     public MockPersistentObject() {
-
     }
 
-    public MockPersistentObject(GlobalID oid) {
-        setGlobalID(oid);
+    public MockPersistentObject(ObjectId oid) {
+        setObjectId(oid);
     }
 }

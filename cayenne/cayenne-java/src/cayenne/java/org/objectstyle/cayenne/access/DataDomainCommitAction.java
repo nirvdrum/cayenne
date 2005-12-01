@@ -231,7 +231,7 @@ class DataDomainCommitAction {
                                 entity.getDbEntity(),
                                 dbEntity));
 
-                List objects = (List) newObjectsByObjEntity.get(entity.getClassName());
+                List objects = (List) newObjectsByObjEntity.get(entity.getName());
 
                 // throw an exception - an attempt to modify read-only entity
                 if (entity.isReadOnly() && objects.size() > 0) {
@@ -291,8 +291,7 @@ class DataDomainCommitAction {
                                 entity.getDbEntity(),
                                 dbEntity));
 
-                List objects = (List) objectsToDeleteByObjEntity.get(entity
-                        .getClassName());
+                List objects = (List) objectsToDeleteByObjEntity.get(entity.getName());
 
                 // throw an exception - an attempt to delete read-only entity
                 if (entity.isReadOnly() && objects.size() > 0) {
@@ -399,8 +398,7 @@ class DataDomainCommitAction {
                         : findMasterToDependentDbRelationship(
                                 entity.getDbEntity(),
                                 dbEntity);
-                List objects = (List) objectsToUpdateByObjEntity.get(entity
-                        .getClassName());
+                List objects = (List) objectsToUpdateByObjEntity.get(entity.getName());
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
@@ -598,8 +596,7 @@ class DataDomainCommitAction {
         Iterator i = objEntitiesToInsert.iterator();
         while (i.hasNext()) {
             ObjEntity currentEntity = (ObjEntity) i.next();
-            List dataObjects = (List) newObjectsByObjEntity.get(currentEntity
-                    .getClassName());
+            List dataObjects = (List) newObjectsByObjEntity.get(currentEntity.getName());
 
             try {
                 pkHelper.createPermIdsForObjEntity(currentEntity, dataObjects);
@@ -695,10 +692,10 @@ class DataDomainCommitAction {
             List objEntities,
             int operationType) {
 
-        Class objEntityClass = o.getObjectId().getObjectClass();
-        ObjEntity entity = domain.getEntityResolver().lookupObjEntity(objEntityClass);
-        Collection objectsForObjEntity = (Collection) objectsByObjEntity
-                .get(objEntityClass.getName());
+        ObjEntity entity = domain.getEntityResolver().lookupObjEntity(
+                o.getObjectId().getEntityName());
+        Collection objectsForObjEntity = (Collection) objectsByObjEntity.get(entity
+                .getName());
         if (objectsForObjEntity == null) {
             objEntities.add(entity);
             DataNode responsibleNode = domain.lookupDataNode(entity.getDataMap());
@@ -707,7 +704,7 @@ class DataDomainCommitAction {
 
             commitHelper.addToEntityList(entity, operationType);
             objectsForObjEntity = new ArrayList();
-            objectsByObjEntity.put(objEntityClass.getName(), objectsForObjEntity);
+            objectsByObjEntity.put(entity.getName(), objectsForObjEntity);
         }
         objectsForObjEntity.add(o);
     }

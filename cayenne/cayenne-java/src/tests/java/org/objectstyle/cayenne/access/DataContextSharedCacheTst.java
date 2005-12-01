@@ -382,7 +382,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         // ObjectId
         ObjectId id = altArtist.getObjectId();
         assertNotNull(id);
-        assertNotNull(id.getValueForAttribute(Artist.ARTIST_ID_PK_COLUMN));
+        assertNotNull(id.getIdSnapshot().get(Artist.ARTIST_ID_PK_COLUMN));
         assertFalse(id.isTemporary());
 
         altContext.commitChanges();

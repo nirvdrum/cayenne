@@ -61,11 +61,8 @@ import java.util.List;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.access.ClientServerChannel;
-import org.objectstyle.cayenne.access.ObjectDataContext;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
@@ -127,7 +124,10 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 .getEntityResolver(), new MockDataRowStore());
 
         ClientServerChannel channel = new ClientServerChannel(context, false);
-        channel.onSync(new SyncMessage(context, SyncMessage.COMMIT_TYPE, new MockGraphDiff()));
+        channel.onSync(new SyncMessage(
+                context,
+                SyncMessage.COMMIT_TYPE,
+                new MockGraphDiff()));
 
         // no changes in context, so no commit should be executed
         assertFalse(parent.isCommitChangesInContext());
@@ -135,8 +135,10 @@ public class ClientServerChannelTst extends CayenneTestCase {
         parent.reset();
 
         // introduce changes
-        channel.onSync(new SyncMessage(context, SyncMessage.COMMIT_TYPE, new NodeCreateOperation(
-                new GlobalID("MtTable1"))));
+        channel.onSync(new SyncMessage(
+                context,
+                SyncMessage.COMMIT_TYPE,
+                new NodeCreateOperation(new ObjectId("MtTable1"))));
         assertTrue(parent.isCommitChangesInContext());
     }
 
@@ -157,7 +159,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
         ObjEntity entity = getDomain()
                 .getEntityResolver()
                 .lookupObjEntity(MtTable1.class);
-        ObjectId oid = new ObjectId(MtTable1.class, "key", 1);
+        ObjectId oid = new ObjectId("MtTable1", "key", new Integer(1));
         MtTable1 serverObject = new MtTable1();
         serverObject.setObjectId(oid);
         serverObject.setObjEntity(entity);
@@ -178,11 +180,9 @@ public class ClientServerChannelTst extends CayenneTestCase {
         Object result = results.get(0);
         assertTrue(result instanceof ClientMtTable1);
         ClientMtTable1 clientObject = (ClientMtTable1) result;
-        assertNotNull(clientObject.getGlobalID());
+        assertNotNull(clientObject.getObjectId());
 
-        GlobalID refId = getDomain().getEntityResolver().convertToGlobalID(
-                new ObjectId(MtTable1.class, "key", 1));
-        assertEquals(refId, clientObject.getGlobalID());
+        assertEquals(oid, clientObject.getObjectId());
     }
 
     public void testOnSelectQueryValuePropagation() {
@@ -192,7 +192,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 .lookupObjEntity(MtTable3.class);
 
         MtTable3 serverObject = new MtTable3();
-        serverObject.setObjectId(new ObjectId(MtTable3.class, "key", 1));
+        serverObject.setObjectId(new ObjectId("MtTable3", "key", new Integer(1)));
         serverObject.setObjEntity(entity);
 
         serverObject.setBinaryColumn(new byte[] {
@@ -230,7 +230,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 MtTable1Subclass.class);
 
         MtTable1Subclass serverObject = new MtTable1Subclass();
-        serverObject.setObjectId(new ObjectId(MtTable1Subclass.class, "key", 1));
+        serverObject.setObjectId(new ObjectId("MtTable1Subclass", "key", new Integer(1)));
         serverObject.setObjEntity(entity);
 
         serverObject.setGlobalAttribute1("abc");

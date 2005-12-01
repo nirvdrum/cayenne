@@ -157,17 +157,21 @@ public class DataContextCompoundOETst extends CayenneTestCase {
             CompoundPainting painting = (CompoundPainting) i.next();
             Number id = (Number) painting
                     .getObjectId()
-                    .getValueForAttribute("PAINTING_ID");
+                    .getIdSnapshot()
+                    .get("PAINTING_ID");
             assertEquals("CompoundPainting.getPaintingTitle(): "
                     + painting.getPaintingTitle(), "painting" + id, painting
                     .getPaintingTitle());
-            assertEquals("CompoundPainting.getTextReview(): " + painting.getTextReview(),
+            assertEquals(
+                    "CompoundPainting.getTextReview(): " + painting.getTextReview(),
                     "painting review" + id,
                     painting.getTextReview());
-            assertEquals("CompoundPainting.getArtistName(): " + painting.getArtistName(),
+            assertEquals(
+                    "CompoundPainting.getArtistName(): " + painting.getArtistName(),
                     painting.getToArtist().getArtistName(),
                     painting.getArtistName());
-            assertEquals("CompoundPainting.getArtistName(): " + painting.getGalleryName(),
+            assertEquals(
+                    "CompoundPainting.getArtistName(): " + painting.getGalleryName(),
                     painting.getToGallery().getGalleryName(),
                     painting.getGalleryName());
         }
@@ -188,18 +192,22 @@ public class DataContextCompoundOETst extends CayenneTestCase {
             CompoundPainting painting = (CompoundPainting) i.next();
             Number id = (Number) painting
                     .getObjectId()
-                    .getValueForAttribute("PAINTING_ID");
+                    .getIdSnapshot()
+                    .get("PAINTING_ID");
             assertEquals("CompoundPainting.getObjectId(): " + id, id.intValue(), 2);
             assertEquals("CompoundPainting.getPaintingTitle(): "
                     + painting.getPaintingTitle(), "painting" + id, painting
                     .getPaintingTitle());
-            assertEquals("CompoundPainting.getTextReview(): " + painting.getTextReview(),
+            assertEquals(
+                    "CompoundPainting.getTextReview(): " + painting.getTextReview(),
                     "painting review" + id,
                     painting.getTextReview());
-            assertEquals("CompoundPainting.getArtistName(): " + painting.getArtistName(),
+            assertEquals(
+                    "CompoundPainting.getArtistName(): " + painting.getArtistName(),
                     "artist2",
                     painting.getArtistName());
-            assertEquals("CompoundPainting.getArtistName(): " + painting.getGalleryName(),
+            assertEquals(
+                    "CompoundPainting.getArtistName(): " + painting.getGalleryName(),
                     painting.getToGallery().getGalleryName(),
                     painting.getGalleryName());
         }

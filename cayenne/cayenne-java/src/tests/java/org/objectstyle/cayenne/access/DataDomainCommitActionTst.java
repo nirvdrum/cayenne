@@ -75,7 +75,7 @@ public class DataDomainCommitActionTst extends CayenneTestCase {
     public void testCommitResult() {
         final Artist artist = new Artist();
         artist.setArtistName("test");
-        artist.setObjectId(new ObjectId(Artist.class));
+        artist.setObjectId(new ObjectId("Artist"));
         artist.setPersistenceState(PersistenceState.NEW);
 
         MockObjectContext context = new MockObjectContext() {

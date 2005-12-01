@@ -124,8 +124,8 @@ class CayenneContextGraphAction {
 
         if (oldValue instanceof Persistent) {
             context.getGraphManager().arcDeleted(
-                    object.getGlobalID(),
-                    ((Persistent) oldValue).getGlobalID(),
+                    object.getObjectId(),
+                    ((Persistent) oldValue).getObjectId(),
                     property.getPropertyName());
 
             if (!arcChangeInProcess) {
@@ -137,8 +137,8 @@ class CayenneContextGraphAction {
 
         if (newValue instanceof Persistent) {
             context.getGraphManager().arcCreated(
-                    object.getGlobalID(),
-                    ((Persistent) newValue).getGlobalID(),
+                    object.getObjectId(),
+                    ((Persistent) newValue).getObjectId(),
                     property.getPropertyName());
 
             if (!arcChangeInProcess) {
@@ -155,7 +155,7 @@ class CayenneContextGraphAction {
             Object oldValue,
             Object newValue) {
         context.getGraphManager().nodePropertyChanged(
-                object.getGlobalID(),
+                object.getObjectId(),
                 propertyName,
                 oldValue,
                 newValue);
@@ -193,8 +193,8 @@ class CayenneContextGraphAction {
                     sourceObject);
 
             context.getGraphManager().arcCreated(
-                    targetObject.getGlobalID(),
-                    sourceObject.getGlobalID(),
+                    targetObject.getObjectId(),
+                    sourceObject.getObjectId(),
                     reverseName);
 
             markAsDirty(targetObject);
@@ -215,8 +215,8 @@ class CayenneContextGraphAction {
                     null);
 
             context.getGraphManager().arcDeleted(
-                    targetObject.getGlobalID(),
-                    sourceObject.getGlobalID(),
+                    targetObject.getObjectId(),
+                    sourceObject.getObjectId(),
                     reverseName);
 
             markAsDirty(targetObject);

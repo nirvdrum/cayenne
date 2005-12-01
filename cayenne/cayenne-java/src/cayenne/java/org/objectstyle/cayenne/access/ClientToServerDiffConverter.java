@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.access;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
@@ -79,7 +78,7 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
     ClientToServerDiffConverter(ObjectDataContext serverContext) {
         this.serverContext = serverContext;
     }
-    
+
     /**
      * Does nothing.
      */
@@ -110,8 +109,7 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
     }
 
     public void nodeCreated(Object nodeId) {
-        ObjectId id = toObjectId(nodeId);
-        serverContext.createAndRegisterNewObject(id);
+        serverContext.createAndRegisterNewObject((ObjectId) nodeId);
     }
 
     public void nodeRemoved(Object nodeId) {
@@ -175,23 +173,6 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
     }
 
     DataObject findObject(Object nodeId) {
-        ObjectId id = toObjectId(nodeId);
-        return serverContext.getObjectStore().getObject(id);
-    }
-
-    ObjectId toObjectId(Object nodeId) {
-        if (nodeId instanceof GlobalID) {
-            return serverContext.getEntityResolver().convertToObjectID((GlobalID) nodeId);
-        }
-        else if (nodeId instanceof ObjectId) {
-            return (ObjectId) nodeId;
-        }
-        else if (nodeId == null) {
-            throw new NullPointerException("Null GlobalID");
-        }
-        else {
-            throw new CayenneRuntimeException(
-                    "Client node id is expected to be GlobalID, got: " + nodeId);
-        }
+        return serverContext.getObjectStore().getObject((ObjectId) nodeId);
     }
 }

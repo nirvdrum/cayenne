@@ -239,7 +239,7 @@ public class DataContextTst extends DataContextTestBase {
         createTestData("testGalleries");
         populateExhibits();
 
-        ObjectId eId = new ObjectId(Exhibit.class, Exhibit.EXHIBIT_ID_PK_COLUMN, 2);
+        ObjectId eId = new ObjectId("Exhibit", Exhibit.EXHIBIT_ID_PK_COLUMN, 2);
         Exhibit e =
             (Exhibit) context.performQuery(QueryUtils.selectObjectForId(eId)).get(0);
 

@@ -57,8 +57,6 @@ package org.objectstyle.cayenne.query;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.GlobalID;
-import org.objectstyle.cayenne.MockDataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 import org.objectstyle.cayenne.util.Util;
@@ -67,38 +65,29 @@ public class SingleObjectQueryTst extends TestCase {
 
     public void testConstructorObjectId() {
 
-        ObjectId oid = new ObjectId(MockDataObject.class, "a", "b");
+        ObjectId oid = new ObjectId("MockDataObject", "a", "b");
         SingleObjectQuery query = new SingleObjectQuery(oid);
 
-        assertSame(oid, query.getObjectID());
-        assertNull(query.getGlobalID());
-    }
-
-    public void testConstructorGlobalId() {
-
-        GlobalID oid = new GlobalID("test", "a", "b");
-        SingleObjectQuery query = new SingleObjectQuery(oid);
-        assertSame(oid, query.getGlobalID());
-        assertNull(query.getObjectID());
+        assertSame(oid, query.getObjectId());
     }
 
     public void testSerializability() throws Exception {
-        GlobalID oid = new GlobalID("test", "a", "b");
+        ObjectId oid = new ObjectId("test", "a", "b");
         SingleObjectQuery query = new SingleObjectQuery(oid);
 
         Object o = Util.cloneViaSerialization(query);
         assertNotNull(o);
         assertTrue(o instanceof SingleObjectQuery);
-        assertEquals(oid, ((SingleObjectQuery) o).getGlobalID());
+        assertEquals(oid, ((SingleObjectQuery) o).getObjectId());
     }
 
     public void testSerializabilityWithHessian() throws Exception {
-        GlobalID oid = new GlobalID("test", "a", "b");
+        ObjectId oid = new ObjectId("test", "a", "b");
         SingleObjectQuery query = new SingleObjectQuery(oid);
 
         Object o = HessianUtil.cloneViaHessianSerialization(query);
         assertNotNull(o);
         assertTrue(o instanceof SingleObjectQuery);
-        assertEquals(oid, ((SingleObjectQuery) o).getGlobalID());
+        assertEquals(oid, ((SingleObjectQuery) o).getObjectId());
     }
 }

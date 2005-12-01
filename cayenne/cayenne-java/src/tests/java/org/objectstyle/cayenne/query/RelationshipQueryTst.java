@@ -57,8 +57,6 @@ package org.objectstyle.cayenne.query;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.GlobalID;
-import org.objectstyle.cayenne.MockDataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 import org.objectstyle.cayenne.util.Util;
@@ -70,40 +68,30 @@ public class RelationshipQueryTst extends TestCase {
 
     public void testConstructorObjectId() {
 
-        ObjectId oid = new ObjectId(MockDataObject.class, "a", "b");
+        ObjectId oid = new ObjectId("MockDataObject", "a", "b");
         RelationshipQuery query = new RelationshipQuery(oid, "relX");
-        assertSame(oid, query.getObjectID());
-        assertNull(query.getGlobalID());
-        assertSame("relX", query.getRelationshipName());
-    }
-
-    public void testConstructorGlobalId() {
-
-        GlobalID oid = new GlobalID("test", "a", "b");
-        RelationshipQuery query = new RelationshipQuery(oid, "relX");
-        assertSame(oid, query.getGlobalID());
-        assertNull(query.getObjectID());
+        assertSame(oid, query.getObjectId());
         assertSame("relX", query.getRelationshipName());
     }
 
     public void testSerializability() throws Exception {
-        GlobalID oid = new GlobalID("test", "a", "b");
+        ObjectId oid = new ObjectId("test", "a", "b");
         RelationshipQuery query = new RelationshipQuery(oid, "relX");
 
         RelationshipQuery q1 = (RelationshipQuery) Util.cloneViaSerialization(query);
         assertNotNull(q1);
-        assertEquals(oid, q1.getGlobalID());
+        assertEquals(oid, q1.getObjectId());
         assertEquals("relX", q1.getRelationshipName());
     }
 
     public void testSerializabilityWithHessian() throws Exception {
-        GlobalID oid = new GlobalID("test", "a", "b");
+        ObjectId oid = new ObjectId("test", "a", "b");
         RelationshipQuery query = new RelationshipQuery(oid, "relX");
 
         RelationshipQuery q1 = (RelationshipQuery) HessianUtil
                 .cloneViaHessianSerialization(query);
         assertNotNull(q1);
-        assertEquals(oid, q1.getGlobalID());
+        assertEquals(oid, q1.getObjectId());
         assertEquals("relX", q1.getRelationshipName());
     }
 }

@@ -210,8 +210,9 @@ class DataRowUtils {
                         .getDbRelationships()
                         .get(0);
 
-                ObjectId id = snapshot.createTargetObjectId(((ObjEntity) rel
-                        .getTargetEntity()).getJavaClass(), dbRelationship);
+                ObjectId id = snapshot.createTargetObjectId(
+                        rel.getTargetEntityName(),
+                        dbRelationship);
                 DataObject target = (id != null) ? context.registeredObject(id) : null;
 
                 anObject.writePropertyDirectly(rel.getName(), target);
@@ -324,9 +325,8 @@ class DataRowUtils {
                 // pk values
                 // note that we must use target entity names to extract id
                 // values.
-                if (!Util.nullSafeEquals(currentId.getValueForAttribute(join
-                        .getTarget()
-                        .getName()), storedSnapshot.get(propertyName))) {
+                if (!Util.nullSafeEquals(currentId.getIdSnapshot().get(
+                        join.getTarget().getName()), storedSnapshot.get(propertyName))) {
                     return true;
                 }
             }

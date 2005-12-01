@@ -93,12 +93,12 @@ public class DataContextPrefetchMultistepTst extends DataContextTestBase {
         Map id1 = new HashMap();
         id1.put("ARTIST_ID", new Integer(33001));
         id1.put("EXHIBIT_ID", new Integer(2));
-        ObjectId oid1 = new ObjectId(ArtistExhibit.class, id1);
+        ObjectId oid1 = new ObjectId("ArtistExhibit", id1);
 
         Map id2 = new HashMap();
         id2.put("ARTIST_ID", new Integer(33003));
         id2.put("EXHIBIT_ID", new Integer(2));
-        ObjectId oid2 = new ObjectId(ArtistExhibit.class, id2);
+        ObjectId oid2 = new ObjectId("ArtistExhibit", id2);
 
         assertNull(context.getObjectStore().getObject(oid1));
         assertNull(context.getObjectStore().getObject(oid2));

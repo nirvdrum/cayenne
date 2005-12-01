@@ -92,19 +92,19 @@ public class ObjectStoreTst extends CayenneTestCase {
         assertEquals(0, objectStore.registeredObjectsCount());
 
         DataObject o1 = new MockDataObject();
-        o1.setObjectId(new ObjectId(Object.class, "key1", "v1"));
+        o1.setObjectId(new ObjectId("T", "key1", "v1"));
         objectStore.addObject(o1);
         assertEquals(1, objectStore.registeredObjectsCount());
 
         // test object with same id
         DataObject o2 = new MockDataObject();
-        o2.setObjectId(new ObjectId(Object.class, "key1", "v1"));
+        o2.setObjectId(new ObjectId("T", "key1", "v1"));
         objectStore.addObject(o2);
         assertEquals(1, objectStore.registeredObjectsCount());
 
         // test new object
         DataObject o3 = new MockDataObject();
-        o3.setObjectId(new ObjectId(Object.class, "key3", "v3"));
+        o3.setObjectId(new ObjectId("T", "key3", "v3"));
         objectStore.addObject(o3);
         assertEquals(2, objectStore.registeredObjectsCount());
     }
@@ -147,7 +147,8 @@ public class ObjectStoreTst extends CayenneTestCase {
 
         // insert object into the ObjectStore
         objectStore.addObject(object);
-        objectStore.getDataRowCache().processSnapshotChanges(this,
+        objectStore.getDataRowCache().processSnapshotChanges(
+                this,
                 Collections.singletonMap(object.getObjectId(), row),
                 Collections.EMPTY_LIST,
                 Collections.EMPTY_LIST,
@@ -173,7 +174,8 @@ public class ObjectStoreTst extends CayenneTestCase {
 
         // insert object into the ObjectStore
         objectStore.addObject(object);
-        objectStore.getDataRowCache().processSnapshotChanges(this,
+        objectStore.getDataRowCache().processSnapshotChanges(
+                this,
                 Collections.singletonMap(object.getObjectId(), row),
                 Collections.EMPTY_LIST,
                 Collections.EMPTY_LIST,
@@ -203,7 +205,7 @@ public class ObjectStoreTst extends CayenneTestCase {
         objectStore.addObject(object);
 
         // do a manual ID substitution
-        object.setObjectId(new ObjectId(Artist.class, Artist.ARTIST_ID_PK_COLUMN, 3));
+        object.setObjectId(new ObjectId("T", Artist.ARTIST_ID_PK_COLUMN, 3));
 
         objectStore.objectsCommitted();
         assertEquals(PersistenceState.COMMITTED, object.getPersistenceState());

@@ -56,8 +56,6 @@
 package org.objectstyle.cayenne.access;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.GlobalID;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
@@ -112,9 +110,7 @@ class ServerToClientDiffConverter implements GraphChangeHandler {
     }
 
     public void nodeIdChanged(Object nodeId, Object newId) {
-        GlobalID nodeGlobalID = toGlobalID(nodeId);
-        GlobalID newGlobalID = toGlobalID(newId);
-        clientDiff.add(new NodeIdChangeOperation(nodeGlobalID, newGlobalID));
+        clientDiff.add(new NodeIdChangeOperation(nodeId, newId));
     }
 
     public void nodeCreated(Object nodeId) {
@@ -139,21 +135,5 @@ class ServerToClientDiffConverter implements GraphChangeHandler {
 
     public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
         throw new CayenneRuntimeException("Unimplemented...");
-    }
-
-    GlobalID toGlobalID(Object nodeId) {
-        if (nodeId instanceof ObjectId) {
-            return resolver.convertToGlobalID((ObjectId) nodeId);
-        }
-        else if (nodeId instanceof GlobalID) {
-            return (GlobalID) nodeId;
-        }
-        else if (nodeId == null) {
-            throw new NullPointerException("Null ObjectId");
-        }
-        else {
-            throw new CayenneRuntimeException(
-                    "Server object identifier is expected to be ObjectId, got: " + nodeId);
-        }
     }
 }

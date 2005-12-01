@@ -81,10 +81,10 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
 
     public void testBeforePropertyReadShouldInflateHollow() {
 
-        GlobalID gid = new GlobalID("MtTable1", "a", "b");
+        ObjectId gid = new ObjectId("MtTable1", "a", "b");
         final ClientMtTable1 inflated = new ClientMtTable1();
         inflated.setPersistenceState(PersistenceState.COMMITTED);
-        inflated.setGlobalID(gid);
+        inflated.setObjectId(gid);
         inflated.setGlobalAttribute1("abc");
 
         MockOPPChannel channel = new MockOPPChannel(Arrays.asList(new Object[] {
@@ -94,7 +94,7 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         // check that a HOLLOW object is infalted on "beforePropertyRead"
         ClientMtTable1 hollow = new ClientMtTable1();
         hollow.setPersistenceState(PersistenceState.HOLLOW);
-        hollow.setGlobalID(gid);
+        hollow.setObjectId(gid);
 
         final boolean[] selectExecuted = new boolean[1];
         CayenneContext context = new CayenneContext(channel) {
@@ -109,7 +109,7 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
                 .getEntityResolver()
                 .getClientEntityResolver());
 
-        context.graphManager.registerNode(hollow.getGlobalID(), hollow);
+        context.graphManager.registerNode(hollow.getObjectId(), hollow);
 
         // testing this...
         context.prepareForAccess(hollow, ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY);
@@ -144,7 +144,7 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         createTestData("prepare");
 
         CayenneContext context = new CayenneContext(new ClientServerChannel(getDomain()));
-        GlobalID id = new GlobalID("MtTable1", MtTable1.TABLE1_ID_PK_COLUMN, new Integer(
+        ObjectId id = new ObjectId("MtTable1", MtTable1.TABLE1_ID_PK_COLUMN, new Integer(
                 1));
         ObjEntity entity = getObjEntity("MtTable1").getClientEntity();
 
@@ -172,7 +172,7 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         createTestData("prepare");
 
         CayenneContext context = new CayenneContext(new ClientServerChannel(getDomain()));
-        GlobalID id = new GlobalID("MtTable1", MtTable1.TABLE1_ID_PK_COLUMN, new Integer(
+        ObjectId id = new ObjectId("MtTable1", MtTable1.TABLE1_ID_PK_COLUMN, new Integer(
                 2));
         ObjEntity entity = getObjEntity("MtTable1").getClientEntity();
 

@@ -130,7 +130,6 @@ public abstract class Fault implements Serializable {
             // 2. Target object has subclasses, and it is not clear which class
             // to instantiate.
 
-            ObjEntity targetEntity = (ObjEntity) relationship.getTargetEntity();
             if (relationship.isSourceIndependentFromTargetChange()) {
 
                 // can't create HOLLOW, do a fetch
@@ -149,7 +148,7 @@ public abstract class Fault implements Serializable {
                     throw new CayenneRuntimeException("Error resolving to-one fault. "
                             + "More than one object found. "
                             + "Fault entity: "
-                            + targetEntity.getName());
+                            + relationship.getTargetEntityName());
                 }
             }
 
@@ -157,16 +156,19 @@ public abstract class Fault implements Serializable {
             DbRelationship dbRel = (DbRelationship) relationship
                     .getDbRelationships()
                     .get(0);
-            Class targetClass = targetEntity.getJavaClass();
+
             ObjectId id = context.getObjectStore().getSnapshot(
                     sourceObject.getObjectId(),
-                    context).createTargetObjectId(targetClass, dbRel);
+                    context).createTargetObjectId(
+                    relationship.getTargetEntityName(),
+                    dbRel);
 
             if (id == null) {
                 return null;
             }
 
-            if (resolver.lookupInheritanceTree(targetEntity) != null) {
+            if (resolver
+                    .lookupInheritanceTree((ObjEntity) relationship.getTargetEntity()) != null) {
                 // this should find a correct subclass if we have inheritance case....
                 return DataObjectUtils.objectForPK(context, id);
             }
@@ -174,6 +176,5 @@ public abstract class Fault implements Serializable {
                 return context.registeredObject(id);
             }
         }
-
     }
 }

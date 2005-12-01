@@ -304,14 +304,14 @@ public class CayenneContext implements ObjectContext {
         if (object.getPersistenceState() == PersistenceState.NEW) {
             // kick it out of context
             object.setPersistenceState(PersistenceState.TRANSIENT);
-            graphManager.unregisterNode(object.getGlobalID());
+            graphManager.unregisterNode(object.getObjectId());
             return;
         }
 
         // TODO: no delete rules (yet)
 
         object.setPersistenceState(PersistenceState.DELETED);
-        graphManager.nodeRemoved(object.getGlobalID());
+        graphManager.nodeRemoved(object.getObjectId());
     }
 
     /**
@@ -329,7 +329,7 @@ public class CayenneContext implements ObjectContext {
         }
 
         synchronized (graphManager) {
-            return createNewObject(entity, new GlobalID(entity.getName()));
+            return createNewObject(entity, new ObjectId(entity.getName()));
         }
     }
 
@@ -354,13 +354,13 @@ public class CayenneContext implements ObjectContext {
                 Persistent fetchedObject = (Persistent) it.next();
 
                 // sanity check
-                if (fetchedObject.getGlobalID() == null) {
+                if (fetchedObject.getObjectId() == null) {
                     throw new CayenneRuntimeException(
                             "Server returned an object without an id: " + fetchedObject);
                 }
 
                 Persistent cachedObject = (Persistent) graphManager.getNode(fetchedObject
-                        .getGlobalID());
+                        .getObjectId());
 
                 if (cachedObject != null) {
 
@@ -392,7 +392,7 @@ public class CayenneContext implements ObjectContext {
                     fetchedObject.setPersistenceState(PersistenceState.COMMITTED);
                     fetchedObject.setObjectContext(this);
                     descriptor.prepareForAccess(fetchedObject);
-                    graphManager.registerNode(fetchedObject.getGlobalID(), fetchedObject);
+                    graphManager.registerNode(fetchedObject.getObjectId(), fetchedObject);
                 }
             }
         }
@@ -447,7 +447,7 @@ public class CayenneContext implements ObjectContext {
     protected void ensureFaultResolved(Persistent object) {
         if (object.getPersistenceState() == PersistenceState.HOLLOW) {
 
-            GlobalID gid = object.getGlobalID();
+            ObjectId gid = object.getObjectId();
             List objects = performSelectQuery(new SingleObjectQuery(gid));
 
             if (objects.size() == 0) {
@@ -465,42 +465,42 @@ public class CayenneContext implements ObjectContext {
 
     protected ClassDescriptor getClassDescriptor(Persistent object) {
         ObjEntity entity = getEntityResolver().lookupObjEntity(
-                object.getGlobalID().getEntityName());
+                object.getObjectId().getEntityName());
         return entity.getClassDescriptor();
     }
 
     // ****** non-public methods ******
 
-    Persistent createNewObject(ObjEntity entity, GlobalID id) {
+    Persistent createNewObject(ObjEntity entity, ObjectId id) {
         ClassDescriptor descriptor = entity.getClassDescriptor();
 
         Persistent object = (Persistent) descriptor.createObject();
 
         object.setPersistenceState(PersistenceState.NEW);
         object.setObjectContext(this);
-        object.setGlobalID(id);
+        object.setObjectId(id);
 
         descriptor.prepareForAccess(object);
-        graphManager.registerNode(object.getGlobalID(), object);
-        graphManager.nodeCreated(object.getGlobalID());
+        graphManager.registerNode(object.getObjectId(), object);
+        graphManager.nodeCreated(object.getObjectId());
 
         return object;
     }
 
-    Persistent createFault(ObjEntity entity, GlobalID id) {
+    Persistent createFault(ObjEntity entity, ObjectId id) {
         ClassDescriptor descriptor = entity.getClassDescriptor();
 
         Persistent object = (Persistent) descriptor.createObject();
 
         object.setPersistenceState(PersistenceState.HOLLOW);
         object.setObjectContext(this);
-        object.setGlobalID(id);
+        object.setObjectId(id);
 
         // note that this must be called AFTER setting persistence state, otherwise we'd
         // get ValueHolders incorrectly marked as resolved
         descriptor.prepareForAccess(object);
 
-        graphManager.registerNode(object.getGlobalID(), object);
+        graphManager.registerNode(object.getObjectId(), object);
 
         return object;
     }

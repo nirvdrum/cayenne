@@ -460,15 +460,21 @@ public class DataContext implements QueryEngine, Serializable {
         synchronized (getObjectStore()) {
             DataObject object = objectStore.getObject(oid);
             if (object == null) {
+
+                ObjEntity entity = getEntityResolver().lookupObjEntity(
+                        oid.getEntityName());
+
+                if (entity == null) {
+                    throw new CayenneRuntimeException("Entity not mapped for ObjectId: "
+                            + oid);
+                }
+
                 try {
-                    object = (DataObject) oid.getObjectClass().newInstance();
+                    object = (DataObject) entity.getJavaClass().newInstance();
                 }
                 catch (Exception ex) {
-                    String entity = (oid != null) ? getEntityResolver().lookupObjEntity(
-                            oid.getObjectClass()).getName() : null;
-                    throw new CayenneRuntimeException(
-                            "Error creating object for entity '" + entity + "'.",
-                            ex);
+                    throw new CayenneRuntimeException("Error creating object for id "
+                            + oid, ex);
                 }
 
                 object.setObjectId(oid);
@@ -769,7 +775,7 @@ public class DataContext implements QueryEngine, Serializable {
         // performed by the caller depending on the invocation context
 
         if (dataObject.getObjectId() == null) {
-            dataObject.setObjectId(new ObjectId(dataObject.getClass()));
+            dataObject.setObjectId(new ObjectId(objEntity.getName()));
         }
 
         // initialize to-many relationships with a fault

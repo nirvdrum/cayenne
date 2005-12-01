@@ -97,8 +97,8 @@ public class QualifierTranslatorTst extends CayenneTestCase {
     }
 
     public void testExtras() throws Exception {
-        ObjectId oid1 = new ObjectId(Gallery.class, "GALLERY_ID", 1);
-        ObjectId oid2 = new ObjectId(Gallery.class, "GALLERY_ID", 2);
+        ObjectId oid1 = new ObjectId("Gallery", "GALLERY_ID", 1);
+        ObjectId oid2 = new ObjectId("Gallery", "GALLERY_ID", 2);
         Gallery g1 = new Gallery();
         Gallery g2 = new Gallery();
         g1.setObjectId(oid1);

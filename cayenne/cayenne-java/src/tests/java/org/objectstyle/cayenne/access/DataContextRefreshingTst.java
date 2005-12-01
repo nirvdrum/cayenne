@@ -123,7 +123,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         updateRow(
             painting.getObjectId(),
             "ARTIST_ID",
-            artistAfter.getObjectId().getValueForAttribute("ARTIST_ID"));
+            artistAfter.getObjectId().getIdSnapshot().get("ARTIST_ID"));
 
         // select without prefetch
         painting = fetchPainting(painting.getPaintingTitle(), false);
@@ -145,7 +145,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         updateRow(
             painting.getObjectId(),
             "ARTIST_ID",
-            artistAfter.getObjectId().getValueForAttribute("ARTIST_ID"));
+            artistAfter.getObjectId().getIdSnapshot().get("ARTIST_ID"));
 
         // select without prefetch
         painting = fetchPainting(painting.getPaintingTitle(), false);
@@ -223,7 +223,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         updateRow(
             painting.getObjectId(),
             "ARTIST_ID",
-            artistAfter.getObjectId().getValueForAttribute("ARTIST_ID"));
+            artistAfter.getObjectId().getIdSnapshot().get("ARTIST_ID"));
 
         context.invalidateObjects(Collections.singletonList(painting));
         assertSame(artistAfter, painting.getToArtist());
@@ -244,7 +244,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         updateRow(
             painting.getObjectId(),
             "ARTIST_ID",
-            artistAfter.getObjectId().getValueForAttribute("ARTIST_ID"));
+            artistAfter.getObjectId().getIdSnapshot().get("ARTIST_ID"));
 
         context.invalidateObjects(Collections.singletonList(painting));
         assertSame(artistAfter, painting.getToArtist());
@@ -316,7 +316,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
      */
     protected void updateRow(ObjectId id, String dbAttribute, Object newValue) {
         UpdateQuery updateQuery = new UpdateQuery();
-        updateQuery.setRoot(id.getObjectClass());
+        updateQuery.setRoot(id.getEntityName());
         updateQuery.addUpdAttribute(dbAttribute, newValue);
 
         // set qualifier
@@ -330,7 +330,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
 
     protected void deleteRow(ObjectId id) {
         DeleteQuery deleteQuery = new DeleteQuery();
-        deleteQuery.setRoot(id.getObjectClass());
+        deleteQuery.setRoot(id.getEntityName());
         deleteQuery.setQualifier(
             ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
         getNode().performQueries(

@@ -100,7 +100,7 @@ public class DataRowTst extends CayenneTestCase {
         DataRow map2 = new DataRow(10);
         map2.put(at.getName(), "123");
 
-        ObjectId ref = new ObjectId(entityClass, map);
+        ObjectId ref = new ObjectId(objEntity.getName(), map);
         ObjectId oid = map2.createObjectId(objEntity);
 
         assertEquals(ref, oid);
@@ -120,8 +120,8 @@ public class DataRowTst extends CayenneTestCase {
         // assert that data row is smart enough to throw on null ids...
         DataRow map = new DataRow(10);
         try {
-            map.createObjectId(Number.class, dbe);
-            throw new Exception("Must have failed... Null pk");
+            map.createObjectId("T", dbe);
+            fail("Must have failed... Null pk");
         }
         catch (CayenneRuntimeException ex) {
             // expected...

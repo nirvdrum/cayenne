@@ -160,13 +160,15 @@ public class NumericTypesTst extends CayenneTestCase {
         assertNotSame(falseRefetched, falseObject);
         assertSame(Boolean.FALSE, falseRefetched.getBitColumn());
     }
-    
+
     public void testBooleanBoolean() throws Exception {
 
         // populate (testing insert as well)
-        BooleanTest trueObject = (BooleanTest) context.createAndRegisterNewObject("BooleanTest");
+        BooleanTest trueObject = (BooleanTest) context
+                .createAndRegisterNewObject("BooleanTest");
         trueObject.setBooleanColumn(Boolean.TRUE);
-        BooleanTest falseObject = (BooleanTest) context.createAndRegisterNewObject("BooleanTest");
+        BooleanTest falseObject = (BooleanTest) context
+                .createAndRegisterNewObject("BooleanTest");
         falseObject.setBooleanColumn(Boolean.FALSE);
         context.commitChanges();
 
@@ -187,7 +189,8 @@ public class NumericTypesTst extends CayenneTestCase {
 
         // fetch false
         Expression falseQ = ExpressionFactory.matchExp("booleanColumn", Boolean.FALSE);
-        List falseResult = context.performQuery(new SelectQuery(BooleanTest.class, falseQ));
+        List falseResult = context
+                .performQuery(new SelectQuery(BooleanTest.class, falseQ));
         assertEquals(1, falseResult.size());
 
         BooleanTest falseRefetched = (BooleanTest) falseResult.get(0);
@@ -209,7 +212,7 @@ public class NumericTypesTst extends CayenneTestCase {
         context.commitChanges();
 
         Map map = Collections.singletonMap("DECIMAL_PK", new BigDecimal("1.25"));
-        ObjectId syntheticId = new ObjectId(DecimalPKTest.class, map);
+        ObjectId syntheticId = new ObjectId("DecimalPKTest", map);
         assertSame(object, context.registeredObject(syntheticId));
     }
 
@@ -224,7 +227,7 @@ public class NumericTypesTst extends CayenneTestCase {
         context.commitChanges();
 
         Map map = Collections.singletonMap("DECIMAL_PK", new Double(1.25));
-        ObjectId syntheticId = new ObjectId(DecimalPKTest1.class, map);
+        ObjectId syntheticId = new ObjectId("DecimalPKTest1", map);
         assertSame(object, context.registeredObject(syntheticId));
     }
 }

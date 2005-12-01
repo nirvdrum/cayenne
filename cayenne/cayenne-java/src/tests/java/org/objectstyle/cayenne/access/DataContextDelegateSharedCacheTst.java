@@ -281,7 +281,8 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         context.setDelegate(delegate);
 
         // create a fault for artist with a non-existing id
-        ObjectId fakeID = new ObjectId(Artist.class, Artist.ARTIST_ID_PK_COLUMN, -10);
+        ObjectId fakeID = new ObjectId("Artist", Artist.ARTIST_ID_PK_COLUMN, new Integer(
+                -10));
         Artist noSuchArtist = (Artist) context.registeredObject(fakeID);
         assertEquals(PersistenceState.HOLLOW, noSuchArtist.getPersistenceState());
 

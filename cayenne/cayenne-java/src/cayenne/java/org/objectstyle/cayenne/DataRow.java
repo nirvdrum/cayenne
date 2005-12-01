@@ -164,11 +164,33 @@ public class DataRow extends HashMap {
      * missing in a snapshot, CayenneRuntimeException is thrown.
      */
     public ObjectId createObjectId(ObjEntity entity) {
-        return createObjectId(entity.getJavaClass(), entity.getDbEntity());
+        return createObjectId(entity.getName(), entity.getDbEntity());
     }
 
+    /**
+     * @deprecated since 1.2, as new portable ObjectIds can't store Java Class and store
+     *             entity name instead. Now this method relies on default CayenneModeler
+     *             naming convention to figure out entity name from class name. This may
+     *             not work if the classes where mapped differently.
+     */
     public ObjectId createObjectId(Class objectClass, DbEntity entity) {
-        return createObjectId(objectClass, entity, null);
+        return createObjectId(ObjectId.entityNameFromClass(objectClass), entity);
+    }
+
+    /**
+     * @deprecated since 1.2, as new portable ObjectIds can't store Java Class and store
+     *             entity name instead. Now this method relies on default CayenneModeler
+     *             naming convention to figure out entity name from class name. This may
+     *             not work if the classes where mapped differently.
+     */
+    public ObjectId createTargetObjectId(Class targetClass, DbRelationship relationship) {
+        return createTargetObjectId(
+                ObjectId.entityNameFromClass(targetClass),
+                relationship);
+    }
+
+    public ObjectId createObjectId(String entityName, DbEntity entity) {
+        return createObjectId(entityName, entity, null);
     }
 
     /**
@@ -176,14 +198,14 @@ public class DataRow extends HashMap {
      * this DataRow representing a source of relationship. Returns null if snapshot FK
      * columns indicate a null to-one relationship.
      */
-    public ObjectId createTargetObjectId(Class targetClass, DbRelationship relationship) {
+    public ObjectId createTargetObjectId(String entityName, DbRelationship relationship) {
 
         if (relationship.isToMany()) {
             throw new CayenneRuntimeException("Only 'to one' can have a target ObjectId.");
         }
 
         Map target = relationship.targetPkSnapshotWithSrcSnapshot(this);
-        return (target != null) ? new ObjectId(targetClass, target) : null;
+        return (target != null) ? new ObjectId(entityName, target) : null;
     }
 
     /**
@@ -197,7 +219,7 @@ public class DataRow extends HashMap {
      * 
      * @since 1.2
      */
-    public ObjectId createObjectId(Class objectClass, DbEntity entity, String namePrefix) {
+    public ObjectId createObjectId(String entityName, DbEntity entity, String namePrefix) {
 
         boolean prefix = namePrefix != null && namePrefix.length() > 0;
 
@@ -222,7 +244,7 @@ public class DataRow extends HashMap {
             }
 
             // PUT without a prefix
-            return new ObjectId(objectClass, attribute.getName(), val);
+            return new ObjectId(entityName, attribute.getName(), val);
         }
 
         // ... handle generic case - PK.size > 1
@@ -249,7 +271,7 @@ public class DataRow extends HashMap {
             idMap.put(attribute.getName(), val);
         }
 
-        return new ObjectId(objectClass, idMap);
+        return new ObjectId(entityName, idMap);
     }
 
     public String toString() {

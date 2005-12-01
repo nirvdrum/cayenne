@@ -57,7 +57,6 @@ package org.objectstyle.cayenne;
 
 import java.io.Serializable;
 
-
 /**
  * Defines minimum API of an object that can be persisted via Cayenne.
  * 
@@ -67,15 +66,9 @@ import java.io.Serializable;
 // TODO: with field-based access there is no need to declare setters...
 public interface Persistent extends Serializable {
 
-    /**
-     * Returns an object id of this object.
-     */
-    GlobalID getGlobalID();
+    ObjectId getObjectId();
 
-    /**
-     * Sets an object id of this object.
-     */
-    void setGlobalID(GlobalID globalID);
+    void setObjectId(ObjectId id);
 
     int getPersistenceState();
 

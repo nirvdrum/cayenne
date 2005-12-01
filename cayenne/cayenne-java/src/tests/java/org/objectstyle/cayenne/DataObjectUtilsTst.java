@@ -91,9 +91,9 @@ public class DataObjectUtilsTst extends CayenneTestCase {
         DataContext context = createDataContext();
 
         DataObject object = DataObjectUtils.objectForPK(context, new ObjectId(
-                Artist.class,
+                "Artist",
                 Artist.ARTIST_ID_PK_COLUMN,
-                33002));
+                new Integer(33002)));
 
         assertNotNull(object);
         assertTrue(object instanceof Artist);

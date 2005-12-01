@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
@@ -339,8 +338,7 @@ class ObjectTreeResolver {
             if (processorNode.isPartitionedByParent()
                     && !processorNode.getIncoming().isFlattened()) {
 
-                DbEntity sourceDbEntity = null;
-                Class sourceObjectClass = null;
+                ObjEntity sourceObjEntity = null;
                 String relatedIdPrefix = null;
 
                 // determine resolution strategy
@@ -355,11 +353,9 @@ class ObjectTreeResolver {
                             .getReverseDbRelationshipPath()
                             + ".";
 
-                    ObjEntity sourceObjEntity = (ObjEntity) processorNode
+                    sourceObjEntity = (ObjEntity) processorNode
                             .getIncoming()
                             .getSourceEntity();
-                    sourceDbEntity = sourceObjEntity.getDbEntity();
-                    sourceObjectClass = sourceObjEntity.getJavaClass();
                 }
 
                 Iterator it = objects.iterator();
@@ -382,8 +378,8 @@ class ObjectTreeResolver {
                                 .getObjectId(), context);
 
                         ObjectId id = snapshot.createObjectId(
-                                sourceObjectClass,
-                                sourceDbEntity,
+                                sourceObjEntity.getName(),
+                                sourceObjEntity.getDbEntity(),
                                 relatedIdPrefix);
 
                         sourceObject = objectStore.getObject(id);

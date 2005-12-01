@@ -72,6 +72,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DataRowUtilsTst extends CayenneTestCase {
+
     protected DataContext context;
 
     protected void setUp() throws Exception {
@@ -87,10 +88,8 @@ public class DataRowUtilsTst extends CayenneTestCase {
         String n1 = "changed";
         String n2 = "changed again";
 
-        SelectQuery artistQ =
-            new SelectQuery(
-                Artist.class,
-                Expression.fromString("artistName = 'artist1'"));
+        SelectQuery artistQ = new SelectQuery(Artist.class, Expression
+                .fromString("artistName = 'artist1'"));
         Artist a1 = (Artist) context.performQuery(artistQ).get(0);
         a1.setArtistName(n1);
 
@@ -110,15 +109,13 @@ public class DataRowUtilsTst extends CayenneTestCase {
     public void testIsToOneTargetModified() throws Exception {
         getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
-        ObjEntity paintingEntity =
-            context.getEntityResolver().lookupObjEntity(Painting.class);
-        ObjRelationship toArtist =
-            (ObjRelationship) paintingEntity.getRelationship("toArtist");
+        ObjEntity paintingEntity = context.getEntityResolver().lookupObjEntity(
+                Painting.class);
+        ObjRelationship toArtist = (ObjRelationship) paintingEntity
+                .getRelationship("toArtist");
 
-        SelectQuery artistQ =
-            new SelectQuery(
-                Artist.class,
-                Expression.fromString("artistName = 'artist2'"));
+        SelectQuery artistQ = new SelectQuery(Artist.class, Expression
+                .fromString("artistName = 'artist2'"));
         Artist anotherArtist = (Artist) context.performQuery(artistQ).get(0);
         Painting painting = (Painting) context.createAndRegisterNewObject(Painting.class);
         painting.setPaintingTitle("PX");
@@ -126,17 +123,14 @@ public class DataRowUtilsTst extends CayenneTestCase {
 
         context.commitChanges();
 
-        artistQ =
-            new SelectQuery(
-                Artist.class,
-                Expression.fromString("artistName = 'artist1'"));
+        artistQ = new SelectQuery(Artist.class, Expression
+                .fromString("artistName = 'artist1'"));
         Artist artist = (Artist) context.performQuery(artistQ).get(0);
         assertNotSame(artist, painting.getToArtist());
 
         Map map = new HashMap();
-        map.put(
-            "ARTIST_ID",
-            painting.getToArtist().getObjectId().getValueForAttribute("ARTIST_ID"));
+        map.put("ARTIST_ID", painting.getToArtist().getObjectId().getIdSnapshot().get(
+                "ARTIST_ID"));
 
         assertFalse(DataRowUtils.isToOneTargetModified(toArtist, painting, map));
 
@@ -155,10 +149,10 @@ public class DataRowUtilsTst extends CayenneTestCase {
         Gallery g1 = (Gallery) context.createAndRegisterNewObject("Gallery");
         g1.addToPaintingArray(p1);
 
-        ObjEntity paintingEntity =
-            context.getEntityResolver().lookupObjEntity(Painting.class);
-        ObjRelationship toGallery =
-            (ObjRelationship) paintingEntity.getRelationship("toGallery");
+        ObjEntity paintingEntity = context.getEntityResolver().lookupObjEntity(
+                Painting.class);
+        ObjRelationship toGallery = (ObjRelationship) paintingEntity
+                .getRelationship("toGallery");
         Map map = context.getObjectStore().getCachedSnapshot(p1.getObjectId());
 
         // testing this:
@@ -166,10 +160,10 @@ public class DataRowUtilsTst extends CayenneTestCase {
     }
 
     public void testIsJoinAttributesModified() throws Exception {
-        ObjEntity paintingEntity =
-            context.getEntityResolver().lookupObjEntity(Painting.class);
-        ObjRelationship toArtist =
-            (ObjRelationship) paintingEntity.getRelationship("toArtist");
+        ObjEntity paintingEntity = context.getEntityResolver().lookupObjEntity(
+                Painting.class);
+        ObjRelationship toArtist = (ObjRelationship) paintingEntity
+                .getRelationship("toArtist");
 
         Map stored = new HashMap();
         stored.put("ARTIST_ID", new Integer(1));

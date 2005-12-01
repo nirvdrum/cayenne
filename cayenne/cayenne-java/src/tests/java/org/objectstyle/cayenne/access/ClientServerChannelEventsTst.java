@@ -55,8 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.GlobalID;
-import org.objectstyle.cayenne.access.ClientServerChannel;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
@@ -86,7 +85,7 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
                 OPPChannel.GRAPH_COMMITTED_SUBJECT,
                 channel);
 
-        GraphDiff diff = new NodeCreateOperation(new GlobalID("MtTable1"));
+        GraphDiff diff = new NodeCreateOperation(new ObjectId("MtTable1"));
         channel.onSync(new SyncMessage(null, SyncMessage.COMMIT_TYPE, diff));
 
         assertTrue(listener.notificationPosted);
@@ -104,7 +103,7 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
                 OPPChannel.GRAPH_CHANGED_SUBJECT,
                 channel);
 
-        GraphDiff diff = new NodeCreateOperation(new GlobalID("MtTable1"));
+        GraphDiff diff = new NodeCreateOperation(new ObjectId("MtTable1"));
         channel.onSync(new SyncMessage(null, SyncMessage.FLUSH_TYPE, diff));
         assertTrue(listener.notificationPosted);
     }
@@ -114,7 +113,7 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
 
         ClientServerChannel channel = new ClientServerChannel(getDomain(), true);
 
-        GraphDiff diff = new NodeCreateOperation(new GlobalID("MtTable1"));
+        GraphDiff diff = new NodeCreateOperation(new ObjectId("MtTable1"));
         channel.onSync(new SyncMessage(null, SyncMessage.FLUSH_TYPE, diff));
 
         channel.getEventManager().addListener(

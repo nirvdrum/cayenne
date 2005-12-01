@@ -111,7 +111,7 @@ public class ObjectStoreValidationTst extends CayenneTestCase {
     private MockupValidatingObject createObject(int state) {
         MockupValidatingObject object = new MockupValidatingObject();
         object.setPersistenceState(state);
-        object.setObjectId(new ObjectId(Artist.class, "ARTIST_NAME", id++));
+        object.setObjectId(new ObjectId("Artist", "ARTIST_NAME", id++));
         return object;
     }
 
@@ -121,7 +121,7 @@ public class ObjectStoreValidationTst extends CayenneTestCase {
         MockupActiveValidatingObject object = new MockupActiveValidatingObject();
         object.setPersistenceState(state);
         object.setDataContext(createMockupDataContext(objectStore));
-        object.setObjectId(new ObjectId(Artist.class, "ARTIST_NAME", id++));
+        object.setObjectId(new ObjectId("Artist", "ARTIST_NAME", id++));
         return object;
     }
 

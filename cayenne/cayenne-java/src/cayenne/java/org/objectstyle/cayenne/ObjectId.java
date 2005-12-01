@@ -64,118 +64,217 @@ import java.util.Map;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.objectstyle.cayenne.util.IDUtil;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * An ObjectId is a globally unique identifier of DataObjects.
- * <p>
- * Each non-transient DataObject has an associated ObjectId. It is a global object
- * identifier and does not depend on the DataContext of a particular object instance.
- * ObjectId conceptually close to a RDBMS primary key idea. Among other things ObjectId is
- * used to ensure object uniqueness within DataContext.
- * </p>
+ * A portable global identifier for persistent objects. ObjectId can be temporary (used
+ * for transient or new uncommitted objects) or permanent (used for objects that have been
+ * already stored in DB). A temporary ObjectId stores object entity name and a
+ * pseudo-unique binary key; permanent id stores a map of values from an external
+ * persistent store (aka "primary key").
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class ObjectId implements Serializable {
 
-    // Keys: DbAttribute names
-    // Values: database values of the corresponding attribute
+    protected String entityName;
     protected Map objectIdKeys;
-    protected Class objectClass;
+
     protected byte[] key;
 
-    /**
-     * @since 1.2
-     */
     protected Map replacementIdMap;
 
-    // TODO: caching hash code may cause issues on deserilaization in a different VM...
-    // need custom readObject/writeObject
-
-    // cache hashCode, since ObjectId is immutable
-    int hashCode = Integer.MIN_VALUE;
+    // hash code is transient to make sure id is portable across VM
+    transient int hashCode;
 
     /**
-     * Creates a TEMPORARY ObjectId that should be replaced by a permanent id once a
-     * corresponding object is committed.
+     * Converts class to the entity name using default naming convention used by the
+     * Modeler. I.e. package name stripped from class. A utility method simplifying
+     * migration from class-based ObjectIds to the entity-based.
+     * 
+     * @since 1.2
+     * @deprecated since 1.2
      */
-    public ObjectId(Class objectClass) {
-        this(objectClass, IDUtil.pseudoUniqueByteSequence16());
+    static final String entityNameFromClass(Class javaClass) {
+        if (javaClass == null) {
+            return null;
+        }
+
+        String fqn = javaClass.getName();
+        int dot = fqn.lastIndexOf('.');
+        return dot > 0 ? fqn.substring(dot + 1) : fqn;
+    }
+
+    // exists for deserialization with Hessian and similar
+    private ObjectId() {
     }
 
     /**
-     * Create a TEMPORARY ObjectId with a binary unique key. This id is "portable" in that
-     * it can be used across virtual machines to identify the same object.
+     * Creates a TEMPORARY ObjectId. Assignes a generated unique key.
      * 
      * @since 1.2
      */
-    public ObjectId(Class objectClass, byte[] key) {
-        this.objectClass = objectClass;
+    public ObjectId(String entityName) {
+        this.entityName = entityName;
+        this.key = IDUtil.pseudoUniqueByteSequence16();
+    }
+
+    /**
+     * Creates a TEMPORARY id with a specified entity name and a binary key. It is a
+     * caller responsibility to provide a globally unique binary key.
+     * 
+     * @since 1.2
+     */
+    public ObjectId(String entityName, byte[] key) {
+        this.entityName = entityName;
         this.key = key;
     }
 
     /**
-     * Convenience constructor for entities that have a single Integer as their id.
-     */
-    public ObjectId(Class objectClass, String keyName, int id) {
-        this(objectClass, keyName, new Integer(id));
-    }
-
-    /**
-     * Convenience constructor for entities that have a single column as their id.
-     */
-    public ObjectId(Class objectClass, String keyName, Object id) {
-        this.objectClass = objectClass;
-        this.setIdKeys(Collections.singletonMap(keyName, id));
-    }
-
-    /**
-     * Creates a new ObjectId.
-     */
-    public ObjectId(Class objectClass, Map idKeys) {
-        this.objectClass = objectClass;
-        if (idKeys != null) {
-            this.setIdKeys(Collections.unmodifiableMap(idKeys));
-        }
-        else {
-            this.setIdKeys(Collections.EMPTY_MAP);
-        }
-    }
-
-    /**
-     * Returns a binary unique key for this id.
+     * Creates a portable permanent ObjectId.
      * 
      * @since 1.2
      */
+    public ObjectId(String entityName, String key, int value) {
+        this(entityName, key, new Integer(value));
+    }
+
+    /**
+     * Creates a portable permanent ObjectId.
+     * 
+     * @since 1.2
+     */
+    public ObjectId(String entityName, String key, Object value) {
+        this.entityName = entityName;
+
+        // don't use Collections.singletonMap() as we need a mutable single level map
+        // internally (for things like Hessian serialization).
+        this.objectIdKeys = new HashMap(1);
+        objectIdKeys.put(key, value);
+    }
+
+    /**
+     * Creates a portable permanent GlobalID.
+     * 
+     * @since 1.2
+     */
+    public ObjectId(String entityName, Map idMap) {
+        this.entityName = entityName;
+
+        // we have to create a copy of the map, otherwise we may run into serialization
+        // problems with hessian
+        this.objectIdKeys = idMap != null && !idMap.isEmpty() ? new HashMap(idMap) : null;
+    }
+
+    /**
+     * @deprecated since 1.2, as new portable ObjectIds can't store Java Class and store
+     *             entity name instead. This constructor relies on default CayenneModeler
+     *             naming convention to figure out entity name from class name. This may
+     *             not work if the classes where mapped differently.
+     */
+    public ObjectId(Class objectClass) {
+        this(entityNameFromClass(objectClass));
+    }
+
+    /**
+     * @deprecated since 1.2, as new portable ObjectIds can't store Java Class and store
+     *             entity name instead. This constructor relies on default CayenneModeler
+     *             naming convention to figure out entity name from class name. This may
+     *             not work if the classes where mapped differently.
+     */
+    public ObjectId(Class objectClass, String keyName, int id) {
+        this(entityNameFromClass(objectClass), keyName, new Integer(id));
+    }
+
+    /**
+     * @deprecated since 1.2, as new portable ObjectIds can't store Java Class and store
+     *             entity name instead. This constructor relies on default CayenneModeler
+     *             naming convention to figure out entity name from class name. This may
+     *             not work if the classes where mapped differently.
+     */
+    public ObjectId(Class objectClass, String keyName, Object id) {
+        this(entityNameFromClass(objectClass), keyName, id);
+    }
+
+    /**
+     * @deprecated since 1.2, as new portable ObjectIds can't store Java Class and store
+     *             entity name instead. This constructor relies on default CayenneModeler
+     *             naming convention to figure out entity name from class name. This may
+     *             not work if the classes where mapped differently.
+     */
+    public ObjectId(Class objectClass, Map idKeys) {
+        this(entityNameFromClass(objectClass), idKeys);
+    }
+
+    public boolean isTemporary() {
+        return key != null;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public String getEntityName() {
+        return entityName;
+    }
+
     public byte[] getKey() {
         return key;
     }
 
+    /**
+     * @deprecated since 1.2
+     */
     protected void setIdKeys(Map idKeys) {
         this.objectIdKeys = idKeys;
     }
 
-    public boolean equals(Object object) {
-        if (!(object instanceof ObjectId)) {
-            return false;
+    /**
+     * Returns an unmodifiable Map of persistent id values, essentailly a primary key map.
+     * For temporary id returns replacement id, if it was already created. Otherwise
+     * returns an empty map.
+     */
+    public Map getIdSnapshot() {
+        if (isTemporary()) {
+            return (replacementIdMap == null) ? Collections.EMPTY_MAP : Collections
+                    .unmodifiableMap(replacementIdMap);
         }
 
+        return objectIdKeys != null
+                ? Collections.unmodifiableMap(objectIdKeys)
+                : Collections.EMPTY_MAP;
+    }
+
+    /**
+     * Returns a value of id attribute identified by the name of DbAttribute.
+     * 
+     * @deprecated since 1.2. This method is redundant. Use
+     *             <code>getIdSnapshot().get(attrName)</code> instead.
+     */
+    public Object getValueForAttribute(String attrName) {
+        return getIdSnapshot().get(attrName);
+    }
+
+    public boolean equals(Object object) {
         if (this == object) {
             return true;
+        }
+
+        if (!(object instanceof ObjectId)) {
+            return false;
         }
 
         ObjectId id = (ObjectId) object;
 
         if (isTemporary()) {
-            return new EqualsBuilder().append(
-                    objectClass.getName(),
-                    id.objectClass.getName()).append(key, id.key).isEquals();
+            return new EqualsBuilder().append(entityName, id.entityName).append(
+                    key,
+                    id.key).isEquals();
         }
 
-        // use the class name because two Objectid's should be equal
-        // even if their objClass'es were loaded by different class loaders.
-        if (!objectClass.getName().equals(id.objectClass.getName())) {
+        if (!Util.nullSafeEquals(entityName, id.entityName)) {
             return false;
         }
 
@@ -215,68 +314,17 @@ public class ObjectId implements Serializable {
         return true;
     }
 
-    /**
-     * Returns a map of id components. Keys in the map are DbAttribute names, values are
-     * database values of corresponding columns.
-     */
-    public Map getIdSnapshot() {
-        if (isTemporary()) {
-            return (replacementIdMap == null) ? Collections.EMPTY_MAP : replacementIdMap;
-        }
-
-        return objectIdKeys;
-    }
-
-    /**
-     * Returns a value of id attribute identified by the name of DbAttribute.
-     */
-    public Object getValueForAttribute(String attrName) {
-        return getIdSnapshot().get(attrName);
-    }
-
-    /**
-     * Returns whether this is a temporary id.
-     */
-    public boolean isTemporary() {
-        return key != null;
-    }
-
-    public String toString() {
-        StringBuffer buf = new StringBuffer(objectClass.getName());
-        if (isTemporary()) {
-            buf.append(" (temp)");
-        }
-
-        buf.append(": ");
-        if (objectIdKeys != null) {
-            Iterator it = objectIdKeys.keySet().iterator();
-            while (it.hasNext()) {
-                String nextKey = (String) it.next();
-                Object value = objectIdKeys.get(nextKey);
-                buf.append(" <").append(nextKey).append(": ").append(value).append('>');
-            }
-        }
-        return buf.toString();
-    }
-
-    /**
-     * @see java.lang.Object#hashCode()
-     */
     public int hashCode() {
-        if (this.hashCode == Integer.MIN_VALUE) {
-            // build and cache hashCode
+
+        if (this.hashCode == 0) {
 
             HashCodeBuilder builder = new HashCodeBuilder(3, 5);
-
-            // use the class name because two Objectid's should be equal
-            // even if their objClass'es were loaded by different class loaders.
-            builder.append(objectClass.getName().hashCode());
+            builder.append(entityName.hashCode());
 
             if (key != null) {
                 builder.append(key);
             }
-
-            if (objectIdKeys != null) {
+            else if (objectIdKeys != null) {
                 int len = objectIdKeys.size();
 
                 // handle cheap and most common case - single key
@@ -302,25 +350,10 @@ public class ObjectId implements Serializable {
             }
 
             this.hashCode = builder.toHashCode();
+            assert hashCode != 0 : "Generated zeroo hashCode";
         }
 
-        return this.hashCode;
-    }
-
-    /**
-     * Returns a Java class of persistent objects identified by this id.
-     * 
-     * @since 1.2 Renamed from getObjClass().
-     */
-    public Class getObjectClass() {
-        return objectClass;
-    }
-
-    /**
-     * @deprecated since 1.2 use getObjectClass().
-     */
-    public Class getObjClass() {
-        return getObjectClass();
+        return hashCode;
     }
 
     /**
@@ -351,8 +384,8 @@ public class ObjectId implements Serializable {
     }
 
     /**
-     * Returns non-null mutable map that can be used to append replacement id values. This
-     * allows to incrementally build a replacement ObjectId.
+     * Returns a non-null mutable map that can be used to append replacement id values.
+     * This allows to incrementally build a replacement GlobalID.
      * 
      * @since 1.2
      */
@@ -370,17 +403,40 @@ public class ObjectId implements Serializable {
      * @since 1.2
      */
     public ObjectId createReplacementId() {
-        return new ObjectId(getObjectClass(), replacementIdMap);
+        return new ObjectId(getEntityName(), replacementIdMap);
     }
 
     /**
      * Returns true if there is full or partial replacement id attached to this id. This
      * method is preferrable to "!getReplacementIdMap().isEmpty()" as it avoids unneeded
      * replacement id map creation.
-     * 
-     * @since 1.2
      */
     public boolean isReplacementIdAttached() {
         return replacementIdMap != null && !replacementIdMap.isEmpty();
+    }
+
+    /**
+     * A standard toString method used for debugging.
+     */
+    public String toString() {
+
+        ToStringBuilder builder = new ToStringBuilder(
+                this,
+                ToStringStyle.SHORT_PREFIX_STYLE);
+
+        builder.append("entityName", entityName);
+        builder.append("temporary", isTemporary());
+
+        if (isTemporary()) {
+            builder.append("key", key);
+        }
+        else if (objectIdKeys != null) {
+            Iterator it = objectIdKeys.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+                builder.append(String.valueOf(entry.getKey()), entry.getValue());
+            }
+        }
+        return builder.toString();
     }
 }

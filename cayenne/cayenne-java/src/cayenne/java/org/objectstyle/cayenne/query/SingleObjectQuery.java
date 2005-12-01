@@ -57,14 +57,13 @@ package org.objectstyle.cayenne.query;
 
 import org.apache.commons.lang.StringUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.GlobalID;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
- * A query that returns a single object matching a GlobalID or an ObjectId.
+ * A query that returns a single object matching an ObjectId.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -72,20 +71,11 @@ import org.objectstyle.cayenne.map.EntityResolver;
 // TODO: implement some sort of batch faulting for multiple ids....
 public class SingleObjectQuery implements QueryExecutionPlan {
 
-    protected GlobalID globalID;
-    protected ObjectId objectID;
-    
+    protected ObjectId objectId;
+
     // needed for hessian serialization
     private SingleObjectQuery() {
-        
-    }
 
-    public SingleObjectQuery(GlobalID globalID) {
-        if (globalID == null) {
-            throw new NullPointerException("Null globalID");
-        }
-
-        this.globalID = globalID;
     }
 
     public SingleObjectQuery(ObjectId objectID) {
@@ -93,15 +83,11 @@ public class SingleObjectQuery implements QueryExecutionPlan {
             throw new NullPointerException("Null objectID");
         }
 
-        this.objectID = objectID;
+        this.objectId = objectID;
     }
 
-    public GlobalID getGlobalID() {
-        return globalID;
-    }
-
-    public ObjectId getObjectID() {
-        return objectID;
+    public ObjectId getObjectId() {
+        return objectId;
     }
 
     public Query resolve(EntityResolver resolver) {
@@ -126,24 +112,19 @@ public class SingleObjectQuery implements QueryExecutionPlan {
      * Creates a query that should be run instead of this query.
      */
     protected Query buildReplacementQuery(EntityResolver resolver) {
-        if (objectID == null && globalID == null) {
-            throw new CayenneRuntimeException(
-                    "Can't resolve query - both objectID and globalID are null.");
+        if (objectId == null) {
+            throw new CayenneRuntimeException("Can't resolve query - objectId is null.");
         }
 
-        ObjectId id = (objectID != null) ? objectID : resolver
-                .convertToObjectID(globalID);
-
-        return new SelectQuery(id.getObjectClass(), ExpressionFactory.matchAllDbExp(id
-                .getIdSnapshot(), Expression.EQUAL_TO));
+        return new SelectQuery(objectId.getEntityName(), ExpressionFactory.matchAllDbExp(
+                objectId.getIdSnapshot(),
+                Expression.EQUAL_TO));
     }
 
     /**
-     * Overrides toString() outputting a short string with query class and ObjectId or
-     * GlobalID.
+     * Overrides toString() outputting a short string with query class and ObjectId.
      */
     public String toString() {
-        Object suffix = (objectID != null) ? (Object) objectID : globalID;
-        return StringUtils.substringAfterLast(getClass().getName(), ".") + ":" + suffix;
+        return StringUtils.substringAfterLast(getClass().getName(), ".") + ":" + objectId;
     }
 }

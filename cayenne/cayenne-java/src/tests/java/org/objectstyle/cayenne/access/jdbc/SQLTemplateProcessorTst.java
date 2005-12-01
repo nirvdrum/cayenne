@@ -190,7 +190,7 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
             "SELECT * FROM ME WHERE COLUMN1 = #bind($helper.cayenneExp($a, 'db:ID_COLUMN'))";
 
         DataObject dataObject = new CayenneDataObject();
-        dataObject.setObjectId(new ObjectId(Object.class, "ID_COLUMN", 5));
+        dataObject.setObjectId(new ObjectId("T", "ID_COLUMN", 5));
 
         Map map = Collections.singletonMap("a", dataObject);
 
@@ -211,7 +211,7 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
         Map idMap = new HashMap();
         idMap.put("ID_COLUMN1", new Integer(3));
         idMap.put("ID_COLUMN2", "aaa");
-        ObjectId id = new ObjectId(Object.class, idMap);
+        ObjectId id = new ObjectId("T", idMap);
         DataObject dataObject = new CayenneDataObject();
         dataObject.setObjectId(id);
 

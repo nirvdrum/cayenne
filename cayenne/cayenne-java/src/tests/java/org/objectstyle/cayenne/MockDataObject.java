@@ -65,7 +65,6 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  */
 public class MockDataObject implements DataObject {
 
-    protected GlobalID globalID;
     protected ObjectId objectId;
     protected int persistenceState;
     protected DataContext context;
@@ -175,13 +174,5 @@ public class MockDataObject implements DataObject {
 
     public void setObjectContext(ObjectContext objectContext) {
         this.objectContext = objectContext;
-    }
-
-    public GlobalID getGlobalID() {
-        return globalID;
-    }
-
-    public void setGlobalID(GlobalID globalID) {
-        this.globalID = globalID;
     }
 }
