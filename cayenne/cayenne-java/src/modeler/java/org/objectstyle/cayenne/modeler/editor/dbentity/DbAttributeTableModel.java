@@ -248,10 +248,6 @@ public class DbAttributeTableModel extends CayenneTableModel {
         return (attr.isMandatory()) ? Boolean.TRUE : Boolean.FALSE;
     }
 
-    public Boolean isGenerated(DbAttribute attr) {
-        return (attr.isGenerated()) ? Boolean.TRUE : Boolean.FALSE;
-    }
-
     public void setMaxLength(String newVal, DbAttribute attr) {
         if (newVal == null || newVal.trim().length() <= 0) {
             attr.setMaxLength(-1);

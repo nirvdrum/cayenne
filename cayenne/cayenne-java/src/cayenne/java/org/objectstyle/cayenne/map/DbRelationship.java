@@ -81,15 +81,16 @@ import org.objectstyle.cayenne.util.XMLEncoder;
  */
 public class DbRelationship extends Relationship {
 
-    //DbRelationship events
-    public static final EventSubject PROPERTY_DID_CHANGE = EventSubject
-            .getSubject(DbRelationship.class, "PropertyDidChange");
+    // DbRelationship events
+    public static final EventSubject PROPERTY_DID_CHANGE = EventSubject.getSubject(
+            DbRelationship.class,
+            "PropertyDidChange");
 
     // The columns through which the join is implemented.
     protected List joins = new ArrayList();
 
     // Is relationship from source to target points to dependent primary
-    //  key (primary key column of destination table that is also a FK to the source
+    // key (primary key column of destination table that is also a FK to the source
     // column)
     protected boolean toDependentPK;
 
@@ -183,7 +184,7 @@ public class DbRelationship extends Relationship {
         reverse.setTargetEntityName(getSourceEntity().getName());
 
         // TODO: must set toDepPK correctly
-        //       must set toMany correctly
+        // must set toMany correctly
 
         reverse.setToMany(!toMany);
 
@@ -428,14 +429,6 @@ public class DbRelationship extends Relationship {
         if (len == 1) {
             DbJoin join = (DbJoin) joins.get(0);
             Object val = targetSnapshot.get(join.getTargetName());
-            if (val == null) {
-                throw new CayenneRuntimeException(
-                        "Some parts of FK are missing in snapshot. Join: "
-                                + join
-                                + ", snapshot: "
-                                + targetSnapshot);
-            }
-
             return Collections.singletonMap(join.getSourceName(), val);
 
         }
@@ -445,14 +438,6 @@ public class DbRelationship extends Relationship {
         for (int i = 0; i < len; i++) {
             DbJoin join = (DbJoin) joins.get(i);
             Object val = targetSnapshot.get(join.getTargetName());
-            if (val == null) {
-                throw new CayenneRuntimeException(
-                        "Some parts of FK are missing in snapshot. Join: "
-                                + join
-                                + ", snapshot: "
-                                + targetSnapshot);
-            }
-
             idMap.put(join.getSourceName(), val);
         }
 
@@ -462,22 +447,22 @@ public class DbRelationship extends Relationship {
     /**
      * Creates a snapshot of foreign key attributes of a source object of this
      * relationship based on a snapshot of a target. Only "to-one" relationships are
-     * supported. Throws CayenneRuntimeException if relationship is "to many" or if
-     * snapshot is missing id components.
+     * supported. Throws CayenneRuntimeException if relationship is "to many".
      */
     public Map srcFkSnapshotWithTargetSnapshot(Map targetSnapshot) {
 
-        if (isToMany())
+        if (isToMany()) {
             throw new CayenneRuntimeException(
                     "Only 'to one' relationships support this method.");
+        }
+
         return srcSnapshotWithTargetSnapshot(targetSnapshot);
     }
 
     /**
      * Creates a snapshot of primary key attributes of a source object of this
      * relationship based on a snapshot of a target. Only "to-many" relationships are
-     * supported. Throws CayenneRuntimeException if relationship is "to one" or if
-     * snapshot is missing id components.
+     * supported. Throws CayenneRuntimeException if relationship is "to one".
      */
     public Map srcPkSnapshotWithTargetSnapshot(Map targetSnapshot) {
         if (!isToMany())

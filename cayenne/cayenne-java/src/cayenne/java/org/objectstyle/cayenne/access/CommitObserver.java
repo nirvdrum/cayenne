@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.access.event.DataObjectTransactionEventListener;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
@@ -197,7 +198,7 @@ class CommitObserver extends DefaultOperationObserver implements
                             + query);
         }
 
-        InsertBatchQuery batch = (InsertBatchQuery) query;
+        BatchQuery batch = (BatchQuery) query;
 
         ObjectId id = batch.getObjectId();
         if (id == null || !id.isTemporary()) {

@@ -167,12 +167,14 @@ public class PrimaryKeyHelper {
                 DbAttribute dbAttr = (DbAttribute) it.next();
                 String dbAttrName = dbAttr.getName();
 
-                // skip generated keys...
-                if (supportsGeneratedKeys && dbAttr.isGenerated()) {
+                if (idMap.containsKey(dbAttrName)) {
                     continue;
                 }
 
-                if (idMap.containsKey(dbAttrName)) {
+                // put a "null" for generated key, so that potential dependent objects
+                // could record a change in their snapshot
+                if (supportsGeneratedKeys && dbAttr.isGenerated()) {
+                    idMap.put(dbAttrName, null);
                     continue;
                 }
 

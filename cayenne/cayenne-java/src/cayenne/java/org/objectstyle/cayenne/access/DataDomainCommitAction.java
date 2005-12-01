@@ -369,6 +369,11 @@ class DataDomainCommitAction {
             return;
         }
 
+        boolean supportsGeneratedKeys = commitHelper
+                .getNode()
+                .getAdapter()
+                .supportsGeneratedKeys();
+
         List dbEntities = new ArrayList(entities.size());
         Map objEntitiesByDbEntity = new HashMap(entities.size());
         groupObjEntitiesBySpannedDbEntities(dbEntities, objEntitiesByDbEntity, entities);
@@ -403,7 +408,8 @@ class DataDomainCommitAction {
                     Map snapshot = BatchQueryUtils.buildSnapshotForUpdate(
                             entity,
                             o,
-                            masterDependentDbRel);
+                            masterDependentDbRel,
+                            supportsGeneratedKeys);
 
                     // check whether MODIFIED object has real db-level
                     // modifications
@@ -464,7 +470,7 @@ class DataDomainCommitAction {
                         batches.put(batchKey, batch);
                     }
 
-                    batch.add(qualifierSnapshot, snapshot);
+                    batch.add(qualifierSnapshot, snapshot, o.getObjectId());
 
                     if (isRootDbEntity) {
                         updateId(

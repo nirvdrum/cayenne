@@ -271,7 +271,7 @@ public class BatchAction extends BaseSQLAction {
     }
 
     /**
-     * Implements generated keys extraction supported since JDBC 3.0 specification.
+     * Implements generated keys extraction supported in JDBC 3.0 specification.
      */
     protected void processGeneratedKeys(Statement statement, OperationObserver observer)
             throws SQLException, CayenneException {

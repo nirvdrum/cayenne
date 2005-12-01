@@ -57,7 +57,12 @@ package org.objectstyle.cayenne.query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections.Factory;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 
 /**
@@ -102,10 +107,9 @@ public abstract class BatchQuery extends AbstractQuery {
      * Returns a List of values for the current batch iteration, in the order they are
      * bound to the query. Used mainly for logging.
      * 
-     * @param includeNullValues A <code>true</code> value indicates that the
-     *        returned list should include <code>null</code> values and
-     *        <code>false</code> indicates they should not be included.
-     * 
+     * @param includeNullValues A <code>true</code> value indicates that the returned
+     *            list should include <code>null</code> values and <code>false</code>
+     *            indicates they should not be included.
      * @deprecated Since 1.2 use BatchQueryBuilder.getParameterValues(), as this allows
      *             better control over which attributes are logged.
      */
@@ -163,4 +167,60 @@ public abstract class BatchQuery extends AbstractQuery {
      * Returns the number of parameter rows in a batch.
      */
     public abstract int size();
+
+    /**
+     * A helper method used by subclasses to resolve deferred values on demand. This is
+     * useful when a certain value comes from a generated key of another master object.
+     * 
+     * @since 1.2
+     */
+    protected Object getValue(Map valueMap, DbAttribute attribute) {
+
+        Object value = valueMap.get(attribute.getName());
+
+        // if a value is a Factory, resolve it here...
+        // slight chance that a normal value will implement Factory interface???
+        if (value instanceof Factory) {
+            value = ((Factory) value).create();
+
+            // update replacement id
+            if (attribute.isPrimaryKey()) {
+                // sanity check
+                if (value == null) {
+                    String name = attribute.getEntity() != null ? attribute
+                            .getEntity()
+                            .getName() : "<null>";
+                    throw new CayenneRuntimeException("Failed to generate PK: "
+                            + name
+                            + "."
+                            + attribute.getName());
+                }
+
+                ObjectId id = getObjectId();
+                if (id != null) {
+                    // always override with fresh value as this is what's in the DB
+                    id.getReplacementIdMap().put(attribute.getName(), value);
+                }
+            }
+
+            // update snapshot
+            valueMap.put(attribute.getName(), value);
+        }
+
+        return value;
+    }
+
+    /**
+     * Returns an ObjectId associated with the current batch iteration. Used internally by
+     * Cayenne to match current iteration with a specific object and assign it generated
+     * keys.
+     * <p>
+     * Default implementation simply returns null.
+     * </p>
+     * 
+     * @since 1.2
+     */
+    public ObjectId getObjectId() {
+        return null;
+    }
 }

@@ -119,8 +119,6 @@ class DataContextCommitAction {
      * Commits changes in the enclosed DataContext.
      */
     void commit() throws CayenneException {
-     
-    
 
         // synchronize on both object store and underlying DataRowStore
         synchronized (context.getObjectStore()) {
@@ -154,8 +152,6 @@ class DataContextCommitAction {
                         insObjects,
                         updObjects,
                         delObjects);
-
-          
 
                 if (context.isTransactionEventsEnabled()) {
                     observer.registerForDataContextEvents();
@@ -392,6 +388,11 @@ class DataContextCommitAction {
             return;
         }
 
+        boolean supportsGeneratedKeys = commitHelper
+                .getNode()
+                .getAdapter()
+                .supportsGeneratedKeys();
+
         List dbEntities = new ArrayList(entities.size());
         Map objEntitiesByDbEntity = new HashMap(entities.size());
         groupObjEntitiesBySpannedDbEntities(dbEntities, objEntitiesByDbEntity, entities);
@@ -426,7 +427,8 @@ class DataContextCommitAction {
                     Map snapshot = BatchQueryUtils.buildSnapshotForUpdate(
                             entity,
                             o,
-                            masterDependentDbRel);
+                            masterDependentDbRel,
+                            supportsGeneratedKeys);
 
                     // check whether MODIFIED object has real db-level
                     // modifications
@@ -487,7 +489,7 @@ class DataContextCommitAction {
                         batches.put(batchKey, batch);
                     }
 
-                    batch.add(qualifierSnapshot, snapshot);
+                    batch.add(qualifierSnapshot, snapshot, o.getObjectId());
 
                     if (isRootDbEntity) {
                         updateId(
@@ -816,6 +818,10 @@ class DataContextCommitAction {
 
         while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
+
+            // id values can be deferred ID factories... we are ignoring this fact here,
+            // hoping they will be replaced by real values on update...
+
             Object key = entry.getKey();
 
             if (oldID.containsKey(key) && !replacementID.containsKey(key)) {
