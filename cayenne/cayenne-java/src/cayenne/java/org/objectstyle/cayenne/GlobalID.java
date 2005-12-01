@@ -70,9 +70,11 @@ import org.objectstyle.cayenne.util.IDUtil;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * A portable global identifier for persistent objects. A temporary GlobalID that stores
- * object entity name and a pseudo-unique binary key is used to identify transient
- * objects. Permamnent id stores persistent values
+ * A portable global identifier for persistent objects. GlobalID can be temporary (used
+ * for transient or new uncommitted objects) or permanent (used for objects that have been
+ * already stored in DB). A temporary GlobalID stores object entity name and a
+ * pseudo-unique binary key; permanent id stores a map of values from an external
+ * persistent store (aka "primary key").
  * 
  * @since 1.2
  * @author Andrus Adamchik
