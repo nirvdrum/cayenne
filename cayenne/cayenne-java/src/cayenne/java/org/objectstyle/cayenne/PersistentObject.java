@@ -55,13 +55,15 @@
  */
 package org.objectstyle.cayenne;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
-
 /**
- * A convenience base superclass for concrete Persistent objects. It provides properties
- * declared in Persistent interface and also hooks to ObjectContext to implement faulting.
+ * A convenience base superclass for concrete Persistent objects. Provides implementation
+ * of properties declared in Persistent interface.
+ * <h4>POJO Note</h4>
+ * <p>
+ * If having PersistentObject as a superclass presents a problem in an application, source
+ * code of this class can be copied verbatim to a custom class generation template.
+ * Desired superclass can be set in CayenneModeler.
+ * </p>
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -72,6 +74,9 @@ public abstract class PersistentObject implements Persistent {
     protected int persistenceState;
     protected transient ObjectContext objectContext;
 
+    /**
+     * Creates a new transient object.
+     */
     public PersistentObject() {
         this.persistenceState = PersistenceState.TRANSIENT;
     }
@@ -105,19 +110,22 @@ public abstract class PersistentObject implements Persistent {
     }
 
     public String toString() {
-        ToStringBuilder builder = new ToStringBuilder(
-                this,
-                ToStringStyle.SHORT_PREFIX_STYLE);
-
         String state = PersistenceState.persistenceStateName(getPersistenceState());
-        String context = (objectContext != null) ? StringUtils.substringAfterLast(
-                objectContext.getClass().getName(),
-                ".")
-                + "@"
-                + System.identityHashCode(objectContext) : "null";
 
-        return builder.append("id", getObjectId()).append("state", state).append(
-                "context",
-                context).toString();
+        StringBuffer buffer = new StringBuffer();
+        buffer
+                .append("<")
+                .append(getClass().getName())
+                .append("@")
+                .append(System.identityHashCode(this))
+                .append(", id=")
+                .append(objectId)
+                .append(", state=")
+                .append(state)
+                .append(", context=")
+                .append(objectContext)
+                .append(">");
+
+        return buffer.toString();
     }
 }
