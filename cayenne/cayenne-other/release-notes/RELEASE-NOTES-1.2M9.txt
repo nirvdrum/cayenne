@@ -21,5 +21,17 @@ Changes/New Features:
 * DbRelationship.srcFkSnapshotWithTargetSnapshot(..) and DbRelationship.srcPkSnapshotWithTargetSnapshot
   no longer throw an exception when null values are found in primary key snapshot, recognizing that key
   generation may be deferred (case of DB-generated keys).
+  
+* Portable ObjectId:
+  ObjectId is now used instead of recently introduced GlobalID within ObjectContext space (i.e. removal of 
+  GlobalID only affects remote tier). Still there are substantial changes in the ObjectId itself. To make 
+  it portable across the network, we no longer use Java Class as the main key within the id. Instead 
+  ObjEntity name string is used for this purpose. 
+  
+  UPGRADE WARNING: it wasn't possible to phase out some of the old ObjectId API via deprecation, so methods 
+  "getObjClass" and "getObjectClass" are removed completely. Constructors that take Class as the first argument
+  are deprecated and will only work if entity naming follows CayenneModeler default conventions of using unqualified
+  class name as the entity name.
+  
 
 Bugs Fixed:

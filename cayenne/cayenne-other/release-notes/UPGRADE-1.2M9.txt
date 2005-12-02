@@ -2,6 +2,13 @@ Cayenne Upgrade Information 1.2 M9 milestone
 Date: 
 ============================================
 
+UPGRADE FROM M8:
+
+* If you where using new remote object persistence API, and explicitly used GlobalID,
+  you must replace it with good old ObjectId - its current API is 100% compatible with
+  M8 GlobalID.
+
+
 GENERAL UPGRADE NOTES:
 
 *  WARNING: Most API deprecated in 1.1 is removed from 1.2.
@@ -41,15 +48,20 @@ UPGRADE FROM 1.1:
    they will contain "oid". The easiest way to migrate your mapping (if you don't want to
    change the DB) is to remap all bytea columns as LONGVARBINARY DbAttributes instead of BLOB.
 
+*  ObjectId methods "getObjClass" and "getObjectClass" are removed (it wasn't possible to deprecate
+   them and still preserve meaningful functionality). Constructors that take Class as the first argument
+   are deprecated and will only work if entity naming follows CayenneModeler default conventions of 
+   using unqualified class name as the entity name.
+   
+*  TempObjectId is deprecated and is no longer used by Cayenne internally. If you were 
+   referencing TempObjectId explicitly in your code (e.g. if(id instanceof TempObjectId) ... ), 
+   you will need to modify the code and use "isTemporary()" superclass method.
+  
 *  The meaning of SnapshotEvent "source" and "postedBy" attributes is reversed per CAY-395 for
    better efficiency. If you implemented custom listeners of SnapshotEvents, you may need to 
    doublecheck their logic. From now on events use DataRowStore as source, and EventBridge or
    ObjectStore as postedBy, depending on whether this was a local or a remote event. I.e. the 
    new structure is the opposite to what we used in 1.1.
- 
-*  TempObjectId is deprecated and is no longer used by Cayenne internally. If you were 
-   referencing TempObjectId explicitly in your code (e.g. if(id instanceof TempObjectId) ... ), 
-   you will need to modify the code and use "isTemporary()" superclass method.
    
 * Cayenne stack events are no longer sent via a shared "default" EventManager.
   If you were using EventManager.getDefaultManager() to communicate or receive Cayenne stack 
