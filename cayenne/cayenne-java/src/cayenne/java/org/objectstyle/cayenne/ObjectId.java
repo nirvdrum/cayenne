@@ -64,8 +64,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
 import org.objectstyle.cayenne.util.IDUtil;
 import org.objectstyle.cayenne.util.Util;
 
@@ -420,23 +418,27 @@ public class ObjectId implements Serializable {
      */
     public String toString() {
 
-        ToStringBuilder builder = new ToStringBuilder(
-                this,
-                ToStringStyle.SHORT_PREFIX_STYLE);
+        StringBuffer buffer = new StringBuffer();
 
-        builder.append("entityName", entityName);
-        builder.append("temporary", isTemporary());
+        buffer.append("<ObjectId:").append(entityName);
 
         if (isTemporary()) {
-            builder.append("key", key);
+            buffer.append(", TEMP:");
+            for (int i = 0; i < key.length; i++) {
+                IDUtil.appendFormattedByte(buffer, key[i]);
+            }
         }
         else if (objectIdKeys != null) {
             Iterator it = objectIdKeys.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
-                builder.append(String.valueOf(entry.getKey()), entry.getValue());
+                buffer.append(", ");
+                buffer.append(String.valueOf(entry.getKey())).append("=").append(
+                        entry.getValue());
             }
         }
-        return builder.toString();
+        
+        buffer.append(">");
+        return buffer.toString();
     }
 }

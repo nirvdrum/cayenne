@@ -92,6 +92,18 @@ public class IDUtil {
     }
 
     /**
+     * Prints a byte value to a StringBuffer as a double digit hex value.
+     * 
+     * @since 1.2
+     */
+    public static void appendFormattedByte(StringBuffer buffer, byte byteValue) {
+        final String digits = "0123456789ABCDEF";
+
+        buffer.append(digits.charAt((byteValue >>> 4) & 0xF));
+        buffer.append(digits.charAt(byteValue & 0xF));
+    }
+    
+    /**
      * @param length the length of returned byte[]
      * @return A pseudo-unique byte array of the specified length. Length must be at least
      *         16 bytes, or an exception is thrown.

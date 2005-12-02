@@ -62,6 +62,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.jdbc.ParameterBinding;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
+import org.objectstyle.cayenne.util.IDUtil;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -166,7 +167,7 @@ public class QueryLogger {
             }
 
             for (int i = 0; i < len; i++) {
-                appendFormattedByte(buf, b[i]);
+                IDUtil.appendFormattedByte(buf, b[i]);
                 buf.append(' ');
             }
 
@@ -191,12 +192,11 @@ public class QueryLogger {
 
     /**
      * Prints a byte value to a StringBuffer as a double digit hex value.
+     * 
+     * @deprecated since 1.2 use a namesake method from IDUtil.
      */
     protected static void appendFormattedByte(StringBuffer buffer, byte byteValue) {
-        final String digits = "0123456789ABCDEF";
-
-        buffer.append(digits.charAt((byteValue >>> 4) & 0xF));
-        buffer.append(digits.charAt(byteValue & 0xF));
+        IDUtil.appendFormattedByte(buffer, byteValue);
     }
 
     /**

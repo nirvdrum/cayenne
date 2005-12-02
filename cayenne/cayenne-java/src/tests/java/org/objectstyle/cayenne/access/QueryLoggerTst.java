@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.access;
 
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.util.IDUtil;
 
 /**
  * @author Andrei Adamchik
@@ -81,7 +82,7 @@ public class QueryLoggerTst extends CayenneTestCase {
 
     private void assertFormatting(byte b, String formatted) throws Exception {
         StringBuffer buffer = new StringBuffer();
-        QueryLogger.appendFormattedByte(buffer, b);
+        IDUtil.appendFormattedByte(buffer, b);
         assertEquals(formatted, buffer.toString());
     }
 }
