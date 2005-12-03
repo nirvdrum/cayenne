@@ -1037,9 +1037,8 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Delegates queries execution to parent QueryEngine. If there are select queries that
-     * require prefetching relationships, will create additional queries to perform
-     * necessary prefetching.
+     * Delegates queries execution to parent QueryEngine, wrapping execution in an
+     * internal transaction provided by parent DataDomain.
      */
     public void performQueries(Collection queries, OperationObserver observer) {
         // note - use external transaction for iterated queries;
@@ -1053,7 +1052,9 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Delegates queries execution to parent QueryEngine.
+     * Executes queries wrapped in provided transaction, by delegating to the parent
+     * QueryEngine. Before execution queries are filtered through a DataContextDelegate if
+     * one exists.
      * 
      * @since 1.1
      */
