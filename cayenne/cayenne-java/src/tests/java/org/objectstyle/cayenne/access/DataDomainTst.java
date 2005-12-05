@@ -265,7 +265,7 @@ public class DataDomainTst extends CayenneTestCase {
         assertFalse(domain.isUsingExternalTransactions());
 
         Transaction transaction = domain.createTransaction();
-        assertTrue(transaction instanceof Transaction.InternalTransaction);
+        assertTrue(transaction instanceof InternalTransaction);
     }
 
     public void testDataDomainExternalTransactions() throws Exception {
@@ -277,7 +277,7 @@ public class DataDomainTst extends CayenneTestCase {
         assertTrue(domain.isUsingExternalTransactions());
 
         Transaction transaction = domain.createTransaction();
-        assertTrue(transaction instanceof Transaction.ExternalTransaction);
+        assertTrue(transaction instanceof ExternalTransaction);
     }
 
     public void testDataDomainDataContextFactory() {

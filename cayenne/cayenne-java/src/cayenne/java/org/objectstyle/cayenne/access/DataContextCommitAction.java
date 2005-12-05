@@ -115,9 +115,6 @@ class DataContextCommitAction {
         context = contextToCommit;
     }
 
-    /**
-     * Commits changes in the enclosed DataContext.
-     */
     void commit() throws CayenneException {
 
         // synchronize on both object store and underlying DataRowStore
@@ -163,9 +160,10 @@ class DataContextCommitAction {
                     Transaction transaction = context
                             .getParentDataDomain()
                             .createTransaction();
-                    transaction.begin();
 
+                    Transaction.bindThreadTransaction(transaction);
                     try {
+                        transaction.begin();
                         Iterator i = nodeHelpers.iterator();
                         while (i.hasNext()) {
                             DataNodeCommitAction nodeHelper = (DataNodeCommitAction) i
@@ -174,10 +172,7 @@ class DataContextCommitAction {
 
                             if (queries.size() > 0) {
                                 // note: observer throws on error
-                                nodeHelper.getNode().performQueries(
-                                        queries,
-                                        observer,
-                                        transaction);
+                                nodeHelper.getNode().performQueries(queries, observer);
                             }
                         }
 
@@ -195,6 +190,9 @@ class DataContextCommitAction {
 
                         context.fireTransactionRolledback();
                         throw new CayenneException("Transaction was rolledback.", th);
+                    }
+                    finally {
+                        Transaction.bindThreadTransaction(null);
                     }
 
                     context.getObjectStore().objectsCommitted();

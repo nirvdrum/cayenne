@@ -78,8 +78,7 @@ public interface QueryEngine {
      * connections that were added to it.
      * 
      * @since 1.1
-     * @see OperationObserver
-     * @see Transaction
+     * @deprecated since 1.2 as thread-bound transactions are used.
      */
     public void performQueries(
             Collection queries,

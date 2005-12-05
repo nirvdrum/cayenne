@@ -58,51 +58,49 @@ package org.objectstyle.cayenne.access;
 import java.sql.Connection;
 
 /**
- * Defines callback methods for customizing Cayenne transaction behavior. 
- *  
- * @author Andrei Adamchik
+ * Defines callback methods for tracking and customizing Transactions execution.
+ * 
+ * @author Andrus Adamchik
  * @since 1.1
  */
 public interface TransactionDelegate {
 
     /**
-     * Called within a context of Transaction before transaction is committed.
-     * Delegate can do its own processing, and optionally suppress further
-     * commit processing by Cayenne by returning <code>false</code>.
+     * Called within a context of a Transaction before the transaction is committed.
+     * Delegate can do its own processing, and optionally suppress further commit
+     * processing by Cayenne by returning <code>false</code>.
      */
     public boolean willCommit(Transaction transaction);
 
     /**
-     * Called within a context of Transaction before transaction is marked as 
-     * "rollback only" (meaning that further commit is impossible).
-     * Delegate can do its own processing, and optionally suppress further
-     * status processing by Cayenne by returning <code>false</code>.
+     * Called within a context of a Transaction before transaction is marked as "rollback
+     * only", meaning that further commit is not possible. Delegate can do its own
+     * processing, and optionally suppress setting transaction status by returning
+     * <code>false</code>.
      */
     public boolean willMarkAsRollbackOnly(Transaction transaction);
 
     /**
-     * Called within a context of Transaction before transaction is rolledback.
-     * Delegate can do its own processing, and optionally suppress further
-     * rolledback processing by Cayenne by returning <code>false</code>.
+     * Called within a context of a Transaction before the transaction is rolledback.
+     * Delegate can do its own processing, and optionally suppress further rollback
+     * processing by Cayenne by returning <code>false</code>.
      */
     public boolean willRollback(Transaction transaction);
 
     /**
-     * Called within a context of a Transaction to notify delegate about a successful 
-     * transaction commit.
+     * Called after a Transaction commit.
      */
     public void didCommit(Transaction transaction);
 
     /**
-     * 
+     * Called after a Transaction is rolledback.
      */
     public void didRollback(Transaction transaction);
 
     /**
-     * Called within a context of Transaction when a new Connection is added
-     * to the list of Connections participating in transaction.
-     * Delegate can do its own processing, and optionally suppress further
-     * Connection registration inside Transaction by returning <code>false</code>.
+     * Called within a context of a Transaction when a new JDBC onnection is added to the
+     * the transaction. Delegate can do its own processing, and optionally suppress
+     * connection registration with the transaction by returning <code>false</code>.
      */
     public boolean willAddConnection(Transaction transaction, Connection connection);
 }

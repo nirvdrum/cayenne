@@ -128,6 +128,7 @@ class DataDomainCommitAction {
      * Commits changes in the enclosed DataContext.
      */
     void commit(ObjectContext context, GraphChangeHandler commitChangeCallback) {
+
         synchronized (domain.getSharedSnapshotCache()) {
             Collection uncommitted = context.uncommittedObjects();
             categorizeObjects(uncommitted);
@@ -149,11 +150,11 @@ class DataDomainCommitAction {
 
             OperationObserver observer = new DataDomainCommitObserver();
             Transaction transaction = domain.createTransaction();
-
-            // TODO: should this line go inside try?
-            transaction.begin();
+            Transaction.bindThreadTransaction(transaction);
 
             try {
+                transaction.begin();
+
                 Iterator i = nodeHelpers.iterator();
                 while (i.hasNext()) {
                     DataNodeCommitAction nodeHelper = (DataNodeCommitAction) i.next();
@@ -161,10 +162,7 @@ class DataDomainCommitAction {
 
                     if (queries.size() > 0) {
                         // note: observer throws on error
-                        nodeHelper.getNode().performQueries(
-                                queries,
-                                observer,
-                                transaction);
+                        nodeHelper.getNode().performQueries(queries, observer);
                     }
                 }
 
@@ -181,6 +179,9 @@ class DataDomainCommitAction {
                 }
 
                 throw new CayenneRuntimeException("Transaction was rolledback.", th);
+            }
+            finally {
+                Transaction.bindThreadTransaction(null);
             }
 
             // notify callback of generated keys ...

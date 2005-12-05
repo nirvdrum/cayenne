@@ -151,21 +151,6 @@ class ObjectDataContext extends DataContext implements ObjectContext {
         getParentContext().performQuery(query.resolve(getEntityResolver()), observer);
     }
 
-    /**
-     * @deprecated since 1.2 as QueryChains are now possible.
-     */
-    public void performQueries(
-            Collection queries,
-            OperationObserver observer,
-            Transaction transaction) {
-
-        QueryChain query = new QueryChain(queries);
-        getParentContext().performQuery(
-                query.resolve(getEntityResolver()),
-                observer,
-                transaction);
-    }
-
     public int[] performNonSelectingQuery(String queryName, Map parameters) {
         return performUpdateQuery(new NamedQuery(queryName, parameters));
     }

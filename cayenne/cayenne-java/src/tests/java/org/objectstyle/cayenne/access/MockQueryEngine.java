@@ -62,10 +62,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.Query;

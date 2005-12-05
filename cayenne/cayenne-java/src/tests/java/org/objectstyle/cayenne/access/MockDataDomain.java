@@ -58,11 +58,6 @@ package org.objectstyle.cayenne.access;
 
 import java.util.Collection;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.access.Transaction;
-
 /**
  * A mockup DataDomain that delegates all queries to the underlying QueryEngine. Ideally
  * there should be no need to use MockupDataDomain for testing, since MockupQueryEngine
@@ -87,11 +82,17 @@ public class MockDataDomain extends DataDomain {
 
     /**
      * Delegates query to the internal engine.
+     * 
+     * @deprecated since 1.2, as the corresponding super method is deprecated.
      */
     public void performQueries(
             Collection queries,
             OperationObserver resultConsumer,
             Transaction transaction) {
         engine.performQueries(queries, resultConsumer, transaction);
+    }
+
+    public void performQueries(Collection queries, OperationObserver observer) {
+        engine.performQueries(queries, observer);
     }
 }

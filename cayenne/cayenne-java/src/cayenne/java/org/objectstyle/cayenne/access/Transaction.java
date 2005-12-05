@@ -57,26 +57,28 @@ package org.objectstyle.cayenne.access;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
- * Class responsible for transaction management within Cayenne.
+ * A Cayenne transaction. Currently supports managing JDBC connections.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  * @since 1.1
  */
 public abstract class Transaction {
 
-    private static final Logger logObj = Logger.getLogger(Transaction.class);
+    /**
+     * A ThreadLocal that stores current thread transaction.
+     * 
+     * @since 1.2
+     */
+    static final ThreadLocal currentTransaction = new InheritableThreadLocal();
 
     private static final Transaction NO_TRANSACTION = new Transaction() {
 
@@ -136,6 +138,25 @@ public abstract class Transaction {
     }
 
     /**
+     * Binds a Transaction to the current thread.
+     * 
+     * @since 1.2
+     */
+    public static void bindThreadTransaction(Transaction transaction) {
+        currentTransaction.set(transaction);
+    }
+
+    /**
+     * Returns a Transaction associated with the current thread, or null if there is no
+     * such Transaction.
+     * 
+     * @since 1.2
+     */
+    public static Transaction getThreadTransaction() {
+        return (Transaction) currentTransaction.get();
+    }
+
+    /**
      * Factory method returning a new transaction instance that would propagate
      * commit/rollback to participating connections. Connections will be closed when
      * commit or rollback is called.
@@ -172,16 +193,19 @@ public abstract class Transaction {
     /**
      * Helper method that wraps a number of queries in this transaction, runs them, and
      * commits or rolls back depending on the outcome. This method allows users to define
-     * their own custom Transactions and easily wrap Cayenne queries in them.
+     * their own custom Transactions and wrap Cayenne queries in them.
      */
     public void performQueries(
             QueryEngine engine,
             Collection queries,
             OperationObserver observer) throws CayenneRuntimeException {
 
+        Transaction old = Transaction.getThreadTransaction();
+        Transaction.bindThreadTransaction(this);
+
         try {
             // implicit begin..
-            engine.performQueries(queries, observer, this);
+            engine.performQueries(queries, observer);
 
             // don't commit iterated queries - leave it up to the caller
             // at the same time rollbacks of iterated queries must be processed here,
@@ -203,6 +227,7 @@ public abstract class Transaction {
             }
         }
         finally {
+            Transaction.bindThreadTransaction(old);
             if (getStatus() == Transaction.STATUS_MARKED_ROLLEDBACK) {
                 try {
                     rollback();
@@ -225,9 +250,11 @@ public abstract class Transaction {
             QueryExecutionPlan query,
             OperationObserver observer) throws CayenneRuntimeException {
 
+        Transaction old = Transaction.getThreadTransaction();
+        Transaction.bindThreadTransaction(this);
         try {
             // implicit begin..
-            context.performQuery(query, observer, this);
+            context.performQuery(query, observer);
 
             // don't commit iterated queries - leave it up to the caller
             // at the same time rollbacks of iterated queries must be processed here,
@@ -249,6 +276,7 @@ public abstract class Transaction {
             }
         }
         finally {
+            Transaction.bindThreadTransaction(old);
             if (getStatus() == Transaction.STATUS_MARKED_ROLLEDBACK) {
                 try {
                     rollback();
@@ -313,267 +341,4 @@ public abstract class Transaction {
 
     public abstract void rollback() throws IllegalStateException, SQLException,
             CayenneException;
-
-    // transaction managed by container, or no transaction at all.
-    // this implementation will simply close the connections on commit
-    // or rollback, and notify the delegate
-    static class ExternalTransaction extends Transaction {
-
-        ExternalTransaction() {
-        }
-
-        ExternalTransaction(TransactionDelegate delegate) {
-            setDelegate(delegate);
-        }
-
-        public synchronized void begin() {
-            if (status != STATUS_NO_TRANSACTION) {
-                throw new IllegalStateException(
-                        "Transaction must have 'STATUS_NO_TRANSACTION' to begin. "
-                                + "Current status: "
-                                + decodeStatus(status));
-            }
-
-            status = STATUS_ACTIVE;
-            // most Cayenne apps are single datanode,
-            // there will be few that have more than 2, esp. in a single tran
-            connections = new ArrayList(2);
-        }
-
-        public synchronized void addConnection(Connection connection)
-                throws IllegalStateException, SQLException, CayenneException {
-
-            // implicitly begin transaction
-            if (status == STATUS_NO_TRANSACTION) {
-                begin();
-            }
-
-            if (delegate != null && !delegate.willAddConnection(this, connection)) {
-                return;
-            }
-
-            if (status != STATUS_ACTIVE) {
-                throw new IllegalStateException(
-                        "Transaction must have 'STATUS_ACTIVE' to add a connection. "
-                                + "Current status: "
-                                + decodeStatus(status));
-            }
-
-            if (!connections.contains(connection)) {
-                // may need to fix connection properties
-                fixConnectionState(connection);
-                connections.add(connection);
-            }
-        }
-
-        public void commit() throws IllegalStateException, SQLException, CayenneException {
-
-            if (status == STATUS_NO_TRANSACTION) {
-                return;
-            }
-
-            if (delegate != null && !delegate.willCommit(this)) {
-                return;
-            }
-
-            try {
-                if (status != STATUS_ACTIVE) {
-                    throw new IllegalStateException(
-                            "Transaction must have 'STATUS_ACTIVE' to be committed. "
-                                    + "Current status: "
-                                    + decodeStatus(status));
-                }
-
-                processCommit();
-
-                status = STATUS_COMMITTED;
-                if (delegate != null) {
-                    delegate.didCommit(this);
-                }
-            }
-            finally {
-                close();
-            }
-        }
-
-        public void rollback() throws IllegalStateException, SQLException,
-                CayenneException {
-
-            if (status == STATUS_NO_TRANSACTION
-                    || status == STATUS_ROLLEDBACK
-                    || status == STATUS_ROLLING_BACK) {
-                return;
-            }
-
-            if (delegate != null && !delegate.willRollback(this)) {
-                return;
-            }
-
-            try {
-                if (status != STATUS_ACTIVE) {
-                    throw new IllegalStateException(
-                            "Transaction must have 'STATUS_ACTIVE' to be rolled back. "
-                                    + "Current status: "
-                                    + decodeStatus(status));
-                }
-
-                processRollback();
-
-                status = STATUS_ROLLEDBACK;
-                if (delegate != null) {
-                    delegate.didRollback(this);
-                }
-            }
-            finally {
-                close();
-            }
-        }
-
-        protected void fixConnectionState(Connection connection) throws SQLException {
-            // NOOP
-        }
-
-        protected void processCommit() throws SQLException, CayenneException {
-            QueryLogger
-                    .logCommitTransaction("no commit - transaction controlled externally.");
-        }
-
-        protected void processRollback() throws SQLException, CayenneException {
-            QueryLogger
-                    .logRollbackTransaction("no rollback - transaction controlled externally.");
-        }
-
-        /**
-         * Closes all connections associated with transaction.
-         */
-        protected void close() {
-            if (connections == null || connections.isEmpty()) {
-                return;
-            }
-
-            Iterator it = connections.iterator();
-            while (it.hasNext()) {
-                try {
-
-                    ((Connection) it.next()).close();
-                }
-                catch (Throwable th) {
-                    // TODO: chain exceptions...
-                    // ignore for now
-                }
-            }
-        }
-    }
-
-    // transaction managed by Cayenne
-    static class InternalTransaction extends ExternalTransaction {
-
-        InternalTransaction(TransactionDelegate delegate) {
-            super(delegate);
-        }
-
-        public void begin() {
-            super.begin();
-            QueryLogger.logBeginTransaction("transaction started.");
-        }
-
-        protected void fixConnectionState(Connection connection) throws SQLException {
-            if (connection.getAutoCommit()) {
-                // some DBs are very particular about that, (e.g. Informix SE 7.0 per
-                // CAY-179), so do a try-catch and ignore exception
-
-                // TODO: maybe allow adapter to provide transaction instance?
-
-                try {
-                    connection.setAutoCommit(false);
-                }
-                catch (SQLException cay179Ex) {
-                    logObj
-                            .info("Can't set connection autocommit to false, ignoring. Message: "
-                                    + cay179Ex.getMessage());
-                }
-            }
-        }
-
-        protected void processCommit() throws SQLException, CayenneException {
-            status = STATUS_COMMITTING;
-
-            if (connections != null && connections.size() > 0) {
-                Throwable deferredException = null;
-                Iterator it = connections.iterator();
-                while (it.hasNext()) {
-                    Connection connection = (Connection) it.next();
-                    try {
-
-                        if (deferredException == null) {
-                            connection.commit();
-                        }
-                        else {
-                            // we must do a partial rollback if only to cleanup
-                            // uncommitted
-                            // connections.
-                            connection.rollback();
-                        }
-
-                    }
-                    catch (Throwable th) {
-                        // there is no such thing as "partial" rollback in real
-                        // transactions,
-                        // so we can't set any meaningful status.
-                        // status = ?;
-                        setRollbackOnly();
-
-                        // stores last exception
-                        // TODO: chain exceptions...
-                        deferredException = th;
-                    }
-                }
-
-                if (deferredException != null) {
-                    QueryLogger.logRollbackTransaction("transaction rolledback.");
-                    if (deferredException instanceof SQLException) {
-                        throw (SQLException) deferredException;
-                    }
-                    else {
-                        throw new CayenneException(deferredException);
-                    }
-                }
-                else {
-                    QueryLogger.logCommitTransaction("transaction committed.");
-                }
-            }
-        }
-
-        protected void processRollback() throws SQLException, CayenneException {
-            status = STATUS_ROLLING_BACK;
-
-            if (connections != null && connections.size() > 0) {
-                Throwable deferredException = null;
-
-                Iterator it = connections.iterator();
-                while (it.hasNext()) {
-                    Connection connection = (Connection) it.next();
-
-                    try {
-                        // continue with rollback even if an exception was thrown before
-                        connection.rollback();
-                    }
-                    catch (Throwable th) {
-                        // stores last exception
-                        // TODO: chain exceptions...
-                        deferredException = th;
-                    }
-                }
-
-                if (deferredException != null) {
-                    if (deferredException instanceof SQLException) {
-                        throw (SQLException) deferredException;
-                    }
-                    else {
-                        throw new CayenneException(deferredException);
-                    }
-                }
-            }
-        }
-    }
 }

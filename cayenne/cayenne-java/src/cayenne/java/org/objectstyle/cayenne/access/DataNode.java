@@ -69,7 +69,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.jdbc.BatchAction;
 import org.objectstyle.cayenne.access.jdbc.ProcedureAction;
 import org.objectstyle.cayenne.access.jdbc.RowDescriptor;
@@ -236,12 +235,22 @@ public class DataNode implements QueryEngine {
     }
 
     /**
-     * Wraps queries in an internal transaction, and executes them via connection obtained
-     * from internal DataSource.
+     * @deprecated since 1.2 as the corresponding interface method is deprecated.
      */
-    public void performQueries(Collection queries, OperationObserver observer) {
-        Transaction transaction = Transaction.internalTransaction(null);
-        transaction.performQueries(this, queries, observer);
+    public void performQueries(
+            Collection queries,
+            OperationObserver observer,
+            Transaction transaction) {
+
+        Transaction old = Transaction.getThreadTransaction();
+        Transaction.bindThreadTransaction(transaction);
+
+        try {
+            performQueries(queries, observer);
+        }
+        finally {
+            Transaction.bindThreadTransaction(old);
+        }
     }
 
     /**
@@ -250,22 +259,24 @@ public class DataNode implements QueryEngine {
      * 
      * @since 1.1
      */
-    public void performQueries(
-            Collection queries,
-            OperationObserver resultConsumer,
-            Transaction transaction) {
+    public void performQueries(Collection queries, OperationObserver callback) {
+
+        Transaction transaction = Transaction.getThreadTransaction();
+
+        // TODO: Andrus, 12/5/2005 - This behavior is compatible with 1.1 and many things
+        // in Cayenne rely on such implicit transaction (e.g. PK generators), however it
+        // is unclear how this ever worked with external Transactions? Does it have
+        // something to do with the fact that it was tested on MySQL?
+        if (transaction == null) {
+            Transaction.internalTransaction(null).performQueries(this, queries, callback);
+            return;
+        }
 
         int listSize = queries.size();
         if (listSize == 0) {
             return;
         }
         QueryLogger.logQueryStart(listSize);
-
-        // since 1.1 Transaction object is required
-        if (transaction == null) {
-            throw new CayenneRuntimeException(
-                    "No transaction associated with the queries.");
-        }
 
         // do this meaningless inexpensive operation to
         // trigger AutoAdapter lazy initialization before opening a connection...
@@ -277,7 +288,7 @@ public class DataNode implements QueryEngine {
 
         try {
             // check for invalid iterated query
-            if (resultConsumer.isIteratedResult() && listSize > 1) {
+            if (callback.isIteratedResult() && listSize > 1) {
                 throw new CayenneException(
                         "Iterated queries are not allowed in a batch. Batch size: "
                                 + listSize);
@@ -296,11 +307,11 @@ public class DataNode implements QueryEngine {
                 transaction.setRollbackOnly();
             }
 
-            resultConsumer.nextGlobalException(globalEx);
+            callback.nextGlobalException(globalEx);
             return;
         }
 
-        DataNodeQueryAction queryRunner = new DataNodeQueryAction(this, resultConsumer);
+        DataNodeQueryAction queryRunner = new DataNodeQueryAction(this, callback);
         Iterator it = queries.iterator();
         while (it.hasNext()) {
             Query nextQuery = (Query) it.next();
@@ -314,7 +325,7 @@ public class DataNode implements QueryEngine {
 
                 // notify consumer of the exception,
                 // stop running further queries
-                resultConsumer.nextQueryException(nextQuery, queryEx);
+                callback.nextQueryException(nextQuery, queryEx);
 
                 // rollback transaction
                 transaction.setRollbackOnly();

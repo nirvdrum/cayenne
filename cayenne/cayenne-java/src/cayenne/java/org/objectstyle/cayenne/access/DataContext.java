@@ -1037,36 +1037,26 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Delegates queries execution to parent QueryEngine, wrapping execution in an
-     * internal transaction provided by parent DataDomain.
+     * Executes all queries in collection. Internally wraps the execution in a Transaction
+     * if no user Transaction is bound to the current thread.
      */
-    public void performQueries(Collection queries, OperationObserver observer) {
-        // note - use external transaction for iterated queries;
-        // other types of transactions won't be safe in this case
-        Transaction transaction = (observer.isIteratedResult())
-                ? Transaction.externalTransaction(getParentDataDomain()
-                        .getTransactionDelegate())
-                : getParentDataDomain().createTransaction();
+    public void performQueries(Collection queries, OperationObserver callback) {
 
-        transaction.performQueries(this, queries, observer);
-    }
+        Transaction transaction = Transaction.getThreadTransaction();
 
-    /**
-     * Executes queries wrapped in provided transaction, by delegating to the parent
-     * QueryEngine. Before execution queries are filtered through a DataContextDelegate if
-     * one exists.
-     * 
-     * @since 1.1
-     */
-    public void performQueries(
-            Collection queries,
-            OperationObserver resultConsumer,
-            Transaction transaction) {
+        // no transaction context - wrap it in one...
+        if (transaction == null) {
+            transaction = (callback.isIteratedResult())
+                    ? Transaction.externalTransaction(getParentDataDomain()
+                            .getTransactionDelegate())
+                    : getParentDataDomain().createTransaction();
 
-        if (this.getParent() == null) {
-            throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
+            transaction.performQueries(this, queries, callback);
+            return;
         }
+        // transaction context exists
 
+        // filter through the delegate
         DataContextDelegate localDelegate = nonNullDelegate();
         List finalQueries = new ArrayList(queries.size());
 
@@ -1092,7 +1082,31 @@ public class DataContext implements QueryEngine, Serializable {
             }
         }
 
-        this.getParent().performQueries(finalQueries, resultConsumer, transaction);
+        if (!finalQueries.isEmpty()) {
+            getParent().performQueries(queries, callback);
+        }
+    }
+
+    /**
+     * Binds provided transaction to the current thread, and then runs queries.
+     * 
+     * @since 1.1
+     * @deprecated since 1.2. Use Transaction.bindThreadTransaction(..) to provide custom
+     *             transactions.
+     */
+    public void performQueries(
+            Collection queries,
+            OperationObserver callback,
+            Transaction transaction) {
+
+        Transaction.bindThreadTransaction(transaction);
+
+        try {
+            performQueries(queries, callback);
+        }
+        finally {
+            Transaction.bindThreadTransaction(null);
+        }
     }
 
     /**

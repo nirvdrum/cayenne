@@ -112,6 +112,7 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
 
         // since stored procedure commits its stuff, we must use an explicit
         // non-committing transaction
+
         Transaction.externalTransaction(null).performQueries(
                 ctxt,
                 Collections.singletonList(q),

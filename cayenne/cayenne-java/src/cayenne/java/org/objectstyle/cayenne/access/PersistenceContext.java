@@ -74,7 +74,9 @@ public interface PersistenceContext {
      * ObjectContexts to commit their objects to parent. Any changes made to objects as a
      * result of commit are appended to the changeBuffer.
      */
-    void commitChangesInContext(ObjectContext context, GraphChangeHandler commitChangeCallback);
+    void commitChangesInContext(
+            ObjectContext context,
+            GraphChangeHandler commitChangeCallback);
 
     /**
      * Executes a query using its own preferred transactional behavior.
@@ -82,16 +84,4 @@ public interface PersistenceContext {
      * @see org.objectstyle.cayenne.query.QueryChain
      */
     void performQuery(QueryExecutionPlan query, OperationObserver observer);
-
-    /**
-     * Executes a query within a given transaction. Note that if there is a need to run
-     * multiple queries, a decorator can be created that implements Query, but internally
-     * resolves to more than one actual query.
-     * 
-     * @see org.objectstyle.cayenne.query.QueryChain
-     */
-    void performQuery(
-            QueryExecutionPlan query,
-            OperationObserver observer,
-            Transaction transaction);
 }

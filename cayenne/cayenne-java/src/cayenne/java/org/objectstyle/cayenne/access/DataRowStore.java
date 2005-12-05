@@ -329,8 +329,6 @@ public class DataRowStore implements Serializable {
         }
 
         // try getting it from database
-
-        // TODO: replace this with SingleObjectQuery...
         Query select = new SingleObjectQuery(oid).resolve(engine.getEntityResolver());
         QueryResult observer = new QueryResult();
         engine.performQueries(Collections.singletonList(select), observer);

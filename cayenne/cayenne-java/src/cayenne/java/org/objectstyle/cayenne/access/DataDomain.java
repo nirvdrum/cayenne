@@ -269,7 +269,7 @@ public class DataDomain implements QueryEngine, PersistenceContext {
      */
     public void setEventManager(EventManager eventManager) {
         this.eventManager = eventManager;
-        
+
         if (sharedSnapshotCache != null) {
             sharedSnapshotCache.setEventManager(eventManager);
         }
@@ -547,9 +547,13 @@ public class DataDomain implements QueryEngine, PersistenceContext {
     }
 
     /**
-     * Creates and returns a new inactive transaction. If there is a TransactionDelegate,
-     * adds the delegate to the newly created Transaction. Behavior of the returned
-     * Transaction depends on "usingInternalTransactions" property setting.
+     * Creates and returns a new inactive transaction. Returned transaction is bound to
+     * the current execution thread.
+     * <p>
+     * If there is a TransactionDelegate, adds the delegate to the newly created
+     * Transaction. Behavior of the returned Transaction depends on
+     * "usingInternalTransactions" property setting.
+     * </p>
      * 
      * @since 1.1
      */
@@ -603,10 +607,8 @@ public class DataDomain implements QueryEngine, PersistenceContext {
     }
 
     /**
-     * Inspects the queries, sending them to appropriate DataNodes for execution. May
-     * modify transaction settings on the OperationObserver.
-     * 
      * @since 1.1
+     * @deprecated since 1.2, as the corresponding interface method is deprecated.
      */
     public void performQueries(
             Collection queries,
@@ -617,13 +619,19 @@ public class DataDomain implements QueryEngine, PersistenceContext {
             return;
         }
 
-        // transaction is passed to us, so assume we are already wrapped in it...
-        performQuery(new QueryChain(queries), resultConsumer, transaction);
+        Transaction old = Transaction.getThreadTransaction();
+        Transaction.bindThreadTransaction(transaction);
+
+        try {
+            performQuery(new QueryChain(queries), resultConsumer);
+        }
+        finally {
+            Transaction.bindThreadTransaction(old);
+        }
     }
 
     /**
-     * Wraps queries in an internal transaction and sends them to appropriate DataNodes
-     * for execution.
+     * Routes queries to appropriate DataNodes for execution.
      */
     public void performQueries(Collection queries, OperationObserver observer) {
         if (queries.isEmpty()) {
@@ -721,25 +729,6 @@ public class DataDomain implements QueryEngine, PersistenceContext {
      */
     public void performQuery(QueryExecutionPlan query, OperationObserver resultConsumer) {
 
-        Transaction transaction = (resultConsumer.isIteratedResult()) ? Transaction
-                .noTransaction() : createTransaction();
-
-        // we created a transaction, so it is this method's responsibility to
-        // wrap the execution in it
-        transaction.performQuery(this, query, resultConsumer);
-    }
-
-    /**
-     * Routes and executes a given query. Note that query resolution phase is not done at
-     * this level and is a responsibility of the caller.
-     * 
-     * @since 1.2
-     */
-    public void performQuery(
-            QueryExecutionPlan query,
-            OperationObserver resultConsumer,
-            Transaction transaction) {
-
         final Map queryMap = new HashMap();
 
         // TODO: optimize for single engine - the most common case...
@@ -783,8 +772,7 @@ public class DataDomain implements QueryEngine, PersistenceContext {
             Map.Entry entry = (Map.Entry) nodeIt.next();
             QueryEngine nextNode = (QueryEngine) entry.getKey();
             Collection nodeQueries = (Collection) entry.getValue();
-
-            nextNode.performQueries(nodeQueries, resultConsumer, transaction);
+            nextNode.performQueries(nodeQueries, resultConsumer);
         }
     }
 }
