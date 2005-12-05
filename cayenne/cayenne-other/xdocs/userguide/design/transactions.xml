@@ -34,29 +34,49 @@
             </subsection>
             
             <subsection name="4.10.2 User Control over Transactions">
-            <p>As mentioned before, users shouldn't normally deal with Transactions explicitly. However if there is a need to do
-            so, Cayenne provides completely open API discussed in this section.</p>
+            <p>As mentioned before, users won't normally have to deal with Transactions. However if there is a need to do
+            so, there are a few ways to customize transactions as described below.</p>
             
-            <p><strong>Explict Transactions.</strong> <a href=
-			"../../api/cayenne/org/objectstyle/cayenne/access/QueryEngine.html">QueryEngine interface</a> implemented by 
-			DataContext, DataDomain and DataNode, defines "performQueries" method that takes an instance of Transaction
-			as one of its arguments. Users can invoke this method with their own subclass of Transaction.
-			</p>
-			
-			<panel name="Explicit Transactions Note:">
-			When calling "QueryEngine.performQueries(Collection, OperationObserver, Transaction)", it is always a caller's responsibility to
-			invoke "begin/commit/rollback" methods. Cayenne will only add the JDBC connections involved in the transaction to the Transaction
-			object, but will not attempt to alter its state.
-			</panel>
+            <p><strong>Explict Transactions.</strong> Users can bind their own transaction to the execution thread before starting
+			Cayenne operation. Note that in this case, it is always a caller's responsibility to
+			invoke "begin/commit/rollback" methods and unbind the transaction when it is finished. For example:
+				</p>
+<source>Transaction transaction = new MyTransaction();
+Transaction.bindThreadTransaction(transaction);
+
+try {
+    // do something...
+    ....
+    // if no failures, commit
+    transaction.commit();
+}
+catch (Exception ex) {
+    transaction.setRollbackOnly();
+}
+finally {
+    // unbind
+    Transaction.bindThreadTransaction(null);
+    // rollback
+    if (getStatus() == Transaction.STATUS_MARKED_ROLLEDBACK) {
+        try {
+           rollback();
+        }
+        catch (Exception rollbackEx) {
+        }
+    }
+}</source>
+		
 			<p> </p>
 			
 			<p><strong>Explict Transactions Made Simple.</strong>
 			As mentioned above, when using a Transaction explicitly, it is the caller's responsibility to commit or rollback 
-			the transaction. However, the Transaction class itself can take care of this. Transaction implements a method
-			<code>performQueries</code> that uses a provided QueryEngine (e.g. DataContext) to run a set of
-			queries in its own transactional context. At the end transaction will be comitted or rolled back depending on the 
-			outcome of the operation. This is much less error-prone than manually managing the Transaction state.
+			the transaction. To simplify this task, the code Transaction has a method
+			<code>performQueries</code> that already does all of the above. This is much less error-prone than manually 
+			managing the Transaction state.
 			</p>
+<source>Transaction transaction = new MyTransaction();
+transaction.performQueries(context, queries, observer);</source>
+				<p> </p>
 			
            <p><strong>TransactionDelegate.</strong> Another way to customize existing Cayenne transactions behavior and/or
            track transactions execution is <a href=

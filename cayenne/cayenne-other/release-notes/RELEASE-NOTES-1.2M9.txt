@@ -28,10 +28,17 @@ Changes/New Features:
   it portable across the network, we no longer use Java Class as the main key within the id. Instead 
   ObjEntity name string is used for this purpose. 
   
-  UPGRADE WARNING: it wasn't possible to phase out some of the old ObjectId API via deprecation, so methods 
+  UPGRADE NOTE: it wasn't possible to phase out some of the old ObjectId API via deprecation, so methods 
   "getObjClass" and "getObjectClass" are removed completely. Constructors that take Class as the first argument
   are deprecated and will only work if entity naming follows CayenneModeler default conventions of using unqualified
   class name as the entity name.
+ 
+* Thread-bound Transactions:
+  QueryEngine.performQueries(Collection,OperationObserver resultConsumer,Transaction) is deprecated and no longer used 
+  internally to further decouple layers in the access stack. Instead transaction initiator (either DataContext or a user)
+  must bind an appropraite transaction before executing an operation (or use Transaction.performQueries(..) that does
+  it internally). 
+  UPGRADE NOTE: This change only affects users who implemented custom transactions. 
   
 
 Bugs Fixed:
