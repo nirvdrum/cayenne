@@ -57,34 +57,38 @@ package org.objectstyle.cayenne.graph;
 
 import java.util.Collection;
 
-/**
- * Represents a generic "managed" graph with nodes mapped by their ids. Inherited
- * GraphChangeHandler methods are intended as callbacks for graph node objects to notify
- * graph of their changes.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public interface GraphManager extends GraphChangeHandler {
+import junit.framework.TestCase;
 
-    /**
-     * Returns a graph node given an id.
-     */
-    Object getNode(Object nodeId);
+public class GraphMapTst extends TestCase {
 
-    /**
-     * "Registers" a graph node, usually striong the node in some internal map using its
-     * id as a key.
-     */
-    void registerNode(Object nodeId, Object nodeObject);
+    public void testRegisterNode() {
+        GraphMap map = new GraphMap();
+        Object node = new Object();
 
-    /**
-     * "Unregisters" a graph node, forgetting any information associated with nodeId.
-     */
-    Object unregisterNode(Object nodeId);
+        map.registerNode("key", node);
+        assertSame(node, map.getNode("key"));
+    }
 
-    /**
-     * Returns all graph nodes regsitered with GraphManager.
-     */
-    Collection registeredNodes();
+    public void testRegisteredNodes() {
+        GraphMap map = new GraphMap();
+        Object n1 = new Object();
+        Object n2 = new Object();
+
+        map.registerNode(n1, n1);
+        map.registerNode(n2, n2);
+
+        Collection nodes = map.registeredNodes();
+        assertNotNull(nodes);
+        assertEquals(2, nodes.size());
+        assertTrue(nodes.contains(n1));
+        assertTrue(nodes.contains(n2));
+
+        try {
+            nodes.add(new Object());
+            fail("Nodes collection is expected to be immutable.");
+        }
+        catch (UnsupportedOperationException e) {
+            // expected...
+        }
+    }
 }

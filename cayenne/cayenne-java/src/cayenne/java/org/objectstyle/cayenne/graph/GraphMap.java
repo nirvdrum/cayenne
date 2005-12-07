@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.graph;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,6 +84,13 @@ public class GraphMap implements GraphManager {
     }
 
     // *** GraphMap methods
+
+    /**
+     * Returns an immutable collection of registered nodes.
+     */
+    public Collection registeredNodes() {
+        return Collections.unmodifiableCollection(nodes.values());
+    }
 
     public synchronized Object getNode(Object nodeId) {
         return nodes.get(nodeId);

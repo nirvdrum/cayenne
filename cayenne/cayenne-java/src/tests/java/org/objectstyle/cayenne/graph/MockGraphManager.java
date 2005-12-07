@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.graph;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,6 +65,10 @@ public class MockGraphManager implements GraphManager {
 
     public MockGraphManager() {
         this.map = new HashMap();
+    }
+
+    public Collection registeredNodes() {
+        return map.values();
     }
 
     public Object getNode(Object nodeId) {
@@ -83,10 +88,10 @@ public class MockGraphManager implements GraphManager {
 
     public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
     }
-    
+
     public void graphCommitAborted() {
     }
-    
+
     public void graphCommitStarted() {
     }
 
