@@ -87,30 +87,21 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
 
     /**
      * Returns an iterator over all executed queries in the order they were executed.
+     * 
+     * @deprecated since 1.2 this method is redundant. Use {@link #allQueries()} instead.
      */
     public Iterator getQueries() {
         return queries.keySet().iterator();
     }
 
     /**
-     * Returns all results regardless of the query.
+     * Returns an immutable collection of all executed queries. Iteration order over the
+     * collection corresponds to the order in which the queries where executed.
      * 
      * @since 1.2
      */
-    public Collection getResults() {
-        if (queries.isEmpty()) {
-            return Collections.EMPTY_LIST;
-        }
-
-        Collection results = new ArrayList(5);
-
-        Iterator it = queries.values().iterator();
-        while (it.hasNext()) {
-            Collection queryResult = (Collection) it.next();
-            results.addAll(queryResult);
-        }
-
-        return results;
+    public Collection allQueries() {
+        return Collections.unmodifiableCollection(queries.keySet());
     }
 
     /**

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.opp;
 
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.graph.GraphDiff;
 
 /**
@@ -72,7 +73,7 @@ public class SyncMessage implements OPPMessage {
     public static final int COMMIT_TYPE = 2;
     public static final int ROLLBACK_TYPE = 3;
 
-    protected transient Object source;
+    protected transient ObjectContext source;
     protected int type;
     protected GraphDiff senderChanges;
 
@@ -81,7 +82,7 @@ public class SyncMessage implements OPPMessage {
 
     }
 
-    public SyncMessage(Object source, int type, GraphDiff senderChanges) {
+    public SyncMessage(ObjectContext source, int type, GraphDiff senderChanges) {
         // validate type
         if (type != FLUSH_TYPE && type != COMMIT_TYPE && type != ROLLBACK_TYPE) {
             throw new IllegalArgumentException("'type' is invalid: " + type);
@@ -95,7 +96,7 @@ public class SyncMessage implements OPPMessage {
     /**
      * Returns a source of SyncMessage.
      */
-    public Object getSource() {
+    public ObjectContext getSource() {
         return source;
     }
 

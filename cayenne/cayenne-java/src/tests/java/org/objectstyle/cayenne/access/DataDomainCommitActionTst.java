@@ -62,7 +62,9 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.MockObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.graph.MockGraphChangeHandler;
+import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class DataDomainCommitActionTst extends CayenneTestCase {
@@ -87,8 +89,12 @@ public class DataDomainCommitActionTst extends CayenneTestCase {
 
         DataDomainCommitAction action = new DataDomainCommitAction(getDomain());
 
-        MockGraphChangeHandler recorder = new MockGraphChangeHandler();
-        action.commit(context, recorder);
-        assertEquals(1, recorder.getCallbackCount());
+        GraphDiff diff = action.commit(new SyncMessage(
+                context,
+                SyncMessage.COMMIT_TYPE,
+                null));
+
+        assertTrue(diff instanceof CompoundDiff);
+        assertEquals(1, ((CompoundDiff) diff).getDiffs().size());
     }
 }

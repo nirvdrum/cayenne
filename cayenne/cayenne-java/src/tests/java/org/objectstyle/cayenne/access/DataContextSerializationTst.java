@@ -77,7 +77,7 @@ public class DataContextSerializationTst extends CayenneTestCase {
 
         assertNotSame(context, deserializedContext);
         assertNotSame(context.getObjectStore(), deserializedContext.getObjectStore());
-        assertSame(context.getParent(), deserializedContext.getParent());
+        assertSame(context.getParentDataDomain(), deserializedContext.getParentDataDomain());
         assertSame(
             context.getObjectStore().getDataRowCache(),
             deserializedContext.getObjectStore().getDataRowCache());
@@ -99,7 +99,7 @@ public class DataContextSerializationTst extends CayenneTestCase {
         assertNotSame(context, deserializedContext);
         assertNotSame(context.getObjectStore(), deserializedContext.getObjectStore());
 
-        assertSame(context.getParent(), deserializedContext.getParent());
+        assertSame(context.getParentDataDomain(), deserializedContext.getParentDataDomain());
         assertNotSame(
             context.getObjectStore().getDataRowCache(),
             deserializedContext.getObjectStore().getDataRowCache());
@@ -117,7 +117,7 @@ public class DataContextSerializationTst extends CayenneTestCase {
 
         DataContext deserializedContext =
             (DataContext) Util.cloneViaSerialization(context);
-        assertSame(context.getParent(), deserializedContext.getParent());
+        assertSame(context.getParentDataDomain(), deserializedContext.getParentDataDomain());
 
         // there should be only one object registered
         Artist deserializedArtist =
@@ -146,10 +146,10 @@ public class DataContextSerializationTst extends CayenneTestCase {
                 + new ArrayList(Configuration.getSharedConfiguration().getDomains()));
         logObj.warn(
             " domains in question: "
-                + context.getParent()
+                + context.getParentDataDomain()
                 + "--"
-                + deserializedContext.getParent());
-        assertSame(context.getParent(), deserializedContext.getParent());
+                + deserializedContext.getParentDataDomain());
+        assertSame(context.getParentDataDomain(), deserializedContext.getParentDataDomain());
 
         // there should be only one object registered
         Artist deserializedArtist =
@@ -188,7 +188,7 @@ public class DataContextSerializationTst extends CayenneTestCase {
         DataContext deserializedContext =
             (DataContext) Util.cloneViaSerialization(context);
 
-        assertSame(context.getParent(), deserializedContext.getParent());
+        assertSame(context.getParentDataDomain(), deserializedContext.getParentDataDomain());
 
         // there should be only one object registered
         Artist deserializedArtist =

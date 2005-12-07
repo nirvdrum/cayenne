@@ -80,7 +80,7 @@ public class PersistentObjectInContextTst extends CayenneTestCase {
     }
 
     protected ObjectContext createObjectContext() {
-        // wrap ClientServerChannel in LocalConnector to enable logging...
+        // wrap ClientServerChannel in LocalConnection to enable logging...
         OPPConnection connector = new LocalConnection(
                 new ClientServerChannel(getDomain()));
         return new CayenneContext(new OPPServerChannel(connector));

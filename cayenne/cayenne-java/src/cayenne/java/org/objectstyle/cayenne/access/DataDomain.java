@@ -67,12 +67,18 @@ import java.util.TreeMap;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
 import org.objectstyle.cayenne.event.EventManager;
-import org.objectstyle.cayenne.graph.GraphChangeHandler;
+import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.opp.BootstrapMessage;
+import org.objectstyle.cayenne.opp.GenericQueryMessage;
+import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.opp.SelectMessage;
+import org.objectstyle.cayenne.opp.SyncMessage;
+import org.objectstyle.cayenne.opp.UpdateMessage;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryChain;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
@@ -89,9 +95,9 @@ import org.objectstyle.cayenne.util.Util;
  * target="_top">Cayenne User Guide. </a> </i>
  * </p>
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-public class DataDomain implements QueryEngine, PersistenceContext {
+public class DataDomain implements QueryEngine, OPPChannel {
 
     private static final Logger logObj = Logger.getLogger(DataDomain.class);
 
@@ -536,7 +542,7 @@ public class DataDomain implements QueryEngine, PersistenceContext {
 
         DataContext context;
         if (null == dataContextFactory) {
-            context = new DataContext(this, new ObjectStore(snapshotCache));
+            context = new DataContext((OPPChannel) this, new ObjectStore(snapshotCache));
         }
         else {
             context = dataContextFactory.createDataContext(this, new ObjectStore(
@@ -711,17 +717,6 @@ public class DataDomain implements QueryEngine, PersistenceContext {
     // =======================================
 
     /**
-     * Commits changes in an ObjectContext.
-     * 
-     * @since 1.2
-     */
-    public void commitChangesInContext(
-            ObjectContext context,
-            GraphChangeHandler commitChangeCallback) {
-        new DataDomainCommitAction(this).commit(context, commitChangeCallback);
-    }
-
-    /**
      * Routes and executes a given query, wrapping it in a transaction. Note that query
      * resolution phase is not done at this level and is a responsibility of the caller.
      * 
@@ -774,5 +769,63 @@ public class DataDomain implements QueryEngine, PersistenceContext {
             Collection nodeQueries = (Collection) entry.getValue();
             nextNode.performQueries(nodeQueries, resultConsumer);
         }
+    }
+
+    // ****** OPPChannel methods:
+
+    /**
+     * @since 1.2
+     */
+    public EntityResolver onBootstrap(BootstrapMessage message) {
+        return entityResolver;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public QueryResponse onGenericQuery(GenericQueryMessage message) {
+        QueryResult result = new QueryResult();
+        performQuery(message.getQueryPlan().resolve(getEntityResolver()), result);
+        return result;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public List onSelectQuery(SelectMessage message) {
+        Query query = message.getQueryPlan().resolve(getEntityResolver());
+        QueryResult result = new QueryResult();
+        performQuery(query, result);
+        return result.getFirstRows(query);
+    }
+
+    /**
+     * @since 1.2
+     */
+    public GraphDiff onSync(SyncMessage message) {
+
+        // ignore all but commit messages
+        if (message.getType() == SyncMessage.COMMIT_TYPE) {
+            return new DataDomainCommitAction(this).commit(message);
+        }
+
+        return null;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public int[] onUpdateQuery(UpdateMessage message) {
+
+        Query query = message.getQueryPlan().resolve(getEntityResolver());
+        QueryResult result = new QueryResult();
+        performQuery(query, result);
+
+        List updates = result.getUpdates(query);
+        int[] counts = new int[updates.size()];
+        for (int i = 0; i < counts.length; i++) {
+            counts[i] = ((Number) updates.get(i)).intValue();
+        }
+        return counts;
     }
 }

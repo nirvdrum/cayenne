@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -63,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
@@ -178,27 +180,32 @@ class DataContextSelectAction {
         return results;
     }
 
-    List getResultsAsObjects(GenericSelectQuery rootQuery, QueryResult observer) {
+    List getResultsAsObjects(GenericSelectQuery rootQuery, QueryResponse response) {
 
-        List mainRows = observer.getFirstRows(rootQuery);
+        List mainRows = response.getFirstRows(rootQuery);
+
+        if (mainRows.isEmpty()) {
+            return new ArrayList(1);
+        }
 
         // take a shortcut when no prefetches exist...
         if (rootQuery.getPrefetchTree() == null) {
-            return new ObjectResolver(context, rootQuery).synchronizedObjectsFromDataRows(mainRows);
+            return new ObjectResolver(context, rootQuery)
+                    .synchronizedObjectsFromDataRows(mainRows);
         }
 
         // map results to prefetch paths
         Map rowsByPath = new HashMap();
 
         // find result set
-        Iterator it = observer.getQueries();
+        Iterator it = response.allQueries().iterator();
 
         while (it.hasNext()) {
             Query q = (Query) it.next();
 
             if (q instanceof PrefetchSelectQuery) {
                 PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) q;
-                rowsByPath.put(prefetchQuery.getPrefetchPath(), observer.getFirstRows(q));
+                rowsByPath.put(prefetchQuery.getPrefetchPath(), response.getFirstRows(q));
             }
         }
 

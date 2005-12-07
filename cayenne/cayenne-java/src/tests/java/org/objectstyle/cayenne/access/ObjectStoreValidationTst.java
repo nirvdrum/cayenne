@@ -60,6 +60,7 @@ import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
@@ -128,7 +129,7 @@ public class ObjectStoreValidationTst extends CayenneTestCase {
     private DataContext createMockupDataContext(ObjectStore objectStore) {
         MockQueryEngine qe = new MockQueryEngine(getDomain());
         MockDataDomain dd = new MockDataDomain(qe);
-        return new DataContext(dd, objectStore);
+        return new DataContext((OPPChannel) dd, objectStore);
     }
 
     class MockupActiveValidatingObject extends CayenneDataObject {

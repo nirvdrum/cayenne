@@ -55,26 +55,24 @@
  */
 package org.objectstyle.cayenne.query;
 
-
 /**
  * @author Andrus Adamchik
  */
 public class MockGenericSelectQuery extends MockQuery implements GenericSelectQuery {
 
     protected boolean fetchingDataRows;
+    protected boolean resolvingInherited;
 
     public MockGenericSelectQuery() {
-        super();
     }
 
-    public MockGenericSelectQuery(boolean fetchingDataRows) {
-        super();
-
-        this.fetchingDataRows = fetchingDataRows;
+    public MockGenericSelectQuery(Object root) {
+        setRoot(root);
     }
 
-    public MockGenericSelectQuery(String name) {
+    public MockGenericSelectQuery(Object root, String name) {
         super(name);
+        setRoot(root);
     }
 
     public PrefetchTreeNode getPrefetchTree() {
@@ -85,15 +83,7 @@ public class MockGenericSelectQuery extends MockQuery implements GenericSelectQu
         return null;
     }
 
-    public boolean isFetchingDataRows() {
-        return fetchingDataRows;
-    }
-
     public boolean isRefreshingObjects() {
-        return false;
-    }
-
-    public boolean isResolvingInherited() {
         return false;
     }
 
@@ -107,5 +97,17 @@ public class MockGenericSelectQuery extends MockQuery implements GenericSelectQu
 
     public void setFetchingDataRows(boolean fetchingDataRows) {
         this.fetchingDataRows = fetchingDataRows;
+    }
+
+    public boolean isResolvingInherited() {
+        return resolvingInherited;
+    }
+
+    public void setResolvingInherited(boolean resolvingInherited) {
+        this.resolvingInherited = resolvingInherited;
+    }
+
+    public boolean isFetchingDataRows() {
+        return fetchingDataRows;
     }
 }

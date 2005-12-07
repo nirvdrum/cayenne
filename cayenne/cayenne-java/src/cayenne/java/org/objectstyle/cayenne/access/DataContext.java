@@ -89,6 +89,8 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.opp.BootstrapMessage;
+import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ParameterizedQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
@@ -122,7 +124,7 @@ import org.objectstyle.cayenne.util.Util;
  * target="_top">Cayenne User Guide. </a> </i>
  * </p>
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class DataContext implements QueryEngine, Serializable {
 
@@ -168,7 +170,7 @@ public class DataContext implements QueryEngine, Serializable {
      * 
      * @since 1.1
      */
-    // TODO: Andrus, 11/7/2005 - shouldn't we use InheritableThreadLocal instead?
+    // TODO: Andrus, 11/7/2005 - should we use InheritableThreadLocal instead?
     protected static final ThreadLocal threadDataContext = new ThreadLocal();
 
     // event posting default for new DataContexts
@@ -184,7 +186,11 @@ public class DataContext implements QueryEngine, Serializable {
     protected boolean validatingObjectsOnCommit;
     protected ObjectStore objectStore;
 
-    protected transient QueryEngine parent;
+    protected transient OPPChannel channel;
+
+    // note that entity resolver is initialized from the parent channel the first time it
+    // is accessed, and later cached in the context
+    protected transient EntityResolver entityResolver;
 
     /**
      * Stores user defined properties associated with this DataContext.
@@ -296,7 +302,7 @@ public class DataContext implements QueryEngine, Serializable {
      * DataDomain.
      */
     public DataContext() {
-        this(null, null);
+        this((OPPChannel) null, null);
     }
 
     /**
@@ -306,11 +312,26 @@ public class DataContext implements QueryEngine, Serializable {
      * @since 1.1
      * @param parent parent QueryEngine used to communicate with the data source.
      * @param objectStore ObjectStore used by DataContext.
+     * @deprecated since 1.2 - use {@link #DataContext(OPPChannel, ObjectStore)}
+     *             constructor instead. Note that DataDomain is both an OPPChannel and a
+     *             QueryEngine, so you may need to do a cast:
+     *             <code>new DataContext((OPPChannel) domain, objectStore)</code>.
      */
     public DataContext(QueryEngine parent, ObjectStore objectStore) {
-        setParent(parent);
+        this((OPPChannel) parent, objectStore);
+    }
+
+    /**
+     * Creates a new DataContext with parent OPPChannel and ObjectStore.
+     * 
+     * @since 1.2
+     */
+    public DataContext(OPPChannel channel, ObjectStore objectStore) {
+        // use a setter to properly initialize EntityResolver
+        setChannel(channel);
 
         this.objectStore = objectStore;
+
         this.setTransactionEventsEnabled(transactionEventsEnabledDefault);
         this.usingSharedSnaphsotCache = getParentDataDomain() != null
                 && objectStore.getDataRowCache() == getParentDataDomain()
@@ -323,7 +344,6 @@ public class DataContext implements QueryEngine, Serializable {
      * @since 1.2
      */
     protected Map getUserProperties() {
-        // do lazy init..
         // as not all users will take advantage of properties, creating the
         // map on demand to keep DataContext lean...
         if (userProperties == null) {
@@ -356,30 +376,58 @@ public class DataContext implements QueryEngine, Serializable {
     /**
      * Returns parent QueryEngine object. In most cases returned object is an instance of
      * DataDomain.
+     * 
+     * @deprecated since 1.2. Use 'getParentDataDomain()' or 'getChannel()' instead.
      */
     public QueryEngine getParent() {
-        awakeFromDeserialization();
-        return parent;
+        return getParentDataDomain();
     }
 
     /**
-     * <i>Note: currently nested DataContexts are not supported, so this method simply
-     * calls "getParent()". Using this method is preferrable to calling "getParent()"
-     * directly and casting it to DataDomain, since it more likely to be compatible with
-     * the future releases of Cayenne. </i>
+     * Sets direct parent of this DataContext.
+     * 
+     * @deprecated since 1.2, use setChannel instead.
+     */
+    public void setParent(QueryEngine parent) {
+        if (parent == null || parent instanceof OPPChannel) {
+            setChannel((OPPChannel) parent);
+        }
+        else {
+            throw new CayenneRuntimeException(
+                    "Only parents that implement OPPChannel are supported.");
+        }
+    }
+
+    /**
+     * Returns parent OPPChannel, that is normally a DataDomain or another DataContext.
+     * 
+     * @since 1.2
+     */
+    public OPPChannel getChannel() {
+        return channel;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setChannel(OPPChannel channel) {
+        if (this.channel != channel) {
+            this.channel = channel;
+            this.entityResolver = channel != null ? channel
+                    .onBootstrap(new BootstrapMessage()) : null;
+        }
+    }
+
+    /**
+     * Returns a DataDomain used by this DataContext. Returns null if DataContext is not
+     * attached to a DataDomain at all or if a channel used is of a different type.
      * 
      * @return DataDomain that is a direct or indirect parent of this DataContext.
      * @since 1.1
      */
     public DataDomain getParentDataDomain() {
-        return (DataDomain) getParent();
-    }
-
-    /**
-     * Sets direct parent of this DataContext.
-     */
-    public void setParent(QueryEngine parent) {
-        this.parent = parent;
+        awakeFromDeserialization();
+        return (channel instanceof DataDomain) ? (DataDomain) channel : null;
     }
 
     /**
@@ -906,10 +954,14 @@ public class DataContext implements QueryEngine, Serializable {
      * @since 1.1
      */
     public DataNode lookupDataNode(DataMap dataMap) {
-        if (this.getParent() == null) {
-            throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
+
+        DataDomain domain = getParentDataDomain();
+        if (domain == null) {
+            throw new CayenneRuntimeException(
+                    "DataContext is not attached to a DataDomain ");
         }
-        return this.getParent().lookupDataNode(dataMap);
+
+        return domain.lookupDataNode(dataMap);
     }
 
     /**
@@ -932,7 +984,7 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public void commitChanges() throws CayenneRuntimeException {
 
-        if (this.getParent() == null) {
+        if (this.getParentDataDomain() == null) {
             throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
         }
 
@@ -1083,7 +1135,7 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         if (!finalQueries.isEmpty()) {
-            getParent().performQueries(queries, callback);
+            getParentDataDomain().performQueries(queries, callback);
         }
     }
 
@@ -1278,13 +1330,11 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Returns EntityResolver object used to resolve and route queries.
+     * Returns EntityResolver. EntityResolver can be null if DataContext has not been
+     * attached to an OPPChannel.
      */
     public EntityResolver getEntityResolver() {
-        if (this.getParent() == null) {
-            throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
-        }
-        return this.getParent().getEntityResolver();
+        return entityResolver;
     }
 
     /**
@@ -1336,7 +1386,9 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     public Collection getDataMaps() {
-        return (getParent() != null) ? getParent().getDataMaps() : Collections.EMPTY_LIST;
+        return (getEntityResolver() != null)
+                ? getEntityResolver().getDataMaps()
+                : Collections.EMPTY_LIST;
     }
 
     void fireWillCommit() {
@@ -1381,16 +1433,16 @@ public class DataContext implements QueryEngine, Serializable {
         // by name, from the shared configuration (which will either load it if need be,
         // or return an existing one.
 
-        if (this.parent == null && this.lazyInitParentDomainName != null) {
+        if (this.channel == null && this.lazyInitParentDomainName != null) {
             out.writeObject(lazyInitParentDomainName);
         }
-        else if (this.parent instanceof DataDomain) {
-            DataDomain domain = (DataDomain) this.parent;
+        else if (this.channel instanceof DataDomain) {
+            DataDomain domain = (DataDomain) this.channel;
             out.writeObject(domain.getName());
         }
         else {
             // Hope that whatever this.parent is, that it is Serializable
-            out.writeObject(this.parent);
+            out.writeObject(this.channel);
         }
 
         // Serialize local snapshots cache
@@ -1408,9 +1460,9 @@ public class DataContext implements QueryEngine, Serializable {
 
         // 2. read parent or its name
         Object value = in.readObject();
-        if (value instanceof QueryEngine) {
+        if (value instanceof OPPChannel) {
             // A real QueryEngine object - use it
-            this.parent = (QueryEngine) value;
+            this.channel = (OPPChannel) value;
         }
         else if (value instanceof String) {
             // The name of a DataDomain - use it
@@ -1462,9 +1514,11 @@ public class DataContext implements QueryEngine, Serializable {
     // sort of thread-local solution that would allow to use an alternative configuration.
     //
     private final void awakeFromDeserialization() {
-        if (parent == null && lazyInitParentDomainName != null) {
-            this.parent = Configuration.getSharedConfiguration().getDomain(
-                    lazyInitParentDomainName);
+        if (channel == null && lazyInitParentDomainName != null) {
+            
+            // call a setter to ensure EntityResolver is extracted from channel
+            setChannel(Configuration.getSharedConfiguration().getDomain(
+                    lazyInitParentDomainName));
         }
     }
 }

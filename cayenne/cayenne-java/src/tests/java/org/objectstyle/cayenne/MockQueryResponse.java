@@ -53,74 +53,45 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.graph.GraphChangeHandler;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.query.Query;
 
-/**
- * @author Andrus Adamchik
- */
-public class MockPersistenceContext implements PersistenceContext {
+public class MockQueryResponse implements QueryResponse {
 
-    protected List mockResults;
-    protected EntityResolver resolver;
+    List firstRows = new ArrayList();
 
-    protected boolean commitChangesInContext;
-    protected boolean performQuery;
-    protected boolean performQueryInTransaction;
-
-    public MockPersistenceContext() {
+    public MockQueryResponse() {
 
     }
 
-    public MockPersistenceContext(EntityResolver resolver, List mockResults) {
-        this.resolver = resolver;
-        this.mockResults = mockResults;
-    }
-    
-    public void reset() {
-        commitChangesInContext = false;
-        performQuery = false;
-        performQueryInTransaction = false;
-    }
+    public MockQueryResponse(Map firstRow) {
 
-    public void commitChangesInContext(ObjectContext context, GraphChangeHandler callback) {
-        this.commitChangesInContext = true;
-    }
-
-    public boolean isCommitChangesInContext() {
-        return commitChangesInContext;
-    }
-
-    public boolean isPerformQuery() {
-        return performQuery;
-    }
-
-    public boolean isPerformQueryInTransaction() {
-        return performQueryInTransaction;
-    }
-
-    public void performQuery(
-            QueryExecutionPlan query,
-            OperationObserver observer,
-            Transaction transaction) {
-        performQueryInTransaction = true;
-
-        if (mockResults != null) {
-            observer.nextDataRows(query.resolve(resolver), mockResults);
+        if (!(firstRow instanceof DataRow)) {
+            firstRow = new DataRow(firstRow);
         }
+
+        firstRows.add(firstRow);
     }
 
-    public void performQuery(QueryExecutionPlan query, OperationObserver observer) {
-        performQuery = true;
+    public Collection allQueries() {
+        return null;
+    }
 
-        if (mockResults != null) {
-            observer.nextDataRows(query.resolve(resolver), mockResults);
-        }
+    public List getResults(Query query) {
+        return null;
+    }
+
+    public int getFirstUpdateCount(Query query) {
+        return 0;
+    }
+
+    public List getFirstRows(Query query) {
+        return firstRows;
     }
 }

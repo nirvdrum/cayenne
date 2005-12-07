@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -85,15 +86,17 @@ public class QueryResultTst extends TestCase {
         };
     }
 
-    public void testQueries() {
+    public void testAllQueries() {
 
         for (int i = 0; i < queries.length; i++) {
             result.nextCount(queries[i], i);
         }
-        Iterator it = result.getQueries();
-        assertNotNull(it);
+        Collection c = result.allQueries();
+        assertNotNull(c);
+        assertFalse(c.isEmpty());
 
         int ind = 0;
+        Iterator it = c.iterator();
         while (it.hasNext()) {
             assertSame(queries[ind], it.next());
             ind++;
@@ -102,7 +105,7 @@ public class QueryResultTst extends TestCase {
         assertEquals(queries.length, ind);
     }
 
-    public void testQueriesIterationOrder() {
+    public void testAllQueriesIterationOrder() {
 
         Query q1 = new MockQuery();
         Query q2 = new MockQuery();
@@ -124,7 +127,7 @@ public class QueryResultTst extends TestCase {
                 q1, q2, q3, q4, q5, q6
         };
 
-        Iterator it = result.getQueries();
+        Iterator it = result.allQueries().iterator();
         for (int i = 0; i < orderedArray.length; i++) {
             assertTrue(it.hasNext());
             assertSame("Unexpected query at index " + i, orderedArray[i], it.next());
@@ -141,7 +144,7 @@ public class QueryResultTst extends TestCase {
         result.nextDataRows(queries[0], Collections.EMPTY_LIST);
         result.nextCount(queries[0], 5);
 
-        Iterator it = result.getQueries();
+        Iterator it = result.allQueries().iterator();
         Query q = (Query) it.next();
 
         List rows = result.getRows(q);

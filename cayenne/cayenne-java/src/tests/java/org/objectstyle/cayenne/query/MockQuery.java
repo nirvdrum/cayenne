@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.query;
 
-import org.apache.log4j.Level;
 import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
@@ -64,6 +63,7 @@ import org.objectstyle.cayenne.map.EntityResolver;
 public class MockQuery implements Query {
 
     protected String name;
+    protected Object root;
 
     public MockQuery() {
     }
@@ -80,26 +80,12 @@ public class MockQuery implements Query {
         this.name = name;
     }
 
-    /**
-     * @deprecated since 1.2
-     */
-    public Level getLoggingLevel() {
-        return null;
-    }
-
-    /**
-     * @deprecated since 1.2
-     */
-    public void setLoggingLevel(Level level) {
-
-    }
-
     public Object getRoot() {
-        return null;
+        return root;
     }
 
     public void setRoot(Object value) {
-
+        this.root = value;
     }
 
     public Query resolve(EntityResolver resolver) {

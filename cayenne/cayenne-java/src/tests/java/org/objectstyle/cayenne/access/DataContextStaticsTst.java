@@ -72,7 +72,7 @@ public class DataContextStaticsTst extends CayenneTestCase {
         try {
             DataContext c1 = DataContext.createDataContext();
             assertNotNull(c1);
-            assertSame(c1.getParent(), getDomain());
+            assertSame(c1.getParentDataDomain(), getDomain());
             assertTrue(c1 != DataContext.createDataContext());
         } finally {
             conf.restoreConfig();
@@ -85,7 +85,7 @@ public class DataContextStaticsTst extends CayenneTestCase {
             String name = getDomain().getName();
             DataContext c1 = DataContext.createDataContext(name);
             assertNotNull(c1);
-            assertSame(c1.getParent(), getDomain());
+            assertSame(c1.getParentDataDomain(), getDomain());
             assertTrue(c1 != DataContext.createDataContext(name));
         } finally {
             conf.restoreConfig();

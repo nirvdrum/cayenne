@@ -18,7 +18,7 @@ public class MockQueryExecutionPlan implements QueryExecutionPlan {
 
     public Query resolve(EntityResolver resolver) {
         this.resolveCalled = true;
-        return (selecting) ? new MockGenericSelectQuery(true) : new MockQuery();
+        return (selecting) ? new MockGenericSelectQuery() : new MockQuery();
     }
 
     public void route(QueryRouter router, EntityResolver resolver) {

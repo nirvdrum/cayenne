@@ -62,13 +62,19 @@ import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.MockDataObject;
+import org.objectstyle.cayenne.MockQueryResponse;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.ObjectDataContext;
-import org.objectstyle.cayenne.access.PersistenceContext;
+import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.MockEntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.opp.GenericQueryMessage;
+import org.objectstyle.cayenne.opp.MockOPPChannel;
+import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.opp.SyncMessage;
+import org.objectstyle.cayenne.opp.UpdateMessage;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.MockQueryExecutionPlan;
@@ -79,20 +85,16 @@ import org.objectstyle.cayenne.query.MockQueryExecutionPlan;
 public class ObjectDataContextTst extends TestCase {
 
     public void testParentContext() {
-        PersistenceContext parent = new MockPersistenceContext();
-        ObjectDataContext context = new ObjectDataContext(
-                parent,
-                new EntityResolver(),
-                new MockDataRowStore());
-        assertSame(parent, context.getParentContext());
+        OPPChannel parent = new MockOPPChannel();
+        ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore());
+        assertSame(parent, context.getChannel());
     }
 
     public void testHasChanges() {
-        // mocking 1.1 Cayenne stack is painful...
         MockDataRowStore cache = new MockDataRowStore();
-        MockPersistenceContext parent = new MockPersistenceContext();
-        ObjectDataContext context = new ObjectDataContext(parent, new MockEntityResolver(
-                new ObjEntity("test")), cache);
+        MockOPPChannel parent = new MockOPPChannel(new MockEntityResolver(new ObjEntity(
+                "test")));
+        ObjectDataContext context = new ObjectDataContext(parent, cache);
 
         assertFalse(context.hasChanges());
 
@@ -106,16 +108,23 @@ public class ObjectDataContextTst extends TestCase {
 
     public void testCommitChanges() {
 
-        // mocking 1.1 Cayenne stack is painful...
+        final boolean[] commitDone = new boolean[1];
         MockDataRowStore cache = new MockDataRowStore();
-        MockPersistenceContext parent = new MockPersistenceContext();
-        ObjectDataContext context = new ObjectDataContext(parent, new MockEntityResolver(
-                new ObjEntity("test")), cache);
+        MockOPPChannel parent = new MockOPPChannel(new MockEntityResolver(new ObjEntity(
+                "test"))) {
+
+            public GraphDiff onSync(SyncMessage message) {
+                commitDone[0] = true;
+                return super.onSync(message);
+            }
+
+        };
+        ObjectDataContext context = new ObjectDataContext(parent, cache);
 
         context.commitChanges();
 
         // no changes in context, so no commit should be executed
-        assertFalse(parent.isCommitChangesInContext());
+        assertFalse(commitDone[0]);
 
         // introduce changes
         ObjectId oid = new ObjectId("T", "key", "value");
@@ -125,43 +134,56 @@ public class ObjectDataContextTst extends TestCase {
 
         assertTrue(context.hasChanges());
         context.commitChanges();
-        assertTrue(parent.isCommitChangesInContext());
+        assertTrue(commitDone[0]);
         assertFalse(context.hasChanges());
     }
 
     public void testPerformNonSelectingQuery() {
-        MockPersistenceContext parent = new MockPersistenceContext();
-        ObjectDataContext context = new ObjectDataContext(
-                parent,
-                new EntityResolver(),
-                new MockDataRowStore());
+
+        final boolean[] queryDone = new boolean[1];
+        MockDataRowStore cache = new MockDataRowStore();
+        MockOPPChannel parent = new MockOPPChannel(new EntityResolver()) {
+
+            public int[] onUpdateQuery(UpdateMessage message) {
+                queryDone[0] = true;
+                return super.onUpdateQuery(message);
+            }
+        };
+        ObjectDataContext context = new ObjectDataContext(parent, cache);
 
         context.performNonSelectingQuery(new MockQuery());
-        assertTrue(parent.isPerformQuery());
+        assertTrue(queryDone[0]);
     }
 
     public void testPerformQuery() {
-        MockPersistenceContext parent = new MockPersistenceContext();
-        ObjectDataContext context = new ObjectDataContext(
-                parent,
+        final boolean[] selectDone = new boolean[1];
+        MockDataRowStore cache = new MockDataRowStore();
+        MockOPPChannel parent = new MockOPPChannel(
                 new EntityResolver(),
-                new MockDataRowStore());
+                new MockQueryResponse()) {
+
+            public QueryResponse onGenericQuery(GenericQueryMessage message) {
+                selectDone[0] = true;
+                return super.onGenericQuery(message);
+            }
+        };
+        ObjectDataContext context = new ObjectDataContext(parent, cache);
 
         // perform both generic select and a "plan" query to test both legacy and new API
-        context.performQuery(new MockGenericSelectQuery(true));
-        assertTrue(parent.isPerformQuery());
+        MockGenericSelectQuery query = new MockGenericSelectQuery();
+        query.setFetchingDataRows(true);
+        context.performQuery(query);
+        assertTrue(selectDone[0]);
 
+        selectDone[0] = false;
         context.performSelectQuery(new MockQueryExecutionPlan(true));
-        assertTrue(parent.isPerformQuery());
+        assertTrue(selectDone[0]);
     }
 
     public void testUncommittedObjects() {
-
-        MockPersistenceContext parent = new MockPersistenceContext();
-        ObjectDataContext context = new ObjectDataContext(
-                parent,
-                new EntityResolver(),
-                new MockDataRowStore());
+        MockDataRowStore cache = new MockDataRowStore();
+        MockOPPChannel parent = new MockOPPChannel(new EntityResolver());
+        ObjectDataContext context = new ObjectDataContext(parent, cache);
 
         DataObject newObject = new MockDataObject(
                 context,

@@ -74,6 +74,7 @@ public class MockOPPChannel implements OPPChannel {
     protected List messages = new ArrayList();
     protected GraphDiff commitResponse;
     protected List selectResponse;
+    protected QueryResponse genericResponse;
 
     public MockOPPChannel() {
 
@@ -86,13 +87,27 @@ public class MockOPPChannel implements OPPChannel {
     public MockOPPChannel(List selectResponse) {
         this.selectResponse = selectResponse;
     }
-    
+
+    public MockOPPChannel(EntityResolver entityResolver, List selectResponse) {
+        this.selectResponse = selectResponse;
+        this.resolver = entityResolver;
+    }
+
+    public MockOPPChannel(EntityResolver entityResolver, QueryResponse genericResponse) {
+        this.genericResponse = genericResponse;
+        this.resolver = entityResolver;
+    }
+
     public MockOPPChannel(EntityResolver resolver) {
         this.resolver = resolver;
     }
 
     public EventManager getEventManager() {
         return null;
+    }
+
+    public void reset() {
+        messages.clear();
     }
 
     public List getMessages() {
@@ -106,7 +121,7 @@ public class MockOPPChannel implements OPPChannel {
 
     public QueryResponse onGenericQuery(GenericQueryMessage message) {
         messages.add(message);
-        return null;
+        return genericResponse;
     }
 
     public List onSelectQuery(SelectMessage message) {

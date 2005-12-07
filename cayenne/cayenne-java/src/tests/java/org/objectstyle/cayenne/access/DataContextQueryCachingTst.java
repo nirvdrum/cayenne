@@ -293,7 +293,7 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         DataContext context = new DataContext();
         context.objectStore = new ObjectStore(dataRowCache);
         context.usingSharedSnaphsotCache = true;
-        context.setParent(new MockDataDomain(engine));
+        context.setChannel(new MockDataDomain(engine));
 
         return context;
     }

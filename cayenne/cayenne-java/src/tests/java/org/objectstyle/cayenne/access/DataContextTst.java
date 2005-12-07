@@ -661,7 +661,7 @@ public class DataContextTst extends DataContextTestBase {
 
     public void changeMaxConnections(int delta) {
         DataNode node =
-            (DataNode) ((DataDomain) context.getParent())
+            (DataNode) context.getParentDataDomain()
                 .getDataNodes()
                 .iterator()
                 .next();

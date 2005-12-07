@@ -57,6 +57,8 @@ package org.objectstyle.cayenne.opp;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.MockObjectContext;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
@@ -65,7 +67,7 @@ import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 public class SyncMessageTst extends TestCase {
 
     public void testConstructor() {
-        Object source = new Object();
+        ObjectContext source = new MockObjectContext();
         GraphDiff diff = new CompoundDiff();
         SyncMessage message = new SyncMessage(source, SyncMessage.FLUSH_TYPE, diff);
 
@@ -76,7 +78,7 @@ public class SyncMessageTst extends TestCase {
 
     public void testHessianSerialization() throws Exception {
         // id must be a serializable object; source doesn't have to be
-        Object source = new Object();
+        ObjectContext source = new MockObjectContext();
         GraphDiff diff = new NodeCreateOperation("id-string");
         SyncMessage message = new SyncMessage(source, SyncMessage.FLUSH_TYPE, diff);
 
@@ -91,7 +93,7 @@ public class SyncMessageTst extends TestCase {
     }
 
     public void testConstructorInvalid() {
-        Object source = new Object();
+        ObjectContext source = new MockObjectContext();
         new SyncMessage(source, SyncMessage.FLUSH_TYPE, new CompoundDiff());
         new SyncMessage(source, SyncMessage.COMMIT_TYPE, new CompoundDiff());
         new SyncMessage(null, SyncMessage.ROLLBACK_TYPE, new CompoundDiff());

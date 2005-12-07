@@ -58,7 +58,6 @@ package org.objectstyle.cayenne;
 import java.util.Collection;
 import java.util.List;
 
-import org.objectstyle.cayenne.access.MockPersistenceContext;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
@@ -68,7 +67,7 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
  * 
  * @author Andrus Adamchik
  */
-public class MockObjectContext extends MockPersistenceContext implements ObjectContext {
+public class MockObjectContext implements ObjectContext {
 
     public MockObjectContext() {
         super();

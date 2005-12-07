@@ -70,11 +70,14 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
-import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.opp.SyncMessage;
+import org.objectstyle.cayenne.opp.UpdateMessage;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -91,47 +94,26 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
 // TODO: merge into DataContext
 class ObjectDataContext extends DataContext implements ObjectContext {
 
-    PersistenceContext parentContext;
-    EntityResolver entityResolver;
+    ObjectDataContext(DataDomain dataDomain) {
+        // call a setter, as it properly initializes EntityResolver...
+        setChannel(dataDomain);
 
-    /**
-     * Initializes ObjectDataContext obtaining settings from parent DataDomain.
-     */
-    ObjectDataContext(DataDomain parentDomain) {
-        this.parentContext = parentDomain;
-        super.parent = parentDomain;
-        this.entityResolver = parentDomain.getEntityResolver();
-
-        DataRowStore cache = parentDomain.isSharedCacheEnabled() ? parentDomain
+        DataRowStore cache = dataDomain.isSharedCacheEnabled() ? dataDomain
                 .getSharedSnapshotCache() : new DataRowStore(
-                parentDomain.getName(),
-                parentDomain.getProperties(),
-                parentDomain.getEventManager());
+                dataDomain.getName(),
+                dataDomain.getProperties(),
+                dataDomain.getEventManager());
 
-        super.objectStore = new ObjectStore(cache);
+        this.usingSharedSnaphsotCache = dataDomain.isSharedCacheEnabled();
+        this.objectStore = new ObjectStore(cache);
     }
 
-    ObjectDataContext(PersistenceContext parentContext, EntityResolver entityResolver,
-            DataRowStore cache) {
-        this.parentContext = parentContext;
-        this.entityResolver = entityResolver;
-
-        // if parent is a DataDomain, init it as "old" parent for backwards
-        // compatibility...
-        if (parentContext instanceof DataDomain) {
-            super.parent = (DataDomain) parentContext;
-        }
-
-        super.objectStore = new ObjectStore(cache);
+    ObjectDataContext(OPPChannel channel, DataRowStore cache) {
+        super(channel, new ObjectStore(cache));
     }
 
     // ==== START: DataContext compatibility code... need to merge to DataContext
     // --------------------------------------------------------------------------
-
-    public EntityResolver getEntityResolver() {
-        // TODO: ready to be moved to DataContext
-        return entityResolver;
-    }
 
     public int[] performNonSelectingQuery(Query query) {
         // channel to the right implementation
@@ -148,7 +130,7 @@ class ObjectDataContext extends DataContext implements ObjectContext {
      */
     public void performQueries(Collection queries, OperationObserver observer) {
         QueryChain query = new QueryChain(queries);
-        getParentContext().performQuery(query.resolve(getEntityResolver()), observer);
+        getParentDataDomain().performQuery(query.resolve(getEntityResolver()), observer);
     }
 
     public int[] performNonSelectingQuery(String queryName, Map parameters) {
@@ -195,7 +177,32 @@ class ObjectDataContext extends DataContext implements ObjectContext {
     }
 
     GraphDiff doCommitChanges() {
-        return new ObjectDataContextCommitAction().commit(this);
+        if (getChannel() == null) {
+            throw new CayenneRuntimeException(
+                    "DataContext is not attached to an OPPChannel");
+        }
+
+        synchronized (getObjectStore()) {
+
+            if (!hasChanges()) {
+                return new CompoundDiff();
+            }
+
+            if (isValidatingObjectsOnCommit()) {
+                getObjectStore().validateUncommittedObjects();
+            }
+
+            // TODO: Andrus, 12/06/2005 - this is a violation of OPP rules, as we do not
+            // pass changes down the stack. Instead this code assumes that a channel will
+            // get them directly from the context.
+            GraphDiff resultDiff = getChannel().onSync(
+                    new SyncMessage(this, SyncMessage.COMMIT_TYPE, null));
+
+            getObjectStore().objectsCommitted();
+
+            // do not ever return null to caller....
+            return resultDiff != null ? resultDiff : new CompoundDiff();
+        }
     }
 
     public void flushChanges() {
@@ -204,10 +211,6 @@ class ObjectDataContext extends DataContext implements ObjectContext {
 
     public void revertChanges() {
         rollbackChanges();
-    }
-
-    public PersistenceContext getParentContext() {
-        return parentContext;
     }
 
     public void deleteObject(Persistent object) {
@@ -273,42 +276,29 @@ class ObjectDataContext extends DataContext implements ObjectContext {
     }
 
     public QueryResponse performGenericQuery(QueryExecutionPlan query) {
-        if (this.getParentContext() == null) {
+        if (this.getChannel() == null) {
             throw new CayenneRuntimeException(
-                    "Can't run query - parent PersistenceContext is not set.");
+                    "Can't run query - parent OPPChannel is not set.");
         }
 
-        return new PersistenceContextQueryAction(getEntityResolver()).performMixed(
-                getParentContext(),
-                query);
+        return getChannel().onGenericQuery(new GenericQueryMessage(query));
     }
 
     public int[] performUpdateQuery(QueryExecutionPlan query) {
-        if (this.getParentContext() == null) {
+        if (this.getChannel() == null) {
             throw new CayenneRuntimeException(
-                    "Can't run query - parent PersistenceContext is not set.");
+                    "Can't run query - parent OPPChannel is not set.");
         }
 
-        return new PersistenceContextQueryAction(getEntityResolver())
-                .performNonSelectingQuery(getParentContext(), query);
+        return getChannel().onUpdateQuery(new UpdateMessage(query));
     }
 
     public List performSelectQuery(QueryExecutionPlan query) {
-        if (this.getParentContext() == null) {
-            throw new CayenneRuntimeException(
-                    "Can't run query - parent PersistenceContext is not set.");
-        }
-
         return new ObjectDataContextSelectAction(this).performQuery(query);
     }
 
     // *** Unfinished stuff
     // --------------------------------------------------------------------------
-
-    public OPPChannel getChannel() {
-        // TODO: DataDomain must implement OPPChannel instead of PersistentContext
-        throw new CayenneRuntimeException("'getChannel' is not implemented yet");
-    }
 
     public GraphManager getGraphManager() {
         // TODO: ObjectStore must implement GraphManager

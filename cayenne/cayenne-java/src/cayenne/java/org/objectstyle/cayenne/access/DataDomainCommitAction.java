@@ -70,12 +70,19 @@ import org.apache.commons.collections.map.LinkedMap;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.util.BatchQueryUtils;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
+import org.objectstyle.cayenne.graph.ArcCreateOperation;
+import org.objectstyle.cayenne.graph.ArcDeleteOperation;
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
+import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.NodeCreateOperation;
+import org.objectstyle.cayenne.graph.NodeDeleteOperation;
+import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
+import org.objectstyle.cayenne.graph.NodePropertyChangeOperation;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
@@ -84,6 +91,7 @@ import org.objectstyle.cayenne.map.EntitySorter;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.DeleteBatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -125,12 +133,14 @@ class DataDomainCommitAction {
     }
 
     /**
-     * Commits changes in the enclosed DataContext.
+     * Commits changes sent by a DataContext.
      */
-    void commit(ObjectContext context, GraphChangeHandler commitChangeCallback) {
+    GraphDiff commit(SyncMessage message) {
+
+        OperationRecorder recorder = new OperationRecorder();
 
         synchronized (domain.getSharedSnapshotCache()) {
-            Collection uncommitted = context.uncommittedObjects();
+            Collection uncommitted = message.getSource().uncommittedObjects();
             categorizeObjects(uncommitted);
             createPrimaryKeys();
 
@@ -185,17 +195,19 @@ class DataDomainCommitAction {
             }
 
             // notify callback of generated keys ...
-            if (commitChangeCallback != null) {
-                Iterator it = uncommitted.iterator();
-                while (it.hasNext()) {
-                    DataObject object = (DataObject) it.next();
-                    ObjectId id = object.getObjectId();
-                    if (id.isReplacementIdAttached()) {
-                        commitChangeCallback.nodeIdChanged(id, id.createReplacementId());
-                    }
+
+            Iterator it = uncommitted.iterator();
+            while (it.hasNext()) {
+                DataObject object = (DataObject) it.next();
+                ObjectId id = object.getObjectId();
+                if (id.isReplacementIdAttached()) {
+                    recorder.nodeIdChanged(id, id.createReplacementId());
                 }
             }
         }
+
+        return recorder.diffs != null && !recorder.diffs.isEmpty() ? new CompoundDiff(
+                recorder.diffs) : null;
     }
 
     private void prepareInsertQueries(DataNodeCommitAction commitHelper) {
@@ -804,5 +816,43 @@ class DataDomainCommitAction {
         }
 
         return helper;
+    }
+
+    class OperationRecorder implements GraphChangeHandler {
+
+        List diffs = new ArrayList();
+
+        public void nodeIdChanged(Object nodeId, Object newId) {
+            diffs.add(new NodeIdChangeOperation(nodeId, newId));
+        }
+
+        public void nodeCreated(Object nodeId) {
+            diffs.add(new NodeIdChangeOperation(nodeId, new NodeCreateOperation(nodeId)));
+        }
+
+        public void nodeRemoved(Object nodeId) {
+            diffs.add(new NodeDeleteOperation(nodeId));
+        }
+
+        public void nodePropertyChanged(
+                Object nodeId,
+                String property,
+                Object oldValue,
+                Object newValue) {
+
+            diffs.add(new NodePropertyChangeOperation(
+                    nodeId,
+                    property,
+                    oldValue,
+                    newValue));
+        }
+
+        public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
+            diffs.add(new ArcCreateOperation(nodeId, targetNodeId, arcId));
+        }
+
+        public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
+            diffs.add(new ArcDeleteOperation(nodeId, targetNodeId, arcId));
+        }
     }
 }

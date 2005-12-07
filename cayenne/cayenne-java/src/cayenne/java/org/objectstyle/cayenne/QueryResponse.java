@@ -57,6 +57,9 @@ package org.objectstyle.cayenne;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
+
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * Encapsulates results of query execution. A caller can use QueryResponse to inspect and
@@ -70,9 +73,33 @@ import java.util.Collection;
 public interface QueryResponse extends Serializable {
 
     /**
-     * Returns a collection of query results in the order they were provided by Cayenne
-     * stack. Collection can contain List objects (for selecting queries) and
-     * java.lang.Number values for the update counts.
+     * Returns all queries whose results weere included in response.
      */
-    Collection getResults();
+    Collection allQueries();
+
+    /**
+     * Returns a collection of results for a single Query in the order they were provided
+     * by Cayenne stack. Collection can contain List objects (for selecting queries) and
+     * java.lang.Number values for the update counts.
+     * <p>
+     * This is the most extreme case. Usually queries return a single result or a single
+     * update count, so consider using <code>getFirstRows(Query)</code> or
+     * <code>getFirstUpdateCount(Query)</code> instead.
+     * </p>
+     */
+    List getResults(Query query);
+
+    /**
+     * Returns the first update count for the query. Returns -1 if no update count is
+     * found for the query. This is a shortcut to simplify extracting update count in the
+     * most common case when it is known that the query resulted only one update.
+     */
+    int getFirstUpdateCount(Query query);
+
+    /**
+     * Returns the first results for the query. This is a shortcut to simplify extracting
+     * a result in the most common case when it is known that the query resulted only one
+     * update.
+     */
+    public List getFirstRows(Query query);
 }
