@@ -87,7 +87,7 @@ ENVIRONMENT:
 	<!-- ============================================= -->
     <!-- Creates a Windows Cayenne release bundle     -->
     <!-- ============================================= -->
-	<target name="release-win">
+	<target name="release-win" depends="release">
 		<ant antfile="ant/win-distro.xml" target="zip" inheritrefs="true"/>
 	</target>
 	
