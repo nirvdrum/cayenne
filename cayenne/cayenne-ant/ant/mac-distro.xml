@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+
+<!-- ========================================== -->
+<!-- Creates Mac OS X-friendly distribution.    -->
+<!-- ========================================== -->
+<project name="MacDistro" default="...">
+	
+	<property name="dist.mac" value="${dist.base}/macosx"/>
+	
+	<target name="prepare">
+		<taskdef name="jarbundler" classpathref="classpath-macosx"
+			classname="com.loomcom.ant.tasks.jarbundler.JarBundler"/>
+		
+		<mkdir dir="${dist.mac}"/>
+	</target>
+	
+	<target name="diskimage" depends="prepare,app">
+		<copy todir="${dist.mac}" file="${cayenne.other}/platform/macosx/README.txt"/>
+		
+		<!-- unzip platform-neutral distro to make sure mac version is identical -->
+		<untar dest="${dist.mac}"
+			src="${dist.base}/${project.name}-${project.version}.tar.gz"
+			overwrite="false" compression="gzip">
+			
+			<patternset excludes="**/lib/modeler/**"/>
+		</untar>
+		
+		<delete>
+			<fileset dir="${dist.base}" includes="*.dmg"/>
+		</delete>
+		
+		<exec executable="hdiutil" failonerror="true">
+			<arg value="create"/>
+			<arg value="-srcfolder"/>
+			<arg value="${dist.mac}"/>
+			<arg value="-format"/>
+			<arg value="UDZO"/>
+			<arg value="-volname"/>
+			<arg value="${project.name}-${project.version}"/>
+			<arg
+				value="${dist.base}/${project.name}-${project.version}-macosx.dmg"/>
+		</exec>
+	</target>
+	
+	<target name="app" depends="prepare">	
+		
+		<delete dir="${dist.mac}/CayenneModeler.app"/>
+		
+		<jarbundler dir="${dist.mac}" verbose="true" name="CayenneModeler"
+			mainclass="org.objectstyle.cayenne.modeler.Main"
+			icon="${cayenne.other}/platform/macosx/CayenneModeler.icns"
+			bundleid="org.objectstyle.cayenne.modeler.CayenneModeler"
+			version="${project.version}"
+			infostring="CayenneModeler ${project.version}"
+			aboutmenuname="CayenneModeler" jvmversion="1.4+" signature="CAYM"
+			type="APPL" vmoptions="-Xmx500m" smalltabs="true"
+			antialiasedgraphics="true" antialiasedtext="true" liveresize="true"
+			growboxintrudes="false" screenmenu="true">
+			
+			<jarfileset dir="${dist}/lib" includes="cayenne.jar"/>
+			<jarfileset dir="${dist}/lib/modeler" includes="*.jar"/>
+		</jarbundler>
+	</target>
+</project>

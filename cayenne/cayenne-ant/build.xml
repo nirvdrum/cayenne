@@ -30,6 +30,7 @@
 			
        dist-bin     - (DEFAULT) builds all subproject JAR files and installs scripts.
        release      - creates a full Cayenne distribution.
+       release-mac  - creates a Mac Cayenne distribution.
        clean        - cleans temporary build and distribution directories
        clean-java   - cleans all build directories, preserving the docs and eclipse build
        doc          - builds Cayenne documentation, excluding Javadocs
@@ -74,6 +75,13 @@ ENVIRONMENT:
 			</tarfileset>
 		</tar>
     </target>
+	
+	<!-- ============================================= -->
+    <!-- Creates a Mac OS X Cayenne release bundle     -->
+    <!-- ============================================= -->
+	<target name="release-mac">
+		<ant antfile="ant/mac-distro.xml" target="diskimage" inheritrefs="true"/>
+	</target>
 	
 	<!-- ========================================== -->
     <!-- Runs Cayenne Unit Tests using JDK 1.4      -->
