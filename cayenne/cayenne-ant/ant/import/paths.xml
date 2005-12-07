@@ -115,4 +115,8 @@
 	<path id="classpath-macosx">
 		<fileset dir="lib" includes="*.jar"/>
 	</path>
+	
+	<path id="classpath-win">
+		<fileset dir="lib" includes="launch4j*/**.jar"/>
+	</path>
 </project>

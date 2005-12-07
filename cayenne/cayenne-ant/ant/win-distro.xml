@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+
+<!-- ========================================== -->
+<!-- Creates Windows-friendly distribution.    -->
+<!-- ========================================== -->
+<project name="WinDistro" default="...">
+	
+	<property name="dist.win" value="${dist.base}/win"/>
+	<property name="build.win" value="${build}/win"/>
+	
+	<target name="prepare">
+		<taskdef name="launch4j" classpathref="classpath-win"
+			classname="net.sf.launch4j.ant.Launch4jTask"/>
+		
+		<mkdir dir="${dist.win}"/>
+	</target>
+	
+	<target name="release" depends="prepare,exe"/>
+	
+	<target name="exe" depends="prepare">	
+		
+		<delete file="${dist.win}/CayenneModeler.exe"/>
+		
+		<mkdir dir="${build.win}"/>
+		<copy todir="${build.win}"
+			file="${cayenne.other}/platform/win/launch4j-config.xml">
+			<filterset>
+				<filter token="DIST" value="${dist}"/>
+			</filterset>
+		</copy>
+		
+		<launch4j configFile="${build.win}/launch4j-config.xml"/>
+	</target>
+</project>
