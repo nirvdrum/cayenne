@@ -15,16 +15,14 @@
 		<mkdir dir="${dist.win}"/>
 	</target>
 	
-	<target name="zip" depends="prepare,exe">
-		
+	<target name="zip" depends="prepare,exe">		
 		
 		<!-- unzip platform-neutral distro to make sure win version is identical -->
 		<untar dest="${dist.win}"
 			src="${dist.base}/${project.name}-${project.version}.tar.gz"
 			overwrite="false" compression="gzip">
 			
-			<patternset excludes="**/lib/modeler/**"/>
-			<patternset excludes="**/bin/modeler.*"/>
+			<patternset excludes="**/lib/modeler/*.jar,**/bin/modeler.*"/>
 		</untar>
 		
 		<copy todir="${dist.win}/${project.name}-${project.version}/bin"
