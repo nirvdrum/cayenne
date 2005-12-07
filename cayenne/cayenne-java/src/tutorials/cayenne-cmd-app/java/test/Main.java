@@ -3,7 +3,6 @@ package test;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -12,10 +11,8 @@ public class Main {
 
     private DataContext ctxt;
 
-    /** 
-     * Runs tutorial.
-     * Usage:
-     *     java test.Main galleryPattern
+    /**
+     * Runs tutorial. Usage: java test.Main galleryPattern
      */
     public static void main(String[] args) {
 
@@ -30,7 +27,7 @@ public class Main {
     }
 
     public Main() {
-        this.ctxt = createContext();
+        this.ctxt = DataContext.createDataContext();
     }
 
     public void runTutorial(String galleryPattern) {
@@ -40,16 +37,9 @@ public class Main {
         }
     }
 
-    /** Creates and returns DataContext object. */
-    private DataContext createContext() {
-        Configuration.bootstrapSharedConfiguration(this.getClass());
-        return Configuration.getSharedConfiguration().getDomain().createDataContext();
-    }
-
-    /** 
-     * Searches for matching galleries in the database. 
-     * If one and only one matching gallery is found, it is returned, 
-     * otherwise null is returned.
+    /**
+     * Searches for matching galleries in the database. If one and only one matching
+     * gallery is found, it is returned, otherwise null is returned.
      */
     private Gallery findGallery(String galleryPattern) {
         String likePattern = "%" + galleryPattern + "%";
