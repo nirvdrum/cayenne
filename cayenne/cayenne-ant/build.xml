@@ -79,7 +79,7 @@ ENVIRONMENT:
 	<!-- ============================================= -->
     <!-- Creates a Mac OS X Cayenne release bundle     -->
     <!-- ============================================= -->
-	<target name="release-mac">
+	<target name="release-mac" depends="release">
 		<ant antfile="ant/mac-distro.xml" target="diskimage" inheritrefs="true"/>
 	</target>
 	
