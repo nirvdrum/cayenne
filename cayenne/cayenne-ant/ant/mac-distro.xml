@@ -23,6 +23,7 @@
 			overwrite="false" compression="gzip">
 			
 			<patternset excludes="**/lib/modeler/**"/>
+			<patternset excludes="**/bin/modeler.*"/>
 		</untar>
 		
 		<delete>
