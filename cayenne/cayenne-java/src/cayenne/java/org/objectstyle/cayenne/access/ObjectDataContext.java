@@ -61,19 +61,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SyncMessage;
@@ -126,14 +123,6 @@ class ObjectDataContext extends DataContext implements ObjectContext {
         getParentDataDomain().performQuery(query.resolve(getEntityResolver()), observer);
     }
 
-    public int[] performNonSelectingQuery(String queryName, Map parameters) {
-        return performNonSelectingQuery(new NamedQuery(queryName, parameters));
-    }
-
-    public int[] performNonSelectingQuery(String queryName) {
-        return performNonSelectingQuery(new NamedQuery(queryName));
-    }
-
     public List performQuery(String queryName, boolean refresh) {
         // TODO: refresh is not handled...
         return performSelectQuery(new NamedQuery(queryName));
@@ -141,29 +130,6 @@ class ObjectDataContext extends DataContext implements ObjectContext {
 
     // ==== END: DataContext compatibility code... need to merge to DataContext
     // --------------------------------------------------------------------------
-
-    DataObject createAndRegisterNewObject(ObjectId id) {
-        if (id.getEntityName() == null) {
-            throw new NullPointerException("Null entity name in id " + id);
-        }
-
-        ObjEntity entity = getEntityResolver().lookupObjEntity(id.getEntityName());
-        if (entity == null) {
-            throw new IllegalArgumentException("Entity not mapped with Cayenne: " + id);
-        }
-
-        DataObject dataObject = null;
-        try {
-            dataObject = (DataObject) entity.getJavaClass().newInstance();
-        }
-        catch (Exception ex) {
-            throw new CayenneRuntimeException("Error instantiating object.", ex);
-        }
-
-        dataObject.setObjectId(id);
-        registerNewObject(dataObject);
-        return dataObject;
-    }
 
     public void commitChanges() throws CayenneRuntimeException {
         doCommitChanges();

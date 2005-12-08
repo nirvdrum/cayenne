@@ -109,7 +109,27 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
     }
 
     public void nodeCreated(Object nodeId) {
-        serverContext.createAndRegisterNewObject((ObjectId) nodeId);
+        ObjectId id = (ObjectId) nodeId;
+        if (id.getEntityName() == null) {
+            throw new NullPointerException("Null entity name in id " + id);
+        }
+
+        ObjEntity entity = serverContext.getEntityResolver().lookupObjEntity(
+                id.getEntityName());
+        if (entity == null) {
+            throw new IllegalArgumentException("Entity not mapped with Cayenne: " + id);
+        }
+
+        DataObject dataObject = null;
+        try {
+            dataObject = (DataObject) entity.getJavaClass().newInstance();
+        }
+        catch (Exception ex) {
+            throw new CayenneRuntimeException("Error instantiating object.", ex);
+        }
+
+        dataObject.setObjectId(id);
+        serverContext.registerNewObject(dataObject);
     }
 
     public void nodeRemoved(Object nodeId) {

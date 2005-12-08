@@ -94,6 +94,7 @@ import org.objectstyle.cayenne.opp.BootstrapMessage;
 import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.ParameterizedQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
@@ -1025,12 +1026,13 @@ public class DataContext implements QueryEngine, Serializable {
      * 
      * @since 1.1 (since 1.2 parameters changed from Query to QueryExecutionPlan)
      */
-    public int[] performNonSelectingQuery(QueryExecutionPlan query) {
+    public int[] performNonSelectingQuery(QueryExecutionPlan queryPlan) {
         if (this.getChannel() == null) {
             throw new CayenneRuntimeException(
                     "Can't run query - parent OPPChannel is not set.");
         }
 
+        Query query = queryPlan.resolve(getEntityResolver());
         QueryResponse response = getChannel().onGenericQuery(
                 new GenericQueryMessage(query));
         return response.getFirstUpdateCounts(query);
@@ -1043,7 +1045,7 @@ public class DataContext implements QueryEngine, Serializable {
      * @since 1.1
      */
     public int[] performNonSelectingQuery(String queryName) {
-        return performNonSelectingQuery(queryName, Collections.EMPTY_MAP);
+        return performNonSelectingQuery(new NamedQuery(queryName));
     }
 
     /**
@@ -1053,21 +1055,7 @@ public class DataContext implements QueryEngine, Serializable {
      * @since 1.1
      */
     public int[] performNonSelectingQuery(String queryName, Map parameters) {
-        // find query...
-        Query query = getEntityResolver().getQuery(queryName);
-        if (query == null) {
-            throw new CayenneRuntimeException("There is no saved query for name '"
-                    + queryName
-                    + "'.");
-        }
-
-        if (parameters != null
-                && !parameters.isEmpty()
-                && query instanceof ParameterizedQuery) {
-            query = ((ParameterizedQuery) query).createQuery(parameters);
-        }
-
-        return performNonSelectingQuery(query);
+        return performNonSelectingQuery(new NamedQuery(queryName, parameters));
     }
 
     /**
@@ -1213,9 +1201,6 @@ public class DataContext implements QueryEngine, Serializable {
      * @since 1.2
      */
     public List performSelectQuery(QueryExecutionPlan queryPlan) {
-
-        // TODO (Andrus, 09/17/2005) - copy implementation from ObjectDataContext once
-        // DataContext becomes a real ObjectContext
 
         Query query = queryPlan.resolve(getEntityResolver());
         if (!(query instanceof GenericSelectQuery)) {
