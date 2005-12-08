@@ -59,7 +59,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * Encapsulates results of query execution. A caller can use QueryResponse to inspect and
@@ -87,19 +87,20 @@ public interface QueryResponse extends Serializable {
      * <code>getFirstUpdateCount(Query)</code> instead.
      * </p>
      */
-    List getResults(Query query);
+    List getResults(QueryExecutionPlan query);
 
     /**
-     * Returns the first update count for the query. Returns -1 if no update count is
-     * found for the query. This is a shortcut to simplify extracting update count in the
-     * most common case when it is known that the query resulted only one update.
+     * Returns the first batch of update counts for the query. If the first update is not
+     * a batch, it is still returned as an int[1] array. Returns an int[0] if no updates
+     * were executed for the query. This is a shortcut to simplify extracting update count
+     * in the most common case when it is known that the query resulted only one update.
      */
-    int getFirstUpdateCount(Query query);
+    int[] getFirstUpdateCounts(QueryExecutionPlan query);
 
     /**
      * Returns the first results for the query. This is a shortcut to simplify extracting
      * a result in the most common case when it is known that the query resulted only one
      * update.
      */
-    public List getFirstRows(Query query);
+    public List getFirstRows(QueryExecutionPlan query);
 }

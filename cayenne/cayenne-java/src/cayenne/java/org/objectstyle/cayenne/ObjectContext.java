@@ -194,7 +194,7 @@ public interface ObjectContext extends Serializable {
     /**
      * Executes a non-selecting query returning an array of update counts.
      */
-    int[] performUpdateQuery(QueryExecutionPlan queryPlan);
+    int[] performNonSelectingQuery(QueryExecutionPlan queryPlan);
 
     /**
      * Executes any kind of query providing the result in a form of QueryResponse.

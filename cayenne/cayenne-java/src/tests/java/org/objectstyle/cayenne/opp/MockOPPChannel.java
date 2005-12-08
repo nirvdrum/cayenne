@@ -129,11 +129,6 @@ public class MockOPPChannel implements OPPChannel {
         return selectResponse;
     }
 
-    public int[] onUpdateQuery(UpdateMessage message) {
-        messages.add(message);
-        return null;
-    }
-
     public EntityResolver onBootstrap(BootstrapMessage message) {
         messages.add(message);
         return resolver;

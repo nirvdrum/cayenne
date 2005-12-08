@@ -69,7 +69,6 @@ import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SelectMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
-import org.objectstyle.cayenne.opp.UpdateMessage;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
@@ -333,11 +332,6 @@ public class CayenneContext implements ObjectContext {
         }
     }
 
-    public int[] performUpdateQuery(QueryExecutionPlan query) {
-        return channel.onUpdateQuery(new UpdateMessage(query));
-    }
-
-    // TODO: maybe change the api to be "performSelectQuery(Class, QueryExecutionPlan)"?
     public List performSelectQuery(QueryExecutionPlan query) {
         List objects = channel.onSelectQuery(new SelectMessage(query));
         if (objects.isEmpty()) {
@@ -398,6 +392,12 @@ public class CayenneContext implements ObjectContext {
         }
 
         return objects;
+    }
+
+    public int[] performNonSelectingQuery(QueryExecutionPlan query) {
+        return channel
+                .onGenericQuery(new GenericQueryMessage(query))
+                .getFirstUpdateCounts(query);
     }
 
     public QueryResponse performGenericQuery(QueryExecutionPlan query) {

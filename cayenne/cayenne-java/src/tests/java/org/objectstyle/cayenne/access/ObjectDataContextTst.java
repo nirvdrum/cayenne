@@ -74,7 +74,6 @@ import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SyncMessage;
-import org.objectstyle.cayenne.opp.UpdateMessage;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.MockQueryExecutionPlan;
@@ -142,11 +141,13 @@ public class ObjectDataContextTst extends TestCase {
 
         final boolean[] queryDone = new boolean[1];
         MockDataRowStore cache = new MockDataRowStore();
-        MockOPPChannel parent = new MockOPPChannel(new EntityResolver()) {
+        MockOPPChannel parent = new MockOPPChannel(
+                new EntityResolver(),
+                new MockQueryResponse()) {
 
-            public int[] onUpdateQuery(UpdateMessage message) {
+            public QueryResponse onGenericQuery(GenericQueryMessage message) {
                 queryDone[0] = true;
-                return super.onUpdateQuery(message);
+                return super.onGenericQuery(message);
             }
         };
         ObjectDataContext context = new ObjectDataContext(parent, cache);

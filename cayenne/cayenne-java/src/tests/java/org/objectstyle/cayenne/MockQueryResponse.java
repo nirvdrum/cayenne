@@ -60,7 +60,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 public class MockQueryResponse implements QueryResponse {
 
@@ -83,15 +83,15 @@ public class MockQueryResponse implements QueryResponse {
         return null;
     }
 
-    public List getResults(Query query) {
+    public List getResults(QueryExecutionPlan query) {
         return null;
     }
 
-    public int getFirstUpdateCount(Query query) {
-        return 0;
+    public int[] getFirstUpdateCounts(QueryExecutionPlan query) {
+        return new int[0];
     }
 
-    public List getFirstRows(Query query) {
+    public List getFirstRows(QueryExecutionPlan query) {
         return firstRows;
     }
 }

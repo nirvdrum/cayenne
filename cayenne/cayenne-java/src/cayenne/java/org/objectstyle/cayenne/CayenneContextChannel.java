@@ -61,11 +61,10 @@ import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SelectMessage;
-import org.objectstyle.cayenne.opp.UpdateMessage;
+import org.objectstyle.cayenne.opp.SyncMessage;
 
 /**
  * An OPPChannel adapter for CayenneContext.
@@ -100,10 +99,6 @@ class CayenneContextChannel implements OPPChannel {
 
     public List onSelectQuery(SelectMessage message) {
         return context.performSelectQuery(message.getQueryPlan());
-    }
-
-    public int[] onUpdateQuery(UpdateMessage message) {
-        return context.performUpdateQuery(message.getQueryPlan());
     }
 
     public QueryResponse onGenericQuery(GenericQueryMessage message) {

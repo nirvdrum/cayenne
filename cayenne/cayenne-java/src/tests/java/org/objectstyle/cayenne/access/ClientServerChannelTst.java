@@ -74,7 +74,6 @@ import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.opp.SelectMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
-import org.objectstyle.cayenne.opp.UpdateMessage;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
@@ -141,23 +140,6 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 SyncMessage.COMMIT_TYPE,
                 new NodeCreateOperation(new ObjectId("MtTable1"))));
         assertTrue(commitDone[0]);
-    }
-
-    public void testOnUpdateQuery() {
-        final boolean[] updateDone = new boolean[1];
-        MockOPPChannel parent = new MockOPPChannel(new EntityResolver()) {
-
-            public int[] onUpdateQuery(UpdateMessage message) {
-                updateDone[0] = true;
-                return super.onUpdateQuery(message);
-            }
-        };
-
-        ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore());
-
-        UpdateMessage message = new UpdateMessage(new MockQuery());
-        new ClientServerChannel(context, false).onUpdateQuery(message);
-        assertTrue(updateDone[0]);
     }
 
     public void testOnSelectQueryGlobalIDInjection() {

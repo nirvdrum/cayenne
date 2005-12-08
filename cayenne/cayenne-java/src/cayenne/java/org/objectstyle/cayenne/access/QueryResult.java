@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -109,7 +110,7 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
      * java.lang.Integer values for update operations and java.util.List for select
      * operations. Results are returned in the order they were obtained.
      */
-    public List getResults(Query query) {
+    public List getResults(QueryExecutionPlan query) {
         List list = (List) queries.get(query);
         return (list != null) ? list : Collections.EMPTY_LIST;
     }
@@ -119,15 +120,22 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
      * <code>(Integer)getUpdates(query).get(0)<code>, kind of like Google's "I'm feeling lucky".
      * Returns -1 if no update count is found for the query.
      */
-    public int getFirstUpdateCount(Query query) {
+    public int getFirstUpdateCount(QueryExecutionPlan query) {
         List allResults = getResults(query);
         int size = allResults.size();
         if (size > 0) {
             Iterator it = allResults.iterator();
             while (it.hasNext()) {
-                Object obj = it.next();
-                if (obj instanceof Number) {
-                    return ((Number) obj).intValue();
+                Object object = it.next();
+
+                // if int
+                if (object instanceof Number) {
+                    return ((Number) object).intValue();
+                }
+                // if batch...
+                else if (object instanceof int[]) {
+                    int[] counts = (int[]) object;
+                    return counts.length > 0 ? counts[0] : -1;
                 }
             }
         }
@@ -135,10 +143,41 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
     }
 
     /**
+     * Returns the first update count. Returns int[0] if there was no update results for
+     * the query.
+     * 
+     * @since 1.2
+     */
+    public int[] getFirstUpdateCounts(QueryExecutionPlan query) {
+        List allResults = getResults(query);
+        int size = allResults.size();
+
+        if (size > 0) {
+            Iterator it = allResults.iterator();
+            while (it.hasNext()) {
+                Object object = it.next();
+
+                // if int
+                if (object instanceof Number) {
+                    return new int[] {
+                        ((Number) object).intValue()
+                    };
+                }
+                // if batch...
+                else if (object instanceof int[]) {
+                    return (int[]) object;
+                }
+            }
+        }
+
+        return new int[0];
+    }
+
+    /**
      * Returns the first results for the query. This is a shortcut for
      * <code>(List)getRows(query).get(0)<code>, kind of like Google's "I'm feeling lucky".
      */
-    public List getFirstRows(Query query) {
+    public List getFirstRows(QueryExecutionPlan query) {
         List allResults = getResults(query);
         int size = allResults.size();
         if (size == 0) {
@@ -162,7 +201,7 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
      * by the query. ResultSets are returned in the oder they were obtained. Any updates
      * that were performed are not included.
      */
-    public List getRows(Query query) {
+    public List getRows(QueryExecutionPlan query) {
         List allResults = getResults(query);
         int size = allResults.size();
         if (size == 0) {
@@ -184,9 +223,9 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
     /**
      * Returns a List that contains java.lang.Integer objects for each one of the update
      * counts returned by the query. Update counts are returned in the order they were
-     * obtained. Data rows are not included.
+     * obtained. Batched and regular updates are combined together.
      */
-    public List getUpdates(Query query) {
+    public List getUpdates(QueryExecutionPlan query) {
         List allResults = getResults(query);
         int size = allResults.size();
         if (size == 0) {
@@ -196,9 +235,15 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
         List list = new ArrayList(size);
         Iterator it = allResults.iterator();
         while (it.hasNext()) {
-            Object obj = it.next();
-            if (obj instanceof Number) {
-                list.add(obj);
+            Object object = it.next();
+            if (object instanceof Number) {
+                list.add(object);
+            }
+            else if (object instanceof int[]) {
+                int[] ints = (int[]) object;
+                for (int i = 0; i < ints.length; i++) {
+                    list.add(new Integer(ints[i]));
+                }
             }
         }
 
@@ -229,9 +274,13 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
     }
 
     public void nextBatchCount(Query query, int[] resultCount) {
-        for (int i = 0; i < resultCount.length; i++) {
-            nextCount(query, resultCount[i]);
+        List list = (List) queries.get(query);
+        if (list == null) {
+            list = new ArrayList(5);
+            queries.put(query, list);
         }
+
+        list.add(resultCount);
     }
 
     public void nextCount(Query query, int resultCount) {

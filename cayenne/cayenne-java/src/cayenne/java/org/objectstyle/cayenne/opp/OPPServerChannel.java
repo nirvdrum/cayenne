@@ -117,10 +117,6 @@ public class OPPServerChannel implements OPPChannel {
         return (List) send(message, List.class);
     }
 
-    public int[] onUpdateQuery(UpdateMessage message) {
-        return (int[]) send(message, int[].class);
-    }
-
     public QueryResponse onGenericQuery(GenericQueryMessage message) {
         return (QueryResponse) send(message, QueryResponse.class);
     }

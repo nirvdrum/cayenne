@@ -70,7 +70,6 @@ import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SelectMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
-import org.objectstyle.cayenne.opp.UpdateMessage;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 
@@ -232,10 +231,6 @@ public class ClientServerChannel implements OPPChannel {
             throw new CayenneRuntimeException("Error converting to client objects: "
                     + e.getLocalizedMessage(), e);
         }
-    }
-
-    public int[] onUpdateQuery(UpdateMessage message) {
-        return serverContext.performUpdateQuery(message.getQueryPlan());
     }
 
     public EntityResolver onBootstrap(BootstrapMessage message) {

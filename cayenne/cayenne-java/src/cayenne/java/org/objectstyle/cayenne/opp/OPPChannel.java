@@ -106,11 +106,6 @@ public interface OPPChannel {
     List onSelectQuery(SelectMessage message);
 
     /**
-     * Processes an UpdateMessage returning update counts.
-     */
-    int[] onUpdateQuery(UpdateMessage message);
-
-    /**
      * Processes a generic query message that can contain both updates and selects.
      */
     QueryResponse onGenericQuery(GenericQueryMessage message);

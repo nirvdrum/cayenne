@@ -106,7 +106,7 @@ public class MockObjectContext implements ObjectContext {
         return null;
     }
 
-    public int[] performUpdateQuery(QueryExecutionPlan query) {
+    public int[] performNonSelectingQuery(QueryExecutionPlan query) {
         return null;
     }
 

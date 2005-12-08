@@ -77,10 +77,8 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SyncMessage;
-import org.objectstyle.cayenne.opp.UpdateMessage;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.NamedQuery;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryChain;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
@@ -115,11 +113,6 @@ class ObjectDataContext extends DataContext implements ObjectContext {
     // ==== START: DataContext compatibility code... need to merge to DataContext
     // --------------------------------------------------------------------------
 
-    public int[] performNonSelectingQuery(Query query) {
-        // channel to the right implementation
-        return performUpdateQuery((QueryExecutionPlan) query);
-    }
-
     public List performQuery(GenericSelectQuery query) {
         // channel through a new implementation...
         return performSelectQuery((QueryExecutionPlan) query);
@@ -134,11 +127,11 @@ class ObjectDataContext extends DataContext implements ObjectContext {
     }
 
     public int[] performNonSelectingQuery(String queryName, Map parameters) {
-        return performUpdateQuery(new NamedQuery(queryName, parameters));
+        return performNonSelectingQuery(new NamedQuery(queryName, parameters));
     }
 
     public int[] performNonSelectingQuery(String queryName) {
-        return performUpdateQuery(new NamedQuery(queryName));
+        return performNonSelectingQuery(new NamedQuery(queryName));
     }
 
     public List performQuery(String queryName, boolean refresh) {
@@ -282,15 +275,6 @@ class ObjectDataContext extends DataContext implements ObjectContext {
         }
 
         return getChannel().onGenericQuery(new GenericQueryMessage(query));
-    }
-
-    public int[] performUpdateQuery(QueryExecutionPlan query) {
-        if (this.getChannel() == null) {
-            throw new CayenneRuntimeException(
-                    "Can't run query - parent OPPChannel is not set.");
-        }
-
-        return getChannel().onUpdateQuery(new UpdateMessage(query));
     }
 
     public List performSelectQuery(QueryExecutionPlan query) {

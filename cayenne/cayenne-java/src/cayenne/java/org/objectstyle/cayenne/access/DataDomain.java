@@ -78,7 +78,6 @@ import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SelectMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
-import org.objectstyle.cayenne.opp.UpdateMessage;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryChain;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
@@ -810,22 +809,5 @@ public class DataDomain implements QueryEngine, OPPChannel {
         }
 
         return null;
-    }
-
-    /**
-     * @since 1.2
-     */
-    public int[] onUpdateQuery(UpdateMessage message) {
-
-        Query query = message.getQueryPlan().resolve(getEntityResolver());
-        QueryResult result = new QueryResult();
-        performQuery(query, result);
-
-        List updates = result.getUpdates(query);
-        int[] counts = new int[updates.size()];
-        for (int i = 0; i < counts.length; i++) {
-            counts[i] = ((Number) updates.get(i)).intValue();
-        }
-        return counts;
     }
 }

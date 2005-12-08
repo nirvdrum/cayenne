@@ -77,6 +77,7 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.access.util.QueryUtils;
@@ -90,6 +91,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
+import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ParameterizedQuery;
@@ -1021,25 +1023,17 @@ public class DataContext implements QueryEngine, Serializable {
      * Performs a single database query that does not select rows. Returns an array of
      * update counts.
      * 
-     * @since 1.1
+     * @since 1.1 (since 1.2 parameters changed from Query to QueryExecutionPlan)
      */
-    public int[] performNonSelectingQuery(Query query) {
-        QueryResult result = new QueryResult();
-        performQueries(Collections.singletonList(query), result);
-        List updateCounts = result.getUpdates(query);
-
-        if (updateCounts == null || updateCounts.isEmpty()) {
-            return new int[0];
+    public int[] performNonSelectingQuery(QueryExecutionPlan query) {
+        if (this.getChannel() == null) {
+            throw new CayenneRuntimeException(
+                    "Can't run query - parent OPPChannel is not set.");
         }
 
-        int len = updateCounts.size();
-        int[] counts = new int[len];
-
-        for (int i = 0; i < len; i++) {
-            counts[i] = ((Number) updateCounts.get(i)).intValue();
-        }
-
-        return counts;
+        QueryResponse response = getChannel().onGenericQuery(
+                new GenericQueryMessage(query));
+        return response.getFirstUpdateCounts(query);
     }
 
     /**
@@ -1515,7 +1509,7 @@ public class DataContext implements QueryEngine, Serializable {
     //
     private final void awakeFromDeserialization() {
         if (channel == null && lazyInitParentDomainName != null) {
-            
+
             // call a setter to ensure EntityResolver is extracted from channel
             setChannel(Configuration.getSharedConfiguration().getDomain(
                     lazyInitParentDomainName));
