@@ -61,7 +61,7 @@ import java.util.List;
 import org.objectstyle.cayenne.access.ClientServerChannel;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
@@ -99,9 +99,9 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         final boolean[] selectExecuted = new boolean[1];
         CayenneContext context = new CayenneContext(channel) {
 
-            public List performSelectQuery(QueryExecutionPlan query) {
+            public List performQuery(Query query) {
                 selectExecuted[0] = true;
-                return super.performSelectQuery(query);
+                return super.performQuery(query);
             }
         };
 

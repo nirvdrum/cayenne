@@ -80,7 +80,6 @@ import org.objectstyle.cayenne.opp.SelectMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryChain;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.query.QueryRouter;
 import org.objectstyle.cayenne.util.Util;
 
@@ -721,7 +720,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
      * 
      * @since 1.2
      */
-    public void performQuery(QueryExecutionPlan query, OperationObserver resultConsumer) {
+    public void performQuery(Query query, OperationObserver resultConsumer) {
 
         final Map queryMap = new HashMap();
 
@@ -784,7 +783,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
      */
     public QueryResponse onGenericQuery(GenericQueryMessage message) {
         QueryResult result = new QueryResult();
-        performQuery(message.getQueryPlan().resolve(getEntityResolver()), result);
+        performQuery(message.getQuery().resolve(getEntityResolver()), result);
         return result;
     }
 
@@ -792,7 +791,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
      * @since 1.2
      */
     public List onSelectQuery(SelectMessage message) {
-        Query query = message.getQueryPlan().resolve(getEntityResolver());
+        Query query = message.getQuery().resolve(getEntityResolver());
         QueryResult result = new QueryResult();
         performQuery(query, result);
         return result.getFirstRows(query);

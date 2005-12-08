@@ -67,7 +67,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -110,7 +109,7 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
      * java.lang.Integer values for update operations and java.util.List for select
      * operations. Results are returned in the order they were obtained.
      */
-    public List getResults(QueryExecutionPlan query) {
+    public List getResults(Query query) {
         List list = (List) queries.get(query);
         return (list != null) ? list : Collections.EMPTY_LIST;
     }
@@ -120,7 +119,7 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
      * <code>(Integer)getUpdates(query).get(0)<code>, kind of like Google's "I'm feeling lucky".
      * Returns -1 if no update count is found for the query.
      */
-    public int getFirstUpdateCount(QueryExecutionPlan query) {
+    public int getFirstUpdateCount(Query query) {
         List allResults = getResults(query);
         int size = allResults.size();
         if (size > 0) {
@@ -148,7 +147,7 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
      * 
      * @since 1.2
      */
-    public int[] getFirstUpdateCounts(QueryExecutionPlan query) {
+    public int[] getFirstUpdateCounts(Query query) {
         List allResults = getResults(query);
         int size = allResults.size();
 
@@ -177,7 +176,7 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
      * Returns the first results for the query. This is a shortcut for
      * <code>(List)getRows(query).get(0)<code>, kind of like Google's "I'm feeling lucky".
      */
-    public List getFirstRows(QueryExecutionPlan query) {
+    public List getFirstRows(Query query) {
         List allResults = getResults(query);
         int size = allResults.size();
         if (size == 0) {
@@ -201,7 +200,7 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
      * by the query. ResultSets are returned in the oder they were obtained. Any updates
      * that were performed are not included.
      */
-    public List getRows(QueryExecutionPlan query) {
+    public List getRows(Query query) {
         List allResults = getResults(query);
         int size = allResults.size();
         if (size == 0) {
@@ -225,7 +224,7 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
      * counts returned by the query. Update counts are returned in the order they were
      * obtained. Batched and regular updates are combined together.
      */
-    public List getUpdates(QueryExecutionPlan query) {
+    public List getUpdates(Query query) {
         List allResults = getResults(query);
         int size = allResults.size();
         if (size == 0) {

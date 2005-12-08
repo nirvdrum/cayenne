@@ -64,7 +64,6 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.query.QueryRouter;
 import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.query.SQLActionVisitor;
@@ -132,10 +131,8 @@ public class ObjectContextQueryUtils {
      * DataObject. If no results are found, null is returned to the caller, if result
      * consists of more than one object, CayenneRuntimeException is thrown.
      */
-    public static Object singleObjectOrDataRow(
-            ObjectContext context,
-            QueryExecutionPlan query) {
-        List results = context.performSelectQuery(query);
+    public static Object singleObjectOrDataRow(ObjectContext context, Query query) {
+        List results = context.performQuery(query);
         if (results.isEmpty()) {
             return null;
         }
@@ -217,7 +214,7 @@ public class ObjectContextQueryUtils {
             query.setParameters(toMap(parameterNames, parameterValues));
         }
         query.setFetchingDataRows(false);
-        return context.performSelectQuery(query);
+        return context.performQuery(query);
     }
 
     private static Map toMap(String[] keys, Object[] values) {

@@ -98,11 +98,11 @@ class CayenneContextChannel implements OPPChannel {
     // channel for most query messages.
 
     public List onSelectQuery(SelectMessage message) {
-        return context.performSelectQuery(message.getQueryPlan());
+        return context.performQuery(message.getQuery());
     }
 
     public QueryResponse onGenericQuery(GenericQueryMessage message) {
-        return context.performGenericQuery(message.getQueryPlan());
+        return context.performGenericQuery(message.getQuery());
     }
 
     public GraphDiff onSync(SyncMessage message) {

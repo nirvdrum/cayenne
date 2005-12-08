@@ -69,8 +69,9 @@ import org.objectstyle.cayenne.map.EntityResolver;
  * @author Andrus Adamchik
  */
 // TODO: implement some sort of batch faulting for multiple ids....
-public class SingleObjectQuery implements QueryExecutionPlan {
+public class SingleObjectQuery implements Query {
 
+    protected String name;
     protected ObjectId objectId;
 
     // needed for hessian serialization
@@ -119,6 +120,28 @@ public class SingleObjectQuery implements QueryExecutionPlan {
         return new SelectQuery(objectId.getEntityName(), ExpressionFactory.matchAllDbExp(
                 objectId.getIdSnapshot(),
                 Expression.EQUAL_TO));
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @deprecated since 1.2
+     */
+    public Object getRoot() {
+        throw new CayenneRuntimeException("This deprecated method is not implemented");
+    }
+
+    /**
+     * @deprecated since 1.2
+     */
+    public void setRoot(Object root) {
+        throw new CayenneRuntimeException("This deprecated method is not implemented");
     }
 
     /**

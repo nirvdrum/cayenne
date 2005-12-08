@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.query;
 
+import org.objectstyle.cayenne.map.EntityResolver;
+
 /**
  * @author Andrus Adamchik
  */
@@ -64,14 +66,17 @@ public class MockGenericSelectQuery extends MockQuery implements GenericSelectQu
     protected boolean resolvingInherited;
 
     public MockGenericSelectQuery() {
+        super(true);
     }
 
     public MockGenericSelectQuery(Object root) {
+        super(true);
         setRoot(root);
     }
 
     public MockGenericSelectQuery(Object root, String name) {
-        super(name);
+        super(true);
+        setName(name);
         setRoot(root);
     }
 
@@ -93,6 +98,11 @@ public class MockGenericSelectQuery extends MockQuery implements GenericSelectQu
 
     public int getFetchLimit() {
         return 0;
+    }
+    
+    public Query resolve(EntityResolver resolver) {
+        this.resolveCalled = true;
+        return this;
     }
 
     public void setFetchingDataRows(boolean fetchingDataRows) {

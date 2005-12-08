@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SelectMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.property.ClassDescriptor;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
 
 /**
@@ -332,7 +332,7 @@ public class CayenneContext implements ObjectContext {
         }
     }
 
-    public List performSelectQuery(QueryExecutionPlan query) {
+    public List performQuery(Query query) {
         List objects = channel.onSelectQuery(new SelectMessage(query));
         if (objects.isEmpty()) {
             return objects;
@@ -394,13 +394,13 @@ public class CayenneContext implements ObjectContext {
         return objects;
     }
 
-    public int[] performNonSelectingQuery(QueryExecutionPlan query) {
+    public int[] performNonSelectingQuery(Query query) {
         return channel
                 .onGenericQuery(new GenericQueryMessage(query))
                 .getFirstUpdateCounts(query);
     }
 
-    public QueryResponse performGenericQuery(QueryExecutionPlan query) {
+    public QueryResponse performGenericQuery(Query query) {
         return channel.onGenericQuery(new GenericQueryMessage(query));
     }
 
@@ -448,7 +448,7 @@ public class CayenneContext implements ObjectContext {
         if (object.getPersistenceState() == PersistenceState.HOLLOW) {
 
             ObjectId gid = object.getObjectId();
-            List objects = performSelectQuery(new SingleObjectQuery(gid));
+            List objects = performQuery(new SingleObjectQuery(gid));
 
             if (objects.size() == 0) {
                 throw new FaultFailureException(

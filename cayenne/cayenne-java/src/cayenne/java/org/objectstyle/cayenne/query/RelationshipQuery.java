@@ -73,8 +73,9 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class RelationshipQuery implements QueryExecutionPlan {
+public class RelationshipQuery implements Query {
 
+    protected String name;
     protected ObjectId objectId;
     protected String relationshipName;
 
@@ -156,6 +157,28 @@ public class RelationshipQuery implements QueryExecutionPlan {
                 .getReverseDbRelationshipPath(), objectId);
 
         return new SelectQuery((ObjEntity) relationship.getTargetEntity(), qualifier);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @deprecated since 1.2
+     */
+    public Object getRoot() {
+        throw new CayenneRuntimeException("This deprecated method is not implemented");
+    }
+
+    /**
+     * @deprecated since 1.2
+     */
+    public void setRoot(Object root) {
+        throw new CayenneRuntimeException("This deprecated method is not implemented");
     }
 
     /**

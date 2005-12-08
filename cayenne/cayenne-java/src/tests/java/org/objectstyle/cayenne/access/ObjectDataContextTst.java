@@ -76,7 +76,6 @@ import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
-import org.objectstyle.cayenne.query.MockQueryExecutionPlan;
 
 /**
  * @author Andrus Adamchik
@@ -177,7 +176,7 @@ public class ObjectDataContextTst extends TestCase {
         assertTrue(selectDone[0]);
 
         selectDone[0] = false;
-        context.performSelectQuery(new MockQueryExecutionPlan(true));
+        context.performQuery(new MockQuery(true));
         assertTrue(selectDone[0]);
     }
 

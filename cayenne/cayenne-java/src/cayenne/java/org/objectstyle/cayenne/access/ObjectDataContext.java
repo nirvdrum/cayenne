@@ -74,10 +74,9 @@ import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SyncMessage;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.NamedQuery;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryChain;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * A temporary subclass of DataContext that implements ObjectContext interface. Used to
@@ -110,11 +109,6 @@ class ObjectDataContext extends DataContext implements ObjectContext {
     // ==== START: DataContext compatibility code... need to merge to DataContext
     // --------------------------------------------------------------------------
 
-    public List performQuery(GenericSelectQuery query) {
-        // channel through a new implementation...
-        return performSelectQuery((QueryExecutionPlan) query);
-    }
-
     /**
      * @deprecated since 1.2 as QueryChains are now possible.
      */
@@ -125,7 +119,7 @@ class ObjectDataContext extends DataContext implements ObjectContext {
 
     public List performQuery(String queryName, boolean refresh) {
         // TODO: refresh is not handled...
-        return performSelectQuery(new NamedQuery(queryName));
+        return performQuery(new NamedQuery(queryName));
     }
 
     // ==== END: DataContext compatibility code... need to merge to DataContext
@@ -234,7 +228,7 @@ class ObjectDataContext extends DataContext implements ObjectContext {
         return objects;
     }
 
-    public QueryResponse performGenericQuery(QueryExecutionPlan query) {
+    public QueryResponse performGenericQuery(Query query) {
         if (this.getChannel() == null) {
             throw new CayenneRuntimeException(
                     "Can't run query - parent OPPChannel is not set.");
@@ -243,7 +237,7 @@ class ObjectDataContext extends DataContext implements ObjectContext {
         return getChannel().onGenericQuery(new GenericQueryMessage(query));
     }
 
-    public List performSelectQuery(QueryExecutionPlan query) {
+    public List performQuery(Query query) {
         return new ObjectDataContextSelectAction(this).performQuery(query);
     }
 

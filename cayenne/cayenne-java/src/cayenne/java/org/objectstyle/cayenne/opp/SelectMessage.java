@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * A message sent to OPPChannel to request selecting query execution.
@@ -65,14 +65,14 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
  */
 public class SelectMessage implements OPPMessage {
 
-    protected QueryExecutionPlan queryPlan;
+    protected Query query;
 
-    public SelectMessage(QueryExecutionPlan queryPlan) {
-        this.queryPlan = queryPlan;
+    public SelectMessage(Query queryPlan) {
+        this.query = queryPlan;
     }
 
-    public QueryExecutionPlan getQueryPlan() {
-        return queryPlan;
+    public Query getQuery() {
+        return query;
     }
 
     /**
@@ -84,7 +84,7 @@ public class SelectMessage implements OPPMessage {
 
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("Select[").append(queryPlan).append("]");
+        buffer.append("Select[").append(query).append("]");
         return buffer.toString();
     }
 }

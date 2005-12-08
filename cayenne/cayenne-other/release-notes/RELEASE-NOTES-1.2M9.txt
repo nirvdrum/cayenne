@@ -46,5 +46,6 @@ Changes/New Features:
   it internally). 
   UPGRADE NOTE: This change only affects users who implemented custom transactions. 
   
+* QueryExecutionPlan introduced earlier during 1.2 cycle is merged to Query interface.
 
 Bugs Fixed:

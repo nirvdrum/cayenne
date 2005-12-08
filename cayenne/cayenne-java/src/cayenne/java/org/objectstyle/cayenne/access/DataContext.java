@@ -98,7 +98,6 @@ import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.ParameterizedQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
@@ -1024,9 +1023,9 @@ public class DataContext implements QueryEngine, Serializable {
      * Performs a single database query that does not select rows. Returns an array of
      * update counts.
      * 
-     * @since 1.1 (since 1.2 parameters changed from Query to QueryExecutionPlan)
+     * @since 1.1
      */
-    public int[] performNonSelectingQuery(QueryExecutionPlan queryPlan) {
+    public int[] performNonSelectingQuery(Query queryPlan) {
         if (this.getChannel() == null) {
             throw new CayenneRuntimeException(
                     "Can't run query - parent OPPChannel is not set.");
@@ -1196,23 +1195,6 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Runs selecting QueryExecutionPlan.
-     * 
-     * @since 1.2
-     */
-    public List performSelectQuery(QueryExecutionPlan queryPlan) {
-
-        Query query = queryPlan.resolve(getEntityResolver());
-        if (!(query instanceof GenericSelectQuery)) {
-            throw new CayenneRuntimeException(
-                    "Only QueryExecutionPlans that resolve to GenericSelectQueries "
-                            + "can be used in this method with current implementation of DataContext. Bad query: "
-                            + queryPlan);
-        }
-        return performQuery((GenericSelectQuery) query);
-    }
-
-    /**
      * Performs a single selecting query. If if query is a SelectQuery that require
      * prefetching relationships, will create additional queries to perform necessary
      * prefetching. Various query setting control the behavior of this method and the
@@ -1226,11 +1208,14 @@ public class DataContext implements QueryEngine, Serializable {
      * <li>Query data rows policy defines whether the result should be returned as
      * DataObjects or DataRows.</li>
      * </ul>
+     * <p>
+     * <i>Since 1.2 takes any Query parameter, not just GenericSelectQuery</i>
+     * </p>
      * 
      * @return A list of DataObjects or a DataRows, depending on the value returned by
      *         {@link GenericSelectQuery#isFetchingDataRows()}.
      */
-    public List performQuery(GenericSelectQuery query) {
+    public List performQuery(Query query) {
         return new DataContextSelectAction(this).performQuery(query);
     }
 

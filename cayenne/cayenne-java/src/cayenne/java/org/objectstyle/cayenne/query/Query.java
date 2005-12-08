@@ -55,13 +55,49 @@
  */
 package org.objectstyle.cayenne.query;
 
+import java.io.Serializable;
+
+import org.objectstyle.cayenne.access.QueryEngine;
+import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
- * An interface of a generic query that can be executed via Cayenne.
+ * Defines minimal API of a query descriptor that is executable via Cayenne.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-public interface Query extends QueryExecutionPlan {
+public interface Query extends Serializable {
+
+    /**
+     * A callback method invoked by Cayenne during the first phase of query execution,
+     * allowing to resolve the actual query to be executed. For example a Query can be
+     * implemented to store a query stored by name in the DataMap. In this method such
+     * query would find the actual mapped query and return it to the caller for execution.
+     * 
+     * @since 1.2
+     */
+    Query resolve(EntityResolver resolver);
+
+    /**
+     * A callback method invoked by Cayenne during the routing phase of the query run.
+     * Mapping of query engines is provided by QueryRouter. Query should use a
+     * {@link QueryRouter#useEngineForQuery(QueryEngine, Query)}callback method to route
+     * itself. At this point a query can create one or more substitute queries or even
+     * provide its own QueryEngine to execute itself.
+     * 
+     * @since 1.2
+     */
+    void route(QueryRouter router, EntityResolver resolver);
+
+    /**
+     * A callback method invoked by Cayenne during the final execution phase of the query
+     * run. A concrete query implementation is given a chance to decide how it should be
+     * handled. Implementors can pick an appropriate method of the SQLActionVisitor to
+     * handle itself, create a custom SQLAction of its own, or substitute itself with
+     * another query that should be used for SQLAction construction.
+     * 
+     * @since 1.2
+     */
+    SQLAction createSQLAction(SQLActionVisitor visitor);
 
     /**
      * Returns a symbolic name of the query.
@@ -80,12 +116,14 @@ public interface Query extends QueryExecutionPlan {
     /**
      * Returns the root object of the query.
      */
-    // TODO: deprecate this... with new routing mechanism, not all queries need a root.
+    // TODO: Andrus, 12/08/2005 - we need to deprecate this at some point as routing is
+    // now done by the query itself.
     Object getRoot();
 
     /**
      * Sets the root of the query.
      */
-    // TODO: deprecate this... with new routing mechanism, not all queries need a root.
+    // TODO: Andrus, 12/08/2005 - we need to deprecate this at some point as routing is
+    // now done by the query itself.
     void setRoot(Object root);
 }

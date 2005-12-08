@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.util.Util;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class NamedQuery implements QueryExecutionPlan {
+public class NamedQuery implements Query {
 
     protected String name;
     protected Map parameters;
@@ -193,6 +193,20 @@ public class NamedQuery implements QueryExecutionPlan {
         }
 
         return query;
+    }
+
+    /**
+     * @deprecated since 1.2
+     */
+    public Object getRoot() {
+        throw new CayenneRuntimeException("This deprecated method is not implemented");
+    }
+
+    /**
+     * @deprecated since 1.2
+     */
+    public void setRoot(Object root) {
+        throw new CayenneRuntimeException("This deprecated method is not implemented");
     }
 
     /**

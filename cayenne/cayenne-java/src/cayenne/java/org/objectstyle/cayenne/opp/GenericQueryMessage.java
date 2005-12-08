@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * A message passed to an OPPChannel to request a query execution with result returned as
@@ -66,14 +66,14 @@ import org.objectstyle.cayenne.query.QueryExecutionPlan;
  */
 public class GenericQueryMessage implements OPPMessage {
 
-    protected QueryExecutionPlan queryPlan;
+    protected Query query;
 
-    public GenericQueryMessage(QueryExecutionPlan queryPlan) {
-        this.queryPlan = queryPlan;
+    public GenericQueryMessage(Query queryPlan) {
+        this.query = queryPlan;
     }
 
-    public QueryExecutionPlan getQueryPlan() {
-        return queryPlan;
+    public Query getQuery() {
+        return query;
     }
 
     /**

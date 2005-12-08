@@ -189,7 +189,7 @@ public class CayenneContextTst extends TestCase {
         Collection entities = Collections.singleton(dataMap);
         context.setEntityResolver(new EntityResolver(entities));
 
-        List list = context.performSelectQuery(new NamedQuery("dummy"));
+        List list = context.performQuery(new NamedQuery("dummy"));
         assertNotNull(list);
         assertEquals(1, list.size());
         assertTrue(list.contains(o1));
@@ -225,7 +225,7 @@ public class CayenneContextTst extends TestCase {
         }));
 
         context.setChannel(channel);
-        List list = context.performSelectQuery(new NamedQuery("dummy"));
+        List list = context.performQuery(new NamedQuery("dummy"));
         assertNotNull(list);
         assertEquals(1, list.size());
         assertTrue("Expected cached object, got: " + list, list.contains(o1));
@@ -257,7 +257,7 @@ public class CayenneContextTst extends TestCase {
         }));
 
         context.setChannel(channel);
-        List list = context.performSelectQuery(new NamedQuery("dummy"));
+        List list = context.performQuery(new NamedQuery("dummy"));
         assertNotNull(list);
         assertEquals(1, list.size());
         assertTrue("Expected cached object, got: " + list, list.contains(o1));

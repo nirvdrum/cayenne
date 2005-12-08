@@ -62,7 +62,7 @@ import java.util.List;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * A Cayenne object facade to a persistent store. Instances of ObjectContext are used in
@@ -189,17 +189,17 @@ public interface ObjectContext extends Serializable {
     /**
      * Executes a selecting query, returning a list of persistent objects or data rows.
      */
-    List performSelectQuery(QueryExecutionPlan queryPlan);
+    List performQuery(Query queryPlan);
 
     /**
      * Executes a non-selecting query returning an array of update counts.
      */
-    int[] performNonSelectingQuery(QueryExecutionPlan queryPlan);
+    int[] performNonSelectingQuery(Query queryPlan);
 
     /**
      * Executes any kind of query providing the result in a form of QueryResponse.
      */
-    QueryResponse performGenericQuery(QueryExecutionPlan queryPlan);
+    QueryResponse performGenericQuery(Query queryPlan);
 
     /**
      * Returns GraphManager that manages object graph associated with this context.

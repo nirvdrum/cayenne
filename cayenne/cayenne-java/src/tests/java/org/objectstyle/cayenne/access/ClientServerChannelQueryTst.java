@@ -86,7 +86,7 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
         createTestData("prepare");
 
         NamedQuery q = new NamedQuery("AllMtTable1");
-        List results = buildContext().performSelectQuery(q);
+        List results = buildContext().performQuery(q);
 
         assertEquals(2, results.size());
         assertTrue(results.get(0) instanceof ClientMtTable1);
@@ -96,7 +96,7 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
         createTestData("prepare");
 
         SelectQuery q = new SelectQuery("MtTable1");
-        List results = buildContext().performSelectQuery(q);
+        List results = buildContext().performQuery(q);
 
         assertEquals(2, results.size());
 
@@ -107,7 +107,7 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
         createTestData("prepare");
 
         SelectQuery q = new SelectQuery(ClientMtTable1.class);
-        List results = buildContext().performSelectQuery(q);
+        List results = buildContext().performQuery(q);
 
         assertEquals(2, results.size());
         assertTrue(results.get(0) instanceof ClientMtTable1);
@@ -118,7 +118,7 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
 
         SelectQuery q = new SelectQuery(ClientMtTable1.class, Expression
                 .fromString("globalAttribute1 = 'g1'"));
-        List results = buildContext().performSelectQuery(q);
+        List results = buildContext().performQuery(q);
 
         assertEquals(1, results.size());
 
@@ -130,7 +130,7 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
 
         SelectQuery q = new SelectQuery(ClientMtTable1.class, Expression
                 .fromString("table2Array.globalAttribute = 'g1'"));
-        List results = buildContext().performSelectQuery(q);
+        List results = buildContext().performQuery(q);
 
         assertEquals(1, results.size());
         assertTrue(results.get(0) instanceof ClientMtTable1);
@@ -141,7 +141,7 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
 
         SelectQuery q = new SelectQuery("MtTable1");
         q.addOrdering(ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY, true);
-        List results = buildContext().performSelectQuery(q);
+        List results = buildContext().performQuery(q);
 
         assertEquals(2, results.size());
 
@@ -154,7 +154,7 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
 
         q.clearOrderings();
         q.addOrdering(ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY, false);
-        List results1 = buildContext().performSelectQuery(q);
+        List results1 = buildContext().performQuery(q);
 
         assertEquals(2, results1.size());
 
@@ -169,7 +169,7 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
         SelectQuery q = new SelectQuery(ClientMtTable2.class, Expression
                 .fromString("globalAttribute = 'g1'"));
         q.addPrefetch(ClientMtTable2.TABLE1_PROPERTY);
-        List results = buildContext().performSelectQuery(q);
+        List results = buildContext().performQuery(q);
 
         assertEquals(1, results.size());
 
@@ -192,7 +192,7 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
         SelectQuery q = new SelectQuery(ClientMtTable1.class, Expression
                 .fromString("globalAttribute1 = 'g1'"));
         q.addPrefetch(ClientMtTable1.TABLE2ARRAY_PROPERTY);
-        List results = buildContext().performSelectQuery(q);
+        List results = buildContext().performQuery(q);
 
         assertEquals(1, results.size());
 

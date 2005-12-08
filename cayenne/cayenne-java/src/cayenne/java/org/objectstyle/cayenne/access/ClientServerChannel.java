@@ -204,11 +204,11 @@ public class ClientServerChannel implements OPPChannel {
     }
 
     public QueryResponse onGenericQuery(GenericQueryMessage message) {
-        return serverContext.performGenericQuery(message.getQueryPlan());
+        return serverContext.performGenericQuery(message.getQuery());
     }
 
     public List onSelectQuery(SelectMessage message) {
-        List objects = serverContext.performSelectQuery(message.getQueryPlan());
+        List objects = serverContext.performQuery(message.getQuery());
 
         // create client objects for a list of server object
 
@@ -218,8 +218,8 @@ public class ClientServerChannel implements OPPChannel {
 
         // detect prefetches...
         PrefetchTreeNode prefetchTree = null;
-        if (message.getQueryPlan() instanceof GenericSelectQuery) {
-            prefetchTree = ((GenericSelectQuery) message.getQueryPlan())
+        if (message.getQuery() instanceof GenericSelectQuery) {
+            prefetchTree = ((GenericSelectQuery) message.getQuery())
                     .getPrefetchTree();
         }
 

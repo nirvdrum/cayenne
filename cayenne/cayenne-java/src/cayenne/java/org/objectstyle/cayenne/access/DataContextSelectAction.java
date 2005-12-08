@@ -69,7 +69,6 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
  * A DataContext helper that handles select query execution.
@@ -85,11 +84,12 @@ class DataContextSelectAction {
         this.context = context;
     }
 
-    List performQuery(GenericSelectQuery query) {
+    List performQuery(Query genericQuery) {
+        GenericSelectQuery query = resolveQuery(genericQuery);
         return performQuery(query, query.getName(), query.isRefreshingObjects());
     }
 
-    List performQuery(QueryExecutionPlan queryPlan, String cacheKey, boolean refreshCache) {
+    List performQuery(Query queryPlan, String cacheKey, boolean refreshCache) {
         // resolve ....
         GenericSelectQuery query = resolveQuery(queryPlan);
 
@@ -225,12 +225,12 @@ class DataContextSelectAction {
     /**
      * Executes query resolving phase...
      */
-    GenericSelectQuery resolveQuery(QueryExecutionPlan queryPlan) {
+    GenericSelectQuery resolveQuery(Query queryPlan) {
         Query resolved = queryPlan.resolve(context.getEntityResolver());
 
         if (!(resolved instanceof GenericSelectQuery)) {
             throw new CayenneRuntimeException(
-                    "QueryExecutionPlan was resolved to a query that is not a GenericSelectQuery: "
+                    "Query was resolved to a query that is not a GenericSelectQuery: "
                             + resolved);
         }
 

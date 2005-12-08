@@ -124,7 +124,7 @@ public abstract class RelationshipFault {
             return new ArrayList();
         }
 
-        List resolved = relationshipOwner.getObjectContext().performSelectQuery(
+        List resolved = relationshipOwner.getObjectContext().performQuery(
                 new RelationshipQuery(relationshipOwner.getObjectId(), relationshipName));
 
         if (resolved.isEmpty()) {

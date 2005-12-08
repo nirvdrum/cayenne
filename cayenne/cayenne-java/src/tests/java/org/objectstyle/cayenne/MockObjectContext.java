@@ -60,7 +60,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * A noop ObjectContext used for unit testing.
@@ -102,11 +102,11 @@ public class MockObjectContext implements ObjectContext {
         return null;
     }
 
-    public List performSelectQuery(QueryExecutionPlan query) {
+    public List performQuery(Query query) {
         return null;
     }
 
-    public int[] performNonSelectingQuery(QueryExecutionPlan query) {
+    public int[] performNonSelectingQuery(Query query) {
         return null;
     }
 
@@ -147,7 +147,7 @@ public class MockObjectContext implements ObjectContext {
         return null;
     }
 
-    public QueryResponse performGenericQuery(QueryExecutionPlan queryPlan) {
+    public QueryResponse performGenericQuery(Query queryPlan) {
         return null;
     }
 }

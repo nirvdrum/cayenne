@@ -61,7 +61,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.QueryExecutionPlan;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * Executes non-selecting queries on behalf of DataDomain.
@@ -80,7 +80,7 @@ class ObjectDataContextSelectAction extends DataContextSelectAction {
         this.context = context;
     }
 
-    List performQuery(QueryExecutionPlan queryPlan) {
+    List performQuery(Query queryPlan) {
         GenericSelectQuery selectQuery = resolveQuery(queryPlan);
 
         // check if result pagination is requested

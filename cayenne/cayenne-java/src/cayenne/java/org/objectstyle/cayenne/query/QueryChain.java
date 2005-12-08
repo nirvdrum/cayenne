@@ -68,9 +68,10 @@ import org.objectstyle.cayenne.map.EntityResolver;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class QueryChain implements QueryExecutionPlan {
+public class QueryChain implements Query {
 
     protected Collection chain;
+    protected String name;
 
     /**
      * Creates an empty QueryChain.
@@ -116,7 +117,7 @@ public class QueryChain implements QueryExecutionPlan {
      */
     public Query resolve(EntityResolver resolver) {
         if (isEmpty()) {
-            return new QueryChainQuery("" + hashCode(), new ArrayList());
+            return new QueryChain();
         }
 
         Collection resolvedChain = new ArrayList(chain.size());
@@ -129,7 +130,7 @@ public class QueryChain implements QueryExecutionPlan {
             }
         }
 
-        return new QueryChainQuery("" + hashCode(), resolvedChain);
+        return new QueryChain(resolvedChain);
     }
 
     /**
@@ -153,5 +154,27 @@ public class QueryChain implements QueryExecutionPlan {
     public SQLAction createSQLAction(SQLActionVisitor visitor) {
         throw new CayenneRuntimeException("Chain doesn't support its own execution "
                 + "and should've been split into separate queries during routing phase.");
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @deprecated since 1.2
+     */
+    public Object getRoot() {
+        throw new CayenneRuntimeException("This deprecated method is not implemented");
+    }
+
+    /**
+     * @deprecated since 1.2
+     */
+    public void setRoot(Object root) {
+        throw new CayenneRuntimeException("This deprecated method is not implemented");
     }
 }

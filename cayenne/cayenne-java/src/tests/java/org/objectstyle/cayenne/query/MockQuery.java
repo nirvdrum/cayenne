@@ -64,12 +64,27 @@ public class MockQuery implements Query {
 
     protected String name;
     protected Object root;
+    protected boolean selecting;
+
+    protected boolean resolveCalled;
+
+    public MockQuery(boolean selecting) {
+        this.selecting = selecting;
+    }
 
     public MockQuery() {
     }
 
     public MockQuery(String name) {
         this.name = name;
+    }
+
+    public boolean isResolveCalled() {
+        return resolveCalled;
+    }
+
+    public boolean isSelecting() {
+        return selecting;
     }
 
     public String getName() {
@@ -89,7 +104,8 @@ public class MockQuery implements Query {
     }
 
     public Query resolve(EntityResolver resolver) {
-        return this;
+        this.resolveCalled = true;
+        return (selecting) ? new MockGenericSelectQuery(root) : new MockQuery();
     }
 
     public SQLAction createSQLAction(SQLActionVisitor visitor) {
