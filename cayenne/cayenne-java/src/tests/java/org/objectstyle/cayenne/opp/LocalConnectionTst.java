@@ -78,38 +78,4 @@ public class LocalConnectionTst extends TestCase {
         assertTrue(connector2.isSerializingMessages());
         assertSame(handler2, connector2.getChannel());
     }
-
-    public void testSendMessage() {
-        OPPChannel handler = new MockOPPChannel();
-
-        // create connector without serialization support...
-        LocalConnection connector = new LocalConnection(handler);
-
-        // test that messages are being dispatched...
-
-        MockOPPMessage message1 = new MockOPPMessage();
-        connector.sendMessage(message1);
-        assertSame(handler, message1.getLastChannel());
-
-        MockOPPMessage message2 = new MockOPPMessage();
-        connector.sendMessage(message2);
-        assertSame(handler, message2.getLastChannel());
-    }
-
-    public void testSendMessageSerialized() {
-        OPPChannel handler = new MockOPPChannel();
-
-        // create connector without serialization support...
-        LocalConnection connector = new LocalConnection(
-                handler,
-                LocalConnection.HESSIAN_SERIALIZATION);
-
-        // indirectly test that a dispatch was done on a different message
-        // a better test would involve some serialization tricks with
-        // MockAbstractMessage....
-
-        MockOPPMessage message1 = new MockOPPMessage();
-        connector.sendMessage(message1);
-        assertNull(message1.getLastChannel());
-    }
 }

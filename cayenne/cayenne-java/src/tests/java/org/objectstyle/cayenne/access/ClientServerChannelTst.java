@@ -70,9 +70,9 @@ import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.GenericQueryMessage;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
-import org.objectstyle.cayenne.opp.SelectMessage;
+import org.objectstyle.cayenne.opp.ObjectSelectMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
@@ -153,16 +153,16 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 response) {
 
             // note that select query calls "onGenericQuery" on the channel
-            public QueryResponse onGenericQuery(GenericQueryMessage message) {
+            public QueryResponse onQuery(QueryMessage message) {
                 selectDone[0] = true;
-                return super.onGenericQuery(message);
+                return super.onQuery(message);
             }
         };
 
         ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore());
 
-        SelectMessage message = new SelectMessage(new MockGenericSelectQuery("MtTable1"));
-        List results = new ClientServerChannel(context, false).onSelectQuery(message);
+        ObjectSelectMessage message = new ObjectSelectMessage(new MockGenericSelectQuery("MtTable1"));
+        List results = new ClientServerChannel(context, false).onSelectObjects(message);
         assertTrue(selectDone[0]);
 
         assertNotNull(results);
@@ -197,8 +197,8 @@ public class ClientServerChannelTst extends CayenneTestCase {
 
         ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore());
 
-        SelectMessage message = new SelectMessage(new MockGenericSelectQuery("MtTable3"));
-        List results = new ClientServerChannel(context, false).onSelectQuery(message);
+        ObjectSelectMessage message = new ObjectSelectMessage(new MockGenericSelectQuery("MtTable3"));
+        List results = new ClientServerChannel(context, false).onSelectObjects(message);
 
         assertNotNull(results);
         assertEquals(1, results.size());
@@ -235,8 +235,8 @@ public class ClientServerChannelTst extends CayenneTestCase {
 
         MockGenericSelectQuery query = new MockGenericSelectQuery(MtTable1.class);
         query.setResolvingInherited(true);
-        SelectMessage message = new SelectMessage(query);
-        List results = new ClientServerChannel(context, false).onSelectQuery(message);
+        ObjectSelectMessage message = new ObjectSelectMessage(query);
+        List results = new ClientServerChannel(context, false).onSelectObjects(message);
 
         assertNotNull(results);
         assertEquals(1, results.size());
@@ -258,15 +258,15 @@ public class ClientServerChannelTst extends CayenneTestCase {
         final boolean[] genericDone = new boolean[1];
         MockOPPChannel parent = new MockOPPChannel(new EntityResolver()) {
 
-            public QueryResponse onGenericQuery(GenericQueryMessage message) {
+            public QueryResponse onQuery(QueryMessage message) {
                 genericDone[0] = true;
-                return super.onGenericQuery(message);
+                return super.onQuery(message);
             }
         };
         ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore());
 
-        GenericQueryMessage message = new GenericQueryMessage(new MockQuery());
-        new ClientServerChannel(context, false).onGenericQuery(message);
+        QueryMessage message = new QueryMessage(new MockQuery());
+        new ClientServerChannel(context, false).onQuery(message);
         assertTrue(genericDone[0]);
     }
 }

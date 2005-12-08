@@ -92,7 +92,7 @@ public class SyncMessage implements OPPMessage {
         this.type = type;
         this.senderChanges = senderChanges;
     }
-    
+
     /**
      * Returns a source of SyncMessage.
      */
@@ -106,10 +106,6 @@ public class SyncMessage implements OPPMessage {
 
     public GraphDiff getSenderChanges() {
         return senderChanges;
-    }
-
-    public Object dispatch(OPPChannel handler) {
-        return handler.onSync(this);
     }
 
     public String toString() {

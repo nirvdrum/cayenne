@@ -145,7 +145,7 @@ public class LocalConnection extends BaseConnection {
                     processedMessage = message;
             }
 
-            return processedMessage.dispatch(channel);
+            return DispatchHelper.dispatch(channel, processedMessage);
         }
         catch (Exception ex) {
             throw new CayenneRuntimeException("Error sending message", ex);

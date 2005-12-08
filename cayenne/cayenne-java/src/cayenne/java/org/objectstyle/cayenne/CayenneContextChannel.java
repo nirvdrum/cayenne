@@ -61,9 +61,9 @@ import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.GenericQueryMessage;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SelectMessage;
+import org.objectstyle.cayenne.opp.ObjectSelectMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
 
 /**
@@ -97,11 +97,11 @@ class CayenneContextChannel implements OPPChannel {
     // TODO (Andrus, 10/11/2005) not sure if should skip the parent and go directly to its
     // channel for most query messages.
 
-    public List onSelectQuery(SelectMessage message) {
+    public List onSelectObjects(ObjectSelectMessage message) {
         return context.performQuery(message.getQuery());
     }
 
-    public QueryResponse onGenericQuery(GenericQueryMessage message) {
+    public QueryResponse onQuery(QueryMessage message) {
         return context.performGenericQuery(message.getQuery());
     }
 

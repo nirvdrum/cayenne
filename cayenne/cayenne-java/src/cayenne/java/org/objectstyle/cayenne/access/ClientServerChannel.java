@@ -66,9 +66,9 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.GenericQueryMessage;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SelectMessage;
+import org.objectstyle.cayenne.opp.ObjectSelectMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
@@ -203,11 +203,11 @@ public class ClientServerChannel implements OPPChannel {
         return returnClientDiff;
     }
 
-    public QueryResponse onGenericQuery(GenericQueryMessage message) {
+    public QueryResponse onQuery(QueryMessage message) {
         return serverContext.performGenericQuery(message.getQuery());
     }
 
-    public List onSelectQuery(SelectMessage message) {
+    public List onSelectObjects(ObjectSelectMessage message) {
         List objects = serverContext.performQuery(message.getQuery());
 
         // create client objects for a list of server object

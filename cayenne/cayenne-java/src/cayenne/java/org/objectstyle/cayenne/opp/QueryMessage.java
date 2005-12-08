@@ -55,15 +55,33 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import java.io.Serializable;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * A tag interface representing a two-way message sent by an OPP client.
+ * A message passed to an OPPChannel to request a query execution with result returned as
+ * QueryResponse.
  * 
  * @since 1.2
  * @author Andrus Adamchik
- * @see org.objectstyle.cayenne.opp.OPPChannel
  */
-public interface OPPMessage extends Serializable {
+public class QueryMessage implements OPPMessage {
 
+    protected Query query;
+
+    // for hessian serialization
+    private QueryMessage() {
+
+    }
+
+    public QueryMessage(Query query) {
+        this.query = query;
+    }
+
+    public Query getQuery() {
+        return query;
+    }
+
+    public String toString() {
+        return "GenericQuery";
+    }
 }

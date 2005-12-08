@@ -65,9 +65,9 @@ import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.GenericQueryMessage;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SelectMessage;
+import org.objectstyle.cayenne.opp.ObjectSelectMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.Query;
@@ -333,7 +333,7 @@ public class CayenneContext implements ObjectContext {
     }
 
     public List performQuery(Query query) {
-        List objects = channel.onSelectQuery(new SelectMessage(query));
+        List objects = channel.onSelectObjects(new ObjectSelectMessage(query));
         if (objects.isEmpty()) {
             return objects;
         }
@@ -396,12 +396,12 @@ public class CayenneContext implements ObjectContext {
 
     public int[] performNonSelectingQuery(Query query) {
         return channel
-                .onGenericQuery(new GenericQueryMessage(query))
+                .onQuery(new QueryMessage(query))
                 .getFirstUpdateCounts(query);
     }
 
     public QueryResponse performGenericQuery(Query query) {
-        return channel.onGenericQuery(new GenericQueryMessage(query));
+        return channel.onQuery(new QueryMessage(query));
     }
 
     public void prepareForAccess(Persistent object, String property) {

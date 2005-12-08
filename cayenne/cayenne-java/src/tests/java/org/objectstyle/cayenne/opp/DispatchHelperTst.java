@@ -55,15 +55,26 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import java.io.Serializable;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.map.EntityResolver;
 
-/**
- * A tag interface representing a two-way message sent by an OPP client.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- * @see org.objectstyle.cayenne.opp.OPPChannel
- */
-public interface OPPMessage extends Serializable {
+import junit.framework.TestCase;
 
+public class DispatchHelperTst extends TestCase {
+
+    public void testBootstrapMessage() {
+        EntityResolver resolver = new EntityResolver();
+        MockOPPChannel channel = new MockOPPChannel(resolver);
+        assertSame(resolver, DispatchHelper.dispatch(channel, new BootstrapMessage()));
+    }
+
+    public void testUnknownMessage() {
+        try {
+            DispatchHelper.dispatch(new MockOPPChannel(), new MockOPPMessage());
+            fail("Unknown message must have failed");
+        }
+        catch (CayenneRuntimeException e) {
+            // expected
+        }
+    }
 }

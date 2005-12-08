@@ -113,11 +113,11 @@ public class OPPServerChannel implements OPPChannel {
         return eventManager;
     }
 
-    public List onSelectQuery(SelectMessage message) {
+    public List onSelectObjects(ObjectSelectMessage message) {
         return (List) send(message, List.class);
     }
 
-    public QueryResponse onGenericQuery(GenericQueryMessage message) {
+    public QueryResponse onQuery(QueryMessage message) {
         return (QueryResponse) send(message, QueryResponse.class);
     }
 

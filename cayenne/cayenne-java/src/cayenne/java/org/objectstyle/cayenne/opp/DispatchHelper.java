@@ -55,35 +55,42 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
- * A message passed to an OPPChannel to request a query execution with result returned as
- * QueryResponse.
+ * A helper class to match messaget types with OPPChannel methods.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class GenericQueryMessage implements OPPMessage {
+class DispatchHelper {
 
-    protected Query query;
+    static Object dispatch(OPPChannel channel, OPPMessage message) {
+        // Andrus, 12/08/2005: originally OPPMessage implemented self-dispatch logic,
+        // later replaced with this ugly if/else. Motivation was that "dispatch" wasn't
+        // called consistently (since OPPChannel methods are accessed directly, bypassing
+        // dispatch in many cases). Also I had a vague security concern about letting an
+        // unknown message to do its own processing...
 
-    public GenericQueryMessage(Query queryPlan) {
-        this.query = queryPlan;
-    }
+        // TODO: Andrus, 12/08/2005, now that there is no message self-dispatch, we need
+        // an extension mechanism for possible custom messages.
 
-    public Query getQuery() {
-        return query;
-    }
-
-    /**
-     * Invoked by message receiver to dispatch message.
-     */
-    public Object dispatch(OPPChannel handler) {
-        return handler.onGenericQuery(this);
-    }
-
-    public String toString() {
-        return "GenericQuery";
+        // do most common messages first...
+        if (message instanceof ObjectSelectMessage) {
+            return channel.onSelectObjects((ObjectSelectMessage) message);
+        }
+        else if (message instanceof QueryMessage) {
+            return channel.onQuery((QueryMessage) message);
+        }
+        else if (message instanceof SyncMessage) {
+            return channel.onSync((SyncMessage) message);
+        }
+        else if (message instanceof BootstrapMessage) {
+            return channel.onBootstrap((BootstrapMessage) message);
+        }
+        else {
+            throw new CayenneRuntimeException(
+                    "Message dispatch error. Unsupported message: " + message);
+        }
     }
 }

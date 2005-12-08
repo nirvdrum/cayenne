@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.MockEntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.opp.GenericQueryMessage;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SyncMessage;
@@ -144,9 +144,9 @@ public class ObjectDataContextTst extends TestCase {
                 new EntityResolver(),
                 new MockQueryResponse()) {
 
-            public QueryResponse onGenericQuery(GenericQueryMessage message) {
+            public QueryResponse onQuery(QueryMessage message) {
                 queryDone[0] = true;
-                return super.onGenericQuery(message);
+                return super.onQuery(message);
             }
         };
         ObjectDataContext context = new ObjectDataContext(parent, cache);
@@ -162,9 +162,9 @@ public class ObjectDataContextTst extends TestCase {
                 new EntityResolver(),
                 new MockQueryResponse()) {
 
-            public QueryResponse onGenericQuery(GenericQueryMessage message) {
+            public QueryResponse onQuery(QueryMessage message) {
                 selectDone[0] = true;
-                return super.onGenericQuery(message);
+                return super.onQuery(message);
             }
         };
         ObjectDataContext context = new ObjectDataContext(parent, cache);

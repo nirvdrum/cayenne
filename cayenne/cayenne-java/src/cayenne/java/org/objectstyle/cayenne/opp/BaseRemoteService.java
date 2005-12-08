@@ -163,7 +163,7 @@ public class BaseRemoteService implements OPPRemoteService {
         return session;
     }
 
-    public Object processMessage(String sessionId, OPPMessage command) throws Throwable {
+    public Object processMessage(String sessionId, OPPMessage message) throws Throwable {
 
         logObj.debug("processMessage, sessionId: " + sessionId);
 
@@ -178,7 +178,7 @@ public class BaseRemoteService implements OPPRemoteService {
 
         // intercept and log exceptions
         try {
-            return command.dispatch(handler);
+            return DispatchHelper.dispatch(handler, message);
         }
         catch (Throwable th) {
             th = Util.unwindException(th);

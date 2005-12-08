@@ -101,14 +101,19 @@ public interface OPPChannel {
     EntityResolver onBootstrap(BootstrapMessage message);
 
     /**
-     * Processes SelectMessage returning a result as list.
+     * Processes a request to select objects matching message query.
+     * <h2>"onSelectObjects" vs. "onQuery"</h2>
+     * "onSelectObjects" indicates that the channel should convert raw database data to
+     * objects before returning the result to the caller, while "onQuery" returns raw
+     * query data (data rows and update counts), and the caller is free to process this
+     * data any way it needs.
      */
-    List onSelectQuery(SelectMessage message);
+    List onSelectObjects(ObjectSelectMessage message);
 
     /**
-     * Processes a generic query message that can contain both updates and selects.
+     * Processes a raw query message.
      */
-    QueryResponse onGenericQuery(GenericQueryMessage message);
+    QueryResponse onQuery(QueryMessage message);
 
     /**
      * Processes SyncMessage returning a GraphDiff that describes changes to objects made

@@ -63,10 +63,6 @@ package org.objectstyle.cayenne.opp;
  */
 public class BootstrapMessage implements OPPMessage {
 
-    public Object dispatch(OPPChannel handler) {
-        return handler.onBootstrap(this);
-    }
-
     public String toString() {
         return "Bootstrap";
     }

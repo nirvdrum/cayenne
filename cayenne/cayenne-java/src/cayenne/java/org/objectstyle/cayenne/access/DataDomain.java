@@ -74,9 +74,9 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.GenericQueryMessage;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SelectMessage;
+import org.objectstyle.cayenne.opp.ObjectSelectMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryChain;
@@ -781,7 +781,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
     /**
      * @since 1.2
      */
-    public QueryResponse onGenericQuery(GenericQueryMessage message) {
+    public QueryResponse onQuery(QueryMessage message) {
         QueryResult result = new QueryResult();
         performQuery(message.getQuery().resolve(getEntityResolver()), result);
         return result;
@@ -790,7 +790,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
     /**
      * @since 1.2
      */
-    public List onSelectQuery(SelectMessage message) {
+    public List onSelectObjects(ObjectSelectMessage message) {
         Query query = message.getQuery().resolve(getEntityResolver());
         QueryResult result = new QueryResult();
         performQuery(query, result);

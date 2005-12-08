@@ -58,16 +58,16 @@ package org.objectstyle.cayenne.opp;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * A message sent to OPPChannel to request selecting query execution.
+ * A message sent to OPPChannel to request a list of objects matching a query.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class SelectMessage implements OPPMessage {
+public class ObjectSelectMessage implements OPPMessage {
 
     protected Query query;
 
-    public SelectMessage(Query queryPlan) {
+    public ObjectSelectMessage(Query queryPlan) {
         this.query = queryPlan;
     }
 
@@ -75,16 +75,9 @@ public class SelectMessage implements OPPMessage {
         return query;
     }
 
-    /**
-     * Invoked by message receiver to dispatch message.
-     */
-    public Object dispatch(OPPChannel handler) {
-        return handler.onSelectQuery(this);
-    }
-
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("Select[").append(query).append("]");
+        buffer.append("ObjectSelect[").append(query).append("]");
         return buffer.toString();
     }
 }

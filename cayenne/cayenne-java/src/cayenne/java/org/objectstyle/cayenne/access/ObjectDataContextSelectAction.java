@@ -59,7 +59,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.opp.GenericQueryMessage;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
@@ -112,8 +112,8 @@ class ObjectDataContextSelectAction extends DataContextSelectAction {
 
         // must fetch...
 
-        QueryResponse response = context.getChannel().onGenericQuery(
-                new GenericQueryMessage(selectQuery));
+        QueryResponse response = context.getChannel().onQuery(
+                new QueryMessage(selectQuery));
 
         List results;
         if (selectQuery.isFetchingDataRows()) {

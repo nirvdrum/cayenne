@@ -91,7 +91,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.GenericQueryMessage;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.NamedQuery;
@@ -1032,8 +1032,8 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         Query query = queryPlan.resolve(getEntityResolver());
-        QueryResponse response = getChannel().onGenericQuery(
-                new GenericQueryMessage(query));
+        QueryResponse response = getChannel().onQuery(
+                new QueryMessage(query));
         return response.getFirstUpdateCounts(query);
     }
 

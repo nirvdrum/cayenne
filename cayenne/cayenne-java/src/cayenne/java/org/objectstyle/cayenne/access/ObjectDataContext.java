@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
-import org.objectstyle.cayenne.opp.GenericQueryMessage;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.NamedQuery;
@@ -234,7 +234,7 @@ class ObjectDataContext extends DataContext implements ObjectContext {
                     "Can't run query - parent OPPChannel is not set.");
         }
 
-        return getChannel().onGenericQuery(new GenericQueryMessage(query));
+        return getChannel().onQuery(new QueryMessage(query));
     }
 
     public List performQuery(Query query) {

@@ -119,12 +119,12 @@ public class MockOPPChannel implements OPPChannel {
         return commitResponse;
     }
 
-    public QueryResponse onGenericQuery(GenericQueryMessage message) {
+    public QueryResponse onQuery(QueryMessage message) {
         messages.add(message);
         return genericResponse;
     }
 
-    public List onSelectQuery(SelectMessage message) {
+    public List onSelectObjects(ObjectSelectMessage message) {
         messages.add(message);
         return selectResponse;
     }
