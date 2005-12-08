@@ -62,6 +62,7 @@ import java.util.Map;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
@@ -83,7 +84,7 @@ public class DataDomainTst extends CayenneTestCase {
         DataContextFactory dataContextFactory = new DataContextFactory() {
 
             public DataContext createDataContext(
-                    QueryEngine parent,
+                    OPPChannel parent,
                     ObjectStore objectStore) {
                 return null;
             }
@@ -111,7 +112,7 @@ public class DataDomainTst extends CayenneTestCase {
         DataContextFactory dataContextFactory = new DataContextFactory() {
 
             public DataContext createDataContext(
-                    QueryEngine parent,
+                    OPPChannel parent,
                     ObjectStore objectStore) {
                 return dataContext;
             }

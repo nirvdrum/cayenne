@@ -115,7 +115,6 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
 // * Currently doesn't support commit events
 // * Doesn't change object store (there is no notion of ObjectStore anymore). Instead
 // caller must do it.
-// * There is no logging level overrides
 class DataDomainCommitAction {
 
     DataDomain domain;
