@@ -14,6 +14,12 @@ Changes/New Features:
 * Generated/Identity Columns - http://objectstyle.org/confluence/display/CAY/Generated+Columns
   - Derby support for generated columns
   - Modeler now allows to specify generated columns for PK only. Non-pk column can't be generated:
+  
+* "DataContextFactory.createDataContext" method signature change. 
+  Previously introduced "DataContextFactory.createDataContext(QueryEngine, ObjectStore)" 
+  is replaced with "DataContextFactory.createDataContext(OPPChannel, ObjectStore)". The change
+  of the custom factories should be trivial, as DataContext now has a corresponding constructor 
+  and DataDomain implements OPPChannel.
 
 * Oracle DATE type is now reverse engineered by default as JDBC TIMESTAMP, as it can store both 
   date and time info.
