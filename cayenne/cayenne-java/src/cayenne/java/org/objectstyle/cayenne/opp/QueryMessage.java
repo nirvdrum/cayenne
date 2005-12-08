@@ -82,6 +82,6 @@ public class QueryMessage implements OPPMessage {
     }
 
     public String toString() {
-        return "GenericQuery";
+        return "Query";
     }
 }
