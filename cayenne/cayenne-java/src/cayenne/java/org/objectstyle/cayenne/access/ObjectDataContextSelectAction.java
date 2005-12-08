@@ -61,7 +61,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.opp.GenericQueryMessage;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryExecutionPlan;
 
 /**
@@ -130,20 +129,5 @@ class ObjectDataContextSelectAction extends DataContextSelectAction {
         }
 
         return results;
-    }
-
-    /**
-     * Executes query resolving phase...
-     */
-    GenericSelectQuery resolveQuery(QueryExecutionPlan queryPlan) {
-        Query resolved = queryPlan.resolve(context.getEntityResolver());
-
-        if (!(resolved instanceof GenericSelectQuery)) {
-            throw new CayenneRuntimeException(
-                    "QueryExecutionPlan was resolved to a query that is not a GenericSelectQuery: "
-                            + resolved);
-        }
-
-        return (GenericSelectQuery) resolved;
     }
 }
