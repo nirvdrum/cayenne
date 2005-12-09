@@ -84,7 +84,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * </p>
  * 
  * <pre>
- *                     SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
+ *                            SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
  * </pre>
  * 
  * <p>
@@ -271,12 +271,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
      * @since 1.1
      */
     public void initWithProperties(Map properties) {
-
         // must init defaults even if properties are empty
-        if (properties == null) {
-            properties = Collections.EMPTY_MAP;
-        }
-
         selectProperties.initWithProperties(properties);
     }
 
@@ -474,7 +469,20 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
     }
 
     public void setParameters(Map[] parameters) {
-        this.parameters = parameters;
+
+        if (parameters == null) {
+            this.parameters = null;
+        }
+        else {
+            // clone parameters to ensure that we don't have immutable maps that are not
+            // serializable with Hessian...
+            this.parameters = new Map[parameters.length];
+            for (int i = 0; i < parameters.length; i++) {
+                this.parameters[i] = parameters[i] != null
+                        ? new HashMap(parameters[i])
+                        : new HashMap();
+            }
+        }
     }
 
     /**

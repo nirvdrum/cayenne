@@ -60,12 +60,49 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.objectstyle.cayenne.opp.hessian.HessianUtil;
+import org.objectstyle.cayenne.util.Util;
+
 import junit.framework.TestCase;
 
 /**
  * @author Andrei Adamchik
  */
 public class SQLTemplateTst extends TestCase {
+
+    public void testSerializability() throws Exception {
+        SQLTemplate o = new SQLTemplate("Test", "DO SQL", false);
+        Object clone = Util.cloneViaSerialization(o);
+
+        assertTrue(clone instanceof SQLTemplate);
+        SQLTemplate c1 = (SQLTemplate) clone;
+
+        assertNotSame(o, c1);
+        assertEquals(o.getRoot(), c1.getRoot());
+        assertEquals(o.getDefaultTemplate(), c1.getDefaultTemplate());
+        assertEquals(o.isSelecting(), c1.isSelecting());
+    }
+
+    public void testSerializabilityWithHessian() throws Exception {
+        SQLTemplate o = new SQLTemplate("Test", "DO SQL", false);
+        Object clone = HessianUtil.cloneViaHessianSerialization(o);
+
+        assertTrue(clone instanceof SQLTemplate);
+        SQLTemplate c1 = (SQLTemplate) clone;
+
+        assertNotSame(o, c1);
+        assertEquals(o.getRoot(), c1.getRoot());
+        assertEquals(o.getDefaultTemplate(), c1.getDefaultTemplate());
+        assertEquals(o.isSelecting(), c1.isSelecting());
+
+        // set immutable parameters ... query must recast them to mutable version
+        Map[] parameters = new Map[] {
+            Collections.EMPTY_MAP
+        };
+        o.setParameters(parameters);
+
+        HessianUtil.cloneViaHessianSerialization(o);
+    }
 
     public void testGetDefaultTemplate() {
         SQLTemplate query = new SQLTemplate(false);
@@ -138,7 +175,7 @@ public class SQLTemplateTst extends TestCase {
         assertTrue(it.hasNext());
         assertEquals(params2, it.next());
         assertTrue(it.hasNext());
-        assertEquals(Collections.EMPTY_MAP, it.next());
+        assertTrue(((Map)it.next()).isEmpty());
         assertFalse(it.hasNext());
 
         query.setParameters((Map[]) null);
