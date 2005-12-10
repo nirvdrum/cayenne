@@ -1298,6 +1298,7 @@ public class DataContext implements QueryEngine, Serializable {
      * attached to an OPPChannel.
      */
     public EntityResolver getEntityResolver() {
+        awakeFromDeserialization();
         return entityResolver;
     }
 

@@ -68,60 +68,100 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class DataContextSerializationTst extends CayenneTestCase {
+
     private static Logger logObj = Logger.getLogger(DataContextSerializationTst.class);
 
-    public void testSerializeWithSharedCache() throws Exception {
+    protected void fixSharedConfiguration() {
+        // for context to deserialize properly,
+        // Configuration singleton must have the right default domain
+        Configuration config = Configuration.getSharedConfiguration();
+        if (getDomain() != config.getDomain()) {
+            if (config.getDomain() != null) {
+                config.removeDomain(config.getDomain().getName());
+            }
+            config.addDomain(getDomain());
+        }
+    }
+
+    public void testSerializeResolver() throws Exception {
+        fixSharedConfiguration();
+
         DataContext context = createDataContextWithSharedCache();
-        DataContext deserializedContext =
-            (DataContext) Util.cloneViaSerialization(context);
+
+        DataContext deserializedContext = (DataContext) Util
+                .cloneViaSerialization(context);
+
+        assertNotNull(deserializedContext.getEntityResolver());
+        assertSame(context.getEntityResolver(), deserializedContext.getEntityResolver());
+    }
+
+    public void testSerializeWithSharedCache() throws Exception {
+        fixSharedConfiguration();
+
+        DataContext context = createDataContextWithSharedCache();
+
+        DataContext deserializedContext = (DataContext) Util
+                .cloneViaSerialization(context);
 
         assertNotSame(context, deserializedContext);
         assertNotSame(context.getObjectStore(), deserializedContext.getObjectStore());
-        assertSame(context.getParentDataDomain(), deserializedContext.getParentDataDomain());
+        assertSame(context.getParentDataDomain(), deserializedContext
+                .getParentDataDomain());
+        assertSame(context.getObjectStore().getDataRowCache(), deserializedContext
+                .getObjectStore()
+                .getDataRowCache());
         assertSame(
-            context.getObjectStore().getDataRowCache(),
-            deserializedContext.getObjectStore().getDataRowCache());
-        assertSame(
-            deserializedContext.getParentDataDomain().getSharedSnapshotCache(),
-            deserializedContext.getObjectStore().getDataRowCache());
+                deserializedContext.getParentDataDomain().getSharedSnapshotCache(),
+                deserializedContext.getObjectStore().getDataRowCache());
+
+        assertNotNull(deserializedContext.getEntityResolver());
+        assertSame(context.getEntityResolver(), deserializedContext.getEntityResolver());
     }
 
     public void testSerializeWithLocalCache() throws Exception {
+        fixSharedConfiguration();
+
         DataContext context = createDataContextWithLocalCache();
 
-        assertNotSame(
-            context.getParentDataDomain().getSharedSnapshotCache(),
-            context.getObjectStore().getDataRowCache());
+        assertNotSame(context.getParentDataDomain().getSharedSnapshotCache(), context
+                .getObjectStore()
+                .getDataRowCache());
 
-        DataContext deserializedContext =
-            (DataContext) Util.cloneViaSerialization(context);
+        DataContext deserializedContext = (DataContext) Util
+                .cloneViaSerialization(context);
 
         assertNotSame(context, deserializedContext);
         assertNotSame(context.getObjectStore(), deserializedContext.getObjectStore());
 
-        assertSame(context.getParentDataDomain(), deserializedContext.getParentDataDomain());
+        assertSame(context.getParentDataDomain(), deserializedContext
+                .getParentDataDomain());
+        assertNotSame(context.getObjectStore().getDataRowCache(), deserializedContext
+                .getObjectStore()
+                .getDataRowCache());
         assertNotSame(
-            context.getObjectStore().getDataRowCache(),
-            deserializedContext.getObjectStore().getDataRowCache());
-        assertNotSame(
-            deserializedContext.getParentDataDomain().getSharedSnapshotCache(),
-            deserializedContext.getObjectStore().getDataRowCache());
+                deserializedContext.getParentDataDomain().getSharedSnapshotCache(),
+                deserializedContext.getObjectStore().getDataRowCache());
     }
 
     public void testSerializeNew() throws Exception {
+        fixSharedConfiguration();
+
         DataContext context = createDataContextWithSharedCache();
 
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName("artist1");
         assertNotNull(artist.getObjectId());
 
-        DataContext deserializedContext =
-            (DataContext) Util.cloneViaSerialization(context);
-        assertSame(context.getParentDataDomain(), deserializedContext.getParentDataDomain());
+        DataContext deserializedContext = (DataContext) Util
+                .cloneViaSerialization(context);
+        assertSame(context.getParentDataDomain(), deserializedContext
+                .getParentDataDomain());
 
         // there should be only one object registered
-        Artist deserializedArtist =
-            (Artist) deserializedContext.getObjectStore().getObjectIterator().next();
+        Artist deserializedArtist = (Artist) deserializedContext
+                .getObjectStore()
+                .getObjectIterator()
+                .next();
 
         assertNotNull(deserializedArtist);
         assertEquals(PersistenceState.NEW, deserializedArtist.getPersistenceState());
@@ -131,6 +171,8 @@ public class DataContextSerializationTst extends CayenneTestCase {
     }
 
     public void testSerializeCommitted() throws Exception {
+        fixSharedConfiguration();
+
         DataContext context = createDataContextWithSharedCache();
 
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
@@ -138,22 +180,23 @@ public class DataContextSerializationTst extends CayenneTestCase {
         assertNotNull(artist.getObjectId());
         context.commitChanges();
 
-        DataContext deserializedContext =
-            (DataContext) Util.cloneViaSerialization(context);
+        DataContext deserializedContext = (DataContext) Util
+                .cloneViaSerialization(context);
 
-        logObj.warn(
-            "registered domains: "
+        logObj.warn("registered domains: "
                 + new ArrayList(Configuration.getSharedConfiguration().getDomains()));
-        logObj.warn(
-            " domains in question: "
+        logObj.warn(" domains in question: "
                 + context.getParentDataDomain()
                 + "--"
                 + deserializedContext.getParentDataDomain());
-        assertSame(context.getParentDataDomain(), deserializedContext.getParentDataDomain());
+        assertSame(context.getParentDataDomain(), deserializedContext
+                .getParentDataDomain());
 
         // there should be only one object registered
-        Artist deserializedArtist =
-            (Artist) deserializedContext.getObjectStore().getObjectIterator().next();
+        Artist deserializedArtist = (Artist) deserializedContext
+                .getObjectStore()
+                .getObjectIterator()
+                .next();
 
         assertNotNull(deserializedArtist);
 
@@ -177,6 +220,8 @@ public class DataContextSerializationTst extends CayenneTestCase {
     }
 
     public void testSerializeModified() throws Exception {
+        fixSharedConfiguration();
+
         DataContext context = createDataContextWithSharedCache();
 
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
@@ -185,14 +230,17 @@ public class DataContextSerializationTst extends CayenneTestCase {
         context.commitChanges();
         artist.setArtistName("artist2");
 
-        DataContext deserializedContext =
-            (DataContext) Util.cloneViaSerialization(context);
+        DataContext deserializedContext = (DataContext) Util
+                .cloneViaSerialization(context);
 
-        assertSame(context.getParentDataDomain(), deserializedContext.getParentDataDomain());
+        assertSame(context.getParentDataDomain(), deserializedContext
+                .getParentDataDomain());
 
         // there should be only one object registered
-        Artist deserializedArtist =
-            (Artist) deserializedContext.getObjectStore().getObjectIterator().next();
+        Artist deserializedArtist = (Artist) deserializedContext
+                .getObjectStore()
+                .getObjectIterator()
+                .next();
 
         assertNotNull(deserializedArtist);
 
