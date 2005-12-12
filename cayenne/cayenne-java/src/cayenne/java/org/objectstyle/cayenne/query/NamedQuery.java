@@ -77,14 +77,15 @@ import org.objectstyle.cayenne.util.Util;
 public class NamedQuery implements Query {
 
     protected String name;
+    protected String queryName;
     protected Map parameters;
 
-    public NamedQuery(String name) {
-        this(name, null);
+    public NamedQuery(String queryName) {
+        this(queryName, null);
     }
 
-    public NamedQuery(String name, Map parameters) {
-        this.name = name;
+    public NamedQuery(String queryName, Map parameters) {
+        this.queryName = queryName;
         this.parameters = parameters;
     }
 
@@ -92,8 +93,8 @@ public class NamedQuery implements Query {
      * Creates NamedQuery with parameters passed as two matching arrays of keys and
      * values.
      */
-    public NamedQuery(String name, String[] keys, Object[] values) {
-        this.name = name;
+    public NamedQuery(String queryName, String[] keys, Object[] values) {
+        this.queryName = queryName;
         this.parameters = Util.toMap(keys, values);
     }
 
@@ -105,32 +106,29 @@ public class NamedQuery implements Query {
         this.name = name;
     }
 
-    /**
-     * A callback method invoked by Cayenne during the first phase of execution. Allows
-     * query to resolve itself. For example a query can be a "proxy" for another query
-     * stored by name in the DataMap. In this method such query would find the actual
-     * mapped query and return it to the caller for execution.
-     */
-    public Query resolve(EntityResolver resolver) {
-        Query substituteQuery = substituteQuery(resolver);
+    public String getQueryName() {
+        return queryName;
+    }
 
-        if (substituteQuery == null) {
-            throw new CayenneRuntimeException("Can't find named query for name '"
-                    + getName()
-                    + "'");
-        }
-
-        return substituteQuery;
+    public void setQueryName(String queryName) {
+        this.queryName = queryName;
     }
 
     /**
      * Resolves a real query for the name and delegates further execution to this query.
      */
-    public void route(QueryRouter router, EntityResolver resolver) {
-        throw new CayenneRuntimeException(this
-                + " doesn't support its own routing. "
-                + "It should've been delegated to another "
-                + "query during resolution phase.");
+    public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
+        Query substituteQuery = substituteQuery(resolver);
+
+        if (substituteQuery == null) {
+            throw new CayenneRuntimeException("Can't find named query for name '"
+                    + getQueryName()
+                    + "'");
+        }
+
+        substituteQuery.route(router, resolver, substitutedQuery != null
+                ? substitutedQuery
+                : this);
     }
 
     /**
@@ -148,7 +146,7 @@ public class NamedQuery implements Query {
      * Locates and initializes a substitution query.
      */
     protected Query substituteQuery(EntityResolver resolver) {
-        Query query = resolver.lookupQuery(getName());
+        Query query = resolver.lookupQuery(getQueryName());
 
         if (query instanceof ParameterizedQuery) {
             // must process the query even if we have no parameters set, so that unused
@@ -193,6 +191,26 @@ public class NamedQuery implements Query {
         }
 
         return query;
+    }
+
+    /**
+     * Returns the root of the named query obtained from the EntityResolver. If such query
+     * does not exist (or if it is the same query as this object), null is returned.
+     */
+    public Object getRoot(EntityResolver resolver) {
+        Query query = resolver.lookupQuery(getQueryName());
+
+        if (query == null) {
+            return null;
+        }
+
+        // sanity check ... there can be an incorrect use of client vs. server
+        // EntityResolver resulting in such condition
+        if (query == this) {
+            return null;
+        }
+
+        return query.getRoot(resolver);
     }
 
     /**

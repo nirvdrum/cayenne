@@ -118,14 +118,14 @@ public class MapLoaderLoadTst extends TestCase {
     private void checkLoadedQueries(DataMap map) throws Exception {
         SelectQuery queryWithQualifier = (SelectQuery) map.getQuery("QueryWithQualifier");
         assertNotNull(queryWithQualifier);
-        assertTrue(queryWithQualifier.getRoot() instanceof ObjEntity);
-        assertEquals("Artist", ((Entity) queryWithQualifier.getRoot()).getName());
+        assertTrue(queryWithQualifier.getRoot(null) instanceof ObjEntity);
+        assertEquals("Artist", ((Entity) queryWithQualifier.getRoot(null)).getName());
         assertNotNull(queryWithQualifier.getQualifier());
 
         SelectQuery queryWithOrdering = (SelectQuery) map.getQuery("QueryWithOrdering");
         assertNotNull(queryWithOrdering);
-        assertTrue(queryWithOrdering.getRoot() instanceof ObjEntity);
-        assertEquals("Artist", ((Entity) queryWithOrdering.getRoot()).getName());
+        assertTrue(queryWithOrdering.getRoot(null) instanceof ObjEntity);
+        assertEquals("Artist", ((Entity) queryWithOrdering.getRoot(null)).getName());
         assertEquals(2, queryWithOrdering.getOrderings().size());
 
         Ordering artistNameOrdering = (Ordering) queryWithOrdering.getOrderings().get(0);
@@ -140,8 +140,8 @@ public class MapLoaderLoadTst extends TestCase {
 
         SelectQuery queryWithPrefetch = (SelectQuery) map.getQuery("QueryWithPrefetch");
         assertNotNull(queryWithPrefetch);
-        assertTrue(queryWithPrefetch.getRoot() instanceof ObjEntity);
-        assertEquals("Gallery", ((Entity) queryWithPrefetch.getRoot()).getName());
+        assertTrue(queryWithPrefetch.getRoot(null) instanceof ObjEntity);
+        assertEquals("Gallery", ((Entity) queryWithPrefetch.getRoot(null)).getName());
         assertNotNull(queryWithPrefetch.getPrefetchTree());
         assertEquals(1, queryWithPrefetch.getPrefetchTree().nonPhantomNodes().size());
         assertNotNull(queryWithPrefetch.getPrefetchTree().getNode(

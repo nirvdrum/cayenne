@@ -78,7 +78,7 @@ public class SQLTemplateTst extends TestCase {
         SQLTemplate c1 = (SQLTemplate) clone;
 
         assertNotSame(o, c1);
-        assertEquals(o.getRoot(), c1.getRoot());
+        assertEquals(o.getRoot(null), c1.getRoot(null));
         assertEquals(o.getDefaultTemplate(), c1.getDefaultTemplate());
         assertEquals(o.isSelecting(), c1.isSelecting());
     }
@@ -91,7 +91,7 @@ public class SQLTemplateTst extends TestCase {
         SQLTemplate c1 = (SQLTemplate) clone;
 
         assertNotSame(o, c1);
-        assertEquals(o.getRoot(), c1.getRoot());
+        assertEquals(o.getRoot(null), c1.getRoot(null));
         assertEquals(o.getDefaultTemplate(), c1.getDefaultTemplate());
         assertEquals(o.isSelecting(), c1.isSelecting());
 

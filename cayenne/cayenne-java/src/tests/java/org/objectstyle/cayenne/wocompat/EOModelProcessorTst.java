@@ -109,7 +109,7 @@ public class EOModelProcessorTst extends BasicTestCase {
         // queries
         Query query = map.getQuery("ExhibitType_TestQuery");
         assertNotNull(query);
-        assertSame(map.getObjEntity("ExhibitType"), query.getRoot());
+        assertSame(map.getObjEntity("ExhibitType"), query.getRoot(null));
         assertTrue(query instanceof SelectQuery);
         assertTrue(query instanceof EOQuery);
 

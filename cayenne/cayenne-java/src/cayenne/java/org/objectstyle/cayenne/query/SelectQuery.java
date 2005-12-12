@@ -65,6 +65,7 @@ import java.util.Map;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -182,51 +183,24 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     }
 
     /**
-     * If query root is a client class, creates a clone of self with resolved server
-     * class, otherwise returns this object unchanged.
-     * 
-     * @since 1.2
-     */
-    public Query resolve(EntityResolver resolver) {
-        Object root = getRoot();
-
-        if (root instanceof Class) {
-            Class rootClass = (Class) root;
-
-            // TODO: (Andrus 09/18/2005) this will be SLOOOOOOW for client queries as no
-            // results force EntityResolver to reindex itself. In fact unit tests timing
-            // shows that for small result sets using client class as root makes query 3x
-            // as slow!!!
-            if (resolver.lookupObjEntity(rootClass) == null) {
-
-                ObjEntity entity = resolver.getClientEntityResolver().lookupObjEntity(
-                        rootClass);
-
-                if (null == entity) {
-                    throw new CayenneRuntimeException("No entity mapped for class: "
-                            + rootClass);
-                }
-
-                String entityName = entity.getName();
-
-                SelectQuery replacement = queryWithParameters(Collections.EMPTY_MAP, true);
-                replacement.setRoot(entityName);
-                return replacement;
-            }
-        }
-
-        return this;
-    }
-
-    /**
      * Routes itself and if there are any prefetches configured, creates prefetch queries
      * and routes them as well.
      * 
      * @since 1.2
      */
-    public void route(QueryRouter router, EntityResolver resolver) {
-        // route self
-        super.route(router, resolver);
+    public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
+
+        // route root
+        DataMap map = resolver.lookupDataMap(this);
+
+        if (map == null) {
+            throw new CayenneRuntimeException("No DataMap found, can't route query "
+                    + this);
+        }
+
+        router.route(router.engineForDataMap(map), this, substitutedQuery != null
+                ? substitutedQuery
+                : this);
 
         // create queries for DISJOINT prefetches
         routePrefetches(router, resolver);
@@ -490,8 +464,8 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         // if query root is DbEntity, and no custom attributes
         // are defined, return DbEntity attributes.
         if ((customDbAttributes == null || customDbAttributes.isEmpty())
-                && (getRoot() instanceof DbEntity)) {
-            Collection attributes = ((DbEntity) getRoot()).getAttributes();
+                && (root instanceof DbEntity)) {
+            Collection attributes = ((DbEntity) root).getAttributes();
             List attributeNames = new ArrayList(attributes.size());
             Iterator it = attributes.iterator();
             while (it.hasNext()) {
@@ -531,7 +505,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * </p>
      */
     public boolean isFetchingCustomAttributes() {
-        return (getRoot() instanceof DbEntity)
+        return (root instanceof DbEntity)
                 || (customDbAttributes != null && !customDbAttributes.isEmpty());
     }
 

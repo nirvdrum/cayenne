@@ -156,7 +156,7 @@ class DataRowUtils {
         DataContext context = anObject.getDataContext();
         Map oldSnap = context.getObjectStore().getSnapshot(
                 anObject.getObjectId(),
-                context);
+                context.getChannel());
 
         // attributes
         Map attrMap = entity.getAttributeMap();

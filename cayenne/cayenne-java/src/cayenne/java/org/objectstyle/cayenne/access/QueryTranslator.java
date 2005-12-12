@@ -190,7 +190,7 @@ public abstract class QueryTranslator {
     }
 
     public ObjEntity getRootEntity() {
-        if (query.getRoot() instanceof DbEntity) {
+        if (query.getRoot(entityResolver) instanceof DbEntity) {
             return null;
         }
 

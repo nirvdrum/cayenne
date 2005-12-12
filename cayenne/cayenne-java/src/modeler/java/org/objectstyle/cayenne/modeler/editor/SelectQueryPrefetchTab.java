@@ -164,7 +164,7 @@ public class SelectQueryPrefetchTab extends SelectQueryOrderingTab {
             return false;
         }
 
-        Object root = selectQuery.getRoot();
+        Object root = selectQuery.getRoot(null);
 
         // totally invalid path would result in ExpressionException
         try {

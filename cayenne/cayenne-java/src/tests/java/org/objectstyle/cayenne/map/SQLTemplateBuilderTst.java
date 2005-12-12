@@ -85,7 +85,7 @@ public class SQLTemplateBuilderTst extends TestCase {
         SQLTemplateBuilder builder = new SQLTemplateBuilder();
         builder.setRoot(map, QueryBuilder.OBJ_ENTITY_ROOT, "A");
 
-        assertSame(entity, builder.getQuery().getRoot());
+        assertSame(entity, builder.getQuery().getRoot(null));
     }
 
     public void testGetQueryProperties() throws Exception {

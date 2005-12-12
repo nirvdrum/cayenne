@@ -71,8 +71,13 @@ public interface QueryRouter {
      * A callback method that allows a query to set its preferred engine during the
      * routing phase. It allows query to further customize its routing, e.g. it is
      * possible to implement query chains that pass multiple queries for execution.
+     * 
+     * @param engine engine to use for query execution
+     * @param query A query to execute.
+     * @param substitutedQuery a query that was substituted for "query". Results must be
+     *            mapped back to substituted query.
      */
-    void useEngineForQuery(QueryEngine engine, Query query);
+    void route(QueryEngine engine, Query query, Query substitutedQuery);
 
     /**
      * Returns a QueryEngine that is configured to handle a given DataMap.

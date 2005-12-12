@@ -76,6 +76,8 @@ import org.objectstyle.cayenne.event.EventBridge;
 import org.objectstyle.cayenne.event.EventBridgeFactory;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
+import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.opp.ObjectSelectMessage;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
 
@@ -315,8 +317,28 @@ public class DataRowStore implements Serializable {
      * Returns a snapshot for ObjectId. If snapshot is currently cached, it is returned.
      * If not, a provided QueryEngine is used to fetch it from the database. If there is
      * no database row for a given id, null is returned.
+     * 
+     * @deprecated since 1.2 use {@link #getSnapshot(ObjectId, OPPChannel)}.
      */
     public synchronized DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
+        if (engine instanceof OPPChannel) {
+            return getSnapshot(oid, (OPPChannel) engine);
+        }
+        else if(engine instanceof DataContext) {
+            return getSnapshot(oid, ((DataContext) engine).getChannel());
+        }
+
+        throw new CayenneRuntimeException("QueryEngine is not an OPPChannel or DataContext: " + engine);
+    }
+
+    /**
+     * Returns a snapshot for ObjectId. If snapshot is currently cached, it is returned.
+     * If not, a provided OPPChannel is used to fetch it from the database. If there is no
+     * database row for a given id, null is returned.
+     * 
+     * @since 1.2
+     */
+    public synchronized DataRow getSnapshot(ObjectId oid, OPPChannel channel) {
 
         // try cache
         DataRow cachedSnapshot = getCachedSnapshot(oid);
@@ -329,10 +351,9 @@ public class DataRowStore implements Serializable {
         }
 
         // try getting it from database
-        Query select = new SingleObjectQuery(oid).resolve(engine.getEntityResolver());
-        QueryResult observer = new QueryResult();
-        engine.performQueries(Collections.singletonList(select), observer);
-        List results = observer.getFirstRows(select);
+
+        Query query = new SingleObjectQuery(oid);
+        List results = channel.onSelectObjects(new ObjectSelectMessage(query));
 
         if (results.size() > 1) {
             throw new CayenneRuntimeException("More than 1 object found for ObjectId "

@@ -176,7 +176,7 @@ public class AshwoodEntitySorter implements EntitySorter {
      * invocation.
      */
     public void indexSorter(QueryEngine queryEngine) {
-        setDataMaps(queryEngine.getDataMaps());
+        setDataMaps(queryEngine.getEntityResolver().getDataMaps());
     }
 
     public void sortDbEntities(List dbEntities, boolean deleteOrder) {
@@ -341,7 +341,7 @@ public class AshwoodEntitySorter implements EntitySorter {
             DataContext context = object.getDataContext();
             snapshot = context
                     .getObjectStore()
-                    .getSnapshot(object.getObjectId(), context);
+                    .getSnapshot(object.getObjectId(), context.getChannel());
         }
 
         if (snapshot == null) {

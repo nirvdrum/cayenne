@@ -109,9 +109,18 @@ public abstract class AbstractQuery implements Query {
     /**
      * Returns the root of this query
      * 
-     * @return Object
+     * @deprecated since 1.2, as corresponding interface method is also deprecated.
      */
     public Object getRoot() {
+        return root;
+    }
+
+    /**
+     * Returns a "root" ivar value.
+     * 
+     * @since 1.2
+     */
+    public Object getRoot(EntityResolver resolver) {
         return root;
     }
 
@@ -147,9 +156,10 @@ public abstract class AbstractQuery implements Query {
     }
 
     public String toString() {
-        return new ToStringBuilder(this).append("root", getRoot()).append(
-                "name",
-                getName()).toString();
+        return new ToStringBuilder(this)
+                .append("root", root)
+                .append("name", getName())
+                .toString();
     }
 
     /**
@@ -158,22 +168,13 @@ public abstract class AbstractQuery implements Query {
     public abstract SQLAction createSQLAction(SQLActionVisitor visitor);
 
     /**
-     * Implements default resolution mechanism - simply returns this query.
-     * 
-     * @since 1.2
-     */
-    public Query resolve(EntityResolver resolver) {
-        return this;
-    }
-
-    /**
      * Implements default routing mechanism relying on the EntityResolver to find DataMap
      * based on the query root. This mechanism should be sufficient for most queries that
      * "know" their root.
      * 
      * @since 1.2
      */
-    public void route(QueryRouter router, EntityResolver resolver) {
+    public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
         DataMap map = resolver.lookupDataMap(this);
 
         if (map == null) {
@@ -181,6 +182,6 @@ public abstract class AbstractQuery implements Query {
                     + this);
         }
 
-        router.useEngineForQuery(router.engineForDataMap(map), this);
+        router.route(router.engineForDataMap(map), this, substitutedQuery);
     }
 }

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.query;
 
+
 /**
  * A query that returns result set. Concrete implementations can be object queries, raw
  * sql queries, stored procedure queries, etc. The most commonly used GenericSelectQueries

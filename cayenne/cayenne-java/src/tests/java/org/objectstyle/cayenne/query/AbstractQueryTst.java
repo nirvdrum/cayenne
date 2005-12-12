@@ -43,30 +43,30 @@ public class AbstractQueryTst extends TestCase {
 
     public void testSetRootEntityName() {
         AbstractQuery query = new MockAbstractQuery();
-        assertNull(query.getRoot());
+        assertNull(query.getRoot(null));
         query.setRoot("SomeEntity");
-        assertSame("SomeEntity", query.getRoot());
+        assertSame("SomeEntity", query.getRoot(null));
     }
 
     public void testSetRootObjEntity() {
         AbstractQuery query = new MockAbstractQuery();
 
-        assertNull(query.getRoot());
+        assertNull(query.getRoot(null));
         ObjEntity e = new ObjEntity("ABC");
         query.setRoot(e);
-        assertSame(e, query.getRoot());
+        assertSame(e, query.getRoot(null));
     }
 
     public void testSetRootClass() {
         AbstractQuery query = new MockAbstractQuery();
-        assertNull(query.getRoot());
+        assertNull(query.getRoot(null));
         query.setRoot(Artist.class);
-        assertSame(Artist.class, query.getRoot());
+        assertSame(Artist.class, query.getRoot(null));
     }
 
     public void testSetInvalidRoot() {
         AbstractQuery query = new MockAbstractQuery();
-        assertNull(query.getRoot());
+        assertNull(query.getRoot(null));
         try {
             query.setRoot(new Integer(1));
             fail("Should not be able to set the root to an Integer");

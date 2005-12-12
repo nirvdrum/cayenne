@@ -70,16 +70,15 @@ import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.opp.ObjectSelectMessage;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1Subclass;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable3;
-import org.objectstyle.cayenne.testdo.mt.MtTable1;
 import org.objectstyle.cayenne.testdo.mt.MtTable1Subclass;
 import org.objectstyle.cayenne.testdo.mt.MtTable3;
 import org.objectstyle.cayenne.unit.AccessStack;
@@ -233,7 +232,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
 
         ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore());
 
-        MockGenericSelectQuery query = new MockGenericSelectQuery(MtTable1.class);
+        MockGenericSelectQuery query = new MockGenericSelectQuery(ClientMtTable1.class);
         query.setResolvingInherited(true);
         ObjectSelectMessage message = new ObjectSelectMessage(query);
         List results = new ClientServerChannel(context, false).onSelectObjects(message);

@@ -68,25 +68,15 @@ import org.objectstyle.cayenne.map.EntityResolver;
 public interface Query extends Serializable {
 
     /**
-     * A callback method invoked by Cayenne during the first phase of query execution,
-     * allowing to resolve the actual query to be executed. For example a Query can be
-     * implemented to store a query stored by name in the DataMap. In this method such
-     * query would find the actual mapped query and return it to the caller for execution.
+     * A callback method invoked by Cayenne during the routing phase of the query
+     * execution. Mapping of DataNodes is provided by QueryRouter. Query should use a
+     * {@link QueryRouter#route(QueryEngine, Query)} callback method to route itself.
+     * Query can create one or more substitute queries or even provide its own QueryEngine
+     * to execute itself.
      * 
      * @since 1.2
      */
-    Query resolve(EntityResolver resolver);
-
-    /**
-     * A callback method invoked by Cayenne during the routing phase of the query run.
-     * Mapping of query engines is provided by QueryRouter. Query should use a
-     * {@link QueryRouter#useEngineForQuery(QueryEngine, Query)}callback method to route
-     * itself. At this point a query can create one or more substitute queries or even
-     * provide its own QueryEngine to execute itself.
-     * 
-     * @since 1.2
-     */
-    void route(QueryRouter router, EntityResolver resolver);
+    void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery);
 
     /**
      * A callback method invoked by Cayenne during the final execution phase of the query
@@ -115,10 +105,19 @@ public interface Query extends Serializable {
 
     /**
      * Returns the root object of the query.
+     * 
+     * @deprecated since 1.2. Use {@link #getRoot(EntityResolver)} instead.
      */
-    // TODO: Andrus, 12/08/2005 - we need to deprecate this at some point as routing is
-    // now done by the query itself.
     Object getRoot();
+
+    /**
+     * Returns query "root" - a token that can be used to identify what mapping object
+     * this query is related to. A root can be a persistent Java class, an ObjEntity name,
+     * etc. - anything understood by EntityResolver.
+     * 
+     * @since 1.2
+     */
+    Object getRoot(EntityResolver resolver);
 
     /**
      * Sets the root of the query.

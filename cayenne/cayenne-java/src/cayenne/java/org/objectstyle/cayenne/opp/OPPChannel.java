@@ -96,7 +96,8 @@ public interface OPPChannel {
     EventManager getEventManager();
 
     /**
-     * Processes BootstrapMessage returning EntityResolver with client ORM information.
+     * Processes BootstrapMessage returning EntityResolver that contains runtime mapping
+     * information.
      */
     EntityResolver onBootstrap(BootstrapMessage message);
 

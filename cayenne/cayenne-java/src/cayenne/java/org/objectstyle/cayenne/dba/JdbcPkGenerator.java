@@ -452,11 +452,9 @@ public class JdbcPkGenerator implements PkGenerator {
 
         public void nextQueryException(Query query, Exception ex) {
             super.nextQueryException(query, ex);
-            String entityName = ((query != null) && (query.getRoot() != null)) ? query
-                    .getRoot()
-                    .toString() : null;
+
             throw new CayenneRuntimeException("Error generating PK for entity '"
-                    + entityName
+                    + entName
                     + "'.", ex);
         }
 

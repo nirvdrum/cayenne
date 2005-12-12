@@ -65,13 +65,15 @@ import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.ObjectSelectMessage;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * An OPPChannel adapter that connects client ObjectContext children to a server
@@ -204,11 +206,12 @@ public class ClientServerChannel implements OPPChannel {
     }
 
     public QueryResponse onQuery(QueryMessage message) {
-        return serverContext.performGenericQuery(message.getQuery());
+        return serverContext.performGenericQuery(rewriteQuery(message.getQuery()));
     }
 
     public List onSelectObjects(ObjectSelectMessage message) {
-        List objects = serverContext.performQuery(message.getQuery());
+
+        List objects = serverContext.performQuery(rewriteQuery(message.getQuery()));
 
         // create client objects for a list of server object
 
@@ -219,8 +222,7 @@ public class ClientServerChannel implements OPPChannel {
         // detect prefetches...
         PrefetchTreeNode prefetchTree = null;
         if (message.getQuery() instanceof GenericSelectQuery) {
-            prefetchTree = ((GenericSelectQuery) message.getQuery())
-                    .getPrefetchTree();
+            prefetchTree = ((GenericSelectQuery) message.getQuery()).getPrefetchTree();
         }
 
         try {
@@ -235,5 +237,29 @@ public class ClientServerChannel implements OPPChannel {
 
     public EntityResolver onBootstrap(BootstrapMessage message) {
         return serverContext.getEntityResolver().getClientEntityResolver();
+    }
+
+    /**
+     * Performs any needed query preprocessing to be able to execute it on the server.
+     * Note that this method may modify the client query. Normally Cayenne doesn't do
+     * that, but it is acceptable in this case as deserialized instance of the query is
+     * not accessible by a user anywhere else.
+     */
+    Query rewriteQuery(Query clientQuery) {
+
+        // replace client class with server class
+        EntityResolver clientResolver = serverContext
+                .getEntityResolver()
+                .getClientEntityResolver();
+        Object root = clientQuery.getRoot(clientResolver);
+        if (root instanceof Class) {
+            ObjEntity entity = clientResolver.lookupObjEntity((Class) root);
+            if (entity == null) {
+                throw new CayenneRuntimeException("Unmapped client class: " + root);
+            }
+            clientQuery.setRoot(entity.getName());
+        }
+
+        return clientQuery;
     }
 }

@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -84,25 +85,37 @@ class DataContextSelectAction {
         this.context = context;
     }
 
-    List performQuery(Query genericQuery) {
-        GenericSelectQuery query = resolveQuery(genericQuery);
-        return performQuery(query, query.getName(), query.isRefreshingObjects());
+    List performQuery(Query query) {
+        boolean refresh = (query instanceof GenericSelectQuery)
+                ? ((GenericSelectQuery) query).isRefreshingObjects()
+                : GenericSelectQuery.REFRESHING_OBJECTS_DEFAULT;
+
+        return performQuery(query, query.getName(), refresh);
     }
 
-    List performQuery(Query queryPlan, String cacheKey, boolean refreshCache) {
-        // resolve ....
-        GenericSelectQuery query = resolveQuery(queryPlan);
+    List performQuery(Query query, String cacheKey, boolean refreshCache) {
 
-        // check if result pagination is requested
-        // let a list handle fetch in this case
-        if (query.getPageSize() > 0) {
-            return new IncrementalFaultList(context, query);
+        String cachePolicy = GenericSelectQuery.CACHE_POLICY_DEFAULT;
+        boolean dataRows = GenericSelectQuery.FETCHING_DATA_ROWS_DEFAULT;
+        boolean inheritance = GenericSelectQuery.RESOLVING_INHERITED_DEFAULT;
+
+        if (query instanceof GenericSelectQuery) {
+            GenericSelectQuery select = (GenericSelectQuery) query;
+
+            // check if result pagination is requested
+            // let a list handle fetch in this case
+            if (select.getPageSize() > 0) {
+                return new IncrementalFaultList(context, select);
+            }
+
+            // init local select parameters
+            cachePolicy = select.getCachePolicy();
+            dataRows = select.isFetchingDataRows();
+            inheritance = select.isResolvingInherited();
         }
 
-        boolean localCache = GenericSelectQuery.LOCAL_CACHE
-                .equals(query.getCachePolicy());
-        boolean sharedCache = GenericSelectQuery.SHARED_CACHE.equals(query
-                .getCachePolicy());
+        boolean localCache = GenericSelectQuery.LOCAL_CACHE.equals(cachePolicy);
+        boolean sharedCache = GenericSelectQuery.SHARED_CACHE.equals(cachePolicy);
         boolean useCache = localCache || sharedCache;
 
         String name = query.getName();
@@ -135,14 +148,17 @@ class DataContextSelectAction {
                     if (rows.size() == 0) {
                         results = Collections.EMPTY_LIST;
                     }
-                    else if (query.isFetchingDataRows()) {
+                    else if (dataRows) {
                         results = Collections.unmodifiableList(rows);
                     }
                     else {
                         ObjEntity root = context.getEntityResolver().lookupObjEntity(
                                 query);
-                        results = context.objectsFromDataRows(root, rows, query
-                                .isRefreshingObjects(), query.isResolvingInherited());
+                        results = context.objectsFromDataRows(
+                                root,
+                                rows,
+                                refreshCache,
+                                inheritance);
                     }
                 }
             }
@@ -158,11 +174,11 @@ class DataContextSelectAction {
 
         List results;
 
-        if (query.isFetchingDataRows()) {
+        if (dataRows) {
             results = observer.getFirstRows(query);
         }
         else {
-            results = getResultsAsObjects(query, observer);
+            results = getResultsAsObjects(query, observer, refreshCache, inheritance);
         }
 
         // cache results if needed
@@ -180,7 +196,11 @@ class DataContextSelectAction {
         return results;
     }
 
-    List getResultsAsObjects(GenericSelectQuery rootQuery, QueryResponse response) {
+    List getResultsAsObjects(
+            Query rootQuery,
+            QueryResponse response,
+            boolean refresh,
+            boolean resolveInheritanceTree) {
 
         List mainRows = response.getFirstRows(rootQuery);
 
@@ -188,9 +208,14 @@ class DataContextSelectAction {
             return new ArrayList(1);
         }
 
+        ObjEntity entity = context.getEntityResolver().lookupObjEntity(rootQuery);
+        PrefetchTreeNode prefetchTree = (rootQuery instanceof GenericSelectQuery)
+                ? ((GenericSelectQuery) rootQuery).getPrefetchTree()
+                : null;
+
         // take a shortcut when no prefetches exist...
-        if (rootQuery.getPrefetchTree() == null) {
-            return new ObjectResolver(context, rootQuery)
+        if (prefetchTree == null) {
+            return new ObjectResolver(context, entity, refresh, resolveInheritanceTree)
                     .synchronizedObjectsFromDataRows(mainRows);
         }
 
@@ -209,31 +234,17 @@ class DataContextSelectAction {
             }
         }
 
-        ObjectTreeResolver resolver = new ObjectTreeResolver(context, rootQuery);
+        ObjectTreeResolver resolver = new ObjectTreeResolver(
+                context,
+                entity,
+                refresh,
+                resolveInheritanceTree);
 
         // double-sync row processing
         synchronized (context.getObjectStore()) {
             synchronized (context.getObjectStore().getDataRowCache()) {
-                return resolver.resolveObjectTree(
-                        rootQuery.getPrefetchTree(),
-                        mainRows,
-                        rowsByPath);
+                return resolver.resolveObjectTree(prefetchTree, mainRows, rowsByPath);
             }
         }
-    }
-
-    /**
-     * Executes query resolving phase...
-     */
-    GenericSelectQuery resolveQuery(Query queryPlan) {
-        Query resolved = queryPlan.resolve(context.getEntityResolver());
-
-        if (!(resolved instanceof GenericSelectQuery)) {
-            throw new CayenneRuntimeException(
-                    "Query was resolved to a query that is not a GenericSelectQuery: "
-                            + resolved);
-        }
-
-        return (GenericSelectQuery) resolved;
     }
 }

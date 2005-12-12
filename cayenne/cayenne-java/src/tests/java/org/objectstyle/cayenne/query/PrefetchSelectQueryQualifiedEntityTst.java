@@ -82,7 +82,7 @@ public class PrefetchSelectQueryQualifiedEntityTst extends PeopleTestCase {
         PrefetchSelectQuery prefetch = new PrefetchSelectQuery(getDomain()
                 .getEntityResolver(), q, "toDepartment");
 
-        assertSame(departmentEntity, prefetch.getRoot());
+        assertSame(departmentEntity, prefetch.getRoot(getDomain().getEntityResolver()));
         assertEquals(Expression.fromString("db:employees.NAME = 'abc' "
                 + "and (db:employees.PERSON_TYPE = 'EE' "
                 + "or db:employees.PERSON_TYPE = 'EM')"), prefetch.getQualifier());
@@ -101,7 +101,7 @@ public class PrefetchSelectQueryQualifiedEntityTst extends PeopleTestCase {
         PrefetchSelectQuery prefetch = new PrefetchSelectQuery(getDomain()
                 .getEntityResolver(), q, "toDepartment");
 
-        assertSame(departmentEntity, prefetch.getRoot());
+        assertSame(departmentEntity, prefetch.getRoot(getDomain().getEntityResolver()));
         assertEquals(
                 Expression
                         .fromString("db:employees.NAME = 'abc' and db:employees.PERSON_TYPE = 'EM'"),

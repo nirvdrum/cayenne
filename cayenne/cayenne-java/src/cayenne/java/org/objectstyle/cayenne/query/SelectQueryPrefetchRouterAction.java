@@ -155,7 +155,7 @@ class SelectQueryPrefetchRouterAction implements PrefetchProcessor {
         prefetchQuery.setPrefetchTree(node);
 
         // route...
-        prefetchQuery.route(router, resolver);
+        prefetchQuery.route(router, resolver, null);
         return true;
     }
 

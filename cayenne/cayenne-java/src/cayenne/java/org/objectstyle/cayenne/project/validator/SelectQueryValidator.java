@@ -114,23 +114,23 @@ public class SelectQueryValidator extends TreeNodeValidator {
 
     protected Entity validateRoot(Query query, ProjectPath path, Validator validator) {
         DataMap map = (DataMap) path.firstInstanceOf(DataMap.class);
-        if (query.getRoot() == null && map != null) {
+        if (query.getRoot(null) == null && map != null) {
             validator.registerWarning("Query has no root", path);
             return null;
         }
 
-        if (query.getRoot() == map) {
+        if (query.getRoot(null) == map) {
             // map-level query... everything is clean
             return null;
         }
 
         if (map == null) {
             // maybe standalone entity, otherwise bail...
-            return (query.getRoot() instanceof Entity) ? (Entity) query.getRoot() : null;
+            return (query.getRoot(null) instanceof Entity) ? (Entity) query.getRoot(null) : null;
         }
 
         // can't validate Class root - it is likely not accessible from here...
-        if (query.getRoot() instanceof Class) {
+        if (query.getRoot(null) instanceof Class) {
             return null;
         }
 

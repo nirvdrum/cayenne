@@ -549,7 +549,7 @@ public class DataContext implements QueryEngine, Serializable {
                 && anObject.getDataContext() != null) {
 
             ObjectId id = anObject.getObjectId();
-            return getObjectStore().getSnapshot(id, this);
+            return getObjectStore().getSnapshot(id, this.getChannel());
         }
 
         DataRow snapshot = new DataRow(10);
@@ -585,7 +585,7 @@ public class DataContext implements QueryEngine, Serializable {
             if (targetObject instanceof Fault) {
                 DataRow storedSnapshot = getObjectStore().getSnapshot(
                         anObject.getObjectId(),
-                        this);
+                        getChannel());
                 if (storedSnapshot == null) {
                     throw new CayenneRuntimeException(
                             "No matching objects found for ObjectId "
@@ -1025,15 +1025,13 @@ public class DataContext implements QueryEngine, Serializable {
      * 
      * @since 1.1
      */
-    public int[] performNonSelectingQuery(Query queryPlan) {
+    public int[] performNonSelectingQuery(Query query) {
         if (this.getChannel() == null) {
             throw new CayenneRuntimeException(
                     "Can't run query - parent OPPChannel is not set.");
         }
 
-        Query query = queryPlan.resolve(getEntityResolver());
-        QueryResponse response = getChannel().onQuery(
-                new QueryMessage(query));
+        QueryResponse response = getChannel().onQuery(new QueryMessage(query));
         return response.getFirstUpdateCounts(query);
     }
 

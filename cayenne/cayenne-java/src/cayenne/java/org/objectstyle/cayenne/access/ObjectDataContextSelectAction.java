@@ -80,18 +80,31 @@ class ObjectDataContextSelectAction extends DataContextSelectAction {
         this.context = context;
     }
 
-    List performQuery(Query queryPlan) {
-        GenericSelectQuery selectQuery = resolveQuery(queryPlan);
+    List performQuery(Query query) {
 
-        // check if result pagination is requested
-        // let a list handle fetch in this case
-        if (selectQuery.getPageSize() > 0) {
-            return new IncrementalFaultList(context, selectQuery);
+        String cachePolicy = GenericSelectQuery.CACHE_POLICY_DEFAULT;
+        boolean dataRows = GenericSelectQuery.FETCHING_DATA_ROWS_DEFAULT;
+        boolean inheritance = GenericSelectQuery.RESOLVING_INHERITED_DEFAULT;
+        boolean refresh = GenericSelectQuery.REFRESHING_OBJECTS_DEFAULT;
+
+        if (query instanceof GenericSelectQuery) {
+            GenericSelectQuery select = (GenericSelectQuery) query;
+
+            // check if result pagination is requested
+            // let a list handle fetch in this case
+            if (select.getPageSize() > 0) {
+                return new IncrementalFaultList(context, select);
+            }
+
+            // init local select parameters
+            cachePolicy = select.getCachePolicy();
+            dataRows = select.isFetchingDataRows();
+            inheritance = select.isResolvingInherited();
+            refresh = select.isRefreshingObjects();
         }
 
-        String cacheKey = selectQuery.getName();
-        boolean cacheResults = GenericSelectQuery.LOCAL_CACHE.equals(selectQuery
-                .getCachePolicy());
+        String cacheKey = query.getName();
+        boolean cacheResults = GenericSelectQuery.LOCAL_CACHE.equals(cachePolicy);
 
         // get results from cache...
         if (cacheResults) {
@@ -113,14 +126,14 @@ class ObjectDataContextSelectAction extends DataContextSelectAction {
         // must fetch...
 
         QueryResponse response = context.getChannel().onQuery(
-                new QueryMessage(selectQuery));
+                new QueryMessage(query));
 
         List results;
-        if (selectQuery.isFetchingDataRows()) {
-            results = response.getFirstRows(selectQuery);
+        if (dataRows) {
+            results = response.getFirstRows(query);
         }
         else {
-            results = getResultsAsObjects(selectQuery, response);
+            results = getResultsAsObjects(query, response, refresh, inheritance);
         }
 
         // cache results if needed

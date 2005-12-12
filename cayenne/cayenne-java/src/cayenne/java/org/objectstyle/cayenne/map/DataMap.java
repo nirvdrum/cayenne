@@ -76,6 +76,7 @@ import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
@@ -223,12 +224,22 @@ public class DataMap implements Serializable, XMLSerializable, MappingNamespace,
 
         DataMap clientMap = new DataMap(getName());
 
-        Iterator it = getObjEntities().iterator();
-        while (it.hasNext()) {
-            ObjEntity entity = (ObjEntity) it.next();
+        // create client entities for entities
+        Iterator entities = getObjEntities().iterator();
+        while (entities.hasNext()) {
+            ObjEntity entity = (ObjEntity) entities.next();
             if (entity.isClientAllowed()) {
                 clientMap.addObjEntity(entity.getClientEntity());
             }
+        }
+
+        // create proxies for named queries
+        Iterator queries = getQueries().iterator();
+        while (queries.hasNext()) {
+            Query q = (Query) queries.next();
+            NamedQuery proxy = new NamedQuery(q.getName());
+            proxy.setName(q.getName());
+            clientMap.addQuery(proxy);
         }
 
         return clientMap;

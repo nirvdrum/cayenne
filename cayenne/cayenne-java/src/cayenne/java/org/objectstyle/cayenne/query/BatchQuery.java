@@ -64,6 +64,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
  * BatchQuery and its descendants allow to group similar data for the batch database
@@ -71,17 +72,67 @@ import org.objectstyle.cayenne.map.DbEntity;
  * a parameterized PreparedStatement and a matrix of values.
  * 
  * @author Andriy Shapochka
+ * @author Andrus Adamchik
  */
-public abstract class BatchQuery extends AbstractQuery {
+public abstract class BatchQuery implements Query {
 
     /**
      * @since 1.2
      */
     protected int batchIndex;
 
+    /**
+     * @since 1.2
+     */
+    protected DbEntity dbEntity;
+
+    protected String name;
+
     public BatchQuery(DbEntity dbEntity) {
-        setRoot(dbEntity);
-        batchIndex = -1;
+        this.dbEntity = dbEntity;
+        this.batchIndex = -1;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @deprecated since 1.2 as the corresponding interface method is also deprecated.
+     */
+    public Object getRoot() {
+        return dbEntity;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public Object getRoot(EntityResolver resolver) {
+        return dbEntity;
+    }
+
+    public void setRoot(Object root) {
+        if (root == null || root instanceof DbEntity) {
+            this.dbEntity = (DbEntity) root;
+        }
+        else {
+            throw new CayenneRuntimeException("Only DbEntity is supported as root: "
+                    + root);
+        }
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
+        router.route(
+                router.engineForDataMap(dbEntity.getDataMap()),
+                this,
+                substitutedQuery);
     }
 
     /**
@@ -106,7 +157,7 @@ public abstract class BatchQuery extends AbstractQuery {
      * Returns a DbEntity associated with this batch.
      */
     public DbEntity getDbEntity() {
-        return (DbEntity) getRoot();
+        return dbEntity;
     }
 
     /**

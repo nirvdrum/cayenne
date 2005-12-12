@@ -112,37 +112,15 @@ public class QueryChain implements Query {
     }
 
     /**
-     * Resolves queries in the chain, creating another QueryChain that contains resolved
-     * queries.
-     */
-    public Query resolve(EntityResolver resolver) {
-        if (isEmpty()) {
-            return new QueryChain();
-        }
-
-        Collection resolvedChain = new ArrayList(chain.size());
-
-        Iterator it = chain.iterator();
-        while (it.hasNext()) {
-            Query resolved = ((Query) it.next()).resolve(resolver);
-            if (resolved != null) {
-                resolvedChain.add(resolved);
-            }
-        }
-
-        return new QueryChain(resolvedChain);
-    }
-
-    /**
      * Delegates routing to each individual query in the chain. If there is no queries,
      * this method does nothing.
      */
-    public void route(QueryRouter router, EntityResolver resolver) {
+    public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
         if (chain != null && !chain.isEmpty()) {
             Iterator it = chain.iterator();
             while (it.hasNext()) {
                 Query q = (Query) it.next();
-                q.route(router, resolver);
+                q.route(router, resolver, substitutedQuery);
             }
         }
     }
@@ -162,6 +140,10 @@ public class QueryChain implements Query {
 
     public void setName(String name) {
         this.name = name;
+    }
+    
+    public Object getRoot(EntityResolver resolver) {
+        throw new CayenneRuntimeException("QueryChain has no root");
     }
 
     /**

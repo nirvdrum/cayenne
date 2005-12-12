@@ -280,27 +280,27 @@ public class SelectQueryTst extends SelectQueryBase {
                 "artistName",
                 "a"));
 
-        q.route(router, resolver);
+        q.route(router, resolver, null);
         assertEquals(1, router.getQueryCount());
 
         q.addPrefetch("paintingArray");
         router.reset();
-        q.route(router, resolver);
+        q.route(router, resolver, null);
         assertEquals(2, router.getQueryCount());
 
         q.addPrefetch("paintingArray.toGallery");
         router.reset();
-        q.route(router, resolver);
+        q.route(router, resolver, null);
         assertEquals(3, router.getQueryCount());
 
         q.addPrefetch("artistExhibitArray.toExhibit");
         router.reset();
-        q.route(router, resolver);
+        q.route(router, resolver, null);
         assertEquals(4, router.getQueryCount());
 
         q.removePrefetch("paintingArray");
         router.reset();
-        q.route(router, resolver);
+        q.route(router, resolver, null);
         assertEquals(3, router.getQueryCount());
     }
 
@@ -339,7 +339,7 @@ public class SelectQueryTst extends SelectQueryBase {
 
         try {
             MockQueryRouter router = new MockQueryRouter();
-            q.route(router, resolver);
+            q.route(router, resolver, null);
             assertEquals(4, router.getQueryCount());
         }
         finally {
@@ -366,7 +366,7 @@ public class SelectQueryTst extends SelectQueryBase {
         // a while
         EntityResolver resolver = getDomain().getEntityResolver();
         MockQueryRouter router = new MockQueryRouter();
-        q.route(router, resolver);
+        q.route(router, resolver, null);
         assertEquals(2, router.getQueryCount());
     }
 

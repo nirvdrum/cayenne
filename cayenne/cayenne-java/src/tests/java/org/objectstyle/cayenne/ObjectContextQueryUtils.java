@@ -59,7 +59,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Level;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -262,7 +261,10 @@ public class ObjectContextQueryUtils {
             return this;
         }
 
-        public void route(QueryRouter router, EntityResolver resolver) {
+        public void route(
+                QueryRouter router,
+                EntityResolver resolver,
+                Query substitutedQuery) {
 
             // build a substitute query and route it to appropriate node
             DataMap rootMap = resolver.getDataMap(dataMapName);
@@ -270,7 +272,9 @@ public class ObjectContextQueryUtils {
             substituteQuery.setParameters(parameters);
             substituteQuery.setFetchingDataRows(dataRows);
 
-            substituteQuery.route(router, resolver);
+            substituteQuery.route(router, resolver, substitutedQuery != null
+                    ? substitutedQuery
+                    : SQLTemplateSelectWrapper.this);
         }
 
         public SQLAction createSQLAction(SQLActionVisitor visitor) {
@@ -278,26 +282,19 @@ public class ObjectContextQueryUtils {
                     "Not intended for execution. Should've been replaced by a SQLTemaplte during routing.");
         }
 
-        /**
-         * @deprecated since 1.2
-         */
-        public Level getLoggingLevel() {
-            throw new CayenneRuntimeException("getLoggingLevel is not implemented");
-        }
-
         public String getName() {
             throw new CayenneRuntimeException("getName is not implemented");
         }
-
-        public Object getRoot() {
-            throw new CayenneRuntimeException("getRoot is obsolete and is not supported");
+        
+        public Object getRoot(EntityResolver resolver) {
+            return resolver.getDataMap(dataMapName);
         }
 
         /**
          * @deprecated since 1.2
          */
-        public void setLoggingLevel(Level level) {
-            throw new CayenneRuntimeException("setLoggingLevel is not implemented");
+        public Object getRoot() {
+            throw new CayenneRuntimeException("getRoot is obsolete and is not supported");
         }
 
         public void setName(String name) {

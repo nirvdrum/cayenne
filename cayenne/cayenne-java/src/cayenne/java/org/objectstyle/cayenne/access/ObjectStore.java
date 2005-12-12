@@ -77,6 +77,7 @@ import org.objectstyle.cayenne.access.event.SnapshotEventListener;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
 import org.objectstyle.cayenne.validation.ValidationResult;
@@ -785,10 +786,25 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * CayenneRuntimeException.
      * 
      * @since 1.1
+     * @deprecated since 1.2. Use {@link #getSnapshot(ObjectId, OPPChannel)} instead.
      */
     public synchronized DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
         DataRow retained = getRetainedSnapshot(oid);
         return (retained != null) ? retained : getDataRowCache().getSnapshot(oid, engine);
+    }
+
+    /**
+     * Returns a snapshot for ObjectId from the underlying snapshot cache. If cache
+     * contains no snapshot, it will attempt fetching it using provided QueryEngine. If
+     * fetch attempt fails or inconsistent data is returned, underlying cache will throw a
+     * CayenneRuntimeException.
+     * 
+     * @since 1.2
+     */
+    public synchronized DataRow getSnapshot(ObjectId oid, OPPChannel channel) {
+        DataRow retained = getRetainedSnapshot(oid);
+        return (retained != null) ? retained : getDataRowCache()
+                .getSnapshot(oid, channel);
     }
 
     /**
@@ -837,7 +853,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
             if (state == PersistenceState.MODIFIED) {
                 DataContext context = dataObject.getDataContext();
-                DataRow committedSnapshot = getSnapshot(dataObject.getObjectId(), context);
+                DataRow committedSnapshot = getSnapshot(dataObject.getObjectId(), context
+                        .getChannel());
                 if (committedSnapshot == null) {
                     return true;
                 }
@@ -1018,7 +1035,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         }
 
         synchronized (this) {
-            DataRow snapshot = getSnapshot(object.getObjectId(), context);
+            DataRow snapshot = getSnapshot(object.getObjectId(), context.getChannel());
 
             // handle deleted object
             if (snapshot == null) {
@@ -1110,7 +1127,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                         break;
                     case PersistenceState.MODIFIED:
                         DataContext context = object.getDataContext();
-                        DataRow diff = getSnapshot(oid, context);
+                        DataRow diff = getSnapshot(oid, context.getChannel());
                         // consult delegate if it exists
                         DataContextDelegate delegate = context.nonNullDelegate();
                         if (delegate.shouldMergeChanges(object, diff)) {
@@ -1210,7 +1227,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                                 .getEntityResolver()
                                 .lookupObjEntity(object);
                         DataRow snapshot = getSnapshot(object.getObjectId(), object
-                                .getDataContext());
+                                .getDataContext()
+                                .getChannel());
                         DataRowUtils.refreshObjectWithSnapshot(
                                 entity,
                                 object,

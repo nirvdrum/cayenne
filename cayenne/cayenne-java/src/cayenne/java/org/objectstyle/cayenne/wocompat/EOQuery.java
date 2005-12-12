@@ -137,8 +137,8 @@ public class EOQuery extends SelectQuery {
     }
 
     public String getEOName() {
-        if (getRoot() instanceof EOObjEntity) {
-            return ((EOObjEntity) getRoot()).localQueryName(getName());
+        if (root instanceof EOObjEntity) {
+            return ((EOObjEntity) root).localQueryName(getName());
         }
         else {
             return getName();
@@ -168,12 +168,12 @@ public class EOQuery extends SelectQuery {
 
         bindings = new HashMap();
 
-        if (!(getRoot() instanceof Entity)) {
+        if (!(root instanceof Entity)) {
             return;
         }
 
         Map qualifier = (Map) plistMap.get("qualifier");
-        initBindings(bindings, (Entity) getRoot(), qualifier);
+        initBindings(bindings, (Entity) root, qualifier);
     }
 
     private void initBindings(Map bindings, Entity entity, Map qualifier) {

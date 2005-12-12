@@ -145,11 +145,12 @@ public class DataContextTst extends DataContextTestBase {
         assertEquals(PersistenceState.HOLLOW, altA.getPersistenceState());
         assertEquals(a.getObjectId(), altA.getObjectId());
 
-        DataRow snapshot =
-            context.getObjectStore().getDataRowCache().getCachedSnapshot(a.getObjectId());
-        DataRow altSnapshot =
-            altContext.getObjectStore().getDataRowCache().getCachedSnapshot(
-                altA.getObjectId());
+        DataRow snapshot = context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                a.getObjectId());
+        DataRow altSnapshot = altContext
+                .getObjectStore()
+                .getDataRowCache()
+                .getCachedSnapshot(altA.getObjectId());
         assertNotNull(altSnapshot);
         assertSame(snapshot, altSnapshot);
 
@@ -157,16 +158,15 @@ public class DataContextTst extends DataContextTestBase {
         // create a query, but rather uses the snapshot
 
         DataContextDelegate delegate = new DataContextDelegate() {
+
             public GenericSelectQuery willPerformSelect(
-                DataContext context,
-                GenericSelectQuery query) {
+                    DataContext context,
+                    GenericSelectQuery query) {
                 fail("Attempt to resolve object via query instead of snapshot");
                 return null;
             }
 
-            public boolean shouldMergeChanges(
-                DataObject object,
-                DataRow snapshotInStore) {
+            public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore) {
                 return true;
             }
 
@@ -231,8 +231,8 @@ public class DataContextTst extends DataContextTestBase {
      */
     public void testCurrentSnapshotWithToOneFault() throws Exception {
 
-        // Exhibit with Gallery as Fault must still include Gallery 
-        // Artist and Exhibit (Exhibit has unresolved to-one to gallery as in the 
+        // Exhibit with Gallery as Fault must still include Gallery
+        // Artist and Exhibit (Exhibit has unresolved to-one to gallery as in the
         // CAY-96 bug report)
 
         // first prepare test fixture
@@ -240,23 +240,23 @@ public class DataContextTst extends DataContextTestBase {
         populateExhibits();
 
         ObjectId eId = new ObjectId("Exhibit", Exhibit.EXHIBIT_ID_PK_COLUMN, 2);
-        Exhibit e =
-            (Exhibit) context.performQuery(QueryUtils.selectObjectForId(eId)).get(0);
+        Exhibit e = (Exhibit) context
+                .performQuery(QueryUtils.selectObjectForId(eId))
+                .get(0);
 
         assertTrue(e.readPropertyDirectly(Exhibit.TO_GALLERY_PROPERTY) instanceof Fault);
 
         DataRow snapshot = context.currentSnapshot(e);
 
-        // assert that after taking a snapshot, we have FK in, but the relationship 
+        // assert that after taking a snapshot, we have FK in, but the relationship
         // is still a Fault
         assertTrue(e.readPropertyDirectly(Exhibit.TO_GALLERY_PROPERTY) instanceof Fault);
         assertEquals(new Integer(33002), snapshot.get("GALLERY_ID"));
     }
 
     /**
-     * Tests how CHAR field is handled during fetch. Some databases (Oracle...)
-     * would pad a CHAR column with extra spaces, returned to the client.
-     * Cayenne should trim it.
+     * Tests how CHAR field is handled during fetch. Some databases (Oracle...) would pad
+     * a CHAR column with extra spaces, returned to the client. Cayenne should trim it.
      */
     public void testCharFetch() throws Exception {
         SelectQuery q = new SelectQuery("Artist");
@@ -266,9 +266,9 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-     * Tests how CHAR field is handled during fetch in the WHERE clause. Some
-     * databases (Oracle...) would pad a CHAR column with extra spaces,
-     * returned to the client. Cayenne should trim it.
+     * Tests how CHAR field is handled during fetch in the WHERE clause. Some databases
+     * (Oracle...) would pad a CHAR column with extra spaces, returned to the client.
+     * Cayenne should trim it.
      */
     public void testCharInQualifier() throws Exception {
         Expression e = ExpressionFactory.matchExp("artistName", "artist1");
@@ -278,8 +278,8 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-     * Test fetching query with multiple relationship paths between the same 2
-     * entities used in qualifier.
+     * Test fetching query with multiple relationship paths between the same 2 entities
+     * used in qualifier.
      */
     public void testMultiObjRelFetch() throws Exception {
         createTestData("testPaintings");
@@ -293,8 +293,8 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-     * Test fetching query with multiple relationship paths between the same 2
-     * entities used in qualifier.
+     * Test fetching query with multiple relationship paths between the same 2 entities
+     * used in qualifier.
      */
     public void testMultiDbRelFetch() throws Exception {
         createTestData("testPaintings");
@@ -320,17 +320,17 @@ public class DataContextTst extends DataContextTestBase {
         createTestData("testPaintings");
 
         SelectQuery q = new SelectQuery("ArtistAssets");
-        q.setQualifier(
-            ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
-   
+        q
+                .setQualifier(ExpressionFactory.matchExp(
+                        "estimatedPrice",
+                        new BigDecimal(1000)));
 
         ArtistAssets a1 = (ArtistAssets) context.performQuery(q).get(0);
         assertEquals(1, a1.getPaintingsCount().intValue());
     }
 
     /**
-     * Test fetching a derived entity with complex qualifier including
-     * relationships.
+     * Test fetching a derived entity with complex qualifier including relationships.
      */
     public void testDerivedEntityFetch2() throws Exception {
         // some DBs don't support HAVING
@@ -342,10 +342,14 @@ public class DataContextTst extends DataContextTestBase {
 
         SelectQuery q = new SelectQuery("ArtistAssets");
         q.setParentObjEntityName("Painting");
-        q.andQualifier(
-            ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
-        q.andParentQualifier(
-            ExpressionFactory.matchExp("toArtist.artistName", "artist1"));
+        q
+                .andQualifier(ExpressionFactory.matchExp(
+                        "estimatedPrice",
+                        new BigDecimal(1000)));
+        q
+                .andParentQualifier(ExpressionFactory.matchExp(
+                        "toArtist.artistName",
+                        "artist1"));
 
         ArtistAssets a1 = (ArtistAssets) context.performQuery(q).get(0);
         assertEquals(1, a1.getPaintingsCount().intValue());
@@ -386,10 +390,10 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     public void testCaseInsensitiveOrdering() throws Exception {
-        if(!getAccessStackAdapter().supportsCaseInsensitiveOrder()) {
+        if (!getAccessStackAdapter().supportsCaseInsensitiveOrder()) {
             return;
         }
-        
+
         // case insensitive ordering appends extra columns
         // to the query when query is using DISTINCT...
         // verify that the result is not messaged up
@@ -404,8 +408,9 @@ public class DataContextTst extends DataContextTestBase {
         assertEquals(artistCount, objects.size());
 
         Artist artist = (Artist) objects.get(0);
-        Map snapshot =
-            context.getObjectStore().getSnapshot(artist.getObjectId(), context);
+        Map snapshot = context.getObjectStore().getSnapshot(
+                artist.getObjectId(),
+                context.getChannel());
         assertEquals(3, snapshot.size());
     }
 
@@ -416,8 +421,8 @@ public class DataContextTst extends DataContextTestBase {
         assertNotNull(objects);
         assertEquals(artistCount, objects.size());
         assertTrue(
-            "Artist expected, got " + objects.get(0).getClass(),
-            objects.get(0) instanceof Artist);
+                "Artist expected, got " + objects.get(0).getClass(),
+                objects.get(0) instanceof Artist);
     }
 
     public void testPerformSelectQuery2() throws Exception {
@@ -427,18 +432,17 @@ public class DataContextTst extends DataContextTestBase {
         expressions.add(ExpressionFactory.matchExp("artistName", "artist5"));
         expressions.add(ExpressionFactory.matchExp("artistName", "artist15"));
 
-        SelectQuery query =
-            new SelectQuery(
-                "Artist",
-                ExpressionFactory.joinExp(Expression.OR, expressions));
-     
+        SelectQuery query = new SelectQuery("Artist", ExpressionFactory.joinExp(
+                Expression.OR,
+                expressions));
+
         List objects = context.performQuery(query);
 
         assertNotNull(objects);
         assertEquals(3, objects.size());
         assertTrue(
-            "Artist expected, got " + objects.get(0).getClass(),
-            objects.get(0) instanceof Artist);
+                "Artist expected, got " + objects.get(0).getClass(),
+                objects.get(0) instanceof Artist);
     }
 
     public void testPerformQuery() throws Exception {
@@ -451,27 +455,25 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     public void testPerformNonSelectingQuery() throws Exception {
-        SelectQuery select =
-            new SelectQuery(Painting.class, Expression.fromString("db:PAINTING_ID = 1"));
+        SelectQuery select = new SelectQuery(Painting.class, Expression
+                .fromString("db:PAINTING_ID = 1"));
 
         assertEquals(0, context.performQuery(select).size());
 
-        SQLTemplate query =
-            new SQLTemplate(
+        SQLTemplate query = new SQLTemplate(
                 Painting.class,
                 "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) "
-                    + "VALUES (1, 'PX', 33002, 1)",
+                        + "VALUES (1, 'PX', 33002, 1)",
                 false);
         context.performNonSelectingQuery(query);
         assertEquals(1, context.performQuery(select).size());
     }
 
     public void testPerformNonSelectingQueryCounts1() throws Exception {
-        SQLTemplate query =
-            new SQLTemplate(
+        SQLTemplate query = new SQLTemplate(
                 Painting.class,
                 "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) "
-                    + "VALUES ($pid, '$pt', $aid, $price)",
+                        + "VALUES ($pid, '$pt', $aid, $price)",
                 false);
 
         Map map = new HashMap();
@@ -490,11 +492,10 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     public void testPerformNonSelectingQueryCounts2() throws Exception {
-        SQLTemplate query =
-            new SQLTemplate(
+        SQLTemplate query = new SQLTemplate(
                 Painting.class,
                 "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) "
-                    + "VALUES ($pid, '$pt', $aid, #bind($price 'DECIMAL' 2))",
+                        + "VALUES ($pid, '$pt', $aid, #bind($price 'DECIMAL' 2))",
                 false);
 
         Map[] maps = new Map[3];
@@ -516,8 +517,10 @@ public class DataContextTst extends DataContextTestBase {
             assertEquals(1, counts[i]);
         }
 
-        SQLTemplate delete =
-            new SQLTemplate(Painting.class, "delete from PAINTING", false);
+        SQLTemplate delete = new SQLTemplate(
+                Painting.class,
+                "delete from PAINTING",
+                false);
         counts = context.performNonSelectingQuery(delete);
         assertNotNull(counts);
         assertEquals(1, counts.length);
@@ -543,8 +546,8 @@ public class DataContextTst extends DataContextTestBase {
         assertNotNull(objects);
         assertEquals(artistCount, objects.size());
         assertTrue(
-            "Map expected, got " + objects.get(0).getClass(),
-            objects.get(0) instanceof Map);
+                "Map expected, got " + objects.get(0).getClass(),
+                objects.get(0) instanceof Map);
     }
 
     public void testCommitChangesRO1() throws Exception {
@@ -602,8 +605,7 @@ public class DataContextTst extends DataContextTestBase {
             context.commitChanges();
         }
         catch (Exception ex) {
-            fail(
-                "Updating 'read-only' object's to-many must succeed, instead an exception was thrown: "
+            fail("Updating 'read-only' object's to-many must succeed, instead an exception was thrown: "
                     + ex);
         }
 
@@ -641,14 +643,14 @@ public class DataContextTst extends DataContextTestBase {
                 DataRow row = (DataRow) it.nextDataRow();
 
                 // try instantiating an object and fetching its relationships
-                Artist artist =
-                    (Artist) context.objectFromDataRow(Artist.class, row, false);
+                Artist artist = (Artist) context.objectFromDataRow(
+                        Artist.class,
+                        row,
+                        false);
                 List paintings = artist.getPaintingArray();
                 assertNotNull(paintings);
-                assertEquals(
-                    "Expected one painting for artist: " + artist,
-                    1,
-                    paintings.size());
+                assertEquals("Expected one painting for artist: " + artist, 1, paintings
+                        .size());
             }
         }
         finally {
@@ -660,8 +662,8 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     public void changeMaxConnections(int delta) {
-        DataNode node =
-            (DataNode) context.getParentDataDomain()
+        DataNode node = (DataNode) context
+                .getParentDataDomain()
                 .getDataNodes()
                 .iterator()
                 .next();
@@ -670,9 +672,8 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-     * Tests that hasChanges performs correctly when an object is "modified"
-     * and the property is simply set to the same value (an unreal
-     * modification)
+     * Tests that hasChanges performs correctly when an object is "modified" and the
+     * property is simply set to the same value (an unreal modification)
      */
     public void testHasChangesUnrealModify() {
         String artistName = "ArtistName";
@@ -680,15 +681,14 @@ public class DataContextTst extends DataContextTestBase {
         artist.setArtistName(artistName);
         context.commitChanges();
 
-        artist.setArtistName(artistName); //Set again to *exactly* the same
+        artist.setArtistName(artistName); // Set again to *exactly* the same
         // value
         assertFalse(context.hasChanges());
     }
 
     /**
-     * Tests that hasChanges performs correctly when an object is "modified"
-     * and the property is simply set to the same value (an unreal
-     * modification)
+     * Tests that hasChanges performs correctly when an object is "modified" and the
+     * property is simply set to the same value (an unreal modification)
      */
     public void testHasChangesRealModify() {
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");

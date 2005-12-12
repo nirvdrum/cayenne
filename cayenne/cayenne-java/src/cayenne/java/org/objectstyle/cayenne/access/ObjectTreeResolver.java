@@ -68,7 +68,6 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchProcessor;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 
@@ -86,11 +85,6 @@ class ObjectTreeResolver {
     ObjEntity rootEntity;
     boolean refreshObjects;
     boolean resolveInheritance;
-
-    ObjectTreeResolver(DataContext context, GenericSelectQuery rootQuery) {
-        this(context, context.getEntityResolver().lookupObjEntity(rootQuery), rootQuery
-                .isRefreshingObjects(), rootQuery.isResolvingInherited());
-    }
 
     ObjectTreeResolver(DataContext context, ObjEntity rootEntity, boolean refresh,
             boolean resolveInheritanceHierarchy) {
@@ -375,7 +369,7 @@ class ObjectTreeResolver {
                         // relationship name.
 
                         DataRow snapshot = objectStore.getSnapshot(destinationObject
-                                .getObjectId(), context);
+                                .getObjectId(), context.getChannel());
 
                         ObjectId id = snapshot.createObjectId(
                                 sourceObjEntity.getName(),

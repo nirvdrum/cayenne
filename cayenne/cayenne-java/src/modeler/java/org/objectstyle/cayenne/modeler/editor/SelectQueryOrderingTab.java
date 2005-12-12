@@ -156,13 +156,13 @@ public class SelectQueryOrderingTab extends JPanel {
             return;
         }
 
-        if (!(query.getRoot() instanceof Entity)) {
+        if (!(query.getRoot(null) instanceof Entity)) {
             processInvalidModel("SelectQuery has no root set.");
             return;
         }
 
         this.selectQuery = (SelectQuery) query;
-        browser.setModel(createBrowserModel((Entity) selectQuery.getRoot()));
+        browser.setModel(createBrowserModel((Entity) selectQuery.getRoot(null)));
         table.setModel(createTableModel());
 
         // init column sizes

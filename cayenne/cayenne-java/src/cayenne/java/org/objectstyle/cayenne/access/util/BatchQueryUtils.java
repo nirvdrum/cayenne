@@ -126,7 +126,7 @@ public class BatchQueryUtils {
         DataContext context = o.getDataContext();
         Map committedSnapshot = context.getObjectStore().getSnapshot(
                 o.getObjectId(),
-                context);
+                context.getChannel());
         Map currentSnapshot = o.getDataContext().currentSnapshot(o);
 
         if (committedSnapshot == null || committedSnapshot.isEmpty()) {
@@ -325,7 +325,7 @@ public class BatchQueryUtils {
         DataContext context = o.getDataContext();
         DataRow committedSnapshot = context.getObjectStore().getSnapshot(
                 o.getObjectId(),
-                context);
+                context.getChannel());
         DataRow currentSnapshot = o.getDataContext().currentSnapshot(o);
         Map snapshot = new HashMap(currentSnapshot.size());
 

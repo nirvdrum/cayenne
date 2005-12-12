@@ -162,7 +162,7 @@ public class IncrementalFaultList implements List {
         // the original query and will serve as a value holder for
         // various parameters
         this.internalQuery = new SelectQuery();
-        this.internalQuery.setRoot(query.getRoot());
+        this.internalQuery.setRoot(query.getRoot(dataContext.getEntityResolver()));
         this.internalQuery.setFetchingDataRows(query.isFetchingDataRows());
         this.internalQuery.setResolvingInherited(query.isResolvingInherited());
 

@@ -86,7 +86,7 @@ public class SelectQueryBuilderTst extends TestCase {
         SelectQueryBuilder builder = new SelectQueryBuilder();
         builder.setRoot(map, QueryBuilder.OBJ_ENTITY_ROOT, "A");
 
-        assertSame(entity, builder.getQuery().getRoot());
+        assertSame(entity, builder.getQuery().getRoot(null));
     }
 
     public void testGetQueryQualifier() throws Exception {

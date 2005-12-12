@@ -95,6 +95,13 @@ public class MockQuery implements Query {
         this.name = name;
     }
 
+    public Object getRoot(EntityResolver resolver) {
+        return root;
+    }
+
+    /**
+     * @deprecated since 1.2
+     */
     public Object getRoot() {
         return root;
     }
@@ -112,7 +119,7 @@ public class MockQuery implements Query {
         return null;
     }
 
-    public void route(QueryRouter router, EntityResolver resolver) {
+    public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
 
     }
 }

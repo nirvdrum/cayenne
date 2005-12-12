@@ -159,7 +159,7 @@ public abstract class Fault implements Serializable {
 
             ObjectId id = context.getObjectStore().getSnapshot(
                     sourceObject.getObjectId(),
-                    context).createTargetObjectId(
+                    context.getChannel()).createTargetObjectId(
                     relationship.getTargetEntityName(),
                     dbRel);
 

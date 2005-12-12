@@ -109,18 +109,18 @@ public class RelationshipQuery implements Query {
         return relationshipName;
     }
 
-    /**
-     * Substitutes this query with a SelectQuery and routes it down the stack.
-     */
-    public Query resolve(EntityResolver resolver) {
-        return buildReplacementQuery(resolver);
+    public Object getRoot(EntityResolver resolver) {
+        return getRelationship(resolver).getTargetEntityName();
     }
 
     /**
      * Substitutes this query with a SelectQuery and routes it down the stack.
      */
-    public void route(QueryRouter router, EntityResolver resolver) {
-        buildReplacementQuery(resolver).route(router, resolver);
+    public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
+        buildReplacementQuery(resolver).route(
+                router,
+                resolver,
+                substitutedQuery != null ? substitutedQuery : this);
     }
 
     /**
@@ -134,7 +134,19 @@ public class RelationshipQuery implements Query {
     }
 
     protected Query buildReplacementQuery(EntityResolver resolver) {
-        // sanity check
+        ObjRelationship relationship = getRelationship(resolver);
+
+        // build executable select...
+        Expression qualifier = ExpressionFactory.matchDbExp(relationship
+                .getReverseDbRelationshipPath(), objectId);
+
+        return new SelectQuery((ObjEntity) relationship.getTargetEntity(), qualifier);
+    }
+
+    /**
+     * Returns a non-null relationship object for this query.
+     */
+    protected ObjRelationship getRelationship(EntityResolver resolver) {
         if (objectId == null) {
             throw new CayenneRuntimeException("Can't resolve query - objectID is null.");
         }
@@ -152,11 +164,7 @@ public class RelationshipQuery implements Query {
                     + objectId);
         }
 
-        // build executable select...
-        Expression qualifier = ExpressionFactory.matchDbExp(relationship
-                .getReverseDbRelationshipPath(), objectId);
-
-        return new SelectQuery((ObjEntity) relationship.getTargetEntity(), qualifier);
+        return relationship;
     }
 
     public String getName() {

@@ -79,7 +79,7 @@ public class MockQueryRouter implements QueryRouter {
         return queries.size();
     }
 
-    public void useEngineForQuery(QueryEngine engine, Query query) {
+    public void route(QueryEngine engine, Query query, Query substitutedQuery) {
         queries.add(query);
     }
 

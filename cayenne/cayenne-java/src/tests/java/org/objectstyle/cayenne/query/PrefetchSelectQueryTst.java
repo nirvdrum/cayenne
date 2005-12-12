@@ -82,7 +82,7 @@ public class PrefetchSelectQueryTst extends CayenneTestCase {
         PrefetchSelectQuery prefetch = new PrefetchSelectQuery(getDomain()
                 .getEntityResolver(), q, "paintingArray");
 
-        assertSame(paintingEntity, prefetch.getRoot());
+        assertSame(paintingEntity, prefetch.getRoot(getDomain().getEntityResolver()));
         assertEquals(Expression.fromString("db:toArtist.ARTIST_NAME = 'abc'"), prefetch
                 .getQualifier());
     }
@@ -100,7 +100,7 @@ public class PrefetchSelectQueryTst extends CayenneTestCase {
         PrefetchSelectQuery prefetch = new PrefetchSelectQuery(getDomain()
                 .getEntityResolver(), q, "paintingArray");
 
-        assertSame(paintingEntity, prefetch.getRoot());
+        assertSame(paintingEntity, prefetch.getRoot(getDomain().getEntityResolver()));
         assertEquals(
                 Expression
                         .fromString("db:toArtist.ARTIST_NAME = 'abc' or db:toArtist.ARTIST_NAME = 'xyz'"),

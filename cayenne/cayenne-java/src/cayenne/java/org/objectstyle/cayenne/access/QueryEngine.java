@@ -111,6 +111,8 @@ public interface QueryEngine {
 
     /**
      * Returns a collection of DataMaps associated with this QueryEngine.
+     * 
+     * @deprecated since 1.2. Use 'getEntityResolver().getDataMaps()' instead.
      */
     public Collection getDataMaps();
 }

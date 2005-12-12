@@ -309,7 +309,7 @@ public final class DataObjectUtils {
         // look in shared cache...
 
         // TODO: take inheritance into account...
-        DataRow row = objectStore.getSnapshot(id, context);
+        DataRow row = objectStore.getSnapshot(id, context.getChannel());
         return (row != null) ? context.objectFromDataRow(
                 entity.getJavaClass(),
                 row,

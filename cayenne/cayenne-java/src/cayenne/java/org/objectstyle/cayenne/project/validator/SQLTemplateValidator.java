@@ -103,7 +103,7 @@ public class SQLTemplateValidator extends TreeNodeValidator {
 
     protected void validateRoot(Query query, ProjectPath path, Validator validator) {
         DataMap map = (DataMap) path.firstInstanceOf(DataMap.class);
-        if (query.getRoot() == null && map != null) {
+        if (query.getRoot(null) == null && map != null) {
             validator.registerWarning("Query has no root", path);
         }
     }
@@ -144,9 +144,9 @@ public class SQLTemplateValidator extends TreeNodeValidator {
 
         if (query.isSelecting()
                 && !query.isFetchingDataRows()
-                && query.getRoot() != null
-                && !(query.getRoot() instanceof ObjEntity || query.getRoot() instanceof Class)) {
-            
+                && query.getRoot(null) != null
+                && !(query.getRoot(null) instanceof ObjEntity || query.getRoot(null) instanceof Class)) {
+
             validator.registerWarning(
                     "Missing result entity for SQLTemplate fetching DataObjects.",
                     path);

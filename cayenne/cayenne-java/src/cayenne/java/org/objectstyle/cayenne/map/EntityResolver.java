@@ -80,7 +80,7 @@ import org.objectstyle.cayenne.query.Query;
  * </p>
  * 
  * @since 1.1 In 1.1 EntityResolver was moved from the access package.
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 // TODO: Andrus, 09/29/2005: we need to change current behavior of reindexing entity
 // resolver when entity lookup fails - now that we have a mix of server and client
@@ -400,8 +400,9 @@ public class EntityResolver implements MappingNamespace, Serializable {
      * Searches for DataMap that holds Query root object.
      */
     public synchronized DataMap lookupDataMap(Query q) {
-        if (q.getRoot() instanceof DataMap) {
-            return (DataMap) q.getRoot();
+        Object root = q.getRoot(this);
+        if (root instanceof DataMap) {
+            return (DataMap) root;
         }
 
         DbEntity entity = lookupDbEntity(q);
@@ -444,7 +445,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
      * @return the root DbEntity of the query
      */
     public synchronized DbEntity lookupDbEntity(Query q) {
-        Object root = q.getRoot();
+        Object root = q.getRoot(this);
         if (root instanceof DbEntity) {
             return (DbEntity) root;
         }
@@ -530,7 +531,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
         // of result type
 
         Object root = (q instanceof ProcedureQuery) ? ((ProcedureQuery) q)
-                .getResultClass() : q.getRoot();
+                .getResultClass() : q.getRoot(this);
 
         if (root instanceof DbEntity) {
             throw new CayenneRuntimeException(
@@ -565,7 +566,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
     }
 
     public Procedure lookupProcedure(Query q) {
-        Object root = q.getRoot();
+        Object root = q.getRoot(this);
         if (root instanceof Procedure) {
             return (Procedure) root;
         }

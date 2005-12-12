@@ -229,8 +229,8 @@ public class SQLTemplateMainTab extends JPanel {
      * Returns an entity that maps to a procedure query result class.
      */
     ObjEntity getEntity(SQLTemplate query) {
-        return query != null && query.getRoot() instanceof ObjEntity ? (ObjEntity) query
-                .getRoot() : null;
+        return query != null && query.getRoot(null) instanceof ObjEntity ? (ObjEntity) query
+                .getRoot(null) : null;
     }
 
     void setEntity(ObjEntity entity) {

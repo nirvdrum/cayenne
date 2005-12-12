@@ -220,7 +220,7 @@ public class ProcedureQueryView extends JPanel {
         }
 
         DefaultComboBoxModel model = new DefaultComboBoxModel(roots);
-        model.setSelectedItem(query.getRoot());
+        model.setSelectedItem(query.getRoot(null));
         queryRoot.setModel(model);
 
         properties.initFromModel(procedureQuery);

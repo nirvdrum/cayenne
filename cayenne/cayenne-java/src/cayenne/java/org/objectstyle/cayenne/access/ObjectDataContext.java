@@ -71,12 +71,11 @@ import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
-import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.QueryChain;
 
 /**
  * A temporary subclass of DataContext that implements ObjectContext interface. Used to
@@ -108,14 +107,6 @@ class ObjectDataContext extends DataContext implements ObjectContext {
 
     // ==== START: DataContext compatibility code... need to merge to DataContext
     // --------------------------------------------------------------------------
-
-    /**
-     * @deprecated since 1.2 as QueryChains are now possible.
-     */
-    public void performQueries(Collection queries, OperationObserver observer) {
-        QueryChain query = new QueryChain(queries);
-        getParentDataDomain().performQuery(query.resolve(getEntityResolver()), observer);
-    }
 
     public List performQuery(String queryName, boolean refresh) {
         // TODO: refresh is not handled...

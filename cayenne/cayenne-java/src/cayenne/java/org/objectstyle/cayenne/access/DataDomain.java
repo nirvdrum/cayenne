@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -74,13 +73,11 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.ObjectSelectMessage;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryChain;
-import org.objectstyle.cayenne.query.QueryRouter;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -616,7 +613,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
      */
     public void performQueries(
             Collection queries,
-            OperationObserver resultConsumer,
+            OperationObserver callback,
             Transaction transaction) {
 
         if (queries.isEmpty()) {
@@ -627,7 +624,8 @@ public class DataDomain implements QueryEngine, OPPChannel {
         Transaction.bindThreadTransaction(transaction);
 
         try {
-            performQuery(new QueryChain(queries), resultConsumer);
+            new DataDomainQueryAction(this, callback)
+                    .performQuery(new QueryChain(queries));
         }
         finally {
             Transaction.bindThreadTransaction(old);
@@ -637,12 +635,12 @@ public class DataDomain implements QueryEngine, OPPChannel {
     /**
      * Routes queries to appropriate DataNodes for execution.
      */
-    public void performQueries(Collection queries, OperationObserver observer) {
+    public void performQueries(Collection queries, OperationObserver callback) {
         if (queries.isEmpty()) {
             return;
         }
 
-        performQuery(new QueryChain(queries), observer);
+        new DataDomainQueryAction(this, callback).performQuery(new QueryChain(queries));
     }
 
     public EntityResolver getEntityResolver() {
@@ -711,64 +709,6 @@ public class DataDomain implements QueryEngine, OPPChannel {
         return new ToStringBuilder(this).append("name", name).toString();
     }
 
-    // **** new 1.2 PersistenceContext methods:
-    // =======================================
-
-    /**
-     * Routes and executes a given query, wrapping it in a transaction. Note that query
-     * resolution phase is not done at this level and is a responsibility of the caller.
-     * 
-     * @since 1.2
-     */
-    public void performQuery(Query query, OperationObserver resultConsumer) {
-
-        final Map queryMap = new HashMap();
-
-        // TODO: optimize for single engine - the most common case...
-
-        // QueryRouter to organize queries by engine
-        QueryRouter router = new QueryRouter() {
-
-            public QueryEngine engineForDataMap(DataMap map) {
-                if (map == null) {
-                    throw new NullPointerException(
-                            "Null DataMap, can't determine DataNode.");
-                }
-
-                QueryEngine node = lookupDataNode(map);
-
-                if (node == null) {
-                    throw new CayenneRuntimeException("No DataNode exists for DataMap "
-                            + map);
-                }
-
-                return node;
-            }
-
-            public void useEngineForQuery(QueryEngine engine, Query query) {
-
-                List queriesByEngine = (List) queryMap.get(engine);
-                if (queriesByEngine == null) {
-                    queriesByEngine = new ArrayList();
-                    queryMap.put(engine, queriesByEngine);
-                }
-
-                queriesByEngine.add(query);
-            }
-        };
-
-        query.route(router, getEntityResolver());
-
-        // perform queries on each node
-        Iterator nodeIt = queryMap.entrySet().iterator();
-        while (nodeIt.hasNext()) {
-            Map.Entry entry = (Map.Entry) nodeIt.next();
-            QueryEngine nextNode = (QueryEngine) entry.getKey();
-            Collection nodeQueries = (Collection) entry.getValue();
-            nextNode.performQueries(nodeQueries, resultConsumer);
-        }
-    }
-
     // ****** OPPChannel methods:
 
     /**
@@ -783,7 +723,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
      */
     public QueryResponse onQuery(QueryMessage message) {
         QueryResult result = new QueryResult();
-        performQuery(message.getQuery().resolve(getEntityResolver()), result);
+        new DataDomainQueryAction(this, result).performQuery(message.getQuery());
         return result;
     }
 
@@ -791,10 +731,9 @@ public class DataDomain implements QueryEngine, OPPChannel {
      * @since 1.2
      */
     public List onSelectObjects(ObjectSelectMessage message) {
-        Query query = message.getQuery().resolve(getEntityResolver());
         QueryResult result = new QueryResult();
-        performQuery(query, result);
-        return result.getFirstRows(query);
+        new DataDomainQueryAction(this, result).performQuery(message.getQuery());
+        return result.getFirstRows(message.getQuery());
     }
 
     /**

@@ -270,9 +270,10 @@ public class RemoveAction extends CayenneAction {
         while (it.hasNext()) {
             Query next = (Query) it.next();
 
-            if (next.getRoot() == entity
-                    || (next.getRoot() instanceof String && next
-                            .getRoot()
+            Object root = next.getRoot(null);
+
+            if (root == entity
+                    || (root instanceof String && root
                             .toString()
                             .equals(entity.getName()))) {
                 map.removeQuery(next.getName());

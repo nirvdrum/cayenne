@@ -91,15 +91,15 @@ public class SingleObjectQuery implements Query {
         return objectId;
     }
 
-    public Query resolve(EntityResolver resolver) {
+    public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
         // TODO: this query wouldn't take advantage of the cache... may need support at
         // the framework level to provide the result from cache or add cache access
         // ability to the query lifecycle API.
-        return buildReplacementQuery(resolver);
-    }
 
-    public void route(QueryRouter router, EntityResolver resolver) {
-        buildReplacementQuery(resolver).route(router, resolver);
+        buildReplacementQuery(resolver).route(
+                router,
+                resolver,
+                substitutedQuery != null ? substitutedQuery : this);
     }
 
     public SQLAction createSQLAction(SQLActionVisitor visitor) {
@@ -131,10 +131,17 @@ public class SingleObjectQuery implements Query {
     }
 
     /**
+     * Returns entity name stored in the ObjectId.
+     */
+    public Object getRoot(EntityResolver resolver) {
+        return objectId.getEntityName();
+    }
+
+    /**
      * @deprecated since 1.2
      */
     public Object getRoot() {
-        throw new CayenneRuntimeException("This deprecated method is not implemented");
+        return objectId.getEntityName();
     }
 
     /**
