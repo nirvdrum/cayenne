@@ -11,6 +11,11 @@ UPGRADE FROM M8:
   - PersistenceContext is removed. There is no use for it anymore.
   - GlobalID is removed. ObjectId now handles its functions.
 
+* It wasn't possible to phase out some of the old ObjectId API via deprecation, so methods 
+  "getObjClass" and "getObjectClass" are removed completely. Constructors that take Class as the first argument
+  are deprecated and will only work if entity naming follows CayenneModeler default conventions of using unqualified
+  class name as the entity name.
+
 
 GENERAL UPGRADE NOTES:
 

@@ -14,7 +14,15 @@ Changes/New Features:
 * Generated/Identity Columns - http://objectstyle.org/confluence/display/CAY/Generated+Columns
   - Derby support for generated columns
   - Modeler now allows to specify generated columns for PK only. Non-pk column can't be generated.
-  
+
+* Custom queries.
+  - Query lifecycle API is simplified.
+  - It is now possible to run any kind of query (including custom and one that is not a GenericSelectQuery) 
+    via a DataContext and obtain the results via 'performQuery'.
+  - QueryChain, SingleObjectQuery, RelationshipQuery, NamedQuery can now be used with DataContext.
+
+* Native versions of the Modeler for Windows and Mac OS X (CayenneModeler.exe, CayenneModeler.app).
+
 * DataDomain now implements OPPChannel.
   
 * "DataContextFactory.createDataContext" method signature change. 
