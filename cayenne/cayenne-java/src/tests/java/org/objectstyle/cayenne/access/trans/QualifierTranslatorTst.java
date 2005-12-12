@@ -128,11 +128,11 @@ public class QualifierTranslatorTst extends CayenneTestCase {
             int len = cases.length;
             for (int i = 0; i < len; i++) {
                 try {
-                    ((QualifiedQuery) qa.getQuery()).setQualifier(cases[i]
-                            .getCayenneExp());
+                    QualifiedQuery q = (QualifiedQuery) qa.getQuery();
+                    q.setQualifier(cases[i].getCayenneExp());
                     ObjEntity ent = getObjEntity(cases[i].getRootEntity());
                     assertNotNull(ent);
-                    qa.getQuery().setRoot(ent);
+                    q.setRoot(ent);
                     String translated = new QualifierTranslator(qa).doTranslation();
                     cases[i].assertTranslatedWell(translated);
                 }

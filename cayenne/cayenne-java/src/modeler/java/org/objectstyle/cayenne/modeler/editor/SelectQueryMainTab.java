@@ -76,6 +76,7 @@ import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.ExpressionConvertor;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.TextAdapter;
+import org.objectstyle.cayenne.query.AbstractQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
@@ -158,7 +159,7 @@ public class SelectQueryMainTab extends JPanel {
         queryRoot.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent event) {
-                Query query = getQuery();
+                SelectQuery query = getQuery();
                 if (query != null) {
                     query.setRoot(queryRoot.getModel().getSelectedItem());
                     mediator.fireQueryEvent(new QueryEvent(this, query));
@@ -215,7 +216,7 @@ public class SelectQueryMainTab extends JPanel {
         }
 
         DefaultComboBoxModel model = new DefaultComboBoxModel(roots);
-        model.setSelectedItem(query.getRoot(null));
+        model.setSelectedItem(selectQuery.getRoot());
         queryRoot.setModel(model);
 
         properties.initFromModel(selectQuery);
@@ -236,10 +237,10 @@ public class SelectQueryMainTab extends JPanel {
         }
 
         SelectQuery query = getQuery();
-        if(query == null) {
+        if (query == null) {
             return;
         }
-        
+
         ExpressionConvertor convertor = new ExpressionConvertor();
         try {
             String oldQualifier = convertor.valueAsString(query.getQualifier());
@@ -263,12 +264,12 @@ public class SelectQueryMainTab extends JPanel {
             newName = null;
         }
 
-        Query query = getQuery();
- 
-        if(query == null) {
+        AbstractQuery query = getQuery();
+
+        if (query == null) {
             return;
         }
-        
+
         if (Util.nullSafeEquals(newName, query.getName())) {
             return;
         }

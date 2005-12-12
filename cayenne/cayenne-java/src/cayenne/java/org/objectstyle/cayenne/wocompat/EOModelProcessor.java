@@ -81,6 +81,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
+import org.objectstyle.cayenne.query.AbstractQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.wocompat.parser.Parser;
@@ -268,7 +269,7 @@ public class EOModelProcessor {
             return null;
         }
         
-        Query query;
+        AbstractQuery query;
         if (queryPlist.containsKey("hints")) { // just a predefined SQL query
         		query = new EOSQLQuery(entity, queryPlist);
         } else {

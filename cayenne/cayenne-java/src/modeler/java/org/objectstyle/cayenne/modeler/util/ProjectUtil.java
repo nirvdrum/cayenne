@@ -79,7 +79,7 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.Relationship;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.AbstractQuery;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -177,7 +177,7 @@ public class ProjectUtil {
         }
     }
 
-    public static void setQueryName(DataMap map, Query query, String newName) {
+    public static void setQueryName(DataMap map, AbstractQuery query, String newName) {
 
         String oldName = query.getName();
 

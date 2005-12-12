@@ -62,6 +62,7 @@ import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
+import org.objectstyle.cayenne.query.AbstractQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.scopemvc.controller.basic.BasicController;
 import org.scopemvc.core.Control;
@@ -123,7 +124,7 @@ public class QueryTypeController extends BasicController {
      */
     public void createQuery() {
         QueryTypeModel model = (QueryTypeModel) getModel();
-        Query query = model.getSelectedQuery();
+        AbstractQuery query = model.getSelectedQuery();
         if (query == null) {
             // wha?
             return;

@@ -57,8 +57,8 @@
 package org.objectstyle.cayenne.modeler.dialog.query;
 
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.query.AbstractQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.scopemvc.core.Selector;
@@ -76,11 +76,11 @@ public class QueryTypeModel {
             .fromString("procedureQuery");
 
     // query prototypes...
-    protected Query objectSelectQuery;
-    protected Query rawSQLQuery;
-    protected Query procedureQuery;
+    protected AbstractQuery objectSelectQuery;
+    protected AbstractQuery rawSQLQuery;
+    protected AbstractQuery procedureQuery;
 
-    protected Query selectedQuery;
+    protected AbstractQuery selectedQuery;
 
     public QueryTypeModel(DataMap root) {
         // create query prototypes:
@@ -96,11 +96,11 @@ public class QueryTypeModel {
         selectedQuery = objectSelectQuery;
     }
 
-    public Query getSelectedQuery() {
+    public AbstractQuery getSelectedQuery() {
         return selectedQuery;
     }
 
-    public void setSelectedQuery(Query selectedQuery) {
+    public void setSelectedQuery(AbstractQuery selectedQuery) {
         this.selectedQuery = selectedQuery;
     }
 

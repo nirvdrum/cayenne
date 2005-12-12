@@ -100,6 +100,7 @@ public interface Query extends Serializable {
      * Sets a symbolic name of the query.
      * 
      * @since 1.1
+     * @deprecated since 1.2
      */
     void setName(String name);
 
@@ -120,7 +121,9 @@ public interface Query extends Serializable {
     Object getRoot(EntityResolver resolver);
 
     /**
-     * Sets the root of the query.
+     * Sets the root of the query. *
+     * 
+     * @deprecated since 1.2
      */
     // TODO: Andrus, 12/08/2005 - we need to deprecate this at some point as routing is
     // now done by the query itself.

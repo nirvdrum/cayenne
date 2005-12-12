@@ -77,6 +77,7 @@ import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.TextAdapter;
+import org.objectstyle.cayenne.query.AbstractQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -157,7 +158,7 @@ public class ProcedureQueryView extends JPanel {
         queryRoot.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent event) {
-                Query query = mediator.getCurrentQuery();
+                AbstractQuery query = (AbstractQuery) mediator.getCurrentQuery();
                 if (query != null) {
                     query.setRoot(queryRoot.getModel().getSelectedItem());
                     mediator.fireQueryEvent(new QueryEvent(this, query));
@@ -235,7 +236,7 @@ public class ProcedureQueryView extends JPanel {
             newName = null;
         }
 
-        Query query = mediator.getCurrentQuery();
+        AbstractQuery query = (AbstractQuery) mediator.getCurrentQuery();
         if (query == null) {
             return;
         }
@@ -290,11 +291,11 @@ public class ProcedureQueryView extends JPanel {
         if (query instanceof ProcedureQuery) {
             ProcedureQuery procedureQuery = (ProcedureQuery) query;
             String resultClass = null;
-            
+
             if (entity != null) {
                 resultClass = entity.getClassName();
             }
-            
+
             procedureQuery.setResultClassName(resultClass);
             mediator.fireQueryEvent(new QueryEvent(this, procedureQuery));
         }

@@ -63,8 +63,8 @@ import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.AbstractQuery;
+import org.objectstyle.cayenne.query.MockAbstractQuery;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -287,17 +287,14 @@ public class DataMapTst extends TestCase {
     }
 
     public void testAddQuery() {
-        Query q = new SelectQuery();
-        q.setName("a");
-
+        AbstractQuery q = new MockAbstractQuery("a");
         DataMap map = new DataMap();
         map.addQuery(q);
         assertSame(q, map.getQuery("a"));
     }
 
     public void testRemoveQuery() {
-        Query q = new SelectQuery();
-        q.setName("a");
+        AbstractQuery q = new MockAbstractQuery("a");
 
         DataMap map = new DataMap();
         map.addQuery(q);
@@ -307,9 +304,7 @@ public class DataMapTst extends TestCase {
     }
 
     public void testGetQueryMap() {
-        Query q = new SelectQuery();
-        q.setName("a");
-
+        AbstractQuery q = new MockAbstractQuery("a");
         DataMap map = new DataMap();
         map.addQuery(q);
         Map queries = map.getQueryMap();

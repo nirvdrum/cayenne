@@ -76,6 +76,7 @@ import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
+import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1Subclass;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable3;
@@ -160,7 +161,8 @@ public class ClientServerChannelTst extends CayenneTestCase {
 
         ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore());
 
-        ObjectSelectMessage message = new ObjectSelectMessage(new MockGenericSelectQuery("MtTable1"));
+        ObjectSelectMessage message = new ObjectSelectMessage(new MockGenericSelectQuery(
+                "MtTable1"));
         List results = new ClientServerChannel(context, false).onSelectObjects(message);
         assertTrue(selectDone[0]);
 
@@ -196,7 +198,8 @@ public class ClientServerChannelTst extends CayenneTestCase {
 
         ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore());
 
-        ObjectSelectMessage message = new ObjectSelectMessage(new MockGenericSelectQuery("MtTable3"));
+        ObjectSelectMessage message = new ObjectSelectMessage(new MockGenericSelectQuery(
+                "MtTable3"));
         List results = new ClientServerChannel(context, false).onSelectObjects(message);
 
         assertNotNull(results);
@@ -232,7 +235,9 @@ public class ClientServerChannelTst extends CayenneTestCase {
 
         ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore());
 
-        MockGenericSelectQuery query = new MockGenericSelectQuery(ClientMtTable1.class);
+        // must use real SelectQuery instead of mockup as root overriding depends on the
+        // fact that Query inherits from AbstractQuery.
+        SelectQuery query = new SelectQuery(ClientMtTable1.class);
         query.setResolvingInherited(true);
         ObjectSelectMessage message = new ObjectSelectMessage(query);
         List results = new ClientServerChannel(context, false).onSelectObjects(message);

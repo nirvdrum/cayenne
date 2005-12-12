@@ -55,18 +55,21 @@
  */
 package org.objectstyle.cayenne.query;
 
-import org.objectstyle.cayenne.query.AbstractQuery;
-import org.objectstyle.cayenne.query.SQLAction;
-import org.objectstyle.cayenne.query.SQLActionVisitor;
-
 
 /**
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class MockAbstractQuery extends AbstractQuery {
+
+    public MockAbstractQuery() {
+
+    }
+
+    public MockAbstractQuery(String name) {
+        setName(name);
+    }
 
     public SQLAction createSQLAction(SQLActionVisitor visitor) {
         return null;
     }
-
 }

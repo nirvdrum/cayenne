@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.ObjectSelectMessage;
 import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
+import org.objectstyle.cayenne.query.AbstractQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
@@ -248,16 +249,23 @@ public class ClientServerChannel implements OPPChannel {
     Query rewriteQuery(Query clientQuery) {
 
         // replace client class with server class
-        EntityResolver clientResolver = serverContext
-                .getEntityResolver()
-                .getClientEntityResolver();
-        Object root = clientQuery.getRoot(clientResolver);
-        if (root instanceof Class) {
-            ObjEntity entity = clientResolver.lookupObjEntity((Class) root);
-            if (entity == null) {
-                throw new CayenneRuntimeException("Unmapped client class: " + root);
+
+        // TODO, Andrus 12/12/2005 - overriding root of only AbstractQuery subclasses is
+        // not very clean...
+        if (clientQuery instanceof AbstractQuery) {
+
+            AbstractQuery abstractClientQuery = (AbstractQuery) clientQuery;
+            EntityResolver clientResolver = serverContext
+                    .getEntityResolver()
+                    .getClientEntityResolver();
+            Object root = abstractClientQuery.getRoot(clientResolver);
+            if (root instanceof Class) {
+                ObjEntity entity = clientResolver.lookupObjEntity((Class) root);
+                if (entity == null) {
+                    throw new CayenneRuntimeException("Unmapped client class: " + root);
+                }
+                abstractClientQuery.setRoot(entity.getName());
             }
-            clientQuery.setRoot(entity.getName());
         }
 
         return clientQuery;

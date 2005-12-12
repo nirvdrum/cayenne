@@ -98,6 +98,10 @@ public class NamedQuery implements Query {
         this.parameters = Util.toMap(keys, values);
     }
 
+    /**
+     * Returns the name of this query, which is different from the name this query
+     * <strong>points to</strong>.
+     */
     public String getName() {
         return name;
     }
@@ -106,6 +110,9 @@ public class NamedQuery implements Query {
         this.name = name;
     }
 
+    /**
+     * Returns the name of the query this query points to.
+     */
     public String getQueryName() {
         return queryName;
     }

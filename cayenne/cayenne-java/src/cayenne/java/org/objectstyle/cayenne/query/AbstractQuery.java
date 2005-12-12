@@ -67,9 +67,9 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 
 /**
- * Superclass of Cayenne queries.
+ * A common superclass of Cayenne queries.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public abstract class AbstractQuery implements Query {
 
@@ -108,20 +108,21 @@ public abstract class AbstractQuery implements Query {
 
     /**
      * Returns the root of this query
-     * 
-     * @deprecated since 1.2, as corresponding interface method is also deprecated.
      */
+    // note that while "getRoot()" is deprecated in the Query interface, it is still valid
+    // in AbstractQuery.
     public Object getRoot() {
         return root;
     }
 
     /**
-     * Returns a "root" ivar value.
+     * Returns a "root" ivar without any extra lookups. In other words this implementation
+     * is analogous to {@link #getRoot()}.
      * 
      * @since 1.2
      */
     public Object getRoot(EntityResolver resolver) {
-        return root;
+        return getRoot();
     }
 
     /**
