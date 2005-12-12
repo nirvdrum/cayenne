@@ -4,9 +4,12 @@ Date:
 
 UPGRADE FROM M8:
 
-* If you where using new remote object persistence API, and explicitly used GlobalID,
-  you must replace it with good old ObjectId - its current API is 100% compatible with
-  M8 GlobalID.
+* A number of temporary interfaces introduced earlier in 1.2 to accomodate remote persistence 
+  stack are now merged back to the main API:
+  
+  - QueryExecutionPlan is removed. Its lifecycle methods are moved to Query 9with some changes).
+  - PersistenceContext is removed. There is no use for it anymore.
+  - GlobalID is removed. ObjectId now handles its functions.
 
 
 GENERAL UPGRADE NOTES:

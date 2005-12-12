@@ -13,7 +13,9 @@ Changes/New Features:
 
 * Generated/Identity Columns - http://objectstyle.org/confluence/display/CAY/Generated+Columns
   - Derby support for generated columns
-  - Modeler now allows to specify generated columns for PK only. Non-pk column can't be generated:
+  - Modeler now allows to specify generated columns for PK only. Non-pk column can't be generated.
+  
+* DataDomain now implements OPPChannel.
   
 * "DataContextFactory.createDataContext" method signature change. 
   Previously introduced "DataContextFactory.createDataContext(QueryEngine, ObjectStore)" 
@@ -45,7 +47,5 @@ Changes/New Features:
   must bind an appropraite transaction before executing an operation (or use Transaction.performQueries(..) that does
   it internally). 
   UPGRADE NOTE: This change only affects users who implemented custom transactions. 
-  
-* QueryExecutionPlan introduced earlier during 1.2 cycle is merged to Query interface.
 
 Bugs Fixed:
