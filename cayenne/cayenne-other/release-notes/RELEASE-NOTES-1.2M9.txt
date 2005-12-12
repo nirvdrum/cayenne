@@ -55,5 +55,7 @@ Changes/New Features:
   must bind an appropraite transaction before executing an operation (or use Transaction.performQueries(..) that does
   it internally). 
   UPGRADE NOTE: This change only affects users who implemented custom transactions. 
+  
+* Bundled HSQLDB is upgraded from 1.7.3 to 1.8.0.2.
 
 Bugs Fixed:
