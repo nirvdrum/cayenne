@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,51 +55,63 @@
  */
 package org.objectstyle.cayenne.dba.hsqldb;
 
-import java.sql.Connection;
-
-import org.objectstyle.cayenne.access.jdbc.ProcedureAction;
-import org.objectstyle.cayenne.access.jdbc.SelectAction;
 import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
-import org.objectstyle.cayenne.access.trans.SelectTranslator;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.JdbcActionBuilder;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.ProcedureQuery;
-import org.objectstyle.cayenne.query.SQLAction;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.map.Procedure;
 
-class HSQLActionBuilder extends JdbcActionBuilder {
+/**
+ * Works around HSQLDB's pickiness about stored procedure syntax.
+ * 
+ * @since 1.2
+ * @author Cristopher Daniluk
+ */
+public class HSQLDBProcedureTranslator extends ProcedureTranslator {
 
-    HSQLActionBuilder(DbAdapter adapter, EntityResolver resolver) {
-        super(adapter, resolver);
-    }
+    /**
+     * Creates HSQLDB-compliant SQL to execute a stored procedure.
+     */
+    protected String createSqlString() {
+        Procedure procedure = getProcedure();
 
-    public SQLAction objectSelectAction(SelectQuery query) {
-        return new SelectAction(query, adapter, entityResolver) {
+        StringBuffer buf = new StringBuffer();
 
-            protected SelectTranslator createTranslator(Connection connection) {
-                SelectTranslator translator = new HSQLSelectTranslator();
-                translator.setQuery(query);
-                translator.setAdapter(adapter);
-                translator.setEntityResolver(getEntityResolver());
-                translator.setConnection(connection);
-                return translator;
+        int totalParams = callParams.size();
+
+        // check if procedure returns values
+        if (procedure.isReturningValue()) {
+            totalParams--;
+
+            // HSQL won't accept "? =". The parser only recognizes "?="
+
+            // TODO: Andrus, 12/12/2005 - this is kind of how it is in the
+            // CallableStatement javadocs, so we may need to make "?=" a default ... this
+            // requires testing on Oracle/PostgreSQL/Sybase/SQLServer.
+            buf.append("{?= call ");
+        }
+        else {
+            buf.append("{call ");
+        }
+
+        // HSQLDB requires that procedures with periods (referring to Java packages)
+        // be enclosed in quotes. It is not clear that quotes can always be used, though
+        if (procedure.getFullyQualifiedName().indexOf('.') > -1) {
+            buf.append("\"").append(procedure.getFullyQualifiedName()).append("\"");
+        }
+        else {
+            buf.append(procedure.getFullyQualifiedName());
+        }
+
+        if (totalParams > 0) {
+            // unroll the loop
+            buf.append("(?");
+
+            for (int i = 1; i < totalParams; i++) {
+                buf.append(", ?");
             }
-        };
-    }
-    
-    public SQLAction procedureAction(ProcedureQuery query) {
-        return new ProcedureAction(query, adapter, entityResolver) {
 
-            protected ProcedureTranslator createTranslator(Connection connection) {
-                ProcedureTranslator transl = new HSQLDBProcedureTranslator();
-                transl.setAdapter(getAdapter());
-                transl.setQuery(query);
-                transl.setEntityResolver(getEntityResolver());
-                transl.setConnection(connection);
-                return transl;
-            }
-        };
-    }
+            buf.append(")");
+        }
 
+        buf.append("}");
+        return buf.toString();
+    }
 }

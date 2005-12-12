@@ -103,11 +103,7 @@ public class ProcedureAction extends BaseSQLAction {
 
         processedResultSets = 0;
 
-        ProcedureTranslator transl = new ProcedureTranslator();
-        transl.setAdapter(getAdapter());
-        transl.setQuery(query);
-        transl.setEntityResolver(getEntityResolver());
-        transl.setConnection(connection);
+        ProcedureTranslator transl = createTranslator(connection);
 
         CallableStatement statement = (CallableStatement) transl.createStatement();
 
@@ -157,6 +153,20 @@ public class ProcedureAction extends BaseSQLAction {
 
             }
         }
+    }
+
+    /**
+     * Returns the ProcedureTranslator to use for this ProcedureAction.
+     * 
+     * @param connection JDBC connection
+     */
+    protected ProcedureTranslator createTranslator(Connection connection) {
+        ProcedureTranslator transl = new ProcedureTranslator();
+        transl.setAdapter(getAdapter());
+        transl.setQuery(query);
+        transl.setEntityResolver(getEntityResolver());
+        transl.setConnection(connection);
+        return transl;
     }
 
     /**

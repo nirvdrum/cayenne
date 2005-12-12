@@ -55,7 +55,10 @@
  */
 package org.objectstyle.cayenne.unit;
 
+import java.sql.Connection;
+
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DataMap;
 
 /**
  * @author Andrei Adamchik
@@ -66,17 +69,22 @@ public class HSQLDBStackAdapter extends AccessStackAdapter {
         super(adapter);
     }
 
+    /**
+     * Note that out of all SP tests HSQLDB (as of 8.0.2) supports only updates that do
+     * not return a ResultSet (see HSQL CallableStatement JavaDocs). Once HSQL implements
+     * the rest of callable statement we can enable our unit test.
+     */
+    public boolean supportsStoredProcedures() {
+        return false;
+    }
+
     public boolean supportsHaving() {
         return false;
     }
 
-    /**
-     * Returns false. This is an HSQLDB bug - I opened a report here:
-     * https://sourceforge.net/tracker/?func=detail&aid=1020127&group_id=23316&atid=378131.
-     * Hopefully this will be fixed in the future releases.
-     */
-    // TODO: this bug was marked as fixed on 07/02/2005 - test with new version...
-    public boolean supportsCaseInsensitiveOrder() {
-        return false;
+    public void createdTables(Connection con, DataMap map) throws Exception {
+        if (map.getProcedureMap().containsKey("cayenne_tst_select_proc")) {
+            executeDDL(con, "hsqldb", "create-sp-aliases.sql");
+        }
     }
 }

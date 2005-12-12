@@ -53,53 +53,49 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.hsqldb;
+package org.objectstyle.cayenne.unit;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
-import org.objectstyle.cayenne.access.jdbc.ProcedureAction;
-import org.objectstyle.cayenne.access.jdbc.SelectAction;
-import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
-import org.objectstyle.cayenne.access.trans.SelectTranslator;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.JdbcActionBuilder;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.ProcedureQuery;
-import org.objectstyle.cayenne.query.SQLAction;
-import org.objectstyle.cayenne.query.SelectQuery;
+/**
+ * Defines Java stored procedures loaded to HSQLDB.
+ */
+public class HSQLProcedures {
 
-class HSQLActionBuilder extends JdbcActionBuilder {
+    public static void cayenne_tst_upd_proc(Connection c, int paintingPrice)
+            throws SQLException {
 
-    HSQLActionBuilder(DbAdapter adapter, EntityResolver resolver) {
-        super(adapter, resolver);
+        PreparedStatement st = c
+                .prepareStatement("UPDATE PAINTING SET ESTIMATED_PRICE = ESTIMATED_PRICE * 2 "
+                        + "WHERE ESTIMATED_PRICE < ?");
+
+        st.setInt(1, paintingPrice);
+        st.execute();
+        st.close();
     }
 
-    public SQLAction objectSelectAction(SelectQuery query) {
-        return new SelectAction(query, adapter, entityResolver) {
+    public static void cayenne_tst_select_proc(
+            Connection c,
+            String name,
+            int paintingPrice) throws SQLException {
 
-            protected SelectTranslator createTranslator(Connection connection) {
-                SelectTranslator translator = new HSQLSelectTranslator();
-                translator.setQuery(query);
-                translator.setAdapter(adapter);
-                translator.setEntityResolver(getEntityResolver());
-                translator.setConnection(connection);
-                return translator;
-            }
-        };
+        PreparedStatement st = c
+                .prepareStatement("UPDATE PAINTING SET ESTIMATED_PRICE = ESTIMATED_PRICE * 2 "
+                        + "WHERE ESTIMATED_PRICE < ?");
+
+        st.setInt(1, paintingPrice);
+        st.execute();
+        st.close();
+
+        PreparedStatement select = c
+                .prepareStatement("SELECT DISTINCT A.ARTIST_ID, A.ARTIST_NAME, A.DATE_OF_BIRTH"
+                        + " FROM ARTIST A, PAINTING P"
+                        + " WHERE A.ARTIST_ID = P.ARTIST_ID AND"
+                        + " A.ARTIST_NAME = ?"
+                        + " ORDER BY A.ARTIST_ID");
+        select.setString(1, name);
+        select.executeQuery();
     }
-    
-    public SQLAction procedureAction(ProcedureQuery query) {
-        return new ProcedureAction(query, adapter, entityResolver) {
-
-            protected ProcedureTranslator createTranslator(Connection connection) {
-                ProcedureTranslator transl = new HSQLDBProcedureTranslator();
-                transl.setAdapter(getAdapter());
-                transl.setQuery(query);
-                transl.setEntityResolver(getEntityResolver());
-                transl.setConnection(connection);
-                return transl;
-            }
-        };
-    }
-
 }

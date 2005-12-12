@@ -21,7 +21,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/ejb-2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/forms-1.0.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/foundrylogic-vpp-2.2.1.jar"/>
-	<classpathentry exported="true" sourcepath="lib-src/hsqldb-1.7.3.3-src.jar" kind="lib" path="lib/hsqldb-1.7.3.3.jar"/>
 	<classpathentry exported="true" sourcepath="lib-src/hessian-3.0.13-src.jar" kind="lib" path="lib/hessian-3.0.13.jar"/>
 	<classpathentry exported="true" sourcepath="lib-src/jdom-1.0-src.jar" kind="lib" path="lib/jdom-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jgroups-2.2.7.jar"/>
@@ -43,5 +42,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry sourcepath="lib-src/postgresql-jdbc-src-8.0-314.jar" kind="lib" path="lib/postgresql-8.0-314.jdbc3.jar"/>
 	<classpathentry kind="lib" path="src/tests/resources"/>
+	<classpathentry sourcepath="lib-src/hsqldb-1.8.0.2-src.jar" kind="lib" path="lib/hsqldb-1.8.0.2.jar"/>
 	<classpathentry kind="output" path="build/eclipse"/>
 </classpath>
