@@ -107,27 +107,6 @@ public class ObjEntityValidator extends TreeNodeValidator {
                     "ObjEntity Java class is invalid: " + className,
                     path);
         }
-
-        DataMap map = (DataMap) path.getObjectParent();
-        if (map == null) {
-            return;
-        }
-
-        // check for duplicate class names in the parent context
-        Iterator it = map.getObjEntities().iterator();
-        while (it.hasNext()) {
-            ObjEntity otherEnt = (ObjEntity) it.next();
-            if (otherEnt == ent) {
-                continue;
-            }
-
-            if (className.equals(otherEnt.getClassName())) {
-                validator.registerWarning("Duplicate ObjEntity class name: "
-                        + className
-                        + ".", path);
-                break;
-            }
-        }
     }
 
     private void validateSuperClassName(

@@ -67,6 +67,7 @@ import java.util.Map;
 import org.apache.commons.collections.collection.CompositeCollection;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 
@@ -82,12 +83,9 @@ import org.objectstyle.cayenne.query.Query;
  * @since 1.1 In 1.1 EntityResolver was moved from the access package.
  * @author Andrus Adamchik
  */
-// TODO: Andrus, 09/29/2005: we need to change current behavior of reindexing entity
-// resolver when entity lookup fails - now that we have a mix of server and client
-// mappings this no longer seems smart. Maybe just throw an
-// exception instead of returning null or doing multiple lookups - this will allow to
-// discover mapping inconsistencies early...
 public class EntityResolver implements MappingNamespace, Serializable {
+
+    static final Object DUPLICATE_MARKER = new Object();
 
     protected boolean indexedByClass;
 
@@ -279,19 +277,30 @@ public class EntityResolver implements MappingNamespace, Serializable {
                         continue;
                     }
 
-                    if (objEntityCache.get(entityClass) != null) {
-                        throw new CayenneRuntimeException(getClass().getName()
-                                + ": More than one ObjEntity ("
-                                + oe.getName()
-                                + " and "
-                                + ((ObjEntity) objEntityCache.get(entityClass)).getName()
-                                + ") uses the class "
-                                + entityClass.getName());
+                    // allow duplicates, but put a special marker indicating that this
+                    // entity can't be looked up by class
+                    Object existing = objEntityCache.get(entityClass);
+                    if (existing != null) {
+
+                        if (existing != DUPLICATE_MARKER) {
+                            objEntityCache.put(entityClass, DUPLICATE_MARKER);
+                        }
+                    }
+                    else {
+                        objEntityCache.put(entityClass, oe);
                     }
 
-                    objEntityCache.put(entityClass, oe);
                     if (oe.getDbEntity() != null) {
-                        dbEntityCache.put(entityClass, oe.getDbEntity());
+                        Object existingDB = dbEntityCache.get(entityClass);
+                        if (existingDB != null) {
+
+                            if (existingDB != DUPLICATE_MARKER) {
+                                dbEntityCache.put(entityClass, DUPLICATE_MARKER);
+                            }
+                        }
+                        else {
+                            dbEntityCache.put(entityClass, oe.getDbEntity());
+                        }
                     }
                 }
             }
@@ -510,7 +519,9 @@ public class EntityResolver implements MappingNamespace, Serializable {
      * @return the required ObjEntity, or null if none matches the specifier
      */
     public synchronized ObjEntity lookupObjEntity(DataObject dataObject) {
-        return this._lookupObjEntity(dataObject.getClass());
+        ObjectId id = dataObject.getObjectId();
+        Object key = id != null ? (Object) id.getEntityName() : dataObject.getClass();
+        return this._lookupObjEntity(key);
     }
 
     /**
@@ -632,14 +643,21 @@ public class EntityResolver implements MappingNamespace, Serializable {
             return (DbEntity) object;
         }
 
-        DbEntity result = (DbEntity) dbEntityCache.get(object);
+        Object result = dbEntityCache.get(object);
         if (result == null) {
             // reconstruct cache just in case some of the datamaps
             // have changed and now contain the required information
             constructCache();
-            result = (DbEntity) dbEntityCache.get(object);
+            result = dbEntityCache.get(object);
         }
-        return result;
+
+        if (result == DUPLICATE_MARKER) {
+            throw new CayenneRuntimeException(
+                    "Can't perform lookup. There is more than one DbEntity mapped to "
+                            + object);
+        }
+
+        return (DbEntity) result;
     }
 
     /**
@@ -660,13 +678,20 @@ public class EntityResolver implements MappingNamespace, Serializable {
             object = object.getClass();
         }
 
-        ObjEntity result = (ObjEntity) objEntityCache.get(object);
+        Object result = objEntityCache.get(object);
         if (result == null) {
             // reconstruct cache just in case some of the datamaps
             // have changed and now contain the required information
             constructCache();
-            result = (ObjEntity) objEntityCache.get(object);
+            result = objEntityCache.get(object);
         }
-        return result;
+
+        if (result == DUPLICATE_MARKER) {
+            throw new CayenneRuntimeException(
+                    "Can't perform lookup. There is more than one ObjEntity mapped to "
+                            + object);
+        }
+
+        return (ObjEntity) result;
     }
 }

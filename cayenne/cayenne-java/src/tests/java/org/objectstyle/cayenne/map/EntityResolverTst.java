@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -72,6 +73,49 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
 
 public class EntityResolverTst extends CayenneTestCase {
+
+    public void testObjEntityLookupDuplicates() {
+        AccessStack stack = CayenneTestResources.getResources().getAccessStack(
+                "GenericStack");
+
+        DataMap generic = stack.getDataDomain().getMap("generic");
+        EntityResolver resolver = new EntityResolver(Collections.singleton(generic));
+
+        ObjEntity g1 = resolver.lookupObjEntity("Generic1");
+        assertNotNull(g1);
+
+        ObjEntity g2 = resolver.lookupObjEntity("Generic2");
+        assertNotNull(g2);
+
+        assertNotSame(g1, g2);
+        assertNull(resolver.lookupObjEntity(Object.class));
+
+        try {
+            resolver.lookupObjEntity(CayenneDataObject.class);
+            fail("two entities mapped to the same class... resolver must have thrown.");
+        }
+        catch (CayenneRuntimeException e) {
+            // expected
+        }
+    }
+
+    public void testDbEntityLookupDuplicates() {
+        AccessStack stack = CayenneTestResources.getResources().getAccessStack(
+                "GenericStack");
+
+        DataMap generic = stack.getDataDomain().getMap("generic");
+        EntityResolver resolver = new EntityResolver(Collections.singleton(generic));
+
+        assertNull(resolver.lookupObjEntity(Object.class));
+
+        try {
+            resolver.lookupDbEntity(CayenneDataObject.class);
+            fail("two entities mapped to the same class... resolver must have thrown.");
+        }
+        catch (CayenneRuntimeException e) {
+            // expected
+        }
+    }
 
     public void testGetClientEntityResolver() {
 
