@@ -123,7 +123,12 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 return super.onSync(message);
             }
         };
-        ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore());
+        ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore()) {
+
+            public DataDomain getParentDataDomain() {
+                return getDomain();
+            }
+        };
 
         ClientServerChannel channel = new ClientServerChannel(context, false);
         channel.onSync(new SyncMessage(

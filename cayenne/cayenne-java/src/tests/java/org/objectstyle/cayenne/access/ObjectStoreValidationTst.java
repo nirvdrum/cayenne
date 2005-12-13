@@ -60,7 +60,6 @@ import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
@@ -71,7 +70,7 @@ public class ObjectStoreValidationTst extends CayenneTestCase {
 
     private static int id = 1;
 
-    public void testValidateUncommittedObjects() throws Exception {
+    public void testValidateUncommittedObjects() {
         MockupValidatingObject deleted = createObject(PersistenceState.DELETED);
         MockupValidatingObject inserted = createObject(PersistenceState.NEW);
         MockupValidatingObject updated = createObject(PersistenceState.MODIFIED);
@@ -94,42 +93,40 @@ public class ObjectStoreValidationTst extends CayenneTestCase {
         assertTrue(updated.validatedForUpdate);
     }
 
-    public void testValidateUncommittedObjectsConcurrency() throws Exception {
-        ObjectStore store = new ObjectStore(new DataRowStore("test"));
-        DataObject updated1 = createActiveValidatingObject(store,
+    public void testValidateUncommittedObjectsConcurrency() {
+        DataContext context = createDataContext();
+        DataObject updated1 = createActiveValidatingObject(
+                context,
                 PersistenceState.MODIFIED);
-        DataObject updated2 = createActiveValidatingObject(store,
+        DataObject updated2 = createActiveValidatingObject(
+                context,
                 PersistenceState.MODIFIED);
-        DataObject updated3 = createActiveValidatingObject(store,
+        DataObject updated3 = createActiveValidatingObject(
+                context,
                 PersistenceState.MODIFIED);
 
-        store.addObject(updated1);
-        store.addObject(updated2);
-        store.addObject(updated3);
-        store.validateUncommittedObjects();
+        context.getObjectStore().addObject(updated1);
+        context.getObjectStore().addObject(updated2);
+        context.getObjectStore().addObject(updated3);
+        context.getObjectStore().validateUncommittedObjects();
     }
 
     private MockupValidatingObject createObject(int state) {
         MockupValidatingObject object = new MockupValidatingObject();
+        object.setDataContext(createDataContext());
         object.setPersistenceState(state);
         object.setObjectId(new ObjectId("Artist", "ARTIST_NAME", id++));
         return object;
     }
 
     private MockupActiveValidatingObject createActiveValidatingObject(
-            ObjectStore objectStore,
+            DataContext context,
             int state) {
         MockupActiveValidatingObject object = new MockupActiveValidatingObject();
         object.setPersistenceState(state);
-        object.setDataContext(createMockupDataContext(objectStore));
+        object.setDataContext(context);
         object.setObjectId(new ObjectId("Artist", "ARTIST_NAME", id++));
         return object;
-    }
-
-    private DataContext createMockupDataContext(ObjectStore objectStore) {
-        MockQueryEngine qe = new MockQueryEngine(getDomain());
-        MockDataDomain dd = new MockDataDomain(qe);
-        return new DataContext((OPPChannel) dd, objectStore);
     }
 
     class MockupActiveValidatingObject extends CayenneDataObject {

@@ -128,12 +128,14 @@ class ObjectDataContext extends DataContext implements ObjectContext {
 
         synchronized (getObjectStore()) {
 
-            if (!hasChanges()) {
+            // TODO: Andrus, 12/13/2005 - in OPP spirit, PK generation should be done on
+            // the DataDomain end and passed back as a diff. At the same time the problem
+            // is that PK generation is the only way to detect some phantom modifications,
+            // and thus is a part of DataContext precommit - need to resolve this conflict
+            // somehow.
+            DataContextPrecommitAction precommit = new DataContextPrecommitAction();
+            if (!precommit.precommit(this)) {
                 return new CompoundDiff();
-            }
-
-            if (isValidatingObjectsOnCommit()) {
-                getObjectStore().validateUncommittedObjects();
             }
 
             // TODO: Andrus, 12/06/2005 - this is a violation of OPP rules, as we do not

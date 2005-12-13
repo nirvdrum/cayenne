@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.access;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,13 +66,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.map.LinkedMap;
-import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.util.BatchQueryUtils;
-import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
 import org.objectstyle.cayenne.graph.ArcCreateOperation;
 import org.objectstyle.cayenne.graph.ArcDeleteOperation;
 import org.objectstyle.cayenne.graph.CompoundDiff;
@@ -141,7 +138,6 @@ class DataDomainCommitAction {
         synchronized (domain.getSharedSnapshotCache()) {
             Collection uncommitted = message.getSource().uncommittedObjects();
             categorizeObjects(uncommitted);
-            createPrimaryKeys();
 
             for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
                 DataNodeCommitAction nodeHelper = (DataNodeCommitAction) i.next();
@@ -596,27 +592,6 @@ class DataDomainCommitAction {
                 }
 
                 qualifierSnapshot.put(name, snapshot.get(name));
-            }
-        }
-    }
-
-    private void createPrimaryKeys() {
-
-        PrimaryKeyHelper pkHelper = domain.getPrimaryKeyHelper();
-
-        Collections.sort(objEntitiesToInsert, pkHelper.getObjEntityComparator());
-        Iterator i = objEntitiesToInsert.iterator();
-        while (i.hasNext()) {
-            ObjEntity currentEntity = (ObjEntity) i.next();
-            List dataObjects = (List) newObjectsByObjEntity.get(currentEntity.getName());
-
-            try {
-                pkHelper.createPermIdsForObjEntity(currentEntity, dataObjects);
-            }
-            catch (CayenneException ex) {
-                throw new CayenneRuntimeException(
-                        "Error creating primary key for entity  " + currentEntity,
-                        ex);
             }
         }
     }

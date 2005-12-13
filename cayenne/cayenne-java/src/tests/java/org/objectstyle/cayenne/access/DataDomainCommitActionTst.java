@@ -74,10 +74,18 @@ public class DataDomainCommitActionTst extends CayenneTestCase {
         assertSame(getDomain(), action.domain);
     }
 
-    public void testCommitResult() {
+    public void testCommitResult() throws Exception {
+        deleteTestData();
+
         final Artist artist = new Artist();
         artist.setArtistName("test");
-        artist.setObjectId(new ObjectId("Artist"));
+
+        // TODO: Andrus, 12/13/2005 - see TODO under ObjectDataContext.doCommitChanges() -
+        // once PK generation is pushed down the domain level, we won't need to provide
+        // explicit PK values
+        ObjectId id = new ObjectId("Artist");
+        id.getReplacementIdMap().put(Artist.ARTIST_ID_PK_COLUMN, new Integer(1));
+        artist.setObjectId(id);
         artist.setPersistenceState(PersistenceState.NEW);
 
         MockObjectContext context = new MockObjectContext() {

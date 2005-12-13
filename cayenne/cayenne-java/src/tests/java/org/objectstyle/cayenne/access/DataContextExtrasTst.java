@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Level;
@@ -73,6 +74,7 @@ import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.SQLTemplate;
+import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
@@ -235,5 +237,38 @@ public class DataContextExtrasTst extends CayenneTestCase {
     public void testEntityResolver() {
         DataContext context = createDataContext();
         assertNotNull(context.getEntityResolver());
+    }
+
+    public void testValidatePhantomModifications() throws Exception {
+        deleteTestData();
+        createTestData("testValidatePhantomModifications");
+        DataContext context = createDataContext();
+
+        List objects = context.performQuery(new SelectQuery(Artist.class));
+        Artist a1 = (Artist) objects.get(0);
+        Artist a2 = (Artist) objects.get(1);
+
+        a1.setArtistName(a1.getArtistName());
+        a1.resetValidationFlags();
+        a2.resetValidationFlags();
+        context.commitChanges();
+
+        assertFalse(a1.isValidateForSaveCalled());
+        assertFalse(a2.isValidateForSaveCalled());
+
+        // "phantom" modification - the property is really unchanged
+        a1.setArtistName(a1.getArtistName());
+
+        // some other unrelated object modification caused phantom modification to be
+        // committed as well...
+        // (see CAY-355)
+        a2.setArtistName(a2.getArtistName() + "_x");
+
+        a1.resetValidationFlags();
+        a2.resetValidationFlags();
+        context.commitChanges();
+
+        assertTrue(a2.isValidateForSaveCalled());
+        assertFalse(a1.isValidateForSaveCalled());
     }
 }

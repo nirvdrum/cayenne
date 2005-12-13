@@ -974,7 +974,7 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * @deprecated Since 1.2, use "commitChnages()" instead.
+     * @deprecated Since 1.2, use {@link #commitChanges()} instead.
      */
     public void commitChanges(Level logLevel) throws CayenneRuntimeException {
         commitChanges();
@@ -992,19 +992,16 @@ public class DataContext implements QueryEngine, Serializable {
 
         // prevent multiple commits occuring simulteneously
         synchronized (getObjectStore()) {
-            // is there anything to do?
-            if (!this.hasChanges()) {
+
+            DataContextPrecommitAction precommit = new DataContextPrecommitAction();
+            if (!precommit.precommit(this)) {
                 return;
             }
 
-            if (isValidatingObjectsOnCommit()) {
-                getObjectStore().validateUncommittedObjects();
-            }
-
-            DataContextCommitAction worker = new DataContextCommitAction(this);
+            DataContextCommitAction commit = new DataContextCommitAction(this);
 
             try {
-                worker.commit();
+                commit.commit();
             }
             catch (CayenneException ex) {
                 Throwable unwound = Util.unwindException(ex);

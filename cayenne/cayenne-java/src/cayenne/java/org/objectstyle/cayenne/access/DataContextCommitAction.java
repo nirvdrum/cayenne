@@ -59,7 +59,6 @@ package org.objectstyle.cayenne.access;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -73,7 +72,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.util.BatchQueryUtils;
-import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
@@ -94,7 +92,8 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
  * batches for massive data modifications, assigns operations to data nodes. It indirectly
  * relies on graph algorithms provided by ASHWOOD library.
  * 
- * @author Andriy Shapochka, Andrei Adamchik
+ * @author Andriy Shapochka, 
+ * @author Andrus Adamchik
  * @since 1.2
  */
 class DataContextCommitAction {
@@ -117,91 +116,89 @@ class DataContextCommitAction {
 
     void commit() throws CayenneException {
 
-        // synchronize on both object store and underlying DataRowStore
-        synchronized (context.getObjectStore()) {
-            synchronized (context.getObjectStore().getDataRowCache()) {
+        // note that there is no syncing on the object store itself. This is caller's
+        // responsibility.
 
-                categorizeObjects();
-                createPrimaryKeys();
-                categorizeFlattenedInsertsAndCreateBatches();
-                categorizeFlattenedDeletesAndCreateBatches();
+        synchronized (context.getObjectStore().getDataRowCache()) {
 
-                insObjects = new ArrayList();
-                delObjects = new ArrayList();
-                updObjects = new ArrayList();
+            categorizeObjects();
+            categorizeFlattenedInsertsAndCreateBatches();
+            categorizeFlattenedDeletesAndCreateBatches();
 
-                for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
-                    DataNodeCommitAction nodeHelper = (DataNodeCommitAction) i.next();
-                    prepareInsertQueries(nodeHelper);
-                    prepareFlattenedQueries(nodeHelper, nodeHelper
-                            .getFlattenedInsertQueries());
+            insObjects = new ArrayList();
+            delObjects = new ArrayList();
+            updObjects = new ArrayList();
 
-                    prepareUpdateQueries(nodeHelper);
+            for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
+                DataNodeCommitAction nodeHelper = (DataNodeCommitAction) i.next();
+                prepareInsertQueries(nodeHelper);
+                prepareFlattenedQueries(nodeHelper, nodeHelper
+                        .getFlattenedInsertQueries());
 
-                    prepareFlattenedQueries(nodeHelper, nodeHelper
-                            .getFlattenedDeleteQueries());
+                prepareUpdateQueries(nodeHelper);
 
-                    prepareDeleteQueries(nodeHelper);
-                }
+                prepareFlattenedQueries(nodeHelper, nodeHelper
+                        .getFlattenedDeleteQueries());
 
-                CommitObserver observer = new CommitObserver(
-                        context,
-                        insObjects,
-                        updObjects,
-                        delObjects);
+                prepareDeleteQueries(nodeHelper);
+            }
 
-                if (context.isTransactionEventsEnabled()) {
-                    observer.registerForDataContextEvents();
-                }
+            CommitObserver observer = new CommitObserver(
+                    context,
+                    insObjects,
+                    updObjects,
+                    delObjects);
 
+            if (context.isTransactionEventsEnabled()) {
+                observer.registerForDataContextEvents();
+            }
+
+            try {
+                context.fireWillCommit();
+
+                Transaction transaction = context
+                        .getParentDataDomain()
+                        .createTransaction();
+
+                Transaction.bindThreadTransaction(transaction);
                 try {
-                    context.fireWillCommit();
+                    transaction.begin();
+                    Iterator i = nodeHelpers.iterator();
+                    while (i.hasNext()) {
+                        DataNodeCommitAction nodeHelper = (DataNodeCommitAction) i.next();
+                        List queries = nodeHelper.getQueries();
 
-                    Transaction transaction = context
-                            .getParentDataDomain()
-                            .createTransaction();
+                        if (queries.size() > 0) {
+                            // note: observer throws on error
+                            nodeHelper.getNode().performQueries(queries, observer);
+                        }
+                    }
 
-                    Transaction.bindThreadTransaction(transaction);
+                    // commit
+                    transaction.commit();
+                }
+                catch (Throwable th) {
                     try {
-                        transaction.begin();
-                        Iterator i = nodeHelpers.iterator();
-                        while (i.hasNext()) {
-                            DataNodeCommitAction nodeHelper = (DataNodeCommitAction) i
-                                    .next();
-                            List queries = nodeHelper.getQueries();
-
-                            if (queries.size() > 0) {
-                                // note: observer throws on error
-                                nodeHelper.getNode().performQueries(queries, observer);
-                            }
-                        }
-
-                        // commit
-                        transaction.commit();
+                        // rollback
+                        transaction.rollback();
                     }
-                    catch (Throwable th) {
-                        try {
-                            // rollback
-                            transaction.rollback();
-                        }
-                        catch (Throwable rollbackTh) {
-                            // ignoring...
-                        }
-
-                        context.fireTransactionRolledback();
-                        throw new CayenneException("Transaction was rolledback.", th);
-                    }
-                    finally {
-                        Transaction.bindThreadTransaction(null);
+                    catch (Throwable rollbackTh) {
+                        // ignoring...
                     }
 
-                    context.getObjectStore().objectsCommitted();
-                    context.fireTransactionCommitted();
+                    context.fireTransactionRolledback();
+                    throw new CayenneException("Transaction was rolledback.", th);
                 }
                 finally {
-                    if (context.isTransactionEventsEnabled()) {
-                        observer.unregisterFromDataContextEvents();
-                    }
+                    Transaction.bindThreadTransaction(null);
+                }
+
+                context.getObjectStore().objectsCommitted();
+                context.fireTransactionCommitted();
+            }
+            finally {
+                if (context.isTransactionEventsEnabled()) {
+                    observer.unregisterFromDataContextEvents();
                 }
             }
         }
@@ -603,20 +600,6 @@ class DataContextCommitAction {
 
                 qualifierSnapshot.put(name, snapshot.get(name));
             }
-        }
-    }
-
-    private void createPrimaryKeys() throws CayenneException {
-
-        DataDomain domain = context.getParentDataDomain();
-        PrimaryKeyHelper pkHelper = domain.getPrimaryKeyHelper();
-
-        Collections.sort(objEntitiesToInsert, pkHelper.getObjEntityComparator());
-        Iterator i = objEntitiesToInsert.iterator();
-        while (i.hasNext()) {
-            ObjEntity currentEntity = (ObjEntity) i.next();
-            List dataObjects = (List) newObjectsByObjEntity.get(currentEntity.getName());
-            pkHelper.createPermIdsForObjEntity(currentEntity, dataObjects);
         }
     }
 

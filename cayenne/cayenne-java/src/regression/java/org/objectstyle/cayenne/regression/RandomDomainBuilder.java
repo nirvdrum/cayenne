@@ -220,8 +220,6 @@ public class RandomDomainBuilder {
             dropSchema();
             throw new CayenneException(ex);
         }
-
-        domain.getPrimaryKeyHelper().reset();
     }
 
     private void dropSchema() throws CayenneException {

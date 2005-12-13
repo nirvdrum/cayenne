@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,8 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
-package org.objectstyle.cayenne.access.util;
+package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,12 +70,9 @@ import org.objectstyle.ashwood.graph.GraphUtils;
 import org.objectstyle.ashwood.graph.IndegreeTopologicalSort;
 import org.objectstyle.ashwood.graph.MapDigraph;
 import org.objectstyle.ashwood.graph.StrongConnection;
-import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -88,41 +84,36 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
- * PrimaryKeyHelper resolves primary key dependencies for entities related to the
- * supported query engine via topological sorting. It is directly based on ASHWOOD. In
- * addition it provides means for primary key generation relying on DbAdapter in this.
+ * Resolves primary key dependencies for entities related to the supported query engine
+ * via topological sorting. It is directly based on ASHWOOD. In addition it provides means
+ * for primary key generation relying on DbAdapter.
  * 
- * @author Andriy Shapochka
- * @deprecated since 1.2 replaced with a non-public utility class.
+ * @author Andrus Adamchik
+ * @since 1.2
  */
-public class PrimaryKeyHelper {
+class PrimaryKeyHelper {
 
     private Map indexedDbEntities;
     private QueryEngine queryEngine;
     private DbEntityComparator dbEntityComparator;
     private ObjEntityComparator objEntityComparator;
 
-    public PrimaryKeyHelper(QueryEngine queryEngine) {
+    PrimaryKeyHelper(QueryEngine queryEngine) {
         this.queryEngine = queryEngine;
         init();
         dbEntityComparator = new DbEntityComparator();
         objEntityComparator = new ObjEntityComparator();
     }
 
-    public void reset() {
-        init();
-    }
-
-    public Comparator getDbEntityComparator() {
+    Comparator getDbEntityComparator() {
         return dbEntityComparator;
     }
 
-    public Comparator getObjEntityComparator() {
+    Comparator getObjEntityComparator() {
         return objEntityComparator;
     }
 
-    public void createPermIdsForObjEntity(ObjEntity objEntity, List dataObjects)
-            throws CayenneException {
+    void createPermIdsForObjEntity(ObjEntity objEntity, List dataObjects) {
 
         if (dataObjects.isEmpty()) {
             return;
@@ -188,7 +179,7 @@ public class PrimaryKeyHelper {
                 // only a single key can be generated from DB... if this is done already
                 // in this loop, we must bail out.
                 if (autoPkDone) {
-                    throw new CayenneException(
+                    throw new CayenneRuntimeException(
                             "Primary Key autogeneration only works for a single attribute.");
                 }
 
@@ -199,9 +190,8 @@ public class PrimaryKeyHelper {
                     autoPkDone = true;
                 }
                 catch (Exception ex) {
-                    throw new CayenneException(
-                            "Error generating PK: " + ex.getMessage(),
-                            ex);
+                    throw new CayenneRuntimeException("Error generating PK: "
+                            + ex.getMessage(), ex);
                 }
             }
         }
@@ -212,7 +202,7 @@ public class PrimaryKeyHelper {
             DataObject dataObject,
             ObjEntity objEntity,
             DbEntity dbEntity,
-            boolean supportsGeneratedKeys) throws CayenneException {
+            boolean supportsGeneratedKeys) throws CayenneRuntimeException {
 
         boolean useful = false;
         Iterator it = dbEntity.getRelationships().iterator();
@@ -231,7 +221,7 @@ public class PrimaryKeyHelper {
                     .getName());
 
             if (targetDo == null) {
-                throw new CayenneException(
+                throw new CayenneRuntimeException(
                         "Null master object, can't create primary key for: "
                                 + dataObject.getClass()
                                 + "."
@@ -241,8 +231,10 @@ public class PrimaryKeyHelper {
             ObjectId targetKey = targetDo.getObjectId();
             Map targetKeyMap = targetKey.getIdSnapshot();
             if (targetKeyMap == null) {
-                throw new CayenneException(noMasterPkMsg(objEntity.getName(), targetKey
-                        .getEntityName(), dbRel.getName()));
+                throw new CayenneRuntimeException(noMasterPkMsg(
+                        objEntity.getName(),
+                        targetKey.getEntityName(),
+                        dbRel.getName()));
             }
 
             // DbRelationship logic currently throws an exception when some key is

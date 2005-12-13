@@ -73,16 +73,16 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
         // needed to save without errors
         p1.setToArtist(a1);
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         pi1.setPainting(p1);
 
         // test before save
         assertSame(pi1, p1.getToPaintingInfo());
         assertSame(p1, pi1.getPainting());
 
-        // do save 
+        // do save
         ctxt.commitChanges();
-		ctxt = createDataContext();
+        ctxt = createDataContext();
 
         // test database data
         PaintingInfo pi2 = fetchPaintingInfo();
@@ -101,9 +101,9 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
         ae1.setToArtist(a1);
         ae1.setToExhibit(e1);
 
-        // do save 
+        // do save
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         ctxt.commitChanges();
     }
 
@@ -111,7 +111,9 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
         String altPaintingName = "alt painting";
 
         Artist a1 = newArtist();
-		assertEquals(a1.getObjectId(), ctxt.registeredObject(a1.getObjectId()).getObjectId());
+        assertEquals(a1.getObjectId(), ctxt
+                .registeredObject(a1.getObjectId())
+                .getObjectId());
 
         PaintingInfo pi1 = newPaintingInfo();
         Painting p1 = newPainting();
@@ -123,7 +125,7 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-		ctxt = createDataContext();
+        ctxt = createDataContext();
 
         // test database data
         PaintingInfo pi2 = fetchPaintingInfo();
@@ -131,11 +133,13 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
         assertNotNull(p21);
         assertEquals(altPaintingName, p21.getPaintingTitle());
         assertSame(pi2, p21.getToPaintingInfo());
-        ByteArrayTypeTst.assertByteArraysEqual(paintingImage, p21.getToPaintingInfo().getImageBlob());
+        ByteArrayTypeTst.assertByteArraysEqual(paintingImage, p21
+                .getToPaintingInfo()
+                .getImageBlob());
 
         Painting p22 = newPainting();
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         pi2.setPainting(p22);
 
         // test before save
@@ -147,7 +151,7 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
         // do save II
         ctxt.commitChanges();
         ObjectId pi2oid = pi2.getObjectId();
-		ctxt = createDataContext();
+        ctxt = createDataContext();
 
         PaintingInfo pi3 = fetchPaintingInfo();
         Painting p3 = pi3.getPainting();

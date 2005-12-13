@@ -78,7 +78,6 @@ import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
@@ -834,15 +833,18 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
     /**
      * Returns <code>true</code> if there are any modified, deleted or new objects
-     * registered with this ObjectStore, <code>false</code> otherwise.
+     * registered with this ObjectStore, <code>false</code> otherwise. This method will
+     * treat "phantom" modifications are real ones. I.e. if you "change" an object
+     * property to an equivalent value, this method will still think such object is
+     * modified. Phantom modifications are only detected and discarded during commit.
      */
     public synchronized boolean hasChanges() {
 
-        // TODO: This implementation is rather naive and would scan all
-        // registered
-        // objects. Any better ideas? Catching events or something...
+        if (checkIndirectChanges()) {
+            return true;
+        }
 
-        if (!flattenedInserts.isEmpty() || !flattenedDeletes.isEmpty()) {
+        if (!retainedSnapshotMap.isEmpty()) {
             return true;
         }
 
@@ -850,48 +852,13 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         while (it.hasNext()) {
             DataObject dataObject = (DataObject) it.next();
             int state = dataObject.getPersistenceState();
-
-            if (state == PersistenceState.MODIFIED) {
-                DataContext context = dataObject.getDataContext();
-                DataRow committedSnapshot = getSnapshot(dataObject.getObjectId(), context
-                        .getChannel());
-                if (committedSnapshot == null) {
-                    return true;
-                }
-
-                DataRow currentSnapshot = context.currentSnapshot(dataObject);
-
-                Iterator currentIt = currentSnapshot.entrySet().iterator();
-                while (currentIt.hasNext()) {
-                    Map.Entry entry = (Map.Entry) currentIt.next();
-                    Object newValue = entry.getValue();
-                    Object oldValue = committedSnapshot.get(entry.getKey());
-                    if (!Util.nullSafeEquals(oldValue, newValue)) {
-                        return true;
-                    }
-                }
-
-                // original snapshot can have extra keys that are missing in the
-                // current snapshot; process those
-                Iterator committedIt = committedSnapshot.entrySet().iterator();
-                while (committedIt.hasNext()) {
-
-                    Map.Entry entry = (Map.Entry) committedIt.next();
-
-                    // committed snapshot has null value, skip it
-                    if (entry.getValue() == null) {
-                        continue;
-                    }
-
-                    if (!currentSnapshot.containsKey(entry.getKey())) {
-                        return true;
-                    }
-                }
-            }
-            else if (state == PersistenceState.NEW || state == PersistenceState.DELETED) {
+            if (state == PersistenceState.NEW
+                    || state == PersistenceState.DELETED
+                    || state == PersistenceState.MODIFIED) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -944,7 +911,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
     /**
      * Performs validation of all uncommitted objects in the ObjectStore. If validation
-     * fails, a ValidationException is thrown, listing all encountered failures.
+     * fails, a ValidationException is thrown, listing all encountered failures. This is a
+     * utility method for the users to call. Cayenne itself uses a different mechanism to
+     * validate objects on commit.
      * 
      * @since 1.1
      * @throws ValidationException
@@ -1014,6 +983,15 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         if (validationResult.hasFailures()) {
             throw new ValidationException(validationResult);
         }
+    }
+
+    /**
+     * Returns whether ObjectStore has changes not directly reflected in the object state.
+     * 
+     * @since 1.2
+     */
+    boolean checkIndirectChanges() {
+        return !flattenedInserts.isEmpty() || !flattenedDeletes.isEmpty();
     }
 
     /**

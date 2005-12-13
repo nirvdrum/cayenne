@@ -67,7 +67,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.DataMap;
@@ -124,7 +123,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
     protected Map properties = Collections.synchronizedMap(new TreeMap());
 
     protected EntityResolver entityResolver;
-    protected PrimaryKeyHelper primaryKeyHelper;
+    PrimaryKeyHelper primaryKeyHelper;
     protected DataRowStore sharedSnapshotCache;
     protected TransactionDelegate transactionDelegate;
     protected DataContextFactory dataContextFactory;
@@ -478,6 +477,8 @@ public class DataDomain implements QueryEngine, OPPChannel {
             nodes.clear();
             nodesByDataMapName.clear();
 
+            primaryKeyHelper = null;
+
             if (entityResolver != null) {
                 entityResolver.clearCache();
                 entityResolver = null;
@@ -670,19 +671,24 @@ public class DataDomain implements QueryEngine, OPPChannel {
         }
     }
 
-    // creates default PrimaryKeyHelper
-    private void createKeyGenerator() {
-        primaryKeyHelper = new PrimaryKeyHelper(this);
+    /**
+     * @return PrimaryKeyHelper
+     * @deprecated unused since 1.2
+     */
+    public synchronized org.objectstyle.cayenne.access.util.PrimaryKeyHelper getPrimaryKeyHelper() {
+        return new org.objectstyle.cayenne.access.util.PrimaryKeyHelper(this);
     }
 
     /**
-     * @return PrimaryKeyHelper
+     * @since 1.2
      */
-    public synchronized PrimaryKeyHelper getPrimaryKeyHelper() {
-        // TODO instead of on the spot generation, we can
-        // use lazy initialization features similar to DefaultSorter
-        if (primaryKeyHelper == null) {
-            createKeyGenerator();
+    PrimaryKeyHelper primaryKeyHelper() {
+        if (this.primaryKeyHelper == null) {
+            synchronized (this) {
+                if (this.primaryKeyHelper == null) {
+                    this.primaryKeyHelper = new PrimaryKeyHelper(this);
+                }
+            }
         }
 
         return primaryKeyHelper;
@@ -743,6 +749,9 @@ public class DataDomain implements QueryEngine, OPPChannel {
 
         // ignore all but commit messages
         if (message.getType() == SyncMessage.COMMIT_TYPE) {
+            // TODO: Andrus, 12/13/2005 - see TODO under
+            // ObjectDataContext.doCommitChanges() -
+            // PK generation needs to be done here...
             return new DataDomainCommitAction(this).commit(message);
         }
 

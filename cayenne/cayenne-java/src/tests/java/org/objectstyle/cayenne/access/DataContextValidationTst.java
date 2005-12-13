@@ -56,14 +56,14 @@
 
 package org.objectstyle.cayenne.access;
 
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.validation.ValidationException;
-import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class DataContextValidationTst extends CayenneTestCase {
+
     public void testValidatingObjectsOnCommitProperty() throws Exception {
         DataContext context = createDataContext();
 
@@ -76,67 +76,19 @@ public class DataContextValidationTst extends CayenneTestCase {
 
     public void testValidatingObjectsOnCommit() throws Exception {
         DataContext context = createDataContext();
-        TestObjectStore objectStore =
-            new TestObjectStore(context.getObjectStore().getDataRowCache());
-        context.objectStore = objectStore;
 
         // test that validation is called properly
-        objectStore.prepare(false);
-        context.setValidatingObjectsOnCommit(true);
-        context.commitChanges();
-        assertTrue(objectStore.validationWasCalled);
 
-        objectStore.prepare(false);
+        context.setValidatingObjectsOnCommit(true);
+        Artist a1 = (Artist) context.createAndRegisterNewObject(Artist.class);
+        a1.setArtistName("a1");
+        context.commitChanges();
+        assertTrue(a1.isValidateForSaveCalled());
+
         context.setValidatingObjectsOnCommit(false);
+        Artist a2 = (Artist) context.createAndRegisterNewObject(Artist.class);
+        a2.setArtistName("a2");
         context.commitChanges();
-        assertFalse(objectStore.validationWasCalled);
-    }
-
-    public void testValidatingObjectsOnCommitStopsCommit() throws Exception {
-        DataContext context = createDataContext();
-        TestObjectStore objectStore =
-            new TestObjectStore(context.getObjectStore().getDataRowCache());
-        context.objectStore = objectStore;
-
-        // test that validation is called properly
-        objectStore.prepare(true);
-        context.setValidatingObjectsOnCommit(true);
-
-        try {
-            context.commitChanges();
-            fail("ValidationException was expected");
-        }
-        catch (ValidationException vex) {
-            // expected
-        }
-
-    }
-
-    class TestObjectStore extends ObjectStore {
-        boolean validationWasCalled;
-        boolean shouldThrow;
-
-        public TestObjectStore(DataRowStore dataRowCache) {
-            super(dataRowCache);
-        }
-
-        public void prepare(boolean shouldThrow) {
-            this.validationWasCalled = false;
-            this.shouldThrow = shouldThrow;
-        }
-
-        public synchronized void validateUncommittedObjects()
-            throws ValidationException {
-
-            validationWasCalled = true;
-            if (shouldThrow) {
-                throw new ValidationException(new ValidationResult());
-            }
-        }
-
-        public synchronized boolean hasChanges() {
-            return true;
-        }
-
+        assertFalse(a2.isValidateForSaveCalled());
     }
 }

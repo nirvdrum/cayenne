@@ -675,15 +675,19 @@ public class DataContextTst extends DataContextTestBase {
      * Tests that hasChanges performs correctly when an object is "modified" and the
      * property is simply set to the same value (an unreal modification)
      */
-    public void testHasChangesUnrealModify() {
+    public void testHasChangesPhantom() {
         String artistName = "ArtistName";
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName(artistName);
         context.commitChanges();
 
-        artist.setArtistName(artistName); // Set again to *exactly* the same
-        // value
-        assertFalse(context.hasChanges());
+        // Set again to *exactly* the same value
+        artist.setArtistName(artistName);
+
+        // note that since 1.2 the polciy is for hasChanges to return true for phantom
+        // modifications, as there is no way to detect some more subtle modifications like
+        // a change of the master related object, until we actually create the PKs
+        assertTrue(context.hasChanges());
     }
 
     /**
