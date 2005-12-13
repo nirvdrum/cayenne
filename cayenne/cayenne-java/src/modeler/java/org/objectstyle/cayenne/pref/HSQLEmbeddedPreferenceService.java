@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.conn.PoolManager;
+import org.objectstyle.cayenne.modeler.util.Version;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.util.Util;
 
@@ -146,7 +147,7 @@ public class HSQLEmbeddedPreferenceService extends CayennePreferenceService {
         dataContext = config.getDomain().createDataContext();
 
         // create DB if it does not exist...
-        if (dataSourceFactory.needSchemaUpdate) {
+        if (dataSourceFactory.needSchemaUpdate && !upgradeDB()) {
             initSchema();
         }
 
@@ -204,6 +205,53 @@ public class HSQLEmbeddedPreferenceService extends CayennePreferenceService {
     }
 
     /**
+     * Copies database with older version.
+     */
+    boolean upgradeDB() {
+        String versionName = dbDirectory.getName();
+        File prefsDir = dbDirectory.getParentFile();
+
+        String[] prefs = prefsDir.list();
+
+        if (prefs == null || prefs.length == 0) {
+            return false;
+        }
+
+        // find older version
+        Version currentVersion = new Version(versionName);
+        Version previousVersion = new Version("0");
+        File lastDir = null;
+        for (int i = 0; i < prefs.length; i++) {
+            File dir = new File(prefsDir, prefs[i]);
+            if (dir.isDirectory() && new File(dir, baseName + ".properties").isFile()) {
+
+                // check that there are DB files
+
+                Version v;
+                try {
+                    v = new Version(prefs[i]);
+                }
+                catch (NumberFormatException nfex) {
+                    // ignore... not a version dir...
+                    continue;
+                }
+
+                if (v.compareTo(currentVersion) < 0 && v.compareTo(previousVersion) > 0) {
+                    previousVersion = v;
+                    lastDir = dir;
+                }
+            }
+        }
+
+        if (lastDir != null) {
+            copyDB(lastDir, baseName, baseName);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Copies one database to another. Caller must provide HSQLDB locks on target for this
      * to work reliably.
      */
@@ -230,8 +278,13 @@ public class HSQLEmbeddedPreferenceService extends CayennePreferenceService {
      * reliably.
      */
     void copyDB(String masterBaseName, String targetBaseName) {
+        copyDB(dbDirectory, masterBaseName, targetBaseName);
+    }
 
-        File[] filesToCopy = dbDirectory.listFiles(new HSQLDBFileFilter(masterBaseName));
+    void copyDB(File sourceDirectory, String masterBaseName, String targetBaseName) {
+
+        File[] filesToCopy = sourceDirectory.listFiles(new HSQLDBFileFilter(
+                masterBaseName));
         if (filesToCopy != null) {
             for (int i = 0; i < filesToCopy.length; i++) {
                 String ext = Util.extractFileExtension(filesToCopy[i].getName());

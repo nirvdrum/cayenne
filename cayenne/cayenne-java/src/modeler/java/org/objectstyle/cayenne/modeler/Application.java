@@ -135,7 +135,7 @@ import org.scopemvc.view.swing.SwingView;
  */
 public class Application {
 
-    public static final String PREFERENCES_VERSION = "1.1";
+    public static final String PREFERENCES_VERSION = "1.2";
     public static final String PREFERENCES_DB_SUBDIRECTORY = "prefs";
     public static final String PREFERENCES_MAP_PACKAGE = "pref";
     public static final String APPLICATION_NAME_PROPERTY = "cayenne.modeler.application.name";
