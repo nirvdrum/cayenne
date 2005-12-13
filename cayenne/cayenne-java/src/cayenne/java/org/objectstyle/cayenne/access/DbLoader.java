@@ -100,9 +100,9 @@ public class DbLoader {
     // loading...
     private static final Collection EXCLUDED_PROCEDURES = Arrays.asList(new Object[] {
             "auto_pk_for_table", "auto_pk_for_table;1" /*
-                                                        * the last name is some Mac OS X
-                                                        * Sybase artifact
-                                                        */
+                                                         * the last name is some Mac OS X
+                                                         * Sybase artifact
+                                                         */
     });
 
     public static final String WILDCARD = "%";
@@ -133,6 +133,7 @@ public class DbLoader {
     protected DbAdapter adapter;
     protected DatabaseMetaData metaData;
     protected DbLoaderDelegate delegate;
+    protected String genericClassName;
 
     /** Creates new DbLoader. */
     public DbLoader(Connection con, DbAdapter adapter, DbLoaderDelegate delegate) {
@@ -141,7 +142,9 @@ public class DbLoader {
         this.delegate = delegate;
     }
 
-    /** Returns DatabaseMetaData object associated with this DbLoader. */
+    /**
+     * Returns DatabaseMetaData object associated with this DbLoader.
+     */
     public DatabaseMetaData getMetaData() throws SQLException {
         if (null == metaData)
             metaData = con.getMetaData();
@@ -153,6 +156,30 @@ public class DbLoader {
      */
     public Connection getCon() {
         return con;
+    }
+
+    /**
+     * Returns a name of a generic class that should be used for all ObjEntities. The most
+     * common generic class is {@link org.objectstyle.cayenne.CayenneDataObject}. If
+     * generic class name is null (which is the default), DbLoader will assign each entity
+     * a unique class name derived from the table name.
+     * 
+     * @since 1.2
+     */
+    public String getGenericClassName() {
+        return genericClassName;
+    }
+
+    /**
+     * Sets a name of a generic class that should be used for all ObjEntities. The most
+     * common generic class is {@link org.objectstyle.cayenne.CayenneDataObject}. If
+     * generic class name is set to null (which is the default), DbLoader will assign each
+     * entity a unique class name derived from the table name.
+     * 
+     * @since 1.2
+     */
+    public void setGenericClassName(String genericClassName) {
+        this.genericClassName = genericClassName;
     }
 
     /**
@@ -276,9 +303,10 @@ public class DbLoader {
                 // want dropped tables to be included here; in fact they may even result
                 // in errors on reverse engineering as their names have special chars like
                 // "/", etc. So skip them all together
-                
-                // TODO: Andrus, 10/29/2005 - this type of filtering should be delegated to adapter
-                if(name == null || name.startsWith("BIN$")) {
+
+                // TODO: Andrus, 10/29/2005 - this type of filtering should be delegated
+                // to adapter
+                if (name == null || name.startsWith("BIN$")) {
                     continue;
                 }
 
@@ -346,7 +374,7 @@ public class DbLoader {
                     table.getSchema(),
                     table.getName(),
                     "%");
-            
+
             try {
                 while (rs.next()) {
                     // for a reason not quiet apparent to me, Oracle sometimes
@@ -477,7 +505,9 @@ public class DbLoader {
 
             ObjEntity objEntity = new ObjEntity(objEntityName);
             objEntity.setDbEntity(dbEntity);
-            objEntity.setClassName(objEntity.getName());
+            objEntity.setClassName(getGenericClassName() != null
+                    ? getGenericClassName()
+                    : objEntity.getName());
             map.addObjEntity(objEntity);
             loadedEntities.add(objEntity);
 
