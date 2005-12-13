@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.map;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.property.ClassDescriptor;
@@ -64,6 +65,26 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.util.Util;
 
 public class ObjEntityTst extends CayenneTestCase {
+    
+    public void testGeneric() {
+        ObjEntity e1 = new ObjEntity("e1");
+        assertTrue(e1.isGeneric());
+        
+        e1.setClassName("SomeClass");
+        assertFalse(e1.isGeneric());
+        
+        DataMap m = new DataMap("X");
+        m.setDefaultSuperclass("SomeClass");
+        m.addObjEntity(e1);
+        
+        assertTrue(e1.isGeneric());
+        
+        e1.setClassName("SomeOtherClass");
+        assertFalse(e1.isGeneric());
+        
+        e1.setClassName(CayenneDataObject.class.getName());
+        assertTrue(e1.isGeneric());
+    }
 
     public void testServerOnly() {
         ObjEntity e1 = new ObjEntity("e1");

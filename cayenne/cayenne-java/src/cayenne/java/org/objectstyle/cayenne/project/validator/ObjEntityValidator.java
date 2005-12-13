@@ -89,8 +89,8 @@ public class ObjEntityValidator extends TreeNodeValidator {
     private void validateClassName(ObjEntity ent, ProjectPath path, Validator validator) {
         String className = ent.getClassName();
 
+        // if mapped to default class, ignore...
         if (Util.isEmptyString(className)) {
-            validator.registerWarning("ObjEntity has no Java class mapped.", path);
             return;
         }
 

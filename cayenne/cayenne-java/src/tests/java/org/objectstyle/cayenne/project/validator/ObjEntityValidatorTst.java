@@ -102,19 +102,4 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         }), validator);
         assertValidator(ValidationInfo.ERROR);
     }
-
-    public void testValidateNoClassName() throws Exception {
-        ObjEntity oe1 = new ObjEntity("oe1");
-        oe1.setDbEntity(new DbEntity("de1"));
-        oe1.setClassName(null);
-        map.addObjEntity(oe1);
-
-        validator.reset();
-        new ObjEntityValidator().validateObject(new ProjectPath(new Object[] {
-                project, domain, map, oe1
-        }), validator);
-        assertValidator(ValidationInfo.WARNING);
-        // WARNING is ok - null class name will give that, but ERROR is bad
-
-    }
 }

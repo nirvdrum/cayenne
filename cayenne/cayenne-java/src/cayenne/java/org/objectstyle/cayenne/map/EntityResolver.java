@@ -260,16 +260,12 @@ public class EntityResolver implements MappingNamespace, Serializable {
                 objEntityCache.put(oe.getName(), oe);
 
                 // index by class
-                String className = oe.getClassName();
-                if (indexedByClass && className != null) {
+                if (indexedByClass) {
                     Class entityClass;
                     try {
-                        entityClass = Thread
-                                .currentThread()
-                                .getContextClassLoader()
-                                .loadClass(className);
+                        entityClass = oe.getJavaClass();
                     }
-                    catch (ClassNotFoundException e) {
+                    catch (CayenneRuntimeException e) {
                         // DataMaps can contain all kinds of garbage...
                         // TODO (Andrus, 10/18/2005) it would be nice to log something
                         // here, but since EntityResolver is used on the client, log4J is
@@ -290,6 +286,10 @@ public class EntityResolver implements MappingNamespace, Serializable {
                         objEntityCache.put(entityClass, oe);
                     }
 
+                    // TODO: Andrus, 12/13/2005 - An invalid DbEntity name will cause
+                    // 'getDbEntity' to go into an
+                    // infinite loop as "getDbEntity" will try to resolve DbEntity via a
+                    // parent namespace (which will be this resolver).
                     if (oe.getDbEntity() != null) {
                         Object existingDB = dbEntityCache.get(entityClass);
                         if (existingDB != null) {

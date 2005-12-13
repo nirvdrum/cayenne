@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -63,6 +64,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.collections.Transformer;
+import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
@@ -91,6 +93,16 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
 
     final public static int LOCK_TYPE_NONE = 0;
     final public static int LOCK_TYPE_OPTIMISTIC = 1;
+
+    /**
+     * A collection of default "generic" entity classes excluded from class generation.
+     * 
+     * @since 1.2
+     */
+    protected static final Collection DEFAULT_GENERIC_CLASSES = Arrays
+            .asList(new String[] {
+                CayenneDataObject.class.getName()
+            });
 
     protected String superClassName;
     protected String className;
@@ -258,25 +270,33 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
     public Class getJavaClass(ClassLoader classLoader) {
         return getJavaClass();
     }
-    
+
     /**
-     * Returns Java class of persistent objects described by this entity. Casts any thrown
-     * exceptions into CayenneRuntimeException.
+     * Returns Java class of persistent objects described by this entity. For generic
+     * entities with no class specified explicitly, default DataMap superclass is used,
+     * and if it is not set - CayenneDataObject is used. Casts any thrown exceptions into
+     * CayenneRuntimeException.
      * 
      * @since 1.2
      */
     public Class getJavaClass() {
-        if (this.getClassName() == null) {
-            return null;
+        String name = getClassName();
+
+        if (name == null && getDataMap() != null) {
+            name = getDataMap().getDefaultSuperclass();
+        }
+
+        if (name == null) {
+            name = CayenneDataObject.class.getName();
         }
 
         try {
-            return Util.getJavaClass(getClassName());
+            return Util.getJavaClass(name);
         }
         catch (ClassNotFoundException e) {
-            throw new CayenneRuntimeException("Failed to load class for name '"
-                    + this.getClassName()
-                    + "': "
+            throw new CayenneRuntimeException("Failed to load class "
+                    + name
+                    + ": "
                     + e.getMessage(), e);
         }
     }
@@ -316,6 +336,21 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
      */
     public void setDeclaredLockType(int i) {
         lockType = i;
+    }
+
+    /**
+     * Returns whether this entity is "generic", meaning it is not mapped to a unique Java
+     * class. Criterion for generic entities is that it either has no Java class mapped or
+     * its class is the same as DataMap's default superclass, or it is CayenneDataObject.
+     * 
+     * @since 1.2
+     */
+    public boolean isGeneric() {
+        String className = getClassName();
+        return className == null
+                || DEFAULT_GENERIC_CLASSES.contains(className)
+                || (getDataMap() != null && className.equals(getDataMap()
+                        .getDefaultSuperclass()));
     }
 
     /**

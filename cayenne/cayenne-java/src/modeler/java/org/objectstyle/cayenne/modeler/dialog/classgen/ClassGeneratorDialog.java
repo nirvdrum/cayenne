@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.modeler.dialog.classgen;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -68,7 +69,6 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.scopemvc.core.PropertyManager;
 import org.scopemvc.core.Selector;
 import org.scopemvc.view.swing.SAction;
@@ -262,7 +262,7 @@ public class ClassGeneratorDialog extends SPanel {
 
         ClassGeneratorTable() {
             problemRenderer = new ClassGeneratorProblemRenderer();
-            problemRenderer.setBackground(ValidatorDialog.WARNING_COLOR);
+            problemRenderer.setBackground(Color.LIGHT_GRAY);
         }
 
         public TableCellRenderer getCellRenderer(int row, int column) {

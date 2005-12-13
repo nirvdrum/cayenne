@@ -71,11 +71,10 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import foundrylogic.vpp.VPPConfig;
 
 /**
- * Generates Java source code for ObjEntities in the DataMap. This class is
- * abstract and does not deal with filesystem issues directly. Concrete
- * subclasses should provide ways to store generated files by implementing
- * {@link #openWriter(ObjEntity, String, String)} and
- * {@link #closeWriter(Writer)}methods.
+ * Generates Java source code for ObjEntities in the DataMap. This class is abstract and
+ * does not deal with filesystem issues directly. Concrete subclasses should provide ways
+ * to store generated files by implementing {@link #openWriter(ObjEntity, String, String)}
+ * and {@link #closeWriter(Writer)}methods.
  * 
  * @author Andrei Adamchik
  */
@@ -84,32 +83,32 @@ public abstract class MapClassGenerator {
     public static final String SINGLE_CLASS_TEMPLATE_1_1 = "dotemplates/singleclass.vm";
     public static final String SUBCLASS_TEMPLATE_1_1 = "dotemplates/subclass.vm";
     public static final String SUPERCLASS_TEMPLATE_1_1 = "dotemplates/superclass.vm";
-    
+
     public static final String SINGLE_CLASS_TEMPLATE_1_2 = "dotemplates/v1_2/singleclass.vm";
     public static final String SUBCLASS_TEMPLATE_1_2 = "dotemplates/v1_2/subclass.vm";
     public static final String SUPERCLASS_TEMPLATE_1_2 = "dotemplates/v1_2/superclass.vm";
-    
+
     /**
      * @since 1.2
      */
     public static final String CLIENT_SUBCLASS_TEMPLATE_1_2 = "dotemplates/v1_2/client-subclass.vm";
-    
+
     /**
      * @since 1.2
      */
     public static final String CLIENT_SUPERCLASS_TEMPLATE_1_2 = "dotemplates/v1_2/client-superclass.vm";
-    
+
     public static final String SINGLE_CLASS_TEMPLATE = SINGLE_CLASS_TEMPLATE_1_1;
     public static final String SUBCLASS_TEMPLATE = SUBCLASS_TEMPLATE_1_1;
     public static final String SUPERCLASS_TEMPLATE = SUPERCLASS_TEMPLATE_1_1;
-    
+
     public static final String SUPERCLASS_PREFIX = "_";
 
     protected static final String VERSION_1_1 = ClassGenerator.VERSION_1_1;
     protected static final String VERSION_1_2 = ClassGenerator.VERSION_1_2;
 
     protected static final String DEFAULT_VERSION = VERSION_1_1;
-    
+
     protected static final String MODE_DATAMAP = "datamap";
     protected static final String MODE_ENTITY = "entity";
 
@@ -122,24 +121,30 @@ public abstract class MapClassGenerator {
     protected String mode = MODE_ENTITY;
     protected boolean client;
     protected Class classForClassLoader;
-    
-    public MapClassGenerator() {}
+
+    public MapClassGenerator() {
+    }
 
     public MapClassGenerator(DataMap dataMap) {
         this(dataMap, new ArrayList(dataMap.getObjEntities()));
     }
 
-    public MapClassGenerator(DataMap dataMap, List selectedObjEntities) {
+    /**
+     * Creates a new MapClassGenerator.
+     * 
+     * @since 1.2
+     */
+    public MapClassGenerator(DataMap dataMap, List objEntities) {
         this.dataMap = dataMap;
-        this.objEntities = selectedObjEntities;
+        this.setObjEntities(objEntities);
     }
 
     /**
      * @deprecated Since 1.2 use MapClassGenerator(DataMap, List) to provide support for
      *             v1.2 templates.
      */
-    public MapClassGenerator(List selectedObjEntities) {
-        this.objEntities = selectedObjEntities;
+    public MapClassGenerator(List objEntities) {
+        this.objEntities = objEntities;
     }
 
     protected String defaultSingleClassTemplate() {
@@ -159,7 +164,7 @@ public abstract class MapClassGenerator {
 
     protected String defaultSubclassTemplate() {
         // client templates are always 1.2
-        if(client) {
+        if (client) {
             return CLIENT_SUBCLASS_TEMPLATE_1_2;
         }
         else if (VERSION_1_1.equals(versionString)) {
@@ -186,17 +191,13 @@ public abstract class MapClassGenerator {
     }
 
     /**
-     * Creates a Writer to output source code for a given ObjEntity and Java
-     * class.
+     * Creates a Writer to output source code for a given ObjEntity and Java class.
      * 
      * @return Writer to store generated class source code or null if this class
      *         generation should be skipped.
      */
-    public abstract Writer openWriter(
-        ObjEntity entity,
-        String pkgName,
-        String className)
-        throws Exception;
+    public abstract Writer openWriter(ObjEntity entity, String pkgName, String className)
+            throws Exception;
 
     /**
      * Closes writer after class code has been successfully written by
@@ -205,29 +206,30 @@ public abstract class MapClassGenerator {
     public abstract void closeWriter(Writer out) throws Exception;
 
     /**
-     * Runs class generation. Produces a pair of Java classes for each ObjEntity
-     * in the map. Uses default Cayenne templates for classes.
+     * Runs class generation. Produces a pair of Java classes for each ObjEntity in the
+     * map. Uses default Cayenne templates for classes.
      */
     public void generateClassPairs() throws Exception {
-        generateClassPairs(defaultSubclassTemplate(), defaultSuperclassTemplate(), SUPERCLASS_PREFIX);
+        generateClassPairs(
+                defaultSubclassTemplate(),
+                defaultSuperclassTemplate(),
+                SUPERCLASS_PREFIX);
     }
 
     /**
-     * Runs class generation. Produces a pair of Java classes for each ObjEntity
-     * in the map. This allows developers to use generated <b>subclass </b> for
-     * their custom code, while generated <b>superclass </b> will contain
-     * Cayenne code. Superclass will be generated in the same package, its class
-     * name will be derived from the class name by adding a
-     * <code>superPrefix</code>.
+     * Runs class generation. Produces a pair of Java classes for each ObjEntity in the
+     * map. This allows developers to use generated <b>subclass </b> for their custom
+     * code, while generated <b>superclass </b> will contain Cayenne code. Superclass will
+     * be generated in the same package, its class name will be derived from the class
+     * name by adding a <code>superPrefix</code>.
      */
     public void generateClassPairs(
-        String classTemplate,
-        String superTemplate,
-        String superPrefix)
-        throws Exception {
-        
+            String classTemplate,
+            String superTemplate,
+            String superPrefix) throws Exception {
+
         // note - client templates ignore version and unconditionally use 1.2
-        if(client) {
+        if (client) {
             generateClientClassPairs_1_2(classTemplate, superTemplate, superPrefix);
         }
         else if (VERSION_1_1.equals(versionString)) {
@@ -237,26 +239,31 @@ public abstract class MapClassGenerator {
             generateClassPairs_1_2(classTemplate, superTemplate, superPrefix);
         }
         else {
-            throw new IllegalStateException("Illegal Version in generateClassPairs: " + versionString);
+            throw new IllegalStateException("Illegal Version in generateClassPairs: "
+                    + versionString);
         }
     }
 
     /**
-     * Runs class generation. Produces a pair of Java classes for each ObjEntity
-     * in the map. This allows developers to use generated <b>subclass </b> for
-     * their custom code, while generated <b>superclass </b> will contain
-     * Cayenne code. Superclass will be generated in the same package, its class
-     * name will be derived from the class name by adding a
-     * <code>superPrefix</code>.
+     * Runs class generation. Produces a pair of Java classes for each ObjEntity in the
+     * map. This allows developers to use generated <b>subclass </b> for their custom
+     * code, while generated <b>superclass </b> will contain Cayenne code. Superclass will
+     * be generated in the same package, its class name will be derived from the class
+     * name by adding a <code>superPrefix</code>.
      */
     private void generateClassPairs_1_1(
-        String classTemplate,
-        String superTemplate,
-        String superPrefix)
-        throws Exception {
+            String classTemplate,
+            String superTemplate,
+            String superPrefix) throws Exception {
 
-        ClassGenerator mainGenSetup = new ClassGenerator(classTemplate, versionString, classForClassLoader);
-        ClassGenerator superGenSetup = new ClassGenerator(superTemplate, versionString, classForClassLoader);
+        ClassGenerator mainGenSetup = new ClassGenerator(
+                classTemplate,
+                versionString,
+                classForClassLoader);
+        ClassGenerator superGenSetup = new ClassGenerator(
+                superTemplate,
+                versionString,
+                classForClassLoader);
 
         ClassGenerationInfo mainGen = mainGenSetup.getClassGenerationInfo();
         ClassGenerationInfo superGen = superGenSetup.getClassGenerationInfo();
@@ -264,36 +271,29 @@ public abstract class MapClassGenerator {
         // prefix is needed for both generators
         mainGen.setSuperPrefix(superPrefix);
         superGen.setSuperPrefix(superPrefix);
-        
+
         // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
-        if (MODE_ENTITY.equals(mode))
-        {
+        if (MODE_ENTITY.equals(mode)) {
             it = objEntities.iterator();
         }
-        else
-        {
-            if (objEntities.isEmpty())
-            {
+        else {
+            if (objEntities.isEmpty()) {
                 it = objEntities.iterator();
             }
-            else
-            {
+            else {
                 it = Collections.singleton(objEntities.get(0)).iterator();
             }
         }
-        
+
         while (it.hasNext()) {
             ObjEntity ent = (ObjEntity) it.next();
 
             // 1. do the superclass
             initClassGenerator_1_1(superGen, ent, true);
 
-            Writer superOut =
-                openWriter(
-                    ent,
-                    superGen.getPackageName(),
-                    superPrefix + superGen.getClassName());
+            Writer superOut = openWriter(ent, superGen.getPackageName(), superPrefix
+                    + superGen.getClassName());
 
             if (superOut != null) {
                 superGenSetup.generateClass(superOut, ent);
@@ -302,28 +302,30 @@ public abstract class MapClassGenerator {
 
             // 2. do the main class
             initClassGenerator_1_1(mainGen, ent, false);
-            Writer mainOut =
-                openWriter(ent, mainGen.getPackageName(), mainGen.getClassName());
+            Writer mainOut = openWriter(ent, mainGen.getPackageName(), mainGen
+                    .getClassName());
             if (mainOut != null) {
                 mainGenSetup.generateClass(mainOut, ent);
                 closeWriter(mainOut);
             }
         }
     }
-    
+
     private void generateClientClassPairs_1_2(
             String classTemplate,
             String superTemplate,
             String superPrefix) throws Exception {
-        
+
         ClassGenerator mainGenSetup = new ClassGenerator(
                 classTemplate,
                 ClassGenerator.VERSION_1_2,
-                vppConfig, classForClassLoader);
+                vppConfig,
+                classForClassLoader);
         ClassGenerator superGenSetup = new ClassGenerator(
                 superTemplate,
                 ClassGenerator.VERSION_1_2,
-                vppConfig, classForClassLoader);
+                vppConfig,
+                classForClassLoader);
 
         // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
@@ -398,19 +400,20 @@ public abstract class MapClassGenerator {
      * name by adding a <code>superPrefix</code>.
      */
     private void generateClassPairs_1_2(
-        String classTemplate,
-        String superTemplate,
-        String superPrefix)
-        throws Exception {
+            String classTemplate,
+            String superTemplate,
+            String superPrefix) throws Exception {
 
         ClassGenerator mainGenSetup = new ClassGenerator(
                 classTemplate,
                 versionString,
-                vppConfig, classForClassLoader);
+                vppConfig,
+                classForClassLoader);
         ClassGenerator superGenSetup = new ClassGenerator(
                 superTemplate,
                 versionString,
-                vppConfig, classForClassLoader);
+                vppConfig,
+                classForClassLoader);
 
         // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
@@ -447,7 +450,8 @@ public abstract class MapClassGenerator {
             Writer superOut = openWriter(ent, superPackageName, superClassName);
 
             if (superOut != null) {
-                superGenSetup.generateClass(superOut,
+                superGenSetup.generateClass(
+                        superOut,
                         dataMap,
                         ent,
                         fqnBaseClass,
@@ -458,7 +462,8 @@ public abstract class MapClassGenerator {
 
             Writer mainOut = openWriter(ent, subPackageName, subClassName);
             if (mainOut != null) {
-                mainGenSetup.generateClass(mainOut,
+                mainGenSetup.generateClass(
+                        mainOut,
                         dataMap,
                         ent,
                         fqnBaseClass,
@@ -469,44 +474,45 @@ public abstract class MapClassGenerator {
         }
     }
 
-    /** 
-     * Runs class generation. Produces a single Java class for
-     * each ObjEntity in the map. Uses default Cayenne templates for classes. 
+    /**
+     * Runs class generation. Produces a single Java class for each ObjEntity in the map.
+     * Uses default Cayenne templates for classes.
      */
     public void generateSingleClasses() throws Exception {
         generateSingleClasses(defaultSingleClassTemplate(), SUPERCLASS_PREFIX);
     }
 
-    /** 
-     * Runs class generation. Produces a single Java class for
-     * each ObjEntity in the map. 
+    /**
+     * Runs class generation. Produces a single Java class for each ObjEntity in the map.
      */
     private void generateSingleClasses_1_1(String classTemplate) throws Exception {
-        ClassGenerator gen = new ClassGenerator(classTemplate, versionString, classForClassLoader);
+        ClassGenerator gen = new ClassGenerator(
+                classTemplate,
+                versionString,
+                classForClassLoader);
 
         // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
-        if (MODE_ENTITY.equals(mode))
-        {
+        if (MODE_ENTITY.equals(mode)) {
             it = objEntities.iterator();
         }
-        else
-        {
-            if (objEntities.isEmpty())
-            {
+        else {
+            if (objEntities.isEmpty()) {
                 it = objEntities.iterator();
             }
-            else
-            {
+            else {
                 it = Collections.singleton(objEntities.get(0)).iterator();
             }
         }
-        
+
         while (it.hasNext()) {
             ObjEntity ent = (ObjEntity) it.next();
-            
+
             initClassGenerator_1_1(gen.getClassGenerationInfo(), ent, false);
-            Writer out = openWriter(ent, gen.getClassGenerationInfo().getPackageName(), gen.getClassGenerationInfo().getClassName());
+            Writer out = openWriter(
+                    ent,
+                    gen.getClassGenerationInfo().getPackageName(),
+                    gen.getClassGenerationInfo().getClassName());
             if (out == null) {
                 continue;
             }
@@ -516,44 +522,45 @@ public abstract class MapClassGenerator {
         }
     }
 
-    /** 
-     * Runs class generation. Produces a single Java class for
-     * each ObjEntity in the map. 
+    /**
+     * Runs class generation. Produces a single Java class for each ObjEntity in the map.
      */
-    private void generateSingleClasses_1_2(String classTemplate, String superPrefix) throws Exception {
-        ClassGenerator gen = new ClassGenerator(classTemplate, versionString, vppConfig, classForClassLoader);
+    private void generateSingleClasses_1_2(String classTemplate, String superPrefix)
+            throws Exception {
+        ClassGenerator gen = new ClassGenerator(
+                classTemplate,
+                versionString,
+                vppConfig,
+                classForClassLoader);
 
         // Iterate only once if this is datamap mode
         Iterator it = objEntities.iterator();
-        if (MODE_ENTITY.equals(mode))
-        {
+        if (MODE_ENTITY.equals(mode)) {
             it = objEntities.iterator();
         }
-        else
-        {
-            if (objEntities.isEmpty())
-            {
+        else {
+            if (objEntities.isEmpty()) {
                 it = objEntities.iterator();
             }
-            else
-            {
+            else {
                 it = Collections.singleton(objEntities.get(0)).iterator();
             }
         }
-        
+
         while (it.hasNext()) {
             ObjEntity ent = (ObjEntity) it.next();
-            
+
             String fqnSubClass = ent.getClassName();
-            String fqnBaseClass = (null != ent.getSuperClassName())
-                ? ent.getSuperClassName() : CayenneDataObject.class.getName();
+            String fqnBaseClass = (null != ent.getSuperClassName()) ? ent
+                    .getSuperClassName() : CayenneDataObject.class.getName();
 
             StringUtils stringUtils = StringUtils.getInstance();
-            
+
             String subClassName = stringUtils.stripPackageName(fqnSubClass);
             String subPackageName = stringUtils.stripClass(fqnSubClass);
 
-            String superClassName = superPrefix + stringUtils.stripPackageName(fqnSubClass);
+            String superClassName = superPrefix
+                    + stringUtils.stripPackageName(fqnSubClass);
 
             String superPackageName = this.superPkg;
             String fqnSuperClass = superPackageName + "." + superClassName;
@@ -563,27 +570,35 @@ public abstract class MapClassGenerator {
                 continue;
             }
 
-            gen.generateClass(out, dataMap, ent, fqnBaseClass, fqnSuperClass, fqnSubClass);
+            gen
+                    .generateClass(
+                            out,
+                            dataMap,
+                            ent,
+                            fqnBaseClass,
+                            fqnSuperClass,
+                            fqnSubClass);
             closeWriter(out);
         }
     }
 
-    /** 
-     * Runs class generation. Produces a single Java class for
-     * each ObjEntity in the map. 
-     * @deprecated Use generateSingleClasses(String classTemplate, String superPrefix) instead.
+    /**
+     * Runs class generation. Produces a single Java class for each ObjEntity in the map.
+     * 
+     * @deprecated Use generateSingleClasses(String classTemplate, String superPrefix)
+     *             instead.
      */
     public void generateSingleClasses(String classTemplate) throws Exception {
         generateSingleClasses(classTemplate, SUPERCLASS_PREFIX);
     }
 
-    /** 
-     * Runs class generation. Produces a single Java class for
-     * each ObjEntity in the map. 
+    /**
+     * Runs class generation. Produces a single Java class for each ObjEntity in the map.
      */
-    public void generateSingleClasses(String classTemplate, String superPrefix) throws Exception {
+    public void generateSingleClasses(String classTemplate, String superPrefix)
+            throws Exception {
         // note - client templates ignore version and automatically switch to 1.2
-        if(client) {
+        if (client) {
             generateSingleClasses_1_2(classTemplate, superPrefix);
         }
         else if (VERSION_1_1.equals(versionString)) {
@@ -593,15 +608,16 @@ public abstract class MapClassGenerator {
             generateSingleClasses_1_2(classTemplate, superPrefix);
         }
         else {
-            throw new IllegalStateException("Illegal Version in generateClassPairs: " + versionString);
+            throw new IllegalStateException("Illegal Version in generateClassPairs: "
+                    + versionString);
         }
     }
 
     /** Initializes ClassGenerationInfo with class name and package of a generated class. */
     protected void initClassGenerator_1_1(
-        ClassGenerationInfo gen,
-        ObjEntity entity,
-        boolean superclass) {
+            ClassGenerationInfo gen,
+            ObjEntity entity,
+            boolean superclass) {
 
         // figure out generator properties
         String fullClassName = entity.getClassName();
@@ -622,28 +638,30 @@ public abstract class MapClassGenerator {
         }
         else {
             cname = fullClassName.substring(i + 1);
-            pkg =
-                (superclass && superPkg != null) ? superPkg : fullClassName.substring(0, i);
+            pkg = (superclass && superPkg != null) ? superPkg : fullClassName.substring(
+                    0,
+                    i);
 
-            spkg =
-                (!superclass && superPkg != null && !pkg.equals(superPkg)) ? superPkg : null;
+            spkg = (!superclass && superPkg != null && !pkg.equals(superPkg))
+                    ? superPkg
+                    : null;
         }
 
         // init generator
         gen.setPackageName(pkg);
         gen.setClassName(cname);
-        if(entity.getSuperClassName()!=null) {
-        	gen.setSuperClassName(entity.getSuperClassName());
-        } else {
-        	gen.setSuperClassName(CayenneDataObject.class.getName());
+        if (entity.getSuperClassName() != null) {
+            gen.setSuperClassName(entity.getSuperClassName());
+        }
+        else {
+            gen.setSuperClassName(CayenneDataObject.class.getName());
         }
         gen.setSuperPackageName(spkg);
     }
 
     /**
-     * Returns "superPkg" property value -
-     * a name of a superclass package that should be used
-     * for all generated superclasses.
+     * Returns "superPkg" property value - a name of a superclass package that should be
+     * used for all generated superclasses.
      */
     public String getSuperPkg() {
         return superPkg;
@@ -664,7 +682,7 @@ public abstract class MapClassGenerator {
     public boolean isClient() {
         return client;
     }
-    
+
     /**
      * Sets whether a default client object template should be used.
      * 
@@ -673,7 +691,7 @@ public abstract class MapClassGenerator {
     public void setClient(boolean client) {
         this.client = client;
     }
-    
+
     /**
      * @return Returns the dataMap.
      */
@@ -692,8 +710,24 @@ public abstract class MapClassGenerator {
         return objEntities;
     }
 
+    /**
+     * Initializes internal ObjEntities list. This method creates a copy of the provided
+     * list to allow its indepdendent modification and also filters out entities that do
+     * not require class generation.
+     */
     public void setObjEntities(List objEntities) {
-        this.objEntities = objEntities;
+        this.objEntities = objEntities != null
+                ? new ArrayList(objEntities)
+                : new ArrayList();
+
+        // remove generic entities...
+        Iterator it = objEntities.iterator();
+        while (it.hasNext()) {
+            ObjEntity e = (ObjEntity) it.next();
+            if (e.isGeneric()) {
+                it.remove();
+            }
+        }
     }
 
     /**
@@ -702,22 +736,31 @@ public abstract class MapClassGenerator {
     public String getVersionString() {
         return versionString;
     }
+
     /**
      * @param versionString The versionString to set.
      */
     public void setVersionString(String versionString) {
-        if ((false == VERSION_1_1.equals(versionString)) && (false == VERSION_1_2.equals(versionString))) {
-            throw new IllegalStateException("'version' must be '" + VERSION_1_1 + "' or '" + VERSION_1_2 + "', but was '" + versionString + "'");
+        if ((false == VERSION_1_1.equals(versionString))
+                && (false == VERSION_1_2.equals(versionString))) {
+            throw new IllegalStateException("'version' must be '"
+                    + VERSION_1_1
+                    + "' or '"
+                    + VERSION_1_2
+                    + "', but was '"
+                    + versionString
+                    + "'");
         }
         this.versionString = versionString;
     }
-    
+
     /**
      * @return Returns the vppConfig.
      */
     public VPPConfig getVppConfig() {
         return vppConfig;
     }
+
     /**
      * @param vppConfig The vppConfig to set.
      */
@@ -726,20 +769,28 @@ public abstract class MapClassGenerator {
     }
 
     /**
-     * @param mode use "entity" for per-entity generation and "datamap" for per-datamap generation.
+     * @param mode use "entity" for per-entity generation and "datamap" for per-datamap
+     *            generation.
      */
     public void setMode(String mode) {
         if ((false == MODE_ENTITY.equals(mode)) && (false == MODE_DATAMAP.equals(mode))) {
-            throw new IllegalStateException("'mode' must be '" + MODE_ENTITY + "' or '" + MODE_DATAMAP + "', but was '" + mode + "'");
+            throw new IllegalStateException("'mode' must be '"
+                    + MODE_ENTITY
+                    + "' or '"
+                    + MODE_DATAMAP
+                    + "', but was '"
+                    + mode
+                    + "'");
         }
         this.mode = mode;
     }
 
-	/**
-	 * @param classForClassLoader to use when initializing VelocityEngine instance.  Can be null to use the ClassLoader of the ClassGenerator class.
-	 * @since 1.2
-	 */
-	public void setClassForClassLoader(Class classForClassLoader) {
-		this.classForClassLoader = classForClassLoader;
-	}
+    /**
+     * @param classForClassLoader to use when initializing VelocityEngine instance. Can be
+     *            null to use the ClassLoader of the ClassGenerator class.
+     * @since 1.2
+     */
+    public void setClassForClassLoader(Class classForClassLoader) {
+        this.classForClassLoader = classForClassLoader;
+    }
 }

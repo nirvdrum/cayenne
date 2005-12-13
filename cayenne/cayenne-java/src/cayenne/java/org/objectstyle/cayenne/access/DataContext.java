@@ -210,13 +210,6 @@ public class DataContext implements QueryEngine, Serializable {
     protected transient String lazyInitParentDomainName;
 
     /**
-     * A factory method of DataObjects.
-     */
-    private static final DataObject newDataObject(String className) throws Exception {
-        return (DataObject) Util.getJavaClass(className).newInstance();
-    }
-
-    /**
      * Returns the DataContext bound to the current thread.
      * 
      * @since 1.1
@@ -744,11 +737,10 @@ public class DataContext implements QueryEngine, Serializable {
         if (entity == null) {
             throw new IllegalArgumentException("Invalid entity name: " + objEntityName);
         }
-
-        String objClassName = entity.getClassName();
-        DataObject dataObject = null;
+        
+        DataObject dataObject;
         try {
-            dataObject = DataContext.newDataObject(objClassName);
+            dataObject = (DataObject) entity.getJavaClass().newInstance();
         }
         catch (Exception ex) {
             throw new CayenneRuntimeException("Error instantiating object.", ex);

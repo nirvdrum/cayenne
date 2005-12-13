@@ -35,14 +35,17 @@ public class ClassNameUpdater extends CayenneController {
         boolean askForServerUpdate = true;
         boolean askForClientUpdate = true;
 
-        String suggestedServerName = suggestedServerClassName();
         String oldServerName = entity.getClassName();
-        if (suggestedServerName == null || suggestedServerName.equals(oldServerName)) {
+        String suggestedServerName = suggestedServerClassName();
+
+        if (oldServerName == null || oldServerName.length() == 0) {
+            // generic entity...
             askForServerUpdate = false;
         }
-        else if (oldServerName == null
-                || oldServerName.length() == 0
-                || oldServerName.indexOf("UntitledObjEntity") >= 0) {
+        else if (suggestedServerName == null || suggestedServerName.equals(oldServerName)) {
+            askForServerUpdate = false;
+        }
+        else if (oldServerName.indexOf("UntitledObjEntity") >= 0) {
 
             // update without user interaction
             entity.setClassName(suggestedServerName);

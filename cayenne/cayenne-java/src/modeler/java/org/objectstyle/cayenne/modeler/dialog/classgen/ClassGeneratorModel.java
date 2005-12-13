@@ -71,7 +71,7 @@ import org.scopemvc.core.Selector;
 import org.scopemvc.model.basic.BasicModel;
 
 /**
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class ClassGeneratorModel extends BasicModel {
 
@@ -127,7 +127,12 @@ public class ClassGeneratorModel extends BasicModel {
             // check if entity didn't pass the validation
             ClassGeneratorEntityWrapper wrapper = null;
             String errorMessage = (String) failedEntities.get(entity.getName());
-            if (errorMessage != null) {
+
+            // "generic" entity (condition is the same as
+            if (entity.isGeneric()) {
+                wrapper = new ClassGeneratorEntityWrapper(entity, false, "Generic Entity");
+            }
+            else if (errorMessage != null) {
                 wrapper = new ClassGeneratorEntityWrapper(entity, false, errorMessage);
             }
             else {
