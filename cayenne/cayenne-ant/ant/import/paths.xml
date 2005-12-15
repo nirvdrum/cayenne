@@ -116,7 +116,11 @@
 		<fileset dir="lib" includes="*.jar"/>
 	</path>
 	
-	<path id="classpath-win">
-		<fileset dir="lib" includes="launch4j*/**.jar"/>
+	<path id="classpath-win-onmac">
+		<fileset dir="lib/mac" includes="launch4j*/**.jar"/>
+	</path>
+	
+	<path id="classpath-win-onlinux">
+		<fileset dir="lib/linux" includes="launch4j*/**.jar"/>
 	</path>
 </project>

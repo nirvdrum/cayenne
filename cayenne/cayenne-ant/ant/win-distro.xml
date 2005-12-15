@@ -9,7 +9,20 @@
 	<property name="build.win" value="${build}/win"/>
 	
 	<target name="prepare">
-		<taskdef name="launch4j" classpathref="classpath-win"
+		<condition property="win-path-ref" value="classpath-win-onlinux">
+			<and>
+				<os family="unix"/>
+				<not>
+					<os family="mac"/>
+				</not>
+			</and>
+		</condition>
+		
+		<condition property="win-path-ref" value="classpath-win-onmac">
+			<os family="mac"/>
+		</condition>
+		
+		<taskdef name="launch4j" classpathref="${win-path-ref}"
 			classname="net.sf.launch4j.ant.Launch4jTask"/>
 		
 		<mkdir dir="${dist.win}"/>
@@ -66,4 +79,5 @@
 		
 		<launch4j configFile="${build.win}/launch4j-config.xml"/>
 	</target>
+
 </project>
