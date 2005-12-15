@@ -264,9 +264,9 @@ public abstract class EventBridge implements EventListener {
      *            RECEIVE_LOCAL, RECEIVE_LOCAL_EXTERNAL.
      * @param localEventSource If not null, only events originating from localEventSource
      *            object will be processed by this bridge.
-     * @param externalEventSource If not null, externalEventSource object will be used as
-     *            source of local events posted by this EventBridge in response to remote
-     *            events.
+     * @param remoteEventSource If not null, remoteEventSource object will be used as
+     *            standby source of local events posted by this EventBridge in response to
+     *            remote events.
      * @since 1.2
      */
     public void startup(

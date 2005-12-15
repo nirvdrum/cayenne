@@ -85,7 +85,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * <h4>Using ProcedureQuery as a GenericSelectQuery</h4>
  * <p>
  * Executing ProcedureQuery via
- * {@link org.objectstyle.cayenne.access.DataContext#performQuery(GenericSelectQuery)}
+ * {@link org.objectstyle.cayenne.access.DataContext#performQuery(Query)}
  * makes sense only if the stored procedure returns a single result set (or alternatively
  * returns a result via OUT parameters and no other result sets). It is still OK if data
  * modification occurs as a side effect. However if the query returns more then one result
@@ -96,7 +96,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * convenient generic OperationObserver implementation.
  * </p>
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
         ParameterizedQuery, XMLSerializable {

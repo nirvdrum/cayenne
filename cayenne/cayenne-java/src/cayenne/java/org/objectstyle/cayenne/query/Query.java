@@ -70,7 +70,7 @@ public interface Query extends Serializable {
     /**
      * A callback method invoked by Cayenne during the routing phase of the query
      * execution. Mapping of DataNodes is provided by QueryRouter. Query should use a
-     * {@link QueryRouter#route(QueryEngine, Query)} callback method to route itself.
+     * {@link QueryRouter#route(QueryEngine, Query, Query)} callback method to route itself.
      * Query can create one or more substitute queries or even provide its own QueryEngine
      * to execute itself.
      * 
