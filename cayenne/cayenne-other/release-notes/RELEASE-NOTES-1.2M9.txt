@@ -13,7 +13,8 @@ Changes/New Features:
 
 * Generated/Identity Columns - http://objectstyle.org/confluence/display/CAY/Generated+Columns
   - Derby support for generated columns
-  - Modeler now allows to specify generated columns for PK only. Non-pk column can't be generated.
+  - CAY-361 Modeler now allows to specify generated columns for PK only. Non-pk column can't be generated.
+  - CAY-291	Implement support for auto-pks propagation to dependent entities
 
 * Custom queries.
   - Query lifecycle API is simplified.
@@ -22,6 +23,8 @@ Changes/New Features:
   - QueryChain, SingleObjectQuery, RelationshipQuery, NamedQuery can now be used with DataContext.
 
 * Native versions of the Modeler for Windows and Mac OS X (CayenneModeler.exe, CayenneModeler.app).
+
+* CAY-405 Generic Persistent Object
 
 * DataDomain now implements OPPChannel.
   
@@ -58,4 +61,8 @@ Changes/New Features:
   
 * Bundled HSQLDB is upgraded from 1.7.3 to 1.8.0.2.
 
-Bugs Fixed:
+Other Bugs Fixed:
+
+CAY-358	MySQL InnoDB table issues with generated columns
+CAY-406	HSQLDB stored procedure support (as much as HSQLDB itself supports them).
+CAY-355	"validateForX" is called inconsistently
