@@ -65,16 +65,48 @@ import org.objectstyle.art.CharPkTest;
 import org.objectstyle.art.CompoundPkTest;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.SingleObjectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class DataObjectUtilsTst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
         deleteTestData();
+    }
+
+    public void testObjectForQuery() throws Exception {
+        createTestData("testObjectForPKInt");
+        DataContext context = createDataContext();
+
+        ObjectId id = new ObjectId("Artist", Artist.ARTIST_ID_PK_COLUMN, new Integer(
+                33002));
+
+        assertNull(context.getObjectStore().getObject(id));
+
+        DataObject object = DataObjectUtils.objectForQuery(
+                context,
+                new SingleObjectQuery(id));
+
+        assertNotNull(object);
+        assertTrue(object instanceof Artist);
+        assertEquals("artist2", ((Artist) object).getArtistName());
+    }
+
+    public void testObjectForQueryNoObject() throws Exception {
+        DataContext context = createDataContext();
+
+        ObjectId id = new ObjectId("Artist", Artist.ARTIST_ID_PK_COLUMN, new Integer(
+                44001));
+
+        DataObject object = DataObjectUtils.objectForQuery(
+                context,
+                new SingleObjectQuery(id));
+
+        assertNull(object);
     }
 
     public void testNoObjectForPK() throws Exception {

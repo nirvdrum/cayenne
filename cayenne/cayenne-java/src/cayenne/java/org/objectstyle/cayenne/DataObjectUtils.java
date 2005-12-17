@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * A collection of utility methods to work with DataObjects.
@@ -314,6 +315,33 @@ public final class DataObjectUtils {
                 entity.getJavaClass(),
                 row,
                 false) : null;
+    }
+
+    /**
+     * Returns a DataObject that is a result of a given query. If query returns more than
+     * one object, an exception is thrown. If query returns no objects, null is returned.
+     * 
+     * @since 1.2
+     */
+    public static DataObject objectForQuery(DataContext context, Query query) {
+        List objects = context.performQuery(query);
+
+        if (objects.size() == 0) {
+            return null;
+        }
+        else if (objects.size() > 1) {
+            throw new CayenneRuntimeException(
+                    "Expected zero or one object, instead query matched: "
+                            + objects.size());
+        }
+
+        Object o = objects.get(0);
+
+        if (o instanceof DataObject) {
+            return (DataObject) o;
+        }
+
+        throw new CayenneRuntimeException("Expected DataObject, got: " + o);
     }
 
     static ObjectId buildId(DataContext context, String objEntityName, Object pk) {

@@ -11,6 +11,8 @@ http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
 
 Changes/New Features:
 
+* New method: DataObjectUtils.objectForQuery(DataContext, Query)
+
 Other Bugs Fixed:
 
 * CayenneModeler doesn't react to change in adapter name.
