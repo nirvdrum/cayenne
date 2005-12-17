@@ -62,6 +62,7 @@ import java.awt.event.ComponentEvent;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.dba.AutoAdapter;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
@@ -162,5 +163,8 @@ public class AdapterEditor extends CayenneController {
         ModelerDbAdapter adapter = new ModelerDbAdapter(name, node.getDataSource());
         adapter.validate();
         node.setAdapter(adapter);
+        
+        DataNodeEvent e = new DataNodeEvent(AdapterEditor.this, node);
+        ((ProjectController) getParent()).fireDataNodeEvent(e);
     }
 }
