@@ -443,7 +443,7 @@ public class DataRowStore implements Serializable {
             processInvalidatedIDs(deletedSnapshotIds);
             processUpdateDiffs(diffs);
             sendUpdateNotification(
-                    event.getSource(),
+                    event.getPostedBy(),
                     diffs,
                     deletedSnapshotIds,
                     invalidatedSnapshotIds,
@@ -476,7 +476,7 @@ public class DataRowStore implements Serializable {
      * the event to all listeners. Source of these changes is usually an ObjectStore.
      */
     public void processSnapshotChanges(
-            Object source,
+            Object postedBy,
             Map updatedSnapshots,
             Collection deletedSnapshotIds,
             Collection invalidatedSnapshotIds,
@@ -497,7 +497,7 @@ public class DataRowStore implements Serializable {
             processInvalidatedIDs(invalidatedSnapshotIds);
             Map diffs = processUpdatedSnapshots(updatedSnapshots);
             sendUpdateNotification(
-                    source,
+                    postedBy,
                     diffs,
                     deletedSnapshotIds,
                     invalidatedSnapshotIds,
@@ -605,7 +605,7 @@ public class DataRowStore implements Serializable {
     }
 
     private void sendUpdateNotification(
-            Object source,
+            Object postedBy,
             Map diffs,
             Collection deletedSnapshotIDs,
             Collection invalidatedSnapshotIDs,
@@ -619,7 +619,7 @@ public class DataRowStore implements Serializable {
 
             SnapshotEvent event = new SnapshotEvent(
                     this,
-                    source,
+                    postedBy,
                     diffs,
                     deletedSnapshotIDs,
                     invalidatedSnapshotIDs,
