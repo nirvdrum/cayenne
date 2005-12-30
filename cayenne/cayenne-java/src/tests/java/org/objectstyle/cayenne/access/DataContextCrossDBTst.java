@@ -55,67 +55,35 @@
  */
 package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.testdo.db1.CrossdbM1E1;
+import org.objectstyle.cayenne.testdo.db2.CrossdbM2E1;
+import org.objectstyle.cayenne.testdo.db2.CrossdbM2E2;
+import org.objectstyle.cayenne.unit.MultiNodeTestCase;
 
-/**
- * Test cases for DbGenerator.
- * 
- * @author Andrus Adamchik
- */
-public class DbGeneratorTst extends CayenneTestCase {
+public class DataContextCrossDBTst extends MultiNodeTestCase {
 
-    protected DbGenerator gen;
-
-    public void setUp() throws Exception {
+    protected void setUp() throws Exception {
         super.setUp();
-
-        gen = new DbGenerator(getNode().getAdapter(), getDomain().getMap("testmap"));
+        deleteTestData();
     }
 
-    public void testAdapter() throws Exception {
-        assertSame(getNode().getAdapter(), gen.getAdapter());
-    }
+    public void testMultiDBUpdate() {
 
-    public void testPkFilteringLogic() throws Exception {
-        DataMap map = getDomain().getMap("testmap");
-        DbEntity artistExhibit = map.getDbEntity("ARTIST_EXHIBIT");
-        DbEntity exhibit = map.getDbEntity("EXHIBIT");
+        DataContext context = createDataContext();
+        CrossdbM1E1 o1 = (CrossdbM1E1) context
+                .createAndRegisterNewObject(CrossdbM1E1.class);
+        o1.setName("o1");
 
-        // sanity check
-        assertNotNull(artistExhibit);
-        assertNotNull(exhibit);
-        assertNotNull(gen.dbEntitiesRequiringAutoPK);
+        CrossdbM2E1 o2 = (CrossdbM2E1) context
+                .createAndRegisterNewObject(CrossdbM2E1.class);
+        o2.setName("o2");
 
-        // real test
-        assertTrue(gen.dbEntitiesRequiringAutoPK.contains(exhibit));
-        assertFalse(gen.dbEntitiesRequiringAutoPK.contains(artistExhibit));
-    }
+        CrossdbM2E2 o3 = (CrossdbM2E2) context
+                .createAndRegisterNewObject(CrossdbM2E2.class);
+        o3.setName("o3");
 
-    public void testCreatePkSupport() throws Exception {
-        assertTrue(gen.shouldCreatePKSupport());
-        gen.setShouldCreatePKSupport(false);
-        assertFalse(gen.shouldCreatePKSupport());
-
-    }
-
-    public void testShouldCreateTables() throws Exception {
-        assertTrue(gen.shouldCreateTables());
-        gen.setShouldCreateTables(false);
-        assertFalse(gen.shouldCreateTables());
-    }
-
-    public void testDropPkSupport() throws Exception {
-
-        assertFalse(gen.shouldDropPKSupport());
-        gen.setShouldDropPKSupport(true);
-        assertTrue(gen.shouldDropPKSupport());
-    }
-
-    public void testShouldDropTables() throws Exception {
-        assertFalse(gen.shouldDropTables());
-        gen.setShouldDropTables(true);
-        assertTrue(gen.shouldDropTables());
+        o3.setToM1E1(o1);
+        o3.setToM2E1(o2);
+        context.commitChanges();
     }
 }

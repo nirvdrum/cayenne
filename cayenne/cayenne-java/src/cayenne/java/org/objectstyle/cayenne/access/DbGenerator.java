@@ -91,7 +91,7 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  * Utility class that generates database schema based on Cayenne mapping. It is a logical
  * counterpart of DbLoader class.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class DbGenerator {
 
@@ -99,6 +99,9 @@ public class DbGenerator {
 
     protected DbAdapter adapter;
     protected DataMap map;
+
+    // optional DataDomain needed for correct FK generation in cross-db situations
+    protected DataDomain domain;
 
     // stores generated SQL statements
     protected Map dropTables;
@@ -412,6 +415,18 @@ public class DbGenerator {
                 continue;
             }
 
+            // skip FK to a different DB
+            if (domain != null) {
+                DataMap srcMap = rel.getSourceEntity().getDataMap();
+                DataMap targetMap = rel.getTargetEntity().getDataMap();
+
+                if (srcMap != null && targetMap != null && srcMap != targetMap) {
+                    if (domain.lookupDataNode(srcMap) != domain.lookupDataNode(targetMap)) {
+                        continue;
+                    }
+                }
+            }
+
             // create an FK CONSTRAINT only if the relationship is to PK
             // and if this is not a dependent PK
 
@@ -492,6 +507,27 @@ public class DbGenerator {
 
     public void setShouldCreateFKConstraints(boolean shouldCreateFKConstraints) {
         this.shouldCreateFKConstraints = shouldCreateFKConstraints;
+    }
+
+    /**
+     * Returns a DataDomain used by the DbGenerator to detect cross-database
+     * relationships. By default DataDomain is null.
+     * 
+     * @since 1.2
+     */
+    public DataDomain getDomain() {
+        return domain;
+    }
+
+    /**
+     * Sets a DataDomain used by the DbGenerator to detect cross-database relationships.
+     * This property is optional. Only consider setting it when there are cross-DataMap
+     * relationships and DataMaps correspond to different physical databases.
+     * 
+     * @since 1.2
+     */
+    public void setDomain(DataDomain domain) {
+        this.domain = domain;
     }
 
     /**

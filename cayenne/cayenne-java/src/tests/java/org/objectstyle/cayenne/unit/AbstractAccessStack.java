@@ -69,6 +69,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.access.QueryLogger;
@@ -99,6 +100,8 @@ public abstract class AbstractAccessStack {
     public AccessStackAdapter getAdapter(DataNode node) {
         return resources.getAccessStackAdapter(node.getAdapter().getClass());
     }
+
+    protected abstract DataDomain getDomain();
 
     /**
      * Helper method that orders DbEntities to satisfy referential constraints and returns
@@ -280,16 +283,16 @@ public abstract class AbstractAccessStack {
 
     protected void createPKSupport(DataNode node, DataMap map) throws Exception {
         List filteredEntities = dbEntitiesInInsertOrder(node, map);
-        
+
         // remove derived...
         Iterator it = filteredEntities.iterator();
-        while(it.hasNext()) {
-            DbEntity e  = (DbEntity) it.next();
-            if(e instanceof DerivedDbEntity) {
+        while (it.hasNext()) {
+            DbEntity e = (DbEntity) it.next();
+            if (e instanceof DerivedDbEntity) {
                 it.remove();
             }
         }
-        
+
         node.getAdapter().getPkGenerator().createAutoPk(node, filteredEntities);
     }
 
@@ -318,6 +321,10 @@ public abstract class AbstractAccessStack {
     protected Iterator tableCreateQueries(DataNode node, DataMap map) throws Exception {
         DbAdapter adapter = node.getAdapter();
         DbGenerator gen = new DbGenerator(adapter, map);
+
+        // needed for multi-node situations
+        gen.setDomain(getDomain());
+
         List orderedEnts = dbEntitiesInInsertOrder(node, map);
         List queries = new ArrayList();
 

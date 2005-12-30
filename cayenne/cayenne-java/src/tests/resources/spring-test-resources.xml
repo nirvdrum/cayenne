@@ -149,6 +149,8 @@
 				<ref bean="RelationshipMap"/>
 				<ref bean="MultiTierMap"/>
 				<ref bean="GenericMap"/>
+				<ref bean="DB1Map"/>
+				<ref bean="DB2Map"/>
 			</list>
 		</constructor-arg>
 	</bean>

@@ -55,67 +55,31 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.List;
+
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.MultiNodeTestCase;
 
-/**
- * Test cases for DbGenerator.
- * 
- * @author Andrus Adamchik
- */
-public class DbGeneratorTst extends CayenneTestCase {
+public class DbGeneratorCrossDBTst extends MultiNodeTestCase {
 
-    protected DbGenerator gen;
+    public void testCreateFkConstraintsQueries() {
+        // can't test this if adapter doesn't support constraints
+        if (!getNode2().getAdapter().supportsFkConstraints()) {
+            return;
+        }
 
-    public void setUp() throws Exception {
-        super.setUp();
+        DataMap m2 = getDomain().getMap("map-db2");
+        DbEntity m2e2 = m2.getDbEntity("CROSSDB_M2E2");
 
-        gen = new DbGenerator(getNode().getAdapter(), getDomain().getMap("testmap"));
-    }
+        DbGenerator g2 = new DbGenerator(getNode2().getAdapter(), m2);
+        g2.setDomain(getDomain());
 
-    public void testAdapter() throws Exception {
-        assertSame(getNode().getAdapter(), gen.getAdapter());
-    }
+        List fk = g2.createFkConstraintsQueries(m2e2);
+        assertNotNull(fk);
 
-    public void testPkFilteringLogic() throws Exception {
-        DataMap map = getDomain().getMap("testmap");
-        DbEntity artistExhibit = map.getDbEntity("ARTIST_EXHIBIT");
-        DbEntity exhibit = map.getDbEntity("EXHIBIT");
-
-        // sanity check
-        assertNotNull(artistExhibit);
-        assertNotNull(exhibit);
-        assertNotNull(gen.dbEntitiesRequiringAutoPK);
-
-        // real test
-        assertTrue(gen.dbEntitiesRequiringAutoPK.contains(exhibit));
-        assertFalse(gen.dbEntitiesRequiringAutoPK.contains(artistExhibit));
-    }
-
-    public void testCreatePkSupport() throws Exception {
-        assertTrue(gen.shouldCreatePKSupport());
-        gen.setShouldCreatePKSupport(false);
-        assertFalse(gen.shouldCreatePKSupport());
-
-    }
-
-    public void testShouldCreateTables() throws Exception {
-        assertTrue(gen.shouldCreateTables());
-        gen.setShouldCreateTables(false);
-        assertFalse(gen.shouldCreateTables());
-    }
-
-    public void testDropPkSupport() throws Exception {
-
-        assertFalse(gen.shouldDropPKSupport());
-        gen.setShouldDropPKSupport(true);
-        assertTrue(gen.shouldDropPKSupport());
-    }
-
-    public void testShouldDropTables() throws Exception {
-        assertFalse(gen.shouldDropTables());
-        gen.setShouldDropTables(true);
-        assertTrue(gen.shouldDropTables());
+        // same-db FK should be included
+        // cross-db FK should not be included
+        assertEquals(1, fk.size());
     }
 }

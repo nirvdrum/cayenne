@@ -86,6 +86,10 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
             initNode(maps[i]);
         }
     }
+    
+    protected DataDomain getDomain() {
+        return domain;
+    }
 
     protected void initNode(DataMap map) throws Exception {
         DataNode node = resources.newDataNode(map.getName());
@@ -139,7 +143,9 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
         }
     }
 
-    /** Creates all test tables in the database. */
+    /**
+     * Creates all test tables in the database.
+     */
     public void createSchema() throws Exception {
         Iterator it = domain.getDataNodes().iterator();
         while (it.hasNext()) {
