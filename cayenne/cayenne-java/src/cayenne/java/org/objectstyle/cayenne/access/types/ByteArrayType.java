@@ -73,7 +73,10 @@ import org.objectstyle.cayenne.validation.BeanValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
- * @author Andrei Adamchik
+ * Handles <code>byte[]</code>, mapping it as either of JDBC types - BLOB or
+ * (VAR)BINARY. Can be configured to trim trailing zero bytes.
+ * 
+ * @author Andrus Adamchik
  */
 public class ByteArrayType extends AbstractType {
 

@@ -81,6 +81,10 @@ public class MockObjectContext implements ObjectContext {
         return null;
     }
 
+    public List localObjects(List objects) {
+        return null;
+    }
+
     public void flushChanges() {
     }
 

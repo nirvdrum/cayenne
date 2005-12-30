@@ -73,10 +73,8 @@ import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
- * A generic raw SQL query that can be either a DML/DDL or a select.
- * <p>
- * <strong>Template Script </strong>
- * </p>
+ * A query that executes unchanged (except for template preprocessing) "raw" SQL specified by the user. 
+ * <h3>Template Script</h3>
  * <p>
  * SQLTemplate stores a dynamic template for the SQL query that supports parameters and
  * customization using Velocity scripting language. The most straightforward use of
@@ -84,25 +82,20 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * </p>
  * 
  * <pre>
- *                            SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
+ *  SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
  * </pre>
  * 
  * <p>
- * Another area where scripting is needed is "dynamic SQL" - SQL that changes its
- * structure depending on parameter values. E.g. if a value is null, a string
- * <code>"COLUMN_X = ?"</code> must be replaced with <code>"COLUMN_X IS NULL"</code>.
+ * <i>For advanced scripting options see "Scripting SQLTemplate" chapter in the User
+ * Guide. </i>
  * </p>
- * <p>
- * <strong>Customizing Template by DB.</strong>
- * </p>
+ * <h3>Per-Database Template Customization</h3>
  * <p>
  * SQLTemplate has a {@link #getDefaultTemplate() default template script}, but also it
  * allows to configure multiple templates and switch them dynamically. This way a single
  * query can have multiple "dialects" specific to a given database.
  * </p>
- * <p>
- * <strong>Parameter Sets </strong>
- * </p>
+ * <h3>Parameter Sets</h3>
  * <p>
  * SQLTemplate supports multiple sets of parameters, so a single query can be executed
  * multiple times with different parameters. "Scrolling" through parameter list is done by
@@ -111,7 +104,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * </p>
  * 
  * @since 1.1
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
         ParameterizedQuery, XMLSerializable {
@@ -167,7 +160,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
     }
 
     /**
-     * Calls "makeSQL" on the visitor.
+     * Calls <em>sqlAction(this)</em> on the visitor.
      * 
      * @since 1.2
      */

@@ -68,6 +68,9 @@ import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 
 /**
+ * Stores graph operations in the order they were performed, optionally allowing to set
+ * named markers.
+ * 
  * @since 1.2
  * @author Andrus Adamchik
  */

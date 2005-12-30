@@ -66,10 +66,10 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 
 /**
- * Default implementation of ExtendedType that matches Java and JDBC types exactly per
- * JDBC specification.
+ * An ExtendedType that can work with any Java class, providing JDBC-to-Java mapping
+ * exactly per JDBC specification.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class DefaultType extends AbstractType {
 
@@ -84,63 +84,89 @@ public class DefaultType extends AbstractType {
             Class[] paramTypes = new Class[] {
                 Integer.TYPE
             };
-            readMethods.put(TypesMapping.JAVA_LONG, rsClass.getMethod("getLong",
+            readMethods.put(TypesMapping.JAVA_LONG, rsClass.getMethod(
+                    "getLong",
                     paramTypes));
-            readMethods.put(TypesMapping.JAVA_BIGDECIMAL, rsClass
-                    .getMethod("getBigDecimal", paramTypes));
-            readMethods.put(TypesMapping.JAVA_BOOLEAN, rsClass.getMethod("getBoolean",
+            readMethods.put(TypesMapping.JAVA_BIGDECIMAL, rsClass.getMethod(
+                    "getBigDecimal",
                     paramTypes));
-            readMethods.put(TypesMapping.JAVA_BYTE, rsClass.getMethod("getByte",
+            readMethods.put(TypesMapping.JAVA_BOOLEAN, rsClass.getMethod(
+                    "getBoolean",
                     paramTypes));
-            readMethods.put(TypesMapping.JAVA_BYTES, rsClass.getMethod("getBytes",
+            readMethods.put(TypesMapping.JAVA_BYTE, rsClass.getMethod(
+                    "getByte",
                     paramTypes));
-            readMethods.put(TypesMapping.JAVA_SQLDATE, rsClass.getMethod("getDate",
+            readMethods.put(TypesMapping.JAVA_BYTES, rsClass.getMethod(
+                    "getBytes",
                     paramTypes));
-            readMethods.put(TypesMapping.JAVA_DOUBLE, rsClass.getMethod("getDouble",
+            readMethods.put(TypesMapping.JAVA_SQLDATE, rsClass.getMethod(
+                    "getDate",
                     paramTypes));
-            readMethods.put(TypesMapping.JAVA_FLOAT, rsClass.getMethod("getFloat",
+            readMethods.put(TypesMapping.JAVA_DOUBLE, rsClass.getMethod(
+                    "getDouble",
                     paramTypes));
-            readMethods.put(TypesMapping.JAVA_INTEGER, rsClass.getMethod("getInt",
+            readMethods.put(TypesMapping.JAVA_FLOAT, rsClass.getMethod(
+                    "getFloat",
                     paramTypes));
-            readMethods.put(TypesMapping.JAVA_SHORT, rsClass.getMethod("getShort",
+            readMethods.put(TypesMapping.JAVA_INTEGER, rsClass.getMethod(
+                    "getInt",
                     paramTypes));
-            readMethods.put(TypesMapping.JAVA_STRING, rsClass.getMethod("getString",
+            readMethods.put(TypesMapping.JAVA_SHORT, rsClass.getMethod(
+                    "getShort",
                     paramTypes));
-            readMethods.put(TypesMapping.JAVA_TIME, rsClass.getMethod("getTime",
+            readMethods.put(TypesMapping.JAVA_STRING, rsClass.getMethod(
+                    "getString",
                     paramTypes));
-            readMethods.put(TypesMapping.JAVA_TIMESTAMP, rsClass
-                    .getMethod("getTimestamp", paramTypes));
+            readMethods.put(TypesMapping.JAVA_TIME, rsClass.getMethod(
+                    "getTime",
+                    paramTypes));
+            readMethods.put(TypesMapping.JAVA_TIMESTAMP, rsClass.getMethod(
+                    "getTimestamp",
+                    paramTypes));
 
             readObjectMethod = rsClass.getMethod("getObject", paramTypes);
 
             // init procedure read methods
             Class csClass = CallableStatement.class;
-            procReadMethods.put(TypesMapping.JAVA_LONG, csClass.getMethod("getLong",
+            procReadMethods.put(TypesMapping.JAVA_LONG, csClass.getMethod(
+                    "getLong",
                     paramTypes));
-            procReadMethods.put(TypesMapping.JAVA_BIGDECIMAL, csClass
-                    .getMethod("getBigDecimal", paramTypes));
-            procReadMethods.put(TypesMapping.JAVA_BOOLEAN, csClass
-                    .getMethod("getBoolean", paramTypes));
-            procReadMethods.put(TypesMapping.JAVA_BYTE, csClass.getMethod("getByte",
+            procReadMethods.put(TypesMapping.JAVA_BIGDECIMAL, csClass.getMethod(
+                    "getBigDecimal",
                     paramTypes));
-            procReadMethods.put(TypesMapping.JAVA_BYTES, csClass.getMethod("getBytes",
+            procReadMethods.put(TypesMapping.JAVA_BOOLEAN, csClass.getMethod(
+                    "getBoolean",
                     paramTypes));
-            procReadMethods.put(TypesMapping.JAVA_SQLDATE, csClass.getMethod("getDate",
+            procReadMethods.put(TypesMapping.JAVA_BYTE, csClass.getMethod(
+                    "getByte",
                     paramTypes));
-            procReadMethods.put(TypesMapping.JAVA_DOUBLE, csClass.getMethod("getDouble",
+            procReadMethods.put(TypesMapping.JAVA_BYTES, csClass.getMethod(
+                    "getBytes",
                     paramTypes));
-            procReadMethods.put(TypesMapping.JAVA_FLOAT, csClass.getMethod("getFloat",
+            procReadMethods.put(TypesMapping.JAVA_SQLDATE, csClass.getMethod(
+                    "getDate",
                     paramTypes));
-            procReadMethods.put(TypesMapping.JAVA_INTEGER, csClass.getMethod("getInt",
+            procReadMethods.put(TypesMapping.JAVA_DOUBLE, csClass.getMethod(
+                    "getDouble",
                     paramTypes));
-            procReadMethods.put(TypesMapping.JAVA_SHORT, csClass.getMethod("getShort",
+            procReadMethods.put(TypesMapping.JAVA_FLOAT, csClass.getMethod(
+                    "getFloat",
                     paramTypes));
-            procReadMethods.put(TypesMapping.JAVA_STRING, csClass.getMethod("getString",
+            procReadMethods.put(TypesMapping.JAVA_INTEGER, csClass.getMethod(
+                    "getInt",
                     paramTypes));
-            procReadMethods.put(TypesMapping.JAVA_TIME, csClass.getMethod("getTime",
+            procReadMethods.put(TypesMapping.JAVA_SHORT, csClass.getMethod(
+                    "getShort",
                     paramTypes));
-            procReadMethods.put(TypesMapping.JAVA_TIMESTAMP, csClass
-                    .getMethod("getTimestamp", paramTypes));
+            procReadMethods.put(TypesMapping.JAVA_STRING, csClass.getMethod(
+                    "getString",
+                    paramTypes));
+            procReadMethods.put(TypesMapping.JAVA_TIME, csClass.getMethod(
+                    "getTime",
+                    paramTypes));
+            procReadMethods.put(TypesMapping.JAVA_TIMESTAMP, csClass.getMethod(
+                    "getTimestamp",
+                    paramTypes));
 
             procReadObjectMethod = csClass.getMethod("getObject", paramTypes);
         }

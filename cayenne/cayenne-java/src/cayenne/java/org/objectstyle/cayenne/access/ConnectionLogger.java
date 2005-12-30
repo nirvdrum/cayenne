@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,37 +53,34 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.jdbc;
+package org.objectstyle.cayenne.access;
+
+import org.objectstyle.cayenne.conn.ConnectionEventLoggingDelegate;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
 
 /**
- * A selecting PreparedStatement descriptor with a String of SQL and 
- * an array of parameters. SQLStatement is essentially a "complied"
- * version of any selecting Cayenne query.
+ * Adapts {@link org.objectstyle.cayenne.access.QueryLogger} to be used as a
+ * {@link org.objectstyle.cayenne.conn.ConnectionEventLoggingDelegate} with Cayenne
+ * connection pools.
  * 
- * @since 1.1
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class SQLSelectStatement extends SQLStatement {
-    protected ColumnDescriptor[] resultColumns;
+public class ConnectionLogger implements ConnectionEventLoggingDelegate {
 
-    public SQLSelectStatement() {
-
+    public void logConnect(String url, String userName, String password) {
+        QueryLogger.logConnect(url, userName, password);
     }
 
-    public SQLSelectStatement(
-        String sql,
-        ColumnDescriptor[] resultColumns,
-        ParameterBinding[] bindings) {
-
-        super(sql, bindings);
-        setResultColumns(resultColumns);
+    public void logConnectFailure(Throwable th) {
+        QueryLogger.logConnectFailure(th);
     }
 
-    public ColumnDescriptor[] getResultColumns() {
-        return resultColumns;
+    public void logConnectSuccess() {
+        QueryLogger.logConnectSuccess();
     }
 
-    public void setResultColumns(ColumnDescriptor[] descriptors) {
-        resultColumns = descriptors;
+    public void logPoolCreated(DataSourceInfo info) {
+        QueryLogger.logPoolCreated(info);
     }
 }

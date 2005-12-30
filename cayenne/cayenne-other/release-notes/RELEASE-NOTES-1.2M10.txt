@@ -12,6 +12,8 @@ http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
 Changes/New Features:
 
 * New method: DataObjectUtils.objectForQuery(DataContext, Query)
+* Remote Object Persistence:
+  - added 'localObjects' to ObjectContext interface.
 
 Other Bugs Fixed:
 

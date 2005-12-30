@@ -88,7 +88,7 @@ import org.objectstyle.cayenne.access.QueryEngine;
  * The class uses topological sorting from <a
  * href="http://objectstyle.org/ashwood/">ASHWOOD library</a>.
  * 
- * @author Andriy Shapochka, Andrei Adamchik
+ * @author Andriy Shapochka, Andrus Adamchik
  * @since 1.1
  */
 public class AshwoodEntitySorter implements EntitySorter {

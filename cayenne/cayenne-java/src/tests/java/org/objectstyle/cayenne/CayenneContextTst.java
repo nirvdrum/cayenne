@@ -55,12 +55,11 @@
  */
 package org.objectstyle.cayenne;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.CompoundDiff;
@@ -70,15 +69,26 @@ import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.opp.OPPMessage;
+import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.NamedQuery;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
+import org.objectstyle.cayenne.testdo.mt.MtTable1;
+import org.objectstyle.cayenne.unit.AccessStack;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestResources;
 
 /**
  * @author Andrus Adamchik
  */
-public class CayenneContextTst extends TestCase {
+public class CayenneContextTst extends CayenneTestCase {
+
+    protected AccessStack buildAccessStack() {
+        return CayenneTestResources
+                .getResources()
+                .getAccessStack(MULTI_TIER_ACCESS_STACK);
+    }
 
     public void testConstructor() {
 
@@ -91,6 +101,58 @@ public class CayenneContextTst extends TestCase {
         MockOPPChannel channel = new MockOPPChannel();
         context.setChannel(channel);
         assertSame(channel, context.getChannel());
+    }
+
+    public void testLocalObjects() {
+
+        MockOPPChannel channel = new MockOPPChannel();
+        CayenneContext src = new CayenneContext(channel);
+        src.setEntityResolver(getDomain().getEntityResolver().getClientEntityResolver());
+
+        List sources = new ArrayList();
+
+        ClientMtTable1 s1 = new ClientMtTable1();
+        s1.setPersistenceState(PersistenceState.COMMITTED);
+        s1.setObjectId(new ObjectId("MtTable1", MtTable1.TABLE1_ID_PK_COLUMN, 1));
+        s1.setGlobalAttribute1("abc");
+        s1.setObjectContext(src);
+        src.getGraphManager().registerNode(s1.getObjectId(), s1);
+        sources.add(s1);
+
+        ClientMtTable1 s2 = new ClientMtTable1();
+        s2.setPersistenceState(PersistenceState.COMMITTED);
+        s2.setObjectId(new ObjectId("MtTable1", MtTable1.TABLE1_ID_PK_COLUMN, 2));
+        s2.setGlobalAttribute1("xyz");
+        s2.setObjectContext(src);
+        src.getGraphManager().registerNode(s2.getObjectId(), s2);
+        sources.add(s2);
+
+        ClientMtTable1 s3 = new ClientMtTable1();
+        s3.setPersistenceState(PersistenceState.HOLLOW);
+        s3.setObjectId(new ObjectId("MtTable1", MtTable1.TABLE1_ID_PK_COLUMN, 3));
+        s3.setObjectContext(src);
+        src.getGraphManager().registerNode(s3.getObjectId(), s3);
+        sources.add(s3);
+
+        CayenneContext target = new CayenneContext(channel);
+        target.setEntityResolver(getDomain()
+                .getEntityResolver()
+                .getClientEntityResolver());
+
+        List targets = target.localObjects(sources);
+        assertNotNull(targets);
+        assertEquals(sources.size(), targets.size());
+
+        for (int i = 0; i < sources.size(); i++) {
+            Persistent srcObject = (Persistent) sources.get(i);
+            Persistent targetObject = (Persistent) targets.get(i);
+
+            assertSame(target, targetObject.getObjectContext());
+            assertSame(src, srcObject.getObjectContext());
+            assertEquals(srcObject.getObjectId(), targetObject.getObjectId());
+            assertSame(targetObject, target.getGraphManager().getNode(
+                    targetObject.getObjectId()));
+        }
     }
 
     public void testChannel() {
@@ -117,11 +179,7 @@ public class CayenneContextTst extends TestCase {
 
         // test that a command is being sent via connector on commit...
 
-        context.internalGraphManager().nodePropertyChanged(
-                new Object(),
-                "x",
-                "y",
-                "z");
+        context.internalGraphManager().nodePropertyChanged(new Object(), "x", "y", "z");
 
         context.commitChanges();
         assertEquals(1, channel.getMessages().size());
@@ -321,8 +379,7 @@ public class CayenneContextTst extends TestCase {
         Persistent newObject = context.newObject(MockPersistentObject.class);
         context.deleteObject(newObject);
         assertEquals(PersistenceState.TRANSIENT, newObject.getPersistenceState());
-        assertFalse(context.internalGraphManager().dirtyNodes().contains(
-                newObject));
+        assertFalse(context.internalGraphManager().dirtyNodes().contains(newObject));
 
         // COMMITTED
         Persistent committed = new MockPersistentObject();

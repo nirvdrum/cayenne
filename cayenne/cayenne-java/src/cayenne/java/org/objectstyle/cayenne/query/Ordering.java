@@ -70,11 +70,12 @@ import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
- * Defines a Comparator for Java Beans. Ordering can be used either to define ORDER BY
- * clause of a query in terms of object properties, or as a Comparator for in-memory Java
- * Beans sorting.
+ * Defines object sorting criteria, used either for in-memory sorting of object lists or
+ * as a specification for building <em>ORDER BY</em> clause of a SelectQuery query. Note
+ * that in case of in-memory sorting, Ordering can be used with any JavaBeans, not just
+ * DataObjects.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  * @author Craig Miskell
  */
 public class Ordering implements Comparator, Serializable, XMLSerializable {

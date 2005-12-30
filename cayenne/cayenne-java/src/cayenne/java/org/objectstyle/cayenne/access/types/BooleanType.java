@@ -64,13 +64,13 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
- * A Boolean type handler. One of the features of this handler is that it ensures that
- * "materialize" methods return either Boolean.TRUE or Boolean.FALSE, instead of creating
- * new Boolean instances using contructor. Therefore it makes possible identity comparison
- * such as <code>object.getBooleanProperty() == Boolean.TRUE</code>.
+ * Handles <code>java.lang.Boolean</code> mapping. Note that "materialize*" methods
+ * return either Boolean.TRUE or Boolean.FALSE, instead of creating new Boolean instances
+ * using contructor. This makes possible identity comparison such as
+ * <code>object.getBooleanProperty() == Boolean.TRUE</code>.
  * 
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class BooleanType implements ExtendedType {
 

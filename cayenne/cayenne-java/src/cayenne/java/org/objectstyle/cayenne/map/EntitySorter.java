@@ -56,18 +56,33 @@
 package org.objectstyle.cayenne.map;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Defines API for sorting of Cayenne entities based on their mutual dependencies.
  * 
  * @since 1.1
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-public interface EntitySorter
-    extends org.objectstyle.cayenne.access.util.DependencySorter {
+public interface EntitySorter {
 
     /**
      * Initializes a list of DataMaps used by the sorter.
      */
-    public void setDataMaps(Collection dataMaps);
+    void setDataMaps(Collection dataMaps);
+
+    /**
+     * Sorts a list of DbEntities.
+     */
+    void sortDbEntities(List dbEntities, boolean deleteOrder);
+
+    /**
+     * Sorts a list of ObjEntities.
+     */
+    void sortObjEntities(List objEntities, boolean deleteOrder);
+
+    /**
+     * Sorts a list of objects belonging to the ObjEntity.
+     */
+    void sortObjectsForEntity(ObjEntity entity, List objects, boolean deleteOrder);
 }

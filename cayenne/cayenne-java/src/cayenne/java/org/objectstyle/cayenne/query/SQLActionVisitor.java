@@ -57,11 +57,16 @@
 package org.objectstyle.cayenne.query;
 
 /**
- * A query "visitor" interface that defines methods for creating SQLActions from
- * "executable" queries.
+ * A factory interface to create standard SQLActions for a set of standard queries.
+ * Instances of SQLActionVisitor are passed by Cayenne to a Query in
+ * {@link org.objectstyle.cayenne.query.Query#createSQLAction(SQLActionVisitor)},
+ * allowing query to choose the action type and convert itself to a "standard" query if
+ * needed. Individual DbAdapters would provide special visitors, thus allowing for
+ * DB-dependent execution algorithms.
  * 
+ * @see org.objectstyle.cayenne.query.Query#createSQLAction(SQLActionVisitor)
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public interface SQLActionVisitor {
 

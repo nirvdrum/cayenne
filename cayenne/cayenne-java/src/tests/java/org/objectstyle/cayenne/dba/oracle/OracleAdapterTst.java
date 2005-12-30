@@ -53,37 +53,21 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.jdbc;
+package org.objectstyle.cayenne.dba.oracle;
 
-/**
- * A selecting PreparedStatement descriptor with a String of SQL and 
- * an array of parameters. SQLStatement is essentially a "complied"
- * version of any selecting Cayenne query.
- * 
- * @since 1.1
- * @author Andrus Adamchik
- */
-public class SQLSelectStatement extends SQLStatement {
-    protected ColumnDescriptor[] resultColumns;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.query.InsertBatchQuery;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-    public SQLSelectStatement() {
+public class OracleAdapterTst extends CayenneTestCase {
 
-    }
-
-    public SQLSelectStatement(
-        String sql,
-        ColumnDescriptor[] resultColumns,
-        ParameterBinding[] bindings) {
-
-        super(sql, bindings);
-        setResultColumns(resultColumns);
-    }
-
-    public ColumnDescriptor[] getResultColumns() {
-        return resultColumns;
-    }
-
-    public void setResultColumns(ColumnDescriptor[] descriptors) {
-        resultColumns = descriptors;
+    public void testUpdatesLOBColumns() throws Exception {
+        DataMap map = getDomain().getMap("testmap");
+        assertTrue(OracleAdapter.updatesLOBColumns(new InsertBatchQuery(map
+                .getDbEntity("BLOB_TEST"), 1)));
+        assertTrue(OracleAdapter.updatesLOBColumns(new InsertBatchQuery(map
+                .getDbEntity("CLOB_TEST"), 1)));
+        assertFalse(OracleAdapter.updatesLOBColumns(new InsertBatchQuery(map
+                .getDbEntity("ARTIST"), 1)));
     }
 }

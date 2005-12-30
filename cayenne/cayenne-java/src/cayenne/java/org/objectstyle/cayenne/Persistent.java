@@ -58,7 +58,7 @@ package org.objectstyle.cayenne;
 import java.io.Serializable;
 
 /**
- * Defines minimum API of an object that can be persisted via Cayenne.
+ * Defines minimal API of an object that can be persisted via Cayenne.
  * 
  * @since 1.2
  * @author Andrus Adamchik

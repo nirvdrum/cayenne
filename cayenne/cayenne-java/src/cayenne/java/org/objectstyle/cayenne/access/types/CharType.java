@@ -72,8 +72,11 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.validation.BeanValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
-/** 
- * Handles CHAR type for JDBC drivers that don't trim trailing spaces.
+/**
+ * Handles <code>java.lang.String</code>, mapping it as either of JDBC types - CLOB or
+ * (VAR)CHAR. Can be configured to trim trailing spaces.
+ * 
+ * @author Andrus Adamchik
  */
 public class CharType extends AbstractType {
 
@@ -88,50 +91,50 @@ public class CharType extends AbstractType {
     }
 
     /**
-     * Returns String as a class name.
+     * Returns "java.lang.String".
      */
     public String getClassName() {
         return String.class.getName();
     }
-    
+
     /**
      * Validates string property.
      * 
      * @since 1.1
      */
     public boolean validateProperty(
-        Object source,
-        String property,
-        Object value,
-        DbAttribute dbAttribute,
-        ValidationResult validationResult) {
+            Object source,
+            String property,
+            Object value,
+            DbAttribute dbAttribute,
+            ValidationResult validationResult) {
 
         if (!(value instanceof String)) {
             return true;
         }
-        
-        if(dbAttribute.getMaxLength() <= 0) {
+
+        if (dbAttribute.getMaxLength() <= 0) {
             return true;
         }
 
         String string = (String) value;
         if (string.length() > dbAttribute.getMaxLength()) {
-            String message =
-                "\""
+            String message = "\""
                     + property
                     + "\" exceeds maximum allowed length ("
                     + dbAttribute.getMaxLength()
                     + " chars): "
                     + string.length();
-            validationResult.addFailure(
-                new BeanValidationFailure(source, property, message));
+            validationResult.addFailure(new BeanValidationFailure(
+                    source,
+                    property,
+                    message));
 
             return false;
         }
 
         return true;
     }
-    
 
     /** Return trimmed string. */
     public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
@@ -140,10 +143,9 @@ public class CharType extends AbstractType {
 
         // CLOB handling
         if (type == Types.CLOB) {
-            val =
-                (isUsingClobs())
-                    ? readClob(rs.getClob(index))
-                    : readCharStream(rs, index);
+            val = (isUsingClobs()) ? readClob(rs.getClob(index)) : readCharStream(
+                    rs,
+                    index);
         }
         else {
 
@@ -160,14 +162,15 @@ public class CharType extends AbstractType {
 
     /** Return trimmed string. */
     public Object materializeObject(CallableStatement cs, int index, int type)
-        throws Exception {
+            throws Exception {
 
         String val = null;
 
         // CLOB handling
         if (type == Types.CLOB) {
             if (!isUsingClobs()) {
-                throw new CayenneException("Character streams are not supported in stored procedure parameters.");
+                throw new CayenneException(
+                        "Character streams are not supported in stored procedure parameters.");
             }
 
             val = readClob(cs.getClob(index));
@@ -186,12 +189,11 @@ public class CharType extends AbstractType {
     }
 
     public void setJdbcObject(
-        PreparedStatement st,
-        Object val,
-        int pos,
-        int type,
-        int precision)
-        throws Exception {
+            PreparedStatement st,
+            Object val,
+            int pos,
+            int type,
+            int precision) throws Exception {
 
         // if this is a CLOB column, set the value as "String"
         // instead. This should work with most drivers
@@ -211,7 +213,7 @@ public class CharType extends AbstractType {
         // sanity check on size
         if (clob.length() > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(
-                "CLOB is too big to be read as String in memory: " + clob.length());
+                    "CLOB is too big to be read as String in memory: " + clob.length());
         }
 
         int size = (int) clob.length();
@@ -222,24 +224,26 @@ public class CharType extends AbstractType {
         int bufSize = (size < BUF_SIZE) ? size : BUF_SIZE;
 
         Reader in = clob.getCharacterStream();
-        return (in != null)
-            ? readValueStream(new BufferedReader(in, bufSize), size, bufSize)
-            : null;
+        return (in != null) ? readValueStream(
+                new BufferedReader(in, bufSize),
+                size,
+                bufSize) : null;
     }
 
-    protected String readCharStream(ResultSet rs, int index)
-        throws IOException, SQLException {
+    protected String readCharStream(ResultSet rs, int index) throws IOException,
+            SQLException {
         Reader in = rs.getCharacterStream(index);
 
         return (in != null) ? readValueStream(in, -1, BUF_SIZE) : null;
     }
 
     protected String readValueStream(Reader in, int streamSize, int bufSize)
-        throws IOException {
+            throws IOException {
         char[] buf = new char[bufSize];
         int read;
-        StringWriter out =
-            (streamSize > 0) ? new StringWriter(streamSize) : new StringWriter();
+        StringWriter out = (streamSize > 0)
+                ? new StringWriter(streamSize)
+                : new StringWriter();
 
         try {
             while ((read = in.read(buf, 0, bufSize)) >= 0) {
@@ -253,10 +257,9 @@ public class CharType extends AbstractType {
     }
 
     /**
-     * Returns <code>true</code> if 'materializeObject' method should trim
-     * trailing spaces from the CHAR columns. This addresses an issue with some
-     * JDBC drivers (e.g. Oracle), that return Strings for CHAR columsn  padded
-     * with spaces.
+     * Returns <code>true</code> if 'materializeObject' method should trim trailing
+     * spaces from the CHAR columns. This addresses an issue with some JDBC drivers (e.g.
+     * Oracle), that return Strings for CHAR columsn padded with spaces.
      */
     public boolean isTrimmingChars() {
         return trimmingChars;

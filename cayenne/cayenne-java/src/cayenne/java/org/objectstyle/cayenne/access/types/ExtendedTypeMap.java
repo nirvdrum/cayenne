@@ -68,13 +68,17 @@ import java.util.Set;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * Contains a map of ExtendedType objects, that serve as handlers for converting values
- * between Java application and JDBC layer.
- * <p>
- * Class uses singleton model, since mapping is usually shared within the application.
- * </p>
+ * Stores ExtendedTypes, implementing an algorithm to determine the right type for a given
+ * Java class. When an ExtendedType is requested via a call to
+ * {@link #getRegisteredType(String)}, ExtendedTypeMap returns the first type found,
+ * using the following algorithm:
+ * <ul>
+ * <li>a type registered explicitly or implicitly for a given Java class name</li>
+ * <li>a non-null type returned by a registered factory</li>
+ * <li>default generic type.</li>
+ * </ul>
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class ExtendedTypeMap {
 
@@ -85,7 +89,8 @@ public class ExtendedTypeMap {
     Collection extendedTypeFactories;
 
     /**
-     * Creates new ExtendedTypeMap, populating it with default JDBC-compatible types.
+     * Creates new ExtendedTypeMap, populating it with default JDBC-compatible types. If
+     * JDK version is at least 1.5, also loads support for enumerated types.
      */
     public ExtendedTypeMap() {
         // see if we can support enums
@@ -126,8 +131,12 @@ public class ExtendedTypeMap {
 
     /**
      * Adds an ExtendedTypeFactory that will be consulted if no direct mapping for a given
-     * class exists and factories regsitered earlier couldn't handle a type. This feature
-     * is normally used to map interfaces.
+     * class exists. This feature can be used to map interfaces.
+     * <p>
+     * <i>Note that the order in which factories are added is important, as factories are
+     * consulted in turn when an ExtendedType is looked up, and lookup is stopped when any
+     * factory provides a non-null type.</i>
+     * </p>
      * 
      * @since 1.2
      */
@@ -240,7 +249,7 @@ public class ExtendedTypeMap {
     }
 
     /**
-     * Retruns default type for specific Java classes. This implementation supports
+     * Returns a default type for specific Java classes. This implementation supports
      * dynamically loading EnumType handlers for concrete Enum classes (assuming the
      * application runs under JDK1.5+).
      * 

@@ -62,6 +62,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -75,15 +77,16 @@ import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.DefaultType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.access.types.ShortType;
-import org.objectstyle.cayenne.access.util.BatchQueryUtils;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
+import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.UpdateBatchQuery;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -92,15 +95,15 @@ import org.objectstyle.cayenne.util.Util;
  * settings </a> to use with Oracle are shown below:
  * 
  * <pre>
- *   
- *    
- *     test-oracle.cayenne.adapter = org.objectstyle.cayenne.dba.oracle.OracleAdapter
- *     test-oracle.jdbc.username = test
- *     test-oracle.jdbc.password = secret
- *     test-oracle.jdbc.url = jdbc:oracle:thin:@192.168.0.20:1521:ora1 
- *     test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
- *     
- *    
+ *      
+ *       
+ *        test-oracle.cayenne.adapter = org.objectstyle.cayenne.dba.oracle.OracleAdapter
+ *        test-oracle.jdbc.username = test
+ *        test-oracle.jdbc.password = secret
+ *        test-oracle.jdbc.url = jdbc:oracle:thin:@192.168.0.20:1521:ora1 
+ *        test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
+ *        
+ *       
  * </pre>
  * 
  * @author Andrei Adamchik
@@ -163,6 +166,35 @@ public class OracleAdapter extends JdbcAdapter {
     // TODO: rename to something that looks like English ...
     public static boolean isSupportsOracleLOB() {
         return supportsOracleLOB;
+    }
+
+    /**
+     * Utility method that returns <code>true</code> if the query will update at least
+     * one BLOB or CLOB DbAttribute.
+     * 
+     * @since 1.2
+     */
+    static boolean updatesLOBColumns(BatchQuery query) {
+        boolean isInsert = query instanceof InsertBatchQuery;
+        boolean isUpdate = query instanceof UpdateBatchQuery;
+
+        if (!isInsert && !isUpdate) {
+            return false;
+        }
+
+        List updatedAttributes = (isInsert)
+                ? query.getDbAttributes()
+                : ((UpdateBatchQuery) query).getUpdatedAttributes();
+
+        Iterator it = updatedAttributes.iterator();
+        while (it.hasNext()) {
+            int type = ((DbAttribute) it.next()).getType();
+            if (type == Types.CLOB || type == Types.BLOB) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static Method getWriterFromClobMethod() {
@@ -328,7 +360,7 @@ public class OracleAdapter extends JdbcAdapter {
 
         // special handling for LOB updates
         if (isSupportsOracleLOB()
-                && BatchQueryUtils.updatesLOBColumns(query)
+                && OracleAdapter.updatesLOBColumns(query)
                 && (node instanceof OracleDataNode)) {
 
             OracleDataNode oracleNode = (OracleDataNode) node;

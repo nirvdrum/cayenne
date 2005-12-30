@@ -76,7 +76,6 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -84,6 +83,7 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.SingleObjectQuery;
 
 public class DataContextTst extends DataContextTestBase {
 
@@ -95,7 +95,7 @@ public class DataContextTst extends DataContextTestBase {
         opObserver = new MockOperationObserver();
     }
 
-    public void testLocalObjects() throws Exception {
+    public void testLocalObjects() {
         List artists = context.performQuery(new SelectQuery(Artist.class));
 
         DataContext altContext = createAltContext();
@@ -240,9 +240,7 @@ public class DataContextTst extends DataContextTestBase {
         populateExhibits();
 
         ObjectId eId = new ObjectId("Exhibit", Exhibit.EXHIBIT_ID_PK_COLUMN, 2);
-        Exhibit e = (Exhibit) context
-                .performQuery(QueryUtils.selectObjectForId(eId))
-                .get(0);
+        Exhibit e = (Exhibit) context.performQuery(new SingleObjectQuery(eId)).get(0);
 
         assertTrue(e.readPropertyDirectly(Exhibit.TO_GALLERY_PROPERTY) instanceof Fault);
 

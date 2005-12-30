@@ -60,12 +60,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 /**
- * Addresses bugs in certain JDBC drivers that do not handle java.lang.Byte properly.
- * Recasts java.lang.Byte to java.lang.Integer when binding values to PreparedStatement.
- * Drivers that are proven to have issues with short values are Sybase and Oracle (Mac OS
- * X only).
+ * Handles <code>java.lang.Byte</code> type mapping. Can be configured to recast
+ * java.lang.Byte to java.lang.Integer when binding values to PreparedStatement. This is a
+ * workaround for bugs in certain drivers. Drivers that are proven to have issues with
+ * byte values are Sybase and Oracle (Mac OS X only).
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  * @since 1.0.3
  */
 public class ByteType extends AbstractType {

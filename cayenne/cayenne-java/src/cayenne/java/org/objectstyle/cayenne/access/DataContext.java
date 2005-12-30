@@ -73,6 +73,7 @@ import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.DataObjectUtils;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
@@ -80,7 +81,6 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
-import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.map.DataMap;
@@ -91,14 +91,15 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.ParameterizedQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.SingleObjectQuery;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -737,7 +738,7 @@ public class DataContext implements QueryEngine, Serializable {
         if (entity == null) {
             throw new IllegalArgumentException("Invalid entity name: " + objEntityName);
         }
-        
+
         DataObject dataObject;
         try {
             dataObject = (DataObject) entity.getJavaClass().newInstance();
@@ -924,22 +925,15 @@ public class DataContext implements QueryEngine, Serializable {
             }
         }
 
-        SelectQuery sel = QueryUtils.selectObjectForId(oid);
-        List results = this.performQuery(sel);
+        DataObject object = DataObjectUtils.objectForQuery(this, new SingleObjectQuery(
+                oid));
 
-        if (results.size() != 1) {
-            String msg = (results.size() == 0)
-                    ? "Refetch failure: no matching objects found for ObjectId " + oid
-                    : "Refetch failure: more than 1 object found for ObjectId "
-                            + oid
-                            + ". Fetch matched "
-                            + results.size()
-                            + " objects.";
-
-            throw new CayenneRuntimeException(msg);
+        if (object == null) {
+            throw new CayenneRuntimeException(
+                    "Refetch failure: no matching objects found for ObjectId " + oid);
         }
 
-        return (DataObject) results.get(0);
+        return object;
     }
 
     /**

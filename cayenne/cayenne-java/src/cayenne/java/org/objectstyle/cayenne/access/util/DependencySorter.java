@@ -61,16 +61,14 @@ import java.util.List;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
- * Interface that defines API to algorithms used for sorting Cayenne entities
- * based on their dependencies.
+ * Interface that defines API to algorithms used for sorting Cayenne entities based on
+ * their dependencies.
  * 
- * <p>Note that since 1.1 this interface is moved to {@link org.objectstyle.cayenne.map.EntitySorter}
- * and should be considered deprecated.
- * </p>
- * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
+ * @deprecated In 1.2 replaced with {@link org.objectstyle.cayenne.map.EntitySorter}
  */
 public interface DependencySorter {
+
     /**
      * Sorts a list of DbEntities.
      */
@@ -82,7 +80,7 @@ public interface DependencySorter {
     public void sortObjEntities(List objEntities, boolean deleteOrder);
 
     /**
-     * Sorts a list of objects belonging to the ObjEntity. 
+     * Sorts a list of objects belonging to the ObjEntity.
      */
     public void sortObjectsForEntity(ObjEntity entity, List objects, boolean deleteOrder);
 }

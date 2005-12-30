@@ -63,8 +63,8 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.ConnectionLogger;
 import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.util.ConnectionEventLogger;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
@@ -429,7 +429,7 @@ public class HSQLEmbeddedPreferenceService extends CayennePreferenceService {
                         1,
                         "sa",
                         null,
-                        new ConnectionEventLogger());
+                        new ConnectionLogger());
 
                 return pm;
             }

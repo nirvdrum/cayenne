@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,13 +53,10 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.access;
 
-package org.objectstyle.cayenne.access.util;
-
-import java.sql.Types;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.Factory;
@@ -68,7 +65,6 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -76,115 +72,26 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.BatchQuery;
-import org.objectstyle.cayenne.query.InsertBatchQuery;
-import org.objectstyle.cayenne.query.UpdateBatchQuery;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * Collection of utility methods to work with BatchQueries.
+ * Helper class to process BatchQueries.
  * 
- * @deprecated since 1.2 - this class is made non-public and moved to the access package.
- * @author Andriy Shapochka, Andrus Adamchik
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public class BatchQueryUtils {
+final class BatchQueryUtils {
 
     // not for instantiation...
     private BatchQueryUtils() {
     }
 
     /**
-     * Utility method that returns <code>true</code> if the query will update at least
-     * one BLOB or CLOB DbAttribute.
-     * 
-     * @deprecated since 1.2
-     */
-    public static boolean updatesLOBColumns(BatchQuery query) {
-        boolean isInsert = query instanceof InsertBatchQuery;
-        boolean isUpdate = query instanceof UpdateBatchQuery;
-
-        if (!isInsert && !isUpdate) {
-            return false;
-        }
-
-        List updatedAttributes = (isInsert)
-                ? query.getDbAttributes()
-                : ((UpdateBatchQuery) query).getUpdatedAttributes();
-
-        Iterator it = updatedAttributes.iterator();
-        while (it.hasNext()) {
-            int type = ((DbAttribute) it.next()).getType();
-            if (type == Types.CLOB || type == Types.BLOB) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @deprecated since 1.2 - unused.
-     */
-    public static Map buildSnapshotForUpdate(DataObject o) {
-        DataContext context = o.getDataContext();
-        Map committedSnapshot = context.getObjectStore().getSnapshot(
-                o.getObjectId(),
-                context.getChannel());
-        Map currentSnapshot = o.getDataContext().currentSnapshot(o);
-
-        if (committedSnapshot == null || committedSnapshot.isEmpty()) {
-            return currentSnapshot;
-        }
-
-        Map snapshot = new HashMap(currentSnapshot.size());
-
-        Iterator it = currentSnapshot.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry entry = (Map.Entry) it.next();
-            String attrName = (String) entry.getKey();
-            Object newValue = entry.getValue();
-            // if snapshot exists, compare old values and new values,
-            // only add attribute to the update clause if the value has changed
-            Object oldValue = committedSnapshot.get(attrName);
-            if (!Util.nullSafeEquals(oldValue, newValue))
-                snapshot.put(attrName, newValue);
-        }
-
-        // original snapshot can have extra keys that are missing in current snapshot
-        // process those
-        Iterator origit = committedSnapshot.entrySet().iterator();
-        while (origit.hasNext()) {
-            Map.Entry entry = (Map.Entry) origit.next();
-            String attrName = (String) entry.getKey();
-            Object oldValue = entry.getValue();
-            if (oldValue == null || currentSnapshot.containsKey(attrName))
-                continue;
-            snapshot.put(attrName, null);
-        }
-
-        return snapshot;
-    }
-
-    /**
-     * Creates a snapshot of inserted columns for a given object.
-     * 
-     * @deprecated since 1.2
-     */
-    public static Map buildSnapshotForInsert(
-            ObjEntity entity,
-            DataObject o,
-            DbRelationship masterDependentRel) {
-        return buildSnapshotForInsert(entity, o, masterDependentRel, false);
-    }
-
-    /**
      * Creates a snapshot of inserted columns for a given object. Supports deferring value
      * resolution by putting factories in the snapshot instead of real values if the value
      * is not known yet.
-     * 
-     * @since 1.2
      */
-    public static Map buildSnapshotForInsert(
+    static Map buildSnapshotForInsert(
             ObjEntity entity,
             DataObject o,
             DbRelationship masterDependentRel,
@@ -290,35 +197,10 @@ public class BatchQueryUtils {
         return map;
     }
 
-    private static String getTargetDbAttributeName(
-            String srcDbAttributeName,
-            DbRelationship masterDependentRel) {
-        for (Iterator i = masterDependentRel.getJoins().iterator(); i.hasNext();) {
-            DbJoin join = (DbJoin) i.next();
-            if (srcDbAttributeName.equals(join.getSourceName()))
-                return join.getTargetName();
-        }
-        return null;
-    }
-
     /**
      * Creates a snapshot of updated columns for a given object.
-     * 
-     * @deprecated since 1.2 - unused.
      */
-    public static Map buildSnapshotForUpdate(
-            ObjEntity entity,
-            DataObject o,
-            DbRelationship masterDependentRel) {
-        return buildSnapshotForUpdate(entity, o, masterDependentRel, false);
-    }
-
-    /**
-     * Creates a snapshot of updated columns for a given object.
-     * 
-     * @since 1.2
-     */
-    public static Map buildSnapshotForUpdate(
+    static Map buildSnapshotForUpdate(
             ObjEntity entity,
             DataObject o,
             DbRelationship masterDependentRel,
@@ -490,6 +372,17 @@ public class BatchQueryUtils {
         }
 
         return snapshot;
+    }
+
+    private static String getTargetDbAttributeName(
+            String srcDbAttributeName,
+            DbRelationship masterDependentRel) {
+        for (Iterator i = masterDependentRel.getJoins().iterator(); i.hasNext();) {
+            DbJoin join = (DbJoin) i.next();
+            if (srcDbAttributeName.equals(join.getSourceName()))
+                return join.getTargetName();
+        }
+        return null;
     }
 
     final static class PropagatedValueFactory implements Factory {

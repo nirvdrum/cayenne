@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -56,41 +56,18 @@
 package org.objectstyle.cayenne.access.util;
 
 import org.apache.log4j.Level;
-import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.conn.ConnectionEventLoggingDelegate;
-import org.objectstyle.cayenne.conn.DataSourceInfo;
 
 /**
- * A default implementation of ConnectionEvenLoggingDelegate.
- * 
+ * @deprecated Since 1.2 moved to the access package.
  * @author Andrus Adamchik
  */
-public class ConnectionEventLogger implements ConnectionEventLoggingDelegate {
+public class ConnectionEventLogger extends
+        org.objectstyle.cayenne.access.ConnectionLogger {
 
     public ConnectionEventLogger() {
     }
 
-    /**
-     * @deprecated since 1.2
-     */
     public ConnectionEventLogger(Level logLevel) {
         // noop
     }
-
-    public void logConnect(String url, String userName, String password) {
-        QueryLogger.logConnect(url, userName, password);
-    }
-
-    public void logConnectFailure(Throwable th) {
-        QueryLogger.logConnectFailure(th);
-    }
-
-    public void logConnectSuccess() {
-        QueryLogger.logConnectSuccess();
-    }
-
-    public void logPoolCreated(DataSourceInfo info) {
-        QueryLogger.logPoolCreated(info);
-    }
-
 }

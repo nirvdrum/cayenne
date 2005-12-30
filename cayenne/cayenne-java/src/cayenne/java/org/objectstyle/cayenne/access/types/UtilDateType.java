@@ -67,15 +67,15 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
- * ExtendedType that allows Java application to use java.util.Date
- * transparently for all three database date/time types: TIME, DATE, TIMESTAMP.
+ * Maps <code>java.util.Date</code> to any of the three database date/time types: TIME,
+ * DATE, TIMESTAMP.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class UtilDateType extends AbstractType {
 
     /**
-     * Always returns java.util.Date class.
+     * Returns "java.util.Date".
      */
     public String getClassName() {
         return Date.class.getName();
@@ -88,11 +88,11 @@ public class UtilDateType extends AbstractType {
      * @since 1.1
      */
     public boolean validateProperty(
-        Object source,
-        String property,
-        Object value,
-        DbAttribute dbAttribute,
-        ValidationResult validationResult) {
+            Object source,
+            String property,
+            Object value,
+            DbAttribute dbAttribute,
+            ValidationResult validationResult) {
         return true;
     }
 
@@ -104,8 +104,9 @@ public class UtilDateType extends AbstractType {
         else if (type == Types.TIMESTAMP)
             return new java.sql.Timestamp(((Date) val).getTime());
         else
-            throw new IllegalArgumentException(
-                "Only date/time types can be used for '" + getClassName() + "'.");
+            throw new IllegalArgumentException("Only date/time types can be used for '"
+                    + getClassName()
+                    + "'.");
     }
 
     public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
@@ -142,29 +143,29 @@ public class UtilDateType extends AbstractType {
     }
 
     public Object materializeObject(CallableStatement cs, int index, int type)
-        throws Exception {
+            throws Exception {
         Object val = null;
 
         switch (type) {
-            case Types.TIMESTAMP :
+            case Types.TIMESTAMP:
                 val = cs.getTimestamp(index);
                 break;
-            case Types.DATE :
+            case Types.DATE:
                 val = cs.getDate(index);
                 break;
-            case Types.TIME :
+            case Types.TIME:
                 val = cs.getTime(index);
                 break;
-            default :
+            default:
                 val = cs.getObject(index);
                 // check if value was properly converted by the driver
                 if (val != null && !(val instanceof java.util.Date)) {
                     String typeName = TypesMapping.getSqlNameByType(type);
                     throw new ClassCastException(
-                        "Expected a java.util.Date or subclass, instead fetched '"
-                            + val.getClass().getName()
-                            + "' for JDBC type "
-                            + typeName);
+                            "Expected a java.util.Date or subclass, instead fetched '"
+                                    + val.getClass().getName()
+                                    + "' for JDBC type "
+                                    + typeName);
                 }
                 break;
         }
@@ -173,18 +174,16 @@ public class UtilDateType extends AbstractType {
         // so lets cast it to Date,
         // if it is not date, ClassCastException will be thrown,
         // which is what we want
-        return (cs.wasNull())
-            ? null
-            : new java.util.Date(((java.util.Date) val).getTime());
+        return (cs.wasNull()) ? null : new java.util.Date(((java.util.Date) val)
+                .getTime());
     }
 
     public void setJdbcObject(
-        PreparedStatement st,
-        Object val,
-        int pos,
-        int type,
-        int precision)
-        throws Exception {
+            PreparedStatement st,
+            Object val,
+            int pos,
+            int type,
+            int precision) throws Exception {
         super.setJdbcObject(st, convertToJdbcObject(val, type), pos, type, precision);
     }
 }

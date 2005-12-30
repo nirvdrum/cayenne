@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.dba.oracle;
 
-import org.objectstyle.cayenne.access.util.BatchQueryUtils;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcActionBuilder;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -66,7 +65,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 class OracleActionBuilder extends JdbcActionBuilder {
 
@@ -77,9 +76,7 @@ class OracleActionBuilder extends JdbcActionBuilder {
     public SQLAction batchAction(BatchQuery query) {
 
         // special handling for LOB updates
-        if (OracleAdapter.isSupportsOracleLOB()
-                && BatchQueryUtils.updatesLOBColumns(query)) {
-
+        if (OracleAdapter.isSupportsOracleLOB() && OracleAdapter.updatesLOBColumns(query)) {
             return new OracleLOBBatchAction(query, getAdapter());
         }
         else {

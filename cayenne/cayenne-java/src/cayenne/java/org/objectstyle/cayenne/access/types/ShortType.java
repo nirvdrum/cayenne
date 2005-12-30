@@ -60,15 +60,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 /**
- * Addresses bugs in certain JDBC drivers that do not handle java.lang.Short 
- * properly. Recasts java.lang.Short to java.lang.Integer when 
- * binding values to PreparedStatement. Drivers that are proven to have issues with
+ * Handles <code>java.lang.Short</code> type mapping. Can be configured to recast
+ * java.lang.Short to java.lang.Integer when binding values to PreparedStatement. This is
+ * a workaround for bugs in certain drivers. Drivers that are proven to have issues with
  * short values are Sybase and Oracle (Mac OS X only).
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  * @since 1.0.2
  */
 public class ShortType extends AbstractType {
+
     protected boolean widenShorts;
 
     public ShortType(boolean widenShorts) {
@@ -85,18 +86,17 @@ public class ShortType extends AbstractType {
     }
 
     public Object materializeObject(CallableStatement st, int index, int type)
-        throws Exception {
+            throws Exception {
         short s = st.getShort(index);
         return (st.wasNull()) ? null : new Short(s);
     }
 
     public void setJdbcObject(
-        PreparedStatement st,
-        Object val,
-        int pos,
-        int type,
-        int precision)
-        throws Exception {
+            PreparedStatement st,
+            Object val,
+            int pos,
+            int type,
+            int precision) throws Exception {
 
         if (widenShorts && (val instanceof Short)) {
             val = new Integer(((Short) val).intValue());

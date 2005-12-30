@@ -62,8 +62,8 @@ import javax.sql.DataSource;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.ConfigurationException;
+import org.objectstyle.cayenne.access.ConnectionLogger;
 import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.util.ConnectionEventLogger;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.util.Util;
@@ -115,7 +115,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     public DataSource getDataSource(String location) throws Exception {
         this.load(location);
 
-        ConnectionEventLogger logger = new ConnectionEventLogger();
+        ConnectionLogger logger = new ConnectionLogger();
 
         try {
             return new PoolManager(driverInfo.getJdbcDriver(), driverInfo

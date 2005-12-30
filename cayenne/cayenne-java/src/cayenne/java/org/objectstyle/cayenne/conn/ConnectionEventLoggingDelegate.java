@@ -52,21 +52,23 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne.conn;
 
 /**
- * Defines API to log connection events.
+ * A callback API to used by {@link org.objectstyle.cayenne.conn.DriverDataSource} and
+ * {@link org.objectstyle.cayenne.conn.PoolManager} to notify of connection events. Used
+ * mainly for logging.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public interface ConnectionEventLoggingDelegate {
-    
-    public void logPoolCreated(DataSourceInfo info);
-    
-    public void logConnect(String url, String userName, String password);
-    
-    public void logConnectSuccess();
-    
-    public void logConnectFailure(Throwable th);
+
+    void logPoolCreated(DataSourceInfo info);
+
+    void logConnect(String url, String userName, String password);
+
+    void logConnectSuccess();
+
+    void logConnectFailure(Throwable th);
 }

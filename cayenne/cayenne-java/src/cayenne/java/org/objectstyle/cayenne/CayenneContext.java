@@ -55,7 +55,9 @@
  */
 package org.objectstyle.cayenne;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -394,10 +396,72 @@ public class CayenneContext implements ObjectContext {
         return objects;
     }
 
+    /**
+     * Converts a list of Persistent objects registered in some other ObjectContext to a
+     * list of objects local to this ObjectContext.
+     * <p>
+     * <i>Current limitation: all objects in the source list must be either in COMMITTED
+     * or in HOLLOW state.</i>
+     * </p>
+     */
+    public List localObjects(List objects) {
+        List localObjects = new ArrayList(objects.size());
+
+        Iterator it = objects.iterator();
+        while (it.hasNext()) {
+            Persistent object = (Persistent) it.next();
+
+            // sanity check
+            if (object.getPersistenceState() != PersistenceState.COMMITTED
+                    && object.getPersistenceState() != PersistenceState.HOLLOW) {
+                throw new CayenneRuntimeException(
+                        "Only COMMITTED and HOLLOW objects can be transferred between contexts. "
+                                + "Invalid object state '"
+                                + PersistenceState.persistenceStateName(object
+                                        .getPersistenceState())
+                                + "', ObjectId: "
+                                + object.getObjectId());
+            }
+
+            if (object.getObjectContext() == this) {
+                localObjects.add(object);
+                continue;
+            }
+
+            ObjectId id = object.getObjectId();
+            Object localObject = internalGraphManager().getNode(id);
+
+            if (localObject == null) {
+                if (id == null) {
+                    throw new CayenneRuntimeException(
+                            "Can't transfer an object without ObjectId to an ObjectContext.");
+                }
+
+                // TODO: Andrus, 12/28/2005 - should we copy all the values if the source
+                // is not HOLLOW?
+                ObjEntity entity = entityResolver.lookupObjEntity(id.getEntityName());
+                if (entity == null) {
+                    throw new CayenneRuntimeException("Unmapped entity: "
+                            + id.getEntityName());
+                }
+                localObject = createFault(entity, id);
+
+                // copy committed values...
+                if (object.getPersistenceState() == PersistenceState.COMMITTED) {
+                    entity.getClassDescriptor().copyProperties(object, localObject);
+                    ((Persistent) localObject)
+                            .setPersistenceState(PersistenceState.COMMITTED);
+                }
+            }
+
+            localObjects.add(localObject);
+        }
+
+        return localObjects;
+    }
+
     public int[] performNonSelectingQuery(Query query) {
-        return channel
-                .onQuery(new QueryMessage(query))
-                .getFirstUpdateCounts(query);
+        return channel.onQuery(new QueryMessage(query)).getFirstUpdateCounts(query);
     }
 
     public QueryResponse performGenericQuery(Query query) {
@@ -500,7 +564,7 @@ public class CayenneContext implements ObjectContext {
         // get ValueHolders incorrectly marked as resolved
         descriptor.prepareForAccess(object);
 
-        graphManager.registerNode(object.getObjectId(), object);
+        graphManager.registerNode(id, object);
 
         return object;
     }

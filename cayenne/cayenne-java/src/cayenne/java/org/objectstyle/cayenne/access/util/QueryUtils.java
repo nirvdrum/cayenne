@@ -71,11 +71,13 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * Implements helper methods that perform different query-related operations. <i>May be
- * deprecated in the future, after its functionality is moved to the places where it is
- * used now. </i>
+ * Implements helper methods that perform different query-related operations.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
+ * @deprecated In 1.2 Cayenne supports specialized queries such as
+ *             {@link org.objectstyle.cayenne.query.SingleObjectQuery} and
+ *             {@link org.objectstyle.cayenne.query.RelationshipQuery}, making this class
+ *             redundant.
  */
 public class QueryUtils {
 
@@ -103,12 +105,14 @@ public class QueryUtils {
         Iterator it = oids.iterator();
 
         ObjectId firstId = (ObjectId) it.next();
-        Expression exp = ExpressionFactory.matchAllDbExp(firstId.getIdSnapshot(),
+        Expression exp = ExpressionFactory.matchAllDbExp(
+                firstId.getIdSnapshot(),
                 Expression.EQUAL_TO);
 
         while (it.hasNext()) {
             ObjectId anId = (ObjectId) it.next();
-            exp = exp.orExp(ExpressionFactory.matchAllDbExp(anId.getIdSnapshot(),
+            exp = exp.orExp(ExpressionFactory.matchAllDbExp(
+                    anId.getIdSnapshot(),
                     Expression.EQUAL_TO));
         }
 
@@ -119,8 +123,6 @@ public class QueryUtils {
     /**
      * Generates a SelectQuery that can be used to fetch relationship destination objects
      * given a source object of a to-many relationship.
-     * 
-     * @deprecated since 1.2 Use RelationshipQuery.
      */
     public static SelectQuery selectRelationshipObjects(
             QueryEngine e,

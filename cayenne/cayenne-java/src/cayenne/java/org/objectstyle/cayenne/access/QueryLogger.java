@@ -66,21 +66,16 @@ import org.objectstyle.cayenne.util.IDUtil;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * A QueryLogger is intended to log special events during query executions. This includes
- * generated SQL statements, result counts, connection events etc. It is a single
- * consistent place for that kind of logging and should be used by all Cayenne classes
- * that work with the database directly.
+ * QueryLogger is intended to log special events that happen whenever Cayenne interacts
+ * with a database. This includes execution of generated SQL statements, result counts,
+ * connection events, etc. Normally QueryLogger methods are not invoked directly by the
+ * user. Rather it is a single logging point used by the framework.
  * <p>
- * In many cases it is important to use this class as opposed to logging from the class
- * that performs a particular operation, since QueryLogger will generate consistently
- * formatted logs that are easy to analyze and turn on/off.
- * </p>
- * <p>
- * <i>For more information see <a href="../../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide.</a></i>
+ * Internally QueryLogger uses Log4J. See a chapter on logging in Cayenne User Guide on
+ * how to setup Log4J.
  * </p>
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class QueryLogger {
 
