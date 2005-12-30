@@ -80,7 +80,7 @@ import org.objectstyle.cayenne.query.Query;
  * EntityResolver is thread-safe.
  * </p>
  * 
- * @since 1.1 In 1.1 EntityResolver was moved from the access package.
+ * @since 1.1
  * @author Andrus Adamchik
  */
 public class EntityResolver implements MappingNamespace, Serializable {

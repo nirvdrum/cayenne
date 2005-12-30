@@ -94,7 +94,7 @@ public class ProjectTreeModel extends DefaultTreeModel {
      */
     public static DefaultMutableTreeNode wrapProjectNode(Object node) {
         TraversalHelper helper = new TraversalHelper();
-        new ProjectTraversal(helper).traverse(node);
+        new ProjectTraversal(helper, true).traverse(node);
         return helper.getStartNode();
     }
 

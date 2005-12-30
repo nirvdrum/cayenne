@@ -114,7 +114,6 @@ public class DataDomain implements QueryEngine, OPPChannel {
     /** Stores mapping of data nodes to DataNode name keys. */
     protected Map nodes = Collections.synchronizedMap(new TreeMap());
     protected Map nodesByDataMapName = Collections.synchronizedMap(new HashMap());
-    protected Collection nodesRef = Collections.unmodifiableCollection(nodes.values());
 
     /**
      * Properties configured for DataDomain. These include properties of the DataRowStore
@@ -466,7 +465,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
      * Returns an unmodifiable collection of DataNodes associated with this domain.
      */
     public Collection getDataNodes() {
-        return nodesRef;
+        return Collections.unmodifiableCollection(nodes.values());
     }
 
     /**
