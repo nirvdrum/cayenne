@@ -69,7 +69,12 @@ public class DataContextCrossDBTst extends MultiNodeTestCase {
 
     public void testMultiDBUpdate() {
 
+        // for now testing that no exceptions are thrown... wouldn't hurt to check the
+        // data as well???
+
         DataContext context = createDataContext();
+
+        // insert
         CrossdbM1E1 o1 = (CrossdbM1E1) context
                 .createAndRegisterNewObject(CrossdbM1E1.class);
         o1.setName("o1");
@@ -84,6 +89,18 @@ public class DataContextCrossDBTst extends MultiNodeTestCase {
 
         o3.setToM1E1(o1);
         o3.setToM2E1(o2);
+        context.commitChanges();
+
+        // update
+        CrossdbM1E1 o11 = (CrossdbM1E1) context
+                .createAndRegisterNewObject(CrossdbM1E1.class);
+        o11.setName("o11");
+        o3.setToM1E1(o11);
+        context.commitChanges();
+
+        // update with existing
+
+        o3.setToM1E1(o1);
         context.commitChanges();
     }
 }
