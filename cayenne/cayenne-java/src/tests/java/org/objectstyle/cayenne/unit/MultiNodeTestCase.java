@@ -62,28 +62,26 @@ import org.objectstyle.cayenne.access.DataNode;
 /**
  * Superclass of test cases that require multiple DataNodes.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class MultiNodeTestCase extends CayenneTestCase {
+
     public static final String MULTINODE_ACCESS_STACK = "MultiNodeStack";
 
     protected AccessStack buildAccessStack() {
         return CayenneTestResources.getResources().getAccessStack(MULTINODE_ACCESS_STACK);
     }
 
-    /**
-     * @see org.objectstyle.cayenne.unittest.CayenneTestCase#getNode()
-     */
     public DataNode getNode() {
         throw new RuntimeException(
-            "'getNode() makes no sense in multinode environment.. "
-                + "use getNode1() or getNode2()");
+                "'getNode() makes no sense in multinode environment.. "
+                        + "use getNode1() or getNode2()");
     }
 
     public Connection getConnection() {
         throw new RuntimeException(
-            "'getConnection() makes no sense in multinode environment.. "
-                + "obtain it via an appropraite DataNode.");
+                "'getConnection() makes no sense in multinode environment.. "
+                        + "obtain it via an appropraite DataNode.");
     }
 
     public DataNode getNode1() {
