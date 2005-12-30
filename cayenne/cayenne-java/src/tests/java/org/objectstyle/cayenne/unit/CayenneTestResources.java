@@ -127,7 +127,7 @@ public class CayenneTestResources implements BeanFactoryAware {
                     + DEFAULT_CONNECTION_KEY);
             connectionKey = DEFAULT_CONNECTION_KEY;
         }
-        
+
         resources.setConnectionKey(connectionKey);
 
         try {
@@ -310,7 +310,7 @@ public class CayenneTestResources implements BeanFactoryAware {
         return connectionInfo;
     }
 
-    protected DataSource createDataSource() {
+    public DataSource createDataSource() {
         try {
             // data source
             PoolDataSource poolDS = new PoolDataSource(

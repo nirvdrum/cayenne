@@ -86,7 +86,7 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
             initNode(maps[i]);
         }
     }
-    
+
     protected DataDomain getDomain() {
         return domain;
     }
@@ -102,7 +102,14 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
         }
 
         node.addDataMap(map);
-        this.domain.addNode(node);
+
+        // avoid using shared DataSource if there is more than one node
+        if (!domain.getDataNodes().isEmpty()) {
+            node.setDataSource(resources.createDataSource());
+        }
+
+        domain.addNode(node);
+
     }
 
     /**
