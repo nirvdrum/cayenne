@@ -72,8 +72,7 @@ public class DbGeneratorCrossDBTst extends MultiNodeTestCase {
         DataMap m2 = getDomain().getMap("map-db2");
         DbEntity m2e2 = m2.getDbEntity("CROSSDB_M2E2");
 
-        DbGenerator g2 = new DbGenerator(getNode2().getAdapter(), m2);
-        g2.setDomain(getDomain());
+        DbGenerator g2 = new DbGenerator(getNode2().getAdapter(), m2, null, getDomain());
 
         List fk = g2.createFkConstraintsQueries(m2e2);
         assertNotNull(fk);

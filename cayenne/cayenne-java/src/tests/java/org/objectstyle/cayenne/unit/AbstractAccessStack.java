@@ -320,10 +320,7 @@ public abstract class AbstractAccessStack {
      */
     protected Iterator tableCreateQueries(DataNode node, DataMap map) throws Exception {
         DbAdapter adapter = node.getAdapter();
-        DbGenerator gen = new DbGenerator(adapter, map);
-
-        // needed for multi-node situations
-        gen.setDomain(getDomain());
+        DbGenerator gen = new DbGenerator(adapter, map, null, getDomain());
 
         List orderedEnts = dbEntitiesInInsertOrder(node, map);
         List queries = new ArrayList();

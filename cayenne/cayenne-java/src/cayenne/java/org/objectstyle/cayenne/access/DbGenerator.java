@@ -133,10 +133,27 @@ public class DbGenerator {
     }
 
     /**
-     * Creates and initializes new DbGenerator. <code>excludedEntities</code> parameter
-     * specifies which entities should be ignored during class generation.
+     * Creates and initializes new DbGenerator instance.
+     * 
+     * @param adapter DbAdapter corresponding to the database
+     * @param map DataMap whose entities will be used in schema generation
+     * @param excludedEntities entities that should be ignored during schema generation
      */
     public DbGenerator(DbAdapter adapter, DataMap map, Collection excludedEntities) {
+        this(adapter, map, excludedEntities, null);
+    }
+
+    /**
+     * Creates and initializes new DbGenerator instance.
+     * 
+     * @param adapter DbAdapter corresponding to the database
+     * @param map DataMap whose entities will be used in schema generation
+     * @param excludedEntities entities that should be ignored during schema generation
+     * @param domain optional DataDomain used to detect cross-database relationships.
+     * @since 1.2
+     */
+    public DbGenerator(DbAdapter adapter, DataMap map, Collection excludedEntities,
+            DataDomain domain) {
         // sanity check
         if (adapter == null) {
             throw new IllegalArgumentException("Adapter must not be null.");
@@ -146,6 +163,7 @@ public class DbGenerator {
             throw new IllegalArgumentException("DataMap must not be null.");
         }
 
+        this.domain = domain;
         this.map = map;
         this.adapter = adapter;
 
@@ -517,17 +535,6 @@ public class DbGenerator {
      */
     public DataDomain getDomain() {
         return domain;
-    }
-
-    /**
-     * Sets a DataDomain used by the DbGenerator to detect cross-database relationships.
-     * This property is optional. Only consider setting it when there are cross-DataMap
-     * relationships and DataMaps correspond to different physical databases.
-     * 
-     * @since 1.2
-     */
-    public void setDomain(DataDomain domain) {
-        this.domain = domain;
     }
 
     /**
