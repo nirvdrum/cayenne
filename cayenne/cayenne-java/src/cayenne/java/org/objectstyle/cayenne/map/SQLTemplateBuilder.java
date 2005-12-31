@@ -74,7 +74,7 @@ class SQLTemplateBuilder extends QueryBuilder {
      */
     public Query getQuery() {
 
-        SQLTemplate template = new SQLTemplate(selecting);
+        SQLTemplate template = new SQLTemplate();
         Object root = getRoot();
 
         if (root != null) {

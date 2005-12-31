@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.dba;
 import org.objectstyle.cayenne.access.jdbc.BatchAction;
 import org.objectstyle.cayenne.access.jdbc.ProcedureAction;
 import org.objectstyle.cayenne.access.jdbc.SQLTemplateAction;
-import org.objectstyle.cayenne.access.jdbc.SQLTemplateSelectAction;
 import org.objectstyle.cayenne.access.jdbc.SelectAction;
 import org.objectstyle.cayenne.access.jdbc.UpdateAction;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -108,9 +107,7 @@ public class JdbcActionBuilder implements SQLActionVisitor {
     }
 
     public SQLAction sqlAction(SQLTemplate query) {
-        return query.isSelecting()
-                ? new SQLTemplateSelectAction(query, adapter)
-                : new SQLTemplateAction(query, adapter);
+        return new SQLTemplateAction(query, adapter);
     }
 
     public SQLAction updateAction(Query query) {

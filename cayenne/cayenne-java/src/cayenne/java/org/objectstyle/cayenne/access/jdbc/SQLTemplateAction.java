@@ -58,25 +58,30 @@ package org.objectstyle.cayenne.access.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.query.SQLAction;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * Implements a strategy for execution of updating SQLTemplates.
+ * Implements a strategy for execution of SQLTemplates.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  * @since 1.2 replaces SQLTemplateExecutionPlan
  */
 public class SQLTemplateAction implements SQLAction {
@@ -100,7 +105,7 @@ public class SQLTemplateAction implements SQLAction {
     /**
      * Runs a SQLTemplate query as an update.
      */
-    public void performAction(Connection connection, OperationObserver observer)
+    public void performAction(Connection connection, OperationObserver callback)
             throws SQLException, Exception {
 
         String template = extractTemplateString();
@@ -118,10 +123,11 @@ public class SQLTemplateAction implements SQLAction {
 
         // zero size indicates a one-shot query with no parameters
         // so fake a single entry batch...
-        int[] counts = new int[size > 0 ? size : 1];
+        int batchSize = (size > 0) ? size : 1;
+        List counts = null;
         Iterator it = (size > 0) ? query.parametersIterator() : IteratorUtils
                 .singletonIterator(Collections.EMPTY_MAP);
-        for (int i = 0; i < counts.length; i++) {
+        for (int i = 0; i < batchSize; i++) {
             Map nextParameters = (Map) it.next();
 
             SQLStatement compiled = templateProcessor.processTemplate(
@@ -133,21 +139,117 @@ public class SQLTemplateAction implements SQLAction {
                         .getBindings()));
             }
 
+            long t1 = System.currentTimeMillis();
+
             // TODO: we may cache prep statements for this loop, using merged string as a
             // key since it is very likely that it will be the same for multiple parameter
             // sets...
+            boolean iteratedResult = callback.isIteratedResult();
             PreparedStatement statement = connection.prepareStatement(compiled.getSql());
             try {
                 bind(statement, compiled.getBindings());
-                counts[i] = statement.executeUpdate();
-                QueryLogger.logUpdateCount(counts[i]);
+
+                // process a mix of results
+
+                boolean isResultSet = statement.execute();
+                boolean firstIteration = true;
+                while (true) {
+
+                    if (firstIteration) {
+                        firstIteration = false;
+                    }
+                    else {
+                        isResultSet = statement.getMoreResults();
+                    }
+
+                    if (isResultSet) {
+                        processSelectResult(compiled, connection, statement, callback, t1);
+                        if (iteratedResult) {
+                            break;
+                        }
+                    }
+                    else {
+                        int updateCount = statement.getUpdateCount();
+                        if (updateCount == -1) {
+                            break;
+                        }
+
+                        if (counts == null) {
+                            counts = new ArrayList();
+                        }
+
+                        counts.add(new Integer(updateCount));
+                        QueryLogger.logUpdateCount(updateCount);
+                    }
+                }
             }
             finally {
-                statement.close();
+                if (!iteratedResult) {
+                    statement.close();
+                }
             }
         }
 
-        observer.nextBatchCount(query, counts);
+        if (counts != null) {
+            int[] ints = new int[counts.size()];
+            for (int i = 0; i < ints.length; i++) {
+                ints[i] = ((Integer) counts.get(i)).intValue();
+            }
+
+            callback.nextBatchCount(query, ints);
+        }
+    }
+
+    void processSelectResult(
+            SQLStatement compiled,
+            Connection connection,
+            Statement statement,
+            OperationObserver callback,
+            long startTime) throws Exception {
+
+        boolean iteratedResult = callback.isIteratedResult();
+        ResultSet rs = statement.getResultSet();
+
+        if (rs != null) {
+
+            try {
+                ExtendedTypeMap types = adapter.getExtendedTypes();
+                RowDescriptor descriptor = (compiled.getResultColumns().length > 0)
+                        ? new RowDescriptor(compiled.getResultColumns(), types)
+                        : new RowDescriptor(rs, types);
+
+                JDBCResultIterator result = new JDBCResultIterator(
+                        connection,
+                        statement,
+                        rs,
+                        descriptor,
+                        query.getFetchLimit());
+
+                if (!iteratedResult) {
+                    List resultRows = result.dataRows(false);
+                    QueryLogger.logSelectCount(resultRows.size(), System
+                            .currentTimeMillis()
+                            - startTime);
+
+                    callback.nextDataRows(query, resultRows);
+                }
+                else {
+                    try {
+                        result.setClosingConnection(true);
+                        callback.nextDataRows(query, result);
+                    }
+                    catch (Exception ex) {
+                        result.close();
+                        throw ex;
+                    }
+                }
+            }
+            finally {
+                if (!iteratedResult) {
+                    rs.close();
+                }
+            }
+        }
     }
 
     /**

@@ -56,34 +56,24 @@
 package org.objectstyle.cayenne.access.jdbc;
 
 /**
- * A selecting PreparedStatement descriptor with a String of SQL and 
- * an array of parameters. SQLStatement is essentially a "complied"
- * version of any selecting Cayenne query.
+ * A selecting PreparedStatement descriptor with a String of SQL and an array of
+ * parameters. SQLStatement is essentially a "complied" version of any selecting Cayenne
+ * query.
  * 
+ * @deprecated Unused since 1.2 as superclass can handle select queries.
  * @since 1.1
  * @author Andrus Adamchik
  */
 public class SQLSelectStatement extends SQLStatement {
-    protected ColumnDescriptor[] resultColumns;
 
     public SQLSelectStatement() {
 
     }
 
-    public SQLSelectStatement(
-        String sql,
-        ColumnDescriptor[] resultColumns,
-        ParameterBinding[] bindings) {
+    public SQLSelectStatement(String sql, ColumnDescriptor[] resultColumns,
+            ParameterBinding[] bindings) {
 
-        super(sql, bindings);
+        super(sql, resultColumns, bindings);
         setResultColumns(resultColumns);
-    }
-
-    public ColumnDescriptor[] getResultColumns() {
-        return resultColumns;
-    }
-
-    public void setResultColumns(ColumnDescriptor[] descriptors) {
-        resultColumns = descriptors;
     }
 }

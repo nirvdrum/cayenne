@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.project.validator;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
@@ -77,7 +76,6 @@ public class SQLTemplateValidator extends TreeNodeValidator {
 
         validateName(query, treeNodePath, validator);
         validateRoot(query, treeNodePath, validator);
-        validateResultType(query, treeNodePath, validator);
         validateDefaultSQL(query, treeNodePath, validator);
     }
 
@@ -137,19 +135,14 @@ public class SQLTemplateValidator extends TreeNodeValidator {
         }
     }
 
+    /**
+     * @deprecated unused since 1.2
+     */
     protected void validateResultType(
             SQLTemplate query,
             ProjectPath path,
             Validator validator) {
 
-        if (query.isSelecting()
-                && !query.isFetchingDataRows()
-                && query.getRoot(null) != null
-                && !(query.getRoot(null) instanceof ObjEntity || query.getRoot(null) instanceof Class)) {
-
-            validator.registerWarning(
-                    "Missing result entity for SQLTemplate fetching DataObjects.",
-                    path);
-        }
+        // noop
     }
 }

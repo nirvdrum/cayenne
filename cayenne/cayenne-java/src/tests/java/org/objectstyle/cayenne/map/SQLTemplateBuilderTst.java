@@ -97,18 +97,6 @@ public class SQLTemplateBuilderTst extends TestCase {
 
         // TODO: test other properties...
     }
-    
-    public void testGetQuerySelecting() throws Exception {
-        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
-        builder.setSelecting("true");
-
-        SQLTemplate selecting = (SQLTemplate) builder.getQuery();
-        assertTrue(selecting.isSelecting());
-        
-        builder.setSelecting("false");
-        SQLTemplate nonselecting = (SQLTemplate) builder.getQuery();
-        assertFalse(nonselecting.isSelecting());
-    }
 
     public void testGetQuerySql() throws Exception {
         SQLTemplateBuilder builder = new MockupRootQueryBuilder();
@@ -117,7 +105,7 @@ public class SQLTemplateBuilderTst extends TestCase {
         SQLTemplate query = (SQLTemplate) builder.getQuery();
         assertEquals("abc", query.getDefaultTemplate());
     }
-    
+
     public void testGetQueryAdapterSql() throws Exception {
         SQLTemplateBuilder builder = new MockupRootQueryBuilder();
         builder.addSql("abc", "adapter");

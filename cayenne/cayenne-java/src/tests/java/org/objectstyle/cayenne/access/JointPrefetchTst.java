@@ -143,8 +143,7 @@ public class JointPrefetchTst extends CayenneTestCase {
                         + "#result('DATE_OF_BIRTH' 'java.util.Date'), "
                         + "#result('t0.ARTIST_ID' 'int' '' 'ARTIST_ID') "
                         + "FROM ARTIST t0, PAINTING t1 "
-                        + "WHERE t0.ARTIST_ID = t1.ARTIST_ID",
-                true);
+                        + "WHERE t0.ARTIST_ID = t1.ARTIST_ID");
 
         PrefetchTreeNode prefetch = q.addPrefetch(Artist.PAINTING_ARRAY_PROPERTY);
         assertEquals(
@@ -215,15 +214,13 @@ public class JointPrefetchTst extends CayenneTestCase {
         SQLTemplate artistSQL = new SQLTemplate(
                 Artist.class,
                 "insert into ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
-                        + "values (33001, 'a1', #bind($date 'DATE'))",
-                false);
+                        + "values (33001, 'a1', #bind($date 'DATE'))");
         artistSQL.setParameters(Collections.singletonMap("date", new Date(System
                 .currentTimeMillis())));
         SQLTemplate paintingSQL = new SQLTemplate(
                 Painting.class,
                 "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) "
-                        + "VALUES (33001, 'p1', 33001, 1000)",
-                false);
+                        + "VALUES (33001, 'p1', 33001, 1000)");
         DataContext context = createDataContext();
 
         context.performNonSelectingQuery(artistSQL);

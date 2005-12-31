@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DataContextCharPKTst extends CayenneTestCase {
+
     protected DataContext ctxt;
 
     protected void setUp() throws Exception {
@@ -81,8 +82,7 @@ public class DataContextCharPKTst extends CayenneTestCase {
         object.setPkCol("PK1");
         ctxt.commitChanges();
 
-        SQLTemplate q =
-            new SQLTemplate(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST", true);
+        SQLTemplate q = new SQLTemplate(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST");
 
         q.setFetchingDataRows(true);
 
@@ -113,8 +113,7 @@ public class DataContextCharPKTst extends CayenneTestCase {
         ctxt.deleteObject(object);
         ctxt.commitChanges();
 
-        SQLTemplate q =
-            new SQLTemplate(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST", true);
+        SQLTemplate q = new SQLTemplate(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST");
         q.setFetchingDataRows(true);
 
         List rows = ctxt.performQuery(q);
@@ -131,8 +130,7 @@ public class DataContextCharPKTst extends CayenneTestCase {
         object.setOtherCol("UPDATED");
         ctxt.commitChanges();
 
-        SQLTemplate q =
-            new SQLTemplate(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST", true);
+        SQLTemplate q = new SQLTemplate(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST");
         q.setFetchingDataRows(true);
 
         List rows = ctxt.performQuery(q);

@@ -60,10 +60,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 import org.objectstyle.cayenne.util.Util;
-
-import junit.framework.TestCase;
 
 /**
  * @author Andrei Adamchik
@@ -71,7 +71,7 @@ import junit.framework.TestCase;
 public class SQLTemplateTst extends TestCase {
 
     public void testSerializability() throws Exception {
-        SQLTemplate o = new SQLTemplate("Test", "DO SQL", false);
+        SQLTemplate o = new SQLTemplate("Test", "DO SQL");
         Object clone = Util.cloneViaSerialization(o);
 
         assertTrue(clone instanceof SQLTemplate);
@@ -80,11 +80,10 @@ public class SQLTemplateTst extends TestCase {
         assertNotSame(o, c1);
         assertEquals(o.getRoot(null), c1.getRoot(null));
         assertEquals(o.getDefaultTemplate(), c1.getDefaultTemplate());
-        assertEquals(o.isSelecting(), c1.isSelecting());
     }
 
     public void testSerializabilityWithHessian() throws Exception {
-        SQLTemplate o = new SQLTemplate("Test", "DO SQL", false);
+        SQLTemplate o = new SQLTemplate("Test", "DO SQL");
         Object clone = HessianUtil.cloneViaHessianSerialization(o);
 
         assertTrue(clone instanceof SQLTemplate);
@@ -93,7 +92,6 @@ public class SQLTemplateTst extends TestCase {
         assertNotSame(o, c1);
         assertEquals(o.getRoot(null), c1.getRoot(null));
         assertEquals(o.getDefaultTemplate(), c1.getDefaultTemplate());
-        assertEquals(o.isSelecting(), c1.isSelecting());
 
         // set immutable parameters ... query must recast them to mutable version
         Map[] parameters = new Map[] {
@@ -105,13 +103,13 @@ public class SQLTemplateTst extends TestCase {
     }
 
     public void testGetDefaultTemplate() {
-        SQLTemplate query = new SQLTemplate(false);
+        SQLTemplate query = new SQLTemplate();
         query.setDefaultTemplate("AAA # BBB");
         assertEquals("AAA # BBB", query.getDefaultTemplate());
     }
 
     public void testGetTemplate() {
-        SQLTemplate query = new SQLTemplate(false);
+        SQLTemplate query = new SQLTemplate();
 
         // no template for key, no default template... must be null
         assertNull(query.getTemplate("key1"));
@@ -131,7 +129,7 @@ public class SQLTemplateTst extends TestCase {
     }
 
     public void testSingleParameterSet() throws Exception {
-        SQLTemplate query = new SQLTemplate(false);
+        SQLTemplate query = new SQLTemplate();
 
         assertNotNull(query.getParameters());
         assertTrue(query.getParameters().isEmpty());
@@ -154,7 +152,7 @@ public class SQLTemplateTst extends TestCase {
     }
 
     public void testBatchParameterSet() throws Exception {
-        SQLTemplate query = new SQLTemplate(false);
+        SQLTemplate query = new SQLTemplate();
 
         assertNotNull(query.getParameters());
         assertTrue(query.getParameters().isEmpty());
@@ -175,7 +173,7 @@ public class SQLTemplateTst extends TestCase {
         assertTrue(it.hasNext());
         assertEquals(params2, it.next());
         assertTrue(it.hasNext());
-        assertTrue(((Map)it.next()).isEmpty());
+        assertTrue(((Map) it.next()).isEmpty());
         assertFalse(it.hasNext());
 
         query.setParameters((Map[]) null);

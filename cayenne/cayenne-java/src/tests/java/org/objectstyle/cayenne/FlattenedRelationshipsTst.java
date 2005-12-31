@@ -123,8 +123,7 @@ public class FlattenedRelationshipsTst extends RelationshipTestCase {
 
         SQLTemplate joinSelect = new SQLTemplate(
                 FlattenedTest1.class,
-                "SELECT * FROM COMPLEX_JOIN",
-                true);
+                "SELECT * FROM COMPLEX_JOIN");
         joinSelect.setFetchingDataRows(true);
         assertEquals(3, context.performQuery(joinSelect).size());
 
@@ -144,13 +143,13 @@ public class FlattenedRelationshipsTst extends RelationshipTestCase {
                 FlattenedTest3.class,
                 3);
         assertTrue(related.contains(ft3));
-        
+
         ft1.removeFromFt3OverComplex(ft3);
         assertFalse(related.contains(ft3));
         context.commitChanges();
-        
+
         // the thing here is that there are two join records between
-        // FT1 and FT3 (emulating invalid data or extras in the join table that 
+        // FT1 and FT3 (emulating invalid data or extras in the join table that
         // are ignored in the object model).. all (2) joins must be deleted
         assertEquals(1, context.performQuery(joinSelect).size());
     }
@@ -220,7 +219,7 @@ public class FlattenedRelationshipsTst extends RelationshipTestCase {
         ft2.addToFt3Array(ft3);
         context.commitChanges();
 
-        context = createDataContext(); //We need a new context
+        context = createDataContext(); // We need a new context
         SelectQuery q = new SelectQuery(FlattenedTest3.class);
         q.setQualifier(ExpressionFactory.matchExp("name", "FT3Name"));
         List results = context.performQuery(q);

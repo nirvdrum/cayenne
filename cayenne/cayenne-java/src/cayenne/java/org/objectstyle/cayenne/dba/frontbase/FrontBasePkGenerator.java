@@ -140,7 +140,7 @@ public class FrontBasePkGenerator extends JdbcPkGenerator {
     protected int pkFromDatabase(DataNode node, DbEntity entity) throws Exception {
         String template = "SELECT #result('UNIQUE' 'int') FROM " + entity.getName();
 
-        SQLTemplate query = new SQLTemplate(entity, template, true);
+        SQLTemplate query = new SQLTemplate(entity, template);
         QueryResult observer = new QueryResult();
         node.performQueries(Collections.singleton(query), observer);
 

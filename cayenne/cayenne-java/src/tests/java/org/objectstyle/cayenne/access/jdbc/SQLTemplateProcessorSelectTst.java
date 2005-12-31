@@ -63,11 +63,11 @@ import org.objectstyle.cayenne.unit.BasicTestCase;
  * @author Andrei Adamchik
  */
 public class SQLTemplateProcessorSelectTst extends BasicTestCase {
+
     public void testProcessTemplateUnchanged() throws Exception {
         String sqlTemplate = "SELECT * FROM ME";
 
-        SQLSelectStatement compiled =
-            new SQLTemplateProcessor().processSelectTemplate(
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
                 sqlTemplate,
                 Collections.EMPTY_MAP);
 
@@ -79,8 +79,7 @@ public class SQLTemplateProcessorSelectTst extends BasicTestCase {
     public void testProcessSelectTemplate1() throws Exception {
         String sqlTemplate = "SELECT #result('A') FROM ME";
 
-        SQLSelectStatement compiled =
-            new SQLTemplateProcessor().processSelectTemplate(
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
                 sqlTemplate,
                 Collections.EMPTY_MAP);
 
@@ -94,8 +93,7 @@ public class SQLTemplateProcessorSelectTst extends BasicTestCase {
     public void testProcessSelectTemplate2() throws Exception {
         String sqlTemplate = "SELECT #result('A' 'String') FROM ME";
 
-        SQLSelectStatement compiled =
-            new SQLTemplateProcessor().processSelectTemplate(
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
                 sqlTemplate,
                 Collections.EMPTY_MAP);
 
@@ -110,8 +108,7 @@ public class SQLTemplateProcessorSelectTst extends BasicTestCase {
     public void testProcessSelectTemplate3() throws Exception {
         String sqlTemplate = "SELECT #result('A' 'String' 'B') FROM ME";
 
-        SQLSelectStatement compiled =
-            new SQLTemplateProcessor().processSelectTemplate(
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
                 sqlTemplate,
                 Collections.EMPTY_MAP);
 
@@ -128,8 +125,7 @@ public class SQLTemplateProcessorSelectTst extends BasicTestCase {
     public void testProcessSelectTemplate4() throws Exception {
         String sqlTemplate = "SELECT #result('A'), #result('B'), #result('C') FROM ME";
 
-        SQLSelectStatement compiled =
-            new SQLTemplateProcessor().processSelectTemplate(
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
                 sqlTemplate,
                 Collections.EMPTY_MAP);
 

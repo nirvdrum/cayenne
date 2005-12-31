@@ -183,7 +183,7 @@ public class DataPort {
             }
 
             Query query = new SQLTemplate(entity, "DELETE FROM "
-                    + entity.getFullyQualifiedName(), false);
+                    + entity.getFullyQualifiedName());
 
             // notify delegate that delete is about to happen
             if (delegate != null) {
@@ -243,7 +243,8 @@ public class DataPort {
             select.setFetchingDataRows(true);
 
             // delegate is allowed to substitute query
-            GenericSelectQuery query = (delegate != null) ? delegate.willPortEntity(this,
+            GenericSelectQuery query = (delegate != null) ? delegate.willPortEntity(
+                    this,
                     entity,
                     select) : select;
 
@@ -268,7 +269,8 @@ public class DataPort {
                             && currentRow % insertBatchSize == 0) {
                         // end of the batch detected... commit and start a new insert
                         // query
-                        destinationNode.performQueries(Collections.singletonList(insert),
+                        destinationNode.performQueries(
+                                Collections.singletonList(insert),
                                 insertObserver);
                         insert = new InsertBatchQuery(entity, batchSize);
                         insertObserver.clear();
@@ -282,7 +284,8 @@ public class DataPort {
 
                 // commit remaining batch if needed
                 if (insert.size() > 0) {
-                    destinationNode.performQueries(Collections.singletonList(insert),
+                    destinationNode.performQueries(
+                            Collections.singletonList(insert),
                             insertObserver);
                 }
 

@@ -70,18 +70,17 @@ public class GenericSelectQueryTst extends BasicTestCase {
     }
 
     public void testSQLTemplate() throws Exception {
-        runTest(new SQLTemplate("Dummy", "AAA", true));
+        runTest(new SQLTemplate("Dummy", "AAA"));
     }
 
     /**
-     * Tests properties for an unknown implementation of GenericSelectQuery.
-     * Assumes there are standard setters for all the properties.
+     * Tests properties for an unknown implementation of GenericSelectQuery. Assumes there
+     * are standard setters for all the properties.
      */
     protected void runTest(GenericSelectQuery q) throws Exception {
         // fetchingDataRows
-        assertEquals(
-            GenericSelectQuery.FETCHING_DATA_ROWS_DEFAULT,
-            q.isFetchingDataRows());
+        assertEquals(GenericSelectQuery.FETCHING_DATA_ROWS_DEFAULT, q
+                .isFetchingDataRows());
 
         PropertyUtils.setProperty(q, "fetchingDataRows", Boolean.FALSE);
         assertFalse(q.isFetchingDataRows());
@@ -93,9 +92,8 @@ public class GenericSelectQueryTst extends BasicTestCase {
         assertFalse(q.isFetchingDataRows());
 
         // refreshingObjects
-        assertEquals(
-            GenericSelectQuery.REFRESHING_OBJECTS_DEFAULT,
-            q.isRefreshingObjects());
+        assertEquals(GenericSelectQuery.REFRESHING_OBJECTS_DEFAULT, q
+                .isRefreshingObjects());
 
         PropertyUtils.setProperty(q, "refreshingObjects", Boolean.FALSE);
         assertFalse(q.isRefreshingObjects());
@@ -107,9 +105,8 @@ public class GenericSelectQueryTst extends BasicTestCase {
         assertFalse(q.isRefreshingObjects());
 
         // resolvingInherited
-        assertEquals(
-            GenericSelectQuery.RESOLVING_INHERITED_DEFAULT,
-            q.isResolvingInherited());
+        assertEquals(GenericSelectQuery.RESOLVING_INHERITED_DEFAULT, q
+                .isResolvingInherited());
 
         PropertyUtils.setProperty(q, "resolvingInherited", Boolean.FALSE);
         assertFalse(q.isResolvingInherited());
@@ -137,7 +134,7 @@ public class GenericSelectQueryTst extends BasicTestCase {
 
         PropertyUtils.setProperty(q, "pageSize", new Integer(0));
         assertEquals(0, q.getPageSize());
-        
+
         // caching policy
         assertEquals(GenericSelectQuery.CACHE_POLICY_DEFAULT, q.getCachePolicy());
 

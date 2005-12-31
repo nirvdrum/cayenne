@@ -170,10 +170,8 @@ public class HSQLEmbeddedPreferenceService extends CayennePreferenceService {
             savePreferences();
 
             // shutdown HSQL
-            dataContext.performNonSelectingQuery(new SQLTemplate(
-                    Domain.class,
-                    "SHUTDOWN",
-                    false));
+            dataContext
+                    .performNonSelectingQuery(new SQLTemplate(Domain.class, "SHUTDOWN"));
 
             // shutdown Cayenne
             dataContext.getParentDataDomain().shutdown();

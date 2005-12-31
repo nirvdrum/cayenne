@@ -207,7 +207,7 @@ public class ObjectContextQueryUtils {
             String[] parameterNames,
             Object[] parameterValues) {
 
-        SQLTemplate query = new SQLTemplate(persistentClass, sql, true);
+        SQLTemplate query = new SQLTemplate(persistentClass, sql);
 
         if (parameterNames != null) {
             query.setParameters(toMap(parameterNames, parameterValues));
@@ -268,7 +268,7 @@ public class ObjectContextQueryUtils {
 
             // build a substitute query and route it to appropriate node
             DataMap rootMap = resolver.getDataMap(dataMapName);
-            SQLTemplate substituteQuery = new SQLTemplate(rootMap, sql, true);
+            SQLTemplate substituteQuery = new SQLTemplate(rootMap, sql);
             substituteQuery.setParameters(parameters);
             substituteQuery.setFetchingDataRows(dataRows);
 
@@ -285,7 +285,7 @@ public class ObjectContextQueryUtils {
         public String getName() {
             throw new CayenneRuntimeException("getName is not implemented");
         }
-        
+
         public Object getRoot(EntityResolver resolver) {
             return resolver.getDataMap(dataMapName);
         }

@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DataContextSQLTemplateTst extends CayenneTestCase {
+
     protected DataContext context;
 
     protected void setUp() throws Exception {
@@ -79,7 +80,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
         getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
         String template = "SELECT * FROM ARTIST ORDER BY ARTIST_ID";
-        SQLTemplate query = new SQLTemplate(Artist.class, template, true);
+        SQLTemplate query = new SQLTemplate(Artist.class, template);
 
         getSQLTemplateBuilder().updateSQLTemplate(query);
 
@@ -98,8 +99,9 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
         getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
         String template = "SELECT * FROM ARTIST ORDER BY ARTIST_ID";
-        SQLTemplate query =
-            getSQLTemplateBuilder().createSQLTemplate(Artist.class, template, true);
+        SQLTemplate query = getSQLTemplateBuilder().createSQLTemplate(
+                Artist.class,
+                template);
 
         query.setFetchingDataRows(false);
 
@@ -119,8 +121,9 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
         // sanity check
         assertTrue(fetchLimit < DataContextTestBase.artistCount);
         String template = "SELECT * FROM ARTIST ORDER BY ARTIST_ID";
-        SQLTemplate query =
-            getSQLTemplateBuilder().createSQLTemplate(Artist.class, template, true);
+        SQLTemplate query = getSQLTemplateBuilder().createSQLTemplate(
+                Artist.class,
+                template);
         query.setFetchLimit(fetchLimit);
 
         List objects = context.performQuery(query);
@@ -137,8 +140,9 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
         assertTrue(pageSize < DataContextTestBase.artistCount);
 
         String template = "SELECT * FROM ARTIST ORDER BY ARTIST_ID";
-        SQLTemplate query =
-            getSQLTemplateBuilder().createSQLTemplate(Artist.class, template, true);
+        SQLTemplate query = getSQLTemplateBuilder().createSQLTemplate(
+                Artist.class,
+                template);
 
         query.setPageSize(pageSize);
 
@@ -148,9 +152,8 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
 
         assertTrue(objects instanceof IncrementalFaultList);
         IncrementalFaultList pagedList = (IncrementalFaultList) objects;
-        assertEquals(
-            DataContextTestBase.artistCount - pageSize,
-            pagedList.getUnfetchedObjects());
+        assertEquals(DataContextTestBase.artistCount - pageSize, pagedList
+                .getUnfetchedObjects());
 
         // check if we can resolve subsequent pages
         Artist artist = (Artist) objects.get(pageSize);
@@ -167,8 +170,9 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
         getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
         String template = "SELECT * FROM ARTIST ORDER BY ARTIST_ID";
-        SQLTemplate query =
-            getSQLTemplateBuilder().createSQLTemplate(Artist.class, template, true);
+        SQLTemplate query = getSQLTemplateBuilder().createSQLTemplate(
+                Artist.class,
+                template);
 
         ResultIterator it = context.performIteratedQuery(query);
 

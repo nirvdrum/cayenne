@@ -88,11 +88,8 @@ public class SQLTemplateCustomizer {
         }
     }
 
-    public SQLTemplate createSQLTemplate(
-            Class root,
-            String defaultTemplate,
-            boolean selecting) {
-        SQLTemplate template = new SQLTemplate(root, defaultTemplate, selecting);
+    public SQLTemplate createSQLTemplate(Class root, String defaultTemplate) {
+        SQLTemplate template = new SQLTemplate(root, defaultTemplate);
         updateSQLTemplate(template);
         return template;
     }

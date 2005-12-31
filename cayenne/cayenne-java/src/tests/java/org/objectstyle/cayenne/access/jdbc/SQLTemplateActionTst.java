@@ -65,6 +65,9 @@ import java.util.Map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.access.DataContextTestBase;
 import org.objectstyle.cayenne.access.MockOperationObserver;
+import org.objectstyle.cayenne.access.QueryResult;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -79,10 +82,161 @@ public class SQLTemplateActionTst extends CayenneTestCase {
         deleteTestData();
     }
 
+    public void testProperties() throws Exception {
+        DbAdapter adapter = new JdbcAdapter();
+        SQLTemplate template = new SQLTemplate(Object.class, "AAAAA");
+        SQLTemplateAction action = new SQLTemplateAction(template, adapter);
+        assertSame(adapter, action.getAdapter());
+        assertSame(template, action.getQuery());
+    }
+
+    public void testExecuteSelect() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+
+        String templateString = "SELECT * FROM ARTIST WHERE ARTIST_ID = #bind($id)";
+        SQLTemplate template = new SQLTemplate(Object.class, templateString);
+        getSQLTemplateBuilder().updateSQLTemplate(template);
+
+        Map bindings = new HashMap();
+        bindings.put("id", new Integer(33005));
+        template.setParameters(bindings);
+
+        DbAdapter adapter = getAccessStackAdapter().getAdapter();
+        SQLTemplateAction plan = new SQLTemplateAction(template, adapter);
+
+        MockOperationObserver observer = new MockOperationObserver();
+        Connection c = getConnection();
+
+        try {
+            plan.performAction(c, observer);
+        }
+        finally {
+            c.close();
+        }
+
+        List rows = observer.rowsForQuery(template);
+        assertNotNull(rows);
+        assertEquals(1, rows.size());
+        Map row = (Map) rows.get(0);
+
+        assertEquals(bindings.get("id"), row.get("ARTIST_ID"));
+        assertEquals("artist5", row.get("ARTIST_NAME"));
+        assertTrue(row.containsKey("DATE_OF_BIRTH"));
+    }
+
+    public void testSelectUtilDate() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        // update data set to include dates....
+        setDate(new java.util.Date(), 33006);
+
+        String templateString = "SELECT #result('DATE_OF_BIRTH' 'java.util.Date' 'DOB') "
+                + "FROM ARTIST WHERE ARTIST_ID = #bind($id)";
+        SQLTemplate template = new SQLTemplate(Object.class, templateString);
+        getSQLTemplateBuilder().updateSQLTemplate(template);
+
+        Map bindings = new HashMap();
+        bindings.put("id", new Integer(33006));
+        template.setParameters(bindings);
+
+        DbAdapter adapter = getAccessStackAdapter().getAdapter();
+        SQLTemplateAction plan = new SQLTemplateAction(template, adapter);
+
+        MockOperationObserver observer = new MockOperationObserver();
+        Connection c = getConnection();
+
+        try {
+            plan.performAction(c, observer);
+        }
+        finally {
+            c.close();
+        }
+
+        List rows = observer.rowsForQuery(template);
+        assertNotNull(rows);
+        assertEquals(1, rows.size());
+        Map row = (Map) rows.get(0);
+
+        assertNotNull(row.get("DOB"));
+        assertEquals(java.util.Date.class, row.get("DOB").getClass());
+    }
+
+    public void testSelectSQLDate() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        // update data set to include dates....
+        setDate(new java.util.Date(), 33006);
+
+        String templateString = "SELECT #result('DATE_OF_BIRTH' 'java.sql.Date' 'DOB') "
+                + "FROM ARTIST WHERE ARTIST_ID = #bind($id)";
+        SQLTemplate template = new SQLTemplate(Object.class, templateString);
+        getSQLTemplateBuilder().updateSQLTemplate(template);
+
+        Map bindings = new HashMap();
+        bindings.put("id", new Integer(33006));
+        template.setParameters(bindings);
+
+        DbAdapter adapter = getAccessStackAdapter().getAdapter();
+        SQLTemplateAction plan = new SQLTemplateAction(template, adapter);
+
+        MockOperationObserver observer = new MockOperationObserver();
+        Connection c = getConnection();
+
+        try {
+            plan.performAction(c, observer);
+        }
+        finally {
+            c.close();
+        }
+
+        List rows = observer.rowsForQuery(template);
+        assertNotNull(rows);
+        assertEquals(1, rows.size());
+        Map row = (Map) rows.get(0);
+
+        assertNotNull(row.get("DOB"));
+        assertEquals(java.sql.Date.class, row.get("DOB").getClass());
+    }
+
+    public void testSelectSQLTimestamp() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        // update data set to include dates....
+        setDate(new java.util.Date(), 33006);
+
+        String templateString = "SELECT #result('DATE_OF_BIRTH' 'java.sql.Timestamp' 'DOB') "
+                + "FROM ARTIST WHERE ARTIST_ID = #bind($id)";
+        SQLTemplate template = new SQLTemplate(Object.class, templateString);
+        getSQLTemplateBuilder().updateSQLTemplate(template);
+
+        Map bindings = new HashMap();
+        bindings.put("id", new Integer(33006));
+        template.setParameters(bindings);
+
+        DbAdapter adapter = getAccessStackAdapter().getAdapter();
+        SQLTemplateAction action = new SQLTemplateAction(template, adapter);
+
+        MockOperationObserver observer = new MockOperationObserver();
+        Connection c = getConnection();
+
+        try {
+            action.performAction(c, observer);
+        }
+        finally {
+            c.close();
+        }
+
+        List rows = observer.rowsForQuery(template);
+        assertNotNull(rows);
+        assertEquals(1, rows.size());
+        Map row = (Map) rows.get(0);
+
+        assertNotNull(row.get("DOB"));
+        // Sybase returns a Timestamp subclass... so can't test equality
+        assertTrue(java.sql.Timestamp.class.isAssignableFrom(row.get("DOB").getClass()));
+    }
+
     public void testExecuteUpdate() throws Exception {
         String templateString = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
                 + "VALUES (#bind($id), #bind($name), #bind($dob 'DATE'))";
-        SQLTemplate template = new SQLTemplate(Object.class, templateString, false);
+        SQLTemplate template = new SQLTemplate(Object.class, templateString);
 
         Map bindings = new HashMap();
         bindings.put("id", new Integer(1));
@@ -125,7 +279,7 @@ public class SQLTemplateActionTst extends CayenneTestCase {
     public void testExecuteUpdateNoParameters() throws Exception {
         getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
-        SQLTemplate template = new SQLTemplate(Object.class, "delete from ARTIST", false);
+        SQLTemplate template = new SQLTemplate(Object.class, "delete from ARTIST");
 
         SQLTemplateAction plan = new SQLTemplateAction(template, getAccessStackAdapter()
                 .getAdapter());
@@ -149,7 +303,7 @@ public class SQLTemplateActionTst extends CayenneTestCase {
     public void testExecuteUpdateBatch() throws Exception {
         String templateString = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
                 + "VALUES (#bind($id), #bind($name), #bind($dob 'DATE'))";
-        SQLTemplate template = new SQLTemplate(Object.class, templateString, false);
+        SQLTemplate template = new SQLTemplate(Object.class, templateString);
 
         Map bindings1 = new HashMap();
         bindings1.put("id", new Integer(1));
@@ -206,7 +360,7 @@ public class SQLTemplateActionTst extends CayenneTestCase {
     }
 
     public void testExtractTemplateString() throws Exception {
-        SQLTemplate template = new SQLTemplate(Artist.class, "A\nBC", false);
+        SQLTemplate template = new SQLTemplate(Artist.class, "A\nBC");
         SQLTemplateAction action = new SQLTemplateAction(
                 template,
                 getAccessStackAdapter().getAdapter());
@@ -216,5 +370,18 @@ public class SQLTemplateActionTst extends CayenneTestCase {
 
         action.setRemovingLineBreaks(true);
         assertEquals("A BC", action.extractTemplateString());
+    }
+
+    private void setDate(java.util.Date date, int artistId) {
+        String templateString = "UPDATE ARTIST SET DATE_OF_BIRTH #bindEqual($date 'DATE') "
+                + "WHERE ARTIST_ID = #bind($id)";
+        SQLTemplate template = new SQLTemplate(Object.class, templateString);
+
+        Map map = new HashMap();
+        map.put("date", date);
+        map.put("id", new Integer(artistId));
+
+        template.setParameters(map);
+        getNode().performQueries(Collections.singleton(template), new QueryResult());
     }
 }

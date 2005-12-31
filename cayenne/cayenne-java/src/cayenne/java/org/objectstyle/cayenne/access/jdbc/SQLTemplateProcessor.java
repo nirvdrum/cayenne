@@ -73,21 +73,21 @@ import org.apache.velocity.runtime.parser.node.SimpleNode;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
- * Processor for SQL velocity templates. 
+ * Processor for SQL velocity templates.
  * 
  * @see org.objectstyle.cayenne.query.SQLTemplate
  * @since 1.1
  * @author Andrei Adamchik
  */
 class SQLTemplateProcessor {
+
     private static RuntimeInstance sharedRuntime;
 
     static final String BINDINGS_LIST_KEY = "bindings";
     static final String RESULT_COLUMNS_LIST_KEY = "resultColumns";
     static final String HELPER_KEY = "helper";
 
-    private static final SQLTemplateRenderingUtils sharedUtils =
-        new SQLTemplateRenderingUtils();
+    private static final SQLTemplateRenderingUtils sharedUtils = new SQLTemplateRenderingUtils();
 
     RuntimeInstance velocityRuntime;
     SQLTemplateRenderingUtils renderingUtils;
@@ -101,11 +101,13 @@ class SQLTemplateProcessor {
         sharedRuntime = new RuntimeInstance();
 
         // set null logger
-        sharedRuntime.addProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM, new NullLogSystem());
-        
         sharedRuntime.addProperty(
-            RuntimeConstants.RESOURCE_MANAGER_CLASS,
-            SQLTemplateResourceManager.class.getName());
+                RuntimeConstants.RUNTIME_LOG_LOGSYSTEM,
+                new NullLogSystem());
+
+        sharedRuntime.addProperty(
+                RuntimeConstants.RESOURCE_MANAGER_CLASS,
+                SQLTemplateResourceManager.class.getName());
         sharedRuntime.addProperty("userdirective", BindDirective.class.getName());
         sharedRuntime.addProperty("userdirective", BindEqualDirective.class.getName());
         sharedRuntime.addProperty("userdirective", BindNotEqualDirective.class.getName());
@@ -117,8 +119,8 @@ class SQLTemplateProcessor {
         }
         catch (Exception ex) {
             throw new CayenneRuntimeException(
-                "Error setting up Velocity RuntimeInstance.",
-                ex);
+                    "Error setting up Velocity RuntimeInstance.",
+                    ex);
         }
     }
 
@@ -127,25 +129,26 @@ class SQLTemplateProcessor {
         this.renderingUtils = sharedUtils;
     }
 
-    SQLTemplateProcessor(
-        RuntimeInstance velocityRuntime,
-        SQLTemplateRenderingUtils renderingUtils) {
+    SQLTemplateProcessor(RuntimeInstance velocityRuntime,
+            SQLTemplateRenderingUtils renderingUtils) {
         this.velocityRuntime = velocityRuntime;
         this.renderingUtils = renderingUtils;
     }
 
     /**
-     * Builds and returns a SQLSelectStatement based on SQL template and a set of parameters. 
-     * During rendering VelocityContext exposes the following  as variables: all parameters 
-     * in the map, {@link SQLTemplateRenderingUtils} as a "helper" variable and SQLStatement 
-     * object as "statement" variable.
+     * Builds and returns a SQLSelectStatement based on SQL template and a set of
+     * parameters. During rendering VelocityContext exposes the following as variables:
+     * all parameters in the map, {@link SQLTemplateRenderingUtils} as a "helper" variable
+     * and SQLStatement object as "statement" variable.
+     * 
+     * @deprecated since 1.2 as there is no longer a distinction between selecting and
+     *             updating queries processing.
      */
     SQLSelectStatement processSelectTemplate(String template, Map parameters)
-        throws Exception {
+            throws Exception {
 
         // have to make a copy of parameter map since we are gonna modify it..
-        Map internalParameters =
-            (parameters != null && !parameters.isEmpty())
+        Map internalParameters = (parameters != null && !parameters.isEmpty())
                 ? new HashMap(parameters)
                 : new HashMap(3);
 
@@ -155,8 +158,10 @@ class SQLTemplateProcessor {
         internalParameters.put(RESULT_COLUMNS_LIST_KEY, results);
         internalParameters.put(HELPER_KEY, renderingUtils);
 
-        String sql =
-            buildStatement(new VelocityContext(internalParameters), template, parameters);
+        String sql = buildStatement(
+                new VelocityContext(internalParameters),
+                template,
+                parameters);
 
         ParameterBinding[] bindingsArray = new ParameterBinding[bindings.size()];
         bindings.toArray(bindingsArray);
@@ -167,33 +172,41 @@ class SQLTemplateProcessor {
     }
 
     /**
-     * Builds and returns a SQLStatement based on SQL template and a set of parameters. 
-     * During rendering, VelocityContext exposes the following  as variables: all parameters 
-     * in the map, {@link SQLTemplateRenderingUtils} as a "helper" variable and SQLStatement 
-     * object as "statement" variable.
+     * Builds and returns a SQLStatement based on SQL template and a set of parameters.
+     * During rendering, VelocityContext exposes the following as variables: all
+     * parameters in the map, {@link SQLTemplateRenderingUtils} as a "helper" variable and
+     * SQLStatement object as "statement" variable.
      */
     SQLStatement processTemplate(String template, Map parameters) throws Exception {
         // have to make a copy of parameter map since we are gonna modify it..
-        Map internalParameters =
-            (parameters != null && !parameters.isEmpty())
+        Map internalParameters = (parameters != null && !parameters.isEmpty())
                 ? new HashMap(parameters)
                 : new HashMap(3);
 
         List bindings = new ArrayList();
+        List results = new ArrayList();
         internalParameters.put(BINDINGS_LIST_KEY, bindings);
+        internalParameters.put(RESULT_COLUMNS_LIST_KEY, results);
         internalParameters.put(HELPER_KEY, renderingUtils);
 
-        String sql =
-            buildStatement(new VelocityContext(internalParameters), template, parameters);
+        String sql = buildStatement(
+                new VelocityContext(internalParameters),
+                template,
+                parameters);
 
         ParameterBinding[] bindingsArray = new ParameterBinding[bindings.size()];
         bindings.toArray(bindingsArray);
-        return new SQLStatement(sql, bindingsArray);
+
+        ColumnDescriptor[] resultsArray = new ColumnDescriptor[results.size()];
+        results.toArray(resultsArray);
+
+        return new SQLStatement(sql, resultsArray, bindingsArray);
     }
 
     String buildStatement(VelocityContext context, String template, Map parameters)
-        throws Exception {
-        // Note: this method is a reworked version of org.apache.velocity.app.Velocity.evaluate(..)
+            throws Exception {
+        // Note: this method is a reworked version of
+        // org.apache.velocity.app.Velocity.evaluate(..)
         // cleaned up to avoid using any Velocity singletons
 
         StringWriter out = new StringWriter(template.length());

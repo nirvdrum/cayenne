@@ -73,7 +73,8 @@ import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
- * A query that executes unchanged (except for template preprocessing) "raw" SQL specified by the user. 
+ * A query that executes unchanged (except for template preprocessing) "raw" SQL specified
+ * by the user.
  * <h3>Template Script</h3>
  * <p>
  * SQLTemplate stores a dynamic template for the SQL query that supports parameters and
@@ -82,7 +83,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * </p>
  * 
  * <pre>
- *  SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
+ *           SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
  * </pre>
  * 
  * <p>
@@ -120,43 +121,112 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
     protected String defaultTemplate;
     protected Map templates;
     protected Map[] parameters;
+
+    /**
+     * @deprecated Since 1.2 this property is redundant.
+     */
     protected boolean selecting;
 
     /**
-     * Creates an empty SQLTemplate.
+     * Creates an empty SQLTemplate. Note this constructor does not specify the "root" of
+     * the query, so a user must call "setRoot" later to make sure SQLTemplate can be
+     * executed.
+     * 
+     * @since 1.2
      */
-    public SQLTemplate(boolean selecting) {
-        setSelecting(selecting);
+    public SQLTemplate() {
     }
 
-    public SQLTemplate(DataMap rootMap, String defaultTemplate, boolean selecting) {
+    /**
+     * @since 1.2
+     */
+    public SQLTemplate(DataMap rootMap, String defaultTemplate) {
         setDefaultTemplate(defaultTemplate);
-        setSelecting(selecting);
         setRoot(rootMap);
     }
 
-    public SQLTemplate(ObjEntity rootEntity, String defaultTemplate, boolean selecting) {
+    /**
+     * @since 1.2
+     */
+    public SQLTemplate(ObjEntity rootEntity, String defaultTemplate) {
         setDefaultTemplate(defaultTemplate);
-        setSelecting(selecting);
         setRoot(rootEntity);
     }
 
-    public SQLTemplate(Class rootClass, String defaultTemplate, boolean selecting) {
+    /**
+     * @since 1.2
+     */
+    public SQLTemplate(Class rootClass, String defaultTemplate) {
         setDefaultTemplate(defaultTemplate);
-        setSelecting(selecting);
         setRoot(rootClass);
     }
 
-    public SQLTemplate(DbEntity rootEntity, String defaultTemplate, boolean selecting) {
+    /**
+     * @since 1.2
+     */
+    public SQLTemplate(DbEntity rootEntity, String defaultTemplate) {
         setDefaultTemplate(defaultTemplate);
-        setSelecting(selecting);
         setRoot(rootEntity);
     }
 
-    public SQLTemplate(String objEntityName, String defaultTemplate, boolean selecting) {
-        setSelecting(selecting);
+    /**
+     * @since 1.2
+     */
+    public SQLTemplate(String objEntityName, String defaultTemplate) {
         setRoot(objEntityName);
         setDefaultTemplate(defaultTemplate);
+    }
+
+    /**
+     * Creates an empty SQLTemplate. Note this constructor does not specify the "root" of
+     * the query, so a user must call "setRoot" later to make sure SQLTemplate can be
+     * executed.
+     * 
+     * @deprecated Since 1.2 'selecting' property is redundant.
+     */
+    public SQLTemplate(boolean selecting) {
+        this();
+        setSelecting(selecting);
+    }
+
+    /**
+     * @deprecated Since 1.2 'selecting' property is redundant.
+     */
+    public SQLTemplate(DataMap rootMap, String defaultTemplate, boolean selecting) {
+        this(rootMap, defaultTemplate);
+        setSelecting(selecting);
+    }
+
+    /**
+     * @deprecated Since 1.2 'selecting' property is redundant.
+     */
+    public SQLTemplate(ObjEntity rootEntity, String defaultTemplate, boolean selecting) {
+        this(rootEntity, defaultTemplate);
+        setSelecting(selecting);
+    }
+
+    /**
+     * @deprecated Since 1.2 'selecting' property is redundant.
+     */
+    public SQLTemplate(Class rootClass, String defaultTemplate, boolean selecting) {
+        this(rootClass, defaultTemplate);
+        setSelecting(selecting);
+    }
+
+    /**
+     * @deprecated Since 1.2 'selecting' property is redundant.
+     */
+    public SQLTemplate(DbEntity rootEntity, String defaultTemplate, boolean selecting) {
+        this(rootEntity, defaultTemplate);
+        setSelecting(selecting);
+    }
+
+    /**
+     * @deprecated Since 1.2 'selecting' property is redundant.
+     */
+    public SQLTemplate(String objEntityName, String defaultTemplate, boolean selecting) {
+        this(objEntityName, defaultTemplate);
+        setSelecting(selecting);
     }
 
     /**
@@ -214,12 +284,8 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
             encoder.print(rootString);
         }
 
-        if (!selecting) {
-            encoder.print("\" selecting=\"false");
-        }
-
         encoder.println("\">");
-
+        
         encoder.indent(1);
 
         selectProperties.encodeAsXML(encoder);
@@ -301,7 +367,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
      */
     public SQLTemplate queryWithParameters(Map[] parameters) {
         // create a query replica
-        SQLTemplate query = new SQLTemplate(isSelecting());
+        SQLTemplate query = new SQLTemplate();
 
         query.setRoot(root);
         query.setDefaultTemplate(getDefaultTemplate());
@@ -480,6 +546,8 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
 
     /**
      * Returns true if SQLTemplate is expected to return a ResultSet.
+     * 
+     * @deprecated Since 1.2 'selecting' property is redundant.
      */
     public boolean isSelecting() {
         return selecting;
@@ -487,6 +555,8 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
 
     /**
      * Sets whether SQLTemplate is expected to return a ResultSet.
+     * 
+     * @deprecated Since 1.2 'selecting' property is redundant.
      */
     public void setSelecting(boolean b) {
         selecting = b;

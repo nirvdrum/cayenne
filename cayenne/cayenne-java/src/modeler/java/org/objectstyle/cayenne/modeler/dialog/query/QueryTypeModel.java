@@ -87,7 +87,7 @@ public class QueryTypeModel {
         objectSelectQuery = new SelectQuery();
         procedureQuery = new ProcedureQuery();
 
-        SQLTemplate rawSQLQuery = new SQLTemplate(true);
+        SQLTemplate rawSQLQuery = new SQLTemplate();
         rawSQLQuery.setRoot(root);
         rawSQLQuery.setFetchingDataRows(true);
         this.rawSQLQuery = rawSQLQuery;

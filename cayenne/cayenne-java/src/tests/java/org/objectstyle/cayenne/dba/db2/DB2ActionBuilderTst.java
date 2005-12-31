@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.dba.db2;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.jdbc.SQLTemplateAction;
-import org.objectstyle.cayenne.access.jdbc.SQLTemplateSelectAction;
 import org.objectstyle.cayenne.dba.MockDbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.MockSQLAction;
@@ -78,9 +77,8 @@ public class DB2ActionBuilderTst extends TestCase {
         SQLAction action = new MockSQLAction();
         assertSame(action, builder.interceptRawSQL(action));
 
-        SQLTemplateAction rawSQLAction = new SQLTemplateAction(
-                new SQLTemplate(false),
-                builder.getAdapter());
+        SQLTemplateAction rawSQLAction = new SQLTemplateAction(new SQLTemplate(), builder
+                .getAdapter());
 
         rawSQLAction.setRemovingLineBreaks(false);
         assertFalse(rawSQLAction.isRemovingLineBreaks());
@@ -89,23 +87,23 @@ public class DB2ActionBuilderTst extends TestCase {
         assertTrue(rawSQLAction.isRemovingLineBreaks());
     }
 
-    public void testSelectAction() {
+    public void testSqlAction() {
         DB2ActionBuilder builder = new DB2ActionBuilder(
                 new MockDbAdapter(),
                 new EntityResolver());
 
-        SQLAction action = builder.sqlAction(new SQLTemplate(true));
+        SQLAction action = builder.sqlAction(new SQLTemplate());
 
-        assertTrue(action instanceof SQLTemplateSelectAction);
-        assertTrue(((SQLTemplateSelectAction) action).isRemovingLineBreaks());
+        assertTrue(action instanceof SQLTemplateAction);
+        assertTrue(((SQLTemplateAction) action).isRemovingLineBreaks());
     }
-    
+
     public void testUpdateAction() {
         DB2ActionBuilder builder = new DB2ActionBuilder(
                 new MockDbAdapter(),
                 new EntityResolver());
 
-        SQLAction action = builder.updateAction(new SQLTemplate(true));
+        SQLAction action = builder.updateAction(new SQLTemplate());
 
         assertTrue(action instanceof SQLTemplateAction);
         assertTrue(((SQLTemplateAction) action).isRemovingLineBreaks());

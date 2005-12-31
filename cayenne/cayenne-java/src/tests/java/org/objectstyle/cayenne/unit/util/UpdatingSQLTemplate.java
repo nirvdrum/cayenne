@@ -61,11 +61,11 @@ import org.objectstyle.cayenne.query.SQLTemplate;
  * A SQLTemplate simplified for Spring configuration.
  * 
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class UpdatingSQLTemplate extends SQLTemplate {
 
     public UpdatingSQLTemplate(Class rootClass, String defaultTemplate) {
-        super(rootClass, defaultTemplate != null ? defaultTemplate.trim() : null, false);
+        super(rootClass, defaultTemplate != null ? defaultTemplate.trim() : null);
     }
 }

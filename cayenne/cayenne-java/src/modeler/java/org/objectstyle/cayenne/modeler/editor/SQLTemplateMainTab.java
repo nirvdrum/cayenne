@@ -56,10 +56,7 @@
 package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -82,20 +79,18 @@ import com.jgoodies.forms.layout.FormLayout;
 /**
  * A main panel for editing a SQLTemplate.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class SQLTemplateMainTab extends JPanel {
 
     protected ProjectController mediator;
     protected TextAdapter name;
-    protected JCheckBox selecting;
     protected SelectPropertiesPanel properties;
 
     public SQLTemplateMainTab(ProjectController mediator) {
         this.mediator = mediator;
 
         initView();
-        initController();
     }
 
     private void initView() {
@@ -106,8 +101,6 @@ public class SQLTemplateMainTab extends JPanel {
                 setQueryName(text);
             }
         };
-
-        selecting = new JCheckBox();
 
         properties = new RawQueryPropertiesPanel(mediator) {
 
@@ -128,36 +121,17 @@ public class SQLTemplateMainTab extends JPanel {
         CellConstraints cc = new CellConstraints();
         FormLayout layout = new FormLayout(
                 "right:max(80dlu;pref), 3dlu, fill:max(200dlu;pref)",
-                "p, 3dlu, p, 3dlu, p");
+                "p, 3dlu, p");
         PanelBuilder builder = new PanelBuilder(layout);
         builder.setDefaultDialogBorder();
 
         builder.addSeparator("SQLTemplate Settings", cc.xywh(1, 1, 3, 1));
         builder.addLabel("Query Name:", cc.xy(1, 3));
         builder.add(name.getComponent(), cc.xy(3, 3));
-        builder.addLabel("Is Selecting:", cc.xy(1, 5));
-        builder.add(selecting, cc.xy(3, 5));
 
         this.setLayout(new BorderLayout());
         this.add(builder.getPanel(), BorderLayout.NORTH);
         this.add(properties, BorderLayout.CENTER);
-    }
-
-    private void initController() {
-
-        selecting.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent event) {
-                properties.setEnabled(selecting.isSelected());
-
-                SQLTemplate query = getQuery();
-                if (query != null) {
-                    query.setSelecting(selecting.isSelected());
-                    mediator.fireQueryEvent(new QueryEvent(this, query));
-                }
-            }
-        });
-
     }
 
     /**
@@ -175,8 +149,6 @@ public class SQLTemplateMainTab extends JPanel {
         SQLTemplate sqlQuery = (SQLTemplate) query;
 
         name.setText(sqlQuery.getName());
-        selecting.setSelected(sqlQuery.isSelecting());
-        properties.setEnabled(sqlQuery.isSelecting());
         properties.initFromModel(sqlQuery);
 
         setVisible(true);
@@ -196,8 +168,8 @@ public class SQLTemplateMainTab extends JPanel {
         }
 
         SQLTemplate query = getQuery();
-        
-        if(query == null) {
+
+        if (query == null) {
             return;
         }
 
@@ -229,8 +201,9 @@ public class SQLTemplateMainTab extends JPanel {
      * Returns an entity that maps to a procedure query result class.
      */
     ObjEntity getEntity(SQLTemplate query) {
-        return query != null && query.getRoot(null) instanceof ObjEntity ? (ObjEntity) query
-                .getRoot(null) : null;
+        return query != null && query.getRoot(null) instanceof ObjEntity
+                ? (ObjEntity) query.getRoot(null)
+                : null;
     }
 
     void setEntity(ObjEntity entity) {

@@ -461,8 +461,7 @@ public class DataContextTst extends DataContextTestBase {
         SQLTemplate query = new SQLTemplate(
                 Painting.class,
                 "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) "
-                        + "VALUES (1, 'PX', 33002, 1)",
-                false);
+                        + "VALUES (1, 'PX', 33002, 1)");
         context.performNonSelectingQuery(query);
         assertEquals(1, context.performQuery(select).size());
     }
@@ -471,8 +470,7 @@ public class DataContextTst extends DataContextTestBase {
         SQLTemplate query = new SQLTemplate(
                 Painting.class,
                 "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) "
-                        + "VALUES ($pid, '$pt', $aid, $price)",
-                false);
+                        + "VALUES ($pid, '$pt', $aid, $price)");
 
         Map map = new HashMap();
         map.put("pid", new Integer(1));
@@ -493,8 +491,7 @@ public class DataContextTst extends DataContextTestBase {
         SQLTemplate query = new SQLTemplate(
                 Painting.class,
                 "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) "
-                        + "VALUES ($pid, '$pt', $aid, #bind($price 'DECIMAL' 2))",
-                false);
+                        + "VALUES ($pid, '$pt', $aid, #bind($price 'DECIMAL' 2))");
 
         Map[] maps = new Map[3];
         for (int i = 0; i < maps.length; i++) {
@@ -515,10 +512,7 @@ public class DataContextTst extends DataContextTestBase {
             assertEquals(1, counts[i]);
         }
 
-        SQLTemplate delete = new SQLTemplate(
-                Painting.class,
-                "delete from PAINTING",
-                false);
+        SQLTemplate delete = new SQLTemplate(Painting.class, "delete from PAINTING");
         counts = context.performNonSelectingQuery(delete);
         assertNotNull(counts);
         assertEquals(1, counts.length);

@@ -199,7 +199,7 @@ public class CAY_207Tst extends PeopleTestCase {
             String query = "SELECT #result('CLIENT_CONTACT_TYPE' 'String' 'CLIENT_CONTACT_TYPE') "
                     + "FROM PERSON WHERE PERSON_ID = "
                     + pk;
-            SQLTemplate template = new SQLTemplate(CAY_207Manager2.class, query, true);
+            SQLTemplate template = new SQLTemplate(CAY_207Manager2.class, query);
             template.setFetchingDataRows(true);
             List rows = context.performQuery(template);
             assertEquals(1, rows.size());

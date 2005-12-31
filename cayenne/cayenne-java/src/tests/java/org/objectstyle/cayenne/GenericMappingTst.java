@@ -104,16 +104,13 @@ public class GenericMappingTst extends CayenneTestCase {
 
         context.performNonSelectingQuery(new SQLTemplate(
                 "Generic1",
-                "INSERT INTO GENERIC1 (ID, NAME) VALUES (1, 'AAAA')",
-                false));
+                "INSERT INTO GENERIC1 (ID, NAME) VALUES (1, 'AAAA')"));
         context.performNonSelectingQuery(new SQLTemplate(
                 "Generic1",
-                "INSERT INTO GENERIC1 (ID, NAME) VALUES (2, 'BBBB')",
-                false));
+                "INSERT INTO GENERIC1 (ID, NAME) VALUES (2, 'BBBB')"));
         context.performNonSelectingQuery(new SQLTemplate(
                 "Generic1",
-                "INSERT INTO GENERIC2 (GENERIC1_ID, ID, NAME) VALUES (1, 1, 'CCCCC')",
-                false));
+                "INSERT INTO GENERIC2 (GENERIC1_ID, ID, NAME) VALUES (1, 1, 'CCCCC')"));
 
         Expression qual = ExpressionFactory.matchExp("name", "AAAA");
         SelectQuery q = new SelectQuery("Generic1", qual);
@@ -133,7 +130,7 @@ public class GenericMappingTst extends CayenneTestCase {
         g2.setToOneTarget("toGeneric1", g1, true);
 
         context.commitChanges();
-        
+
         List r1 = (List) g1.readProperty("generic2s");
         assertTrue(r1.contains(g2));
 
@@ -142,10 +139,10 @@ public class GenericMappingTst extends CayenneTestCase {
         g2.setToOneTarget("toGeneric1", g11, true);
 
         context.commitChanges();
-        
+
         List r11 = (List) g11.readProperty("generic2s");
         assertTrue(r11.contains(g2));
-        
+
         List r1_1 = (List) g1.readProperty("generic2s");
         assertFalse(r1_1.contains(g2));
     }

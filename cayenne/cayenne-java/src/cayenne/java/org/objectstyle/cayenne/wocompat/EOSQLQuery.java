@@ -73,7 +73,7 @@ public class EOSQLQuery extends SQLTemplate {
     protected Map plistMap;
 
     public EOSQLQuery(ObjEntity root, Map plistMap) {
-        super(root, null, false);
+        super(root, null);
         this.plistMap = plistMap;
         initFromPlist(plistMap);
     }
@@ -106,11 +106,7 @@ public class EOSQLQuery extends SQLTemplate {
             String sqlExpression = (String) hints.get("EOCustomQueryExpressionHintKey");
             if (sqlExpression != null) {
                 setDefaultTemplate(sqlExpression);
-                if (sqlExpression.toUpperCase().indexOf("SELECT") != -1) {
-                    setSelecting(true);
-                }
             }
-
         }
     }
 }

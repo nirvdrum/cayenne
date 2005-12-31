@@ -213,10 +213,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
     public void testSelectException() {
         DataContext context = createDataContext();
 
-        SQLTemplate q = new SQLTemplate(
-                Artist.class,
-                "SELECT * FROM NON_EXISTENT_TABLE",
-                true);
+        SQLTemplate q = new SQLTemplate(Artist.class, "SELECT * FROM NON_EXISTENT_TABLE");
 
         // disable logging for thrown exceptions
         Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);
