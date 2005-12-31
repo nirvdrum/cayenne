@@ -29,7 +29,7 @@
 		
 <source>// build SQLTemplate
 String sql = "delete from $tableName";
-SQLTemplate delete = new SQLTemplate(Artist.class, sql, false);
+SQLTemplate delete = new SQLTemplate(Artist.class, sql);
 ...
 // this will create a query "delete from ARTIST"
 update.setParameters(Collections.singletonMap("tableName", "ARTIST"));
@@ -65,7 +65,7 @@ String sql = "SELECT"
    + " #result('ARTIST_NAME' 'String'),"
    + " #result('DATE_OF_BIRTH' 'java.util.Date')"
    + " FROM ARTIST";
-SQLTemplate select = new SQLTemplate(Artist.class, sql, true);
+SQLTemplate select = new SQLTemplate(Artist.class, sql);
 ...
 DataContext context...;
 List artists = context.performQuery(select);
@@ -89,7 +89,7 @@ List artists = context.performQuery(select);
  		<p><code>#bind</code> directive example:</p>
 <source>// build SQLTemplate
 String sql = "update ARTIST set ARTIST_NAME = #bind($name) where ARTIST_ID = #bind($id)";
-SQLTemplate update = new SQLTemplate(Artist.class, sql, false);
+SQLTemplate update = new SQLTemplate(Artist.class, sql);
 ...
 // set parameters and run it...
 Map parameters = new HashMap();
@@ -118,7 +118,7 @@ context.performNonSelectingQuery(update);
 <source>// build SQLTemplate
 // note that "=" is ommitted for the second binding, since it is a part of the directive
 String sql = "update ARTIST set ARTIST_NAME = #bind($name) where ARTIST_ID #bindEqual($id);
-SQLTemplate update = new SQLTemplate(Artist.class, sql, false);
+SQLTemplate update = new SQLTemplate(Artist.class, sql);
 ...
 // set parameters and run it...
 Map parameters = new HashMap();
@@ -136,7 +136,7 @@ context.performNonSelectingQuery(update);
 <source>// build SQLTemplate
 // note that "!=" is ommitted for the second binding, since it is a part of the directive
 String sql = "update ARTIST set ARTIST_NAME = #bind($name) where ARTIST_ID #bindNotEqual($id)";
-SQLTemplate update = new SQLTemplate(Artist.class, sql, false);
+SQLTemplate update = new SQLTemplate(Artist.class, sql);
 ...
 // set parameters and run it...
 Map parameters = new HashMap();
@@ -165,7 +165,7 @@ context.performNonSelectingQuery(update);
    + " FROM ARTIST t0"
    + " WHERE ARTIST_NAME LIKE #bind($name)"
    + " OR ARTIST_ID > #bind($id)";
-SQLTemplate select = new SQLTemplate(Artist.class, sql, true);
+SQLTemplate select = new SQLTemplate(Artist.class, sql);
 </source>
 
 		<p>It would be nice to exclude ARTIST_NAME matching if "name" parameter is null, exclude ARTIST_ID
@@ -184,7 +184,7 @@ SQLTemplate select = new SQLTemplate(Artist.class, sql, true);
    + " #chunk($name) ARTIST_NAME LIKE #bind($name) #end" // ARTIST_NAME "chunk"
    + " #chunk($id) ARTIST_ID > #bind($id) #end"          // ARTIST_ID "chunk"
    + " #end";                                            // end of chain
-SQLTemplate select = new SQLTemplate(Artist.class, sql, true);
+SQLTemplate select = new SQLTemplate(Artist.class, sql);
 </source>		
 		
 		

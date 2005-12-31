@@ -11,26 +11,20 @@
             the database data. Subsequent chapters show how to build SQL dynamically, bind parameters and describe result sets
             using SQLTemplate scripting features.</p> 
             
-            <panel name="Note:">In Cayenne 1.0 executing SQL directly was done via SqlSelectQuery and SqlModifyQuery. 
-            These classes didn't provide adequate support for building dynamic parameterized SQL, and are now deprecated
-             in favor of SQLTemplate.
-            </panel>
-            
             <subsection name="7.6.1 Creating SQLTemplate">
-            <p>While SQLTemplates can be built using CayenneModeler <i>[not there yet, coming soon...]</i>, creating them in
-            the code is just as easy as regular SelectQueries. SQLTemplate consists of root and dynamic template string.
+            <p>SQLTemplates can be built using CayenneModeler. Here we demonstrate how to do the same thing via API. 
+			SQLTemplate consists of root and dynamic template string.
             Dynamic behavior of the template is discussed in subsequent chapters, for now it is sufficient to know that the template string 
-            is simply a valid SQL statement in the target database SQL dialect. Note that one of the parameters in SQLTemplate constructor 
-            is a boolean specifying whether the query is expected to return the result or not.
+            is simply a valid SQL statement in the target database SQL dialect.
             </p>
 <source>
 import org.objectstyle.cayenne.query.SQLTemplate;
 ...
 // create selecting SQLTemplate
-SQLTemplate selectQuery = new SQLTemplate(Artist.class, "select * from ARTIST", true);
+SQLTemplate selectQuery = new SQLTemplate(Artist.class, "select * from ARTIST");
 ...
 // create updating SQLTemplate
-SQLTemplate updateQuery = new SQLTemplate(Artist.class, "delete from ARTIST", false);
+SQLTemplate updateQuery = new SQLTemplate(Artist.class, "delete from ARTIST");
 </source>
 
 		</subsection>
@@ -43,7 +37,7 @@ SQLTemplate updateQuery = new SQLTemplate(Artist.class, "delete from ARTIST", fa
 import org.objectstyle.cayenne.query.SQLTemplate;
 ...
 // fetch all artists, but no more than 1000 objects...
-SQLTemplate rawSelect = new SQLTemplate(Artist.class, "select * from ARTIST", true);
+SQLTemplate rawSelect = new SQLTemplate(Artist.class, "select * from ARTIST");
 rawSelect.setFetchLimit(1000);
 
 List artists = dataContext.performQuery(rawSelect);
@@ -62,7 +56,7 @@ List artists = dataContext.performQuery(rawSelect);
 import org.objectstyle.cayenne.query.SQLTemplate;
 ...
 // fetch all artists, but no more than 1000 objects...
-SQLTemplate rawDelete = new SQLTemplate(Artist.class, "delete from ARTIST", false);
+SQLTemplate rawDelete = new SQLTemplate(Artist.class, "delete from ARTIST");
 int[] deleteCounts = dataContext.performNonSelectingQuery(rawDelete);
 </source>
 	
@@ -79,7 +73,7 @@ int[] deleteCounts = dataContext.performNonSelectingQuery(rawDelete);
 		</p>
 		
 <source>// build template with default SQL
-SQLTemplate query = new SQLTemplate(Artist.class, "select * from ARTIST", true);
+SQLTemplate query = new SQLTemplate(Artist.class, "select * from ARTIST");
 
 // for Postgres it would be nice to trim the CHAR ARTIST_NAME column 
 // or otherwise it will be returned padded with spaces

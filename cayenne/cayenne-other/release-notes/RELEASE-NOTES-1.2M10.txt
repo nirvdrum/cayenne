@@ -14,6 +14,8 @@ Changes/New Features:
 * New method: DataObjectUtils.objectForQuery(DataContext, Query)
 * Remote Object Persistence:
   - added 'localObjects' to ObjectContext interface.
+* SQLTemplate no longer requires users to specify whether it is selecting or not. 
+  This information is really redundant and can be determined from JDBC in runtime.
 
 Other Bugs Fixed:
 
