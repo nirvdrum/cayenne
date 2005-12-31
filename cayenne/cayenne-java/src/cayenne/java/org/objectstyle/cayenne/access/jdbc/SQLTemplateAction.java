@@ -103,7 +103,8 @@ public class SQLTemplateAction implements SQLAction {
     }
 
     /**
-     * Runs a SQLTemplate query as an update.
+     * Runs a SQLTemplate query, collecting all results. If a callback expects an iterated
+     * result, result processing is stopped after the first ResultSet is encountered.
      */
     public void performAction(Connection connection, OperationObserver callback)
             throws SQLException, Exception {
@@ -140,17 +141,12 @@ public class SQLTemplateAction implements SQLAction {
             }
 
             long t1 = System.currentTimeMillis();
-
-            // TODO: we may cache prep statements for this loop, using merged string as a
-            // key since it is very likely that it will be the same for multiple parameter
-            // sets...
             boolean iteratedResult = callback.isIteratedResult();
             PreparedStatement statement = connection.prepareStatement(compiled.getSql());
             try {
                 bind(statement, compiled.getBindings());
 
                 // process a mix of results
-
                 boolean isResultSet = statement.execute();
                 boolean firstIteration = true;
                 while (true) {
@@ -190,6 +186,8 @@ public class SQLTemplateAction implements SQLAction {
             }
         }
 
+        // notify of combined counts of all queries inside SQLTemplate multipled by the
+        // number of parameter sets...
         if (counts != null) {
             int[] ints = new int[counts.size()];
             for (int i = 0; i < ints.length; i++) {
