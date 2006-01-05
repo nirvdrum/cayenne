@@ -496,7 +496,7 @@ public class DbEntity extends Entity implements DbEntityListener, DbAttributeLis
                     while (rit.hasNext()) {
                         ObjRelationship or = (ObjRelationship) rit.next();
                         // rename the db relationship path with the new name
-                        if (or.getDbRelationshipPath().equals(oldName)) {
+                        if (Util.nullSafeEquals(or.getDbRelationshipPath(), oldName)) {
                             or.setDbRelationshipPath(newName);
                         }
                     }
