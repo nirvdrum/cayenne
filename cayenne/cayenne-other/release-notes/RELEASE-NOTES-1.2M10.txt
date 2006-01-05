@@ -1,5 +1,5 @@
 Cayenne Release Notes 1.2 M10 milestone
-Date: 
+Date: 01/05/2006
 ============================================
 
 For the latest information visit project web site: 
@@ -28,3 +28,8 @@ Changes/New Features:
 Other Bugs Fixed:
 
 * CayenneModeler doesn't react to change in adapter name.
+* CAY-410	Endless loop on remote notifications
+* CAY-374	Generate explicit error message instead of silently ignoring lack of support for Generated columns
+* CAY-413	DataMaps and DataNodes must be alphabetically sorted in the Modeler and cayenne.xml
+* CAY-408	cayenne.xml not found in servlet context path though it is there
+* CAY-403	Incorrect FK statement during schema generation for cross-DB relationships

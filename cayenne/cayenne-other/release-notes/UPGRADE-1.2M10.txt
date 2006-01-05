@@ -1,6 +1,8 @@
 Cayenne Upgrade Information 1.2 M10 milestone
-Date: 
+Date: 01/05/2006
 ============================================
+
+Upgrade from M9 is recommended for users who used cross-platform distribution.
 
 GENERAL UPGRADE NOTES:
 
