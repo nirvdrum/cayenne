@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,41 +55,54 @@
  */
 package org.objectstyle.cayenne.dba.sqlserver;
 
-import java.sql.DatabaseMetaData;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.DbAdapterFactory;
+import org.objectstyle.cayenne.unit.AccessStackAdapter;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.SQLServerStackAdapter;
 
-/**
- * Detects SQLServer database from JDBC metadata.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public class SQLServerSniffer implements DbAdapterFactory {
+public class SQLServerSnifferTst extends CayenneTestCase {
 
-    public DbAdapter createAdapter(DatabaseMetaData md) throws SQLException {
-        String dbName = md.getDatabaseProductName();
-        if (dbName == null || dbName.toUpperCase().indexOf("MICROSOFT SQL SERVER") < 0) {
-            return null;
-        }
+    public void testCreateAdapter() throws Exception {
 
-        SQLServerAdapter adapter = new SQLServerAdapter();
+        SQLServerSniffer sniffer = new SQLServerSniffer();
 
-        // detect whether generated keys are supported
+        DbAdapter adapter = null;
+        Connection c = getConnection();
 
-        boolean generatedKeys = false;
         try {
-            generatedKeys = md.supportsGetGeneratedKeys();
+            adapter = sniffer.createAdapter(c.getMetaData());
         }
-        catch (Throwable th) {
-            // catch exceptions resulting from incomplete JDBC3 implementation
-            // ** we have to catch Throwable, as unimplemented methods would result in
-            // "AbstractMethodError".
+        finally {
+            try {
+                c.close();
+            }
+            catch (SQLException e) {
+
+            }
         }
 
-        adapter.setSupportsGeneratedKeys(generatedKeys);
-        return adapter;
+        // only test with SQLServer adapter
+        AccessStackAdapter testAdapter = getAccessStackAdapter();
+        boolean sqlServer = testAdapter instanceof SQLServerStackAdapter;
+
+        if (!sqlServer) {
+            assertNull(adapter);
+            return;
+        }
+
+        String driver = getConnectionInfo().getJdbcDriver();
+        boolean msDriver = driver != null && driver.startsWith("com.microsoft.");
+
+        assertTrue(adapter instanceof SQLServerAdapter);
+
+        if (msDriver) {
+            assertFalse(adapter.supportsGeneratedKeys());
+        }
+        else {
+            assertTrue(adapter.supportsGeneratedKeys());
+        }
     }
 }
