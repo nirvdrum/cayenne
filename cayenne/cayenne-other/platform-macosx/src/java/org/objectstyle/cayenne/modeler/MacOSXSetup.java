@@ -8,17 +8,18 @@ import com.apple.eawt.ApplicationAdapter;
 import com.apple.eawt.ApplicationEvent;
 
 /**
- * Configures Modeler to better integrate into Mac OS X environment. Has no effect
- * on other platforms.
+ * Configures Modeler to better integrate into Mac OS X environment. Has no effect on
+ * other platforms.
  * 
  * @since 1.1
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 class MacOSXSetup {
 
     static void configureMacOSX() {
         // Application.getApplication().setEnabledPreferencesMenu(true);
-        com.apple.eawt.Application.getApplication().addApplicationListener(new MacEventsAdapter());
+        com.apple.eawt.Application.getApplication().addApplicationListener(
+                new MacEventsAdapter());
     }
 
     static class MacEventsAdapter extends ApplicationAdapter {

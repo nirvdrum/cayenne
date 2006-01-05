@@ -11,6 +11,14 @@ http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
 
 Changes/New Features:
 
+* Fixed cross-platform CayenneModeler startup issue.
+
+* MacOSX CayenneModeler will now use Aqua look and feel by default. 
+  If you already used Cayenne on Mac, you may need to delete the old preferences.
+  Go to "/Users/username/.cayenne/modeler.preferences" and remve the following lines: 
+       Editor.lookAndFeel=...
+       Editor.theme=...
+       
 * New method: DataObjectUtils.objectForQuery(DataContext, Query)
 * Remote Object Persistence:
   - added 'localObjects' to ObjectContext interface.

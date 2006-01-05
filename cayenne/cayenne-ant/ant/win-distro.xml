@@ -67,10 +67,10 @@
 		</jar>
 		
 		<copy todir="${build.win}"
-			file="${cayenne.other}/platform/win/launch4j-config.xml">
+			file="${cayenne.other}/platform-win32/launch4j-config.xml">
 			<filterset>
 				<filter token="ICON"
-					value="${basedir}/${cayenne.other}/platform/win/CayenneModeler.ico"/>
+					value="${basedir}/${cayenne.other}/platform-win32/CayenneModeler.ico"/>
 				<filter token="JAR" value="${build.win}/cayenne-modeler-all.jar"/>
 				<filter token="EXE" value="${build.win}/CayenneModeler.exe"/>
 				<filter token="PROJECT-VERSION" value="${project.version}"/>

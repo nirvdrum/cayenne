@@ -48,6 +48,10 @@
 		<pathelement path="${cayenne.other}/src/pdf/java"/>
 	</path>
 	
+	<path id="srcpath-macosx">
+		<pathelement path="${cayenne.other}/platform-macosx/src/java"/>
+	</path>
+	
 	<!-- ============================================= -->
 	<!-- Class Paths.                                  -->
 	<!-- ============================================= -->
@@ -114,6 +118,7 @@
 	
 	<path id="classpath-macosx">
 		<fileset dir="lib" includes="*.jar"/>
+		<path refid="classpath-cayenne-lib-tools"/>
 	</path>
 	
 	<path id="classpath-win-onmac">

@@ -65,7 +65,6 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Layout;
 import org.apache.log4j.Logger;
@@ -79,7 +78,7 @@ import com.jgoodies.looks.plastic.PlasticTheme;
 /**
  * Main class responsible for starting CayenneModeler.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  * @since 1.1
  */
 public class Main {
@@ -99,9 +98,6 @@ public class Main {
         if (!main.checkJDKVersion()) {
             System.exit(1);
         }
-
-        // run Mac hooks
-        main.configureMacOSX();
 
         File projectFile = projectFileFromArgs(args);
         main.runModeler(projectFile);
@@ -161,20 +157,6 @@ public class Main {
                     "Unsupported JDK Version",
                     JOptionPane.ERROR_MESSAGE);
             return false;
-        }
-    }
-
-    protected void configureMacOSX() {
-        
-        if (!SystemUtils.IS_OS_MAC_OSX) {
-            return;
-        }
-
-        try {
-            MacOSXSetup.configureMacOSX();
-        }
-        catch (Exception ex) {
-            // ignore... not a mac
         }
     }
 
@@ -244,6 +226,20 @@ public class Main {
         }
     }
 
+    protected String getLookAndFeelName() {
+        ModelerPreferences prefs = ModelerPreferences.getPreferences();
+        return prefs.getString(
+                ModelerPreferences.EDITOR_LAFNAME,
+                ModelerConstants.DEFAULT_LAF_NAME);
+    }
+
+    protected String getThemeName() {
+        ModelerPreferences prefs = ModelerPreferences.getPreferences();
+        return prefs.getString(
+                ModelerPreferences.EDITOR_THEMENAME,
+                ModelerConstants.DEFAULT_THEME_NAME);
+    }
+
     /**
      * Set up the UI Look & Feel according to $HOME/.cayenne/modeler.preferences
      */
@@ -251,14 +247,9 @@ public class Main {
         // get preferences
         ModelerPreferences prefs = ModelerPreferences.getPreferences();
 
-        // get L&F name
-        String lfName = prefs.getString(
-                ModelerPreferences.EDITOR_LAFNAME,
-                ModelerConstants.DEFAULT_LAF_NAME);
-        // get UI theme name
-        String themeName = prefs.getString(
-                ModelerPreferences.EDITOR_THEMENAME,
-                ModelerConstants.DEFAULT_THEME_NAME);
+  
+        String lfName = getLookAndFeelName();
+        String themeName = getThemeName();
 
         try {
             // only install theme if L&F is Plastic;

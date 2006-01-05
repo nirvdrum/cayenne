@@ -6,6 +6,7 @@
 <project name="MacDistro" default="...">
 	
 	<property name="dist.mac" value="${dist.base}/macosx"/>
+	<property name="build.mac" value="${build}/macosx"/>
 	
 	<target name="prepare">
 		<taskdef name="jarbundler" classpathref="classpath-macosx"
@@ -15,7 +16,7 @@
 	</target>
 	
 	<target name="diskimage" depends="prepare,app">
-		<copy todir="${dist.mac}" file="${cayenne.other}/platform/macosx/README.txt"/>
+		<copy todir="${dist.mac}" file="${cayenne.other}/platform-macosx/src/resources/README.txt"/>
 		
 		<!-- unzip platform-neutral distro to make sure mac version is identical -->
 		<untar dest="${dist.mac}"
@@ -42,13 +43,22 @@
 		</exec>
 	</target>
 	
-	<target name="app" depends="prepare">	
+	<target name="build-ext" depends="prepare">
+		<compile-1_4 destdir="${build.mac}/classes" srcref="srcpath-macosx"
+			classpathref="classpath-macosx"/>
+		
+		<jar jarfile="${dist.mac}/cayenne-modeler-macosx.jar">
+			<fileset dir="${build.mac}/classes"/>
+		</jar>
+	</target>
+	
+	<target name="app" depends="prepare,build-ext">	
 		
 		<delete dir="${dist.mac}/CayenneModeler.app"/>
 		
 		<jarbundler dir="${dist.mac}" verbose="true" name="CayenneModeler"
-			mainclass="org.objectstyle.cayenne.modeler.Main"
-			icon="${cayenne.other}/platform/macosx/CayenneModeler.icns"
+			mainclass="org.objectstyle.cayenne.modeler.MacOSXMain"
+			icon="${cayenne.other}/platform-macosx/src/resources/CayenneModeler.icns"
 			bundleid="org.objectstyle.cayenne.modeler.CayenneModeler"
 			version="${project.version}"
 			infostring="CayenneModeler ${project.version}"
@@ -59,6 +69,7 @@
 			
 			<jarfileset dir="${dist}/lib" includes="cayenne.jar"/>
 			<jarfileset dir="${dist}/lib/modeler" includes="*.jar"/>
+			<jarfileset dir="${dist.mac}" includes="*.jar"/>
 		</jarbundler>
 	</target>
 </project>
