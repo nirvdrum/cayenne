@@ -131,9 +131,20 @@ public class WebApplicationResourceLocator extends ResourceLocator {
     public URL findResource(String location) {
         if (!additionalContextPaths.isEmpty() && getServletContext() != null) {
 
+            String suffix = location != null ? location : "";
+            if (suffix.startsWith("/")) {
+                suffix = suffix.substring(1);
+            }
+
             Iterator cpi = this.additionalContextPaths.iterator();
             while (cpi.hasNext()) {
-                String fullName = cpi.next() + "/" + location;
+                String prefix = (String) cpi.next();
+
+                if (!prefix.endsWith("/")) {
+                    prefix += "/";
+                }
+
+                String fullName = prefix + suffix;
                 logObj.debug("searching for: " + fullName);
                 try {
                     URL url = getServletContext().getResource(fullName);
