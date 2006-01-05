@@ -22,8 +22,11 @@ Changes/New Features:
 * New method: DataObjectUtils.objectForQuery(DataContext, Query)
 * Remote Object Persistence:
   - added 'localObjects' to ObjectContext interface.
+  
 * SQLTemplate no longer requires users to specify whether it is selecting or not. 
   This information is really redundant and can be determined from JDBC in runtime.
+  FrontBase note: you will need FrontBase JDBC driver newer than version 2.5.2. 
+  Older driver will not work due to this change.
 
 Other Bugs Fixed:
 
