@@ -13,6 +13,8 @@
 			classname="com.loomcom.ant.tasks.jarbundler.JarBundler"/>
 		
 		<mkdir dir="${dist.mac}"/>
+		<mkdir dir="${build.mac}/lib"/>
+		<mkdir dir="${build.mac}/classes"/>
 	</target>
 	
 	<target name="diskimage" depends="prepare,app">
@@ -47,7 +49,7 @@
 		<compile-1_4 destdir="${build.mac}/classes" srcref="srcpath-macosx"
 			classpathref="classpath-macosx"/>
 		
-		<jar jarfile="${dist.mac}/cayenne-modeler-macosx.jar">
+		<jar jarfile="${build.mac}/lib/cayenne-modeler-macosx.jar">
 			<fileset dir="${build.mac}/classes"/>
 		</jar>
 	</target>
@@ -69,7 +71,7 @@
 			
 			<jarfileset dir="${dist}/lib" includes="cayenne.jar"/>
 			<jarfileset dir="${dist}/lib/modeler" includes="*.jar"/>
-			<jarfileset dir="${dist.mac}" includes="*.jar"/>
+			<jarfileset dir="${build.mac}/lib" includes="*.jar"/>
 		</jarbundler>
 	</target>
 </project>
