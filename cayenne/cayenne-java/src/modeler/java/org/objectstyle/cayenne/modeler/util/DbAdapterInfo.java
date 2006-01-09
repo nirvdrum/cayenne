@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.db2.DB2Adapter;
 import org.objectstyle.cayenne.dba.derby.DerbyAdapter;
 import org.objectstyle.cayenne.dba.firebird.FirebirdAdapter;
+import org.objectstyle.cayenne.dba.frontbase.FrontBaseAdapter;
 import org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter;
 import org.objectstyle.cayenne.dba.mysql.MySQLAdapter;
 import org.objectstyle.cayenne.dba.openbase.OpenBaseAdapter;
@@ -77,7 +78,7 @@ import org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter;
 import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
 
 /**
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public final class DbAdapterInfo {
 
@@ -87,8 +88,8 @@ public final class DbAdapterInfo {
             MySQLAdapter.class.getName(), SybaseAdapter.class.getName(),
             PostgresAdapter.class.getName(), HSQLDBAdapter.class.getName(),
             DB2Adapter.class.getName(), SQLServerAdapter.class.getName(),
-            OpenBaseAdapter.class.getName(), DerbyAdapter.class.getName(),
-            FirebirdAdapter.class.getName()
+            FrontBaseAdapter.class.getName(), OpenBaseAdapter.class.getName(),
+            DerbyAdapter.class.getName(), FirebirdAdapter.class.getName()
     };
 
     private static final Map IMMUTABLE_LABELS = Collections
@@ -102,8 +103,10 @@ public final class DbAdapterInfo {
         DEFAULT_ADAPTER_LABELS.put(PostgresAdapter.class.getName(), "PostgreSQL Adapter");
         DEFAULT_ADAPTER_LABELS.put(HSQLDBAdapter.class.getName(), "HypersonicDB Adapter");
         DEFAULT_ADAPTER_LABELS.put(DB2Adapter.class.getName(), "DB2 Adapter");
-        DEFAULT_ADAPTER_LABELS.put(SQLServerAdapter.class.getName(),
+        DEFAULT_ADAPTER_LABELS.put(
+                SQLServerAdapter.class.getName(),
                 "MS SQLServer Adapter");
+        DEFAULT_ADAPTER_LABELS.put(FrontBaseAdapter.class.getName(), "FrontBase Adapter");
         DEFAULT_ADAPTER_LABELS.put(OpenBaseAdapter.class.getName(), "OpenBase Adapter");
         DEFAULT_ADAPTER_LABELS.put(DerbyAdapter.class.getName(), "Derby Adapter");
         DEFAULT_ADAPTER_LABELS.put(FirebirdAdapter.class.getName(), "FireBird Adapter");
