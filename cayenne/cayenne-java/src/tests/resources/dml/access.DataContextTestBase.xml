@@ -398,6 +398,26 @@
 		</value></constructor-arg>
 	</bean>
 	
+	<!-- PAINTING_INFO -->
+	<bean id="PI1" class="org.objectstyle.cayenne.unit.util.UpdatingSQLTemplate">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.art.Painting</value></constructor-arg>
+		<constructor-arg><value>
+		INSERT INTO PAINTING_INFO (PAINTING_ID) VALUES (33001)
+		</value></constructor-arg>
+	</bean>
+	<bean id="PI2" class="org.objectstyle.cayenne.unit.util.UpdatingSQLTemplate">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.art.Painting</value></constructor-arg>
+		<constructor-arg><value>
+		INSERT INTO PAINTING_INFO (PAINTING_ID) VALUES (33002)
+		</value></constructor-arg>
+	</bean>
+	<bean id="PI3" class="org.objectstyle.cayenne.unit.util.UpdatingSQLTemplate">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.art.Painting</value></constructor-arg>
+		<constructor-arg><value>
+		INSERT INTO PAINTING_INFO (PAINTING_ID) VALUES (33003)
+		</value></constructor-arg>
+	</bean>
+	
 	
 	<!-- ======================================= -->
 	<!-- Data Sets -->
@@ -487,6 +507,19 @@
 				<ref bean="P23"/>
 				<ref bean="P24"/>
 				<ref bean="P25"/>
+			</list>
+		</constructor-arg>
+	</bean>
+	<bean id="testPaintingInfos" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<ref bean="P1"/>
+				<ref bean="P2"/>
+				<ref bean="P3"/>
+				<ref bean="P4"/>
+				<ref bean="PI1"/>
+				<ref bean="PI2"/>
+				<ref bean="PI3"/>
 			</list>
 		</constructor-arg>
 	</bean>

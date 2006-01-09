@@ -63,6 +63,7 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 
@@ -142,18 +143,39 @@ class PrefetchProcessorNode extends PrefetchTreeNode {
 
     void connectToParents() {
 
+        // to-one's were connected earlier...
         if (isPartitionedByParent()) {
 
             // depending on whether parent is a "phantom" node,
             // use different strategy
 
             PrefetchProcessorNode parent = (PrefetchProcessorNode) getParent();
-
-            if (parent.getObjects() != null && parent.getObjects().size() > 0) {
-                connectToNodeParents(parent.getObjects());
+            boolean parentObjectsExist = parent.getObjects() != null
+                    && parent.getObjects().size() > 0;
+            if (incoming.isToMany()) {
+                if (parentObjectsExist) {
+                    connectToNodeParents(parent.getObjects());
+                }
+                else {
+                    connectToFaultedParents();
+                }
             }
             else {
-                connectToFaultedParents();
+                // optional to-one ... need to fill in unresolved relationships with
+                // null...
+                if (parentObjectsExist) {
+                    clearNullRelationships(parent.getObjects());
+                }
+            }
+        }
+    }
+
+    private final void clearNullRelationships(List parentObjects) {
+        Iterator it = parentObjects.iterator();
+        while (it.hasNext()) {
+            DataObject object = (DataObject) it.next();
+            if (object.readPropertyDirectly(name) instanceof Fault) {
+                object.writeProperty(name, null);
             }
         }
     }
@@ -188,7 +210,7 @@ class PrefetchProcessorNode extends PrefetchTreeNode {
             toManyList.setObjectList(related != null ? related : new ArrayList(1));
         }
         else {
-            // this should've been handled earlier in 'linkToParent'
+            // this should've been handled elsewhere
             throw new CayenneRuntimeException(
                     "To-one relationship wasn't handled properly: " + incoming.getName());
         }

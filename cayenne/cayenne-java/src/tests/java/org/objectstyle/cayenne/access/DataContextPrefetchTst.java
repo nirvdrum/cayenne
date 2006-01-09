@@ -64,8 +64,10 @@ import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
 import org.objectstyle.art.Painting;
+import org.objectstyle.art.PaintingInfo;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.DataObjectUtils;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -374,6 +376,34 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         Painting px = (Painting) paintings.get(3);
         Artist ax = (Artist) px.readProperty(Painting.TO_ARTIST_PROPERTY);
         assertEquals(PersistenceState.COMMITTED, ax.getPersistenceState());
+    }
+
+    public void testPrefetchOneToOne() throws Exception {
+        createTestData("testPaintingInfos");
+
+        Expression e = ExpressionFactory.likeExp("toArtist.artistName", "a%");
+        SelectQuery q = new SelectQuery(Painting.class, e);
+        q.addPrefetch(Painting.TO_PAINTING_INFO_PROPERTY);
+        q.addOrdering(Painting.PAINTING_TITLE_PROPERTY, true);
+
+        List results = context.performQuery(q);
+        // block further queries
+        context.setDelegate(new QueryBlockingDelegate());
+
+        assertEquals(4, results.size());
+
+        // testing non-null to-one target
+        Painting p2 = (Painting) results.get(1);
+        Object o2 = p2.readPropertyDirectly(Painting.TO_PAINTING_INFO_PROPERTY);
+        assertTrue(o2 instanceof PaintingInfo);
+        PaintingInfo pi2 = (PaintingInfo) o2;
+        assertEquals(PersistenceState.COMMITTED, pi2.getPersistenceState());
+        assertEquals(DataObjectUtils.intPKForObject(p2), DataObjectUtils
+                .intPKForObject(pi2));
+
+        // testing null to-one target
+        Painting p4 = (Painting) results.get(3);
+        assertNull(p4.readPropertyDirectly(Painting.TO_PAINTING_INFO_PROPERTY));
     }
 
     public void testCAY119() throws Exception {
