@@ -59,6 +59,7 @@ import junit.framework.TestCase;
 
 import org.objectstyle.art.oneway.Artist;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.unit.util.TestBean;
 
 public class CayenneDataObjectTst extends TestCase {
 
@@ -109,5 +110,17 @@ public class CayenneDataObjectTst extends TestCase {
         assertNull(a.readNestedProperty("someOtherObjectProperty"));
         a.setSomeOtherObjectProperty(object);
         assertSame(object, a.readNestedProperty("someOtherObjectProperty"));
+    }
+
+    public void testReadNestedPropertyNonDataObjectPath() {
+        CayenneDataObject o1 = new CayenneDataObject();
+        TestBean o2 = new TestBean();
+        o2.setInteger(new Integer(55));
+        o1.writePropertyDirectly("o2", o2);
+
+        assertSame(o2, o1.readNestedProperty("o2"));
+        assertEquals(new Integer(55), o1.readNestedProperty("o2.integer"));
+        assertEquals(TestBean.class, o1.readNestedProperty("o2.class"));
+        assertEquals(TestBean.class.getName(), o1.readNestedProperty("o2.class.name"));
     }
 }

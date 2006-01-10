@@ -157,7 +157,10 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
         String[] tokenized = tokenizePath(path);
         int length = tokenized.length;
 
+        int pathIndex = 0;
+
         for (int i = 0; i < length; i++) {
+            pathIndex += tokenized[i].length();
 
             object = dataObject.readSimpleProperty(tokenized[i]);
 
@@ -168,7 +171,8 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
                 dataObject = (CayenneDataObject) object;
             }
             else if (i + 1 < length) {
-                throw new CayenneRuntimeException("Invalid path: " + path);
+                // read the rest of the path via introspection
+                return PropertyUtils.getProperty(object, path.substring(pathIndex));
             }
         }
 
