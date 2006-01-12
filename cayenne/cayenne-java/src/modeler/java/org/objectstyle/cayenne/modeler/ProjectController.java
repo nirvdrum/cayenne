@@ -625,7 +625,7 @@ public class ProjectController extends CayenneController {
             temp.currentDomainChanged(e);
         }
 
-        ((CayenneModelerController) parent).dataDomainSelectedAction(currentState.domain);
+        ((CayenneModelerController) parent).getActionController().domainSelected();
     }
 
     /**

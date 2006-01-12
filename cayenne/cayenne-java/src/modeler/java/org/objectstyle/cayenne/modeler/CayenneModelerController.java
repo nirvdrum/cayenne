@@ -64,7 +64,6 @@ import java.util.Vector;
 
 import javax.swing.JFrame;
 
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
@@ -108,8 +107,6 @@ public class CayenneModelerController extends CayenneController {
         return projectController;
     }
 
-
-
     public FSPath getLastEOModelDirectory() {
         // find start directory in preferences
 
@@ -138,10 +135,6 @@ public class CayenneModelerController extends CayenneController {
                 frame.getClass());
         ComponentGeometry geometry = ComponentGeometry.getPreference(prefDomain);
         geometry.bind(frame, 650, 550, 30);
-    }
-
-    public void dataDomainSelectedAction(DataDomain domain) {
-        actionController.domainSelected(domain);
     }
 
     public void startupAction() {
@@ -233,9 +226,8 @@ public class CayenneModelerController extends CayenneController {
             projectController.setDirty(true);
 
             // show warning dialog
-            ValidatorDialog.showDialog(frame, new Validator(
-                    project,
-                    project.getLoadStatus()));
+            ValidatorDialog.showDialog(frame, new Validator(project, project
+                    .getLoadStatus()));
         }
 
     }

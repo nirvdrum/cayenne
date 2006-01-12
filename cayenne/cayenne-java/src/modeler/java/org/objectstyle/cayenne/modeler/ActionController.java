@@ -56,35 +56,95 @@
 package org.objectstyle.cayenne.modeler;
 
 import java.awt.Component;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
 import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
+import org.objectstyle.cayenne.modeler.action.CreateDbEntityAction;
+import org.objectstyle.cayenne.modeler.action.CreateDerivedDbEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
 import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
-import org.objectstyle.cayenne.modeler.action.ImportDataMapAction;
+import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
+import org.objectstyle.cayenne.modeler.action.CreateProcedureAction;
+import org.objectstyle.cayenne.modeler.action.CreateProcedureParameterAction;
+import org.objectstyle.cayenne.modeler.action.CreateQueryAction;
+import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
+import org.objectstyle.cayenne.modeler.action.DbEntitySyncAction;
+import org.objectstyle.cayenne.modeler.action.GenerateClassesAction;
+import org.objectstyle.cayenne.modeler.action.GenerateDBAction;
 import org.objectstyle.cayenne.modeler.action.ImportDBAction;
+import org.objectstyle.cayenne.modeler.action.ImportDataMapAction;
 import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
+import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.RevertAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
-import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
-import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
- * @author Andrei Adamchik
+ * A controller that activates/decativate registered actions depending on current
+ * selection.
+ * 
+ * @author Andrus Adamchik
  */
 public class ActionController extends CayenneController {
+
+    static final Collection PROJECT_ACTIONS = Arrays.asList(new String[] {
+            CreateDomainAction.getActionName(), ProjectAction.getActionName(),
+            ValidateAction.getActionName(), SaveAsAction.getActionName()
+    });
+
+    static final Collection DOMAIN_ACTIONS = new HashSet(PROJECT_ACTIONS);
+    static {
+        DOMAIN_ACTIONS.addAll(Arrays.asList(new String[] {
+                ImportDataMapAction.getActionName(), CreateDataMapAction.getActionName(),
+                RemoveAction.getActionName(), CreateNodeAction.getActionName(),
+                ImportDBAction.getActionName(), ImportEOModelAction.getActionName()
+        }));
+    }
+
+    static final Collection DATA_MAP_ACTIONS = new HashSet(DOMAIN_ACTIONS);
+    static {
+        DATA_MAP_ACTIONS.addAll(Arrays.asList(new String[] {
+                GenerateClassesAction.getActionName(),
+                CreateObjEntityAction.getActionName(),
+                CreateDbEntityAction.getActionName(),
+                CreateDerivedDbEntityAction.getActionName(),
+                CreateQueryAction.getActionName(), CreateProcedureAction.getActionName(),
+                GenerateDBAction.getActionName()
+        }));
+    }
+
+    static final Collection OBJ_ENTITY_ACTIONS = new HashSet(DATA_MAP_ACTIONS);
+    static {
+        OBJ_ENTITY_ACTIONS.addAll(Arrays.asList(new String[] {
+                ObjEntitySyncAction.getActionName(),
+                CreateAttributeAction.getActionName(),
+                CreateRelationshipAction.getActionName()
+        }));
+    }
+
+    static final Collection DB_ENTITY_ACTIONS = new HashSet(DATA_MAP_ACTIONS);
+    static {
+        DB_ENTITY_ACTIONS.addAll(Arrays.asList(new String[] {
+                CreateAttributeAction.getActionName(),
+                CreateRelationshipAction.getActionName(),
+                DbEntitySyncAction.getActionName()
+        }));
+    }
+
+    static final Collection PROCEDURE_ACTIONS = new HashSet(DATA_MAP_ACTIONS);
+    static {
+        PROCEDURE_ACTIONS.addAll(Arrays.asList(new String[] {
+            CreateProcedureParameterAction.getActionName()
+        }));
+    }
 
     public ActionController(Application application) {
         super(application);
@@ -94,130 +154,77 @@ public class ActionController extends CayenneController {
         throw new UnsupportedOperationException("ActionController is 'headless'");
     }
 
-    public void domainSelected(DataDomain domain) {
-        enableDataDomainActions(domain);
-        updateRemoveAction(domain);
-    }
-
+    /**
+     * Updates actions state to reflect an open project.
+     */
     public void projectOpened() {
-        enableProjectActions();
-        updateRemoveAction(null);
+        processActionsState(PROJECT_ACTIONS);
+        application.getAction(RemoveAction.getActionName()).setName("Remove");
     }
 
     public void projectClosed() {
-        disableAllActions();
-        getAction(ValidateAction.getActionName()).setEnabled(false);
-        getAction(ProjectAction.getActionName()).setEnabled(false);
-        getAction(SaveAction.getActionName()).setEnabled(false);
-        getAction(SaveAsAction.getActionName()).setEnabled(false);
-        getAction(RevertAction.getActionName()).setEnabled(false);
-        getAction(CreateDomainAction.getActionName()).setEnabled(false);
-
-        updateRemoveAction(null);
+        processActionsState(Collections.EMPTY_SET);
+        application.getAction(RemoveAction.getActionName()).setName("Remove");
     }
 
     /**
-     * Updates the name of "Remove" action based on the current model state.
+     * Updates actions state to reflect DataDomain selecttion.
      */
-    protected void updateRemoveAction(Object selected) {
-        String name = null;
+    public void domainSelected() {
+        processActionsState(DOMAIN_ACTIONS);
+    }
 
-        if (selected == null) {
-            name = "Remove";
-        }
-        else if (selected instanceof DataDomain) {
-            name = "Remove DataDomain";
-        }
-        else if (selected instanceof DataMap) {
-            name = "Remove DataMap";
-        }
-        else if (selected instanceof DbEntity) {
-            name = "Remove DbEntity";
-        }
-        else if (selected instanceof ObjEntity) {
-            name = "Remove ObjEntity";
-        }
-        else if (selected instanceof DbAttribute) {
-            name = "Remove DbAttribute";
-        }
-        else if (selected instanceof ObjAttribute) {
-            name = "Remove ObjAttribute";
-        }
-        else if (selected instanceof DbRelationship) {
-            name = "Remove DbRelationship";
-        }
-        else if (selected instanceof ObjRelationship) {
-            name = "Remove ObjRelationship";
-        }
-        else {
-            name = "Remove";
-        }
+    public void dataNodeSelected() {
+        processActionsState(DOMAIN_ACTIONS);
+        application.getAction(RemoveAction.getActionName()).setName("Remove DataNode");
+    }
 
-        getAction(RemoveAction.getActionName()).setName(name);
+    public void dataMapSelected() {
+        processActionsState(DATA_MAP_ACTIONS);
+        application.getAction(RemoveAction.getActionName()).setName("Remove DataMap");
+        // reset
+        // getAction(CreateAttributeAction.getActionName()).setName("Create Attribute");
+    }
+
+    public void objEntitySelected() {
+        processActionsState(OBJ_ENTITY_ACTIONS);
+        application.getAction(RemoveAction.getActionName()).setName("Remove ObjEntity");
+    }
+
+    public void dbEntitySelected() {
+        processActionsState(DB_ENTITY_ACTIONS);
+        application.getAction(RemoveAction.getActionName()).setName("Remove DbEntity");
+    }
+
+    public void procedureSelected() {
+        processActionsState(PROCEDURE_ACTIONS);
+        application.getAction(RemoveAction.getActionName()).setName("Remove Procedure");
+    }
+
+    public void querySelected() {
+        processActionsState(DATA_MAP_ACTIONS);
+        application.getAction(RemoveAction.getActionName()).setName("Remove Query");
     }
 
     /**
-     * Returns an action object for the specified key.
+     * Sets the state of all controlled actions, flipping it to "enabled" for all actions
+     * in provided collection and to "disabled" for the rest.
      */
-    private CayenneAction getAction(String key) {
-        return application.getAction(key);
-    }
+    protected void processActionsState(Collection namesOfEnabled) {
 
-    /**
-     * Disables all controlled actions.
-     */
-    protected void disableAllActions() {
         // disable everything we can
         Object[] keys = application.getActionMap().allKeys();
-        int len = keys.length;
-        for (int i = 0; i < len; i++) {
 
-            // "save" button has its own rules
+        for (int i = 0; i < keys.length; i++) {
+
+            // these two buttons are exceptions...
             if (keys[i].equals(SaveAction.getActionName())
                     || keys[i].equals(RevertAction.getActionName())) {
                 continue;
             }
 
-            application.getActionMap().get(keys[i]).setEnabled(false);
-        }
-    }
-
-    /**
-     * Configures actions to support an active project.
-     */
-    protected void enableProjectActions() {
-        disableAllActions();
-        getAction(CreateDomainAction.getActionName()).setEnabled(true);
-        getAction(ProjectAction.getActionName()).setEnabled(true);
-        getAction(ValidateAction.getActionName()).setEnabled(true);
-        getAction(SaveAsAction.getActionName()).setEnabled(true);
-    }
-
-    /**
-     * Updates actions "on/off" state for the selected project path.
-     */
-    protected void updateActions(ProjectPath objectPath) {
-        Object[] keys = application.getActionMap().allKeys();
-        int len = keys.length;
-        for (int i = 0; i < len; i++) {
-            CayenneAction action = getAction((String) keys[i]);
-            action.setEnabled(action.enableForPath(objectPath));
-        }
-    }
-
-    /**
-     * Configures actions to support an active DataDomain.
-     */
-    protected void enableDataDomainActions(DataDomain domain) {
-        enableProjectActions();
-
-        if (domain != null) {
-            getAction(ImportDataMapAction.getActionName()).setEnabled(true);
-            getAction(CreateDataMapAction.getActionName()).setEnabled(true);
-            getAction(RemoveAction.getActionName()).setEnabled(true);
-            getAction(CreateNodeAction.getActionName()).setEnabled(true);
-            getAction(ImportDBAction.getActionName()).setEnabled(true);
-            getAction(ImportEOModelAction.getActionName()).setEnabled(true);
+            application.getAction((String) keys[i]).setEnabled(
+                    namesOfEnabled.contains(keys[i]));
         }
     }
 }

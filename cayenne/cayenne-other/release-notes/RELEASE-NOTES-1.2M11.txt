@@ -13,4 +13,6 @@ Changes/New Features:
 
 * Addressing concurrency issues in Derby PK generator.
 
+* Speeding up very slow Modeler attribute and relationship operations.
+
 Bugs Fixed:

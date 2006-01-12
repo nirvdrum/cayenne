@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Superclass of CayenneModeler actions that implements support for some common
@@ -109,10 +110,7 @@ public abstract class CayenneAction extends AbstractAction {
     }
 
     protected Project getCurrentProject() {
-        return application
-                .getFrameController()
-                .getProjectController()
-                .getProject();
+        return application.getFrameController().getProjectController().getProject();
     }
 
     /**
@@ -120,7 +118,9 @@ public abstract class CayenneAction extends AbstractAction {
      * action.
      */
     public void setName(String newName) {
-        super.putValue(Action.NAME, newName);
+        if (!Util.nullSafeEquals(getValue(Action.NAME), newName)) {
+            super.putValue(Action.NAME, newName);
+        }
     }
 
     /**

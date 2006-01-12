@@ -59,7 +59,6 @@ package org.objectstyle.cayenne.modeler;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
-
 import java.awt.event.KeyEvent;
 
 import javax.swing.Box;
@@ -74,7 +73,6 @@ import org.apache.commons.lang.SystemUtils;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.modeler.action.AboutAction;
 import org.objectstyle.cayenne.modeler.action.ConfigurePreferencesAction;
-import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
 import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CreateDbEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateDerivedDbEntityAction;
@@ -82,16 +80,13 @@ import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
 import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
 import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateProcedureAction;
-import org.objectstyle.cayenne.modeler.action.CreateProcedureParameterAction;
 import org.objectstyle.cayenne.modeler.action.CreateQueryAction;
-import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
-import org.objectstyle.cayenne.modeler.action.DbEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.GenerateClassesAction;
 import org.objectstyle.cayenne.modeler.action.GenerateDBAction;
-import org.objectstyle.cayenne.modeler.action.ImportDataMapAction;
 import org.objectstyle.cayenne.modeler.action.ImportDBAction;
+import org.objectstyle.cayenne.modeler.action.ImportDataMapAction;
 import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
 import org.objectstyle.cayenne.modeler.action.NavigateBackwardAction;
 import org.objectstyle.cayenne.modeler.action.NavigateForwardAction;
@@ -276,124 +271,71 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
     }
 
     public void currentDataNodeChanged(DataNodeDisplayEvent e) {
-        enableDataNodeMenu();
-        getAction(RemoveAction.getActionName()).setName("Remove DataNode");
+        controller.getActionController().dataNodeSelected();
     }
 
     public void currentDataMapChanged(DataMapDisplayEvent e) {
-        enableDataMapMenu();
-        getAction(RemoveAction.getActionName()).setName("Remove DataMap");
+        controller.getActionController().dataMapSelected();
     }
 
     public void currentObjEntityChanged(EntityDisplayEvent e) {
-        enableObjEntityMenu();
-        getAction(RemoveAction.getActionName()).setName("Remove ObjEntity");
+        controller.getActionController().objEntitySelected();
     }
 
     public void currentDbEntityChanged(EntityDisplayEvent e) {
-        enableDbEntityMenu();
-        getAction(RemoveAction.getActionName()).setName("Remove DbEntity");
+        controller.getActionController().dbEntitySelected();
+
+        if (e.getEntity() instanceof DerivedDbEntity) {
+            getAction(DerivedEntitySyncAction.getActionName()).setEnabled(true);
+        }
     }
 
     public void currentQueryChanged(QueryDisplayEvent e) {
-        enableDataMapMenu();
-
-        if (e.getQuery() != null) {
-            getAction(RemoveAction.getActionName()).setName("Remove Query");
-        }
+        controller.getActionController().querySelected();
     }
 
     public void currentProcedureChanged(ProcedureDisplayEvent e) {
-        enableProcedureMenu();
-
-        if (e.getProcedure() != null) {
-            getAction(RemoveAction.getActionName()).setName("Remove Stored Procedure");
-        }
+        controller.getActionController().procedureSelected();
     }
 
     public void currentDbAttributeChanged(AttributeDisplayEvent e) {
-        enableDbEntityMenu();
+        // assuming that buttons active state has not changed...
+
         if (e.getAttribute() != null) {
             getAction(RemoveAction.getActionName()).setName("Remove DbAttribute");
         }
     }
 
     public void currentProcedureParameterChanged(ProcedureParameterDisplayEvent e) {
-        enableProcedureMenu();
+        // assuming that buttons active state has not changed...
+
         if (e.getProcedureParameter() != null) {
             getAction(RemoveAction.getActionName()).setName("Remove Parameter");
         }
     }
 
     public void currentObjAttributeChanged(AttributeDisplayEvent e) {
-        enableObjEntityMenu();
+        // assuming that buttons active state has not changed...
+
         if (e.getAttribute() != null) {
             getAction(RemoveAction.getActionName()).setName("Remove ObjAttribute");
         }
     }
 
     public void currentDbRelationshipChanged(RelationshipDisplayEvent e) {
-        enableDbEntityMenu();
+        // assuming that buttons active state has not changed...
+
         if (e.getRelationship() != null) {
             getAction(RemoveAction.getActionName()).setName("Remove DbRelationship");
         }
     }
 
     public void currentObjRelationshipChanged(RelationshipDisplayEvent e) {
-        enableObjEntityMenu();
+        // assuming that buttons active state has not changed...
+
         if (e.getRelationship() != null) {
             getAction(RemoveAction.getActionName()).setName("Remove ObjRelationship");
         }
-    }
-
-    private void enableDataMapMenu() {
-        if (controller.getProjectController().getCurrentDataNode() != null)
-            enableDataNodeMenu();
-        else {
-            // Andrus: Temp hack till moved to controller
-            controller.getActionController().domainSelected(
-                    controller.getProjectController().getCurrentDataDomain());
-        }
-
-        getAction(GenerateClassesAction.getActionName()).setEnabled(true);
-        getAction(CreateObjEntityAction.getActionName()).setEnabled(true);
-        getAction(CreateDbEntityAction.getActionName()).setEnabled(true);
-        getAction(CreateDerivedDbEntityAction.getActionName()).setEnabled(true);
-        getAction(CreateQueryAction.getActionName()).setEnabled(true);
-        getAction(CreateProcedureAction.getActionName()).setEnabled(true);
-        getAction(GenerateDBAction.getActionName()).setEnabled(true);
-
-        // reset
-        getAction(CreateAttributeAction.getActionName()).setName("Create Attribute");
-    }
-
-    private void enableObjEntityMenu() {
-        enableDataMapMenu();
-        getAction(ObjEntitySyncAction.getActionName()).setEnabled(true);
-        getAction(CreateAttributeAction.getActionName()).setEnabled(true);
-        getAction(CreateRelationshipAction.getActionName()).setEnabled(true);
-    }
-
-    private void enableDbEntityMenu() {
-        enableDataMapMenu();
-        getAction(CreateAttributeAction.getActionName()).setEnabled(true);
-        getAction(CreateRelationshipAction.getActionName()).setEnabled(true);
-        getAction(DbEntitySyncAction.getActionName()).setEnabled(true);
-
-        if (controller.getProjectController().getCurrentDbEntity() instanceof DerivedDbEntity) {
-            getAction(DerivedEntitySyncAction.getActionName()).setEnabled(true);
-        }
-    }
-
-    private void enableProcedureMenu() {
-        enableDataMapMenu();
-        getAction(CreateProcedureParameterAction.getActionName()).setEnabled(true);
-    }
-
-    private void enableDataNodeMenu() {
-        // Andrus: Temp hack till moved to controller
-        controller.getActionController().domainSelected(
-                controller.getProjectController().getCurrentDataDomain());
     }
 
     /**
