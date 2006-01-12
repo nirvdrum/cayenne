@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.modeler;
 
-import java.awt.Component;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -168,12 +167,7 @@ public class ActionManager {
     protected Map actionMap;
 
     public ActionManager(Application application) {
-        initActions(application);
-    }
-
-    protected void initActions(Application application) {
-        // build action map
-        actionMap = new HashMap();
+        this.actionMap = new HashMap();
 
         registerAction(new ProjectAction(application));
         registerAction(new NewProjectAction(application)).setAlwaysOn(true);
@@ -222,10 +216,6 @@ public class ActionManager {
      */
     public CayenneAction getAction(String key) {
         return (CayenneAction) actionMap.get(key);
-    }
-
-    public Component getView() {
-        throw new UnsupportedOperationException("ActionController is 'headless'");
     }
 
     /**
