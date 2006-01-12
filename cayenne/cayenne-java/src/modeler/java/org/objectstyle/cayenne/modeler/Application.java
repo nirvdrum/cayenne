@@ -61,7 +61,6 @@ import java.awt.Window;
 import java.io.File;
 import java.util.Collection;
 
-import javax.swing.ActionMap;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JRootPane;
@@ -69,41 +68,6 @@ import javax.swing.SwingUtilities;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
-import org.objectstyle.cayenne.modeler.action.AboutAction;
-import org.objectstyle.cayenne.modeler.action.ConfigurePreferencesAction;
-import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
-import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
-import org.objectstyle.cayenne.modeler.action.CreateDbEntityAction;
-import org.objectstyle.cayenne.modeler.action.CreateDerivedDbEntityAction;
-import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
-import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
-import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
-import org.objectstyle.cayenne.modeler.action.CreateProcedureAction;
-import org.objectstyle.cayenne.modeler.action.CreateProcedureParameterAction;
-import org.objectstyle.cayenne.modeler.action.CreateQueryAction;
-import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
-import org.objectstyle.cayenne.modeler.action.DbEntitySyncAction;
-import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
-import org.objectstyle.cayenne.modeler.action.ExitAction;
-import org.objectstyle.cayenne.modeler.action.GenerateClassesAction;
-import org.objectstyle.cayenne.modeler.action.GenerateDBAction;
-import org.objectstyle.cayenne.modeler.action.ImportDataMapAction;
-import org.objectstyle.cayenne.modeler.action.ImportDBAction;
-import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
-import org.objectstyle.cayenne.modeler.action.NavigateBackwardAction;
-import org.objectstyle.cayenne.modeler.action.NavigateForwardAction;
-import org.objectstyle.cayenne.modeler.action.NewProjectAction;
-import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
-import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
-import org.objectstyle.cayenne.modeler.action.ProjectAction;
-import org.objectstyle.cayenne.modeler.action.RemoveAction;
-import org.objectstyle.cayenne.modeler.action.RemoveAttributeAction;
-import org.objectstyle.cayenne.modeler.action.RemoveProcedureParameterAction;
-import org.objectstyle.cayenne.modeler.action.RemoveRelationshipAction;
-import org.objectstyle.cayenne.modeler.action.RevertAction;
-import org.objectstyle.cayenne.modeler.action.SaveAction;
-import org.objectstyle.cayenne.modeler.action.SaveAsAction;
-import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.modeler.util.AdapterMapping;
 import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.CayenneDialog;
@@ -131,7 +95,7 @@ import org.scopemvc.view.swing.SwingView;
  * "1.1".</li>
  * </ul>
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class Application {
 
@@ -148,8 +112,9 @@ public class Application {
 
     protected FileClassLoadingService modelerClassLoader;
     protected HSQLEmbeddedPreferenceService preferenceService;
+    protected ActionManager actionManager;
     protected CayenneModelerController frameController;
-    protected ActionMap actionMap;
+
     protected File initialProject;
     protected String name;
     protected String preferencesDB;
@@ -205,14 +170,14 @@ public class Application {
      * Returns an action for key.
      */
     public CayenneAction getAction(String key) {
-        return (CayenneAction) actionMap.get(key);
+        return getActionManager().getAction(key);
     }
 
     /**
-     * Returns Application ActionMap.
+     * Returns action controller.
      */
-    public ActionMap getActionMap() {
-        return actionMap;
+    public ActionManager getActionManager() {
+        return actionManager;
     }
 
     /**
@@ -229,7 +194,7 @@ public class Application {
         // init subsystems
         initPreferences();
         initClassLoader();
-        initActions();
+
         this.bindingFactory = new BindingFactory();
         this.adapterMapping = new AdapterMapping();
 
@@ -239,6 +204,10 @@ public class Application {
         // force Scope to use CayenneModeler properties
         UIStrings.setPropertiesName(ModelerConstants.DEFAULT_MESSAGE_BUNDLE);
         ViewContext.clearThreadContext();
+
+        // init actions before the frame, as it will attempt to build menus out of
+        // actions.
+        this.actionManager = new ActionManager(this);
 
         // ...create main frame
         this.frameController = new CayenneModelerController(this, initialProject);
@@ -321,52 +290,6 @@ public class Application {
 
         // test service
         getPreferenceDomain();
-    }
-
-    protected void initActions() {
-        // build action map
-        actionMap = new ActionMap();
-
-        registerAction(new ProjectAction(this));
-        registerAction(new NewProjectAction(this)).setAlwaysOn(true);
-        registerAction(new OpenProjectAction(this)).setAlwaysOn(true);
-        registerAction(new ImportDataMapAction(this));
-        registerAction(new SaveAction(this));
-        registerAction(new SaveAsAction(this));
-        registerAction(new RevertAction(this));
-        registerAction(new ValidateAction(this));
-        registerAction(new RemoveAction(this));
-        registerAction(new CreateDomainAction(this));
-        registerAction(new CreateNodeAction(this));
-        registerAction(new CreateDataMapAction(this));
-        registerAction(new GenerateClassesAction(this));
-        registerAction(new CreateObjEntityAction(this));
-        registerAction(new CreateDbEntityAction(this));
-        registerAction(new CreateDerivedDbEntityAction(this));
-        registerAction(new CreateProcedureAction(this));
-        registerAction(new CreateProcedureParameterAction(this));
-        registerAction(new RemoveProcedureParameterAction(this));
-        registerAction(new CreateQueryAction(this));
-        registerAction(new CreateAttributeAction(this));
-        registerAction(new RemoveAttributeAction(this));
-        registerAction(new CreateRelationshipAction(this));
-        registerAction(new RemoveRelationshipAction(this));
-        registerAction(new DbEntitySyncAction(this));
-        registerAction(new ObjEntitySyncAction(this));
-        registerAction(new DerivedEntitySyncAction(this));
-        registerAction(new ImportDBAction(this));
-        registerAction(new ImportEOModelAction(this));
-        registerAction(new GenerateDBAction(this));
-        registerAction(new AboutAction(this)).setAlwaysOn(true);
-        registerAction(new ConfigurePreferencesAction(this)).setAlwaysOn(true);
-        registerAction(new ExitAction(this)).setAlwaysOn(true);
-        registerAction(new NavigateBackwardAction(this)).setAlwaysOn(true);
-        registerAction(new NavigateForwardAction(this)).setAlwaysOn(true);
-    }
-
-    private CayenneAction registerAction(CayenneAction action) {
-        actionMap.put(action.getKey(), action);
-        return action;
     }
 
     static final class PreferencesDelegate implements

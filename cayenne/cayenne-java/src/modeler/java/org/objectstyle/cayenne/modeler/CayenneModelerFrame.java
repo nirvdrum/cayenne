@@ -134,13 +134,12 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
 
     protected EditorView view;
     protected RecentFileMenu recentFileMenu;
-    protected CayenneModelerController controller;
+    protected ActionManager actionManager;
     protected JLabel status;
 
-    public CayenneModelerFrame(CayenneModelerController controller) {
+    public CayenneModelerFrame(ActionManager actionManager) {
         super(ModelerConstants.TITLE);
-
-        this.controller = controller;
+        this.actionManager = actionManager;
 
         initMenus();
         initToolbar();
@@ -150,8 +149,8 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
     /**
      * Returns an action object associated with the key.
      */
-    public CayenneAction getAction(String key) {
-        return controller.getApplication().getAction(key);
+    private CayenneAction getAction(String key) {
+        return actionManager.getAction(key);
     }
 
     protected void initMenus() {
@@ -271,19 +270,19 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
     }
 
     public void currentDataNodeChanged(DataNodeDisplayEvent e) {
-        controller.getActionController().dataNodeSelected();
+        actionManager.dataNodeSelected();
     }
 
     public void currentDataMapChanged(DataMapDisplayEvent e) {
-        controller.getActionController().dataMapSelected();
+        actionManager.dataMapSelected();
     }
 
     public void currentObjEntityChanged(EntityDisplayEvent e) {
-        controller.getActionController().objEntitySelected();
+        actionManager.objEntitySelected();
     }
 
     public void currentDbEntityChanged(EntityDisplayEvent e) {
-        controller.getActionController().dbEntitySelected();
+        actionManager.dbEntitySelected();
 
         if (e.getEntity() instanceof DerivedDbEntity) {
             getAction(DerivedEntitySyncAction.getActionName()).setEnabled(true);
@@ -291,11 +290,11 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
     }
 
     public void currentQueryChanged(QueryDisplayEvent e) {
-        controller.getActionController().querySelected();
+        actionManager.querySelected();
     }
 
     public void currentProcedureChanged(ProcedureDisplayEvent e) {
-        controller.getActionController().procedureSelected();
+        actionManager.procedureSelected();
     }
 
     public void currentDbAttributeChanged(AttributeDisplayEvent e) {

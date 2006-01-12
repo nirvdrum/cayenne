@@ -202,7 +202,7 @@ public class ValidatorDialog extends CayenneDialog {
 
             public void actionPerformed(ActionEvent e) {
                 Application
-                        .getFrame()
+                        .getInstance()
                         .getAction(ValidateAction.getActionName())
                         .actionPerformed(e);
             };

@@ -147,7 +147,7 @@ public class ProjectAction extends CayenneAction {
                         ActionEvent.ACTION_PERFORMED,
                         "SaveAll");
                 Application
-                        .getFrame()
+                        .getInstance()
                         .getAction(SaveAction.getActionName())
                         .actionPerformed(e);
                 if (projectController.isDirty()) {

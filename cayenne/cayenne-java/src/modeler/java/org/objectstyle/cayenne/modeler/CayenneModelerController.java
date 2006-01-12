@@ -84,7 +84,6 @@ import org.objectstyle.cayenne.project.validator.Validator;
 public class CayenneModelerController extends CayenneController {
 
     protected ProjectController projectController;
-    protected ActionController actionController;
 
     protected CayenneModelerFrame frame;
     protected File initialProject;
@@ -93,10 +92,8 @@ public class CayenneModelerController extends CayenneController {
         super(application);
 
         this.initialProject = initialProject;
-        this.frame = new CayenneModelerFrame(this);
-
-        projectController = new ProjectController(this);
-        actionController = new ActionController(application);
+        this.frame = new CayenneModelerFrame(application.getActionManager());
+        this.projectController = new ProjectController(this);
     }
 
     public Component getView() {
@@ -184,7 +181,7 @@ public class CayenneModelerController extends CayenneController {
         projectController.setProject(null);
 
         projectController.reset();
-        actionController.projectClosed();
+        application.getActionManager().projectClosed();
 
         updateStatus("Project Closed...");
     }
@@ -200,7 +197,7 @@ public class CayenneModelerController extends CayenneController {
         frame.setView(new EditorView(projectController));
 
         projectController.projectOpened();
-        actionController.projectOpened();
+        application.getActionManager().projectOpened();
 
         // do status update AFTER the project is actually opened...
         if (project.isLocationUndefined()) {
@@ -252,13 +249,6 @@ public class CayenneModelerController extends CayenneController {
         while (iter.hasNext()) {
             pref.addProperty(ModelerPreferences.LAST_PROJ_FILES, iter.next());
         }
-    }
-
-    /**
-     * Returns the child action controller.
-     */
-    public ActionController getActionController() {
-        return actionController;
     }
 
     /**
