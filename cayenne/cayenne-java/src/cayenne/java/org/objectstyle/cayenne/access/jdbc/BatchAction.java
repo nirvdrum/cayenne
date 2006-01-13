@@ -165,7 +165,11 @@ public class BatchAction extends BaseSQLAction {
             delegate.nextBatchCount(query, results);
 
             if (isLoggable) {
-                QueryLogger.logUpdateCount(statement.getUpdateCount());
+                int totalUpdateCount = 0;
+                for (int i = 0; i < results.length; i++) {
+                    totalUpdateCount += results[i];
+                }
+                QueryLogger.logUpdateCount(totalUpdateCount);
             }
         }
         finally {
