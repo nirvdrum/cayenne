@@ -117,6 +117,17 @@ public class DataObjectUtilsTst extends CayenneTestCase {
         DataObject object = DataObjectUtils.objectForPK(context, Artist.class, 44001);
         assertNull(object);
     }
+    
+    public void testObjectForPKTemporary() throws Exception {
+       
+        DataContext context = createDataContext();
+        
+        DataObject o1 = context.createAndRegisterNewObject(Artist.class);
+        DataObject o2 = context.createAndRegisterNewObject(Artist.class);
+        assertSame(o1, DataObjectUtils.objectForPK(context, o1.getObjectId()));
+        assertSame(o2, DataObjectUtils.objectForPK(context, o2.getObjectId()));
+        assertNull(DataObjectUtils.objectForPK(context, new ObjectId("Artist", new byte[] {1, 2, 3} )));
+    }
 
     public void testObjectForPKObjectId() throws Exception {
         createTestData("testObjectForPKInt");
