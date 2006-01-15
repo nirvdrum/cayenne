@@ -70,11 +70,9 @@ import junit.framework.TestCase;
 import org.objectstyle.cayenne.access.DataContext;
 
 import com.mockrunner.mock.web.MockFilterChain;
-import com.mockrunner.mock.web.MockFilterConfig;
 import com.mockrunner.mock.web.MockHttpServletRequest;
 import com.mockrunner.mock.web.MockHttpServletResponse;
 import com.mockrunner.mock.web.MockHttpSession;
-import com.mockrunner.mock.web.MockServletContext;
 
 /**
  * @author Andrei Adamchik
@@ -82,14 +80,8 @@ import com.mockrunner.mock.web.MockServletContext;
 public class WebApplicationContextFilterTst extends TestCase {
 
     public void testDoFilter() throws Exception {
-        // assemble filter..
-        MockServletContext context = new MockServletContext();
-        MockFilterConfig config = new MockFilterConfig();
-        config.setupServletContext(context);
 
         WebApplicationContextFilter filter = new WebApplicationContextFilter();
-        // don't call init as it sets Configuration sigleton.
-        filter.config = config;
 
         // assemble session
         DataContext dataContext = new DataContext();
@@ -111,7 +103,7 @@ public class WebApplicationContextFilterTst extends TestCase {
             fail("There is a DataContext bound to thread already.");
         }
         catch (IllegalStateException ex) {
-            //expected
+            // expected
         }
 
         chain.doFilter(request, response);
@@ -124,7 +116,7 @@ public class WebApplicationContextFilterTst extends TestCase {
             fail("DataContext was not unbound from the thread.");
         }
         catch (IllegalStateException ex) {
-            //expected
+            // expected
         }
     }
 

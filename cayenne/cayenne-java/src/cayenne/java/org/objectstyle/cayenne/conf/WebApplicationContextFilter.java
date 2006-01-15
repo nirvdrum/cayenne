@@ -94,24 +94,20 @@ import org.objectstyle.cayenne.access.DataContext;
  * This filter can be installed in the web container as a &quot;filter&quot; as follows:
  * 
  * <pre>
- * 
- *   &lt;filter&gt;
- *       &lt;filter-name&gt;WebApplicationContextFilter&lt;/filter-name&gt;
- *       &lt;filter-class&gt;org.objectstyle.cayenne.conf.WebApplicationContextFilter&lt;/filter-class&gt;
- *  &lt;/filter&gt;
- *  
+ *         &lt;filter&gt;
+ *             &lt;filter-name&gt;WebApplicationContextFilter&lt;/filter-name&gt;
+ *             &lt;filter-class&gt;org.objectstyle.cayenne.conf.WebApplicationContextFilter&lt;/filter-class&gt;
+ *        &lt;/filter&gt;
  * </pre>
  * 
  * Then the mapping needs to be created to direct all or some requests to be processed by
  * the filter as follows:
  * 
  * <pre>
- * 
- *  &lt;filter-mapping&gt;
- *       &lt;filter-name&gt;WebApplicationContextFilter&lt;/filter-name&gt;
- *       &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
- *   &lt;/filter-mapping&gt;
- *  
+ *        &lt;filter-mapping&gt;
+ *             &lt;filter-name&gt;WebApplicationContextFilter&lt;/filter-name&gt;
+ *             &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+ *         &lt;/filter-mapping&gt;
  * </pre>
  * 
  * The above example the filter would be applied to all the servlets and static content
@@ -129,8 +125,6 @@ public class WebApplicationContextFilter implements Filter {
 
     private static Logger logger = Logger.getLogger(WebApplicationContextFilter.class);
 
-    protected FilterConfig config = null;
-
     /**
      * Does nothing. As per the servlet specification, gets called by the container when
      * the filter is taken out of service.
@@ -145,9 +139,7 @@ public class WebApplicationContextFilter implements Filter {
      * variable for possible later access. This method is part of the <code>Filter</code>
      * interface and is called by the container when the filter is placed into service.
      */
-
     public synchronized void init(FilterConfig config) throws ServletException {
-        this.config = config;
         ServletUtil.initializeSharedConfiguration(config.getServletContext());
     }
 
@@ -176,7 +168,7 @@ public class WebApplicationContextFilter implements Filter {
                 logger.debug("DataContext was null. Throwing Exception");
 
                 throw new ServletException("DataContext was null and could "
-                        + "not be bound to thred");
+                        + "not be bound to thread.");
             }
 
             DataContext.bindThreadDataContext(dataContext);
@@ -186,16 +178,11 @@ public class WebApplicationContextFilter implements Filter {
             logger.debug("requests that are not HttpServletRequest are not supported..");
         }
 
-        chain.doFilter(request, response);
-        DataContext.bindThreadDataContext(null);
-    }
-
-    /**
-     * This method returns the <code>FilterConfig</code> object with which this filter
-     * was initialized.
-     */
-    public FilterConfig getFilterConfig() {
-        return this.config;
+        try {
+            chain.doFilter(request, response);
+        }
+        finally {
+            DataContext.bindThreadDataContext(null);
+        }
     }
 }
-
