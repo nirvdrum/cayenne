@@ -61,6 +61,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.graph.GraphManager;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.Query;
 
@@ -90,6 +91,12 @@ public interface ObjectContext extends Serializable {
     public static final EventSubject GRAPH_ROLLEDBACK_SUBJECT = EventSubject.getSubject(
             ObjectContext.class,
             "graphRolledback");
+
+    /**
+     * Returns EntityResolver that stores all mapping information accessible by this
+     * ObjectContext.
+     */
+    EntityResolver getEntityResolver();
 
     /**
      * Returns a collection of objects that are registered with this ObjectContext and

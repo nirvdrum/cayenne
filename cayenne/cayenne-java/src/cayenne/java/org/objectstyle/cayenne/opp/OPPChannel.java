@@ -103,7 +103,7 @@ public interface OPPChannel {
 
     /**
      * Processes a request to select objects matching message query.
-     * <h2>"onSelectObjects" vs. "onQuery"</h2>
+     * <h3>"onSelectObjects" vs. "onQuery"</h3>
      * "onSelectObjects" indicates that the channel should convert raw database data to
      * objects before returning the result to the caller, while "onQuery" returns raw
      * query data (data rows and update counts), and the caller is free to process this
@@ -113,6 +113,11 @@ public interface OPPChannel {
 
     /**
      * Processes a raw query message.
+     * <h3>"onSelectObjects" vs. "onQuery"</h3>
+     * "onSelectObjects" indicates that the channel should convert raw database data to
+     * objects before returning the result to the caller, while "onQuery" returns raw
+     * query data (data rows and update counts), and the caller is free to process this
+     * data any way it needs.
      */
     QueryResponse onQuery(QueryMessage message);
 
