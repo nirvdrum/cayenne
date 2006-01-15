@@ -64,6 +64,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -85,7 +86,7 @@ class DataContextDeleteAction {
     /**
      * Deletes internal DataObject from its DataContext, processing delete rules.
      */
-    boolean performDelete(DataObject object) throws DeleteDenyException {
+    boolean performDelete(Persistent object) throws DeleteDenyException {
         int oldState = object.getPersistenceState();
         if (oldState == PersistenceState.DELETED
                 || oldState == PersistenceState.TRANSIENT) {
@@ -97,12 +98,23 @@ class DataContextDeleteAction {
             return false;
         }
 
-        if (object.getDataContext() == null) {
+        // TODO: Andrus, 1/14/2006 - temp hack
+        if (!(object instanceof DataObject)) {
+            throw new IllegalArgumentException(
+                    this
+                            + ": this implementation of ObjectContext only supports full DataObjects. Object "
+                            + object
+                            + " is not supported.");
+        }
+
+        DataObject dataObject = (DataObject) object;
+
+        if (dataObject.getDataContext() == null) {
             throw new CayenneRuntimeException(
                     "Attempt to delete unregistered non-TRANSIENT object: " + object);
         }
 
-        if (object.getDataContext() != dataContext) {
+        if (dataObject.getDataContext() != dataContext) {
             throw new CayenneRuntimeException(
                     "Attempt to delete object regsitered in a different DataContext. Object: "
                             + object
@@ -111,14 +123,14 @@ class DataContextDeleteAction {
         }
 
         // must resolve HOLLOW objects before delete... needed
-        // to process relationships and optimistric locking...
-        object.resolveFault();
+        // to process relationships and optimistic locking...
+        dataObject.resolveFault();
 
         if (oldState == PersistenceState.NEW) {
-            deleteNew(object, oldState);
+            deleteNew(dataObject, oldState);
         }
         else {
-            deletePersistent(object, oldState);
+            deletePersistent(dataObject, oldState);
         }
 
         return true;

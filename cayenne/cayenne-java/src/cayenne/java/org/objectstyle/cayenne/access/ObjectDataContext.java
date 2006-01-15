@@ -56,23 +56,12 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -85,7 +74,7 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrus Adamchik
  */
 // TODO: merge into DataContext
-class ObjectDataContext extends DataContext implements ObjectContext {
+class ObjectDataContext extends DataContext {
 
     ObjectDataContext(DataDomain dataDomain) {
         // call a setter, as it properly initializes EntityResolver...
@@ -151,109 +140,7 @@ class ObjectDataContext extends DataContext implements ObjectContext {
         }
     }
 
-    public void flushChanges() {
-        // noop ... for now...
-    }
-
-    public void revertChanges() {
-        rollbackChanges();
-    }
-
-    public void deleteObject(Persistent object) {
-
-        // TODO: only supports DataObject subclasses
-        if (object != null && !(object instanceof DataObject)) {
-            throw new IllegalArgumentException(
-                    this
-                            + ": this implementation of ObjectContext only supports full DataObjects. Object "
-                            + object
-                            + " is not supported.");
-        }
-
-        super.deleteObject((DataObject) object);
-    }
-
-    /**
-     * Creates and registers new persistent object.
-     */
-    public Persistent newObject(Class persistentClass) {
-        if (persistentClass == null) {
-            throw new NullPointerException("Null 'persistentClass'");
-        }
-
-        // TODO: only supports DataObject subclasses
-        if (!DataObject.class.isAssignableFrom(persistentClass)) {
-            throw new IllegalArgumentException(
-                    this
-                            + ": this implementation of ObjectContext only supports full DataObjects. Class "
-                            + persistentClass
-                            + " is invalid.");
-        }
-
-        return super.createAndRegisterNewObject(persistentClass);
-    }
-
-    /**
-     * Returns a collection of all uncommitted registered objects.
-     */
-    public Collection uncommittedObjects() {
-
-        int len = getObjectStore().registeredObjectsCount();
-        if (len == 0) {
-            return Collections.EMPTY_LIST;
-        }
-
-        // guess target collection size
-        Collection objects = new ArrayList(len > 100 ? len / 2 : len);
-
-        Iterator it = getObjectStore().getObjectIterator();
-        while (it.hasNext()) {
-            Persistent object = (Persistent) it.next();
-            int state = object.getPersistenceState();
-            if (state == PersistenceState.MODIFIED
-                    || state == PersistenceState.NEW
-                    || state == PersistenceState.DELETED) {
-
-                objects.add(object);
-            }
-        }
-
-        return objects;
-    }
-
-    public QueryResponse performGenericQuery(Query query) {
-        if (this.getChannel() == null) {
-            throw new CayenneRuntimeException(
-                    "Can't run query - parent OPPChannel is not set.");
-        }
-
-        return getChannel().onQuery(new QueryMessage(query));
-    }
-
     public List performQuery(Query query) {
         return new ObjectDataContextSelectAction(this).performQuery(query);
-    }
-
-    // *** Unfinished stuff
-    // --------------------------------------------------------------------------
-
-    public GraphManager getGraphManager() {
-        // TODO: ObjectStore must implement GraphManager
-        throw new CayenneRuntimeException("'getGraphManager' is not implemented yet");
-    }
-
-    public void prepareForAccess(Persistent object, String property) {
-        // TODO: implement me
-        throw new CayenneRuntimeException("'prepareForAccess' is not implemented yet.");
-    }
-
-    public void propertyChanged(
-            Persistent object,
-            String property,
-            Object oldValue,
-            Object newValue) {
-        // TODO: implement me
-        throw new CayenneRuntimeException(
-                "Persistent interface methods are not yet handled.");
     }
 }

@@ -157,7 +157,7 @@ class DataContextSelectAction {
                         results = context.objectsFromDataRows(
                                 root,
                                 rows,
-                                refreshCache,
+                                false,
                                 inheritance);
                     }
                 }

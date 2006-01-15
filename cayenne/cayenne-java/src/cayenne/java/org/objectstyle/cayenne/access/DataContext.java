@@ -76,13 +76,16 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataObjectUtils;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.event.EventSubject;
+import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -129,7 +132,7 @@ import org.objectstyle.cayenne.util.Util;
  * 
  * @author Andrus Adamchik
  */
-public class DataContext implements QueryEngine, Serializable {
+public class DataContext implements ObjectContext, QueryEngine, Serializable {
 
     // noop delegate
     private static final DataContextDelegate defaultDelegate = new DataContextDelegate() {
@@ -495,6 +498,36 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
+     * Returns a collection of all uncommitted registered objects.
+     * 
+     * @since 1.2
+     */
+    public Collection uncommittedObjects() {
+
+        int len = getObjectStore().registeredObjectsCount();
+        if (len == 0) {
+            return Collections.EMPTY_LIST;
+        }
+
+        // guess target collection size
+        Collection objects = new ArrayList(len > 100 ? len / 2 : len);
+
+        Iterator it = getObjectStore().getObjectIterator();
+        while (it.hasNext()) {
+            Persistent object = (Persistent) it.next();
+            int state = object.getPersistenceState();
+            if (state == PersistenceState.MODIFIED
+                    || state == PersistenceState.NEW
+                    || state == PersistenceState.DELETED) {
+
+                objects.add(object);
+            }
+        }
+
+        return objects;
+    }
+
+    /**
      * Returns an object for a given ObjectId. If object is not registered with this
      * context, a "hollow" object fault is created, registered, and returned to the
      * caller.
@@ -752,6 +785,29 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
+     * Creates and registers new persistent object. This is an ObjectContext version of
+     * 'createAndRegisterNewObject'.
+     * 
+     * @since 1.2
+     */
+    public Persistent newObject(Class persistentClass) {
+        if (persistentClass == null) {
+            throw new NullPointerException("Null 'persistentClass'");
+        }
+
+        // TODO: only supports DataObject subclasses
+        if (!DataObject.class.isAssignableFrom(persistentClass)) {
+            throw new IllegalArgumentException(
+                    this
+                            + ": this implementation of ObjectContext only supports full DataObjects. Class "
+                            + persistentClass
+                            + " is invalid.");
+        }
+
+        return createAndRegisterNewObject(persistentClass);
+    }
+
+    /**
      * Instantiates new object and registers it with itself. Object class must have a
      * default constructor.
      * 
@@ -887,12 +943,12 @@ public class DataContext implements QueryEngine, Serializable {
      * object are processed according to delete rules, i.e. relationships can be unset
      * ("nullify" rule), deletion operation is cascaded (cascade rule).
      * 
-     * @param object data object that we want to delete.
+     * @param object a persistent object that we want to delete.
      * @throws DeleteDenyException if a DENY delete rule is applicable for object
      *             deletion.
      * @throws NullPointerException if object is null.
      */
-    public void deleteObject(DataObject object) throws DeleteDenyException {
+    public void deleteObject(Persistent object) throws DeleteDenyException {
         new DataContextDeleteAction(this).performDelete(object);
     }
 
@@ -950,6 +1006,20 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         return domain.lookupDataNode(dataMap);
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void flushChanges() {
+        // noop ... for now...
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void revertChanges() {
+        rollbackChanges();
     }
 
     /**
@@ -1048,6 +1118,20 @@ public class DataContext implements QueryEngine, Serializable {
         IteratedSelectObserver observer = new IteratedSelectObserver();
         performQueries(Collections.singletonList(query), observer);
         return observer.getResultIterator();
+    }
+
+    /**
+     * Executes a query returning a generic response.
+     * 
+     * @since 1.2
+     */
+    public QueryResponse performGenericQuery(Query query) {
+        if (this.getChannel() == null) {
+            throw new CayenneRuntimeException(
+                    "Can't run query - parent OPPChannel is not set.");
+        }
+
+        return getChannel().onQuery(new QueryMessage(query));
     }
 
     /**
@@ -1466,5 +1550,43 @@ public class DataContext implements QueryEngine, Serializable {
             setChannel(Configuration.getSharedConfiguration().getDomain(
                     lazyInitParentDomainName));
         }
+    }
+
+    // *** Unfinished stuff
+    // --------------------------------------------------------------------------
+
+    /**
+     * Unimplemented in DataContext - this implementation throws exception.
+     * 
+     * @since 1.2
+     */
+    public GraphManager getGraphManager() {
+        // TODO: ObjectStore must implement GraphManager
+        throw new CayenneRuntimeException("'getGraphManager' is not implemented yet");
+    }
+
+    /**
+     * Unimplemented in DataContext - this implementation throws exception.
+     * 
+     * @since 1.2
+     */
+    public void prepareForAccess(Persistent object, String property) {
+        // TODO: implement me
+        throw new CayenneRuntimeException("'prepareForAccess' is not implemented yet.");
+    }
+
+    /**
+     * Unimplemented in DataContext - this implementation throws exception.
+     * 
+     * @since 1.2
+     */
+    public void propertyChanged(
+            Persistent object,
+            String property,
+            Object oldValue,
+            Object newValue) {
+        // TODO: implement me
+        throw new CayenneRuntimeException(
+                "Persistent interface methods are not yet handled.");
     }
 }
