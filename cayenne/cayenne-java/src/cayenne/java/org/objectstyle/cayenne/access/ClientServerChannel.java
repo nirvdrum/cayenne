@@ -241,10 +241,10 @@ public class ClientServerChannel implements OPPChannel {
     }
 
     /**
-     * Performs any needed query preprocessing to be able to execute it on the server.
-     * Note that this method may modify the client query. Normally Cayenne doesn't do
-     * that, but it is acceptable in this case as deserialized instance of the query is
-     * not accessible by a user anywhere else.
+     * Performs query preprocessing to be able to execute it on the server. Note that this
+     * method may modify the client query. Normally Cayenne doesn't do that, but it is
+     * acceptable in this case as deserialized instance of the query is not accessible by
+     * a user anywhere else.
      */
     Query rewriteQuery(Query clientQuery) {
 
