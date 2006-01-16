@@ -1353,7 +1353,7 @@ public class DataContext implements ObjectContext, QueryEngine, Serializable {
         }
 
         return new DataContextSelectAction(this).performQuery(
-                (GenericSelectQuery) query,
+                query,
                 query.getName(),
                 refresh);
     }
