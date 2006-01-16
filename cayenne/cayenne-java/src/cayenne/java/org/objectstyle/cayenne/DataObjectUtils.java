@@ -90,7 +90,7 @@ public final class DataObjectUtils {
      * numeric primary keys. If a DataObjects is transient or has an ObjectId that can not
      * be converted to an int PK, an exception is thrown.
      */
-    public static int intPKForObject(DataObject dataObject) {
+    public static int intPKForObject(Persistent dataObject) {
         Object value = pkForObject(dataObject);
 
         if (!(value instanceof Number)) {
@@ -106,7 +106,7 @@ public final class DataObjectUtils {
      * keys. If a DataObjects is transient or has a compound ObjectId, an exception is
      * thrown.
      */
-    public static Object pkForObject(DataObject dataObject) {
+    public static Object pkForObject(Persistent dataObject) {
         Map pk = extractObjectId(dataObject);
 
         if (pk.size() != 1) {
@@ -125,11 +125,11 @@ public final class DataObjectUtils {
      * all methods for primary key retrieval. It will work for all possible types of
      * primary keys. If a DataObjects is transient, an exception is thrown.
      */
-    public static Map compoundPKForObject(DataObject dataObject) {
+    public static Map compoundPKForObject(Persistent dataObject) {
         return Collections.unmodifiableMap(extractObjectId(dataObject));
     }
 
-    static Map extractObjectId(DataObject dataObject) {
+    static Map extractObjectId(Persistent dataObject) {
         if (dataObject == null) {
             throw new IllegalArgumentException("Null DataObject");
         }
@@ -142,7 +142,7 @@ public final class DataObjectUtils {
         // replacement ID is more tricky... do some sanity check...
         if (id.isReplacementIdAttached()) {
             DbEntity entity = dataObject
-                    .getDataContext()
+                    .getObjectContext()
                     .getEntityResolver()
                     .lookupDbEntity(dataObject);
 

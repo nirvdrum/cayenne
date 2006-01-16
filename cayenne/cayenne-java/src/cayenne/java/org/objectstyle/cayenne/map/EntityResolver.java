@@ -68,6 +68,7 @@ import org.apache.commons.collections.collection.CompositeCollection;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 
@@ -443,7 +444,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
      * 
      * @return the required DbEntity, or null if none matches the specifier
      */
-    public synchronized DbEntity lookupDbEntity(DataObject dataObject) {
+    public synchronized DbEntity lookupDbEntity(Persistent dataObject) {
         return this._lookupDbEntity(dataObject.getClass());
     }
 
@@ -468,8 +469,8 @@ public class EntityResolver implements MappingNamespace, Serializable {
             ObjEntity objEntity = this.lookupObjEntity((String) root);
             return (objEntity != null) ? objEntity.getDbEntity() : null;
         }
-        else if (root instanceof DataObject) {
-            return this.lookupDbEntity((DataObject) root);
+        else if (root instanceof Persistent) {
+            return this.lookupDbEntity((Persistent) root);
         }
         return null;
     }

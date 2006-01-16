@@ -439,7 +439,7 @@ public class CayenneContext implements ObjectContext {
 
                 // TODO: Andrus, 12/28/2005 - should we copy all the values if the source
                 // is not HOLLOW?
-                ObjEntity entity = entityResolver.lookupObjEntity(id.getEntityName());
+                ObjEntity entity = getEntityResolver().lookupObjEntity(id.getEntityName());
                 if (entity == null) {
                     throw new CayenneRuntimeException("Unmapped entity: "
                             + id.getEntityName());

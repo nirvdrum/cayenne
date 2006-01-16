@@ -732,6 +732,11 @@ public class DataContext implements ObjectContext, QueryEngine, Serializable {
             boolean refresh,
             boolean resolveInheritanceHierarchy) {
         ObjEntity entity = this.getEntityResolver().lookupObjEntity(objectClass);
+        
+        if(entity == null) {
+            throw new CayenneRuntimeException("Unmapped Java class: " + objectClass);
+        }
+        
         return objectsFromDataRows(entity, dataRows, refresh, resolveInheritanceHierarchy);
     }
 

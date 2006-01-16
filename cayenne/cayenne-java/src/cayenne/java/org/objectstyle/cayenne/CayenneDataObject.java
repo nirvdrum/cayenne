@@ -783,9 +783,7 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
      * @since 1.2
      */
     public ObjectContext getObjectContext() {
-        return (dataContext == null || dataContext instanceof ObjectContext)
-                ? (ObjectContext) dataContext
-                : null;
+        return dataContext;
     }
 
     /**
