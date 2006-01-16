@@ -291,18 +291,18 @@ public class ObjectId implements Serializable {
         EqualsBuilder builder = new EqualsBuilder();
         Iterator entries = objectIdKeys.entrySet().iterator();
         while (entries.hasNext()) {
-            Map.Entry entry = (Map.Entry) entries.next();
+            Map.Entry entry      = (Map.Entry) entries.next();
+            Object    entryKey   = entry.getKey();
+            Object    entryValue = entry.getValue();
 
-            Object key = entry.getKey();
-            Object value = entry.getValue();
-            if (value == null) {
-                if (id.objectIdKeys.get(key) != null || !id.objectIdKeys.containsKey(key)) {
+            if (entryValue == null) {
+                if (id.objectIdKeys.get(entryKey) != null || !id.objectIdKeys.containsKey(entryKey)) {
                     return false;
                 }
             }
             else {
                 // takes care of comparing primitive arrays, such as byte[]
-                builder.append(value, id.objectIdKeys.get(key));
+                builder.append(entryValue, id.objectIdKeys.get(entryKey));
                 if (!builder.isEquals()) {
                     return false;
                 }
