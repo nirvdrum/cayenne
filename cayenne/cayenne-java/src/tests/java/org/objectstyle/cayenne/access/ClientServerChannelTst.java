@@ -65,12 +65,14 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.MockQueryResponse;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
+import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.ObjectSelectMessage;
 import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
@@ -107,7 +109,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
     public void testOnCommit() {
 
         final boolean[] commitDone = new boolean[1];
-        MockOPPChannel parent = new MockOPPChannel(getDomain().getEntityResolver()) {
+        final MockOPPChannel parent = new MockOPPChannel(getDomain().getEntityResolver()) {
 
             public GraphDiff onSync(SyncMessage message) {
                 commitDone[0] = true;
@@ -120,11 +122,16 @@ public class ClientServerChannelTst extends CayenneTestCase {
                     o.getObjectId().getReplacementIdMap().put("x", "y" + i++);
                 }
 
-                return super.onSync(message);
+                return new CompoundDiff();
             }
         };
+
         ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore()) {
 
+            public OPPChannel getChannel() {
+                return parent;
+            }
+            
             public DataDomain getParentDataDomain() {
                 return getDomain();
             }

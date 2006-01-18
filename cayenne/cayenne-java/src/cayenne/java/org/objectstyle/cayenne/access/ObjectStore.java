@@ -75,6 +75,15 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.access.event.SnapshotEventListener;
 import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.graph.ArcCreateOperation;
+import org.objectstyle.cayenne.graph.ArcDeleteOperation;
+import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphChangeHandler;
+import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.NodeCreateOperation;
+import org.objectstyle.cayenne.graph.NodeDeleteOperation;
+import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
+import org.objectstyle.cayenne.graph.NodePropertyChangeOperation;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.opp.OPPChannel;
@@ -507,6 +516,17 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * @since 1.1
      */
     public synchronized void objectsCommitted() {
+        postprocessAfterCommit();
+    }
+
+    /**
+     * Internal unsynchronized method to processes objects state after commit was
+     * performed.
+     * 
+     * @since 1.2
+     */
+    GraphDiff postprocessAfterCommit() {
+
         // these will store snapshot changes
         List deletedIds = null;
         Map modifiedSnapshots = null;
@@ -588,9 +608,13 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     break;
             }
         }
+        
+        GraphDiff diff = null;
 
         // process id replacements
         if (modifiedIds != null) {
+            OperationRecorder recorder = new OperationRecorder();
+            
             Iterator ids = modifiedIds.iterator();
             while (ids.hasNext()) {
                 ObjectId id = (ObjectId) ids.next();
@@ -617,6 +641,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 }
 
                 ObjectId replacementId = id.createReplacementId();
+                
+                // record id change...
+                recorder.nodeIdChanged(id, replacementId);
+                
                 DataRow dataRow = object.getDataContext().currentSnapshot(object);
                 modifiedSnapshots.put(replacementId, dataRow);
                 dataRow.setReplacesVersion(object.getSnapshotVersion());
@@ -630,6 +658,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 objectMap.remove(id);
                 dataRowCache.forgetSnapshot(id);
             }
+            
+            diff = recorder.getDiff();
         }
 
         // notify parent cache
@@ -651,6 +681,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         this.indirectlyModifiedIds.clear();
         this.flattenedDeletes.clear();
         this.flattenedInserts.clear();
+        
+        return (diff != null) ? diff : new CompoundDiff();
     }
 
     /**
@@ -1325,5 +1357,47 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      */
     Factory getDataRowCacheFactory() {
         return dataRowCacheFactory;
+    }
+    
+    class OperationRecorder implements GraphChangeHandler {
+
+        List diffs = new ArrayList();
+        
+        GraphDiff getDiff() {
+            return new CompoundDiff(diffs.isEmpty() ? null : diffs);
+        }
+
+        public void nodeIdChanged(Object nodeId, Object newId) {
+            diffs.add(new NodeIdChangeOperation(nodeId, newId));
+        }
+
+        public void nodeCreated(Object nodeId) {
+            diffs.add(new NodeIdChangeOperation(nodeId, new NodeCreateOperation(nodeId)));
+        }
+
+        public void nodeRemoved(Object nodeId) {
+            diffs.add(new NodeDeleteOperation(nodeId));
+        }
+
+        public void nodePropertyChanged(
+                Object nodeId,
+                String property,
+                Object oldValue,
+                Object newValue) {
+
+            diffs.add(new NodePropertyChangeOperation(
+                    nodeId,
+                    property,
+                    oldValue,
+                    newValue));
+        }
+
+        public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
+            diffs.add(new ArcCreateOperation(nodeId, targetNodeId, arcId));
+        }
+
+        public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
+            diffs.add(new ArcDeleteOperation(nodeId, targetNodeId, arcId));
+        }
     }
 }

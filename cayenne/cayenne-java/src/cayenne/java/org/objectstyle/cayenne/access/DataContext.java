@@ -85,6 +85,8 @@ import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.event.EventSubject;
+import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbJoin;
@@ -96,6 +98,7 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.opp.BootstrapMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.QueryMessage;
+import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.ParameterizedQuery;
@@ -732,11 +735,11 @@ public class DataContext implements ObjectContext, QueryEngine, Serializable {
             boolean refresh,
             boolean resolveInheritanceHierarchy) {
         ObjEntity entity = this.getEntityResolver().lookupObjEntity(objectClass);
-        
-        if(entity == null) {
+
+        if (entity == null) {
             throw new CayenneRuntimeException("Unmapped Java class: " + objectClass);
         }
-        
+
         return objectsFromDataRows(entity, dataRows, refresh, resolveInheritanceHierarchy);
     }
 
@@ -1046,25 +1049,42 @@ public class DataContext implements ObjectContext, QueryEngine, Serializable {
      * delete queries (generated internally).
      */
     public void commitChanges() throws CayenneRuntimeException {
+        doCommitChanges();
+    }
 
-        if (this.getParentDataDomain() == null) {
-            throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
+    /**
+     * Commit worker method.
+     * 
+     * @since 1.2
+     */
+    GraphDiff doCommitChanges() throws CayenneRuntimeException {
+        if (this.getChannel() == null) {
+            throw new CayenneRuntimeException(
+                    "Cannot commit changes - channel is not set.");
         }
 
         // prevent multiple commits occuring simulteneously
         synchronized (getObjectStore()) {
 
+            // TODO: Andrus, 12/13/2005 - in the OPP spirit, PK generation should be done
+            // on the DataDomain end and passed back as a diff. At the same time the
+            // problem is that PK generation is the only way to detect some phantom
+            // modifications, and thus is a part of DataContext precommit - need to
+            // resolve this conflict somehow.
             DataContextPrecommitAction precommit = new DataContextPrecommitAction();
             if (!precommit.precommit(this)) {
-                return;
+                return new CompoundDiff();
             }
-
-            DataContextCommitAction commit = new DataContextCommitAction(this);
 
             try {
-                commit.commit();
+                // TODO: Andrus, 12/06/2005 - this is a violation of OPP rules, as we do
+                // not pass changes down the stack. Instead this code assumes that a
+                // channel will get them directly from the context.
+                return getChannel().onSync(
+                        new SyncMessage(this, SyncMessage.COMMIT_TYPE, null));
             }
-            catch (CayenneException ex) {
+            // needed to unwrap OptimisticLockExceptions
+            catch (CayenneRuntimeException ex) {
                 Throwable unwound = Util.unwindException(ex);
 
                 if (unwound instanceof CayenneRuntimeException) {

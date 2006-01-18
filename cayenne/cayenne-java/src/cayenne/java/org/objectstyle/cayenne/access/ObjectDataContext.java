@@ -58,11 +58,7 @@ package org.objectstyle.cayenne.access;
 
 import java.util.List;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.graph.CompoundDiff;
-import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.Query;
 
@@ -104,41 +100,6 @@ class ObjectDataContext extends DataContext {
 
     // ==== END: DataContext compatibility code... need to merge to DataContext
     // --------------------------------------------------------------------------
-
-    public void commitChanges() throws CayenneRuntimeException {
-        doCommitChanges();
-    }
-
-    GraphDiff doCommitChanges() {
-        if (getChannel() == null) {
-            throw new CayenneRuntimeException(
-                    "DataContext is not attached to an OPPChannel");
-        }
-
-        synchronized (getObjectStore()) {
-
-            // TODO: Andrus, 12/13/2005 - in OPP spirit, PK generation should be done on
-            // the DataDomain end and passed back as a diff. At the same time the problem
-            // is that PK generation is the only way to detect some phantom modifications,
-            // and thus is a part of DataContext precommit - need to resolve this conflict
-            // somehow.
-            DataContextPrecommitAction precommit = new DataContextPrecommitAction();
-            if (!precommit.precommit(this)) {
-                return new CompoundDiff();
-            }
-
-            // TODO: Andrus, 12/06/2005 - this is a violation of OPP rules, as we do not
-            // pass changes down the stack. Instead this code assumes that a channel will
-            // get them directly from the context.
-            GraphDiff resultDiff = getChannel().onSync(
-                    new SyncMessage(this, SyncMessage.COMMIT_TYPE, null));
-
-            getObjectStore().objectsCommitted();
-
-            // do not ever return null to caller....
-            return resultDiff != null ? resultDiff : new CompoundDiff();
-        }
-    }
 
     public List performQuery(Query query) {
         return new ObjectDataContextSelectAction(this).performQuery(query);

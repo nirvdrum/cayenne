@@ -749,9 +749,9 @@ public class DataDomain implements QueryEngine, OPPChannel {
         // ignore all but commit messages
         if (message.getType() == SyncMessage.COMMIT_TYPE) {
             // TODO: Andrus, 12/13/2005 - see TODO under
-            // ObjectDataContext.doCommitChanges() -
+            // DataContext.doCommitChanges() -
             // PK generation needs to be done here...
-            return new DataDomainCommitAction(this).commit(message);
+            return new DataDomainCommitAction().commit(message);
         }
 
         return null;

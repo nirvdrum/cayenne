@@ -90,7 +90,7 @@ public class CompoundDiff implements GraphDiff {
      * Returns true if this diff has no other diffs or if all of its diffs are noops.
      */
     public boolean isNoop() {
-        if (diffs == null) {
+        if (diffs == null || diffs.isEmpty()) {
             return true;
         }
 

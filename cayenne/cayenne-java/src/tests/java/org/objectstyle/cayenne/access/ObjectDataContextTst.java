@@ -66,14 +66,12 @@ import org.objectstyle.cayenne.MockQueryResponse;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.MockEntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SyncMessage;
+import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
 
@@ -102,38 +100,6 @@ public class ObjectDataContextTst extends TestCase {
         cache.putSnapshot(oid, Collections.singletonMap("p1", "v1"));
 
         assertTrue(context.hasChanges());
-    }
-
-    public void testCommitChanges() {
-
-        final boolean[] commitDone = new boolean[1];
-        MockDataRowStore cache = new MockDataRowStore();
-        MockOPPChannel parent = new MockOPPChannel(new MockEntityResolver(new ObjEntity(
-                "test"))) {
-
-            public GraphDiff onSync(SyncMessage message) {
-                commitDone[0] = true;
-                return super.onSync(message);
-            }
-
-        };
-        ObjectDataContext context = new ObjectDataContext(parent, cache);
-
-        context.commitChanges();
-
-        // no changes in context, so no commit should be executed
-        assertFalse(commitDone[0]);
-
-        // introduce changes
-        ObjectId oid = new ObjectId("T", "key", "value");
-        DataObject object = new MockDataObject(context, oid, PersistenceState.MODIFIED);
-        context.getObjectStore().addObject(object);
-        cache.putSnapshot(oid, Collections.singletonMap("p1", "v1"));
-
-        assertTrue(context.hasChanges());
-        context.commitChanges();
-        assertTrue(commitDone[0]);
-        assertFalse(context.hasChanges());
     }
 
     public void testPerformNonSelectingQuery() {

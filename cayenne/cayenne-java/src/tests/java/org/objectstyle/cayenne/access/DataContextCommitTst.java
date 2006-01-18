@@ -55,54 +55,66 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.MockObjectContext;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.opp.SyncMessage;
+import org.objectstyle.cayenne.graph.MockGraphChangeHandler;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-public class DataDomainCommitActionTst extends CayenneTestCase {
+public class DataContextCommitTst extends CayenneTestCase {
 
-    public void testConstructor() {
-        DataDomainCommitAction action = new DataDomainCommitAction(getDomain());
-        assertSame(getDomain(), action.domain);
-    }
+    public void testDoCommit() {
 
-    public void testCommitResult() throws Exception {
-        deleteTestData();
+        DataContext context = createDataContext();
+        
+        // commit new object
+        Artist a = (Artist) context.createAndRegisterNewObject(Artist.class);
+        a.setArtistName("Test");
 
-        final Artist artist = new Artist();
-        artist.setArtistName("test");
+        assertTrue(context.hasChanges());
 
-        // TODO: Andrus, 12/13/2005 - see TODO under ObjectDataContext.doCommitChanges() -
-        // once PK generation is pushed down the domain level, we won't need to provide
-        // explicit PK values
-        ObjectId id = new ObjectId("Artist");
-        id.getReplacementIdMap().put(Artist.ARTIST_ID_PK_COLUMN, new Integer(1));
-        artist.setObjectId(id);
-        artist.setPersistenceState(PersistenceState.NEW);
+        GraphDiff diff = context.doCommitChanges();
+        assertNotNull(diff);
+        assertFalse(context.hasChanges());
 
-        MockObjectContext context = new MockObjectContext() {
+        final Object[] newIds = new Object[1];
 
-            public Collection uncommittedObjects() {
-                return Collections.singleton(artist);
+        MockGraphChangeHandler diffChecker = new MockGraphChangeHandler() {
+
+            public void nodeIdChanged(Object nodeId, Object newId) {
+                super.nodeIdChanged(nodeId, newId);
+
+                newIds[0] = newId;
             }
         };
 
-        DataDomainCommitAction action = new DataDomainCommitAction(getDomain());
+        diff.apply(diffChecker);
+        assertEquals(1, diffChecker.getCallbackCount());
+        assertSame(a.getObjectId(), newIds[0]);
+        
+        // commit a mix of new and modified
+        Painting p = (Painting) context.createAndRegisterNewObject(Painting.class);
+        p.setPaintingTitle("PT");
+        p.setToArtist(a);
+        a.setArtistName(a.getArtistName() + "_");
+        
+        GraphDiff diff2 = context.doCommitChanges();
+        assertNotNull(diff2);
+        assertFalse(context.hasChanges());
 
-        GraphDiff diff = action.commit(new SyncMessage(
-                context,
-                SyncMessage.COMMIT_TYPE,
-                null));
+        final Object[] newIds2 = new Object[1];
 
-        assertTrue(diff instanceof CompoundDiff);
-        assertEquals(1, ((CompoundDiff) diff).getDiffs().size());
+        MockGraphChangeHandler diffChecker2 = new MockGraphChangeHandler() {
+
+            public void nodeIdChanged(Object nodeId, Object newId) {
+                super.nodeIdChanged(nodeId, newId);
+
+                newIds2[0] = newId;
+            }
+        };
+
+        diff2.apply(diffChecker2);
+        assertEquals(1, diffChecker2.getCallbackCount());
+        assertSame(p.getObjectId(), newIds2[0]);
     }
 }

@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,6 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
@@ -68,17 +69,8 @@ import java.util.Set;
 import org.apache.commons.collections.map.LinkedMap;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.graph.ArcCreateOperation;
-import org.objectstyle.cayenne.graph.ArcDeleteOperation;
-import org.objectstyle.cayenne.graph.CompoundDiff;
-import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.graph.NodeCreateOperation;
-import org.objectstyle.cayenne.graph.NodeDeleteOperation;
-import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
-import org.objectstyle.cayenne.graph.NodePropertyChangeOperation;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
@@ -94,49 +86,51 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
 
 /**
- * A stateful commit operation invoked by DataDomain to commit changes in an
- * ObjectContext.
+ * A stateful commit handler used by DataContext to perform commit operation.
+ * DataContextCommitAction resolves primary key dependencies, referential integrity
+ * dependencies (including multi-reflexive entities), generates primary keys, creates
+ * batches for massive data modifications, assigns operations to data nodes. It indirectly
+ * relies on graph algorithms provided by ASHWOOD library.
  * 
- * @since 1.2
+ * @author Andriy Shapochka,
  * @author Andrus Adamchik
+ * @since 1.2
  */
-
-// Differences with DataContextCommitAction:
-// * no synchronization on object store. Caller must do the right thing.
-// * (!!!) no flattened relationships support, as it relied on the ObjectStore API... do
-// something for ObjectContext (something smarter as it shouldn't care about "flattened"
-// aspect)
-// * DataDomain cache is used, so if a DataContext used a local cache, it can't use this
-// action.
-// * Currently doesn't support commit events
-// * Doesn't change object store (there is no notion of ObjectStore anymore). Instead
-// caller must do it.
 class DataDomainCommitAction {
 
-    DataDomain domain;
+    private DataContext context;
+    private Map newObjectsByObjEntity;
+    private Map objectsToDeleteByObjEntity;
+    private Map objectsToUpdateByObjEntity;
+    private List objEntitiesToInsert;
+    private List objEntitiesToDelete;
+    private List objEntitiesToUpdate;
+    private List nodeHelpers;
+    private List insObjects; // event support
+    private List delObjects; // event support
+    private List updObjects; // event support
 
-    Map newObjectsByObjEntity;
-    Map objectsToDeleteByObjEntity;
-    Map objectsToUpdateByObjEntity;
-    List objEntitiesToInsert;
-    List objEntitiesToDelete;
-    List objEntitiesToUpdate;
-    List nodeHelpers;
-
-    DataDomainCommitAction(DataDomain domain) {
-        this.domain = domain;
-    }
-
-    /**
-     * Commits changes sent by a DataContext.
-     */
     GraphDiff commit(SyncMessage message) {
 
-        OperationRecorder recorder = new OperationRecorder();
+        if (!(message.getSource() instanceof DataContext)) {
+            throw new CayenneRuntimeException(
+                    "No support for committing ObjectContexts that are not DataContexts. Unsupported context: "
+                            + message.getSource());
+        }
 
-        synchronized (domain.getSharedSnapshotCache()) {
-            Collection uncommitted = message.getSource().uncommittedObjects();
-            categorizeObjects(uncommitted);
+        this.context = (DataContext) message.getSource();
+
+        // note that there is no syncing on the object store itself. This is caller's
+        // responsibility.
+        synchronized (context.getObjectStore().getDataRowCache()) {
+
+            categorizeObjects();
+            categorizeFlattenedInsertsAndCreateBatches();
+            categorizeFlattenedDeletesAndCreateBatches();
+
+            insObjects = new ArrayList();
+            delObjects = new ArrayList();
+            updObjects = new ArrayList();
 
             for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
                 DataNodeCommitAction nodeHelper = (DataNodeCommitAction) i.next();
@@ -152,56 +146,66 @@ class DataDomainCommitAction {
                 prepareDeleteQueries(nodeHelper);
             }
 
-            OperationObserver observer = new DataDomainCommitObserver();
-            Transaction transaction = domain.createTransaction();
-            Transaction.bindThreadTransaction(transaction);
+            CommitObserver observer = new CommitObserver(
+                    context,
+                    insObjects,
+                    updObjects,
+                    delObjects);
+
+            if (context.isTransactionEventsEnabled()) {
+                observer.registerForDataContextEvents();
+            }
 
             try {
-                transaction.begin();
+                context.fireWillCommit();
 
-                Iterator i = nodeHelpers.iterator();
-                while (i.hasNext()) {
-                    DataNodeCommitAction nodeHelper = (DataNodeCommitAction) i.next();
-                    List queries = nodeHelper.getQueries();
+                Transaction transaction = context
+                        .getParentDataDomain()
+                        .createTransaction();
 
-                    if (queries.size() > 0) {
-                        // note: observer throws on error
-                        nodeHelper.getNode().performQueries(queries, observer);
-                    }
-                }
-
-                // commit
-                transaction.commit();
-            }
-            catch (Throwable th) {
+                Transaction.bindThreadTransaction(transaction);
                 try {
-                    // rollback
-                    transaction.rollback();
+                    transaction.begin();
+                    Iterator i = nodeHelpers.iterator();
+                    while (i.hasNext()) {
+                        DataNodeCommitAction nodeHelper = (DataNodeCommitAction) i.next();
+                        List queries = nodeHelper.getQueries();
+
+                        if (queries.size() > 0) {
+                            // note: observer throws on error
+                            nodeHelper.getNode().performQueries(queries, observer);
+                        }
+                    }
+
+                    // commit
+                    transaction.commit();
                 }
-                catch (Throwable rollbackTh) {
-                    // ignoring...
+                catch (Throwable th) {
+                    try {
+                        // rollback
+                        transaction.rollback();
+                    }
+                    catch (Throwable rollbackTh) {
+                        // ignoring...
+                    }
+
+                    context.fireTransactionRolledback();
+                    throw new CayenneRuntimeException("Transaction was rolledback.", th);
+                }
+                finally {
+                    Transaction.bindThreadTransaction(null);
                 }
 
-                throw new CayenneRuntimeException("Transaction was rolledback.", th);
+                GraphDiff changes = context.getObjectStore().postprocessAfterCommit();
+                context.fireTransactionCommitted();
+                return changes;
             }
             finally {
-                Transaction.bindThreadTransaction(null);
-            }
-
-            // notify callback of generated keys ...
-
-            Iterator it = uncommitted.iterator();
-            while (it.hasNext()) {
-                DataObject object = (DataObject) it.next();
-                ObjectId id = object.getObjectId();
-                if (id.isReplacementIdAttached()) {
-                    recorder.nodeIdChanged(id, id.createReplacementId());
+                if (context.isTransactionEventsEnabled()) {
+                    observer.unregisterFromDataContextEvents();
                 }
             }
         }
-
-        return recorder.diffs != null && !recorder.diffs.isEmpty() ? new CompoundDiff(
-                recorder.diffs) : null;
     }
 
     private void prepareInsertQueries(DataNodeCommitAction commitHelper) {
@@ -257,6 +261,10 @@ class DataDomainCommitAction {
                             masterDependentDbRel,
                             supportsGeneratedKeys);
                     batch.add(snapshot, o.getObjectId());
+                }
+
+                if (isMasterDbEntity) {
+                    insObjects.addAll(objects);
                 }
             }
             commitHelper.getQueries().add(batch);
@@ -356,7 +364,6 @@ class DataDomainCommitAction {
                                 qualifierAttributes,
                                 nullQualifierNames,
                                 27);
-
                         batch.setUsingOptimisticLocking(optimisticLocking);
                         batches.put(batchKey, batch);
                     }
@@ -364,6 +371,10 @@ class DataDomainCommitAction {
                     batch.add(qualifierSnapshot);
 
                 }
+
+                if (isRootDbEntity)
+                    delObjects.addAll(objects);
+
             }
             commitHelper.getQueries().addAll(batches.values());
         }
@@ -482,6 +493,7 @@ class DataDomainCommitAction {
                                 idSnapshot,
                                 o.getObjectId().getReplacementIdMap(),
                                 snapshot);
+                        updObjects.add(o);
                     }
                 }
             }
@@ -598,9 +610,10 @@ class DataDomainCommitAction {
     /**
      * Organizes committed objects by node, performs sorting operations.
      */
-    private void categorizeObjects(Collection uncommittedObjects) {
+    private void categorizeObjects() {
         this.nodeHelpers = new ArrayList();
 
+        Iterator it = context.getObjectStore().getObjectIterator();
         newObjectsByObjEntity = new HashMap();
         objectsToDeleteByObjEntity = new HashMap();
         objectsToUpdateByObjEntity = new HashMap();
@@ -608,7 +621,6 @@ class DataDomainCommitAction {
         objEntitiesToDelete = new ArrayList();
         objEntitiesToUpdate = new ArrayList();
 
-        Iterator it = uncommittedObjects.iterator();
         while (it.hasNext()) {
             DataObject nextObject = (DataObject) it.next();
             int objectState = nextObject.getPersistenceState();
@@ -678,13 +690,13 @@ class DataDomainCommitAction {
             List objEntities,
             int operationType) {
 
-        ObjEntity entity = domain.getEntityResolver().lookupObjEntity(
+        ObjEntity entity = context.getEntityResolver().lookupObjEntity(
                 o.getObjectId().getEntityName());
         Collection objectsForObjEntity = (Collection) objectsByObjEntity.get(entity
                 .getName());
         if (objectsForObjEntity == null) {
             objEntities.add(entity);
-            DataNode responsibleNode = domain.lookupDataNode(entity.getDataMap());
+            DataNode responsibleNode = context.lookupDataNode(entity.getDataMap());
 
             DataNodeCommitAction commitHelper = nodeHelper(responsibleNode);
 
@@ -693,6 +705,84 @@ class DataDomainCommitAction {
             objectsByObjEntity.put(entity.getName(), objectsForObjEntity);
         }
         objectsForObjEntity.add(o);
+    }
+
+    private void categorizeFlattenedInsertsAndCreateBatches() {
+        Iterator i = context.getObjectStore().getFlattenedInserts().iterator();
+
+        while (i.hasNext()) {
+            FlattenedRelationshipUpdate info = (FlattenedRelationshipUpdate) i.next();
+
+            DataObject source = info.getSource();
+
+            // TODO: does it ever happen? How?
+            if (source.getPersistenceState() == PersistenceState.DELETED) {
+                continue;
+            }
+
+            if (info.getDestination().getPersistenceState() == PersistenceState.DELETED) {
+                continue;
+            }
+
+            DbEntity flattenedEntity = info.getJoinEntity();
+            DataNode responsibleNode = context.lookupDataNode(flattenedEntity
+                    .getDataMap());
+            DataNodeCommitAction commitHelper = nodeHelper(responsibleNode);
+            Map batchesByDbEntity = commitHelper.getFlattenedInsertQueries();
+
+            InsertBatchQuery relationInsertQuery = (InsertBatchQuery) batchesByDbEntity
+                    .get(flattenedEntity);
+
+            if (relationInsertQuery == null) {
+                relationInsertQuery = new InsertBatchQuery(flattenedEntity, 50);
+                batchesByDbEntity.put(flattenedEntity, relationInsertQuery);
+            }
+
+            Map flattenedSnapshot = info.buildJoinSnapshotForInsert();
+            relationInsertQuery.add(flattenedSnapshot);
+        }
+    }
+
+    private void categorizeFlattenedDeletesAndCreateBatches() {
+        Iterator i = context.getObjectStore().getFlattenedDeletes().iterator();
+
+        while (i.hasNext()) {
+            FlattenedRelationshipUpdate info = (FlattenedRelationshipUpdate) i.next();
+
+            // TODO: does it ever happen?
+            Map sourceId = info.getSource().getObjectId().getIdSnapshot();
+
+            if (sourceId == null)
+                continue;
+
+            Map dstId = info.getDestination().getObjectId().getIdSnapshot();
+            if (dstId == null)
+                continue;
+
+            DbEntity flattenedEntity = info.getJoinEntity();
+
+            DataNode responsibleNode = context.lookupDataNode(flattenedEntity
+                    .getDataMap());
+            DataNodeCommitAction commitHelper = nodeHelper(responsibleNode);
+            Map batchesByDbEntity = commitHelper.getFlattenedDeleteQueries();
+
+            DeleteBatchQuery relationDeleteQuery = (DeleteBatchQuery) batchesByDbEntity
+                    .get(flattenedEntity);
+            if (relationDeleteQuery == null) {
+                boolean optimisticLocking = false;
+                relationDeleteQuery = new DeleteBatchQuery(flattenedEntity, 50);
+                relationDeleteQuery.setUsingOptimisticLocking(optimisticLocking);
+                batchesByDbEntity.put(flattenedEntity, relationDeleteQuery);
+            }
+
+            List flattenedSnapshots = info.buildJoinSnapshotsForDelete();
+            if (!flattenedSnapshots.isEmpty()) {
+                Iterator snapsIt = flattenedSnapshots.iterator();
+                while (snapsIt.hasNext()) {
+                    relationDeleteQuery.add((Map) snapsIt.next());
+                }
+            }
+        }
     }
 
     private void prepareFlattenedQueries(
@@ -704,11 +794,16 @@ class DataDomainCommitAction {
         }
     }
 
+    // 
     private void updateId(Map oldID, Map replacementID, Map updatedKeys) {
         Iterator it = updatedKeys.entrySet().iterator();
 
         while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
+
+            // id values can be deferred ID factories... we are ignoring this fact here,
+            // hoping they will be replaced by real values on update...
+
             Object key = entry.getKey();
 
             if (oldID.containsKey(key) && !replacementID.containsKey(key)) {
@@ -789,43 +884,5 @@ class DataDomainCommitAction {
         }
 
         return helper;
-    }
-
-    class OperationRecorder implements GraphChangeHandler {
-
-        List diffs = new ArrayList();
-
-        public void nodeIdChanged(Object nodeId, Object newId) {
-            diffs.add(new NodeIdChangeOperation(nodeId, newId));
-        }
-
-        public void nodeCreated(Object nodeId) {
-            diffs.add(new NodeIdChangeOperation(nodeId, new NodeCreateOperation(nodeId)));
-        }
-
-        public void nodeRemoved(Object nodeId) {
-            diffs.add(new NodeDeleteOperation(nodeId));
-        }
-
-        public void nodePropertyChanged(
-                Object nodeId,
-                String property,
-                Object oldValue,
-                Object newValue) {
-
-            diffs.add(new NodePropertyChangeOperation(
-                    nodeId,
-                    property,
-                    oldValue,
-                    newValue));
-        }
-
-        public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
-            diffs.add(new ArcCreateOperation(nodeId, targetNodeId, arcId));
-        }
-
-        public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
-            diffs.add(new ArcDeleteOperation(nodeId, targetNodeId, arcId));
-        }
     }
 }
