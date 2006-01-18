@@ -66,16 +66,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** 
- * A utility class that handles mappings of JDBC data types to 
- * the database types and Java types. Also contains methods that
- * provide information about JDBC types.
- *
- *
+/**
+ * A utility class that handles mappings of JDBC data types to the database types and Java
+ * types. Also contains methods that provide information about JDBC types.
+ * 
  * @author Michael Shengaout
  * @author Andrei Adamchik
  */
 public class TypesMapping {
+
     // Never use "-1" or any other normal integer, since there
     // is a big chance it is being reserved in java.sql.Types
     public static final int NOT_DEFINED = Integer.MAX_VALUE;
@@ -86,12 +85,12 @@ public class TypesMapping {
     public static final String SQL_BINARY = "BINARY";
     public static final String SQL_BIT = "BIT";
     public static final String SQL_BLOB = "BLOB";
-    
+
     /**
      * @since 1.2
      */
     public static final String SQL_BOOLEAN = "BOOLEAN";
-    
+
     public static final String SQL_CLOB = "CLOB";
     public static final String SQL_CHAR = "CHAR";
     public static final String SQL_DATE = "DATE";
@@ -127,20 +126,24 @@ public class TypesMapping {
     public static final String JAVA_TIME = "java.sql.Time";
     public static final String JAVA_TIMESTAMP = "java.sql.Timestamp";
 
-    /** Keys: SQL string type names,
-     *  Values: SQL int type definitions from java.sql.Types */
+    /**
+     * Keys: SQL string type names, Values: SQL int type definitions from java.sql.Types
+     */
     private static final Map sqlStringType = new HashMap();
 
-    /** Keys: SQL int type definitions from java.sql.Types,
-     *  Values: SQL string type names */
+    /**
+     * Keys: SQL int type definitions from java.sql.Types, Values: SQL string type names
+     */
     private static final Map sqlEnumType = new HashMap();
 
-    /** Keys: SQL int type definitions from java.sql.Types,
-     *  Values: java class names */
+    /**
+     * Keys: SQL int type definitions from java.sql.Types, Values: java class names
+     */
     private static final Map sqlEnumJava = new HashMap();
 
-    /** Keys: java class names,
-     *  Values:  SQL int type definitions from java.sql.Types */
+    /**
+     * Keys: java class names, Values: SQL int type definitions from java.sql.Types
+     */
     private static final Map javaSqlEnum = new HashMap();
 
     static {
@@ -233,50 +236,50 @@ public class TypesMapping {
         javaSqlEnum.put(JAVA_TIMESTAMP, new Integer(Types.TIMESTAMP));
     }
 
-    /** 
-     * Returns true if supplied type can have a length attribute 
-     * as a part of column definition. 
+    /**
+     * Returns true if supplied type can have a length attribute as a part of column
+     * definition.
      */
     public static boolean supportsLength(int type) {
         return type == Types.BINARY
-            || type == Types.CHAR
-            || type == Types.DECIMAL
-            || type == Types.DOUBLE
-            || type == Types.FLOAT
-            || type == Types.NUMERIC
-            || type == Types.REAL
-            || type == Types.VARBINARY
-            || type == Types.VARCHAR;
+                || type == Types.CHAR
+                || type == Types.DECIMAL
+                || type == Types.DOUBLE
+                || type == Types.FLOAT
+                || type == Types.NUMERIC
+                || type == Types.REAL
+                || type == Types.VARBINARY
+                || type == Types.VARCHAR;
     }
 
-    /** 
+    /**
      * Returns true if supplied type is a numeric type.
      */
     public static boolean isNumeric(int type) {
         return type == Types.BIGINT
-            || type == Types.BIT
-            || type == Types.DECIMAL
-            || type == Types.DOUBLE
-            || type == Types.FLOAT
-            || type == Types.INTEGER
-            || type == Types.NUMERIC
-            || type == Types.REAL
-            || type == Types.SMALLINT
-            || type == Types.TINYINT;
+                || type == Types.BIT
+                || type == Types.DECIMAL
+                || type == Types.DOUBLE
+                || type == Types.FLOAT
+                || type == Types.INTEGER
+                || type == Types.NUMERIC
+                || type == Types.REAL
+                || type == Types.SMALLINT
+                || type == Types.TINYINT;
     }
 
-    /** 
+    /**
      * Returns true if supplied type is a decimal type.
      */
     public static boolean isDecimal(int type) {
         return type == Types.DECIMAL
-            || type == Types.DOUBLE
-            || type == Types.FLOAT
-            || type == Types.REAL
-            || type == Types.NUMERIC;
+                || type == Types.DOUBLE
+                || type == Types.FLOAT
+                || type == Types.REAL
+                || type == Types.NUMERIC;
     }
 
-    /** Returns an array of string names of the default JDBC data types.*/
+    /** Returns an array of string names of the default JDBC data types. */
     public static String[] getDatabaseTypes() {
         Set keys = sqlStringType.keySet();
         int len = keys.size();
@@ -290,8 +293,10 @@ public class TypesMapping {
         return types;
     }
 
-    /** Method implements an algorithm to pick a data type from a list of alternatives
-    * that most closely matches JDBC data type. */
+    /**
+     * Method implements an algorithm to pick a data type from a list of alternatives that
+     * most closely matches JDBC data type.
+     */
     protected static String pickDataType(int jdbcType, TypeInfo[] alts) {
         int len = alts.length;
 
@@ -350,7 +355,7 @@ public class TypesMapping {
         return ((TypeInfo) list.get(0)).name;
     }
 
-    /** 
+    /**
      * Returns a JDBC int type for SQL typem name.
      */
     public static int getSqlTypeByName(String typeName) {
@@ -358,14 +363,14 @@ public class TypesMapping {
         return (null == tmp) ? NOT_DEFINED : tmp.intValue();
     }
 
-    /** 
+    /**
      * Returns a String representation of the SQL type from its JDBC code.
      */
     public static String getSqlNameByType(int type) {
         return (String) sqlEnumType.get(new Integer(type));
     }
 
-    /** 
+    /**
      * Returns default java.sql.Types type by the Java type name.
      * 
      * @param javaTypeName Fully qualified Java Class name.
@@ -383,7 +388,17 @@ public class TypesMapping {
      */
     public static int getSqlTypeByJava(Class javaClass) {
         while (javaClass != null) {
-            Object type = javaSqlEnum.get(javaClass.getName());
+
+            String name;
+
+            if (javaClass.isArray()) {
+                name = javaClass.getComponentType().getName() + "[]";
+            }
+            else {
+                name = javaClass.getName();
+            }
+
+            Object type = javaSqlEnum.get(name);
             if (type != null) {
                 return ((Number) type).intValue();
             }
@@ -394,20 +409,20 @@ public class TypesMapping {
         return NOT_DEFINED;
     }
 
-    /** 
+    /**
      * Get the corresponding Java type by its java.sql.Types counterpart.
      * 
-     *  @return Fully qualified Java type name or null if not found. 
+     * @return Fully qualified Java type name or null if not found.
      */
     public static String getJavaBySqlType(int type) {
         return (String) sqlEnumJava.get(new Integer(type));
     }
 
-    /** 
-      * Get the corresponding Java type by its java.sql.Types counterpart.
-      * 
-      *  @return Fully qualified Java type name or null if not found. 
-      */
+    /**
+     * Get the corresponding Java type by its java.sql.Types counterpart.
+     * 
+     * @return Fully qualified Java type name or null if not found.
+     */
     public static String getJavaBySqlType(int type, int length, int precision) {
 
         if (type == Types.NUMERIC && precision == 0) {
@@ -489,6 +504,7 @@ public class TypesMapping {
 
     /** Stores (incomplete) information about database data type */
     static class TypeInfo {
+
         String name;
         int jdbcType;
         long precision;
@@ -497,7 +513,7 @@ public class TypesMapping {
             StringBuffer buf = new StringBuffer();
             buf.append("[   TypeInfo: ").append(name);
             buf.append("\n    JDBC Type: ").append(
-                TypesMapping.getSqlNameByType(jdbcType));
+                    TypesMapping.getSqlNameByType(jdbcType));
             buf.append("\n    Precision: ").append(precision);
             buf.append("\n]");
             return buf.toString();

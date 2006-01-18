@@ -58,13 +58,23 @@ package org.objectstyle.cayenne.dba;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.Types;
 import java.util.Iterator;
 import java.util.List;
 
-public class TypesMappingTst extends TypesMappingBase {
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-    public void testTypeInfoCompleteness() throws java.lang.Exception {
-        // check counts 
+public class TypesMappingTst extends CayenneTestCase {
+
+    public void testGetSqlTypeByJava() throws Exception {
+        assertEquals(Types.VARCHAR, TypesMapping.getSqlTypeByJava(String.class));
+
+        // make sure we can handle arrays...
+        assertEquals(Types.BINARY, TypesMapping.getSqlTypeByJava(byte[].class));
+    }
+
+    public void testTypeInfoCompleteness() throws Exception {
+        // check counts
         // since more then 1 database type can map to a single JDBC type
         Connection conn = getConnection();
         int len = 0;
@@ -92,9 +102,21 @@ public class TypesMappingTst extends TypesMappingBase {
             actualLen += vals.size();
         }
 
-        // this is bad assertion, since due to some hacks 
+        // this is bad assertion, since due to some hacks
         // the same database types may map more then once,
         // so we have to use <=
         assertTrue(len <= actualLen);
+    }
+
+    TypesMapping createTypesMapping() throws Exception {
+        Connection conn = getConnection();
+
+        try {
+            DatabaseMetaData md = conn.getMetaData();
+            return new TypesMapping(md);
+        }
+        finally {
+            conn.close();
+        }
     }
 }
