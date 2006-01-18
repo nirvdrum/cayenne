@@ -83,7 +83,7 @@ public class DataRowUtilsTst extends CayenneTestCase {
     }
 
     public void testMerge() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
 
         String n1 = "changed";
         String n2 = "changed again";
@@ -107,7 +107,7 @@ public class DataRowUtilsTst extends CayenneTestCase {
     }
 
     public void testIsToOneTargetModified() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
 
         ObjEntity paintingEntity = context.getEntityResolver().lookupObjEntity(
                 Painting.class);

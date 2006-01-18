@@ -77,7 +77,7 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     public void setUp() throws Exception {
         super.setUp();
         deleteTestData();
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
         context = createDataContext();
     }
 
@@ -153,19 +153,19 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testLessThan() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings", null);
         Expression parsed1 = Expression.fromString("estimatedPrice < 2000.0");
         assertEquals(1, execute(Painting.class, parsed1).size());
     }
 
     public void testLessThanEqualTo() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings", null);
         Expression parsed1 = Expression.fromString("estimatedPrice <= 2000.0");
         assertEquals(2, execute(Painting.class, parsed1).size());
     }
 
     public void testGreaterThan() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings", null);
         Expression parsed1 = Expression.fromString("estimatedPrice > 2000");
         assertEquals(
             DataContextTestBase.artistCount - 2,
@@ -173,7 +173,7 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testGreaterThanEqualTo() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings", null);
         Expression parsed1 = Expression.fromString("estimatedPrice >= 2000");
         assertEquals(
             DataContextTestBase.artistCount - 1,
@@ -221,14 +221,14 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testBetween() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings", null);
         Expression parsed1 =
             Expression.fromString("estimatedPrice between 2000.0 and 4000.0");
         assertEquals(3, execute(Painting.class, parsed1).size());
     }
 
     public void testNotBetween() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings", null);
         Expression parsed1 =
             Expression.fromString("estimatedPrice not between 2000.0 and 4000.0");
         assertEquals(
@@ -250,7 +250,7 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testFloatExpression() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings", null);
         Expression parsed1 = Expression.fromString("estimatedPrice < 2001.01");
         assertEquals(2, execute(Painting.class, parsed1).size());
     }

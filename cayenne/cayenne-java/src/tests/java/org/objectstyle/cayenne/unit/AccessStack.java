@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.unit;
 
+import java.util.Map;
+
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 
@@ -64,19 +66,20 @@ import org.objectstyle.cayenne.access.DataNode;
  * @author Andrei Adamchik
  */
 public interface AccessStack {
-    public AccessStackAdapter getAdapter(DataNode node);
 
-    public DataDomain getDataDomain();
+    AccessStackAdapter getAdapter(DataNode node);
 
-    public void createTestData(Class testCase, String testName) throws Exception;
+    DataDomain getDataDomain();
 
-    public void deleteTestData() throws Exception;
+    void createTestData(Class testCase, String testName, Map parameters) throws Exception;
 
-    public void dropSchema() throws Exception;
+    void deleteTestData() throws Exception;
 
-    public void createSchema() throws Exception;
+    void dropSchema() throws Exception;
 
-    public void dropPKSupport() throws Exception;
+    void createSchema() throws Exception;
 
-    public void createPKSupport() throws Exception;
+    void dropPKSupport() throws Exception;
+
+    void createPKSupport() throws Exception;
 }

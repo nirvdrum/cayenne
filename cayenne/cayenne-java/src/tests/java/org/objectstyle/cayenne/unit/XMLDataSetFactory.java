@@ -57,13 +57,15 @@ package org.objectstyle.cayenne.unit;
 
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.query.ParameterizedQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryChain;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.InputStreamResource;
@@ -87,7 +89,7 @@ public class XMLDataSetFactory implements DataSetFactory {
     /**
      * Returns a Collection of Cayenne queries for a given test.
      */
-    public Collection getDataSet(Class testCase, String testName) {
+    public Query getDataSetQuery(Class testCase, String testName, Map parameters) {
         // use test case class name as a key to locate BeanFactory
         // use test name to locate DataSet
         BeanFactory factory = getFactory(testCase);
@@ -99,13 +101,19 @@ public class XMLDataSetFactory implements DataSetFactory {
         // name is either a Collection or an individual query
         Object object = factory.getBean(testName);
         if (object == null) {
-            return null;
+            throw new RuntimeException("No query exists for test name:" + testName);
         }
+
+        QueryChain chain = new QueryChain();
+
         if (object instanceof Collection) {
-            return (Collection) object;
+            Iterator it = ((Collection) object).iterator();
+            while (it.hasNext()) {
+                chain.addQuery(processQuery((Query) it.next(), parameters));
+            }
         }
         else if (object instanceof Query) {
-            return Collections.singleton(object);
+            chain.addQuery(processQuery((Query) object, parameters));
         }
         else {
             throw new RuntimeException("Invalid object type for name '"
@@ -113,6 +121,17 @@ public class XMLDataSetFactory implements DataSetFactory {
                     + "': "
                     + object.getClass().getName());
         }
+
+        return chain;
+    }
+
+    protected Query processQuery(Query query, Map parameters) {
+        if (parameters == null) {
+            return query;
+        }
+
+        return (query instanceof ParameterizedQuery) ? ((ParameterizedQuery) query)
+                .createQuery(parameters) : query;
     }
 
     protected BeanFactory getFactory(Class testCase) {

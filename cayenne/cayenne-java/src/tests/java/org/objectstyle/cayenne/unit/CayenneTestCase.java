@@ -56,7 +56,9 @@
 package org.objectstyle.cayenne.unit;
 
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
@@ -136,7 +138,11 @@ public abstract class CayenneTestCase extends BasicTestCase {
      * mechanism is loading test data DML from XML file.
      */
     protected void createTestData(String testName) throws Exception {
-        accessStack.createTestData(this.getClass(), testName);
+        accessStack.createTestData(this.getClass(), testName, Collections.EMPTY_MAP);
+    }
+    
+    protected void createTestData(String testName, Map parameters) throws Exception {
+        accessStack.createTestData(this.getClass(), testName, parameters);
     }
 
     protected DataNode getNode() {

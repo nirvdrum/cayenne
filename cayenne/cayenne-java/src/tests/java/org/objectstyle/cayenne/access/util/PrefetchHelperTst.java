@@ -80,8 +80,8 @@ public class PrefetchHelperTst extends CayenneTestCase {
     }
 
     public void testResolveToOneRelations() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
-        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings", null);
 
         DataContext context = createDataContext();
         List paintings = context.performQuery(new SelectQuery(Painting.class));
@@ -111,8 +111,8 @@ public class PrefetchHelperTst extends CayenneTestCase {
         // mainly testing CAY-188 - a case when related objects are already resolved
         // ..
 
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
-        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings", null);
 
         DataContext context = createDataContext();
         SelectQuery q = new SelectQuery(Painting.class);

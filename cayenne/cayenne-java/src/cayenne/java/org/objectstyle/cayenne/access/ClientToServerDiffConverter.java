@@ -73,9 +73,9 @@ import org.objectstyle.cayenne.map.Relationship;
 // TODO: (Andrus, 09/2005) Server-side ClassDescriptor is needed to handle all that...
 class ClientToServerDiffConverter implements GraphChangeHandler {
 
-    ObjectDataContext serverContext;
+    DataContext serverContext;
 
-    ClientToServerDiffConverter(ObjectDataContext serverContext) {
+    ClientToServerDiffConverter(DataContext serverContext) {
         this.serverContext = serverContext;
     }
 

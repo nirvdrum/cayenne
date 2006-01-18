@@ -55,17 +55,19 @@
  */
 package org.objectstyle.cayenne.unit;
 
-import java.util.Collection;
+import java.util.Map;
+
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * A class that manages sets of queries for Cayenne 
- * test cases.
+ * A class that manages sets of queries for Cayenne test cases.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public interface DataSetFactory {
+
     /**
-     * Returns a Collection of Cayenne queries for a given test.
+     * Returns a query for creation of the data set.
      */
-    public Collection getDataSet(Class testCase, String testName);
+    Query getDataSetQuery(Class testCase, String testName, Map parameters);
 }

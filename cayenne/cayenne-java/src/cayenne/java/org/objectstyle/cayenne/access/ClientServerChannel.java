@@ -85,7 +85,7 @@ import org.objectstyle.cayenne.query.Query;
  */
 public class ClientServerChannel implements OPPChannel {
 
-    protected ObjectDataContext serverContext;
+    protected DataContext serverContext;
     protected boolean lifecycleEventsEnabled;
 
     public ClientServerChannel(DataDomain domain) {
@@ -93,10 +93,10 @@ public class ClientServerChannel implements OPPChannel {
     }
 
     public ClientServerChannel(DataDomain domain, boolean lifecycleEventsEnabled) {
-        this(new ObjectDataContext(domain), lifecycleEventsEnabled);
+        this(domain.createDataContext(), lifecycleEventsEnabled);
     }
 
-    ClientServerChannel(ObjectDataContext serverContext, boolean lifecycleEventsEnabled) {
+    ClientServerChannel(DataContext serverContext, boolean lifecycleEventsEnabled) {
 
         this.serverContext = serverContext;
         this.lifecycleEventsEnabled = lifecycleEventsEnabled;

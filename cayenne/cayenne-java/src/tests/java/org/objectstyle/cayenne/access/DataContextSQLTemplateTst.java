@@ -77,7 +77,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
     }
 
     public void testFetchDataRows() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
 
         String template = "SELECT * FROM ARTIST ORDER BY ARTIST_ID";
         SQLTemplate query = new SQLTemplate(Artist.class, template);
@@ -96,7 +96,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
     }
 
     public void testFetchObjects() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
 
         String template = "SELECT * FROM ARTIST ORDER BY ARTIST_ID";
         SQLTemplate query = getSQLTemplateBuilder().createSQLTemplate(
@@ -114,7 +114,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
     }
 
     public void testFetchLimit() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
 
         int fetchLimit = 3;
 
@@ -132,7 +132,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
     }
 
     public void testPageSize() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
 
         int pageSize = 3;
 
@@ -167,7 +167,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
     }
 
     public void testIteratedQuery() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
 
         String template = "SELECT * FROM ARTIST ORDER BY ARTIST_ID";
         SQLTemplate query = getSQLTemplateBuilder().createSQLTemplate(

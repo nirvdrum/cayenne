@@ -91,7 +91,7 @@ public class SQLTemplateActionTst extends CayenneTestCase {
     }
 
     public void testExecuteSelect() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
 
         String templateString = "SELECT * FROM ARTIST WHERE ARTIST_ID = #bind($id)";
         SQLTemplate template = new SQLTemplate(Object.class, templateString);
@@ -125,7 +125,7 @@ public class SQLTemplateActionTst extends CayenneTestCase {
     }
 
     public void testSelectUtilDate() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
         // update data set to include dates....
         setDate(new java.util.Date(), 33006);
 
@@ -161,7 +161,7 @@ public class SQLTemplateActionTst extends CayenneTestCase {
     }
 
     public void testSelectSQLDate() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
         // update data set to include dates....
         setDate(new java.util.Date(), 33006);
 
@@ -197,7 +197,7 @@ public class SQLTemplateActionTst extends CayenneTestCase {
     }
 
     public void testSelectSQLTimestamp() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
         // update data set to include dates....
         setDate(new java.util.Date(), 33006);
 
@@ -277,7 +277,7 @@ public class SQLTemplateActionTst extends CayenneTestCase {
     }
 
     public void testExecuteUpdateNoParameters() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
 
         SQLTemplate template = new SQLTemplate(Object.class, "delete from ARTIST");
 

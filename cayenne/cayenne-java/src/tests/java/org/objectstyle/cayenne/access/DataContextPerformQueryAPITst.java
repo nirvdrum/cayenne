@@ -78,8 +78,8 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
     }
 
     public void testObjectQueryStringBoolean() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
-        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings", null);
 
         List paintings = createDataContext().performQuery("ObjectQuery", true);
         assertNotNull(paintings);
@@ -87,8 +87,8 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
     }
 
     public void testObjectQueryStringMapBoolean() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
-        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings", null);
 
         // fetch artist
         DataContext context = createDataContext();
@@ -114,8 +114,8 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
             return;
         }
 
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
-        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings", null);
 
         // fetch artist
         Map parameters = Collections.singletonMap("aName", "artist2");

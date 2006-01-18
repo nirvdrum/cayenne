@@ -62,7 +62,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.MockQueryResponse;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.graph.CompoundDiff;
@@ -76,14 +75,12 @@ import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.ObjectSelectMessage;
 import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.SyncMessage;
-import org.objectstyle.cayenne.query.MockGenericSelectQuery;
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1Subclass;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable3;
-import org.objectstyle.cayenne.testdo.mt.MtTable1Subclass;
-import org.objectstyle.cayenne.testdo.mt.MtTable3;
+import org.objectstyle.cayenne.testdo.mt.MtTable1;
 import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
@@ -126,12 +123,13 @@ public class ClientServerChannelTst extends CayenneTestCase {
             }
         };
 
-        ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore()) {
+        DataContext context = new DataContext(parent, new ObjectStore(
+                new MockDataRowStore())) {
 
             public OPPChannel getChannel() {
                 return parent;
             }
-            
+
             public DataDomain getParentDataDomain() {
                 return getDomain();
             }
@@ -154,29 +152,13 @@ public class ClientServerChannelTst extends CayenneTestCase {
         assertTrue(commitDone[0]);
     }
 
-    public void testOnSelectQueryGlobalIDInjection() {
+    public void testOnSelectQueryObjectIDInjection() throws Exception {
+        createTestData("testOnSelectQueryObjectIDInjection");
 
-        ObjectId oid = new ObjectId("MtTable1", "TABLE1_ID", new Integer(1));
-        QueryResponse response = new MockQueryResponse(oid.getIdSnapshot());
+        DataContext context = createDataContext();
 
-        final boolean[] selectDone = new boolean[1];
-        MockOPPChannel parent = new MockOPPChannel(
-                getDomain().getEntityResolver(),
-                response) {
-
-            // note that select query calls "onGenericQuery" on the channel
-            public QueryResponse onQuery(QueryMessage message) {
-                selectDone[0] = true;
-                return super.onQuery(message);
-            }
-        };
-
-        ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore());
-
-        ObjectSelectMessage message = new ObjectSelectMessage(new MockGenericSelectQuery(
-                "MtTable1"));
+        ObjectSelectMessage message = new ObjectSelectMessage(new SelectQuery("MtTable1"));
         List results = new ClientServerChannel(context, false).onSelectObjects(message);
-        assertTrue(selectDone[0]);
 
         assertNotNull(results);
         assertEquals(1, results.size());
@@ -186,32 +168,28 @@ public class ClientServerChannelTst extends CayenneTestCase {
         ClientMtTable1 clientObject = (ClientMtTable1) result;
         assertNotNull(clientObject.getObjectId());
 
-        assertEquals(oid, clientObject.getObjectId());
+        assertEquals(
+                new ObjectId("MtTable1", MtTable1.TABLE1_ID_PK_COLUMN, 55),
+                clientObject.getObjectId());
     }
 
-    public void testOnSelectQueryValuePropagation() {
+    public void testOnSelectQueryValuePropagation() throws Exception {
 
-        ObjectId oid = new ObjectId(
-                "MtTable3",
-                MtTable3.TABLE3_ID_PK_COLUMN,
-                new Integer(1));
-        Map row = new HashMap(oid.getIdSnapshot());
-
-        row.put("BINARY_COLUMN", new byte[] {
+        byte[] bytes = new byte[] {
                 1, 2, 3
-        });
+        };
 
-        row.put("CHAR_COLUMN", "abc");
-        row.put("INT_COLUMN", new Integer(4));
+        String chars = "abc";
 
-        MockOPPChannel parent = new MockOPPChannel(
-                getDomain().getEntityResolver(),
-                new MockQueryResponse(row));
+        Map parameters = new HashMap();
+        parameters.put("bytes", bytes);
+        parameters.put("chars", chars);
 
-        ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore());
+        createTestData("testOnSelectQueryValuePropagation", parameters);
 
-        ObjectSelectMessage message = new ObjectSelectMessage(new MockGenericSelectQuery(
-                "MtTable3"));
+        DataContext context = createDataContext();
+
+        ObjectSelectMessage message = new ObjectSelectMessage(new SelectQuery("MtTable3"));
         List results = new ClientServerChannel(context, false).onSelectObjects(message);
 
         assertNotNull(results);
@@ -221,38 +199,29 @@ public class ClientServerChannelTst extends CayenneTestCase {
         assertTrue("Result is of wrong type: " + result, result instanceof ClientMtTable3);
         ClientMtTable3 clientObject = (ClientMtTable3) result;
 
-        assertEquals(row.get("CHAR_COLUMN"), clientObject.getCharColumn());
-        assertEquals(row.get("INT_COLUMN"), clientObject.getIntColumn());
-        assertTrue(new EqualsBuilder().append(
-                clientObject.getBinaryColumn(),
-                row.get("BINARY_COLUMN")).isEquals());
+        assertEquals(chars, clientObject.getCharColumn());
+        assertEquals(new Integer(4), clientObject.getIntColumn());
+        assertTrue(new EqualsBuilder()
+                .append(clientObject.getBinaryColumn(), bytes)
+                .isEquals());
     }
 
-    public void testOnSelectQueryValuePropagationInheritance() {
+    public void testOnSelectQueryValuePropagationInheritance() throws Exception {
 
-        ObjectId oid = new ObjectId(
-                "MtTable1Subclass",
-                MtTable1Subclass.TABLE1_ID_PK_COLUMN,
-                new Integer(1));
+        Map parameters = new HashMap();
+        parameters.put("GLOBAL_ATTRIBUTE1", "sub1");
+        parameters.put("SERVER_ATTRIBUTE1", "xyz");
+        createTestData("testOnSelectQueryValuePropagationInheritance", parameters);
 
-        Map row = new HashMap(oid.getIdSnapshot());
-
-        // note that "sub1" is used in subclass qualifier
-        row.put("GLOBAL_ATTRIBUTE1", "sub1");
-        row.put("SERVER_ATTRIBUTE1", "xyz");
-
-        MockOPPChannel parent = new MockOPPChannel(
-                getDomain().getEntityResolver(),
-                new MockQueryResponse(row));
-
-        ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore());
+        DataContext context = createDataContext();
 
         // must use real SelectQuery instead of mockup as root overriding depends on the
         // fact that Query inherits from AbstractQuery.
         SelectQuery query = new SelectQuery(ClientMtTable1.class);
         query.setResolvingInherited(true);
-        ObjectSelectMessage message = new ObjectSelectMessage(query);
-        List results = new ClientServerChannel(context, false).onSelectObjects(message);
+
+        List results = new ClientServerChannel(context, false)
+                .onSelectObjects(new ObjectSelectMessage(query));
 
         assertNotNull(results);
         assertEquals(1, results.size());
@@ -263,10 +232,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 result instanceof ClientMtTable1Subclass);
         ClientMtTable1Subclass clientObject = (ClientMtTable1Subclass) result;
 
-        assertEquals(
-                "Invalid object: " + clientObject,
-                row.get("GLOBAL_ATTRIBUTE1"),
-                clientObject.getGlobalAttribute1());
+        assertEquals("sub1", clientObject.getGlobalAttribute1());
     }
 
     public void testOnGenericQuery() {
@@ -279,7 +245,8 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 return super.onQuery(message);
             }
         };
-        ObjectDataContext context = new ObjectDataContext(parent, new MockDataRowStore());
+        DataContext context = new DataContext(parent, new ObjectStore(
+                new MockDataRowStore()));
 
         QueryMessage message = new QueryMessage(new MockQuery());
         new ClientServerChannel(context, false).onQuery(message);

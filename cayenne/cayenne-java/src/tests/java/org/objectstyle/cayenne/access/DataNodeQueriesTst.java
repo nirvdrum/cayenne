@@ -129,7 +129,7 @@ public class DataNodeQueriesTst extends CayenneTestCase {
     }
 
     public void testPerfomQueriesSelectingSQLTemplate1() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
 
         String template = "SELECT #result('ARTIST_ID' 'int') FROM ARTIST ORDER BY ARTIST_ID";
         SQLTemplate query = new SQLTemplate(Object.class, template);
@@ -145,7 +145,7 @@ public class DataNodeQueriesTst extends CayenneTestCase {
     }
 
     public void testPerfomQueriesSelectingSQLTemplate2() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
 
         String template = "SELECT * FROM ARTIST ORDER BY ARTIST_ID";
         SQLTemplate query = new SQLTemplate(Object.class, template);
@@ -163,7 +163,7 @@ public class DataNodeQueriesTst extends CayenneTestCase {
     }
 
     public void testPerfomQueriesSelectingSQLTemplateAlias() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
 
         String template = "SELECT #result('ARTIST_ID' 'int' 'A') FROM ARTIST ORDER BY ARTIST_ID";
         SQLTemplate query = new SQLTemplate(Object.class, template);
