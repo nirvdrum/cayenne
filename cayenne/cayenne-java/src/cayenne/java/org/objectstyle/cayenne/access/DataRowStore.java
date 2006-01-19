@@ -77,7 +77,6 @@ import org.objectstyle.cayenne.event.EventBridgeFactory;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.ObjectSelectMessage;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
 
@@ -353,7 +352,7 @@ public class DataRowStore implements Serializable {
         // try getting it from database
 
         Query query = new SingleObjectQuery(oid);
-        List results = channel.onSelectObjects(new ObjectSelectMessage(query));
+        List results = channel.performQuery(query);
 
         if (results.size() > 1) {
             throw new CayenneRuntimeException("More than 1 object found for ObjectId "

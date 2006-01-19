@@ -66,11 +66,8 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.opp.BootstrapMessage;
-import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.ObjectSelectMessage;
-import org.objectstyle.cayenne.opp.SyncMessage;
+import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
@@ -193,7 +190,7 @@ public class CayenneContext implements ObjectContext {
         if (entityResolver == null) {
             synchronized (this) {
                 if (entityResolver == null) {
-                    setEntityResolver(channel.onBootstrap(new BootstrapMessage()));
+                    setEntityResolver(channel.getEntityResolver());
                 }
             }
         }
@@ -236,9 +233,9 @@ public class CayenneContext implements ObjectContext {
                 graphManager.graphCommitStarted();
 
                 try {
-                    commitDiff = channel.onSync(new SyncMessage(
+                    commitDiff = channel.synchronize(new SyncCommand(
                             this,
-                            SyncMessage.COMMIT_TYPE,
+                            SyncCommand.COMMIT_TYPE,
                             graphManager.getDiffsSinceLastFlush()));
                 }
                 catch (Throwable th) {
@@ -266,7 +263,11 @@ public class CayenneContext implements ObjectContext {
                 GraphDiff diff = graphManager.getDiffs();
                 graphManager.graphReverted();
 
-                channel.onSync(new SyncMessage(this, SyncMessage.ROLLBACK_TYPE, diff));
+                channel
+                        .synchronize(new SyncCommand(
+                                this,
+                                SyncCommand.ROLLBACK_TYPE,
+                                diff));
             }
         }
     }
@@ -276,7 +277,7 @@ public class CayenneContext implements ObjectContext {
             if (graphManager.hasChangesSinceLastFlush()) {
                 GraphDiff diff = graphManager.getDiffsSinceLastFlush();
                 graphManager.graphFlushed();
-                channel.onSync(new SyncMessage(this, SyncMessage.FLUSH_TYPE, diff));
+                channel.synchronize(new SyncCommand(this, SyncCommand.FLUSH_TYPE, diff));
             }
         }
     }
@@ -335,7 +336,7 @@ public class CayenneContext implements ObjectContext {
     }
 
     public List performQuery(Query query) {
-        List objects = channel.onSelectObjects(new ObjectSelectMessage(query));
+        List objects = channel.performQuery(query);
         if (objects.isEmpty()) {
             return objects;
         }
@@ -439,7 +440,8 @@ public class CayenneContext implements ObjectContext {
 
                 // TODO: Andrus, 12/28/2005 - should we copy all the values if the source
                 // is not HOLLOW?
-                ObjEntity entity = getEntityResolver().lookupObjEntity(id.getEntityName());
+                ObjEntity entity = getEntityResolver()
+                        .lookupObjEntity(id.getEntityName());
                 if (entity == null) {
                     throw new CayenneRuntimeException("Unmapped entity: "
                             + id.getEntityName());
@@ -461,11 +463,11 @@ public class CayenneContext implements ObjectContext {
     }
 
     public int[] performNonSelectingQuery(Query query) {
-        return channel.onQuery(new QueryMessage(query)).getFirstUpdateCounts(query);
+        return channel.performGenericQuery(query).getFirstUpdateCounts(query);
     }
 
     public QueryResponse performGenericQuery(Query query) {
-        return channel.onQuery(new QueryMessage(query));
+        return channel.performGenericQuery(query);
     }
 
     public void prepareForAccess(Persistent object, String property) {

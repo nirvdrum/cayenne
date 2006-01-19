@@ -62,6 +62,7 @@ import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * A two-way communication channel connecting a parent persistence engine and its
@@ -96,34 +97,33 @@ public interface OPPChannel {
     EventManager getEventManager();
 
     /**
-     * Processes BootstrapMessage returning EntityResolver that contains runtime mapping
-     * information.
+     * Returns an EntityResolver instance that contains runtime mapping information.
      */
-    EntityResolver onBootstrap(BootstrapMessage message);
+    EntityResolver getEntityResolver();
 
     /**
-     * Processes a request to select objects matching message query.
-     * <h3>"onSelectObjects" vs. "onQuery"</h3>
-     * "onSelectObjects" indicates that the channel should convert raw database data to
-     * objects before returning the result to the caller, while "onQuery" returns raw
-     * query data (data rows and update counts), and the caller is free to process this
-     * data any way it needs.
+     * Processes a request to select objects matching the query.
+     * <h3>"performQuery" vs. "performGenericQuery"</h3>
+     * "performQuery" indicates that the channel should convert raw database data to
+     * objects before returning the result to the caller, while "performGenericQuery"
+     * returns raw query data (data rows and update counts), and the caller is free to
+     * process this data any way it needs.
      */
-    List onSelectObjects(ObjectSelectMessage message);
+    List performQuery(Query query);
 
     /**
-     * Processes a raw query message.
-     * <h3>"onSelectObjects" vs. "onQuery"</h3>
-     * "onSelectObjects" indicates that the channel should convert raw database data to
-     * objects before returning the result to the caller, while "onQuery" returns raw
-     * query data (data rows and update counts), and the caller is free to process this
-     * data any way it needs.
+     * Processes a query.
+     * <h3>"performQuery" vs. "performGenericQuery"</h3>
+     * "performQuery" indicates that the channel should convert raw database data to
+     * objects before returning the result to the caller, while "performGenericQuery"
+     * returns raw query data (data rows and update counts), and the caller is free to
+     * process this data any way it needs.
      */
-    QueryResponse onQuery(QueryMessage message);
+    QueryResponse performGenericQuery(Query query);
 
     /**
-     * Processes SyncMessage returning a GraphDiff that describes changes to objects made
-     * on the receiving end as a result of sync operation.
+     * Processes SyncCommand returning a GraphDiff that describes changes to objects made
+     * on the receiving end as a result of syncronization.
      */
-    GraphDiff onSync(SyncMessage message);
+    GraphDiff synchronize(SyncCommand sync);
 }

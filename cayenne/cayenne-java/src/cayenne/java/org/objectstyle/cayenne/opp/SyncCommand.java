@@ -55,56 +55,58 @@
  */
 package org.objectstyle.cayenne.opp;
 
-import junit.framework.TestCase;
+import java.io.Serializable;
 
-import org.objectstyle.cayenne.MockObjectContext;
 import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.graph.NodeCreateOperation;
-import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 
-public class SyncMessageTst extends TestCase {
+/**
+ * An object that stores passed to the OPPChannel during state synchronization with one of
+ * its children. It defines a few types of synchronization: "flush" (when the child sends
+ * its changes without a commit), "commit" (cascading flush with ultimate commit to the
+ * database), and "rollback" - cascading reverting of all uncommitted changes.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+public class SyncCommand implements Serializable {
 
-    public void testConstructor() {
-        ObjectContext source = new MockObjectContext();
-        GraphDiff diff = new CompoundDiff();
-        SyncMessage message = new SyncMessage(source, SyncMessage.FLUSH_TYPE, diff);
+    public static final int FLUSH_TYPE = 1;
+    public static final int COMMIT_TYPE = 2;
+    public static final int ROLLBACK_TYPE = 3;
 
-        assertSame(source, message.getSource());
-        assertEquals(SyncMessage.FLUSH_TYPE, message.getType());
-        assertSame(diff, message.getSenderChanges());
+    protected transient ObjectContext source;
+    protected int type;
+    protected GraphDiff senderChanges;
+
+    // private constructor for Hessian deserialization
+    private SyncCommand() {
+
     }
 
-    public void testHessianSerialization() throws Exception {
-        // id must be a serializable object; source doesn't have to be
-        ObjectContext source = new MockObjectContext();
-        GraphDiff diff = new NodeCreateOperation("id-string");
-        SyncMessage message = new SyncMessage(source, SyncMessage.FLUSH_TYPE, diff);
+    public SyncCommand(ObjectContext source, int type, GraphDiff senderChanges) {
+        // validate type
+        if (type != FLUSH_TYPE && type != COMMIT_TYPE && type != ROLLBACK_TYPE) {
+            throw new IllegalArgumentException("'type' is invalid: " + type);
+        }
 
-        Object d = HessianUtil.cloneViaHessianSerialization(message);
-        assertNotNull(d);
-        assertTrue(d instanceof SyncMessage);
-
-        SyncMessage ds = (SyncMessage) d;
-        assertNull(ds.getSource());
-        assertEquals(message.getType(), ds.getType());
-        assertNotNull(ds.getSenderChanges());
+        this.source = source;
+        this.type = type;
+        this.senderChanges = senderChanges;
     }
 
-    public void testConstructorInvalid() {
-        ObjectContext source = new MockObjectContext();
-        new SyncMessage(source, SyncMessage.FLUSH_TYPE, new CompoundDiff());
-        new SyncMessage(source, SyncMessage.COMMIT_TYPE, new CompoundDiff());
-        new SyncMessage(null, SyncMessage.ROLLBACK_TYPE, new CompoundDiff());
+    /**
+     * Returns a source of SyncMessage.
+     */
+    public ObjectContext getSource() {
+        return source;
+    }
 
-        int bogusType = 45678;
-        try {
-            new SyncMessage(source, bogusType, new CompoundDiff());
-            fail("invalid type was allowed to go unnoticed...");
-        }
-        catch (IllegalArgumentException e) {
+    public int getType() {
+        return type;
+    }
 
-        }
+    public GraphDiff getSenderChanges() {
+        return senderChanges;
     }
 }

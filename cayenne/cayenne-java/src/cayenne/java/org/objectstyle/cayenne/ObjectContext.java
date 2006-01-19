@@ -202,17 +202,17 @@ public interface ObjectContext extends Serializable {
     /**
      * Executes a selecting query, returning a list of persistent objects or data rows.
      */
-    List performQuery(Query queryPlan);
+    List performQuery(Query query);
 
     /**
      * Executes a non-selecting query returning an array of update counts.
      */
-    int[] performNonSelectingQuery(Query queryPlan);
+    int[] performNonSelectingQuery(Query query);
 
     /**
      * Executes any kind of query providing the result in a form of QueryResponse.
      */
-    QueryResponse performGenericQuery(Query queryPlan);
+    QueryResponse performGenericQuery(Query query);
 
     /**
      * Returns GraphManager that manages object graph associated with this context.

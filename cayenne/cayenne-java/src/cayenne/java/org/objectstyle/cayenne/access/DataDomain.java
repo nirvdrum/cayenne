@@ -71,11 +71,9 @@ import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.opp.BootstrapMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.ObjectSelectMessage;
-import org.objectstyle.cayenne.opp.QueryMessage;
-import org.objectstyle.cayenne.opp.SyncMessage;
+import org.objectstyle.cayenne.opp.SyncCommand;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryChain;
 import org.objectstyle.cayenne.util.Util;
 
@@ -643,14 +641,6 @@ public class DataDomain implements QueryEngine, OPPChannel {
         new DataDomainQueryAction(this, callback).performQuery(new QueryChain(queries));
     }
 
-    public EntityResolver getEntityResolver() {
-        if (entityResolver == null) {
-            createEntityResolver();
-        }
-
-        return entityResolver;
-    }
-
     /**
      * Sets EntityResolver. If not set explicitly, DataDomain creates a default
      * EntityResolver internally on demand.
@@ -716,42 +706,46 @@ public class DataDomain implements QueryEngine, OPPChannel {
 
     // ****** OPPChannel methods:
 
-    /**
-     * @since 1.2
-     */
-    public EntityResolver onBootstrap(BootstrapMessage message) {
+    public EntityResolver getEntityResolver() {
+        if (entityResolver == null) {
+            createEntityResolver();
+        }
+
         return entityResolver;
     }
 
     /**
      * @since 1.2
      */
-    public QueryResponse onQuery(QueryMessage message) {
+    public QueryResponse performGenericQuery(Query query) {
         QueryResult result = new QueryResult();
-        new DataDomainQueryAction(this, result).performQuery(message.getQuery());
+        new DataDomainQueryAction(this, result).performQuery(query);
         return result;
     }
 
     /**
+     * Performs a selecting query. Note that DataDomain can't convert results to
+     * DataObjects, so results are returned as DataRows.
+     * 
      * @since 1.2
      */
-    public List onSelectObjects(ObjectSelectMessage message) {
+    public List performQuery(Query query) {
         QueryResult result = new QueryResult();
-        new DataDomainQueryAction(this, result).performQuery(message.getQuery());
-        return result.getFirstRows(message.getQuery());
+        new DataDomainQueryAction(this, result).performQuery(query);
+        return result.getFirstRows(query);
     }
 
     /**
      * @since 1.2
      */
-    public GraphDiff onSync(SyncMessage message) {
+    public GraphDiff synchronize(SyncCommand sync) {
 
         // ignore all but commit messages
-        if (message.getType() == SyncMessage.COMMIT_TYPE) {
+        if (sync.getType() == SyncCommand.COMMIT_TYPE) {
             // TODO: Andrus, 12/13/2005 - see TODO under
             // DataContext.doCommitChanges() -
             // PK generation needs to be done here...
-            return new DataDomainCommitAction().commit(message);
+            return new DataDomainCommitAction().commit(sync);
         }
 
         return null;

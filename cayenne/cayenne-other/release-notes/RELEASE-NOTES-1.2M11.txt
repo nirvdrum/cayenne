@@ -15,4 +15,9 @@ Changes/New Features:
 
 * Speeding up very slow Modeler attribute and relationship operations.
 
+* Completely changed the signatures of OPPChannel interface, as using messaging-based
+  API patterns made no sens in the local application context. Note that this does NOT 
+  affect 99.99% of the users.
+  
+
 Bugs Fixed:

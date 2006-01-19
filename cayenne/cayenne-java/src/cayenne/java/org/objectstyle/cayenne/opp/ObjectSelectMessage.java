@@ -67,8 +67,8 @@ public class ObjectSelectMessage implements OPPMessage {
 
     protected Query query;
 
-    public ObjectSelectMessage(Query queryPlan) {
-        this.query = queryPlan;
+    public ObjectSelectMessage(Query query) {
+        this.query = query;
     }
 
     public Query getQuery() {

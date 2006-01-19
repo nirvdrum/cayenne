@@ -60,7 +60,7 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SyncMessage;
+import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
@@ -86,7 +86,7 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
                 channel);
 
         GraphDiff diff = new NodeCreateOperation(new ObjectId("MtTable1"));
-        channel.onSync(new SyncMessage(null, SyncMessage.COMMIT_TYPE, diff));
+        channel.synchronize(new SyncCommand(null, SyncCommand.COMMIT_TYPE, diff));
 
         assertTrue(listener.notificationPosted);
     }
@@ -104,7 +104,7 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
                 channel);
 
         GraphDiff diff = new NodeCreateOperation(new ObjectId("MtTable1"));
-        channel.onSync(new SyncMessage(null, SyncMessage.FLUSH_TYPE, diff));
+        channel.synchronize(new SyncCommand(null, SyncCommand.FLUSH_TYPE, diff));
         assertTrue(listener.notificationPosted);
     }
 
@@ -114,7 +114,7 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
         ClientServerChannel channel = new ClientServerChannel(getDomain(), true);
 
         GraphDiff diff = new NodeCreateOperation(new ObjectId("MtTable1"));
-        channel.onSync(new SyncMessage(null, SyncMessage.FLUSH_TYPE, diff));
+        channel.synchronize(new SyncCommand(null, SyncCommand.FLUSH_TYPE, diff));
 
         channel.getEventManager().addListener(
                 listener,
@@ -123,7 +123,7 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
                 OPPChannel.GRAPH_ROLLEDBACK_SUBJECT,
                 channel);
 
-        channel.onSync(new SyncMessage(null, SyncMessage.ROLLBACK_TYPE, null));
+        channel.synchronize(new SyncCommand(null, SyncCommand.ROLLBACK_TYPE, null));
         assertTrue(listener.notificationPosted);
     }
 

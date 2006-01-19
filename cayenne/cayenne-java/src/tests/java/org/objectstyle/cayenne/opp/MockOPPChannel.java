@@ -62,6 +62,7 @@ import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * Stores all messages passed via this handler.
@@ -71,7 +72,7 @@ import org.objectstyle.cayenne.map.EntityResolver;
 public class MockOPPChannel implements OPPChannel {
 
     protected EntityResolver resolver;
-    protected List messages = new ArrayList();
+    protected List requestObjects = new ArrayList();
     protected GraphDiff commitResponse;
     protected List selectResponse;
     protected QueryResponse genericResponse;
@@ -107,30 +108,29 @@ public class MockOPPChannel implements OPPChannel {
     }
 
     public void reset() {
-        messages.clear();
+        requestObjects.clear();
     }
 
-    public List getMessages() {
-        return messages;
+    public List getRequestObjects() {
+        return requestObjects;
     }
 
-    public GraphDiff onSync(SyncMessage message) {
-        messages.add(message);
+    public GraphDiff synchronize(SyncCommand sync) {
+        requestObjects.add(sync);
         return commitResponse;
     }
 
-    public QueryResponse onQuery(QueryMessage message) {
-        messages.add(message);
+    public QueryResponse performGenericQuery(Query query) {
+        requestObjects.add(query);
         return genericResponse;
     }
 
-    public List onSelectObjects(ObjectSelectMessage message) {
-        messages.add(message);
+    public List performQuery(Query query) {
+        requestObjects.add(query);
         return selectResponse;
     }
 
-    public EntityResolver onBootstrap(BootstrapMessage message) {
-        messages.add(message);
+    public EntityResolver getEntityResolver() {
         return resolver;
     }
 }

@@ -63,7 +63,6 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Procedure;
-import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -123,7 +122,7 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
     public void createTestData(Class testCase, String testName, Map parameters)
             throws Exception {
         Query query = dataSetFactory.getDataSetQuery(testCase, testName, parameters);
-        getDataDomain().onQuery(new QueryMessage(query));
+        getDataDomain().performGenericQuery(query);
     }
 
     /**

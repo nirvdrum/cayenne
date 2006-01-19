@@ -63,9 +63,9 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.graph.GraphEventListener;
 import org.objectstyle.cayenne.graph.MockGraphEventListener;
-import org.objectstyle.cayenne.opp.SyncMessage;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.opp.SyncCommand;
 
 public class CayenneContextEventsTst extends TestCase {
 
@@ -77,7 +77,7 @@ public class CayenneContextEventsTst extends TestCase {
                 return manager;
             }
 
-            public GraphDiff onSync(SyncMessage message) {
+            public GraphDiff synchronize(SyncCommand message) {
                 return new CompoundDiff();
             }
         };
@@ -114,7 +114,7 @@ public class CayenneContextEventsTst extends TestCase {
                 return manager;
             }
 
-            public GraphDiff onSync(SyncMessage message) {
+            public GraphDiff synchronize(SyncCommand message) {
                 return new CompoundDiff();
             }
         };

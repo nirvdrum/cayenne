@@ -55,44 +55,56 @@
  */
 package org.objectstyle.cayenne.opp;
 
+import junit.framework.TestCase;
 
-/**
- * A message used for synchronization of the child with parent. It defines a few types of
- * synchronization: "flush" (when the child sends its changes without a commit), "commit"
- * (cascading flush with ultimate commit to the database), and "rollback" - cascading
- * reverting of all uncommitted changes.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public class SyncMessage implements OPPMessage {
+import org.objectstyle.cayenne.MockObjectContext;
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.NodeCreateOperation;
+import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 
-    protected SyncCommand sync;
+public class SyncCommandTst extends TestCase {
 
-    // private constructor for Hessian deserialization
-    private SyncMessage() {
+    public void testConstructor() {
+        ObjectContext source = new MockObjectContext();
+        GraphDiff diff = new CompoundDiff();
+        SyncCommand message = new SyncCommand(source, SyncCommand.FLUSH_TYPE, diff);
 
+        assertSame(source, message.getSource());
+        assertEquals(SyncCommand.FLUSH_TYPE, message.getType());
+        assertSame(diff, message.getSenderChanges());
     }
 
-    public SyncMessage(SyncCommand sync) {
-        this.sync = sync;
-    }
-    
-    public SyncCommand getSync() {
-        return sync;
+    public void testHessianSerialization() throws Exception {
+        // id must be a serializable object; source doesn't have to be
+        ObjectContext source = new MockObjectContext();
+        GraphDiff diff = new NodeCreateOperation("id-string");
+        SyncCommand message = new SyncCommand(source, SyncCommand.FLUSH_TYPE, diff);
+
+        Object d = HessianUtil.cloneViaHessianSerialization(message);
+        assertNotNull(d);
+        assertTrue(d instanceof SyncCommand);
+
+        SyncCommand ds = (SyncCommand) d;
+        assertNull(ds.getSource());
+        assertEquals(message.getType(), ds.getType());
+        assertNotNull(ds.getSenderChanges());
     }
 
-    public String toString() {
-        int type = sync != null ? sync.getType() : -1;
-        switch (type) {
-            case SyncCommand.FLUSH_TYPE:
-                return "Sync-flush";
-            case SyncCommand.COMMIT_TYPE:
-                return "Sync-commit";
-            case SyncCommand.ROLLBACK_TYPE:
-                return "Sync-rollback";
-            default:
-                return "Sync-unknown";
+    public void testConstructorInvalid() {
+        ObjectContext source = new MockObjectContext();
+        new SyncCommand(source, SyncCommand.FLUSH_TYPE, new CompoundDiff());
+        new SyncCommand(source, SyncCommand.COMMIT_TYPE, new CompoundDiff());
+        new SyncCommand(null, SyncCommand.ROLLBACK_TYPE, new CompoundDiff());
+
+        int bogusType = 45678;
+        try {
+            new SyncCommand(source, bogusType, new CompoundDiff());
+            fail("invalid type was allowed to go unnoticed...");
+        }
+        catch (IllegalArgumentException e) {
+
         }
     }
 }

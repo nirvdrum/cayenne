@@ -79,7 +79,7 @@ import org.objectstyle.cayenne.map.EntitySorter;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.opp.SyncMessage;
+import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.query.DeleteBatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -110,15 +110,15 @@ class DataDomainCommitAction {
     private List delObjects; // event support
     private List updObjects; // event support
 
-    GraphDiff commit(SyncMessage message) {
+    GraphDiff commit(SyncCommand sync) {
 
-        if (!(message.getSource() instanceof DataContext)) {
+        if (!(sync.getSource() instanceof DataContext)) {
             throw new CayenneRuntimeException(
                     "No support for committing ObjectContexts that are not DataContexts. Unsupported context: "
-                            + message.getSource());
+                            + sync.getSource());
         }
 
-        this.context = (DataContext) message.getSource();
+        this.context = (DataContext) sync.getSource();
 
         // note that there is no syncing on the object store itself. This is caller's
         // responsibility.

@@ -77,16 +77,16 @@ class DispatchHelper {
 
         // do most common messages first...
         if (message instanceof ObjectSelectMessage) {
-            return channel.onSelectObjects((ObjectSelectMessage) message);
+            return channel.performQuery(((ObjectSelectMessage) message).getQuery());
         }
         else if (message instanceof QueryMessage) {
-            return channel.onQuery((QueryMessage) message);
+            return channel.performGenericQuery(((QueryMessage) message).getQuery());
         }
         else if (message instanceof SyncMessage) {
-            return channel.onSync((SyncMessage) message);
+            return channel.synchronize(((SyncMessage) message).getSync());
         }
         else if (message instanceof BootstrapMessage) {
-            return channel.onBootstrap((BootstrapMessage) message);
+            return channel.getEntityResolver();
         }
         else {
             throw new CayenneRuntimeException(

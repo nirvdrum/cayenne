@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * An OPPChannel implementation that accesses an OPP server via an OPPConnection.
@@ -113,28 +114,28 @@ public class OPPServerChannel implements OPPChannel {
         return eventManager;
     }
 
-    public List onSelectObjects(ObjectSelectMessage message) {
-        return (List) send(message, List.class);
+    public List performQuery(Query query) {
+        return (List) send(new ObjectSelectMessage(query), List.class);
     }
 
-    public QueryResponse onQuery(QueryMessage message) {
-        return (QueryResponse) send(message, QueryResponse.class);
+    public QueryResponse performGenericQuery(Query query) {
+        return (QueryResponse) send(new QueryMessage(query), QueryResponse.class);
     }
 
-    public GraphDiff onSync(SyncMessage message) {
-        GraphDiff replyDiff = (GraphDiff) send(message, GraphDiff.class);
+    public GraphDiff synchronize(SyncCommand sync) {
+        GraphDiff replyDiff = (GraphDiff) send(new SyncMessage(sync), GraphDiff.class);
 
         if (channelEventsEnabled) {
             EventSubject subject;
 
-            switch (message.getType()) {
-                case SyncMessage.ROLLBACK_TYPE:
+            switch (sync.getType()) {
+                case SyncCommand.ROLLBACK_TYPE:
                     subject = OPPChannel.GRAPH_ROLLEDBACK_SUBJECT;
                     break;
-                case SyncMessage.FLUSH_TYPE:
+                case SyncCommand.FLUSH_TYPE:
                     subject = OPPChannel.GRAPH_CHANGED_SUBJECT;
                     break;
-                case SyncMessage.COMMIT_TYPE:
+                case SyncCommand.COMMIT_TYPE:
                     subject = OPPChannel.GRAPH_COMMITTED_SUBJECT;
                     break;
                 default:
@@ -145,22 +146,22 @@ public class OPPServerChannel implements OPPChannel {
 
                 // combine message sender changes and message receiver changes into a
                 // single event
-                boolean sentNoop = message.getSenderChanges() == null
-                        || message.getSenderChanges().isNoop();
+                boolean sentNoop = sync.getSenderChanges() == null
+                        || sync.getSenderChanges().isNoop();
                 boolean receivedNoop = replyDiff == null || replyDiff.isNoop();
 
                 if (!sentNoop || !receivedNoop) {
                     CompoundDiff notification = new CompoundDiff();
 
                     if (!sentNoop) {
-                        notification.add(message.getSenderChanges());
+                        notification.add(sync.getSenderChanges());
                     }
 
                     if (!receivedNoop) {
                         notification.add(replyDiff);
                     }
 
-                    Object eventSource = (message.getSource() != null) ? (Object) message
+                    Object eventSource = (sync.getSource() != null) ? (Object) sync
                             .getSource() : this;
                     GraphEvent e = new GraphEvent(eventSource, notification);
                     e.setPostedBy(this);
@@ -172,8 +173,8 @@ public class OPPServerChannel implements OPPChannel {
         return replyDiff;
     }
 
-    public EntityResolver onBootstrap(BootstrapMessage message) {
-        return (EntityResolver) send(message, EntityResolver.class);
+    public EntityResolver getEntityResolver() {
+        return (EntityResolver) send(new BootstrapMessage(), EntityResolver.class);
     }
 
     /**

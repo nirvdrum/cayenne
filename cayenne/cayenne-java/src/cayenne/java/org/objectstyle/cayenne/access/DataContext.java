@@ -95,10 +95,8 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.opp.BootstrapMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.QueryMessage;
-import org.objectstyle.cayenne.opp.SyncMessage;
+import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.ParameterizedQuery;
@@ -414,8 +412,10 @@ public class DataContext implements ObjectContext, QueryEngine, Serializable {
     public void setChannel(OPPChannel channel) {
         if (this.channel != channel) {
             this.channel = channel;
-            this.entityResolver = channel != null ? channel
-                    .onBootstrap(new BootstrapMessage()) : null;
+
+            // cache entity resolver, as we have no idea how expensive it is to query it
+            // on the channel every time
+            this.entityResolver = channel != null ? channel.getEntityResolver() : null;
         }
     }
 
@@ -1079,8 +1079,8 @@ public class DataContext implements ObjectContext, QueryEngine, Serializable {
                 // TODO: Andrus, 12/06/2005 - this is a violation of OPP rules, as we do
                 // not pass changes down the stack. Instead this code assumes that a
                 // channel will get them directly from the context.
-                return getChannel().onSync(
-                        new SyncMessage(this, SyncMessage.COMMIT_TYPE, null));
+                return getChannel().synchronize(
+                        new SyncCommand(this, SyncCommand.COMMIT_TYPE, null));
             }
             // needed to unwrap OptimisticLockExceptions
             catch (CayenneRuntimeException ex) {
@@ -1108,7 +1108,7 @@ public class DataContext implements ObjectContext, QueryEngine, Serializable {
                     "Can't run query - parent OPPChannel is not set.");
         }
 
-        QueryResponse response = getChannel().onQuery(new QueryMessage(query));
+        QueryResponse response = getChannel().performGenericQuery(query);
         return response.getFirstUpdateCounts(query);
     }
 
@@ -1155,7 +1155,7 @@ public class DataContext implements ObjectContext, QueryEngine, Serializable {
                     "Can't run query - parent OPPChannel is not set.");
         }
 
-        return getChannel().onQuery(new QueryMessage(query));
+        return getChannel().performGenericQuery(query);
     }
 
     /**

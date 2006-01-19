@@ -70,8 +70,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
-import org.objectstyle.cayenne.opp.OPPMessage;
-import org.objectstyle.cayenne.opp.SyncMessage;
+import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
@@ -169,7 +168,7 @@ public class CayenneContextTst extends CayenneTestCase {
 
         // no context changes so no connector access is expected
         context.commitChanges();
-        assertTrue(channel.getMessages().isEmpty());
+        assertTrue(channel.getRequestObjects().isEmpty());
     }
 
     public void testCommitCommandExecuted() {
@@ -182,11 +181,11 @@ public class CayenneContextTst extends CayenneTestCase {
         context.internalGraphManager().nodePropertyChanged(new Object(), "x", "y", "z");
 
         context.commitChanges();
-        assertEquals(1, channel.getMessages().size());
+        assertEquals(1, channel.getRequestObjects().size());
 
         // expect a sync/commit chain
-        OPPMessage mainMessage = (OPPMessage) channel.getMessages().iterator().next();
-        assertTrue(mainMessage instanceof SyncMessage);
+        Object mainMessage = channel.getRequestObjects().iterator().next();
+        assertTrue(mainMessage instanceof SyncCommand);
     }
 
     public void testCommitChangesNew() {
@@ -199,7 +198,7 @@ public class CayenneContextTst extends CayenneTestCase {
 
         MockOPPChannel channel = new MockOPPChannel() {
 
-            public GraphDiff onSync(SyncMessage message) {
+            public GraphDiff synchronize(SyncCommand message) {
                 return diff;
             }
 

@@ -66,11 +66,8 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.opp.BootstrapMessage;
 import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.ObjectSelectMessage;
-import org.objectstyle.cayenne.opp.QueryMessage;
-import org.objectstyle.cayenne.opp.SyncMessage;
+import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.query.AbstractQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
@@ -116,19 +113,19 @@ public class ClientServerChannel implements OPPChannel {
         this.lifecycleEventsEnabled = lifecycleEventsEnabled;
     }
 
-    public GraphDiff onSync(SyncMessage message) {
+    public GraphDiff synchronize(SyncCommand sync) {
 
         // sync client changes
-        switch (message.getType()) {
-            case SyncMessage.ROLLBACK_TYPE:
-                return onRollback(message.getSenderChanges());
-            case SyncMessage.FLUSH_TYPE:
-                return onFlush(message.getSenderChanges());
-            case SyncMessage.COMMIT_TYPE:
-                return onCommit(message.getSenderChanges());
+        switch (sync.getType()) {
+            case SyncCommand.ROLLBACK_TYPE:
+                return onRollback(sync.getSenderChanges());
+            case SyncCommand.FLUSH_TYPE:
+                return onFlush(sync.getSenderChanges());
+            case SyncCommand.COMMIT_TYPE:
+                return onCommit(sync.getSenderChanges());
             default:
                 throw new CayenneRuntimeException("Unrecognized SyncMessage type: "
-                        + message.getType());
+                        + sync.getType());
         }
     }
 
@@ -206,13 +203,13 @@ public class ClientServerChannel implements OPPChannel {
         return returnClientDiff;
     }
 
-    public QueryResponse onQuery(QueryMessage message) {
-        return serverContext.performGenericQuery(rewriteQuery(message.getQuery()));
+    public QueryResponse performGenericQuery(Query query) {
+        return serverContext.performGenericQuery(rewriteQuery(query));
     }
 
-    public List onSelectObjects(ObjectSelectMessage message) {
+    public List performQuery(Query query) {
 
-        List objects = serverContext.performQuery(rewriteQuery(message.getQuery()));
+        List objects = serverContext.performQuery(rewriteQuery(query));
 
         // create client objects for a list of server object
 
@@ -222,8 +219,8 @@ public class ClientServerChannel implements OPPChannel {
 
         // detect prefetches...
         PrefetchTreeNode prefetchTree = null;
-        if (message.getQuery() instanceof GenericSelectQuery) {
-            prefetchTree = ((GenericSelectQuery) message.getQuery()).getPrefetchTree();
+        if (query instanceof GenericSelectQuery) {
+            prefetchTree = ((GenericSelectQuery) query).getPrefetchTree();
         }
 
         try {
@@ -236,7 +233,7 @@ public class ClientServerChannel implements OPPChannel {
         }
     }
 
-    public EntityResolver onBootstrap(BootstrapMessage message) {
+    public EntityResolver getEntityResolver() {
         return serverContext.getEntityResolver().getClientEntityResolver();
     }
 
