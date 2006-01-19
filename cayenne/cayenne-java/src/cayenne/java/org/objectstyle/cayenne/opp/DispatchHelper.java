@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.opp;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
- * A helper class to match messaget types with OPPChannel methods.
+ * A helper class to match message types with OPPChannel methods.
  * 
  * @since 1.2
  * @author Andrus Adamchik

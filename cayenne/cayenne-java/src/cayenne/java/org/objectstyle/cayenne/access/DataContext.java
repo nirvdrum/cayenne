@@ -300,8 +300,7 @@ public class DataContext implements ObjectContext, QueryEngine, Serializable {
     }
 
     /**
-     * Default constructor that creates a DataContext that has no association with a
-     * DataDomain.
+     * Creates a new DataContext that is not attached to the Cayenne stack.
      */
     public DataContext() {
         this((OPPChannel) null, null);
