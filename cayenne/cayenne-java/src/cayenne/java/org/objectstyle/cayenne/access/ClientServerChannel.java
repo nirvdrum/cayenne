@@ -151,7 +151,7 @@ public class ClientServerChannel implements OPPChannel {
      * Applies child diff, without returning anything back.
      */
     GraphDiff onFlush(GraphDiff childDiff) {
-        childDiff.apply(new ClientToServerDiffConverter(serverContext));
+        childDiff.apply(new ChildDiffLoader(serverContext));
 
         if (lifecycleEventsEnabled) {
             EventManager eventManager = getEventManager();
@@ -170,7 +170,7 @@ public class ClientServerChannel implements OPPChannel {
      * Applies child diff, and then commits.
      */
     GraphDiff onCommit(GraphDiff childDiff) {
-        childDiff.apply(new ClientToServerDiffConverter(serverContext));
+        childDiff.apply(new ChildDiffLoader(serverContext));
         GraphDiff diff = serverContext.doCommitChanges();
 
         GraphDiff returnClientDiff;

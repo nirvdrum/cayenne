@@ -56,21 +56,16 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.graph.CompoundDiff;
-import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
-import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.query.MockQuery;
@@ -95,63 +90,41 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 .getAccessStack(MULTI_TIER_ACCESS_STACK);
     }
 
-    public void testOnBootstrap() throws Exception {
+    public void testGetEntityResolver() throws Exception {
         EntityResolver resolver = new ClientServerChannel(getDomain())
                 .getEntityResolver();
         assertNotNull(resolver);
         assertNotNull(resolver.lookupObjEntity(ClientMtTable1.class));
     }
 
-    public void testOnCommit() {
+    public void testSynchronizeCommit() throws Exception {
 
-        final boolean[] commitDone = new boolean[1];
-        final MockOPPChannel parent = new MockOPPChannel(getDomain().getEntityResolver()) {
+        deleteTestData();
+        SelectQuery query = new SelectQuery(MtTable1.class);
 
-            public GraphDiff synchronize(SyncCommand sync) {
-                commitDone[0] = true;
+        DataContext context = createDataContext();
 
-                // replace temp ids to satisfy ObjectStore
-                Iterator it = sync.getSource().newObjects().iterator();
-                int i = 0;
-                while (it.hasNext()) {
-                    DataObject o = (DataObject) it.next();
-                    o.getObjectId().getReplacementIdMap().put("x", "y" + i++);
-                }
+        assertEquals(0, context.performQuery(query).size());
 
-                return new CompoundDiff();
-            }
-        };
-
-        DataContext context = new DataContext(parent, new ObjectStore(
-                new MockDataRowStore())) {
-
-            public OPPChannel getChannel() {
-                return parent;
-            }
-
-            public DataDomain getParentDataDomain() {
-                return getDomain();
-            }
-        };
-
+        // no changes...
         ClientServerChannel channel = new ClientServerChannel(context, false);
         channel.synchronize(new SyncCommand(
                 context,
                 SyncCommand.COMMIT_TYPE,
                 new MockGraphDiff()));
 
-        // no changes in context, so no commit should be executed
-        assertFalse(commitDone[0]);
+        assertEquals(0, context.performQuery(query).size());
 
         // introduce changes
         channel.synchronize(new SyncCommand(
                 context,
                 SyncCommand.COMMIT_TYPE,
                 new NodeCreateOperation(new ObjectId("MtTable1"))));
-        assertTrue(commitDone[0]);
+
+        assertEquals(1, context.performQuery(query).size());
     }
 
-    public void testOnSelectQueryObjectIDInjection() throws Exception {
+    public void testPerformQueryObjectIDInjection() throws Exception {
         createTestData("testOnSelectQueryObjectIDInjection");
 
         DataContext context = createDataContext();
@@ -172,7 +145,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 clientObject.getObjectId());
     }
 
-    public void testOnSelectQueryValuePropagation() throws Exception {
+    public void testPerformQueryValuePropagation() throws Exception {
 
         byte[] bytes = new byte[] {
                 1, 2, 3
@@ -205,7 +178,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
                 .isEquals());
     }
 
-    public void testOnSelectQueryValuePropagationInheritance() throws Exception {
+    public void testPerformQueryPropagationInheritance() throws Exception {
 
         Map parameters = new HashMap();
         parameters.put("GLOBAL_ATTRIBUTE1", "sub1");

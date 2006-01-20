@@ -64,19 +64,18 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Relationship;
 
 /**
- * A GraphChangeHandler that propagates submitted object graph changes to an underlying
- * ObjectContext. Graph node ids are expected to be GlobalIDs.
+ * A GraphChangeHandler that loads child ObjectContext diffs into a parent DataContext.
+ * Graph node ids are expected to be ObjectIds.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-// TODO: (Andrus, 09/2005) Server-side ClassDescriptor is needed to handle all that...
-class ClientToServerDiffConverter implements GraphChangeHandler {
+class ChildDiffLoader implements GraphChangeHandler {
 
-    DataContext serverContext;
+    DataContext context;
 
-    ClientToServerDiffConverter(DataContext serverContext) {
-        this.serverContext = serverContext;
+    ChildDiffLoader(DataContext context) {
+        this.context = context;
     }
 
     /**
@@ -105,7 +104,7 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
 
     public void nodeIdChanged(Object nodeId, Object newId) {
         throw new CayenneRuntimeException(
-                "Not supported - client is not allowed to change Global ID of server objects.");
+                "Not supported - client is not allowed to change ObjectId of a server object.");
     }
 
     public void nodeCreated(Object nodeId) {
@@ -114,8 +113,9 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
             throw new NullPointerException("Null entity name in id " + id);
         }
 
-        ObjEntity entity = serverContext.getEntityResolver().lookupObjEntity(
-                id.getEntityName());
+        ObjEntity entity = context
+                .getEntityResolver()
+                .lookupObjEntity(id.getEntityName());
         if (entity == null) {
             throw new IllegalArgumentException("Entity not mapped with Cayenne: " + id);
         }
@@ -129,12 +129,12 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
         }
 
         dataObject.setObjectId(id);
-        serverContext.registerNewObject(dataObject);
+        context.registerNewObject(dataObject);
     }
 
     public void nodeRemoved(Object nodeId) {
         Persistent object = findObject(nodeId);
-        serverContext.deleteObject(object);
+        context.deleteObject(object);
     }
 
     public void nodePropertyChanged(
@@ -143,8 +143,8 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
             Object oldValue,
             Object newValue) {
 
-        // convert related objects to server-side objects
-
+        // this change is for simple property, so no need to convert targets to server
+        // objects...
         DataObject object = findObject(nodeId);
 
         try {
@@ -160,9 +160,7 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
         DataObject source = findObject(nodeId);
 
         // find whether this is to-one or to-many
-        ObjEntity sourceEntity = serverContext
-                .getEntityResolver()
-                .lookupObjEntity(source);
+        ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
         Relationship relationship = sourceEntity.getRelationship(arcId.toString());
 
         DataObject target = findObject(targetNodeId);
@@ -178,9 +176,7 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
         DataObject source = findObject(nodeId);
 
         // find whether this is to-one or to-many
-        ObjEntity sourceEntity = serverContext
-                .getEntityResolver()
-                .lookupObjEntity(source);
+        ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
         Relationship relationship = sourceEntity.getRelationship(arcId.toString());
 
         DataObject target = findObject(targetNodeId);
@@ -193,6 +189,6 @@ class ClientToServerDiffConverter implements GraphChangeHandler {
     }
 
     DataObject findObject(Object nodeId) {
-        return serverContext.getObjectStore().getObject((ObjectId) nodeId);
+        return context.getObjectStore().getObject((ObjectId) nodeId);
     }
 }

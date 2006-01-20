@@ -736,6 +736,8 @@ public class DataDomain implements QueryEngine, OPPChannel {
     }
 
     /**
+     * Only handles commit-type synchronization, ignoring any other type.
+     * 
      * @since 1.2
      */
     public GraphDiff synchronize(SyncCommand sync) {

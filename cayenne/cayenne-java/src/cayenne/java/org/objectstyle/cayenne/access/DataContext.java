@@ -84,6 +84,7 @@ import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
@@ -133,7 +134,7 @@ import org.objectstyle.cayenne.util.Util;
  * 
  * @author Andrus Adamchik
  */
-public class DataContext implements ObjectContext, QueryEngine, Serializable {
+public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Serializable {
 
     // noop delegate
     private static final DataContextDelegate defaultDelegate = new DataContextDelegate() {
@@ -420,15 +421,30 @@ public class DataContext implements ObjectContext, QueryEngine, Serializable {
     }
 
     /**
-     * Returns a DataDomain used by this DataContext. Returns null if DataContext is not
-     * attached to a DataDomain at all or if a channel used is of a different type.
+     * Returns a DataDomain used by this DataContext. DataDomain is looked up in the
+     * OPPCHannel hierarchy. If a channel is not a DataDomain or a DataContext, null is
+     * returned.
      * 
-     * @return DataDomain that is a direct or indirect parent of this DataContext.
+     * @return DataDomain that is a direct or indirect parent of this DataContext in the
+     *         OPPChannel hierarchy.
      * @since 1.1
      */
     public DataDomain getParentDataDomain() {
         awakeFromDeserialization();
-        return (channel instanceof DataDomain) ? (DataDomain) channel : null;
+
+        if (channel == null) {
+            return null;
+        }
+
+        if (channel instanceof DataDomain) {
+            return (DataDomain) channel;
+        }
+
+        if (channel instanceof DataContext) {
+            return ((DataContext) channel).getParentDataDomain();
+        }
+
+        return null;
     }
 
     /**
@@ -1016,24 +1032,47 @@ public class DataContext implements ObjectContext, QueryEngine, Serializable {
     }
 
     /**
+     * If the parent channel is a DataContext, sends the changes to the parent; if the
+     * parent is DataDomain, commits the changes to DB.
+     * 
      * @since 1.2
      */
+    // TODO: Andrus, 1/19/2006: implement for nested DataContexts
     public void flushChanges() {
-        // noop ... for now...
+        if (getChannel() instanceof DataDomain) {
+            commitChanges();
+        }
+        else {
+            throw new CayenneRuntimeException("Implementation pending.");
+        }
     }
 
     /**
+     * If the parent channel is a DataContext, reverts local changes to make this context
+     * look like the parent, if the parent channel is a DataDomain, reverts all changes.
+     * 
      * @since 1.2
      */
+    // TODO: Andrus, 1/19/2006: implement for nested DataContexts
     public void revertChanges() {
-        rollbackChanges();
+        if (getChannel() instanceof DataDomain) {
+            rollbackChanges();
+        }
+        else {
+            throw new CayenneRuntimeException("Implementation pending.");
+        }
     }
 
     /**
-     * Reverts any changes that have occurred to objects registered with DataContext.
+     * Reverts any changes that have occurred to objects registered with DataContext; also
+     * performs cascading rollback of all parent DataContexts.
      */
     public void rollbackChanges() {
         getObjectStore().objectsRolledBack();
+
+        if (channel != null) {
+            channel.synchronize(new SyncCommand(this, SyncCommand.ROLLBACK_TYPE));
+        }
     }
 
     /**
@@ -1062,38 +1101,96 @@ public class DataContext implements ObjectContext, QueryEngine, Serializable {
                     "Cannot commit changes - channel is not set.");
         }
 
-        // prevent multiple commits occuring simulteneously
-        synchronized (getObjectStore()) {
+        if (this.getChannel() instanceof DataDomain) {
 
-            // TODO: Andrus, 12/13/2005 - in the OPP spirit, PK generation should be done
-            // on the DataDomain end and passed back as a diff. At the same time the
-            // problem is that PK generation is the only way to detect some phantom
-            // modifications, and thus is a part of DataContext precommit - need to
-            // resolve this conflict somehow.
-            DataContextPrecommitAction precommit = new DataContextPrecommitAction();
-            if (!precommit.precommit(this)) {
-                return new CompoundDiff();
-            }
+            // prevent multiple commits occuring simulteneously
+            synchronized (getObjectStore()) {
 
-            try {
-                // TODO: Andrus, 12/06/2005 - this is a violation of OPP rules, as we do
-                // not pass changes down the stack. Instead this code assumes that a
-                // channel will get them directly from the context.
-                return getChannel().synchronize(
-                        new SyncCommand(this, SyncCommand.COMMIT_TYPE, null));
-            }
-            // needed to unwrap OptimisticLockExceptions
-            catch (CayenneRuntimeException ex) {
-                Throwable unwound = Util.unwindException(ex);
-
-                if (unwound instanceof CayenneRuntimeException) {
-                    throw (CayenneRuntimeException) unwound;
+                // TODO: Andrus, 12/13/2005 - in the OPP spirit, PK generation should be
+                // done
+                // on the DataDomain end and passed back as a diff. At the same time the
+                // problem is that PK generation is the only way to detect some phantom
+                // modifications, and thus is a part of DataContext precommit - need to
+                // resolve this conflict somehow.
+                DataContextPrecommitAction precommit = new DataContextPrecommitAction();
+                if (!precommit.precommit(this)) {
+                    return new CompoundDiff();
                 }
-                else {
-                    throw new CayenneRuntimeException("Commit Exception", unwound);
+
+                try {
+                    // TODO: Andrus, 12/06/2005 - this is a violation of OPP rules, as we
+                    // do not pass changes down the stack. Instead this code assumes that
+                    // a channel will get them directly from the context.
+                    return getChannel().synchronize(
+                            new SyncCommand(this, SyncCommand.COMMIT_TYPE, null));
+                }
+                // needed to unwrap OptimisticLockExceptions
+                catch (CayenneRuntimeException ex) {
+                    Throwable unwound = Util.unwindException(ex);
+
+                    if (unwound instanceof CayenneRuntimeException) {
+                        throw (CayenneRuntimeException) unwound;
+                    }
+                    else {
+                        throw new CayenneRuntimeException("Commit Exception", unwound);
+                    }
                 }
             }
         }
+        else {
+            // TODO: Andrus, 1/19/2006: implement for nested contexts...
+            throw new CayenneRuntimeException("Not implemented");
+        }
+    }
+
+    /**
+     * Returns EventManager associated with the ObjectStore.
+     * 
+     * @since 1.2
+     */
+    public EventManager getEventManager() {
+        return getObjectStore().getEventManager();
+    }
+
+    /**
+     * Processes a SyncCommand.
+     * 
+     * @since 1.2
+     */
+    public GraphDiff synchronize(SyncCommand sync) {
+        // sync client changes
+        switch (sync.getType()) {
+            case SyncCommand.ROLLBACK_TYPE:
+                return syncRollback();
+            case SyncCommand.FLUSH_TYPE:
+                return syncFlush(sync.getSenderChanges());
+            case SyncCommand.COMMIT_TYPE:
+                return syncCommit(sync.getSenderChanges());
+            default:
+                throw new CayenneRuntimeException("Unrecognized SyncMessage type: "
+                        + sync.getType());
+        }
+    }
+
+    GraphDiff syncRollback() {
+        rollbackChanges();
+        return new CompoundDiff();
+    }
+
+    /**
+     * Applies child diff, without returning anything back.
+     */
+    GraphDiff syncFlush(GraphDiff childDiff) {
+        childDiff.apply(new ChildDiffLoader(this));
+        return new CompoundDiff();
+    }
+
+    /**
+     * Applies child diff, and then commits.
+     */
+    GraphDiff syncCommit(GraphDiff childDiff) {
+        childDiff.apply(new ChildDiffLoader(this));
+        return doCommitChanges();
     }
 
     /**

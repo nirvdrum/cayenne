@@ -84,6 +84,13 @@ public class SyncCommand implements Serializable {
 
     }
 
+    /**
+     * Creates a SyncCommand with no changes.
+     */
+    public SyncCommand(ObjectContext source, int type) {
+        this(source, type, null);
+    }
+
     public SyncCommand(ObjectContext source, int type, GraphDiff senderChanges) {
         // validate type
         if (type != FLUSH_TYPE && type != COMMIT_TYPE && type != ROLLBACK_TYPE) {
