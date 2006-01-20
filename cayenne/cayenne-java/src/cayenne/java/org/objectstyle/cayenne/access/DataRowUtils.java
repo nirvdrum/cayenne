@@ -62,6 +62,7 @@ import java.util.Map;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.map.DbJoin;
@@ -75,10 +76,38 @@ import org.objectstyle.cayenne.util.Util;
  * DataRowUtils contains a number of static methods to work with DataRows. This is a
  * helper class for DataContext and ObjectStore
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  * @since 1.1
  */
 class DataRowUtils {
+
+    /**
+     * Merges changes reflected in snapshot map to the object. Changes made to attributes
+     * and to-one relationships will be merged. In case an object is already modified,
+     * modified properties will not be overwritten.
+     */
+    static void mergeObjectWithSnapshot(
+            ObjEntity entity,
+            DataObject object,
+            DataRow snapshot) {
+
+        int state = object.getPersistenceState();
+
+        if (entity.isReadOnly() || state == PersistenceState.HOLLOW) {
+            refreshObjectWithSnapshot(entity, object, snapshot, true);
+        }
+        // if nested DataContext is involved, we'll have to go through merge to keep
+        // uncommitted parent modifications
+        else if (state != PersistenceState.COMMITTED
+                || object.getDataContext().getChannel() instanceof ObjectContext) {
+            forceMergeWithSnapshot(entity, object, snapshot);
+        }
+        else {
+            // do not invalidate to-many relationships, since they might have
+            // just been prefetched...
+            refreshObjectWithSnapshot(entity, object, snapshot, false);
+        }
+    }
 
     /**
      * Replaces all object attribute values with snapshot values. Sets object state to
@@ -99,14 +128,10 @@ class DataRowUtils {
             ObjAttribute attr = (ObjAttribute) entry.getValue();
             String dbAttrPath = attr.getDbAttributePath();
             object.writePropertyDirectly(attrName, snapshot.get(dbAttrPath));
+
+            // note that a check "snaphsot.get(..) == null" would be incorrect in this
+            // case, as NULL value is entirely valid.
             if (!snapshot.containsKey(dbAttrPath)) {
-                // Note the distinction between
-                // 1) the map returning null because there was no mapping
-                // for that key and
-                // 2) returning null because 'null' was the value mapped
-                // for that key.
-                // If the first case (this clause) then snapshot is only
-                // partial
                 isPartialSnapshot = true;
             }
         }
@@ -150,12 +175,12 @@ class DataRowUtils {
 
     static void forceMergeWithSnapshot(
             ObjEntity entity,
-            DataObject anObject,
+            DataObject object,
             DataRow snapshot) {
 
-        DataContext context = anObject.getDataContext();
+        DataContext context = object.getDataContext();
         Map oldSnap = context.getObjectStore().getSnapshot(
-                anObject.getObjectId(),
+                object.getObjectId(),
                 context.getChannel());
 
         // attributes
@@ -179,14 +204,14 @@ class DataRowUtils {
                 continue;
             }
 
-            Object curVal = anObject.readPropertyDirectly(attrName);
+            Object curVal = object.readPropertyDirectly(attrName);
             Object oldVal = oldSnap.get(dbAttrPath);
 
             // if value not modified, update it from snapshot,
             // otherwise leave it alone
             if (Util.nullSafeEquals(curVal, oldVal)
                     && !Util.nullSafeEquals(newVal, curVal)) {
-                anObject.writePropertyDirectly(attrName, newVal);
+                object.writePropertyDirectly(attrName, newVal);
             }
         }
 
@@ -203,7 +228,7 @@ class DataRowUtils {
 
             // if value not modified, update it from snapshot,
             // otherwise leave it alone
-            if (!isToOneTargetModified(rel, anObject, oldSnap)
+            if (!isToOneTargetModified(rel, object, oldSnap)
                     && isJoinAttributesModified(rel, snapshot, oldSnap)) {
 
                 DbRelationship dbRelationship = (DbRelationship) rel
@@ -215,32 +240,8 @@ class DataRowUtils {
                         dbRelationship);
                 DataObject target = (id != null) ? context.registeredObject(id) : null;
 
-                anObject.writePropertyDirectly(rel.getName(), target);
+                object.writePropertyDirectly(rel.getName(), target);
             }
-        }
-    }
-
-    /**
-     * Merges changes reflected in snapshot map to the object. Changes made to attributes
-     * and to-one relationships will be merged. In case an object is already modified,
-     * modified properties will not be overwritten.
-     */
-    static void mergeObjectWithSnapshot(
-            ObjEntity entity,
-            DataObject anObject,
-            DataRow snapshot) {
-
-        if (entity.isReadOnly()
-                || anObject.getPersistenceState() == PersistenceState.HOLLOW) {
-            refreshObjectWithSnapshot(entity, anObject, snapshot, true);
-        }
-        else if (anObject.getPersistenceState() == PersistenceState.COMMITTED) {
-            // do not invalidate to-many relationships, since they might have
-            // just been prefetched...
-            refreshObjectWithSnapshot(entity, anObject, snapshot, false);
-        }
-        else {
-            forceMergeWithSnapshot(entity, anObject, snapshot);
         }
     }
 
@@ -328,10 +329,7 @@ class DataRowUtils {
         return false;
     }
 
-    /**
-     * Instantiation is not allowed.
-     */
+    // not for instantiation
     DataRowUtils() {
-        super();
     }
 }

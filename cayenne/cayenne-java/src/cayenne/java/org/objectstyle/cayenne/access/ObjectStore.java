@@ -608,13 +608,13 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     break;
             }
         }
-        
+
         GraphDiff diff = null;
 
         // process id replacements
         if (modifiedIds != null) {
             OperationRecorder recorder = new OperationRecorder();
-            
+
             Iterator ids = modifiedIds.iterator();
             while (ids.hasNext()) {
                 ObjectId id = (ObjectId) ids.next();
@@ -641,10 +641,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 }
 
                 ObjectId replacementId = id.createReplacementId();
-                
+
                 // record id change...
                 recorder.nodeIdChanged(id, replacementId);
-                
+
                 DataRow dataRow = object.getDataContext().currentSnapshot(object);
                 modifiedSnapshots.put(replacementId, dataRow);
                 dataRow.setReplacesVersion(object.getSnapshotVersion());
@@ -658,7 +658,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 objectMap.remove(id);
                 dataRowCache.forgetSnapshot(id);
             }
-            
+
             diff = recorder.getDiff();
         }
 
@@ -681,7 +681,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         this.indirectlyModifiedIds.clear();
         this.flattenedDeletes.clear();
         this.flattenedInserts.clear();
-        
+
         return (diff != null) ? diff : new CompoundDiff();
     }
 
@@ -834,8 +834,19 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      */
     public synchronized DataRow getSnapshot(ObjectId oid, OPPChannel channel) {
         DataRow retained = getRetainedSnapshot(oid);
-        return (retained != null) ? retained : getDataRowCache()
-                .getSnapshot(oid, channel);
+        if (retained != null) {
+            return retained;
+        }
+
+        // nested DataContext case - lookup for retained snapshots in the context
+        // hierarchy.
+        if (channel instanceof DataContext) {
+            DataContext parent = (DataContext) channel;
+            return parent.getObjectStore().getSnapshot(oid, parent.getChannel());
+        }
+        else {
+            return getDataRowCache().getSnapshot(oid, channel);
+        }
     }
 
     /**
@@ -1358,11 +1369,11 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     Factory getDataRowCacheFactory() {
         return dataRowCacheFactory;
     }
-    
+
     class OperationRecorder implements GraphChangeHandler {
 
         List diffs = new ArrayList();
-        
+
         GraphDiff getDiff() {
             return new CompoundDiff(diffs.isEmpty() ? null : diffs);
         }

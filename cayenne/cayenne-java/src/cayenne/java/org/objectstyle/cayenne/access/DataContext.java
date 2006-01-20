@@ -594,6 +594,20 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
                 object.setPersistenceState(PersistenceState.HOLLOW);
                 object.setDataContext(this);
                 objectStore.addObject(object);
+
+                // in a nested DataContext, we need to connect this object with parent
+                if (channel instanceof DataContext) {
+                    DataContext parent = (DataContext) channel;
+                    DataObject parentObject = parent.registeredObject(oid);
+                    if (parentObject.getPersistenceState() != PersistenceState.HOLLOW) {
+                        DataRow parentSnapshot = parent.currentSnapshot(parentObject);
+                        DataRowUtils.refreshObjectWithSnapshot(
+                                entity,
+                                object,
+                                parentSnapshot,
+                                false);
+                    }
+                }
             }
             return object;
         }
