@@ -354,6 +354,24 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
     }
 
     /**
+     * Creates and returns a new child DataContext.
+     * 
+     * @since 1.2
+     */
+    public DataContext createChildDataContext() {
+        DataContextFactory factory = getParentDataDomain().getDataContextFactory();
+        ObjectStore objectStore = new ObjectStore(getObjectStore().getDataRowCache());
+
+        DataContext child = factory != null ? factory
+                .createDataContext(this, objectStore) : new DataContext(
+                (OPPChannel) this,
+                objectStore);
+
+        child.setValidatingObjectsOnCommit(isValidatingObjectsOnCommit());
+        return child;
+    }
+
+    /**
      * Returns a user-defined property previously set via 'setUserProperty'. Note that it
      * is a caller responsibility to synchronize access to properties.
      * 
