@@ -62,6 +62,7 @@ import java.util.Map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
+import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -93,7 +94,7 @@ public class DataRowUtilsTst extends CayenneTestCase {
         Artist a1 = (Artist) context.performQuery(artistQ).get(0);
         a1.setArtistName(n1);
 
-        Map s2 = new HashMap();
+        DataRow s2 = new DataRow(2);
         s2.put("ARTIST_NAME", n2);
         s2.put("DATE_OF_BIRTH", new java.util.Date());
         ObjEntity e = context.getEntityResolver().lookupObjEntity(a1);

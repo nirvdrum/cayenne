@@ -228,26 +228,19 @@ class DataRowUtils {
     static void mergeObjectWithSnapshot(
             ObjEntity entity,
             DataObject anObject,
-            Map snapshot) {
-
-        // TODO: once we use DataRow consistently instead of a Map, this line
-        // should go away.
-        // Instead method signiture should include "DataRow".
-        DataRow dataRow = (snapshot instanceof DataRow)
-                ? (DataRow) snapshot
-                : new DataRow(snapshot);
+            DataRow snapshot) {
 
         if (entity.isReadOnly()
                 || anObject.getPersistenceState() == PersistenceState.HOLLOW) {
-            refreshObjectWithSnapshot(entity, anObject, dataRow, true);
+            refreshObjectWithSnapshot(entity, anObject, snapshot, true);
         }
         else if (anObject.getPersistenceState() == PersistenceState.COMMITTED) {
             // do not invalidate to-many relationships, since they might have
             // just been prefetched...
-            refreshObjectWithSnapshot(entity, anObject, dataRow, false);
+            refreshObjectWithSnapshot(entity, anObject, snapshot, false);
         }
         else {
-            forceMergeWithSnapshot(entity, anObject, dataRow);
+            forceMergeWithSnapshot(entity, anObject, snapshot);
         }
     }
 
