@@ -754,15 +754,15 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
 
     /**
      * Creates a list of DataObjects local to this DataContext from a list of DataObjects
-     * coming from a different DataContext. This method as a way to <b>map</b> objects
+     * coming from a different DataContext. This method is a way to <b>map</b> objects
      * from one context into the other (as opposed to "synchronize"). This means that the
      * state of modified objects will be reflected only if this context is a child of an
      * original DataObject context. If it is a peer or parent, you won't see any
-     * uncommitted changes.
+     * uncommitted changes from the original context.
      * <p>
      * Based on the description above, the only limitation of this method is that it can
      * not transfer NEW objects to a peer or parent DataContext (but can to a child DC).
-     * If such condition is encountered, a CayenneRuntimeException is thrown.
+     * If such condition is encountered, CayenneRuntimeException is thrown.
      * 
      * @since 1.0.3
      */

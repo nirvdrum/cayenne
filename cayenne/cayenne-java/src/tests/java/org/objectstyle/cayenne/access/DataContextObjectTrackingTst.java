@@ -256,6 +256,8 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
             DataObject peerModified2 = (DataObject) mods.get(0);
             assertSame(peerModified, peerModified2);
             assertEquals(PersistenceState.MODIFIED, peerModified2.getPersistenceState());
+            assertEquals("M2", peerModified.getArtistName());
+            assertEquals("M1", modified.getArtistName());
         }
         finally {
             unblockQueries();
