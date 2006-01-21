@@ -532,7 +532,7 @@ public class DataNode implements QueryEngine {
         public void readResultSet(
                 ResultSet resultSet,
                 RowDescriptor descriptor,
-                GenericSelectQuery query,
+                Query query,
                 OperationObserver delegate) throws SQLException, Exception {
             super.readResultSet(resultSet, descriptor, query, delegate);
         }

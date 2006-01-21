@@ -141,7 +141,14 @@ public class QueryChain implements Query {
     public void setName(String name) {
         this.name = name;
     }
-    
+
+    /**
+     * Returns default select parameters.
+     */
+    public SelectInfo getSelectInfo(EntityResolver resolver) {
+        return DefaultSelectInfo.defaultParameters;
+    }
+
     public Object getRoot(EntityResolver resolver) {
         throw new CayenneRuntimeException("QueryChain has no root");
     }

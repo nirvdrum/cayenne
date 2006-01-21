@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.dba.mysql;
 
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 /**
  * @since 1.2
@@ -68,7 +67,7 @@ class MySQLSelectTranslator extends SelectTranslator {
         String sql = super.createSqlString();
 
         // limit results
-        int limit = ((GenericSelectQuery) getQuery()).getFetchLimit();
+        int limit = getQuery().getSelectInfo(getEntityResolver()).getFetchLimit();
         if (limit > 0) {
             return sql + " LIMIT " + limit;
         }

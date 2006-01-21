@@ -62,7 +62,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JCheckBox;
 
 import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -128,9 +128,9 @@ public class ObjectQueryPropertiesPanel extends SelectPropertiesPanel {
      * Updates the view from the current model state. Invoked when a currently displayed
      * query is changed.
      */
-    public void initFromModel(GenericSelectQuery query) {
+    public void initFromModel(Query query) {
         super.initFromModel(query);
 
-        dataRows.setSelected(query.isFetchingDataRows());
+        dataRows.setSelected(query.getSelectInfo(null).isFetchingDataRows());
     }
 }

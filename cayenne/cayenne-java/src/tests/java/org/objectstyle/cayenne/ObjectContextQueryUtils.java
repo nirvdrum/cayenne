@@ -60,12 +60,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.QueryRouter;
-import org.objectstyle.cayenne.query.SQLAction;
-import org.objectstyle.cayenne.query.SQLActionVisitor;
 import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
@@ -237,72 +232,5 @@ public class ObjectContextQueryUtils {
      */
     private ObjectContextQueryUtils() {
         // noop
-    }
-
-    /**
-     * A SQLTemplate decorator that allows DataMap name as root.
-     */
-    static class SQLTemplateSelectWrapper implements Query {
-
-        String dataMapName;
-        String sql;
-        Map parameters;
-        boolean dataRows;
-
-        SQLTemplateSelectWrapper(String dataMapName, String sql, Map parameters,
-                boolean dataRows) {
-            this.dataMapName = dataMapName;
-            this.sql = sql;
-            this.parameters = parameters;
-            this.dataRows = dataRows;
-        }
-
-        public Query resolve(EntityResolver resolver) {
-            return this;
-        }
-
-        public void route(
-                QueryRouter router,
-                EntityResolver resolver,
-                Query substitutedQuery) {
-
-            // build a substitute query and route it to appropriate node
-            DataMap rootMap = resolver.getDataMap(dataMapName);
-            SQLTemplate substituteQuery = new SQLTemplate(rootMap, sql);
-            substituteQuery.setParameters(parameters);
-            substituteQuery.setFetchingDataRows(dataRows);
-
-            substituteQuery.route(router, resolver, substitutedQuery != null
-                    ? substitutedQuery
-                    : SQLTemplateSelectWrapper.this);
-        }
-
-        public SQLAction createSQLAction(SQLActionVisitor visitor) {
-            throw new CayenneRuntimeException(
-                    "Not intended for execution. Should've been replaced by a SQLTemaplte during routing.");
-        }
-
-        public String getName() {
-            throw new CayenneRuntimeException("getName is not implemented");
-        }
-
-        public Object getRoot(EntityResolver resolver) {
-            return resolver.getDataMap(dataMapName);
-        }
-
-        /**
-         * @deprecated since 1.2
-         */
-        public Object getRoot() {
-            throw new CayenneRuntimeException("getRoot is obsolete and is not supported");
-        }
-
-        public void setName(String name) {
-            throw new CayenneRuntimeException("setName is not implemented");
-        }
-
-        public void setRoot(Object root) {
-            throw new CayenneRuntimeException("setRoot is obsolete and is not supported");
-        }
     }
 }

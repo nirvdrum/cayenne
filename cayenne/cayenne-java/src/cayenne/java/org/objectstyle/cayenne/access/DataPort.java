@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
@@ -243,7 +242,7 @@ public class DataPort {
             select.setFetchingDataRows(true);
 
             // delegate is allowed to substitute query
-            GenericSelectQuery query = (delegate != null) ? delegate.willPortEntity(
+            Query query = (delegate != null) ? delegate.willPortEntity(
                     this,
                     entity,
                     select) : select;

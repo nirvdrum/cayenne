@@ -66,10 +66,10 @@ import java.util.Map;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectInfo;
 
 /**
  * A DataContext helper that handles select query execution.
@@ -86,36 +86,21 @@ class DataContextSelectAction {
     }
 
     List performQuery(Query query) {
-        boolean refresh = (query instanceof GenericSelectQuery)
-                ? ((GenericSelectQuery) query).isRefreshingObjects()
-                : GenericSelectQuery.REFRESHING_OBJECTS_DEFAULT;
 
-        return performQuery(query, query.getName(), refresh);
+        return performQuery(query, query.getName(), query.getSelectInfo(
+                context.getEntityResolver()).isRefreshingObjects());
     }
 
     List performQuery(Query query, String cacheKey, boolean refreshCache) {
 
-        String cachePolicy = GenericSelectQuery.CACHE_POLICY_DEFAULT;
-        boolean dataRows = GenericSelectQuery.FETCHING_DATA_ROWS_DEFAULT;
-        boolean inheritance = GenericSelectQuery.RESOLVING_INHERITED_DEFAULT;
+        SelectInfo info = query.getSelectInfo(context.getEntityResolver());
 
-        if (query instanceof GenericSelectQuery) {
-            GenericSelectQuery select = (GenericSelectQuery) query;
-
-            // check if result pagination is requested
-            // let a list handle fetch in this case
-            if (select.getPageSize() > 0) {
-                return new IncrementalFaultList(context, select);
-            }
-
-            // init local select parameters
-            cachePolicy = select.getCachePolicy();
-            dataRows = select.isFetchingDataRows();
-            inheritance = select.isResolvingInherited();
+        if (info.getPageSize() > 0) {
+            return new IncrementalFaultList(context, query);
         }
 
-        boolean localCache = GenericSelectQuery.LOCAL_CACHE.equals(cachePolicy);
-        boolean sharedCache = GenericSelectQuery.SHARED_CACHE.equals(cachePolicy);
+        boolean localCache = SelectInfo.LOCAL_CACHE.equals(info.getCachePolicy());
+        boolean sharedCache = SelectInfo.SHARED_CACHE.equals(info.getCachePolicy());
         boolean useCache = localCache || sharedCache;
 
         String name = query.getName();
@@ -148,17 +133,14 @@ class DataContextSelectAction {
                     if (rows.size() == 0) {
                         results = Collections.EMPTY_LIST;
                     }
-                    else if (dataRows) {
+                    else if (info.isFetchingDataRows()) {
                         results = Collections.unmodifiableList(rows);
                     }
                     else {
                         ObjEntity root = context.getEntityResolver().lookupObjEntity(
                                 query);
-                        results = context.objectsFromDataRows(
-                                root,
-                                rows,
-                                false,
-                                inheritance);
+                        results = context.objectsFromDataRows(root, rows, false, info
+                                .isResolvingInherited());
                     }
                 }
             }
@@ -174,11 +156,12 @@ class DataContextSelectAction {
 
         List results;
 
-        if (dataRows) {
+        if (info.isFetchingDataRows()) {
             results = observer.getFirstRows(query);
         }
         else {
-            results = getResultsAsObjects(query, observer, refreshCache, inheritance);
+            results = getResultsAsObjects(query, observer, refreshCache, info
+                    .isResolvingInherited());
         }
 
         // cache results if needed
@@ -209,9 +192,8 @@ class DataContextSelectAction {
         }
 
         ObjEntity entity = context.getEntityResolver().lookupObjEntity(rootQuery);
-        PrefetchTreeNode prefetchTree = (rootQuery instanceof GenericSelectQuery)
-                ? ((GenericSelectQuery) rootQuery).getPrefetchTree()
-                : null;
+        PrefetchTreeNode prefetchTree = rootQuery.getSelectInfo(
+                context.getEntityResolver()).getPrefetchTree();
 
         // take a shortcut when no prefetches exist...
         if (prefetchTree == null) {

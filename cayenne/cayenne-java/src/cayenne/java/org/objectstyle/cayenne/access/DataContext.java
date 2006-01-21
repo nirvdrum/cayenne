@@ -1310,9 +1310,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * Performs a single database select query returning result as a ResultIterator.
      * Returned ResultIterator will provide access to DataRows.
      */
-    public ResultIterator performIteratedQuery(GenericSelectQuery query)
-            throws CayenneException {
-
+    public ResultIterator performIteratedQuery(Query query) throws CayenneException {
         IteratedSelectObserver observer = new IteratedSelectObserver();
         performQueries(Collections.singletonList(query), observer);
         return observer.getResultIterator();
@@ -1476,7 +1474,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * </p>
      * 
      * @return A list of DataObjects or a DataRows, depending on the value returned by
-     *         {@link GenericSelectQuery#isFetchingDataRows()}.
+     *         {@link SelectInfo#isFetchingDataRows()}.
      */
     public List performQuery(Query query) {
         return new DataContextSelectAction(this).performQuery(query);
@@ -1541,13 +1539,6 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
                 && !parameters.isEmpty()
                 && query instanceof ParameterizedQuery) {
             query = ((ParameterizedQuery) query).createQuery(parameters);
-        }
-
-        if (!(query instanceof GenericSelectQuery)) {
-            throw new CayenneRuntimeException("Query for name '"
-                    + queryName
-                    + "' is not a GenericSelectQuery: "
-                    + query);
         }
 
         return new DataContextSelectAction(this).performQuery(

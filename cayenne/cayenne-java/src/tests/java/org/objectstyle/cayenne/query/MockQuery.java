@@ -79,6 +79,10 @@ public class MockQuery implements Query {
         this.name = name;
     }
 
+    public SelectInfo getSelectInfo(EntityResolver resolver) {
+        return null;
+    }
+
     public boolean isResolveCalled() {
         return resolveCalled;
     }

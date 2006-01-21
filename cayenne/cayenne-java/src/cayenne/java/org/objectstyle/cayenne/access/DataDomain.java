@@ -725,14 +725,12 @@ public class DataDomain implements QueryEngine, OPPChannel {
 
     /**
      * Performs a selecting query. Note that DataDomain can't convert results to
-     * DataObjects, so results are returned as DataRows.
+     * DataObjects, so results are always returned as DataRows.
      * 
      * @since 1.2
      */
     public List performQuery(Query query) {
-        QueryResult result = new QueryResult();
-        new DataDomainQueryAction(this, result).performQuery(query);
-        return result.getFirstRows(query);
+        return performGenericQuery(query).getFirstRows(query);
     }
 
     /**

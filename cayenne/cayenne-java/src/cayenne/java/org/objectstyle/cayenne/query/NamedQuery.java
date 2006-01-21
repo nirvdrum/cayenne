@@ -110,6 +110,10 @@ public class NamedQuery implements Query {
         this.name = name;
     }
 
+    public SelectInfo getSelectInfo(EntityResolver resolver) {
+        return resolveQuery(resolver).getSelectInfo(resolver);
+    }
+
     /**
      * Returns the name of the query this query points to.
      */
@@ -126,12 +130,6 @@ public class NamedQuery implements Query {
      */
     public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
         Query substituteQuery = substituteQuery(resolver);
-
-        if (substituteQuery == null) {
-            throw new CayenneRuntimeException("Can't find named query for name '"
-                    + getQueryName()
-                    + "'");
-        }
 
         substituteQuery.route(router, resolver, substitutedQuery != null
                 ? substitutedQuery
@@ -150,10 +148,32 @@ public class NamedQuery implements Query {
     }
 
     /**
+     * Returns a query for name, throwing an exception if such query is not mapped in the
+     * EntityResolver.
+     */
+    protected Query resolveQuery(EntityResolver resolver) {
+        Query query = resolver.lookupQuery(getQueryName());
+
+        if (query == null) {
+            throw new CayenneRuntimeException("Can't find named query for name '"
+                    + getQueryName()
+                    + "'");
+        }
+
+        if (query == this) {
+            throw new CayenneRuntimeException("Named query resolves to self: '"
+                    + getQueryName()
+                    + "'");
+        }
+
+        return query;
+    }
+
+    /**
      * Locates and initializes a substitution query.
      */
     protected Query substituteQuery(EntityResolver resolver) {
-        Query query = resolver.lookupQuery(getQueryName());
+        Query query = resolveQuery(resolver);
 
         if (query instanceof ParameterizedQuery) {
             // must process the query even if we have no parameters set, so that unused

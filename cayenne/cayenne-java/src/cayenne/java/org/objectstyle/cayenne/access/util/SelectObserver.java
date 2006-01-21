@@ -64,8 +64,8 @@ import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectInfo;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -154,18 +154,11 @@ public class SelectObserver extends DefaultOperationObserver {
      */
     public List getResultsAsObjects(DataContext dataContext, Query rootQuery) {
 
-        if (!(rootQuery instanceof GenericSelectQuery)) {
-            throw new CayenneRuntimeException("Expected GenericSelectQuery, got: "
-                    + rootQuery);
-        }
+        SelectInfo info = rootQuery.getSelectInfo(dataContext.getEntityResolver());
 
-        GenericSelectQuery selectQuery = (GenericSelectQuery) rootQuery;
         ObjEntity rootEntity = dataContext.getEntityResolver().lookupObjEntity(rootQuery);
-        return dataContext.objectsFromDataRows(
-                rootEntity,
-                getResults(rootQuery),
-                selectQuery.isRefreshingObjects(),
-                selectQuery.isResolvingInherited());
+        return dataContext.objectsFromDataRows(rootEntity, getResults(rootQuery), info
+                .isRefreshingObjects(), info.isResolvingInherited());
     }
 
     /**

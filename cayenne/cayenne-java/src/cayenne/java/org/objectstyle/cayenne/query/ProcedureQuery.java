@@ -66,6 +66,7 @@ import java.util.Map;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.jdbc.ColumnDescriptor;
 import org.objectstyle.cayenne.access.jdbc.RowDescriptor;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.QueryBuilder;
 import org.objectstyle.cayenne.util.Util;
@@ -85,11 +86,11 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * <h4>Using ProcedureQuery as a GenericSelectQuery</h4>
  * <p>
  * Executing ProcedureQuery via
- * {@link org.objectstyle.cayenne.access.DataContext#performQuery(Query)}
- * makes sense only if the stored procedure returns a single result set (or alternatively
- * returns a result via OUT parameters and no other result sets). It is still OK if data
- * modification occurs as a side effect. However if the query returns more then one result
- * set, a more generic form should be used:
+ * {@link org.objectstyle.cayenne.access.DataContext#performQuery(Query)} makes sense only
+ * if the stored procedure returns a single result set (or alternatively returns a result
+ * via OUT parameters and no other result sets). It is still OK if data modification
+ * occurs as a side effect. However if the query returns more then one result set, a more
+ * generic form should be used:
  * {@link org.objectstyle.cayenne.access.DataContext#performQueries(java.util.Collection, 
  * org.objectstyle.cayenne.access.OperationObserver) DataContextperformQueries(Collection,
  * OperationObserver)}. Use {@link org.objectstyle.cayenne.access.QueryResult}as a
@@ -109,8 +110,8 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     protected String resultClassName;
 
     protected Map parameters = new HashMap();
-    protected SelectExecutionProperties selectProperties = new SelectExecutionProperties();
     protected boolean selecting;
+    BaseSelectInfo selectInfo = new BaseSelectInfo();
 
     // TODO: ColumnDescriptor is not XMLSerializable so we can't store
     // it in a DataMap
@@ -124,7 +125,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      */
     public ProcedureQuery() {
         // for backwards compatibility we go against usual default...
-        selectProperties.setFetchingDataRows(true);
+        selectInfo.setFetchingDataRows(true);
     }
 
     /**
@@ -132,7 +133,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      */
     public ProcedureQuery(Procedure procedure) {
         // for backwards compatibility we go against usual default...
-        selectProperties.setFetchingDataRows(true);
+        selectInfo.setFetchingDataRows(true);
         setRoot(procedure);
     }
 
@@ -151,7 +152,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      */
     public ProcedureQuery(String procedureName) {
         // for backwards compatibility we go against usual default...
-        selectProperties.setFetchingDataRows(true);
+        selectInfo.setFetchingDataRows(true);
 
         setRoot(procedureName);
     }
@@ -178,6 +179,13 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     public ProcedureQuery(String procedureName, Class resultType) {
         setRoot(procedureName);
         setResultClassName(resultType != null ? resultType.getName() : null);
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public SelectInfo getSelectInfo(EntityResolver resolver) {
+        return selectInfo;
     }
 
     /**
@@ -242,7 +250,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
             properties = Collections.EMPTY_MAP;
         }
 
-        selectProperties.initWithProperties(properties);
+        selectInfo.initWithProperties(properties);
     }
 
     /**
@@ -286,7 +294,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
 
         encoder.indent(1);
 
-        selectProperties.encodeAsXML(encoder);
+        selectInfo.encodeAsXML(encoder);
 
         encoder.indent(-1);
         encoder.println("</query>");
@@ -307,8 +315,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
         }
 
         query.setResultClassName(resultClassName);
-
-        selectProperties.copyToProperties(query.selectProperties);
+        query.selectInfo.copyFromInfo(this.selectInfo);
         query.setParameters(parameters);
 
         // TODO: implement algorithm for building the name based on the original name and
@@ -318,51 +325,51 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     }
 
     public String getCachePolicy() {
-        return selectProperties.getCachePolicy();
+        return selectInfo.getCachePolicy();
     }
 
     public void setCachePolicy(String policy) {
-        this.selectProperties.setCachePolicy(policy);
+        this.selectInfo.setCachePolicy(policy);
     }
 
     public int getFetchLimit() {
-        return selectProperties.getFetchLimit();
+        return selectInfo.getFetchLimit();
     }
 
     public void setFetchLimit(int fetchLimit) {
-        this.selectProperties.setFetchLimit(fetchLimit);
+        this.selectInfo.setFetchLimit(fetchLimit);
     }
 
     public int getPageSize() {
-        return selectProperties.getPageSize();
+        return selectInfo.getPageSize();
     }
 
     public void setPageSize(int pageSize) {
-        selectProperties.setPageSize(pageSize);
+        selectInfo.setPageSize(pageSize);
     }
 
     public void setFetchingDataRows(boolean flag) {
-        selectProperties.setFetchingDataRows(flag);
+        selectInfo.setFetchingDataRows(flag);
     }
 
     public boolean isFetchingDataRows() {
-        return selectProperties.isFetchingDataRows();
+        return selectInfo.isFetchingDataRows();
     }
 
     public boolean isRefreshingObjects() {
-        return selectProperties.isRefreshingObjects();
+        return selectInfo.isRefreshingObjects();
     }
 
     public void setRefreshingObjects(boolean flag) {
-        selectProperties.setRefreshingObjects(flag);
+        selectInfo.setRefreshingObjects(flag);
     }
 
     public boolean isResolvingInherited() {
-        return selectProperties.isResolvingInherited();
+        return selectInfo.isResolvingInherited();
     }
 
     public void setResolvingInherited(boolean b) {
-        selectProperties.setResolvingInherited(b);
+        selectInfo.setResolvingInherited(b);
     }
 
     /**
@@ -484,7 +491,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public PrefetchTreeNode getPrefetchTree() {
-        return selectProperties.getPrefetchTree();
+        return selectInfo.getPrefetchTree();
     }
 
     /**
@@ -494,7 +501,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      */
     public PrefetchTreeNode addPrefetch(String prefetchPath) {
         // by default use JOINT_PREFETCH_SEMANTICS
-        return selectProperties.addPrefetch(
+        return selectInfo.addPrefetch(
                 prefetchPath,
                 PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
     }
@@ -503,7 +510,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public void removePrefetch(String prefetch) {
-        selectProperties.removePrefetch(prefetch);
+        selectInfo.removePrefetch(prefetch);
     }
 
     /**
@@ -512,7 +519,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public void addPrefetches(Collection prefetches) {
-        selectProperties.addPrefetches(
+        selectInfo.addPrefetches(
                 prefetches,
                 PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
     }
@@ -523,6 +530,6 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public void clearPrefetches() {
-        selectProperties.clearPrefetches();
+        selectInfo.clearPrefetches();
     }
 }

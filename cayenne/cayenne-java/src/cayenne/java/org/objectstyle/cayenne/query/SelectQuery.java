@@ -83,7 +83,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * @author Andrei Adamchik
  */
 public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
-        ParameterizedQuery, XMLSerializable {
+        SelectInfo, ParameterizedQuery, XMLSerializable {
 
     public static final String DISTINCT_PROPERTY = "cayenne.SelectQuery.distinct";
     public static final boolean DISTINCT_DEFAULT = false;
@@ -95,7 +95,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     protected Expression parentQualifier;
     protected String parentObjEntityName;
 
-    SelectExecutionProperties selectProperties = new SelectExecutionProperties();
+    BaseSelectInfo selectInfo = new BaseSelectInfo();
 
     /** Creates an empty SelectQuery. */
     public SelectQuery() {
@@ -183,6 +183,15 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     }
 
     /**
+     * @since 1.2
+     */
+    public SelectInfo getSelectInfo(EntityResolver resolver) {
+        // return 'this' instead of 'selectInfo' as there is some logic in deriving select
+        // parameters that BaseSelectInfo is unaware of
+        return this;
+    }
+
+    /**
      * Routes itself and if there are any prefetches configured, creates prefetch queries
      * and routes them as well.
      * 
@@ -243,7 +252,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
                 ? "true".equalsIgnoreCase(distinct.toString())
                 : DISTINCT_DEFAULT;
 
-        selectProperties.initWithProperties(properties);
+        selectInfo.initWithProperties(properties);
     }
 
     /**
@@ -297,7 +306,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
             encoder.printProperty(DISTINCT_PROPERTY, distinct);
         }
 
-        selectProperties.encodeAsXML(encoder);
+        selectInfo.encodeAsXML(encoder);
 
         // encode qualifier
         if (qualifier != null) {
@@ -339,8 +348,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         SelectQuery query = new SelectQuery();
         query.setDistinct(distinct);
 
-        this.selectProperties.copyToProperties(query.selectProperties);
-
+        query.selectInfo.copyFromInfo(this.selectInfo);
         query.setParentObjEntityName(parentObjEntityName);
         query.setParentQualifier(parentQualifier);
         query.setRoot(root);
@@ -535,14 +543,14 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public PrefetchTreeNode getPrefetchTree() {
-        return selectProperties.getPrefetchTree();
+        return selectInfo.getPrefetchTree();
     }
 
     /**
      * @since 1.2
      */
     public void setPrefetchTree(PrefetchTreeNode prefetchTree) {
-        selectProperties.setPrefetchTree(prefetchTree);
+        selectInfo.setPrefetchTree(prefetchTree);
     }
 
     /**
@@ -551,9 +559,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.2 signature changed to return created PrefetchTreeNode.
      */
     public PrefetchTreeNode addPrefetch(String prefetchPath) {
-        return selectProperties.addPrefetch(
-                prefetchPath,
-                PrefetchTreeNode.UNDEFINED_SEMANTICS);
+        return selectInfo.addPrefetch(prefetchPath, PrefetchTreeNode.UNDEFINED_SEMANTICS);
     }
 
     /**
@@ -562,14 +568,14 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @deprecated since 1.2
      */
     public void addPrefetches(Collection prefetches) {
-        selectProperties.addPrefetches(prefetches, PrefetchTreeNode.UNDEFINED_SEMANTICS);
+        selectInfo.addPrefetches(prefetches, PrefetchTreeNode.UNDEFINED_SEMANTICS);
     }
 
     /**
      * Clears all stored prefetch paths.
      */
     public void clearPrefetches() {
-        selectProperties.clearPrefetches();
+        selectInfo.clearPrefetches();
     }
 
     /**
@@ -578,7 +584,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.1
      */
     public void removePrefetch(String prefetchPath) {
-        selectProperties.removePrefetch(prefetchPath);
+        selectInfo.removePrefetch(prefetchPath);
     }
 
     /**
@@ -587,7 +593,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * QueryEngine executing this query.
      */
     public boolean isFetchingDataRows() {
-        return this.isFetchingCustomAttributes() || selectProperties.isFetchingDataRows();
+        return this.isFetchingCustomAttributes() || selectInfo.isFetchingDataRows();
     }
 
     /**
@@ -599,7 +605,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * </p>
      */
     public void setFetchingDataRows(boolean flag) {
-        selectProperties.setFetchingDataRows(flag);
+        selectInfo.setFetchingDataRows(flag);
     }
 
     /**
@@ -608,28 +614,28 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.1
      */
     public boolean isRefreshingObjects() {
-        return selectProperties.isRefreshingObjects();
+        return selectInfo.isRefreshingObjects();
     }
 
     /**
      * @since 1.1
      */
     public void setRefreshingObjects(boolean flag) {
-        selectProperties.setRefreshingObjects(flag);
+        selectInfo.setRefreshingObjects(flag);
     }
 
     /**
      * @since 1.1
      */
     public String getCachePolicy() {
-        return selectProperties.getCachePolicy();
+        return selectInfo.getCachePolicy();
     }
 
     /**
      * @since 1.1
      */
     public void setCachePolicy(String policy) {
-        this.selectProperties.setCachePolicy(policy);
+        this.selectInfo.setCachePolicy(policy);
     }
 
     /**
@@ -638,7 +644,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @return int
      */
     public int getFetchLimit() {
-        return selectProperties.getFetchLimit();
+        return selectInfo.getFetchLimit();
     }
 
     /**
@@ -647,7 +653,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @param fetchLimit The fetchLimit to set
      */
     public void setFetchLimit(int fetchLimit) {
-        this.selectProperties.setFetchLimit(fetchLimit);
+        this.selectInfo.setFetchLimit(fetchLimit);
     }
 
     /** Setter for query's parent entity qualifier. */
@@ -718,7 +724,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @return int
      */
     public int getPageSize() {
-        return selectProperties.getPageSize();
+        return selectInfo.getPageSize();
     }
 
     /**
@@ -727,7 +733,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @param pageSize The pageSize to set
      */
     public void setPageSize(int pageSize) {
-        selectProperties.setPageSize(pageSize);
+        selectInfo.setPageSize(pageSize);
     }
 
     /**
@@ -737,7 +743,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.1
      */
     public boolean isResolvingInherited() {
-        return selectProperties.isResolvingInherited();
+        return selectInfo.isResolvingInherited();
     }
 
     /**
@@ -747,7 +753,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.1
      */
     public void setResolvingInherited(boolean b) {
-        selectProperties.setResolvingInherited(b);
+        selectInfo.setResolvingInherited(b);
     }
 
     /**

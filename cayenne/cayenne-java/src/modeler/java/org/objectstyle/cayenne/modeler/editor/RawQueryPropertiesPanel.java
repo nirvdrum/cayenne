@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -152,10 +152,10 @@ public abstract class RawQueryPropertiesPanel extends SelectPropertiesPanel {
      * Updates the view from the current model state. Invoked when a currently displayed
      * query is changed.
      */
-    public void initFromModel(GenericSelectQuery query) {
+    public void initFromModel(Query query) {
         super.initFromModel(query);
 
-        boolean fetchingDO = !query.isFetchingDataRows();
+        boolean fetchingDO = !query.getSelectInfo(null).isFetchingDataRows();
         dataObjects.setSelected(fetchingDO);
 
         // TODO: now we only allow ObjEntities from the current map,
@@ -178,7 +178,7 @@ public abstract class RawQueryPropertiesPanel extends SelectPropertiesPanel {
 
     protected abstract void setEntity(ObjEntity selectedEntity);
 
-    protected abstract ObjEntity getEntity(GenericSelectQuery query);
+    protected abstract ObjEntity getEntity(Query query);
 
     protected void setFetchingDataObjects(boolean dataObjects) {
         entities.setEnabled(dataObjects && isEnabled());

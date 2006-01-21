@@ -53,25 +53,43 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.openbase;
-
-import org.objectstyle.cayenne.access.trans.SelectTranslator;
+package org.objectstyle.cayenne.query;
 
 /**
+ * A SelectParameters implementation that returns all the defaults.
+ * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class OpenBaseSelectTranslator extends SelectTranslator {
+final class DefaultSelectInfo implements SelectInfo {
 
-    public String createSqlString() throws Exception {
-        String sql = super.createSqlString();
+    static final SelectInfo defaultParameters = new DefaultSelectInfo();
 
-        // limit results
-        int limit = getQuery().getSelectInfo(getEntityResolver()).getFetchLimit();
-        if (limit > 0) {
-            return sql + " RETURN RESULTS " + limit;
-        }
+    public String getCachePolicy() {
+        return SelectInfo.CACHE_POLICY_DEFAULT;
+    }
 
-        return sql;
+    public boolean isFetchingDataRows() {
+        return SelectInfo.FETCHING_DATA_ROWS_DEFAULT;
+    }
+
+    public boolean isRefreshingObjects() {
+        return SelectInfo.REFRESHING_OBJECTS_DEFAULT;
+    }
+
+    public boolean isResolvingInherited() {
+        return SelectInfo.RESOLVING_INHERITED_DEFAULT;
+    }
+
+    public int getPageSize() {
+        return SelectInfo.PAGE_SIZE_DEFAULT;
+    }
+
+    public int getFetchLimit() {
+        return SelectInfo.FETCH_LIMIT_DEFAULT;
+    }
+
+    public PrefetchTreeNode getPrefetchTree() {
+        return null;
     }
 }

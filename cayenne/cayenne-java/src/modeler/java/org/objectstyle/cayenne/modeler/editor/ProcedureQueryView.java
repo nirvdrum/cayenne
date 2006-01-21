@@ -78,7 +78,6 @@ import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.TextAdapter;
 import org.objectstyle.cayenne.query.AbstractQuery;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
@@ -123,7 +122,7 @@ public class ProcedureQueryView extends JPanel {
                 ProcedureQueryView.this.setEntity(entity);
             }
 
-            public ObjEntity getEntity(GenericSelectQuery query) {
+            public ObjEntity getEntity(Query query) {
                 if (query instanceof ProcedureQuery) {
                     return ProcedureQueryView.this.getEntity((ProcedureQuery) query);
                 }

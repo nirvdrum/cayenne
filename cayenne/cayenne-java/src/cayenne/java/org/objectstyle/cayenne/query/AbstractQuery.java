@@ -107,6 +107,15 @@ public abstract class AbstractQuery implements Query {
     }
 
     /**
+     * Returns default select parameters.
+     * 
+     * @since 1.2
+     */
+    public SelectInfo getSelectInfo(EntityResolver resolver) {
+        return DefaultSelectInfo.defaultParameters;
+    }
+
+    /**
      * Returns the root of this query
      */
     // note that while "getRoot()" is deprecated in the Query interface, it is still valid

@@ -66,6 +66,7 @@ import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.collections.Transformer;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.QueryBuilder;
@@ -83,7 +84,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * </p>
  * 
  * <pre>
- *           SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
+ *              SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
  * </pre>
  * 
  * <p>
@@ -117,10 +118,11 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
         }
     };
 
-    protected SelectExecutionProperties selectProperties = new SelectExecutionProperties();
     protected String defaultTemplate;
     protected Map templates;
     protected Map[] parameters;
+
+    BaseSelectInfo selectInfo = new BaseSelectInfo();
 
     /**
      * @deprecated Since 1.2 this property is redundant.
@@ -230,6 +232,13 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
     }
 
     /**
+     * @since 1.2
+     */
+    public SelectInfo getSelectInfo(EntityResolver resolver) {
+        return selectInfo;
+    }
+
+    /**
      * Calls <em>sqlAction(this)</em> on the visitor.
      * 
      * @since 1.2
@@ -285,10 +294,10 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
         }
 
         encoder.println("\">");
-        
+
         encoder.indent(1);
 
-        selectProperties.encodeAsXML(encoder);
+        selectInfo.encodeAsXML(encoder);
 
         // encode default SQL
         if (defaultTemplate != null) {
@@ -331,7 +340,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
      */
     public void initWithProperties(Map properties) {
         // must init defaults even if properties are empty
-        selectProperties.initWithProperties(properties);
+        selectInfo.initWithProperties(properties);
     }
 
     /**
@@ -376,7 +385,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
             query.templates = new HashMap(templates);
         }
 
-        selectProperties.copyToProperties(query.selectProperties);
+        query.selectInfo.copyFromInfo(this.selectInfo);
         query.setParameters(parameters);
 
         // TODO: implement algorithm for building the name based on the original name and
@@ -397,51 +406,51 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
     }
 
     public String getCachePolicy() {
-        return selectProperties.getCachePolicy();
+        return selectInfo.getCachePolicy();
     }
 
     public void setCachePolicy(String policy) {
-        this.selectProperties.setCachePolicy(policy);
+        this.selectInfo.setCachePolicy(policy);
     }
 
     public int getFetchLimit() {
-        return selectProperties.getFetchLimit();
+        return selectInfo.getFetchLimit();
     }
 
     public void setFetchLimit(int fetchLimit) {
-        this.selectProperties.setFetchLimit(fetchLimit);
+        this.selectInfo.setFetchLimit(fetchLimit);
     }
 
     public int getPageSize() {
-        return selectProperties.getPageSize();
+        return selectInfo.getPageSize();
     }
 
     public void setPageSize(int pageSize) {
-        selectProperties.setPageSize(pageSize);
+        selectInfo.setPageSize(pageSize);
     }
 
     public void setFetchingDataRows(boolean flag) {
-        selectProperties.setFetchingDataRows(flag);
+        selectInfo.setFetchingDataRows(flag);
     }
 
     public boolean isFetchingDataRows() {
-        return selectProperties.isFetchingDataRows();
+        return selectInfo.isFetchingDataRows();
     }
 
     public boolean isRefreshingObjects() {
-        return selectProperties.isRefreshingObjects();
+        return selectInfo.isRefreshingObjects();
     }
 
     public void setRefreshingObjects(boolean flag) {
-        selectProperties.setRefreshingObjects(flag);
+        selectInfo.setRefreshingObjects(flag);
     }
 
     public boolean isResolvingInherited() {
-        return selectProperties.isResolvingInherited();
+        return selectInfo.isResolvingInherited();
     }
 
     public void setResolvingInherited(boolean b) {
-        selectProperties.setResolvingInherited(b);
+        selectInfo.setResolvingInherited(b);
     }
 
     /**
@@ -566,7 +575,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public PrefetchTreeNode getPrefetchTree() {
-        return selectProperties.getPrefetchTree();
+        return selectInfo.getPrefetchTree();
     }
 
     /**
@@ -576,7 +585,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
      */
     public PrefetchTreeNode addPrefetch(String prefetchPath) {
         // by default use JOINT_PREFETCH_SEMANTICS
-        return selectProperties.addPrefetch(
+        return selectInfo.addPrefetch(
                 prefetchPath,
                 PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
     }
@@ -585,7 +594,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public void removePrefetch(String prefetch) {
-        selectProperties.removePrefetch(prefetch);
+        selectInfo.removePrefetch(prefetch);
     }
 
     /**
@@ -594,9 +603,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public void addPrefetches(Collection prefetches) {
-        selectProperties.addPrefetches(
-                prefetches,
-                PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
+        selectInfo.addPrefetches(prefetches, PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
     }
 
     /**
@@ -605,6 +612,6 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public void clearPrefetches() {
-        selectProperties.clearPrefetches();
+        selectInfo.clearPrefetches();
     }
 }

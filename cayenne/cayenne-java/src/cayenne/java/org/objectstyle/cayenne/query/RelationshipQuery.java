@@ -176,6 +176,13 @@ public class RelationshipQuery implements Query {
     }
 
     /**
+     * Returns default select parameters.
+     */
+    public SelectInfo getSelectInfo(EntityResolver resolver) {
+        return DefaultSelectInfo.defaultParameters;
+    }
+
+    /**
      * @deprecated since 1.2
      */
     public Object getRoot() {

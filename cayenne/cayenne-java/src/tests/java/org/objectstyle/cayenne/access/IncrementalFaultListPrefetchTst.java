@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.access;
 
 import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.exp.Expression;
@@ -69,15 +68,16 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Andrei Adamchik
  */
 public class IncrementalFaultListPrefetchTst extends DataContextTestBase {
+
     protected void setUp() throws Exception {
         super.setUp();
         createTestData("testPaintings");
     }
 
     /**
-      * Test that all queries specified in prefetch are executed
-      * with a single prefetch path.
-      */
+     * Test that all queries specified in prefetch are executed with a single prefetch
+     * path.
+     */
     public void testPrefetch1() {
 
         Expression e = ExpressionFactory.likeExp("artistName", "artist1%");
@@ -135,7 +135,7 @@ public class IncrementalFaultListPrefetchTst extends DataContextTestBase {
     /**
      * Test that a to-one relationship is initialized.
      */
-    public void testPrefetch4()  {
+    public void testPrefetch4() {
 
         SelectQuery q = new SelectQuery("Painting");
         q.setPageSize(4);
@@ -146,34 +146,31 @@ public class IncrementalFaultListPrefetchTst extends DataContextTestBase {
         // get an objects from the second page
         DataObject p1 = (DataObject) result.get(q.getPageSize());
 
-        // resolving the fault must not result in extra queries, since
-        // artist must have been prefetched
-        DataContextDelegate delegate = new MockDataContextDelegate() {
-            public GenericSelectQuery willPerformSelect(
-                DataContext context,
-                GenericSelectQuery query) {
-                throw new CayenneRuntimeException(
-                    "No query expected.. attempt to run: " + query);
-            }
-        };
+        blockQueries();
 
-        p1.getDataContext().setDelegate(delegate);
+        try {
 
-        Object toOnePrefetch = p1.readNestedProperty("toArtist");
-        assertNotNull(toOnePrefetch);
-        assertTrue(
-            "Expected DataObject, got: " + toOnePrefetch.getClass().getName(),
-            toOnePrefetch instanceof DataObject);
+            Object toOnePrefetch = p1.readNestedProperty("toArtist");
+            assertNotNull(toOnePrefetch);
+            assertTrue(
+                    "Expected DataObject, got: " + toOnePrefetch.getClass().getName(),
+                    toOnePrefetch instanceof DataObject);
 
-        DataObject a1 = (DataObject) toOnePrefetch;
-        assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
+            DataObject a1 = (DataObject) toOnePrefetch;
+            assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
+        }
+        finally {
+            unblockQueries();
+        }
     }
 
     class CountingDelegate extends MockDataContextDelegate {
+
         int count;
+
         public GenericSelectQuery willPerformSelect(
-            DataContext context,
-            GenericSelectQuery query) {
+                DataContext context,
+                GenericSelectQuery query) {
             count++;
             return query;
         }

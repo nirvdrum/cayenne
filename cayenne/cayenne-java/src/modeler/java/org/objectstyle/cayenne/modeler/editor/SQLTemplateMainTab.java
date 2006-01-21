@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.TextAdapter;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.util.Util;
@@ -108,7 +107,7 @@ public class SQLTemplateMainTab extends JPanel {
                 SQLTemplateMainTab.this.setEntity(entity);
             }
 
-            public ObjEntity getEntity(GenericSelectQuery query) {
+            public ObjEntity getEntity(Query query) {
                 if (query instanceof SQLTemplate) {
                     return SQLTemplateMainTab.this.getEntity((SQLTemplate) query);
                 }

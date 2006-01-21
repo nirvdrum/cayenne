@@ -76,8 +76,8 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.TextAdapter;
 import org.objectstyle.cayenne.property.PropertyUtils;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectInfo;
 import org.objectstyle.cayenne.validation.ValidationException;
 
 /**
@@ -96,16 +96,15 @@ public abstract class SelectPropertiesPanel extends JPanel {
     private static final String SHARED_CACHE_LABEL = "Shared Cache";
 
     private static final Object[] CACHE_POLICIES = new Object[] {
-            GenericSelectQuery.NO_CACHE, GenericSelectQuery.LOCAL_CACHE,
-            GenericSelectQuery.SHARED_CACHE
+            SelectInfo.NO_CACHE, SelectInfo.LOCAL_CACHE, SelectInfo.SHARED_CACHE
     };
 
     private static final Map cachePolicyLabels = new TreeMap();
 
     static {
-        cachePolicyLabels.put(GenericSelectQuery.NO_CACHE, NO_CACHE_LABEL);
-        cachePolicyLabels.put(GenericSelectQuery.LOCAL_CACHE, LOCAL_CACHE_LABEL);
-        cachePolicyLabels.put(GenericSelectQuery.SHARED_CACHE, SHARED_CACHE_LABEL);
+        cachePolicyLabels.put(SelectInfo.NO_CACHE, NO_CACHE_LABEL);
+        cachePolicyLabels.put(SelectInfo.LOCAL_CACHE, LOCAL_CACHE_LABEL);
+        cachePolicyLabels.put(SelectInfo.SHARED_CACHE, SHARED_CACHE_LABEL);
     }
 
     protected TextAdapter fetchLimit;
@@ -163,14 +162,14 @@ public abstract class SelectPropertiesPanel extends JPanel {
      * Updates the view from the current model state. Invoked when a currently displayed
      * query is changed.
      */
-    public void initFromModel(GenericSelectQuery query) {
+    public void initFromModel(Query query) {
         DefaultComboBoxModel cacheModel = new DefaultComboBoxModel(CACHE_POLICIES);
-        cacheModel.setSelectedItem(query.getCachePolicy());
+        cacheModel.setSelectedItem(query.getSelectInfo(null).getCachePolicy());
         cachePolicy.setModel(cacheModel);
 
-        fetchLimit.setText(String.valueOf(query.getFetchLimit()));
-        pageSize.setText(String.valueOf(query.getPageSize()));
-        refreshesResults.setSelected(query.isRefreshingObjects());
+        fetchLimit.setText(String.valueOf(query.getSelectInfo(null).getFetchLimit()));
+        pageSize.setText(String.valueOf(query.getSelectInfo(null).getPageSize()));
+        refreshesResults.setSelected(query.getSelectInfo(null).isRefreshingObjects());
     }
 
     void setFetchLimit(String string) {

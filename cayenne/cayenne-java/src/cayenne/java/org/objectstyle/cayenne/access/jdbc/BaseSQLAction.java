@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLAction;
 
 /**
@@ -97,7 +97,7 @@ public abstract class BaseSQLAction implements SQLAction {
     protected void readResultSet(
             ResultSet resultSet,
             RowDescriptor descriptor,
-            GenericSelectQuery query,
+            Query query,
             OperationObserver delegate) throws SQLException, Exception {
 
         long t1 = System.currentTimeMillis();
@@ -106,7 +106,7 @@ public abstract class BaseSQLAction implements SQLAction {
                 null,
                 resultSet,
                 descriptor,
-                query.getFetchLimit());
+                query.getSelectInfo(getEntityResolver()).getFetchLimit());
 
         if (!delegate.isIteratedResult()) {
             List resultRows = resultReader.dataRows(false);

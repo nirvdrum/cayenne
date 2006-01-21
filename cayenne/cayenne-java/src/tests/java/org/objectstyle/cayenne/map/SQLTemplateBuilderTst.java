@@ -57,8 +57,9 @@ package org.objectstyle.cayenne.map;
 
 import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
+import org.objectstyle.cayenne.query.SelectInfo;
 
 /**
  * @author Andrei Adamchik
@@ -90,10 +91,10 @@ public class SQLTemplateBuilderTst extends TestCase {
 
     public void testGetQueryProperties() throws Exception {
         SQLTemplateBuilder builder = new MockupRootQueryBuilder();
-        builder.addProperty(GenericSelectQuery.FETCH_LIMIT_PROPERTY, "5");
+        builder.addProperty(SelectInfo.FETCH_LIMIT_PROPERTY, "5");
 
-        GenericSelectQuery query = (GenericSelectQuery) builder.getQuery();
-        assertEquals(5, query.getFetchLimit());
+        Query query = builder.getQuery();
+        assertEquals(5, query.getSelectInfo(null).getFetchLimit());
 
         // TODO: test other properties...
     }

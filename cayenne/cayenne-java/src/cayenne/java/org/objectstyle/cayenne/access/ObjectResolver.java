@@ -66,8 +66,10 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.EntityInheritanceTree;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectInfo;
 
 /**
  * DataRows-to-objects converter for a specific ObjEntity.
@@ -83,17 +85,24 @@ class ObjectResolver {
     boolean refreshObjects;
     boolean resolveInheritance;
 
-    ObjectResolver(DataContext context, GenericSelectQuery query) {
-        this(context, context.getEntityResolver().lookupObjEntity(query), query);
-    }
+    ObjectResolver(DataContext context, Query query) {
 
-    ObjectResolver(DataContext context, ObjEntity entity, GenericSelectQuery query) {
-        this(context, entity, query.isRefreshingObjects(), query.isResolvingInherited());
+        EntityResolver resolver = context.getEntityResolver();
+        SelectInfo info = query.getSelectInfo(resolver);
+        init(context, resolver.lookupObjEntity(query), info.isRefreshingObjects(), info
+                .isResolvingInherited());
     }
 
     ObjectResolver(DataContext context, ObjEntity entity, boolean refresh,
             boolean resolveInheritanceHierarchy) {
+        init(context, entity, refresh, resolveInheritanceHierarchy);
+    }
 
+    void init(
+            DataContext context,
+            ObjEntity entity,
+            boolean refresh,
+            boolean resolveInheritanceHierarchy) {
         // sanity check
         DbEntity dbEntity = entity.getDbEntity();
         if (dbEntity == null) {
@@ -188,10 +197,8 @@ class ObjectResolver {
 
             // The algorithm below of building an ID doesn't take inheritance into
             // account, so there maybe a miss...
-            ObjectId id = row.createObjectId(
-                    sourceObjEntity.getName(),
-                    sourceObjEntity.getDbEntity(),
-                    relatedIdPrefix);
+            ObjectId id = row.createObjectId(sourceObjEntity.getName(), sourceObjEntity
+                    .getDbEntity(), relatedIdPrefix);
 
             DataObject parentObject = context.getObjectStore().getObject(id);
 

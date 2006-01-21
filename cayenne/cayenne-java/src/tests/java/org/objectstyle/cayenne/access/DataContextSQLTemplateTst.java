@@ -88,7 +88,9 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
 
         List rows = context.performQuery(query);
         assertEquals(DataContextTestBase.artistCount, rows.size());
-        assertTrue(rows.get(1) instanceof DataRow);
+        assertTrue(
+                "Expected DataRow, got this: " + rows.get(1),
+                rows.get(1) instanceof DataRow);
 
         DataRow row2 = (DataRow) rows.get(1);
         assertEquals(3, row2.size());

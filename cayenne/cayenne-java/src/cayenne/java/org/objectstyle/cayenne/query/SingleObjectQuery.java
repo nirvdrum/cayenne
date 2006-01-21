@@ -91,6 +91,13 @@ public class SingleObjectQuery implements Query {
         return objectId;
     }
 
+    /**
+     * Returns default select parameters.
+     */
+    public SelectInfo getSelectInfo(EntityResolver resolver) {
+        return DefaultSelectInfo.defaultParameters;
+    }
+
     public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
         // TODO: this query wouldn't take advantage of the cache... may need support at
         // the framework level to provide the result from cache or add cache access

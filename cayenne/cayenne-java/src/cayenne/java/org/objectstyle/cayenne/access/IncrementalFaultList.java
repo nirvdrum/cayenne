@@ -71,7 +71,8 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectInfo;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
@@ -120,8 +121,7 @@ public class IncrementalFaultList implements List {
     // the where clause generation that is necessary to fetch specific records a page
     // at a time. Some JDBC Drivers/Databases may have limits on statement length
     // or complexity of the where clause - e.g., PostgreSQL having a default limit of
-    // 10,000
-    // nested expressions.
+    // 10,000 nested expressions.
 
     /**
      * Creates a new list copying settings from another list. Elements WILL NOT be copied
@@ -146,16 +146,17 @@ public class IncrementalFaultList implements List {
      * @param query Main query used to retrieve data. Must have "pageSize" property set to
      *            a value greater than zero.
      */
-    public IncrementalFaultList(DataContext dataContext, GenericSelectQuery query) {
-        if (query.getPageSize() <= 0) {
+    public IncrementalFaultList(DataContext dataContext, Query query) {
+        SelectInfo info = query.getSelectInfo(dataContext.getEntityResolver());
+        if (info.getPageSize() <= 0) {
             throw new CayenneRuntimeException(
                     "IncrementalFaultList does not support unpaged queries. Query page size is "
-                            + query.getPageSize());
+                            + info.getPageSize());
         }
 
         this.elements = Collections.synchronizedList(new ArrayList());
         this.dataContext = dataContext;
-        this.pageSize = query.getPageSize();
+        this.pageSize = info.getPageSize();
         this.rootEntity = dataContext.getEntityResolver().lookupObjEntity(query);
 
         // create an internal query, it is a partial replica of
@@ -163,17 +164,17 @@ public class IncrementalFaultList implements List {
         // various parameters
         this.internalQuery = new SelectQuery();
         this.internalQuery.setRoot(query.getRoot(dataContext.getEntityResolver()));
-        this.internalQuery.setFetchingDataRows(query.isFetchingDataRows());
-        this.internalQuery.setResolvingInherited(query.isResolvingInherited());
+        this.internalQuery.setFetchingDataRows(info.isFetchingDataRows());
+        this.internalQuery.setResolvingInherited(info.isResolvingInherited());
 
-        if (query.isFetchingDataRows()) {
+        if (info.isFetchingDataRows()) {
             helper = new DataRowListHelper();
         }
         else {
             helper = new DataObjectListHelper();
         }
 
-        if (!query.isFetchingDataRows() && (query instanceof SelectQuery)) {
+        if (!info.isFetchingDataRows() && (query instanceof SelectQuery)) {
             SelectQuery select = (SelectQuery) query;
 
             this.internalQuery.setPrefetchTree(select.getPrefetchTree());
@@ -202,7 +203,9 @@ public class IncrementalFaultList implements List {
      * 
      * @since 1.0.6
      */
-    protected void fillIn(GenericSelectQuery query) {
+    protected void fillIn(Query query) {
+        SelectInfo info = query.getSelectInfo(dataContext.getEntityResolver());
+        
         synchronized (elements) {
 
             boolean fetchesDataRows = internalQuery.isFetchingDataRows();
@@ -232,8 +235,8 @@ public class IncrementalFaultList implements List {
                             elements.addAll(dataContext.objectsFromDataRows(
                                     rootEntity,
                                     firstPage,
-                                    query.isRefreshingObjects(),
-                                    query.isResolvingInherited()));
+                                    info.isRefreshingObjects(),
+                                    info.isResolvingInherited()));
                         }
                     }
 

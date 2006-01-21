@@ -56,8 +56,8 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.List;
+
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -82,10 +82,7 @@ public interface DataPortDelegate {
      * substitute or alter the select query used to fecth the source data, e.g. set a
      * limiting qualifier.
      */
-    GenericSelectQuery willPortEntity(
-            DataPort portTool,
-            DbEntity entity,
-            GenericSelectQuery query);
+    Query willPortEntity(DataPort portTool, DbEntity entity, Query query);
 
     /**
      * Invoked by DataPort right after the end of data port for a given entity. Allows
@@ -113,4 +110,3 @@ public interface DataPortDelegate {
      */
     void didCleanData(DataPort portTool, DbEntity entity, int rowCount);
 }
-

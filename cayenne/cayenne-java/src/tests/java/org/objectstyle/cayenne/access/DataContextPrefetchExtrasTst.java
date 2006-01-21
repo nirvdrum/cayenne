@@ -62,12 +62,10 @@ import org.objectstyle.art.CharPkTest;
 import org.objectstyle.art.CompoundFkTest;
 import org.objectstyle.art.CompoundPkTest;
 import org.objectstyle.cayenne.CayenneDataObject;
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -78,6 +76,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DataContextPrefetchExtrasTst extends CayenneTestCase {
+
     protected DataContext context;
 
     protected void setUp() throws Exception {
@@ -122,28 +121,22 @@ public class DataContextPrefetchExtrasTst extends CayenneTestCase {
         assertEquals(1, objects.size());
         CayenneDataObject fk1 = (CayenneDataObject) objects.get(0);
 
-        // resolving the fault must not result in extra queries, since
-        // artist must have been prefetched
-        DataContextDelegate delegate = new MockDataContextDelegate() {
-            public GenericSelectQuery willPerformSelect(
-                DataContext context,
-                GenericSelectQuery query) {
-                throw new CayenneRuntimeException(
-                    "No query expected.. attempt to run: " + query);
-            }
-        };
+        blockQueries();
+        try {
 
-        fk1.getDataContext().setDelegate(delegate);
+            Object toOnePrefetch = fk1.readNestedProperty("toCompoundPk");
+            assertNotNull(toOnePrefetch);
+            assertTrue(
+                    "Expected DataObject, got: " + toOnePrefetch.getClass().getName(),
+                    toOnePrefetch instanceof DataObject);
 
-        Object toOnePrefetch = fk1.readNestedProperty("toCompoundPk");
-        assertNotNull(toOnePrefetch);
-        assertTrue(
-            "Expected DataObject, got: " + toOnePrefetch.getClass().getName(),
-            toOnePrefetch instanceof DataObject);
-
-        DataObject pk1 = (DataObject) toOnePrefetch;
-        assertEquals(PersistenceState.COMMITTED, pk1.getPersistenceState());
-        assertEquals("CPK2", pk1.readPropertyDirectly("name"));
+            DataObject pk1 = (DataObject) toOnePrefetch;
+            assertEquals(PersistenceState.COMMITTED, pk1.getPersistenceState());
+            assertEquals("CPK2", pk1.readPropertyDirectly("name"));
+        }
+        finally {
+            unblockQueries();
+        }
     }
 
     /**

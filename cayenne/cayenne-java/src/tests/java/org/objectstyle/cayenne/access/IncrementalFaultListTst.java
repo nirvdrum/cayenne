@@ -64,8 +64,8 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -73,12 +73,10 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class IncrementalFaultListTst extends CayenneTestCase {
-    protected IncrementalFaultList list;
-    protected GenericSelectQuery query;
 
-    /**
-     * @see junit.framework.TestCase#setUp()
-     */
+    protected IncrementalFaultList list;
+    protected Query query;
+
     protected void setUp() throws Exception {
         super.setUp();
         deleteTestData();
@@ -107,8 +105,9 @@ public class IncrementalFaultListTst extends CayenneTestCase {
             assertTrue(obj instanceof DataObject);
 
             // iterator must be resolved page by page
-            int expectedResolved =
-                list.pageIndex(counter) * list.getPageSize() + list.getPageSize();
+            int expectedResolved = list.pageIndex(counter)
+                    * list.getPageSize()
+                    + list.getPageSize();
             if (expectedResolved > list.size()) {
                 expectedResolved = list.size();
             }
@@ -128,8 +127,9 @@ public class IncrementalFaultListTst extends CayenneTestCase {
             assertTrue(obj instanceof DataObject);
 
             // iterator must be resolved page by page
-            int expectedResolved =
-                list.pageIndex(counter) * list.getPageSize() + list.getPageSize();
+            int expectedResolved = list.pageIndex(counter)
+                    * list.getPageSize()
+                    + list.getPageSize();
             if (expectedResolved > list.size()) {
                 expectedResolved = list.size();
             }
@@ -156,7 +156,8 @@ public class IncrementalFaultListTst extends CayenneTestCase {
         try {
             assertEquals(13, list.pageIndex(82));
             fail("Element index beyound array size must throw an IndexOutOfBoundsException.");
-        } catch (IndexOutOfBoundsException ex) {
+        }
+        catch (IndexOutOfBoundsException ex) {
             // exception expercted
         }
     }
@@ -204,9 +205,8 @@ public class IncrementalFaultListTst extends CayenneTestCase {
 
         Artist row = (Artist) artists.get(0);
         assertEquals(19, list.indexOf(row));
-        assertEquals(
-            -1,
-            list.indexOf(list.dataContext.createAndRegisterNewObject("Artist")));
+        assertEquals(-1, list.indexOf(list.dataContext
+                .createAndRegisterNewObject("Artist")));
     }
 
     public void testLastIndexOf() throws Exception {
@@ -219,8 +219,7 @@ public class IncrementalFaultListTst extends CayenneTestCase {
 
         Artist row = (Artist) artists.get(0);
         assertEquals(19, list.lastIndexOf(row));
-        assertEquals(
-            -1,
-            list.lastIndexOf(list.dataContext.createAndRegisterNewObject("Artist")));
+        assertEquals(-1, list.lastIndexOf(list.dataContext
+                .createAndRegisterNewObject("Artist")));
     }
 }

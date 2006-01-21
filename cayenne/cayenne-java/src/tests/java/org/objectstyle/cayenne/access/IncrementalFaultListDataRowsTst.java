@@ -62,8 +62,8 @@ import java.util.Map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  */
 public class IncrementalFaultListDataRowsTst extends CayenneTestCase {
     protected IncrementalFaultList list;
-    protected GenericSelectQuery query;
+    protected Query query;
 
     protected void setUp() throws Exception {
         super.setUp();

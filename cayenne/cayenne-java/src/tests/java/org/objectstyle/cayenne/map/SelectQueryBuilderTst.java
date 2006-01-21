@@ -58,7 +58,8 @@ package org.objectstyle.cayenne.map;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectInfo;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
@@ -77,12 +78,12 @@ public class SelectQueryBuilderTst extends TestCase {
 
         assertEquals("xyz", builder.getQuery().getName());
     }
-    
+
     public void testGetQueryRoot() throws Exception {
         DataMap map = new DataMap();
         ObjEntity entity = new ObjEntity("A");
         map.addObjEntity(entity);
-        
+
         SelectQueryBuilder builder = new SelectQueryBuilder();
         builder.setRoot(map, QueryBuilder.OBJ_ENTITY_ROOT, "A");
 
@@ -97,18 +98,19 @@ public class SelectQueryBuilderTst extends TestCase {
 
         assertEquals(Expression.fromString("abc = 5"), query.getQualifier());
     }
-    
+
     public void testGetQueryProperties() throws Exception {
         SelectQueryBuilder builder = new MockupRootQueryBuilder();
-        builder.addProperty(GenericSelectQuery.FETCH_LIMIT_PROPERTY, "5");
+        builder.addProperty(SelectInfo.FETCH_LIMIT_PROPERTY, "5");
 
-        GenericSelectQuery query = (GenericSelectQuery) builder.getQuery();
-        assertEquals(5, query.getFetchLimit());
-        
+        Query query = builder.getQuery();
+        assertEquals(5, query.getSelectInfo(null).getFetchLimit());
+
         // TODO: test other properties...
     }
-    
+
     class MockupRootQueryBuilder extends SelectQueryBuilder {
+
         public Object getRoot() {
             return "FakeRoot";
         }

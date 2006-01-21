@@ -69,9 +69,8 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.query.AbstractQuery;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectInfo;
 
 /**
  * An OPPChannel adapter that connects client ObjectContext children to a server
@@ -209,7 +208,9 @@ public class ClientServerChannel implements OPPChannel {
 
     public List performQuery(Query query) {
 
-        List objects = serverContext.performQuery(rewriteQuery(query));
+        Query serverQuery = rewriteQuery(query);
+
+        List objects = serverContext.performQuery(serverQuery);
 
         // create client objects for a list of server object
 
@@ -217,15 +218,13 @@ public class ClientServerChannel implements OPPChannel {
             return new ArrayList(0);
         }
 
-        // detect prefetches...
-        PrefetchTreeNode prefetchTree = null;
-        if (query instanceof GenericSelectQuery) {
-            prefetchTree = ((GenericSelectQuery) query).getPrefetchTree();
-        }
+        // detect prefetches... note that we are getting selectInfo from the server query.
+        // Getting it from the client may blow for named queries...
+        SelectInfo info = serverQuery.getSelectInfo(serverContext.getEntityResolver());
 
         try {
             return new ServerToClientObjectConverter(objects, serverContext
-                    .getEntityResolver(), prefetchTree).getConverted();
+                    .getEntityResolver(), info.getPrefetchTree()).getConverted();
         }
         catch (Exception e) {
             throw new CayenneRuntimeException("Error converting to client objects: "

@@ -67,35 +67,32 @@ import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
- * Helper class that holds common parameters defined in {@link GenericSelectQuery}
- * interface.
+ * Default mutable implementation of {@link SelectInfo}.
  * 
  * @author Andrus Adamchik
  * @since 1.1
  */
-final class SelectExecutionProperties implements XMLSerializable, Serializable {
+final class BaseSelectInfo implements SelectInfo, XMLSerializable, Serializable {
 
-    int fetchLimit = GenericSelectQuery.FETCH_LIMIT_DEFAULT;
-    int pageSize = GenericSelectQuery.PAGE_SIZE_DEFAULT;
-    boolean fetchingDataRows = GenericSelectQuery.FETCHING_DATA_ROWS_DEFAULT;
-    boolean refreshingObjects = GenericSelectQuery.REFRESHING_OBJECTS_DEFAULT;
-    boolean resolvingInherited = GenericSelectQuery.RESOLVING_INHERITED_DEFAULT;
-    String cachePolicy = GenericSelectQuery.CACHE_POLICY_DEFAULT;
+    int fetchLimit = SelectInfo.FETCH_LIMIT_DEFAULT;
+    int pageSize = SelectInfo.PAGE_SIZE_DEFAULT;
+    boolean fetchingDataRows = SelectInfo.FETCHING_DATA_ROWS_DEFAULT;
+    boolean refreshingObjects = SelectInfo.REFRESHING_OBJECTS_DEFAULT;
+    boolean resolvingInherited = SelectInfo.RESOLVING_INHERITED_DEFAULT;
+    String cachePolicy = SelectInfo.CACHE_POLICY_DEFAULT;
     PrefetchTreeNode prefetchTree;
 
     /**
-     * Copies values of this object to another SelectQueryProperties object.
+     * Copies values of this object to another SelectInfo object.
      */
-    void copyToProperties(SelectExecutionProperties anotherProperties) {
-        anotherProperties.fetchingDataRows = this.fetchingDataRows;
-        anotherProperties.fetchLimit = this.fetchLimit;
-        anotherProperties.pageSize = this.pageSize;
-        anotherProperties.refreshingObjects = this.refreshingObjects;
-        anotherProperties.resolvingInherited = this.resolvingInherited;
-        anotherProperties.cachePolicy = this.cachePolicy;
-
-        // use a setter as it correctly clones the tree...
-        anotherProperties.setPrefetchTree(prefetchTree);
+    void copyFromInfo(SelectInfo info) {
+        this.fetchingDataRows = info.isFetchingDataRows();
+        this.fetchLimit = info.getFetchLimit();
+        this.pageSize = info.getPageSize();
+        this.refreshingObjects = info.isRefreshingObjects();
+        this.resolvingInherited = info.isResolvingInherited();
+        this.cachePolicy = info.getCachePolicy();
+        setPrefetchTree(info.getPrefetchTree());
     }
 
     void initWithProperties(Map properties) {
@@ -104,74 +101,71 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
             properties = Collections.EMPTY_MAP;
         }
 
-        Object fetchLimit = properties.get(GenericSelectQuery.FETCH_LIMIT_PROPERTY);
-        Object pageSize = properties.get(GenericSelectQuery.PAGE_SIZE_PROPERTY);
-        Object refreshingObjects = properties
-                .get(GenericSelectQuery.REFRESHING_OBJECTS_PROPERTY);
-        Object fetchingDataRows = properties
-                .get(GenericSelectQuery.FETCHING_DATA_ROWS_PROPERTY);
+        Object fetchLimit = properties.get(SelectInfo.FETCH_LIMIT_PROPERTY);
+        Object pageSize = properties.get(SelectInfo.PAGE_SIZE_PROPERTY);
+        Object refreshingObjects = properties.get(SelectInfo.REFRESHING_OBJECTS_PROPERTY);
+        Object fetchingDataRows = properties.get(SelectInfo.FETCHING_DATA_ROWS_PROPERTY);
 
         Object resolvingInherited = properties
-                .get(GenericSelectQuery.RESOLVING_INHERITED_PROPERTY);
+                .get(SelectInfo.RESOLVING_INHERITED_PROPERTY);
 
-        Object cachePolicy = properties.get(GenericSelectQuery.CACHE_POLICY_PROPERTY);
+        Object cachePolicy = properties.get(SelectInfo.CACHE_POLICY_PROPERTY);
 
         // init ivars from properties
         this.fetchLimit = (fetchLimit != null)
                 ? Integer.parseInt(fetchLimit.toString())
-                : GenericSelectQuery.FETCH_LIMIT_DEFAULT;
+                : SelectInfo.FETCH_LIMIT_DEFAULT;
 
         this.pageSize = (pageSize != null)
                 ? Integer.parseInt(pageSize.toString())
-                : GenericSelectQuery.PAGE_SIZE_DEFAULT;
+                : SelectInfo.PAGE_SIZE_DEFAULT;
 
         this.refreshingObjects = (refreshingObjects != null)
                 ? "true".equalsIgnoreCase(refreshingObjects.toString())
-                : GenericSelectQuery.REFRESHING_OBJECTS_DEFAULT;
+                : SelectInfo.REFRESHING_OBJECTS_DEFAULT;
 
         this.fetchingDataRows = (fetchingDataRows != null)
                 ? "true".equalsIgnoreCase(fetchingDataRows.toString())
-                : GenericSelectQuery.FETCHING_DATA_ROWS_DEFAULT;
+                : SelectInfo.FETCHING_DATA_ROWS_DEFAULT;
 
         this.resolvingInherited = (resolvingInherited != null)
                 ? "true".equalsIgnoreCase(resolvingInherited.toString())
-                : GenericSelectQuery.RESOLVING_INHERITED_DEFAULT;
+                : SelectInfo.RESOLVING_INHERITED_DEFAULT;
 
         this.cachePolicy = (cachePolicy != null)
                 ? cachePolicy.toString()
-                : GenericSelectQuery.CACHE_POLICY_DEFAULT;
+                : SelectInfo.CACHE_POLICY_DEFAULT;
     }
 
     public void encodeAsXML(XMLEncoder encoder) {
-        if (refreshingObjects != GenericSelectQuery.REFRESHING_OBJECTS_DEFAULT) {
+        if (refreshingObjects != SelectInfo.REFRESHING_OBJECTS_DEFAULT) {
             encoder.printProperty(
-                    GenericSelectQuery.REFRESHING_OBJECTS_PROPERTY,
+                    SelectInfo.REFRESHING_OBJECTS_PROPERTY,
                     refreshingObjects);
         }
 
-        if (fetchingDataRows != GenericSelectQuery.FETCHING_DATA_ROWS_DEFAULT) {
+        if (fetchingDataRows != SelectInfo.FETCHING_DATA_ROWS_DEFAULT) {
             encoder.printProperty(
-                    GenericSelectQuery.FETCHING_DATA_ROWS_PROPERTY,
+                    SelectInfo.FETCHING_DATA_ROWS_PROPERTY,
                     fetchingDataRows);
         }
 
-        if (resolvingInherited != GenericSelectQuery.RESOLVING_INHERITED_DEFAULT) {
+        if (resolvingInherited != SelectInfo.RESOLVING_INHERITED_DEFAULT) {
             encoder.printProperty(
-                    GenericSelectQuery.RESOLVING_INHERITED_PROPERTY,
+                    SelectInfo.RESOLVING_INHERITED_PROPERTY,
                     resolvingInherited);
         }
 
-        if (fetchLimit != GenericSelectQuery.FETCH_LIMIT_DEFAULT) {
-            encoder.printProperty(GenericSelectQuery.FETCH_LIMIT_PROPERTY, fetchLimit);
+        if (fetchLimit != SelectInfo.FETCH_LIMIT_DEFAULT) {
+            encoder.printProperty(SelectInfo.FETCH_LIMIT_PROPERTY, fetchLimit);
         }
 
-        if (pageSize != GenericSelectQuery.PAGE_SIZE_DEFAULT) {
-            encoder.printProperty(GenericSelectQuery.PAGE_SIZE_PROPERTY, pageSize);
+        if (pageSize != SelectInfo.PAGE_SIZE_DEFAULT) {
+            encoder.printProperty(SelectInfo.PAGE_SIZE_PROPERTY, pageSize);
         }
 
-        if (cachePolicy != null
-                && !GenericSelectQuery.CACHE_POLICY_DEFAULT.equals(cachePolicy)) {
-            encoder.printProperty(GenericSelectQuery.CACHE_POLICY_PROPERTY, cachePolicy);
+        if (cachePolicy != null && !SelectInfo.CACHE_POLICY_DEFAULT.equals(cachePolicy)) {
+            encoder.printProperty(SelectInfo.CACHE_POLICY_PROPERTY, cachePolicy);
         }
 
         if (prefetchTree != null) {
@@ -182,7 +176,7 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
     /**
      * @since 1.2
      */
-    PrefetchTreeNode getPrefetchTree() {
+    public PrefetchTreeNode getPrefetchTree() {
         return prefetchTree;
     }
 
@@ -205,7 +199,7 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
         this.prefetchTree = prefetchTree;
     }
 
-    String getCachePolicy() {
+    public String getCachePolicy() {
         return cachePolicy;
     }
 
@@ -213,23 +207,23 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
         this.cachePolicy = policy;
     }
 
-    boolean isFetchingDataRows() {
+    public boolean isFetchingDataRows() {
         return fetchingDataRows;
     }
 
-    int getFetchLimit() {
+    public int getFetchLimit() {
         return fetchLimit;
     }
 
-    int getPageSize() {
+    public int getPageSize() {
         return pageSize;
     }
 
-    boolean isRefreshingObjects() {
+    public boolean isRefreshingObjects() {
         return refreshingObjects;
     }
 
-    boolean isResolvingInherited() {
+    public boolean isResolvingInherited() {
         return resolvingInherited;
     }
 

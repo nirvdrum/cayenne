@@ -65,7 +65,6 @@ import org.objectstyle.cayenne.access.DataPort;
 import org.objectstyle.cayenne.access.DataPortDelegate;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -165,14 +164,10 @@ class AntDataPortDelegate implements DataPortDelegate {
     /**
      * Logs entity porting event using Ant logger.
      */
-    public GenericSelectQuery willPortEntity(
-            DataPort portTool,
-            DbEntity entity,
-            GenericSelectQuery query) {
+    public Query willPortEntity(DataPort portTool, DbEntity entity, Query query) {
         parentTask.log("Porting '" + entity.getName() + "'");
         lastEntity = entity;
         timestamp = System.currentTimeMillis();
-
         return query;
     }
 
