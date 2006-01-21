@@ -763,6 +763,10 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * Based on the description above, the only limitation of this method is that it can
      * not transfer NEW objects to a peer or parent DataContext (but can to a child DC).
      * If such condition is encountered, CayenneRuntimeException is thrown.
+     * </p>
+     * <p>
+     * Note that the objects in the list do not have to be of the same type or even from
+     * the same DataContext.
      * 
      * @since 1.0.3
      */
