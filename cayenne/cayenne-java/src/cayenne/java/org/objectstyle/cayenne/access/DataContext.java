@@ -564,15 +564,31 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
     }
 
     /**
-     * Returns an object for a given ObjectId. If object is not registered with this
-     * context, a "hollow" object fault is created, registered, and returned to the
-     * caller.
+     * Returns an object for a given ObjectId. When an object is not yet registered with
+     * this context's ObjectStore, the behavior of this method depends on whether ObjectId
+     * is permanent or temporary and whether a DataContext is a part of a nested context
+     * hierarchy or not. More specifically the following rules are applied in order:
+     * <ul>
+     * <li>If a matching registered object is found in this DataContext, it is
+     * immediately returned.</li>
+     * <li>If a context is nested (i.e. it has another DataContext as its parent
+     * channel), an attempt is made to locate a registered object up the hierarchy chain,
+     * until it is found. Such object is transferred to this DataContext and returned to
+     * the caller.</li>
+     * <li>If the ObjectId is temporary, null is returned; if it is permanent, a HOLLOW
+     * object (aka fault) is created and returned.</li>
+     * </ul>
      */
     public DataObject registeredObject(ObjectId oid) {
         // must synchronize on ObjectStore since we must read and write atomically
         synchronized (getObjectStore()) {
             DataObject object = objectStore.getObject(oid);
             if (object == null) {
+
+                DataObject parentObject = objectFromParentChannel(oid);
+                if (parentObject == null && oid.isTemporary()) {
+                    return null;
+                }
 
                 ObjEntity entity = getEntityResolver().lookupObjEntity(
                         oid.getEntityName());
@@ -596,21 +612,40 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
                 objectStore.addObject(object);
 
                 // in a nested DataContext, we need to connect this object with parent
-                if (channel instanceof DataContext) {
-                    DataContext parent = (DataContext) channel;
-                    DataObject parentObject = parent.registeredObject(oid);
-                    if (parentObject.getPersistenceState() != PersistenceState.HOLLOW) {
-                        DataRow parentSnapshot = parent.currentSnapshot(parentObject);
-                        DataRowUtils.refreshObjectWithSnapshot(
-                                entity,
-                                object,
-                                parentSnapshot,
-                                false);
-                    }
+                if (parentObject != null) {
+                    DataRow parentSnapshot = parentObject
+                            .getDataContext()
+                            .currentSnapshot(parentObject);
+
+                    // this may or may not reset the state to COMMITTED
+                    DataRowUtils.refreshObjectWithSnapshot(
+                            entity,
+                            object,
+                            parentSnapshot,
+                            false);
                 }
             }
             return object;
         }
+    }
+
+    /**
+     * Looks up a registered object in the channel hierarchy.
+     * 
+     * @since 1.2
+     */
+    DataObject objectFromParentChannel(ObjectId oid) {
+        if (channel instanceof DataContext) {
+            DataContext parent = (DataContext) channel;
+            DataObject parentObject = parent.registeredObject(oid);
+
+            // treat HOLLOW as unknown...
+            if (parentObject.getPersistenceState() != PersistenceState.HOLLOW) {
+                return parentObject;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -719,8 +754,15 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
 
     /**
      * Creates a list of DataObjects local to this DataContext from a list of DataObjects
-     * coming from a different DataContext. Note that all objects in the source list must
-     * be either in COMMITTED or in HOLLOW state.
+     * coming from a different DataContext. This method as a way to <b>map</b> objects
+     * from one context into the other (as opposed to "synchronize"). This means that the
+     * state of modified objects will be reflected only if this context is a child of an
+     * original DataObject context. If it is a peer or parent, you won't see any
+     * uncommitted changes.
+     * <p>
+     * Based on the description above, the only limitation of this method is that it can
+     * not transfer NEW objects to a peer or parent DataContext (but can to a child DC).
+     * If such condition is encountered, a CayenneRuntimeException is thrown.
      * 
      * @since 1.0.3
      */
@@ -731,21 +773,20 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
         while (it.hasNext()) {
             DataObject object = (DataObject) it.next();
 
-            // sanity check
-            if (object.getPersistenceState() != PersistenceState.COMMITTED
-                    && object.getPersistenceState() != PersistenceState.HOLLOW) {
-                throw new CayenneRuntimeException(
-                        "Only COMMITTED and HOLLOW objects can be transferred between contexts. "
-                                + "Invalid object state '"
-                                + PersistenceState.persistenceStateName(object
-                                        .getPersistenceState())
-                                + "', ObjectId: "
-                                + object.getObjectId());
+            if (object == null) {
+                throw new CayenneRuntimeException("Null object");
             }
 
             DataObject localObject = (object.getDataContext() != this)
                     ? registeredObject(object.getObjectId())
                     : object;
+
+            if (localObject == null) {
+                throw new CayenneRuntimeException(
+                        "Can't map an object to this DataContext. Failed object:"
+                                + object);
+            }
+
             localObjects.add(localObject);
         }
 
