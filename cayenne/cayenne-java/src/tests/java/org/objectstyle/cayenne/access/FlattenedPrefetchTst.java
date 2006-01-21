@@ -90,30 +90,34 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
 
         List objects = context.performQuery(q);
 
-        // block further queries
-        context.setDelegate(new QueryBlockingDelegate());
-        assertEquals(3, objects.size());
+        blockQueries();
+        try {
 
-        Iterator it = objects.iterator();
-        while (it.hasNext()) {
-            Artist a = (Artist) it.next();
-            ToManyList list = (ToManyList) a.getGroupArray();
+            assertEquals(3, objects.size());
 
-            assertNotNull(list);
-            assertFalse("artist's groups not resolved: " + a, list.needsFetch());
-            assertTrue(list.size() > 0);
+            Iterator it = objects.iterator();
+            while (it.hasNext()) {
+                Artist a = (Artist) it.next();
+                ToManyList list = (ToManyList) a.getGroupArray();
 
-            Iterator children = list.iterator();
-            while (children.hasNext()) {
-                ArtGroup g = (ArtGroup) children.next();
-                assertEquals(PersistenceState.COMMITTED, g.getPersistenceState());
+                assertNotNull(list);
+                assertFalse("artist's groups not resolved: " + a, list.needsFetch());
+                assertTrue(list.size() > 0);
+
+                Iterator children = list.iterator();
+                while (children.hasNext()) {
+                    ArtGroup g = (ArtGroup) children.next();
+                    assertEquals(PersistenceState.COMMITTED, g.getPersistenceState());
+                }
+
+                // assert no duplicates
+                Set s = new HashSet(list);
+                assertEquals(s.size(), list.size());
             }
-
-            // assert no duplicates
-            Set s = new HashSet(list);
-            assertEquals(s.size(), list.size());
         }
-
+        finally {
+            unblockQueries();
+        }
     }
 
     public void testMultiPrefetch() throws Exception {
@@ -127,30 +131,35 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
 
         List objects = context.performQuery(q);
 
-        // block further queries
-        context.setDelegate(new QueryBlockingDelegate());
-        assertEquals(3, objects.size());
+        blockQueries();
 
-        Iterator it = objects.iterator();
-        while (it.hasNext()) {
-            Painting p = (Painting) it.next();
-            Artist a = p.getToArtist();
-            assertEquals(PersistenceState.COMMITTED, a.getPersistenceState());
+        try {
+            assertEquals(3, objects.size());
 
-            ToManyList list = (ToManyList) a.getGroupArray();
-            assertNotNull(list);
-            assertFalse("artist's groups not resolved: " + a, list.needsFetch());
-            assertTrue(list.size() > 0);
+            Iterator it = objects.iterator();
+            while (it.hasNext()) {
+                Painting p = (Painting) it.next();
+                Artist a = p.getToArtist();
+                assertEquals(PersistenceState.COMMITTED, a.getPersistenceState());
 
-            Iterator children = list.iterator();
-            while (children.hasNext()) {
-                ArtGroup g = (ArtGroup) children.next();
-                assertEquals(PersistenceState.COMMITTED, g.getPersistenceState());
+                ToManyList list = (ToManyList) a.getGroupArray();
+                assertNotNull(list);
+                assertFalse("artist's groups not resolved: " + a, list.needsFetch());
+                assertTrue(list.size() > 0);
+
+                Iterator children = list.iterator();
+                while (children.hasNext()) {
+                    ArtGroup g = (ArtGroup) children.next();
+                    assertEquals(PersistenceState.COMMITTED, g.getPersistenceState());
+                }
+
+                // assert no duplicates
+                Set s = new HashSet(list);
+                assertEquals(s.size(), list.size());
             }
-
-            // assert no duplicates
-            Set s = new HashSet(list);
-            assertEquals(s.size(), list.size());
+        }
+        finally {
+            unblockQueries();
         }
     }
 
@@ -164,29 +173,35 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
         DataContext context = createDataContext();
 
         List objects = context.performQuery(q);
-        // block further queries
-        context.setDelegate(new QueryBlockingDelegate());
 
-        assertEquals(3, objects.size());
+        blockQueries();
 
-        Iterator it = objects.iterator();
-        while (it.hasNext()) {
-            Artist a = (Artist) it.next();
-            ToManyList list = (ToManyList) a.getGroupArray();
+        try {
 
-            assertNotNull(list);
-            assertFalse("artist's groups not resolved: " + a, list.needsFetch());
-            assertTrue(list.size() > 0);
+            assertEquals(3, objects.size());
 
-            Iterator children = list.iterator();
-            while (children.hasNext()) {
-                ArtGroup g = (ArtGroup) children.next();
-                assertEquals(PersistenceState.COMMITTED, g.getPersistenceState());
+            Iterator it = objects.iterator();
+            while (it.hasNext()) {
+                Artist a = (Artist) it.next();
+                ToManyList list = (ToManyList) a.getGroupArray();
+
+                assertNotNull(list);
+                assertFalse("artist's groups not resolved: " + a, list.needsFetch());
+                assertTrue(list.size() > 0);
+
+                Iterator children = list.iterator();
+                while (children.hasNext()) {
+                    ArtGroup g = (ArtGroup) children.next();
+                    assertEquals(PersistenceState.COMMITTED, g.getPersistenceState());
+                }
+
+                // assert no duplicates
+                Set s = new HashSet(list);
+                assertEquals(s.size(), list.size());
             }
-
-            // assert no duplicates
-            Set s = new HashSet(list);
-            assertEquals(s.size(), list.size());
+        }
+        finally {
+            unblockQueries();
         }
     }
 
@@ -205,32 +220,35 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
 
         List objects = context.performQuery(q);
 
-        // block further queries
+        blockQueries();
+        try {
+            assertEquals(3, objects.size());
 
-        context.setDelegate(new QueryBlockingDelegate());
-        assertEquals(3, objects.size());
+            Iterator it = objects.iterator();
+            while (it.hasNext()) {
+                Painting p = (Painting) it.next();
+                Artist a = p.getToArtist();
+                assertEquals(PersistenceState.COMMITTED, a.getPersistenceState());
 
-        Iterator it = objects.iterator();
-        while (it.hasNext()) {
-            Painting p = (Painting) it.next();
-            Artist a = p.getToArtist();
-            assertEquals(PersistenceState.COMMITTED, a.getPersistenceState());
+                ToManyList list = (ToManyList) a.getGroupArray();
+                assertNotNull(list);
+                assertFalse("artist's groups not resolved: " + a, list.needsFetch());
+                assertTrue(list.size() > 0);
 
-            ToManyList list = (ToManyList) a.getGroupArray();
-            assertNotNull(list);
-            assertFalse("artist's groups not resolved: " + a, list.needsFetch());
-            assertTrue(list.size() > 0);
+                Iterator children = list.iterator();
+                while (children.hasNext()) {
+                    ArtGroup g = (ArtGroup) children.next();
+                    assertEquals(PersistenceState.COMMITTED, g.getPersistenceState());
+                }
 
-            Iterator children = list.iterator();
-            while (children.hasNext()) {
-                ArtGroup g = (ArtGroup) children.next();
-                assertEquals(PersistenceState.COMMITTED, g.getPersistenceState());
+                // assert no duplicates
+
+                Set s = new HashSet(list);
+                assertEquals(s.size(), list.size());
             }
-
-            // assert no duplicates
-
-            Set s = new HashSet(list);
-            assertEquals(s.size(), list.size());
+        }
+        finally {
+            unblockQueries();
         }
     }
 }

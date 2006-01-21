@@ -53,24 +53,56 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.unit;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import junit.framework.Assert;
+import junit.framework.AssertionFailedError;
 
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.query.Query;
 
-/**
- * A DataContextDelegate that fails on any attempt to run a query. Very useful for
- * regression testing of prefetching.
- * 
- * @author Andrus Adamchik
- */
-class QueryBlockingDelegate extends DefaultDataContextDelegate {
+public class TestDataDomain extends DataDomain {
 
-    public GenericSelectQuery willPerformSelect(
-            DataContext context,
-            GenericSelectQuery query) {
-        Assert.fail("No query expected.. attempt to run: " + query);
-        return null;
+    protected boolean blockingQueries;
+
+    public TestDataDomain(String name) {
+        super(name);
+    }
+
+    public TestDataDomain(String name, Map properties) {
+        super(name, properties);
+    }
+
+    public boolean isBlockingQueries() {
+        return blockingQueries;
+    }
+
+    public void setBlockingQueries(boolean blockingQueries) {
+        this.blockingQueries = blockingQueries;
+    }
+
+    public QueryResponse performGenericQuery(Query query) {
+        checkQueryAllowed();
+        return super.performGenericQuery(query);
+    }
+
+    public void performQueries(Collection queries, OperationObserver callback) {
+        checkQueryAllowed();
+        super.performQueries(queries, callback);
+    }
+
+    public List performQuery(Query query) {
+        checkQueryAllowed();
+        return super.performQuery(query);
+    }
+
+    protected void checkQueryAllowed() throws AssertionFailedError {
+        Assert.assertFalse("Query is unexpected.", blockingQueries);
     }
 }

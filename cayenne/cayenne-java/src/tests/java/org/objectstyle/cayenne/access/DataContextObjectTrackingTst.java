@@ -57,69 +57,166 @@ package org.objectstyle.cayenne.access;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.DataObjectUtils;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.query.SingleObjectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
- * Tests objects registration in DataContext.
+ * Tests objects registration in DataContext, transferring objects between contexts and
+ * such.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class DataContextObjectTrackingTst extends CayenneTestCase {
 
-    protected DataContext ctxt;
+    public void testUnregisterObject() {
 
-    protected void setUp() throws Exception {
-        super.setUp();
-        
-        ctxt = createDataContext();
-    }
+        DataContext context = createDataContext();
 
-    public void testUnregisterObject() throws Exception {
-		DataRow row = new DataRow(10);
+        DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
-        DataObject obj = ctxt.objectFromDataRow(Artist.class, row, false);
+        DataObject obj = context.objectFromDataRow(Artist.class, row, false);
         ObjectId oid = obj.getObjectId();
 
         assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
-        assertSame(ctxt, obj.getDataContext());
-        assertSame(obj, ctxt.getObjectStore().getObject(oid));
+        assertSame(context, obj.getDataContext());
+        assertSame(obj, context.getObjectStore().getObject(oid));
 
-        ctxt.unregisterObjects(Collections.singletonList(obj));
+        context.unregisterObjects(Collections.singletonList(obj));
 
         assertEquals(PersistenceState.TRANSIENT, obj.getPersistenceState());
         assertNull(obj.getDataContext());
         assertNull(obj.getObjectId());
-        assertNull(ctxt.getObjectStore().getObject(oid));
-        assertNull(ctxt.getObjectStore().getCachedSnapshot(oid));
+        assertNull(context.getObjectStore().getObject(oid));
+        assertNull(context.getObjectStore().getCachedSnapshot(oid));
     }
 
-    public void testInvalidateObject() throws Exception {
-		DataRow row = new DataRow(10);
+    public void testInvalidateObject() {
+        DataContext context = createDataContext();
+
+        DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
-        DataObject obj = ctxt.objectFromDataRow(Artist.class, row, false);
+        DataObject obj = context.objectFromDataRow(Artist.class, row, false);
         ObjectId oid = obj.getObjectId();
 
         assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
-        assertSame(ctxt, obj.getDataContext());
-        assertSame(obj, ctxt.getObjectStore().getObject(oid));
+        assertSame(context, obj.getDataContext());
+        assertSame(obj, context.getObjectStore().getObject(oid));
 
-        ctxt.invalidateObjects(Collections.singletonList(obj));
+        context.invalidateObjects(Collections.singletonList(obj));
 
         assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
-        assertSame(ctxt, obj.getDataContext());
+        assertSame(context, obj.getDataContext());
         assertSame(oid, obj.getObjectId());
-        assertNull(ctxt.getObjectStore().getCachedSnapshot(oid));
-        assertNotNull(ctxt.getObjectStore().getObject(oid));
+        assertNull(context.getObjectStore().getCachedSnapshot(oid));
+        assertNotNull(context.getObjectStore().getObject(oid));
+    }
+
+    public void testLocalObjectsPeerContext() throws Exception {
+        deleteTestData();
+        createTestData("testArtists");
+
+        // must create both contexts before running the queries, as each call to
+        // 'createDataContext' clears the cache.
+        DataContext context = createDataContext();
+        DataContext peerContext = createDataContext();
+
+        DataObject _new = context.createAndRegisterNewObject(Artist.class);
+
+        DataObject hollow = context.registeredObject(new ObjectId(
+                "Artist",
+                Artist.ARTIST_ID_PK_COLUMN,
+                33001));
+        DataObject committed = DataObjectUtils.objectForQuery(
+                context,
+                new SingleObjectQuery(new ObjectId(
+                        "Artist",
+                        Artist.ARTIST_ID_PK_COLUMN,
+                        33002)));
+
+        int modifiedId = 33003;
+        Artist modified = (Artist) DataObjectUtils.objectForQuery(
+                context,
+                new SingleObjectQuery(new ObjectId(
+                        "Artist",
+                        Artist.ARTIST_ID_PK_COLUMN,
+                        modifiedId)));
+        modified.setArtistName("MODDED");
+        DataObject deleted = DataObjectUtils.objectForQuery(
+                context,
+                new SingleObjectQuery(new ObjectId(
+                        "Artist",
+                        Artist.ARTIST_ID_PK_COLUMN,
+                        33004)));
+        context.deleteObject(deleted);
+
+        assertEquals(PersistenceState.HOLLOW, hollow.getPersistenceState());
+        assertEquals(PersistenceState.COMMITTED, committed.getPersistenceState());
+        assertEquals(PersistenceState.MODIFIED, modified.getPersistenceState());
+        assertEquals(PersistenceState.DELETED, deleted.getPersistenceState());
+        assertEquals(PersistenceState.NEW, _new.getPersistenceState());
+
+        // now check how objects in different state behave
+        try {
+            peerContext.localObjects(Collections.singletonList(_new));
+            fail("A presence of new object should have triggered an exception");
+        }
+        catch (CayenneRuntimeException e) {
+            // expected
+        }
+
+        blockQueries();
+
+        try {
+
+            List hollows = peerContext.localObjects(Collections.singletonList(hollow));
+            assertEquals(1, hollows.size());
+            DataObject hollowPeer = (DataObject) hollows.get(0);
+            assertEquals(PersistenceState.HOLLOW, hollowPeer.getPersistenceState());
+            assertEquals(hollow.getObjectId(), hollowPeer.getObjectId());
+            assertSame(peerContext, hollowPeer.getDataContext());
+            assertSame(context, hollow.getDataContext());
+
+            List commits = peerContext.localObjects(Collections.singletonList(committed));
+            assertEquals(1, commits.size());
+            DataObject committedPeer = (DataObject) commits.get(0);
+            assertEquals(PersistenceState.HOLLOW, committedPeer.getPersistenceState());
+            assertEquals(committed.getObjectId(), committedPeer.getObjectId());
+            assertSame(peerContext, committedPeer.getDataContext());
+            assertSame(context, committed.getDataContext());
+
+            // List mods = peerContext.localObjects(Collections.singletonList(modified));
+            // assertEquals(1, mods.size());
+            // DataObject modifiedPeer = (DataObject) mods.get(0);
+            // assertEquals(PersistenceState.HOLLOW, modifiedPeer.getPersistenceState());
+            // assertEquals(modified.getObjectId(), modifiedPeer.getObjectId());
+            // assertSame(peerContext, modifiedPeer.getDataContext());
+            // assertSame(context, modified.getDataContext());
+            //
+            // List deletes =
+            // peerContext.localObjects(Collections.singletonList(deleted));
+            // assertEquals(1, deletes.size());
+            // DataObject deletedPeer = (DataObject) deletes.get(0);
+            // assertEquals(PersistenceState.HOLLOW, deletedPeer.getPersistenceState());
+            // assertEquals(deleted.getObjectId(), deletedPeer.getObjectId());
+            // assertSame(peerContext, deletedPeer.getDataContext());
+            // assertSame(context, deleted.getDataContext());
+        }
+        finally {
+            unblockQueries();
+        }
     }
 
 }

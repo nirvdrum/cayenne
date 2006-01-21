@@ -60,7 +60,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -70,8 +69,6 @@ import org.objectstyle.art.Exhibit;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.ROArtist;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
@@ -79,7 +76,6 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -93,103 +89,6 @@ public class DataContextTst extends DataContextTestBase {
         super.setUp();
 
         opObserver = new MockOperationObserver();
-    }
-
-    public void testLocalObjects() {
-        List artists = context.performQuery(new SelectQuery(Artist.class));
-
-        DataContext altContext = createAltContext();
-
-        List altArtists = altContext.localObjects(artists);
-        assertNotNull(altArtists);
-        assertEquals(artists.size(), altArtists.size());
-
-        // verify new artists
-        Iterator it = altArtists.iterator();
-        while (it.hasNext()) {
-            DataObject a = (DataObject) it.next();
-            assertSame(altContext, a.getDataContext());
-        }
-
-        // verify original artists
-        it = artists.iterator();
-        while (it.hasNext()) {
-            DataObject a = (DataObject) it.next();
-            assertSame(context, a.getDataContext());
-        }
-    }
-
-    public void testLocalObjectsSanity() throws Exception {
-        List artists = context.performQuery(new SelectQuery(Artist.class));
-        Artist a = (Artist) artists.get(0);
-        a.setArtistName("new name");
-
-        DataContext altContext = createAltContext();
-        try {
-            altContext.localObjects(Collections.singletonList(a));
-            fail("Shouldn't allow transfers of modified objects.");
-        }
-        catch (CayenneRuntimeException ex) {
-            // expected
-        }
-    }
-
-    public void testLocalObjectsFaulting() throws Exception {
-        List artists = context.performQuery(new SelectQuery(Artist.class));
-        Artist a = (Artist) artists.get(0);
-
-        DataContext altContext = createAltContext();
-        List altArtists = altContext.localObjects(Collections.singletonList(a));
-        Artist altA = (Artist) altArtists.get(0);
-
-        assertEquals(PersistenceState.HOLLOW, altA.getPersistenceState());
-        assertEquals(a.getObjectId(), altA.getObjectId());
-
-        DataRow snapshot = context.getObjectStore().getDataRowCache().getCachedSnapshot(
-                a.getObjectId());
-        DataRow altSnapshot = altContext
-                .getObjectStore()
-                .getDataRowCache()
-                .getCachedSnapshot(altA.getObjectId());
-        assertNotNull(altSnapshot);
-        assertSame(snapshot, altSnapshot);
-
-        // try to read a property and make sure it does not
-        // create a query, but rather uses the snapshot
-
-        DataContextDelegate delegate = new DataContextDelegate() {
-
-            public GenericSelectQuery willPerformSelect(
-                    DataContext context,
-                    GenericSelectQuery query) {
-                fail("Attempt to resolve object via query instead of snapshot");
-                return null;
-            }
-
-            public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore) {
-                return true;
-            }
-
-            public boolean shouldProcessDelete(DataObject object) {
-                return true;
-            }
-
-            public void finishedMergeChanges(DataObject object) {
-
-            }
-
-            public void finishedProcessDelete(DataObject object) {
-
-            }
-        };
-
-        altContext.setDelegate(delegate);
-        altA.getArtistName();
-    }
-
-    private DataContext createAltContext() {
-        // can't use super.createdataContext(), since it would clean up the cache
-        return context.getParentDataDomain().createDataContext();
     }
 
     public void testCurrentSnapshot1() throws Exception {

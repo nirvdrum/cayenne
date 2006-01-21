@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.unit;
 
 import java.util.Map;
 
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 
 /**
@@ -69,7 +68,7 @@ public interface AccessStack {
 
     AccessStackAdapter getAdapter(DataNode node);
 
-    DataDomain getDataDomain();
+    TestDataDomain getDataDomain();
 
     void createTestData(Class testCase, String testName, Map parameters) throws Exception;
 

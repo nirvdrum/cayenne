@@ -62,7 +62,6 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
@@ -99,8 +98,21 @@ public abstract class CayenneTestCase extends BasicTestCase {
     public CayenneTestCase() {
         // make sure CayenneTestResources shared instance is loaded
         CayenneTestResources.getResources();
-        
+
         this.accessStack = buildAccessStack();
+    }
+
+    /**
+     * A helper method that allows to block any query passing through the DataDomain, thus
+     * allowing to check for stray fault firings during the test case. Must be paired with
+     * <em>unblockQueries</em>.
+     */
+    protected void blockQueries() {
+        getDomain().setBlockingQueries(true);
+    }
+
+    protected void unblockQueries() {
+        getDomain().setBlockingQueries(false);
     }
 
     protected AccessStack buildAccessStack() {
@@ -119,7 +131,7 @@ public abstract class CayenneTestCase extends BasicTestCase {
         return getNode().getDataSource().getConnection();
     }
 
-    protected DataDomain getDomain() {
+    protected TestDataDomain getDomain() {
         return accessStack.getDataDomain();
     }
 
@@ -140,7 +152,7 @@ public abstract class CayenneTestCase extends BasicTestCase {
     protected void createTestData(String testName) throws Exception {
         accessStack.createTestData(this.getClass(), testName, Collections.EMPTY_MAP);
     }
-    
+
     protected void createTestData(String testName, Map parameters) throws Exception {
         accessStack.createTestData(this.getClass(), testName, parameters);
     }

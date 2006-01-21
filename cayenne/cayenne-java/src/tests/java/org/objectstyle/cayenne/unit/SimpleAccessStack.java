@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.query.Query;
  */
 public class SimpleAccessStack extends AbstractAccessStack implements AccessStack {
 
-    protected DataDomain domain;
+    protected TestDataDomain domain;
     protected DataSetFactory dataSetFactory;
 
     public SimpleAccessStack(CayenneTestResources resources,
@@ -80,7 +80,7 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
 
         this.dataSetFactory = dataSetFactory;
         this.resources = resources;
-        this.domain = new DataDomain("domain");
+        this.domain = new TestDataDomain("domain");
         domain.setEventManager(new EventManager(2));
         for (int i = 0; i < maps.length; i++) {
             initNode(maps[i]);
@@ -115,7 +115,7 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
     /**
      * Returns DataDomain for this AccessStack.
      */
-    public DataDomain getDataDomain() {
+    public TestDataDomain getDataDomain() {
         return domain;
     }
 

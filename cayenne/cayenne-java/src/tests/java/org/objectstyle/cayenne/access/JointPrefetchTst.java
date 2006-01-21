@@ -103,28 +103,34 @@ public class JointPrefetchTst extends CayenneTestCase {
         DataContext context = createDataContext();
 
         List rows = context.performQuery(q);
-        // block further queries
-        context.setDelegate(new QueryBlockingDelegate());
-        assertEquals(3, rows.size());
 
-        // row should contain columns from both entities minus those duplicated in a
-        // join...
-        int rowWidth = getDbEntity("ARTIST").getAttributes().size()
-                + getDbEntity("PAINTING").getAttributes().size()
-                - 1;
-        Iterator it = rows.iterator();
-        while (it.hasNext()) {
-            DataRow row = (DataRow) it.next();
-            assertEquals(rowWidth, row.size());
+        blockQueries();
 
-            // assert columns presence
-            assertTrue(row + "", row.containsKey("PAINTING_ID"));
-            assertTrue(row + "", row.containsKey("ARTIST_ID"));
-            assertTrue(row + "", row.containsKey("GALLERY_ID"));
-            assertTrue(row + "", row.containsKey("PAINTING_TITLE"));
-            assertTrue(row + "", row.containsKey("ESTIMATED_PRICE"));
-            assertTrue(row + "", row.containsKey("toArtist.ARTIST_NAME"));
-            assertTrue(row + "", row.containsKey("toArtist.DATE_OF_BIRTH"));
+        try {
+            assertEquals(3, rows.size());
+
+            // row should contain columns from both entities minus those duplicated in a
+            // join...
+            int rowWidth = getDbEntity("ARTIST").getAttributes().size()
+                    + getDbEntity("PAINTING").getAttributes().size()
+                    - 1;
+            Iterator it = rows.iterator();
+            while (it.hasNext()) {
+                DataRow row = (DataRow) it.next();
+                assertEquals(rowWidth, row.size());
+
+                // assert columns presence
+                assertTrue(row + "", row.containsKey("PAINTING_ID"));
+                assertTrue(row + "", row.containsKey("ARTIST_ID"));
+                assertTrue(row + "", row.containsKey("GALLERY_ID"));
+                assertTrue(row + "", row.containsKey("PAINTING_TITLE"));
+                assertTrue(row + "", row.containsKey("ESTIMATED_PRICE"));
+                assertTrue(row + "", row.containsKey("toArtist.ARTIST_NAME"));
+                assertTrue(row + "", row.containsKey("toArtist.DATE_OF_BIRTH"));
+            }
+        }
+        finally {
+            unblockQueries();
         }
     }
 
@@ -155,29 +161,35 @@ public class JointPrefetchTst extends CayenneTestCase {
         DataContext context = createDataContext();
 
         List objects = context.performQuery(q);
-        // block further queries
-        context.setDelegate(new QueryBlockingDelegate());
 
-        // without OUTER join we will get fewer objects...
-        assertEquals(2, objects.size());
+        blockQueries();
 
-        Iterator it = objects.iterator();
-        while (it.hasNext()) {
-            Artist a = (Artist) it.next();
-            ToManyList list = (ToManyList) a.getPaintingArray();
+        try {
 
-            assertNotNull(list);
-            assertFalse(list.needsFetch());
-            assertTrue(list.size() > 0);
+            // without OUTER join we will get fewer objects...
+            assertEquals(2, objects.size());
 
-            Iterator children = list.iterator();
-            while (children.hasNext()) {
-                Painting p = (Painting) children.next();
-                assertEquals(PersistenceState.COMMITTED, p.getPersistenceState());
+            Iterator it = objects.iterator();
+            while (it.hasNext()) {
+                Artist a = (Artist) it.next();
+                ToManyList list = (ToManyList) a.getPaintingArray();
 
-                // make sure properties are not null..
-                assertNotNull(p.getPaintingTitle());
+                assertNotNull(list);
+                assertFalse(list.needsFetch());
+                assertTrue(list.size() > 0);
+
+                Iterator children = list.iterator();
+                while (children.hasNext()) {
+                    Painting p = (Painting) children.next();
+                    assertEquals(PersistenceState.COMMITTED, p.getPersistenceState());
+
+                    // make sure properties are not null..
+                    assertNotNull(p.getPaintingTitle());
+                }
             }
+        }
+        finally {
+            unblockQueries();
         }
     }
 
@@ -193,16 +205,22 @@ public class JointPrefetchTst extends CayenneTestCase {
         DataContext context = createDataContext();
 
         List objects = context.performQuery(q);
-        // block further queries
-        context.setDelegate(new QueryBlockingDelegate());
-        assertEquals(3, objects.size());
 
-        Iterator it = objects.iterator();
-        while (it.hasNext()) {
-            Painting p = (Painting) it.next();
-            Artist target = p.getToArtist();
-            assertNotNull(target);
-            assertEquals(PersistenceState.COMMITTED, target.getPersistenceState());
+        blockQueries();
+
+        try {
+            assertEquals(3, objects.size());
+
+            Iterator it = objects.iterator();
+            while (it.hasNext()) {
+                Painting p = (Painting) it.next();
+                Artist target = p.getToArtist();
+                assertNotNull(target);
+                assertEquals(PersistenceState.COMMITTED, target.getPersistenceState());
+            }
+        }
+        finally {
+            unblockQueries();
         }
     }
 
@@ -237,17 +255,23 @@ public class JointPrefetchTst extends CayenneTestCase {
         dateOfBirth.setType("java.sql.Date");
         try {
             List objects = context.performQuery(q);
-            // block further queries
-            context.setDelegate(new QueryBlockingDelegate());
-            assertEquals(1, objects.size());
 
-            Iterator it = objects.iterator();
-            while (it.hasNext()) {
-                Painting p = (Painting) it.next();
-                Artist a = p.getToArtist();
-                assertNotNull(a);
-                assertNotNull(a.getDateOfBirth());
-                assertTrue(Date.class.isAssignableFrom(a.getDateOfBirth().getClass()));
+            blockQueries();
+
+            try {
+                assertEquals(1, objects.size());
+
+                Iterator it = objects.iterator();
+                while (it.hasNext()) {
+                    Painting p = (Painting) it.next();
+                    Artist a = p.getToArtist();
+                    assertNotNull(a);
+                    assertNotNull(a.getDateOfBirth());
+                    assertTrue(Date.class.isAssignableFrom(a.getDateOfBirth().getClass()));
+                }
+            }
+            finally {
+                unblockQueries();
             }
         }
         finally {
@@ -266,28 +290,32 @@ public class JointPrefetchTst extends CayenneTestCase {
         DataContext context = createDataContext();
 
         List objects = context.performQuery(q);
-        // block further queries
-        context.setDelegate(new QueryBlockingDelegate());
 
-        // without OUTER join we will get fewer objects...
-        assertEquals(2, objects.size());
+        blockQueries();
+        try {
+            // without OUTER join we will get fewer objects...
+            assertEquals(2, objects.size());
 
-        Iterator it = objects.iterator();
-        while (it.hasNext()) {
-            Artist a = (Artist) it.next();
-            ToManyList list = (ToManyList) a.getPaintingArray();
+            Iterator it = objects.iterator();
+            while (it.hasNext()) {
+                Artist a = (Artist) it.next();
+                ToManyList list = (ToManyList) a.getPaintingArray();
 
-            assertNotNull(list);
-            assertFalse(list.needsFetch());
-            assertTrue(list.size() > 0);
+                assertNotNull(list);
+                assertFalse(list.needsFetch());
+                assertTrue(list.size() > 0);
 
-            Iterator children = list.iterator();
-            while (children.hasNext()) {
-                Painting p = (Painting) children.next();
-                assertEquals(PersistenceState.COMMITTED, p.getPersistenceState());
-                // make sure properties are not null..
-                assertNotNull(p.getPaintingTitle());
+                Iterator children = list.iterator();
+                while (children.hasNext()) {
+                    Painting p = (Painting) children.next();
+                    assertEquals(PersistenceState.COMMITTED, p.getPersistenceState());
+                    // make sure properties are not null..
+                    assertNotNull(p.getPaintingTitle());
+                }
             }
+        }
+        finally {
+            unblockQueries();
         }
     }
 
@@ -306,29 +334,35 @@ public class JointPrefetchTst extends CayenneTestCase {
         DataContext context = createDataContext();
 
         List objects = context.performQuery(q);
-        // block further queries
-        context.setDelegate(new QueryBlockingDelegate());
 
-        assertEquals(1, objects.size());
+        blockQueries();
 
-        Artist a = (Artist) objects.get(0);
-        ToManyList list = (ToManyList) a.getPaintingArray();
+        try {
 
-        assertNotNull(list);
-        assertFalse(list.needsFetch());
-        assertEquals(2, list.size());
+            assertEquals(1, objects.size());
 
-        Iterator children = list.iterator();
-        while (children.hasNext()) {
-            Painting p = (Painting) children.next();
-            assertEquals(PersistenceState.COMMITTED, p.getPersistenceState());
-            // make sure properties are not null..
-            assertNotNull(p.getPaintingTitle());
+            Artist a = (Artist) objects.get(0);
+            ToManyList list = (ToManyList) a.getPaintingArray();
+
+            assertNotNull(list);
+            assertFalse(list.needsFetch());
+            assertEquals(2, list.size());
+
+            Iterator children = list.iterator();
+            while (children.hasNext()) {
+                Painting p = (Painting) children.next();
+                assertEquals(PersistenceState.COMMITTED, p.getPersistenceState());
+                // make sure properties are not null..
+                assertNotNull(p.getPaintingTitle());
+            }
+
+            // assert no duplicates
+            Set s = new HashSet(list);
+            assertEquals(s.size(), list.size());
         }
-
-        // assert no duplicates
-        Set s = new HashSet(list);
-        assertEquals(s.size(), list.size());
+        finally {
+            unblockQueries();
+        }
     }
 
     public void testJointPrefetchMultiStep() throws Exception {
@@ -351,31 +385,36 @@ public class JointPrefetchTst extends CayenneTestCase {
         assertNull(g1);
 
         List objects = context.performQuery(q);
-        // block further queries
-        context.setDelegate(new QueryBlockingDelegate());
 
-        // without OUTER join we will get fewer objects...
-        assertEquals(2, objects.size());
+        blockQueries();
+        try {
 
-        Iterator it = objects.iterator();
-        while (it.hasNext()) {
-            Artist a = (Artist) it.next();
-            ToManyList list = (ToManyList) a.getPaintingArray();
+            // without OUTER join we will get fewer objects...
+            assertEquals(2, objects.size());
 
-            assertNotNull(list);
+            Iterator it = objects.iterator();
+            while (it.hasNext()) {
+                Artist a = (Artist) it.next();
+                ToManyList list = (ToManyList) a.getPaintingArray();
 
-            // intermediate relationship is not fetched...
-            assertTrue(list.needsFetch());
+                assertNotNull(list);
+
+                // intermediate relationship is not fetched...
+                assertTrue(list.needsFetch());
+            }
+
+            // however both galleries must be in memory...
+            g1 = context.getObjectStore().getObject(
+                    new ObjectId("Gallery", Gallery.GALLERY_ID_PK_COLUMN, 33001));
+            assertNotNull(g1);
+            assertEquals(PersistenceState.COMMITTED, g1.getPersistenceState());
+            DataObject g2 = context.getObjectStore().getObject(
+                    new ObjectId("Gallery", Gallery.GALLERY_ID_PK_COLUMN, 33002));
+            assertNotNull(g2);
+            assertEquals(PersistenceState.COMMITTED, g2.getPersistenceState());
         }
-
-        // however both galleries must be in memory...
-        g1 = context.getObjectStore().getObject(
-                new ObjectId("Gallery", Gallery.GALLERY_ID_PK_COLUMN, 33001));
-        assertNotNull(g1);
-        assertEquals(PersistenceState.COMMITTED, g1.getPersistenceState());
-        DataObject g2 = context.getObjectStore().getObject(
-                new ObjectId("Gallery", Gallery.GALLERY_ID_PK_COLUMN, 33002));
-        assertNotNull(g2);
-        assertEquals(PersistenceState.COMMITTED, g2.getPersistenceState());
+        finally {
+            unblockQueries();
+        }
     }
 }
