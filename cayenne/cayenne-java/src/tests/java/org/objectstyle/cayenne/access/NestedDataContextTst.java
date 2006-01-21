@@ -116,7 +116,7 @@ public class NestedDataContextTst extends CayenneTestCase {
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         33002)));
-        
+
         int modifiedId = 33003;
         Artist modified = (Artist) DataObjectUtils.objectForQuery(
                 parent,
@@ -143,14 +143,110 @@ public class NestedDataContextTst extends CayenneTestCase {
         assertEquals("All but NEW object must have been included", 4, objects.size());
 
         Iterator it = objects.iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             DataObject next = (DataObject) it.next();
             assertEquals(PersistenceState.COMMITTED, next.getPersistenceState());
-            
+
             int id = DataObjectUtils.intPKForObject(next);
-            if(id == modifiedId) {
+            if (id == modifiedId) {
                 assertEquals("MODDED", next.readProperty(Artist.ARTIST_NAME_PROPERTY));
             }
         }
     }
+
+//    public void testReadToOneRelationship() throws Exception {
+//        deleteTestData();
+//        createTestData("testReadRelationship");
+//
+//        DataContext parent = createDataContext();
+//        DataContext child = parent.createChildDataContext();
+//
+//        // test how different object states appear in the child on select
+//
+//        int hollowTargetSrcId = 33001;
+//        int modifiedTargetSrcId = 33002;
+//        int deletedTargetSrcId = 33003;
+//        int committedTargetSrcId = 33004;
+//        int newTargetSrcId = 33005;
+//
+//        Painting hollowTargetSrc = (Painting) DataObjectUtils.objectForPK(
+//                parent,
+//                Painting.class,
+//                hollowTargetSrcId);
+//        Artist hollowTarget = hollowTargetSrc.getToArtist();
+//
+//        Painting modifiedTargetSrc = (Painting) DataObjectUtils.objectForPK(
+//                parent,
+//                Painting.class,
+//                modifiedTargetSrcId);
+//        Artist modifiedTarget = modifiedTargetSrc.getToArtist();
+//        modifiedTarget.setArtistName("M1");
+//
+//        Painting deletedTargetSrc = (Painting) DataObjectUtils.objectForPK(
+//                parent,
+//                Painting.class,
+//                deletedTargetSrcId);
+//        Artist deletedTarget = deletedTargetSrc.getToArtist();
+//        deletedTargetSrc.setToArtist(null);
+//        parent.deleteObject(deletedTarget);
+//
+//        Painting committedTargetSrc = (Painting) DataObjectUtils.objectForPK(
+//                parent,
+//                Painting.class,
+//                committedTargetSrcId);
+//        Artist committedTarget = committedTargetSrc.getToArtist();
+//        committedTarget.getArtistName();
+//
+//        Painting newTargetSrc = (Painting) DataObjectUtils.objectForPK(
+//                parent,
+//                Painting.class,
+//                newTargetSrcId);
+//        Artist newTarget = (Artist) parent.createAndRegisterNewObject(Artist.class);
+//        newTarget.setArtistName("N1");
+//        newTargetSrc.setToArtist(newTarget);
+//
+//        assertEquals(PersistenceState.COMMITTED, hollowTargetSrc.getPersistenceState());
+//        assertEquals(PersistenceState.COMMITTED, modifiedTargetSrc.getPersistenceState());
+//        assertEquals(PersistenceState.MODIFIED, deletedTargetSrc.getPersistenceState());
+//        assertEquals(PersistenceState.COMMITTED, committedTargetSrc.getPersistenceState());
+//        assertEquals(PersistenceState.MODIFIED, newTargetSrc.getPersistenceState());
+//
+//        assertEquals(PersistenceState.HOLLOW, hollowTarget.getPersistenceState());
+//        assertEquals(PersistenceState.MODIFIED, modifiedTarget.getPersistenceState());
+//        assertEquals(PersistenceState.DELETED, deletedTarget.getPersistenceState());
+//        assertEquals(PersistenceState.COMMITTED, committedTarget.getPersistenceState());
+//        assertEquals(PersistenceState.NEW, newTarget.getPersistenceState());
+//
+//        // run an ordered query, so we can address specific objects directly by index
+//        SelectQuery q = new SelectQuery(Painting.class);
+//        q.addOrdering(Painting.PAINTING_TITLE_PROPERTY, true);
+//        List childSources = child.performQuery(q);
+//        assertEquals(5, childSources.size());
+//
+//        blockQueries();
+//        try {
+//            Artist childHollowTarget = ((Painting) childSources.get(0)).getToArtist();
+//            assertEquals(PersistenceState.HOLLOW, childHollowTarget.getPersistenceState());
+//
+//            Artist childModifiedTarget = ((Painting) childSources.get(1)).getToArtist();
+//            assertEquals(PersistenceState.COMMITTED, childModifiedTarget
+//                    .getPersistenceState());
+//            assertEquals("M1", childModifiedTarget.getArtistName());
+//
+//            Artist childDeletedTarget = ((Painting) childSources.get(2)).getToArtist();
+//            assertNull(childDeletedTarget);
+//
+//            Artist childCommittedTarget = ((Painting) childSources.get(3)).getToArtist();
+//            assertEquals(PersistenceState.COMMITTED, childCommittedTarget
+//                    .getPersistenceState());
+//            
+//            Artist childNewTarget = ((Painting) childSources.get(4)).getToArtist();
+//            assertEquals(PersistenceState.COMMITTED, childNewTarget
+//                    .getPersistenceState());
+//            assertEquals("N1", childNewTarget.getArtistName());
+//        }
+//        finally {
+//            unblockQueries();
+//        }
+//    }
 }
