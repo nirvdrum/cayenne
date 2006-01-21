@@ -98,7 +98,7 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         DataContext altContext = mirrorDataContext(context);
 
         final boolean[] methodInvoked = new boolean[1];
-        DataContextDelegate delegate = new DefaultDataContextDelegate() {
+        DataContextDelegate delegate = new MockDataContextDelegate() {
 
             public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore) {
                 methodInvoked[0] = true;
@@ -143,7 +143,7 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         DataContext context = artist.getDataContext();
         DataContext altContext = mirrorDataContext(context);
 
-        DataContextDelegate delegate = new DefaultDataContextDelegate() {
+        DataContextDelegate delegate = new MockDataContextDelegate() {
 
             public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore) {
                 return false;
@@ -180,7 +180,7 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         DataContext altContext = mirrorDataContext(context);
 
         final boolean[] methodInvoked = new boolean[1];
-        DataContextDelegate delegate = new DefaultDataContextDelegate() {
+        DataContextDelegate delegate = new MockDataContextDelegate() {
 
             public boolean shouldProcessDelete(DataObject object) {
                 methodInvoked[0] = true;
@@ -225,7 +225,7 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         DataContext altContext = mirrorDataContext(context);
 
         final boolean[] methodInvoked = new boolean[1];
-        DataContextDelegate delegate = new DefaultDataContextDelegate() {
+        DataContextDelegate delegate = new MockDataContextDelegate() {
 
             public boolean shouldProcessDelete(DataObject object) {
                 methodInvoked[0] = true;
@@ -271,7 +271,7 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         DataContext context = artist.getDataContext();
 
         final boolean[] methodInvoked = new boolean[1];
-        DataContextDelegate delegate = new DefaultDataContextDelegate() {
+        DataContextDelegate delegate = new MockDataContextDelegate() {
 
             public boolean shouldProcessDelete(DataObject object) {
                 methodInvoked[0] = true;

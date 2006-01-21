@@ -124,7 +124,7 @@ public class DataContextPrefetchExtrasTst extends CayenneTestCase {
 
         // resolving the fault must not result in extra queries, since
         // artist must have been prefetched
-        DataContextDelegate delegate = new DefaultDataContextDelegate() {
+        DataContextDelegate delegate = new MockDataContextDelegate() {
             public GenericSelectQuery willPerformSelect(
                 DataContext context,
                 GenericSelectQuery query) {

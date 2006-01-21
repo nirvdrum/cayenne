@@ -55,94 +55,37 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.objectstyle.art.Artist;
-import org.objectstyle.art.Gallery;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
- * Tests various DataContextDelegate methods invocation and consequences on DataContext
- * behavior.
+ * Default implementation of DataContextDelegate that serves as a superclass for mockup
+ * test delegates.
  * 
  * @author Andrei Adamchik
  */
-public class DataContextDelegateTst extends CayenneTestCase {
+public class MockDataContextDelegate implements DataContextDelegate {
 
-    protected Gallery gallery;
-    protected Artist artist;
-
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        DataContext context = createDataContextWithSharedCache();
-
-        // prepare a single gallery record
-        gallery = (Gallery) context.createAndRegisterNewObject("Gallery");
-        gallery.setGalleryName("version1");
-
-        // prepare a single artist record
-        artist = (Artist) context.createAndRegisterNewObject("Artist");
-        artist.setArtistName("version1");
-
-        context.commitChanges();
+    public GenericSelectQuery willPerformSelect(
+            DataContext context,
+            GenericSelectQuery query) {
+        return query;
     }
 
-    public void testWillPerformSelect() throws Exception {
-        DataContext context = gallery.getDataContext();
-
-        final List queriesPerformed = new ArrayList(1);
-        DataContextDelegate delegate = new MockDataContextDelegate() {
-
-            public GenericSelectQuery willPerformSelect(
-                    DataContext context,
-                    GenericSelectQuery query) {
-                // save query, and allow its execution
-                queriesPerformed.add(query);
-                return query;
-            }
-        };
-        context.setDelegate(delegate);
-
-        // test that delegate is consulted before select
-        SelectQuery query = new SelectQuery(Gallery.class);
-        List results = context.performQuery(query);
-
-        assertTrue("Delegate is not notified of a query being run.", queriesPerformed
-                .contains(query));
-        assertEquals(1, queriesPerformed.size());
-        assertNotNull(results);
+    public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore) {
+        return true;
     }
 
-    public void testWillPerformSelectQueryBlocked() throws Exception {
-        DataContext context = gallery.getDataContext();
+    public boolean shouldProcessDelete(DataObject object) {
+        return true;
+    }
 
-        final List queriesPerformed = new ArrayList(1);
-        DataContextDelegate delegate = new MockDataContextDelegate() {
+    public void finishedMergeChanges(DataObject object) {
 
-            public GenericSelectQuery willPerformSelect(
-                    DataContext context,
-                    GenericSelectQuery query) {
-                // save query, and block its execution
-                queriesPerformed.add(query);
-                return null;
-            }
-        };
+    }
 
-        context.setDelegate(delegate);
-        SelectQuery query = new SelectQuery(Gallery.class);
-        List results = context.performQuery(query);
+    public void finishedProcessDelete(DataObject object) {
 
-        assertTrue("Delegate is not notified of a query being run.", queriesPerformed
-                .contains(query));
-        assertEquals(1, queriesPerformed.size());
-
-        assertNotNull(results);
-
-        // blocked
-        assertEquals("Delegate couldn't block the query.", 0, results.size());
     }
 }

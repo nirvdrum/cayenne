@@ -53,39 +53,79 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.unit;
 
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.DataRow;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import java.util.Collections;
+
+import junit.framework.AssertionFailedError;
+
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * Default implementation of DataContextDelegate that serves as a superclass for
- * mockup test delegates.
+ * A test case checking that TestDataDomain query blocking works.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-public abstract class DefaultDataContextDelegate implements DataContextDelegate {
+public class TestDataDomainTst extends CayenneTestCase {
 
-    public GenericSelectQuery willPerformSelect(
-        DataContext context,
-        GenericSelectQuery query) {
-        return query;
+    public void testBlockUnblock() {
+
+        assertFalse(getDomain().isBlockingQueries());
+
+        blockQueries();
+        try {
+            assertTrue(getDomain().isBlockingQueries());
+        }
+        finally {
+            unblockQueries();
+        }
+
+        assertFalse(getDomain().isBlockingQueries());
     }
 
-    public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore) {
-        return true;
+    public void testQuery() {
+        DataContext context = createDataContext();
+        assertSame(getDomain(), context.getParentDataDomain());
+
+        blockQueries();
+        try {
+            context.performQuery(new SelectQuery(Artist.class));
+        }
+        catch (AssertionFailedError e) {
+            // expected...
+            return;
+        }
+        finally {
+            unblockQueries();
+        }
+
+        fail("Must have failed on fault resolution");
     }
 
-    public boolean shouldProcessDelete(DataObject object) {
-        return true;
-    }
-    
-    public void finishedMergeChanges(DataObject object) {
-            
-    }
-        
-    public void finishedProcessDelete(DataObject object) {
-            
+    public void testFaultFired() {
+        DataContext context = createDataContext();
+        assertSame(getDomain(), context.getParentDataDomain());
+
+        Artist a = (Artist) context.createAndRegisterNewObject(Artist.class);
+        a.setArtistName("aa");
+        context.commitChanges();
+
+        context.invalidateObjects(Collections.singleton(a));
+
+        blockQueries();
+        try {
+            a.getArtistName();
+        }
+        catch (AssertionFailedError e) {
+            // expected...
+            return;
+        }
+        finally {
+            unblockQueries();
+        }
+
+        fail("Must have failed on fault resolution");
     }
 }
