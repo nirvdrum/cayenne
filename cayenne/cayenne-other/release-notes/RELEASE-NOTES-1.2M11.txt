@@ -26,5 +26,8 @@ Changes/New Features:
 * Implementation of QueryEngine by DataContext is deprecated. But now DataContext implements OPPChannel
   and ObjectContext interfaces instead.
   
+* Removed 'performNonSelectingQuery' method from ObjectContext and CayenneContext. It is redundant. 
+  Use 'performGenericQuery(query).getFirstUpdateCounts(query)' instead.
+  
 
 Bugs Fixed:

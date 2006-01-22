@@ -55,12 +55,15 @@
  */
 package org.objectstyle.cayenne.query;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.Persistent;
@@ -83,6 +86,8 @@ public class NamedQuery implements Query {
     // using Boolean instead of boolean to implement "trinary" logic - override with
     // refresh, override with no-refresh, no override.
     protected Boolean refreshOverride;
+
+    protected transient int hashCode;
 
     public NamedQuery(String queryName) {
         this(queryName, null);
@@ -285,5 +290,93 @@ public class NamedQuery implements Query {
      */
     public void setRefreshOverride(Boolean refreshOverride) {
         this.refreshOverride = refreshOverride;
+    }
+
+    /**
+     * An object is considered equal to this NamedQuery if it is a NamedQuery with the
+     * same queryName and same parameters.
+     */
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof NamedQuery)) {
+            return false;
+        }
+
+        NamedQuery query = (NamedQuery) object;
+
+        if (!Util.nullSafeEquals(queryName, query.getQueryName())) {
+            return false;
+        }
+
+        if (query.parameters == null && parameters == null) {
+            return true;
+        }
+
+        if (query.parameters == null || parameters == null) {
+            return false;
+        }
+
+        if (query.parameters.size() != parameters.size()) {
+            return false;
+        }
+
+        EqualsBuilder builder = new EqualsBuilder();
+        Iterator entries = parameters.entrySet().iterator();
+        while (entries.hasNext()) {
+            Map.Entry entry = (Map.Entry) entries.next();
+            Object entryKey = entry.getKey();
+            Object entryValue = entry.getValue();
+
+            if (entryValue == null) {
+                if (query.parameters.get(entryKey) != null
+                        || !query.parameters.containsKey(entryKey)) {
+                    return false;
+                }
+            }
+            else {
+                // takes care of comparing primitive arrays, such as byte[]
+                builder.append(entryValue, query.parameters.get(entryKey));
+                if (!builder.isEquals()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Implements a standard hashCode contract considering custom 'equals' implementation.
+     */
+    public int hashCode() {
+
+        if (this.hashCode == 0) {
+
+            HashCodeBuilder builder = new HashCodeBuilder(13, 17);
+
+            if (queryName != null) {
+                builder.append(queryName.hashCode());
+            }
+
+            if (parameters != null) {
+                Object[] keys = parameters.keySet().toArray();
+                Arrays.sort(keys);
+
+                for (int i = 0; i < keys.length; i++) {
+                    // HashCodeBuilder will take care of processing object if it
+                    // happens to be a primitive array such as byte[]
+                    builder.append(keys[i]).append(parameters.get(keys[i]));
+                }
+
+            }
+
+            this.hashCode = builder.toHashCode();
+            assert hashCode != 0 : "Generated zero hashCode";
+        }
+
+        return hashCode;
     }
 }

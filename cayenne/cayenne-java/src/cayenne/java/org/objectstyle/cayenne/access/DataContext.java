@@ -1553,6 +1553,9 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
         this.validatingObjectsOnCommit = flag;
     }
 
+    /**
+     * @deprecated since 1.2. Use 'getEntityResolver().getDataMaps()' instead.
+     */
     public Collection getDataMaps() {
         return (getEntityResolver() != null)
                 ? getEntityResolver().getDataMaps()

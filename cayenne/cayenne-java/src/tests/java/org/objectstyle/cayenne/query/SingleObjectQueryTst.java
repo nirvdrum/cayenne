@@ -90,4 +90,24 @@ public class SingleObjectQueryTst extends TestCase {
         assertTrue(o instanceof SingleObjectQuery);
         assertEquals(oid, ((SingleObjectQuery) o).getObjectId());
     }
+
+    /**
+     * Proper 'equals' and 'hashCode' implementations are important when mapping results
+     * obtained in a QueryChain back to the query.
+     */
+    public void testEquals() throws Exception {
+        SingleObjectQuery q1 = new SingleObjectQuery(new ObjectId("abc", "a", 1));
+        SingleObjectQuery q2 = new SingleObjectQuery(new ObjectId("abc", "a", 1));
+        SingleObjectQuery q3 = new SingleObjectQuery(new ObjectId("abc", "a", 3));
+        SingleObjectQuery q4 = new SingleObjectQuery(new ObjectId("123", "a", 1));
+
+        assertTrue(q1.equals(q2));
+        assertEquals(q1.hashCode(), q2.hashCode());
+
+        assertFalse(q1.equals(q3));
+        assertFalse(q1.hashCode() == q3.hashCode());
+
+        assertFalse(q1.equals(q4));
+        assertFalse(q1.hashCode() == q4.hashCode());
+    }
 }

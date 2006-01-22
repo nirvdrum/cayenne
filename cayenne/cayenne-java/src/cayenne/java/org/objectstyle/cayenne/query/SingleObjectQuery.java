@@ -61,6 +61,7 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * A query that returns a single object matching an ObjectId.
@@ -68,7 +69,6 @@ import org.objectstyle.cayenne.map.EntityResolver;
  * @since 1.2
  * @author Andrus Adamchik
  */
-// TODO: implement some sort of batch faulting for multiple ids....
 public class SingleObjectQuery implements Query {
 
     protected String name;
@@ -163,5 +163,30 @@ public class SingleObjectQuery implements Query {
      */
     public String toString() {
         return StringUtils.substringAfterLast(getClass().getName(), ".") + ":" + objectId;
+    }
+
+    /**
+     * An object is considered equal to this SingleObjectQuery if it is also a
+     * SingleObjectQuery with an equal ObjectId.
+     */
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof SingleObjectQuery)) {
+            return false;
+        }
+
+        SingleObjectQuery query = (SingleObjectQuery) object;
+
+        return Util.nullSafeEquals(objectId, query.getObjectId());
+    }
+
+    /**
+     * Implements a standard hashCode contract considering custom 'equals' implementation.
+     */
+    public int hashCode() {
+        return (objectId != null) ? objectId.hashCode() : 11;
     }
 }

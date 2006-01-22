@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -77,6 +78,15 @@ public class QueryChain implements Query {
      * Creates an empty QueryChain.
      */
     public QueryChain() {
+    }
+
+    /**
+     * Creates a new QueryChain out of an array of queries.
+     */
+    public QueryChain(Query[] queries) {
+        if (queries != null && queries.length > 0) {
+            this.chain = new ArrayList(Arrays.asList(queries));
+        }
     }
 
     /**

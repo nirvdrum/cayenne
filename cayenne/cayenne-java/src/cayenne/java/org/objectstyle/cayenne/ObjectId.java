@@ -348,7 +348,7 @@ public class ObjectId implements Serializable {
             }
 
             this.hashCode = builder.toHashCode();
-            assert hashCode != 0 : "Generated zeroo hashCode";
+            assert hashCode != 0 : "Generated zero hashCode";
         }
 
         return hashCode;

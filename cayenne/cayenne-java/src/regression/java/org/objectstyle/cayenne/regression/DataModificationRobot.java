@@ -104,7 +104,8 @@ public class DataModificationRobot {
         this.context = context;
         this.randomizer = randomizer;
         objEntities = new ArrayList(32);
-        for (Iterator i = context.getDataMaps().iterator(); i.hasNext();) {
+        for (Iterator i = context.getEntityResolver().getDataMaps().iterator(); i
+                .hasNext();) {
             DataMap dataMap = (DataMap) i.next();
             objEntities.addAll(dataMap.getObjEntities());
         }
