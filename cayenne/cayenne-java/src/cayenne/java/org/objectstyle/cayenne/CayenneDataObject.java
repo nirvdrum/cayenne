@@ -577,7 +577,8 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
                     "No ObjEntity mapping found for DataObject " + getClass().getName());
         }
 
-        DataNode node = getDataContext().lookupDataNode(objEntity.getDataMap());
+        DataNode node = getDataContext().getParentDataDomain().lookupDataNode(
+                objEntity.getDataMap());
         if (node == null) {
             throw new CayenneRuntimeException("No DataNode found for objEntity: "
                     + objEntity.getName());

@@ -221,7 +221,8 @@ public class PreferenceDetail extends CayenneDataObject {
             DbEntity entity = getDataContext().getEntityResolver().lookupDbEntity(
                     domainPreference);
 
-            DataNode node = getDataContext().lookupDataNode(entity.getDataMap());
+            DataNode node = getDataContext().getParentDataDomain().lookupDataNode(
+                    entity.getDataMap());
 
             try {
                 Object pk = node.getAdapter().getPkGenerator().generatePkForDbEntity(

@@ -130,6 +130,10 @@ import org.objectstyle.cayenne.util.Util;
  * <i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide. </a> </i>
  * </p>
+ * <p>
+ * <i>Note that all QueryEngine interface methods are deprecated in the DataContext. Since
+ * 1.2 release DataContext implements ObjectContext and OPPChannel interfaces.</i>
+ * </p>
  * 
  * @author Andrus Adamchik
  */
@@ -1069,6 +1073,8 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * Returns a DataNode that should handle queries for all DataMap components.
      * 
      * @since 1.1
+     * @deprecated since 1.2 DataContext's QueryEngine implementation is replaced by
+     *             OPPChannel. Use "getParentDataDomain().lookupDataNode(..)".
      */
     public DataNode lookupDataNode(DataMap dataMap) {
 
@@ -1340,23 +1346,12 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
     }
 
     /**
-     * Executes all queries in collection. Internally wraps the execution in a Transaction
-     * if no user Transaction is bound to the current thread.
+     * Executes all queries in collection.
+     * 
+     * @deprecated since 1.2 DataContext's QueryEngine implementation is replaced by
+     *             OPPChannel.
      */
     public void performQueries(Collection queries, OperationObserver callback) {
-
-        Transaction transaction = Transaction.getThreadTransaction();
-
-        // no transaction context - wrap it in one...
-        if (transaction == null) {
-            transaction = (callback.isIteratedResult())
-                    ? Transaction.externalTransaction(getParentDataDomain()
-                            .getTransactionDelegate())
-                    : getParentDataDomain().createTransaction();
-
-            transaction.performQueries(this, queries, callback);
-            return;
-        }
 
         // filter through the delegate
 
@@ -1396,7 +1391,8 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * 
      * @since 1.1
      * @deprecated since 1.2. Use Transaction.bindThreadTransaction(..) to provide custom
-     *             transactions.
+     *             transactions, besides DataContext's QueryEngine implementation is
+     *             replaced by OPPChannel.
      */
     public void performQueries(
             Collection queries,

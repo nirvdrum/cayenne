@@ -100,7 +100,8 @@ public class PregeneratedPKTst extends CayenneTestCase {
     void updateId(Artist object) throws Exception {
         DbEntity entity = object.getDataContext().getEntityResolver().lookupDbEntity(
                 object);
-        DataNode node = object.getDataContext().lookupDataNode(entity.getDataMap());
+        DataNode node = object.getDataContext().getParentDataDomain().lookupDataNode(
+                entity.getDataMap());
 
         Object pk = node
                 .getAdapter()

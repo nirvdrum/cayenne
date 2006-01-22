@@ -94,12 +94,12 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 class PrimaryKeyHelper {
 
     private Map indexedDbEntities;
-    private QueryEngine queryEngine;
+    private DataDomain domain;
     private DbEntityComparator dbEntityComparator;
     private ObjEntityComparator objEntityComparator;
 
-    PrimaryKeyHelper(QueryEngine queryEngine) {
-        this.queryEngine = queryEngine;
+    PrimaryKeyHelper(DataDomain domain) {
+        this.domain = domain;
         init();
         dbEntityComparator = new DbEntityComparator();
         objEntityComparator = new ObjEntityComparator();
@@ -120,7 +120,7 @@ class PrimaryKeyHelper {
         }
 
         DbEntity dbEntity = objEntity.getDbEntity();
-        DataNode owner = queryEngine.lookupDataNode(objEntity.getDataMap());
+        DataNode owner = domain.lookupDataNode(objEntity.getDataMap());
         if (owner == null) {
             throw new CayenneRuntimeException(
                     "No suitable DataNode to handle primary key generation.");
@@ -275,7 +275,7 @@ class PrimaryKeyHelper {
 
     private List collectAllDbEntities() {
         List entities = new ArrayList(32);
-        for (Iterator i = queryEngine.getEntityResolver().getDataMaps().iterator(); i
+        for (Iterator i = domain.getEntityResolver().getDataMaps().iterator(); i
                 .hasNext();) {
             entities.addAll(((DataMap) i.next()).getDbEntities());
         }

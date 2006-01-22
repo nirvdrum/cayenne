@@ -631,17 +631,6 @@ public class DataDomain implements QueryEngine, OPPChannel {
     }
 
     /**
-     * Routes queries to appropriate DataNodes for execution.
-     */
-    public void performQueries(Collection queries, OperationObserver callback) {
-        if (queries.isEmpty()) {
-            return;
-        }
-
-        new DataDomainQueryAction(this, callback).performQuery(new QueryChain(queries));
-    }
-
-    /**
      * Sets EntityResolver. If not set explicitly, DataDomain creates a default
      * EntityResolver internally on demand.
      * 
@@ -704,20 +693,38 @@ public class DataDomain implements QueryEngine, OPPChannel {
         return new ToStringBuilder(this).append("name", name).toString();
     }
 
-    // ****** OPPChannel methods:
+    /**
+     * Routes queries to appropriate DataNodes for execution.
+     */
+    public void performQueries(Collection queries, OperationObserver callback) {
 
-    public EntityResolver getEntityResolver() {
-        if (entityResolver == null) {
-            createEntityResolver();
+        // wrap in transaction if no Transaction context exists
+        Transaction transaction = Transaction.getThreadTransaction();
+        if (transaction == null) {
+            transaction = (callback.isIteratedResult()) ? Transaction
+                    .externalTransaction(getTransactionDelegate()) : createTransaction();
+
+            transaction.performQueries(this, queries, callback);
+            return;
         }
 
-        return entityResolver;
+        // run ...
+        new DataDomainQueryAction(this, callback).performQuery(new QueryChain(queries));
     }
+
+    // ****** OPPChannel methods:
 
     /**
      * @since 1.2
      */
     public QueryResponse performGenericQuery(Query query) {
+        // wrap in transaction if no Transaction context exists
+        Transaction transaction = Transaction.getThreadTransaction();
+        if (transaction == null) {
+            return createTransaction().performGenericQuery(this, query);
+        }
+
+        // run ...
         QueryResult result = new QueryResult();
         new DataDomainQueryAction(this, result).performQuery(query);
         return result;
@@ -733,6 +740,14 @@ public class DataDomain implements QueryEngine, OPPChannel {
         return performGenericQuery(query).getFirstRows(query);
     }
 
+    public EntityResolver getEntityResolver() {
+        if (entityResolver == null) {
+            createEntityResolver();
+        }
+
+        return entityResolver;
+    }
+
     /**
      * Only handles commit-type synchronization, ignoring any other type.
      * 
@@ -745,7 +760,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
             // TODO: Andrus, 12/13/2005 - see TODO under
             // DataContext.doCommitChanges() -
             // PK generation needs to be done here...
-            return new DataDomainCommitAction().commit(sync);
+            return new DataDomainCommitAction(this).commit(sync);
         }
 
         return null;

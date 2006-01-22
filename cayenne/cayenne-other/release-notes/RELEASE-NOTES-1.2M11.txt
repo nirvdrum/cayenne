@@ -23,5 +23,8 @@ Changes/New Features:
   added: "willPerformQuery" (for selecting queries) and "willPerformGenericQuery" 
   (for all other queries).
   
+* Implementation of QueryEngine by DataContext is deprecated. But now DataContext implements OPPChannel
+  and ObjectContext interfaces instead.
+  
 
 Bugs Fixed:

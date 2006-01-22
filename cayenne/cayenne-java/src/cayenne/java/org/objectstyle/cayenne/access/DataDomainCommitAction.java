@@ -97,6 +97,7 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
  */
 class DataDomainCommitAction {
 
+    private DataDomain domain;
     private DataContext context;
     private Map newObjectsByObjEntity;
     private Map objectsToDeleteByObjEntity;
@@ -108,6 +109,10 @@ class DataDomainCommitAction {
     private List insObjects; // event support
     private List delObjects; // event support
     private List updObjects; // event support
+
+    DataDomainCommitAction(DataDomain domain) {
+        this.domain = domain;
+    }
 
     GraphDiff commit(SyncCommand sync) {
 
@@ -695,7 +700,7 @@ class DataDomainCommitAction {
                 .getName());
         if (objectsForObjEntity == null) {
             objEntities.add(entity);
-            DataNode responsibleNode = context.lookupDataNode(entity.getDataMap());
+            DataNode responsibleNode = domain.lookupDataNode(entity.getDataMap());
 
             DataNodeCommitAction commitHelper = nodeHelper(responsibleNode);
 
@@ -724,8 +729,8 @@ class DataDomainCommitAction {
             }
 
             DbEntity flattenedEntity = info.getJoinEntity();
-            DataNode responsibleNode = context.lookupDataNode(flattenedEntity
-                    .getDataMap());
+            DataNode responsibleNode = domain
+                    .lookupDataNode(flattenedEntity.getDataMap());
             DataNodeCommitAction commitHelper = nodeHelper(responsibleNode);
             Map batchesByDbEntity = commitHelper.getFlattenedInsertQueries();
 
@@ -760,8 +765,8 @@ class DataDomainCommitAction {
 
             DbEntity flattenedEntity = info.getJoinEntity();
 
-            DataNode responsibleNode = context.lookupDataNode(flattenedEntity
-                    .getDataMap());
+            DataNode responsibleNode = domain
+                    .lookupDataNode(flattenedEntity.getDataMap());
             DataNodeCommitAction commitHelper = nodeHelper(responsibleNode);
             Map batchesByDbEntity = commitHelper.getFlattenedDeleteQueries();
 

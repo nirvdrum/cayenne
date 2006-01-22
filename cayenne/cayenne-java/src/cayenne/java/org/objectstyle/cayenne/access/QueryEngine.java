@@ -97,10 +97,9 @@ public interface QueryEngine {
      * Returns a DataNode that should handle queries for all DataMap components.
      * 
      * @since 1.1
+     * @deprecated since 1.2 not a part of the interface. Only DataDomain has meaningful
+     *             implementation.
      */
-    // TODO: since 1.2 this method is not used for routing (its original intention),
-    // however many classes in Cayenne use it to pick at the DataNode... eventually we
-    // should clean this up and deprecate this method.
     public DataNode lookupDataNode(DataMap dataMap);
 
     /**

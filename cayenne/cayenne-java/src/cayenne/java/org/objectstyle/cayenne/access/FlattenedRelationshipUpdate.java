@@ -163,8 +163,10 @@ final class FlattenedRelationshipUpdate extends RelationshipUpdate {
 
             // finally, use database generation mechanism
             try {
-                DataNode node = source.getDataContext().lookupDataNode(
-                        joinEntity.getDataMap());
+                DataNode node = source
+                        .getDataContext()
+                        .getParentDataDomain()
+                        .lookupDataNode(joinEntity.getDataMap());
                 PkGenerator pkGenerator = node.getAdapter().getPkGenerator();
                 Object pkValue = pkGenerator.generatePkForDbEntity(node, joinEntity);
                 snapshot.put(dbAttrName, pkValue);
