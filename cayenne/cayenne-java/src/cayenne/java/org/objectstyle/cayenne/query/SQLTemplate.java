@@ -122,7 +122,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
     protected Map templates;
     protected Map[] parameters;
 
-    BaseSelectInfo selectInfo = new BaseSelectInfo();
+    BaseQueryMetadata selectInfo = new BaseQueryMetadata();
 
     /**
      * @deprecated Since 1.2 this property is redundant.
@@ -234,7 +234,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
     /**
      * @since 1.2
      */
-    public SelectInfo getSelectInfo(EntityResolver resolver) {
+    public QueryMetadata getMetaData(EntityResolver resolver) {
         selectInfo.resolve(root, resolver);
         return selectInfo;
     }

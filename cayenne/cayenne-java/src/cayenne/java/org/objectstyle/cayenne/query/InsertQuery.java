@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.query;
 import java.util.Map;
 
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
@@ -96,6 +98,19 @@ public class InsertQuery extends AbstractQuery {
     /** Creates InsertQuery with <code>objEntityName</code> parameter. */
     public InsertQuery(String objEntityName) {
         this.setRoot(objEntityName);
+    }
+
+    public QueryMetadata getMetaData(final EntityResolver resolver) {
+        return new DefaultQueryMetadata() {
+
+            public ObjEntity getObjEntity() {
+                return resolver.lookupObjEntity(objectId.getEntityName());
+            }
+
+            public DbEntity getDbEntity() {
+                return getObjEntity().getDbEntity();
+            }
+        };
     }
 
     /**

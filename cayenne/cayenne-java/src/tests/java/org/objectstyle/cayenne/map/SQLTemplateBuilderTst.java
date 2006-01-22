@@ -59,7 +59,7 @@ import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
-import org.objectstyle.cayenne.query.SelectInfo;
+import org.objectstyle.cayenne.query.QueryMetadata;
 
 /**
  * @author Andrei Adamchik
@@ -91,7 +91,7 @@ public class SQLTemplateBuilderTst extends TestCase {
 
     public void testGetQueryProperties() throws Exception {
         SQLTemplateBuilder builder = new MockupRootQueryBuilder();
-        builder.addProperty(SelectInfo.FETCH_LIMIT_PROPERTY, "5");
+        builder.addProperty(QueryMetadata.FETCH_LIMIT_PROPERTY, "5");
 
         Query query = builder.getQuery();
         assertTrue(query instanceof SQLTemplate);

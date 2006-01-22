@@ -108,7 +108,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
 
     protected Map parameters = new HashMap();
     protected boolean selecting;
-    BaseSelectInfo selectInfo = new BaseSelectInfo();
+    BaseQueryMetadata selectInfo = new BaseQueryMetadata();
 
     // TODO: ColumnDescriptor is not XMLSerializable so we can't store
     // it in a DataMap
@@ -181,7 +181,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     /**
      * @since 1.2
      */
-    public SelectInfo getSelectInfo(EntityResolver resolver) {
+    public QueryMetadata getMetaData(EntityResolver resolver) {
         selectInfo.resolve(getResultClass(), resolver);
         return selectInfo;
     }

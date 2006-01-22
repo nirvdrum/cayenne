@@ -56,8 +56,6 @@
 
 package org.objectstyle.cayenne.query;
 
-import java.io.IOException;
-
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DataMap;
@@ -79,14 +77,6 @@ public abstract class AbstractQuery implements Query {
      */
     protected Object root;
     protected String name;
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException,
-            ClassNotFoundException {
-
-        // addressing the fact that logLevel is not serializable
-
-        in.defaultReadObject();
-    }
 
     /**
      * Returns a symbolic name of the query.
@@ -111,8 +101,10 @@ public abstract class AbstractQuery implements Query {
      * 
      * @since 1.2
      */
-    public SelectInfo getSelectInfo(EntityResolver resolver) {
-        return DefaultSelectInfo.defaultParameters;
+    public QueryMetadata getMetaData(EntityResolver resolver) {
+        BaseQueryMetadata md = new BaseQueryMetadata();
+        md.resolve(getRoot(), resolver);
+        return md;
     }
 
     /**

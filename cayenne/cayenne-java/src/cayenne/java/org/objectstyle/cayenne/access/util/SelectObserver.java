@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectInfo;
+import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -154,7 +154,7 @@ public class SelectObserver extends DefaultOperationObserver {
      */
     public List getResultsAsObjects(DataContext dataContext, Query rootQuery) {
 
-        SelectInfo info = rootQuery.getSelectInfo(dataContext.getEntityResolver());
+        QueryMetadata info = rootQuery.getMetaData(dataContext.getEntityResolver());
 
         ObjEntity rootEntity = dataContext.getEntityResolver().lookupObjEntity(rootQuery);
         return dataContext.objectsFromDataRows(rootEntity, getResults(rootQuery), info

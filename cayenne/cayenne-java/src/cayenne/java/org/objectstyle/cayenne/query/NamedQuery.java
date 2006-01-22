@@ -106,15 +106,15 @@ public class NamedQuery extends IndirectQuery {
         this.parameters = Util.toMap(keys, values);
     }
 
-    public SelectInfo getSelectInfo(EntityResolver resolver) {
-        SelectInfo info = super.getSelectInfo(resolver);
+    public QueryMetadata getMetaData(EntityResolver resolver) {
+        QueryMetadata info = super.getMetaData(resolver);
 
         if (refreshOverride == null) {
             return info;
         }
 
-        SelectInfoWrapper wrapper = new SelectInfoWrapper(info);
-        wrapper.override(SelectInfo.REFRESHING_OBJECTS_PROPERTY, refreshOverride);
+        QueryMetadataWrapper wrapper = new QueryMetadataWrapper(info);
+        wrapper.override(QueryMetadata.REFRESHING_OBJECTS_PROPERTY, refreshOverride);
         return wrapper;
     }
 

@@ -62,7 +62,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -71,19 +71,19 @@ import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
- * Default mutable implementation of {@link SelectInfo}.
+ * Default mutable implementation of {@link QueryMetadata}.
  * 
  * @author Andrus Adamchik
  * @since 1.1
  */
-final class BaseSelectInfo implements SelectInfo, XMLSerializable, Serializable {
+final class BaseQueryMetadata implements QueryMetadata, XMLSerializable, Serializable {
 
-    int fetchLimit = SelectInfo.FETCH_LIMIT_DEFAULT;
-    int pageSize = SelectInfo.PAGE_SIZE_DEFAULT;
-    boolean fetchingDataRows = SelectInfo.FETCHING_DATA_ROWS_DEFAULT;
-    boolean refreshingObjects = SelectInfo.REFRESHING_OBJECTS_DEFAULT;
-    boolean resolvingInherited = SelectInfo.RESOLVING_INHERITED_DEFAULT;
-    String cachePolicy = SelectInfo.CACHE_POLICY_DEFAULT;
+    int fetchLimit = QueryMetadata.FETCH_LIMIT_DEFAULT;
+    int pageSize = QueryMetadata.PAGE_SIZE_DEFAULT;
+    boolean fetchingDataRows = QueryMetadata.FETCHING_DATA_ROWS_DEFAULT;
+    boolean refreshingObjects = QueryMetadata.REFRESHING_OBJECTS_DEFAULT;
+    boolean resolvingInherited = QueryMetadata.RESOLVING_INHERITED_DEFAULT;
+    String cachePolicy = QueryMetadata.CACHE_POLICY_DEFAULT;
     PrefetchTreeNode prefetchTree;
 
     transient ObjEntity objEntity;
@@ -94,7 +94,7 @@ final class BaseSelectInfo implements SelectInfo, XMLSerializable, Serializable 
     /**
      * Copies values of this object to another SelectInfo object.
      */
-    void copyFromInfo(SelectInfo info) {
+    void copyFromInfo(QueryMetadata info) {
         this.lastEntityResolver = null;
         this.lastRoot = null;
         this.objEntity = null;
@@ -133,8 +133,8 @@ final class BaseSelectInfo implements SelectInfo, XMLSerializable, Serializable 
                     this.objEntity = null;
                     this.dbEntity = (DbEntity) root;
                 }
-                else if (root instanceof DataObject) {
-                    this.objEntity = resolver.lookupObjEntity((DataObject) root);
+                else if (root instanceof Persistent) {
+                    this.objEntity = resolver.lookupObjEntity((Persistent) root);
                     this.dbEntity = objEntity != null ? objEntity.getDbEntity() : null;
                 }
             }
@@ -150,71 +150,71 @@ final class BaseSelectInfo implements SelectInfo, XMLSerializable, Serializable 
             properties = Collections.EMPTY_MAP;
         }
 
-        Object fetchLimit = properties.get(SelectInfo.FETCH_LIMIT_PROPERTY);
-        Object pageSize = properties.get(SelectInfo.PAGE_SIZE_PROPERTY);
-        Object refreshingObjects = properties.get(SelectInfo.REFRESHING_OBJECTS_PROPERTY);
-        Object fetchingDataRows = properties.get(SelectInfo.FETCHING_DATA_ROWS_PROPERTY);
+        Object fetchLimit = properties.get(QueryMetadata.FETCH_LIMIT_PROPERTY);
+        Object pageSize = properties.get(QueryMetadata.PAGE_SIZE_PROPERTY);
+        Object refreshingObjects = properties.get(QueryMetadata.REFRESHING_OBJECTS_PROPERTY);
+        Object fetchingDataRows = properties.get(QueryMetadata.FETCHING_DATA_ROWS_PROPERTY);
 
         Object resolvingInherited = properties
-                .get(SelectInfo.RESOLVING_INHERITED_PROPERTY);
+                .get(QueryMetadata.RESOLVING_INHERITED_PROPERTY);
 
-        Object cachePolicy = properties.get(SelectInfo.CACHE_POLICY_PROPERTY);
+        Object cachePolicy = properties.get(QueryMetadata.CACHE_POLICY_PROPERTY);
 
         // init ivars from properties
         this.fetchLimit = (fetchLimit != null)
                 ? Integer.parseInt(fetchLimit.toString())
-                : SelectInfo.FETCH_LIMIT_DEFAULT;
+                : QueryMetadata.FETCH_LIMIT_DEFAULT;
 
         this.pageSize = (pageSize != null)
                 ? Integer.parseInt(pageSize.toString())
-                : SelectInfo.PAGE_SIZE_DEFAULT;
+                : QueryMetadata.PAGE_SIZE_DEFAULT;
 
         this.refreshingObjects = (refreshingObjects != null)
                 ? "true".equalsIgnoreCase(refreshingObjects.toString())
-                : SelectInfo.REFRESHING_OBJECTS_DEFAULT;
+                : QueryMetadata.REFRESHING_OBJECTS_DEFAULT;
 
         this.fetchingDataRows = (fetchingDataRows != null)
                 ? "true".equalsIgnoreCase(fetchingDataRows.toString())
-                : SelectInfo.FETCHING_DATA_ROWS_DEFAULT;
+                : QueryMetadata.FETCHING_DATA_ROWS_DEFAULT;
 
         this.resolvingInherited = (resolvingInherited != null)
                 ? "true".equalsIgnoreCase(resolvingInherited.toString())
-                : SelectInfo.RESOLVING_INHERITED_DEFAULT;
+                : QueryMetadata.RESOLVING_INHERITED_DEFAULT;
 
         this.cachePolicy = (cachePolicy != null)
                 ? cachePolicy.toString()
-                : SelectInfo.CACHE_POLICY_DEFAULT;
+                : QueryMetadata.CACHE_POLICY_DEFAULT;
     }
 
     public void encodeAsXML(XMLEncoder encoder) {
-        if (refreshingObjects != SelectInfo.REFRESHING_OBJECTS_DEFAULT) {
+        if (refreshingObjects != QueryMetadata.REFRESHING_OBJECTS_DEFAULT) {
             encoder.printProperty(
-                    SelectInfo.REFRESHING_OBJECTS_PROPERTY,
+                    QueryMetadata.REFRESHING_OBJECTS_PROPERTY,
                     refreshingObjects);
         }
 
-        if (fetchingDataRows != SelectInfo.FETCHING_DATA_ROWS_DEFAULT) {
+        if (fetchingDataRows != QueryMetadata.FETCHING_DATA_ROWS_DEFAULT) {
             encoder.printProperty(
-                    SelectInfo.FETCHING_DATA_ROWS_PROPERTY,
+                    QueryMetadata.FETCHING_DATA_ROWS_PROPERTY,
                     fetchingDataRows);
         }
 
-        if (resolvingInherited != SelectInfo.RESOLVING_INHERITED_DEFAULT) {
+        if (resolvingInherited != QueryMetadata.RESOLVING_INHERITED_DEFAULT) {
             encoder.printProperty(
-                    SelectInfo.RESOLVING_INHERITED_PROPERTY,
+                    QueryMetadata.RESOLVING_INHERITED_PROPERTY,
                     resolvingInherited);
         }
 
-        if (fetchLimit != SelectInfo.FETCH_LIMIT_DEFAULT) {
-            encoder.printProperty(SelectInfo.FETCH_LIMIT_PROPERTY, fetchLimit);
+        if (fetchLimit != QueryMetadata.FETCH_LIMIT_DEFAULT) {
+            encoder.printProperty(QueryMetadata.FETCH_LIMIT_PROPERTY, fetchLimit);
         }
 
-        if (pageSize != SelectInfo.PAGE_SIZE_DEFAULT) {
-            encoder.printProperty(SelectInfo.PAGE_SIZE_PROPERTY, pageSize);
+        if (pageSize != QueryMetadata.PAGE_SIZE_DEFAULT) {
+            encoder.printProperty(QueryMetadata.PAGE_SIZE_PROPERTY, pageSize);
         }
 
-        if (cachePolicy != null && !SelectInfo.CACHE_POLICY_DEFAULT.equals(cachePolicy)) {
-            encoder.printProperty(SelectInfo.CACHE_POLICY_PROPERTY, cachePolicy);
+        if (cachePolicy != null && !QueryMetadata.CACHE_POLICY_DEFAULT.equals(cachePolicy)) {
+            encoder.printProperty(QueryMetadata.CACHE_POLICY_PROPERTY, cachePolicy);
         }
 
         if (prefetchTree != null) {

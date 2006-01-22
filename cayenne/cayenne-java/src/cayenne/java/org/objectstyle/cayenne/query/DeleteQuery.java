@@ -101,8 +101,7 @@ public class DeleteQuery extends QualifiedQuery {
     public DeleteQuery(String objEntityName, Expression qualifier) {
         this.init(objEntityName, qualifier);
     }
-    
-    
+
     /**
      * Calls "makeUpdate" on the visitor.
      * 

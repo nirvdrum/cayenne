@@ -101,7 +101,7 @@ import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectInfo;
+import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
 import org.objectstyle.cayenne.util.Util;
@@ -1298,7 +1298,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * </p>
      * 
      * @return A list of DataObjects or a DataRows, depending on the value returned by
-     *         {@link SelectInfo#isFetchingDataRows()}.
+     *         {@link QueryMetadata#isFetchingDataRows()}.
      */
     public List performQuery(Query query) {
         query = nonNullDelegate().willPerformQuery(this, query);

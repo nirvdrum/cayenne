@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectInfo;
+import org.objectstyle.cayenne.query.QueryMetadata;
 
 /**
  * DataRows-to-objects converter for a specific ObjEntity.
@@ -88,7 +88,7 @@ class ObjectResolver {
     ObjectResolver(DataContext context, Query query) {
 
         EntityResolver resolver = context.getEntityResolver();
-        SelectInfo info = query.getSelectInfo(resolver);
+        QueryMetadata info = query.getMetaData(resolver);
         init(context, resolver.lookupObjEntity(query), info.isRefreshingObjects(), info
                 .isResolvingInherited());
     }

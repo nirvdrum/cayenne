@@ -95,7 +95,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     protected Expression parentQualifier;
     protected String parentObjEntityName;
 
-    BaseSelectInfo selectInfo = new BaseSelectInfo();
+    BaseQueryMetadata selectInfo = new BaseQueryMetadata();
 
     /** Creates an empty SelectQuery. */
     public SelectQuery() {
@@ -185,13 +185,13 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     /**
      * @since 1.2
      */
-    public SelectInfo getSelectInfo(EntityResolver resolver) {
+    public QueryMetadata getMetaData(EntityResolver resolver) {
         selectInfo.resolve(root, resolver);
 
         // must force DataRows if custom attributes are fetched
         if (isFetchingCustomAttributes()) {
-            SelectInfoWrapper wrapper = new SelectInfoWrapper(selectInfo);
-            wrapper.override(SelectInfo.FETCHING_DATA_ROWS_PROPERTY, Boolean.TRUE);
+            QueryMetadataWrapper wrapper = new QueryMetadataWrapper(selectInfo);
+            wrapper.override(QueryMetadata.FETCHING_DATA_ROWS_PROPERTY, Boolean.TRUE);
             return wrapper;
         }
         else {

@@ -67,7 +67,7 @@ class OpenBaseSelectTranslator extends SelectTranslator {
         String sql = super.createSqlString();
 
         // limit results
-        int limit = getQuery().getSelectInfo(getEntityResolver()).getFetchLimit();
+        int limit = getQuery().getMetaData(getEntityResolver()).getFetchLimit();
         if (limit > 0) {
             return sql + " RETURN RESULTS " + limit;
         }

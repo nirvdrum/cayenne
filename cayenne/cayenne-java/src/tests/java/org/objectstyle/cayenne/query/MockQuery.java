@@ -76,7 +76,7 @@ public class MockQuery implements Query {
         this.name = name;
     }
 
-    public SelectInfo getSelectInfo(EntityResolver resolver) {
+    public QueryMetadata getMetaData(EntityResolver resolver) {
         return null;
     }
 

@@ -77,7 +77,7 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.TextAdapter;
 import org.objectstyle.cayenne.property.PropertyUtils;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectInfo;
+import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.validation.ValidationException;
 
 /**
@@ -96,15 +96,15 @@ public abstract class SelectPropertiesPanel extends JPanel {
     private static final String SHARED_CACHE_LABEL = "Shared Cache";
 
     private static final Object[] CACHE_POLICIES = new Object[] {
-            SelectInfo.NO_CACHE, SelectInfo.LOCAL_CACHE, SelectInfo.SHARED_CACHE
+            QueryMetadata.NO_CACHE, QueryMetadata.LOCAL_CACHE, QueryMetadata.SHARED_CACHE
     };
 
     private static final Map cachePolicyLabels = new TreeMap();
 
     static {
-        cachePolicyLabels.put(SelectInfo.NO_CACHE, NO_CACHE_LABEL);
-        cachePolicyLabels.put(SelectInfo.LOCAL_CACHE, LOCAL_CACHE_LABEL);
-        cachePolicyLabels.put(SelectInfo.SHARED_CACHE, SHARED_CACHE_LABEL);
+        cachePolicyLabels.put(QueryMetadata.NO_CACHE, NO_CACHE_LABEL);
+        cachePolicyLabels.put(QueryMetadata.LOCAL_CACHE, LOCAL_CACHE_LABEL);
+        cachePolicyLabels.put(QueryMetadata.SHARED_CACHE, SHARED_CACHE_LABEL);
     }
 
     protected TextAdapter fetchLimit;
@@ -164,12 +164,12 @@ public abstract class SelectPropertiesPanel extends JPanel {
      */
     public void initFromModel(Query query) {
         DefaultComboBoxModel cacheModel = new DefaultComboBoxModel(CACHE_POLICIES);
-        cacheModel.setSelectedItem(query.getSelectInfo(null).getCachePolicy());
+        cacheModel.setSelectedItem(query.getMetaData(null).getCachePolicy());
         cachePolicy.setModel(cacheModel);
 
-        fetchLimit.setText(String.valueOf(query.getSelectInfo(null).getFetchLimit()));
-        pageSize.setText(String.valueOf(query.getSelectInfo(null).getPageSize()));
-        refreshesResults.setSelected(query.getSelectInfo(null).isRefreshingObjects());
+        fetchLimit.setText(String.valueOf(query.getMetaData(null).getFetchLimit()));
+        pageSize.setText(String.valueOf(query.getMetaData(null).getPageSize()));
+        refreshesResults.setSelected(query.getMetaData(null).isRefreshingObjects());
     }
 
     void setFetchLimit(String string) {

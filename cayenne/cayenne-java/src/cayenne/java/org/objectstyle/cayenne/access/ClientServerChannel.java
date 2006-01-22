@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.query.AbstractQuery;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectInfo;
+import org.objectstyle.cayenne.query.QueryMetadata;
 
 /**
  * An OPPChannel adapter that connects client ObjectContext children to a server
@@ -220,7 +220,7 @@ public class ClientServerChannel implements OPPChannel {
 
         // detect prefetches... note that we are getting selectInfo from the server query.
         // Getting it from the client may blow for named queries...
-        SelectInfo info = serverQuery.getSelectInfo(serverContext.getEntityResolver());
+        QueryMetadata info = serverQuery.getMetaData(serverContext.getEntityResolver());
 
         try {
             return new ServerToClientObjectConverter(objects, serverContext

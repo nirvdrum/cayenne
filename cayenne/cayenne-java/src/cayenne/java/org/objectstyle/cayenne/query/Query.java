@@ -68,11 +68,11 @@ import org.objectstyle.cayenne.map.EntityResolver;
 public interface Query extends Serializable {
 
     /**
-     * Returns select operation parameters.
+     * Returns query runtime parameters.
      * 
      * @since 1.2
      */
-    SelectInfo getSelectInfo(EntityResolver resolver);
+    QueryMetadata getMetaData(EntityResolver resolver);
 
     /**
      * A callback method invoked by Cayenne during the routing phase of the query

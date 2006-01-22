@@ -55,52 +55,103 @@
  */
 package org.objectstyle.cayenne.query;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
- * A SelectParameters implementation that returns all the defaults.
+ * A wrapper for a QueryMetadata instance allowing that may override a subset of metadata
+ * properties.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-final class DefaultSelectInfo implements SelectInfo {
+class QueryMetadataWrapper implements QueryMetadata {
 
-    static final SelectInfo defaultParameters = new DefaultSelectInfo();
+    QueryMetadata info;
+    Map overrides;
+
+    public QueryMetadataWrapper(QueryMetadata info) {
+        this.info = info;
+    }
+
+    /**
+     * Overrides a property with an alternative value. Property names are defined in the
+     * {@link QueryMetadata} interface.
+     */
+    void override(String key, Object value) {
+        if (overrides == null) {
+            overrides = new HashMap();
+        }
+
+        overrides.put(key, value);
+    }
+
+    boolean overrideExists(String key) {
+        return overrides != null && overrides.containsKey(key);
+    }
 
     public DbEntity getDbEntity() {
-        return null;
+        return info.getDbEntity();
     }
 
     public ObjEntity getObjEntity() {
-        return null;
+        return info.getObjEntity();
     }
 
     public String getCachePolicy() {
-        return SelectInfo.CACHE_POLICY_DEFAULT;
+        return (overrideExists(QueryMetadata.CACHE_POLICY_PROPERTY)) ? (String) overrides
+                .get(QueryMetadata.CACHE_POLICY_PROPERTY) : info.getCachePolicy();
     }
 
     public boolean isFetchingDataRows() {
-        return SelectInfo.FETCHING_DATA_ROWS_DEFAULT;
+        if (!overrideExists(QueryMetadata.FETCHING_DATA_ROWS_PROPERTY)) {
+            return info.isFetchingDataRows();
+        }
+
+        Boolean b = (Boolean) overrides.get(QueryMetadata.FETCHING_DATA_ROWS_PROPERTY);
+        return b != null && b.booleanValue();
     }
 
     public boolean isRefreshingObjects() {
-        return SelectInfo.REFRESHING_OBJECTS_DEFAULT;
+        if (!overrideExists(QueryMetadata.REFRESHING_OBJECTS_PROPERTY)) {
+            return info.isRefreshingObjects();
+        }
+
+        Boolean b = (Boolean) overrides.get(QueryMetadata.REFRESHING_OBJECTS_PROPERTY);
+        return b != null && b.booleanValue();
     }
 
     public boolean isResolvingInherited() {
-        return SelectInfo.RESOLVING_INHERITED_DEFAULT;
+        if (!overrideExists(QueryMetadata.RESOLVING_INHERITED_PROPERTY)) {
+            return info.isResolvingInherited();
+        }
+
+        Boolean b = (Boolean) overrides.get(QueryMetadata.RESOLVING_INHERITED_PROPERTY);
+        return b != null && b.booleanValue();
     }
 
     public int getPageSize() {
-        return SelectInfo.PAGE_SIZE_DEFAULT;
+        if (!overrideExists(QueryMetadata.PAGE_SIZE_PROPERTY)) {
+            return info.getPageSize();
+        }
+
+        Number n = (Number) overrides.get(QueryMetadata.PAGE_SIZE_PROPERTY);
+        return n != null ? n.intValue() : 0;
     }
 
     public int getFetchLimit() {
-        return SelectInfo.FETCH_LIMIT_DEFAULT;
+        if (!overrideExists(QueryMetadata.FETCH_LIMIT_PROPERTY)) {
+            return info.getFetchLimit();
+        }
+
+        Number n = (Number) overrides.get(QueryMetadata.FETCH_LIMIT_PROPERTY);
+        return n != null ? n.intValue() : 0;
     }
 
     public PrefetchTreeNode getPrefetchTree() {
-        return null;
+        return info.getPrefetchTree();
     }
 }

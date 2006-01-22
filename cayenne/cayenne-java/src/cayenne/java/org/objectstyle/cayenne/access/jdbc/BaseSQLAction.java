@@ -106,7 +106,7 @@ public abstract class BaseSQLAction implements SQLAction {
                 null,
                 resultSet,
                 descriptor,
-                query.getSelectInfo(getEntityResolver()).getFetchLimit());
+                query.getMetaData(getEntityResolver()).getFetchLimit());
 
         if (!delegate.isIteratedResult()) {
             List resultRows = resultReader.dataRows(false);

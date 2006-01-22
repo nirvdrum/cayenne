@@ -59,13 +59,12 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
- * Provides metadata of a select operation executed via
- * {@link org.objectstyle.cayenne.opp.OPPChannel#performQuery(Query)}.
+ * Provides a common interface for accessing query metadata.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface SelectInfo {
+public interface QueryMetadata {
 
     /**
      * A cache policy that disables caching of query results.

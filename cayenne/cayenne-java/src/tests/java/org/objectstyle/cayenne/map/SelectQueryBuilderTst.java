@@ -59,7 +59,7 @@ import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectInfo;
+import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
@@ -101,7 +101,7 @@ public class SelectQueryBuilderTst extends TestCase {
 
     public void testGetQueryProperties() throws Exception {
         SelectQueryBuilder builder = new MockupRootQueryBuilder();
-        builder.addProperty(SelectInfo.FETCH_LIMIT_PROPERTY, "5");
+        builder.addProperty(QueryMetadata.FETCH_LIMIT_PROPERTY, "5");
 
         Query query = builder.getQuery();
         assertTrue(query instanceof SelectQuery);

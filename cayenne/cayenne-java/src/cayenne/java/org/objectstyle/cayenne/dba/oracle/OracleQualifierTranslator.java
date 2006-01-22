@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.dba.oracle;
 
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
-import org.objectstyle.cayenne.query.SelectInfo;
+import org.objectstyle.cayenne.query.QueryMetadata;
 
 /**
  * @since 1.2
@@ -72,7 +72,7 @@ class OracleQualifierTranslator extends TrimmingQualifierTranslator {
     public String doTranslation() {
         String qualifier = super.doTranslation();
 
-        SelectInfo info = getQueryAssembler().getQuery().getSelectInfo(
+        QueryMetadata info = getQueryAssembler().getQuery().getMetaData(
                 getQueryAssembler().getEntityResolver());
 
         if (info.getFetchLimit() > 0) {

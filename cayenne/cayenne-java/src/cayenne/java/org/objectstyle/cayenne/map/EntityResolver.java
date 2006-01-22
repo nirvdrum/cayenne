@@ -69,7 +69,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -455,24 +454,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
      * @return the root DbEntity of the query
      */
     public synchronized DbEntity lookupDbEntity(Query q) {
-        Object root = q.getRoot(this);
-        if (root instanceof DbEntity) {
-            return (DbEntity) root;
-        }
-        else if (root instanceof Class) {
-            return this.lookupDbEntity((Class) root);
-        }
-        else if (root instanceof ObjEntity) {
-            return ((ObjEntity) root).getDbEntity();
-        }
-        else if (root instanceof String) {
-            ObjEntity objEntity = this.lookupObjEntity((String) root);
-            return (objEntity != null) ? objEntity.getDbEntity() : null;
-        }
-        else if (root instanceof Persistent) {
-            return this.lookupDbEntity((Persistent) root);
-        }
-        return null;
+        return q.getMetaData(this).getDbEntity();
     }
 
     /**
@@ -519,7 +501,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
      * 
      * @return the required ObjEntity, or null if none matches the specifier
      */
-    public synchronized ObjEntity lookupObjEntity(DataObject dataObject) {
+    public synchronized ObjEntity lookupObjEntity(Persistent dataObject) {
         ObjectId id = dataObject.getObjectId();
         Object key = id != null ? (Object) id.getEntityName() : dataObject.getClass();
         return this._lookupObjEntity(key);
@@ -536,35 +518,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
      *             such behaviour).
      */
     public synchronized ObjEntity lookupObjEntity(Query q) {
-
-        // a special case of ProcedureQuery ...
-        // TODO: should really come up with some generic way of doing this...
-        // e.g. all queries may separate the notion of root from the notion
-        // of result type
-
-        Object root = (q instanceof ProcedureQuery) ? ((ProcedureQuery) q)
-                .getResultClass() : q.getRoot(this);
-
-        if (root instanceof DbEntity) {
-            throw new CayenneRuntimeException(
-                    "Cannot safely resolve the ObjEntity for the query "
-                            + q
-                            + " because the root of the query is a DbEntity");
-        }
-        else if (root instanceof ObjEntity) {
-            return (ObjEntity) root;
-        }
-        else if (root instanceof Class) {
-            return this.lookupObjEntity((Class) root);
-        }
-        else if (root instanceof String) {
-            return this.lookupObjEntity((String) root);
-        }
-        else if (root instanceof DataObject) {
-            return this.lookupObjEntity((DataObject) root);
-        }
-
-        return null;
+        return q.getMetaData(this).getObjEntity();
     }
 
     /**

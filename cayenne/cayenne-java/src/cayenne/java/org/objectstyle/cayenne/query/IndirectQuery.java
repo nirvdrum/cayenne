@@ -73,10 +73,10 @@ public abstract class IndirectQuery implements Query {
     protected transient EntityResolver lastResolver;
 
     /**
-     * Gets SelectInfo from the replacement query.
+     * Returns the metadata obtained from the replacement query.
      */
-    public SelectInfo getSelectInfo(EntityResolver resolver) {
-        return getReplacementQuery(resolver).getSelectInfo(resolver);
+    public QueryMetadata getMetaData(EntityResolver resolver) {
+        return getReplacementQuery(resolver).getMetaData(resolver);
     }
 
     public String getName() {

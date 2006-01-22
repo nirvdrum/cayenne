@@ -61,7 +61,7 @@ import java.util.List;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
-import org.objectstyle.cayenne.query.SelectInfo;
+import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -90,7 +90,7 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         select.setName("c");
         select.setRefreshingObjects(false);
         select.setFetchingDataRows(true);
-        select.setCachePolicy(SelectInfo.LOCAL_CACHE);
+        select.setCachePolicy(QueryMetadata.LOCAL_CACHE);
 
         List rows = mockupDataRows(2);
         engine.reset();
@@ -115,7 +115,7 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         select.setName("c");
         select.setRefreshingObjects(true);
         select.setFetchingDataRows(true);
-        select.setCachePolicy(SelectInfo.LOCAL_CACHE);
+        select.setCachePolicy(QueryMetadata.LOCAL_CACHE);
 
         // first run, no cache yet
         List rows1 = mockupDataRows(2);
@@ -143,7 +143,7 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         select.setName("c");
         select.setRefreshingObjects(false);
         select.setFetchingDataRows(true);
-        select.setCachePolicy(SelectInfo.SHARED_CACHE);
+        select.setCachePolicy(QueryMetadata.SHARED_CACHE);
 
         List rows = mockupDataRows(2);
         engine.reset();
@@ -175,7 +175,7 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         select.setName("c");
         select.setRefreshingObjects(true);
         select.setFetchingDataRows(true);
-        select.setCachePolicy(SelectInfo.SHARED_CACHE);
+        select.setCachePolicy(QueryMetadata.SHARED_CACHE);
 
         // first run, no cache yet
         List rows1 = mockupDataRows(2);
@@ -203,7 +203,7 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         select.setName("c");
         select.setRefreshingObjects(true);
         select.setFetchingDataRows(false);
-        select.setCachePolicy(SelectInfo.LOCAL_CACHE);
+        select.setCachePolicy(QueryMetadata.LOCAL_CACHE);
 
         // first run, no cache yet
         List rows1 = mockupDataRows(2);
@@ -233,7 +233,7 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         select.setName("c");
         select.setRefreshingObjects(false);
         select.setFetchingDataRows(false);
-        select.setCachePolicy(SelectInfo.LOCAL_CACHE);
+        select.setCachePolicy(QueryMetadata.LOCAL_CACHE);
 
         List rows = mockupDataRows(2);
         engine.reset();
@@ -259,7 +259,7 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         select.setName("c");
         select.setRefreshingObjects(false);
         select.setFetchingDataRows(false);
-        select.setCachePolicy(SelectInfo.SHARED_CACHE);
+        select.setCachePolicy(QueryMetadata.SHARED_CACHE);
 
         List rows = mockupDataRows(2);
         engine.reset();

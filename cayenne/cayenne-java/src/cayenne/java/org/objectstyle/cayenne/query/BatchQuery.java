@@ -100,14 +100,19 @@ public abstract class BatchQuery implements Query {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     /**
      * Returns default select parameters.
      * 
      * @since 1.2
      */
-    public SelectInfo getSelectInfo(EntityResolver resolver) {
-        return DefaultSelectInfo.defaultParameters;
+    public QueryMetadata getMetaData(EntityResolver resolver) {
+        return new DefaultQueryMetadata() {
+
+            public DbEntity getDbEntity() {
+                return dbEntity;
+            }
+        };
     }
 
     /**

@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectInfo;
+import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
@@ -147,7 +147,7 @@ public class IncrementalFaultList implements List {
      *            a value greater than zero.
      */
     public IncrementalFaultList(DataContext dataContext, Query query) {
-        SelectInfo info = query.getSelectInfo(dataContext.getEntityResolver());
+        QueryMetadata info = query.getMetaData(dataContext.getEntityResolver());
         if (info.getPageSize() <= 0) {
             throw new CayenneRuntimeException(
                     "IncrementalFaultList does not support unpaged queries. Query page size is "
@@ -204,7 +204,7 @@ public class IncrementalFaultList implements List {
      * @since 1.0.6
      */
     protected void fillIn(Query query) {
-        SelectInfo info = query.getSelectInfo(dataContext.getEntityResolver());
+        QueryMetadata info = query.getMetaData(dataContext.getEntityResolver());
         
         synchronized (elements) {
 

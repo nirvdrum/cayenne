@@ -155,8 +155,8 @@ public class QueryChain implements Query {
     /**
      * Returns default select parameters.
      */
-    public SelectInfo getSelectInfo(EntityResolver resolver) {
-        return DefaultSelectInfo.defaultParameters;
+    public QueryMetadata getMetaData(EntityResolver resolver) {
+        return DefaultQueryMetadata.defaultInfo;
     }
 
     public Object getRoot(EntityResolver resolver) {

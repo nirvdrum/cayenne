@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectInfo;
+import org.objectstyle.cayenne.query.QueryMetadata;
 
 /**
  * A DataContext helper that handles select query execution.
@@ -87,20 +87,20 @@ class DataContextSelectAction {
 
     List performQuery(Query query) {
 
-        return performQuery(query, query.getName(), query.getSelectInfo(
+        return performQuery(query, query.getName(), query.getMetaData(
                 context.getEntityResolver()).isRefreshingObjects());
     }
 
     List performQuery(Query query, String cacheKey, boolean refreshCache) {
 
-        SelectInfo info = query.getSelectInfo(context.getEntityResolver());
+        QueryMetadata info = query.getMetaData(context.getEntityResolver());
 
         if (info.getPageSize() > 0) {
             return new IncrementalFaultList(context, query);
         }
 
-        boolean localCache = SelectInfo.LOCAL_CACHE.equals(info.getCachePolicy());
-        boolean sharedCache = SelectInfo.SHARED_CACHE.equals(info.getCachePolicy());
+        boolean localCache = QueryMetadata.LOCAL_CACHE.equals(info.getCachePolicy());
+        boolean sharedCache = QueryMetadata.SHARED_CACHE.equals(info.getCachePolicy());
         boolean useCache = localCache || sharedCache;
 
         String name = query.getName();
@@ -191,7 +191,7 @@ class DataContextSelectAction {
         }
 
         ObjEntity entity = context.getEntityResolver().lookupObjEntity(rootQuery);
-        PrefetchTreeNode prefetchTree = rootQuery.getSelectInfo(
+        PrefetchTreeNode prefetchTree = rootQuery.getMetaData(
                 context.getEntityResolver()).getPrefetchTree();
 
         // take a shortcut when no prefetches exist...
