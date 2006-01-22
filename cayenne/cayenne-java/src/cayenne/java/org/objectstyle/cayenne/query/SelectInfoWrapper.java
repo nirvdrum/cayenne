@@ -53,50 +53,88 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.query;
 
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.DataRow;
-import org.objectstyle.cayenne.query.Query;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Default implementation of DataContextDelegate that serves as a superclass for mockup
- * test delegates.
+ * A wrapper for another SelectInfo allowing to override some but not all properties.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
-public class MockDataContextDelegate implements DataContextDelegate {
+class SelectInfoWrapper implements SelectInfo {
 
-    /**
-     * @deprecated since 1.2
-     */
-    public org.objectstyle.cayenne.query.GenericSelectQuery willPerformSelect(
-            DataContext context,
-            org.objectstyle.cayenne.query.GenericSelectQuery query) {
-        return query;
+    SelectInfo info;
+    Map overrides;
+
+    public SelectInfoWrapper(SelectInfo info) {
+        this.info = info;
     }
 
-    public Query willPerformGenericQuery(DataContext context, Query query) {
-        return query;
+    void override(String key, Object value) {
+        if (overrides == null) {
+            overrides = new HashMap();
+        }
+
+        overrides.put(key, value);
     }
 
-    public Query willPerformQuery(DataContext context, Query query) {
-        return query;
+    boolean overrideExists(String key) {
+        return overrides != null && overrides.containsKey(key);
     }
 
-    public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore) {
-        return true;
+    public String getCachePolicy() {
+        return (overrideExists(SelectInfo.CACHE_POLICY_PROPERTY)) ? (String) overrides
+                .get(SelectInfo.CACHE_POLICY_PROPERTY) : info.getCachePolicy();
     }
 
-    public boolean shouldProcessDelete(DataObject object) {
-        return true;
+    public boolean isFetchingDataRows() {
+        if (!overrideExists(SelectInfo.FETCHING_DATA_ROWS_PROPERTY)) {
+            return info.isFetchingDataRows();
+        }
+
+        Boolean b = (Boolean) overrides.get(SelectInfo.FETCHING_DATA_ROWS_PROPERTY);
+        return b != null && b.booleanValue();
     }
 
-    public void finishedMergeChanges(DataObject object) {
+    public boolean isRefreshingObjects() {
+        if (!overrideExists(SelectInfo.REFRESHING_OBJECTS_PROPERTY)) {
+            return info.isRefreshingObjects();
+        }
 
+        Boolean b = (Boolean) overrides.get(SelectInfo.REFRESHING_OBJECTS_PROPERTY);
+        return b != null && b.booleanValue();
     }
 
-    public void finishedProcessDelete(DataObject object) {
+    public boolean isResolvingInherited() {
+        if (!overrideExists(SelectInfo.RESOLVING_INHERITED_PROPERTY)) {
+            return info.isResolvingInherited();
+        }
 
+        Boolean b = (Boolean) overrides.get(SelectInfo.RESOLVING_INHERITED_PROPERTY);
+        return b != null && b.booleanValue();
+    }
+
+    public int getPageSize() {
+        if (!overrideExists(SelectInfo.PAGE_SIZE_PROPERTY)) {
+            return info.getPageSize();
+        }
+
+        Number n = (Number) overrides.get(SelectInfo.PAGE_SIZE_PROPERTY);
+        return n != null ? n.intValue() : 0;
+    }
+
+    public int getFetchLimit() {
+        if (!overrideExists(SelectInfo.FETCH_LIMIT_PROPERTY)) {
+            return info.getFetchLimit();
+        }
+
+        Number n = (Number) overrides.get(SelectInfo.FETCH_LIMIT_PROPERTY);
+        return n != null ? n.intValue() : 0;
+    }
+
+    public PrefetchTreeNode getPrefetchTree() {
+        return info.getPrefetchTree();
     }
 }

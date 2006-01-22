@@ -83,7 +83,6 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.EntitySorter;
 import org.objectstyle.cayenne.query.BatchQuery;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -447,7 +446,7 @@ public class DataNode implements QueryEngine {
     protected void readResultSet(
             ResultSet resultSet,
             org.objectstyle.cayenne.access.util.ResultDescriptor descriptor,
-            GenericSelectQuery query,
+            org.objectstyle.cayenne.query.GenericSelectQuery query,
             OperationObserver delegate) throws SQLException, Exception {
 
         // method is deprecated, so keep this ugly piece here as a placeholder

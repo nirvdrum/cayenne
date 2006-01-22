@@ -61,7 +61,7 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
@@ -92,8 +92,16 @@ public class IncrementalFaultListPrefetchTst extends DataContextTestBase {
         // currently queries with prefetch do not resolve their first page
         assertEquals(result.size(), result.getUnfetchedObjects());
 
+        final int[] count = new int[1];
+
         // use delegate to track further queries
-        CountingDelegate delegate = new CountingDelegate();
+        DataContextDelegate delegate = new MockDataContextDelegate() {
+
+            public Query willPerformQuery(DataContext context, Query query) {
+                count[0]++;
+                return query;
+            }
+        };
         context.setDelegate(delegate);
 
         // go through the second page objects
@@ -101,7 +109,7 @@ public class IncrementalFaultListPrefetchTst extends DataContextTestBase {
             result.get(i);
 
             // within the same page only one query should've been executed
-            assertEquals(1, delegate.count);
+            assertEquals(1, count[0]);
         }
     }
 
@@ -164,15 +172,4 @@ public class IncrementalFaultListPrefetchTst extends DataContextTestBase {
         }
     }
 
-    class CountingDelegate extends MockDataContextDelegate {
-
-        int count;
-
-        public GenericSelectQuery willPerformSelect(
-                DataContext context,
-                GenericSelectQuery query) {
-            count++;
-            return query;
-        }
-    }
 }

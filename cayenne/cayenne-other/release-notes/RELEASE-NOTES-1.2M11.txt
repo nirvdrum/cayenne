@@ -18,6 +18,10 @@ Changes/New Features:
 * Completely changed the signatures of OPPChannel interface, as using messaging-based
   API patterns made no sens in the local application context. Note that this does NOT 
   affect 99.99% of the users.
+
+* DataContextDelegate changes: "willPerformSelect" method is deprecated, instead two methods
+  added: "willPerformQuery" (for selecting queries) and "willPerformGenericQuery" 
+  (for all other queries).
   
 
 Bugs Fixed:

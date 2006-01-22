@@ -89,8 +89,7 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
  * A stateful commit handler used by DataContext to perform commit operation.
  * DataContextCommitAction resolves primary key dependencies, referential integrity
  * dependencies (including multi-reflexive entities), generates primary keys, creates
- * batches for massive data modifications, assigns operations to data nodes. It indirectly
- * relies on graph algorithms provided by ASHWOOD library.
+ * batches for massive data modifications, assigns operations to data nodes.
  * 
  * @author Andriy Shapochka,
  * @author Andrus Adamchik

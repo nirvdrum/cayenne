@@ -656,7 +656,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
         if (entityResolver == null) {
             // entity resolver will be self-indexing as we add all our maps
             // to it as they are added to the DataDomain
-            entityResolver = new org.objectstyle.cayenne.map.EntityResolver();
+            entityResolver = new EntityResolver();
         }
     }
 

@@ -53,71 +53,52 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.query.Query;
 
 /**
+ * A noop DataContextDelegate.
+ * 
+ * @since 1.2
  * @author Andrus Adamchik
  */
-public class MockGenericSelectQuery extends MockQuery implements GenericSelectQuery {
+final class NoopDelegate implements DataContextDelegate {
 
-    protected boolean fetchingDataRows;
-    protected boolean resolvingInherited;
+    static DataContextDelegate noopDelegate = new NoopDelegate();
 
-    public MockGenericSelectQuery() {
-        super(true);
+    /**
+     * @deprecated since 1.2, as the corresponding interface method is deprecated.
+     */
+    public org.objectstyle.cayenne.query.GenericSelectQuery willPerformSelect(
+            DataContext context,
+            org.objectstyle.cayenne.query.GenericSelectQuery query) {
+        return query;
     }
 
-    public MockGenericSelectQuery(Object root) {
-        super(true);
-        setRoot(root);
+    public Query willPerformGenericQuery(DataContext context, Query query) {
+        return query;
     }
 
-    public MockGenericSelectQuery(Object root, String name) {
-        super(true);
-        setName(name);
-        setRoot(root);
+    public Query willPerformQuery(DataContext context, Query query) {
+        return query;
     }
 
-    public PrefetchTreeNode getPrefetchTree() {
-        return null;
+    public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore) {
+        return true;
     }
 
-    public String getCachePolicy() {
-        return null;
+    public boolean shouldProcessDelete(DataObject object) {
+        return true;
     }
 
-    public boolean isRefreshingObjects() {
-        return false;
+    public void finishedMergeChanges(DataObject object) {
+
     }
 
-    public int getPageSize() {
-        return 0;
-    }
+    public void finishedProcessDelete(DataObject object) {
 
-    public int getFetchLimit() {
-        return 0;
-    }
-    
-    public Query resolve(EntityResolver resolver) {
-        this.resolveCalled = true;
-        return this;
-    }
-
-    public void setFetchingDataRows(boolean fetchingDataRows) {
-        this.fetchingDataRows = fetchingDataRows;
-    }
-
-    public boolean isResolvingInherited() {
-        return resolvingInherited;
-    }
-
-    public void setResolvingInherited(boolean resolvingInherited) {
-        this.resolvingInherited = resolvingInherited;
-    }
-
-    public boolean isFetchingDataRows() {
-        return fetchingDataRows;
     }
 }

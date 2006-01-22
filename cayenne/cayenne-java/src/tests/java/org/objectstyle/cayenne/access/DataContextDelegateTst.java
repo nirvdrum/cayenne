@@ -60,7 +60,8 @@ import java.util.List;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Gallery;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.MockQuery;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -68,7 +69,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * Tests various DataContextDelegate methods invocation and consequences on DataContext
  * behavior.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class DataContextDelegateTst extends CayenneTestCase {
 
@@ -91,15 +92,112 @@ public class DataContextDelegateTst extends CayenneTestCase {
         context.commitChanges();
     }
 
+    public void testWillPerformGenericQuery() throws Exception {
+        DataContext context = gallery.getDataContext();
+
+        final List queriesPerformed = new ArrayList(1);
+        DataContextDelegate delegate = new MockDataContextDelegate() {
+
+            public Query willPerformGenericQuery(DataContext context, Query query) {
+                queriesPerformed.add(query);
+                return query;
+            }
+        };
+        context.setDelegate(delegate);
+
+        // test that delegate is consulted before select
+        MockQuery query = new MockQuery();
+        context.performGenericQuery(query);
+
+        assertTrue("Delegate is not notified of a query being run.", queriesPerformed
+                .contains(query));
+        assertEquals(1, queriesPerformed.size());
+        assertTrue("Delegate unexpectedly blocked the query.", query.isRouteCalled());
+    }
+
+    public void testWillPerformGenericQueryBlocked() throws Exception {
+        DataContext context = gallery.getDataContext();
+
+        final List queriesPerformed = new ArrayList(1);
+        DataContextDelegate delegate = new MockDataContextDelegate() {
+
+            public Query willPerformGenericQuery(DataContext context, Query query) {
+                queriesPerformed.add(query);
+                return null;
+            }
+        };
+
+        context.setDelegate(delegate);
+        MockQuery query = new MockQuery();
+        context.performGenericQuery(query);
+
+        assertTrue("Delegate is not notified of a query being run.", queriesPerformed
+                .contains(query));
+        assertEquals(1, queriesPerformed.size());
+        assertFalse("Delegate couldn't block the query.", query.isRouteCalled());
+    }
+
+    public void testWillPerformQuery() throws Exception {
+        DataContext context = gallery.getDataContext();
+
+        final List queriesPerformed = new ArrayList(1);
+        DataContextDelegate delegate = new MockDataContextDelegate() {
+
+            public Query willPerformQuery(DataContext context, Query query) {
+                queriesPerformed.add(query);
+                return query;
+            }
+        };
+        context.setDelegate(delegate);
+
+        // test that delegate is consulted before select
+        SelectQuery query = new SelectQuery(Gallery.class);
+        List results = context.performQuery(query);
+
+        assertTrue("Delegate is not notified of a query being run.", queriesPerformed
+                .contains(query));
+        assertEquals(1, queriesPerformed.size());
+        assertNotNull(results);
+    }
+
+    public void testWillPerformQueryBlocked() throws Exception {
+        DataContext context = gallery.getDataContext();
+
+        final List queriesPerformed = new ArrayList(1);
+        DataContextDelegate delegate = new MockDataContextDelegate() {
+
+            public Query willPerformQuery(DataContext context, Query query) {
+                queriesPerformed.add(query);
+                return null;
+            }
+        };
+
+        context.setDelegate(delegate);
+        SelectQuery query = new SelectQuery(Gallery.class);
+        List results = context.performQuery(query);
+
+        assertTrue("Delegate is not notified of a query being run.", queriesPerformed
+                .contains(query));
+        assertEquals(1, queriesPerformed.size());
+
+        assertNotNull(results);
+
+        // blocked
+        assertEquals("Delegate couldn't block the query.", 0, results.size());
+    }
+
+    /**
+     * @deprecated since 1.2
+     */
     public void testWillPerformSelect() throws Exception {
         DataContext context = gallery.getDataContext();
 
         final List queriesPerformed = new ArrayList(1);
         DataContextDelegate delegate = new MockDataContextDelegate() {
 
-            public GenericSelectQuery willPerformSelect(
+            public org.objectstyle.cayenne.query.GenericSelectQuery willPerformSelect(
                     DataContext context,
-                    GenericSelectQuery query) {
+                    org.objectstyle.cayenne.query.GenericSelectQuery query) {
                 // save query, and allow its execution
                 queriesPerformed.add(query);
                 return query;
@@ -117,15 +215,18 @@ public class DataContextDelegateTst extends CayenneTestCase {
         assertNotNull(results);
     }
 
+    /**
+     * @deprecated since 1.2
+     */
     public void testWillPerformSelectQueryBlocked() throws Exception {
         DataContext context = gallery.getDataContext();
 
         final List queriesPerformed = new ArrayList(1);
         DataContextDelegate delegate = new MockDataContextDelegate() {
 
-            public GenericSelectQuery willPerformSelect(
+            public org.objectstyle.cayenne.query.GenericSelectQuery willPerformSelect(
                     DataContext context,
-                    GenericSelectQuery query) {
+                    org.objectstyle.cayenne.query.GenericSelectQuery query) {
                 // save query, and block its execution
                 queriesPerformed.add(query);
                 return null;

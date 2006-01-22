@@ -52,75 +52,95 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 
 package org.objectstyle.cayenne.access;
 
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * Defines API for a DataContext "delegate" - an object that is temporarily passed control 
- * by DataContext at some critical points in the normal flow of execution. A delegate thus can 
- * modify the flow, abort an operation, modify the objects participating in an operation, 
- * or perform any other tasks it deems necessary. DataContextDelegate is shared by DataContext 
- * and its ObjectStore.
+ * Defines API for a DataContext "delegate" - an object that is temporarily passed control
+ * by DataContext at some critical points in the normal flow of execution. A delegate thus
+ * can modify the flow, abort an operation, modify the objects participating in an
+ * operation, or perform any other tasks it deems necessary. DataContextDelegate is shared
+ * by DataContext and its ObjectStore.
  * 
  * @see org.objectstyle.cayenne.access.DataContext
- * 
  * @author Mike Kienenberger
  * @author Andrus Adamchik
- * 
  * @since 1.1
  */
 public interface DataContextDelegate {
-	
-    /** 
-     * Invoked before a <code>GenericSelectQuery</code> is executed.  The delegate
-     * may modify the <code>GenericSelectQuery</code> by returning a different
+
+    /**
+     * Invoked before a <code>GenericSelectQuery</code> is executed. The delegate may
+     * modify the <code>GenericSelectQuery</code> by returning a different
      * <code>GenericSelectQuery</code>, or may return null to discard the query.
      * 
-     * @return the original or modified <code>GenericSelectQuery</code> or null to discard the query.
+     * @return the original or modified <code>GenericSelectQuery</code> or null to
+     *         discard the query.
+     * @deprecated since 1.2 implement either
+     *             {@link #willPerformQuery(DataContext, Query)} or
+     *             {@link #willPerformGenericQuery(DataContext, Query)}.
      */
-	public GenericSelectQuery willPerformSelect(DataContext context, GenericSelectQuery query);
+    org.objectstyle.cayenne.query.GenericSelectQuery willPerformSelect(
+            DataContext context,
+            org.objectstyle.cayenne.query.GenericSelectQuery query);
 
-	/**
-	 * Invoked by parent DataContext whenever an object change is detected.
-     * This can be a change to the object snapshot, or a modification of an "independent"
-     * relationship not resulting in a snapshot change. In the later case snapshot
-     * argument may be null. If a delegate returns <code>true</code>, ObjectStore 
-     * will attempt to merge the changes into an object.
-	 */
-    public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore);
-    
     /**
-     * Called after a successful merging of external changes to an object. 
-     * If previosly a delegate returned <code>false</code> from
-     * {@link #shouldMergeChanges(DataObject, DataRow)}, this method
-     * is not invoked, since changes were not merged.
-     */
-    public void finishedMergeChanges(DataObject object);
-    
-    /**
-     * Invoked by ObjectStore whenever it is detected that a database
-     * row was deleted for object. If a delegate returns <code>true</code>,
-     * ObjectStore will change MODIFIED objects to NEW (resulting in recreating the 
-     * deleted record on next commit) and all other objects - to TRANSIENT. 
-     * To block this behavior, delegate should return <code>false</code>, and
-     * possibly do its own processing.
+     * Invoked before a Query is executed via <em>DataContext.performQuery</em>. The
+     * delegate may subsitute the Query with a different one or may return null to discard
+     * the query.
      * 
-     * @param object DataObject that was deleted externally and is still present
-     * in the ObjectStore associated with the delegate.
+     * @since 1.2
      */
-    public boolean shouldProcessDelete(DataObject object);
-    
-    /**
-     * Called after a successful processing of externally deleted object. 
-     * If previosly a delegate returned <code>false</code> from
-     * {@link #shouldProcessDelete(DataObject)}, this method
-     * is not invoked, since no processing was done.
-     */
-    public void finishedProcessDelete(DataObject object);
-}
+    Query willPerformQuery(DataContext context, Query query);
 
+    /**
+     * Invoked before a Query is executed via <em>DataContext.performGenericQuery</em>.
+     * The delegate may subsitute the Query with a different one or may return null to
+     * discard the query.
+     * 
+     * @since 1.2
+     */
+    Query willPerformGenericQuery(DataContext context, Query query);
+
+    /**
+     * Invoked by parent DataContext whenever an object change is detected. This can be a
+     * change to the object snapshot, or a modification of an "independent" relationship
+     * not resulting in a snapshot change. In the later case snapshot argument may be
+     * null. If a delegate returns <code>true</code>, ObjectStore will attempt to merge
+     * the changes into an object.
+     */
+    boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore);
+
+    /**
+     * Called after a successful merging of external changes to an object. If previosly a
+     * delegate returned <code>false</code> from
+     * {@link #shouldMergeChanges(DataObject, DataRow)}, this method is not invoked,
+     * since changes were not merged.
+     */
+    void finishedMergeChanges(DataObject object);
+
+    /**
+     * Invoked by ObjectStore whenever it is detected that a database row was deleted for
+     * object. If a delegate returns <code>true</code>, ObjectStore will change
+     * MODIFIED objects to NEW (resulting in recreating the deleted record on next commit)
+     * and all other objects - to TRANSIENT. To block this behavior, delegate should
+     * return <code>false</code>, and possibly do its own processing.
+     * 
+     * @param object DataObject that was deleted externally and is still present in the
+     *            ObjectStore associated with the delegate.
+     */
+    boolean shouldProcessDelete(DataObject object);
+
+    /**
+     * Called after a successful processing of externally deleted object. If previosly a
+     * delegate returned <code>false</code> from
+     * {@link #shouldProcessDelete(DataObject)}, this method is not invoked, since no
+     * processing was done.
+     */
+    void finishedProcessDelete(DataObject object);
+}

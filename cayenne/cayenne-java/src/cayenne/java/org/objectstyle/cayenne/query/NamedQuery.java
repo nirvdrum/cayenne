@@ -80,6 +80,10 @@ public class NamedQuery implements Query {
     protected String queryName;
     protected Map parameters;
 
+    // using Boolean instead of boolean to implement "trinary" logic - override with
+    // refresh, override with no-refresh, no override.
+    protected Boolean refreshOverride;
+
     public NamedQuery(String queryName) {
         this(queryName, null);
     }
@@ -111,7 +115,15 @@ public class NamedQuery implements Query {
     }
 
     public SelectInfo getSelectInfo(EntityResolver resolver) {
-        return resolveQuery(resolver).getSelectInfo(resolver);
+        SelectInfo info = resolveQuery(resolver).getSelectInfo(resolver);
+
+        if (refreshOverride == null) {
+            return info;
+        }
+
+        SelectInfoWrapper wrapper = new SelectInfoWrapper(info);
+        wrapper.override(SelectInfo.REFRESHING_OBJECTS_PROPERTY, refreshOverride);
+        return wrapper;
     }
 
     /**
@@ -261,5 +273,17 @@ public class NamedQuery implements Query {
         return StringUtils.substringAfterLast(getClass().getName(), ".")
                 + ":"
                 + getName();
+    }
+
+    public Boolean getRefreshOverride() {
+        return refreshOverride;
+    }
+
+    /**
+     * Sets whether refreshing behavior of the target query should be overrdiden and if so -
+     * what value should be used.
+     */
+    public void setRefreshOverride(Boolean refreshOverride) {
+        this.refreshOverride = refreshOverride;
     }
 }

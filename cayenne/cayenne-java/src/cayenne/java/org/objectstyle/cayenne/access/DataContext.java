@@ -98,11 +98,10 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SyncCommand;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.NamedQuery;
-import org.objectstyle.cayenne.query.ParameterizedQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectInfo;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
 import org.objectstyle.cayenne.util.Util;
@@ -135,32 +134,6 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrus Adamchik
  */
 public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Serializable {
-
-    // noop delegate
-    private static final DataContextDelegate defaultDelegate = new DataContextDelegate() {
-
-        public GenericSelectQuery willPerformSelect(
-                DataContext context,
-                GenericSelectQuery query) {
-            return query;
-        }
-
-        public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore) {
-            return true;
-        }
-
-        public boolean shouldProcessDelete(DataObject object) {
-            return true;
-        }
-
-        public void finishedMergeChanges(DataObject object) {
-
-        }
-
-        public void finishedProcessDelete(DataObject object) {
-
-        }
-    };
 
     // DataContext events
     public static final EventSubject WILL_COMMIT = EventSubject.getSubject(
@@ -491,7 +464,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * @since 1.1
      */
     DataContextDelegate nonNullDelegate() {
-        return (delegate != null) ? delegate : DataContext.defaultDelegate;
+        return (delegate != null) ? delegate : NoopDelegate.noopDelegate;
     }
 
     /**
@@ -1277,13 +1250,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * @since 1.1
      */
     public int[] performNonSelectingQuery(Query query) {
-        if (this.getChannel() == null) {
-            throw new CayenneRuntimeException(
-                    "Can't run query - parent OPPChannel is not set.");
-        }
-
-        QueryResponse response = getChannel().performGenericQuery(query);
-        return response.getFirstUpdateCounts(query);
+        return performGenericQuery(query).getFirstUpdateCounts(query);
     }
 
     /**
@@ -1312,7 +1279,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      */
     public ResultIterator performIteratedQuery(Query query) throws CayenneException {
         IteratedSelectObserver observer = new IteratedSelectObserver();
-        performQueries(Collections.singletonList(query), observer);
+        getParentDataDomain().performQueries(Collections.singletonList(query), observer);
         return observer.getResultIterator();
     }
 
@@ -1322,6 +1289,12 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * @since 1.2
      */
     public QueryResponse performGenericQuery(Query query) {
+        
+        query = nonNullDelegate().willPerformGenericQuery(this, query);
+        if(query == null) {
+            return new QueryResult();
+        }
+        
         if (this.getChannel() == null) {
             throw new CayenneRuntimeException(
                     "Can't run query - parent OPPChannel is not set.");
@@ -1348,30 +1321,18 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
             transaction.performQueries(this, queries, callback);
             return;
         }
-        // transaction context exists
 
         // filter through the delegate
-        DataContextDelegate localDelegate = nonNullDelegate();
+
         List finalQueries = new ArrayList(queries.size());
 
         Iterator it = queries.iterator();
         while (it.hasNext()) {
-            Object query = it.next();
+            Query query = (Query) it.next();
 
-            if (query instanceof GenericSelectQuery) {
-                GenericSelectQuery genericSelect = (GenericSelectQuery) query;
+            query = filterThroughDelegateDeprecated(query);
 
-                // filter via a delegate
-                GenericSelectQuery filteredSelect = localDelegate.willPerformSelect(
-                        this,
-                        genericSelect);
-
-                // suppressed by the delegate
-                if (filteredSelect != null) {
-                    finalQueries.add(filteredSelect);
-                }
-            }
-            else {
+            if (query != null) {
                 finalQueries.add(query);
             }
         }
@@ -1379,6 +1340,19 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
         if (!finalQueries.isEmpty()) {
             getParentDataDomain().performQueries(queries, callback);
         }
+    }
+
+    /**
+     * @since 1.2
+     * @deprecated since 1.2
+     */
+    // deprecated code is extracted in a separate method to avoid Eclipse warnings...
+    Query filterThroughDelegateDeprecated(Query query) {
+        if (query instanceof org.objectstyle.cayenne.query.GenericSelectQuery) {
+            org.objectstyle.cayenne.query.GenericSelectQuery genericSelect = (org.objectstyle.cayenne.query.GenericSelectQuery) query;
+            return nonNullDelegate().willPerformSelect(this, genericSelect);
+        }
+        return query;
     }
 
     /**
@@ -1456,10 +1430,8 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
     }
 
     /**
-     * Performs a single selecting query. If if query is a SelectQuery that require
-     * prefetching relationships, will create additional queries to perform necessary
-     * prefetching. Various query setting control the behavior of this method and the
-     * results returned:
+     * Performs a single selecting query. Various query setting control the behavior of
+     * this method and the results returned:
      * <ul>
      * <li>Query caching policy defines whether the results are retrieved from cache or
      * fetched from the database. Note that queries that use caching must have a name that
@@ -1477,7 +1449,10 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      *         {@link SelectInfo#isFetchingDataRows()}.
      */
     public List performQuery(Query query) {
-        return new DataContextSelectAction(this).performQuery(query);
+        query = nonNullDelegate().willPerformQuery(this, query);
+        return query != null
+                ? new DataContextSelectAction(this).performQuery(query)
+                : new ArrayList(1);
     }
 
     /**
@@ -1510,41 +1485,9 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * @since 1.1
      */
     public List performQuery(String queryName, Map parameters, boolean refresh) {
-        // find query...
-        Query query = getEntityResolver().getQuery(queryName);
-        if (query == null) {
-            throw new CayenneRuntimeException("There is no saved query for name '"
-                    + queryName
-                    + "'.");
-        }
-
-        // for SelectQuery we must always run parameter substitution as the query
-        // in question might have unbound values in the qualifier... that's a bit
-        // inefficient... any better ideas to determine whether we can skip parameter
-        // processing?
-
-        // another side effect from NOT substituting parameters is that caching key of the
-        // final query will be that of the original query... thus parameters vs. no
-        // paramete will result in inconsistent caching behavior.
-
-        if (query instanceof SelectQuery) {
-            SelectQuery select = (SelectQuery) query;
-            if (select.getQualifier() != null) {
-                query = select.createQuery(parameters != null
-                        ? parameters
-                        : Collections.EMPTY_MAP);
-            }
-        }
-        else if (parameters != null
-                && !parameters.isEmpty()
-                && query instanceof ParameterizedQuery) {
-            query = ((ParameterizedQuery) query).createQuery(parameters);
-        }
-
-        return new DataContextSelectAction(this).performQuery(
-                query,
-                query.getName(),
-                refresh);
+        NamedQuery query = new NamedQuery(queryName, parameters);
+        query.setRefreshOverride(refresh ? Boolean.TRUE : Boolean.FALSE);
+        return performQuery(query);
     }
 
     /**

@@ -57,16 +57,13 @@ package org.objectstyle.cayenne.query;
 
 import org.objectstyle.cayenne.map.EntityResolver;
 
-/**
- * @author Andrei Adamchik
- */
 public class MockQuery implements Query {
 
     protected String name;
     protected Object root;
     protected boolean selecting;
 
-    protected boolean resolveCalled;
+    protected boolean routeCalled;
 
     public MockQuery(boolean selecting) {
         this.selecting = selecting;
@@ -83,8 +80,8 @@ public class MockQuery implements Query {
         return null;
     }
 
-    public boolean isResolveCalled() {
-        return resolveCalled;
+    public boolean isRouteCalled() {
+        return routeCalled;
     }
 
     public boolean isSelecting() {
@@ -114,16 +111,11 @@ public class MockQuery implements Query {
         this.root = value;
     }
 
-    public Query resolve(EntityResolver resolver) {
-        this.resolveCalled = true;
-        return (selecting) ? new MockGenericSelectQuery(root) : new MockQuery();
-    }
-
     public SQLAction createSQLAction(SQLActionVisitor visitor) {
         return null;
     }
 
     public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
-
+        routeCalled = true;
     }
 }

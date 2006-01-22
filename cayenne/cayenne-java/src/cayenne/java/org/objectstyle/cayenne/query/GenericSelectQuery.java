@@ -61,6 +61,8 @@ package org.objectstyle.cayenne.query;
  * are {@link SelectQuery},{@link SQLTemplate}and {@link ProcedureQuery}.
  * 
  * @author Andrei Adamchik
+ * @deprecated Since 1.2 this interface is substituted with SelectInfo which is used in a
+ *             composition pattern.
  */
 public interface GenericSelectQuery extends Query {
 
