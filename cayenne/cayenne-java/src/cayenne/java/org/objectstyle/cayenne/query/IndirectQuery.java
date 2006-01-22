@@ -126,11 +126,20 @@ public abstract class IndirectQuery implements Query {
     }
 
     /**
+     * This implementation throws an exception.
+     * 
      * @deprecated since 1.2
      */
-    public abstract Object getRoot();
+    public Object getRoot() {
+        throw new CayenneRuntimeException("This deprecated method is not implemented");
+    }
 
-    public abstract Object getRoot(EntityResolver resolver);
+    /**
+     * Delegates root lookup to the replacement query.
+     */
+    public Object getRoot(EntityResolver resolver) {
+        return getReplacementQuery(resolver).getRoot(resolver);
+    }
 
     /**
      * Throws an exception.

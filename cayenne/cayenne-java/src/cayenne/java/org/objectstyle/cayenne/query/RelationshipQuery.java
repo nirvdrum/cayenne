@@ -108,10 +108,6 @@ public class RelationshipQuery extends IndirectQuery {
         return relationshipName;
     }
 
-    public Object getRoot(EntityResolver resolver) {
-        return getRelationship(resolver).getTargetEntityName();
-    }
-
     protected Query createReplacementQuery(EntityResolver resolver) {
         ObjRelationship relationship = getRelationship(resolver);
 
@@ -144,13 +140,6 @@ public class RelationshipQuery extends IndirectQuery {
         }
 
         return relationship;
-    }
-
-    /**
-     * @deprecated since 1.2
-     */
-    public Object getRoot() {
-        throw new CayenneRuntimeException("This deprecated method is not implemented");
     }
 
     /**

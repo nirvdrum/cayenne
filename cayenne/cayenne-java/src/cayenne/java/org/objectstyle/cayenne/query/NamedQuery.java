@@ -200,33 +200,6 @@ public class NamedQuery extends IndirectQuery {
     }
 
     /**
-     * Returns the root of the named query obtained from the EntityResolver. If such query
-     * does not exist (or if it is the same query as this object), null is returned.
-     */
-    public Object getRoot(EntityResolver resolver) {
-        Query query = resolver.lookupQuery(getQueryName());
-
-        if (query == null) {
-            return null;
-        }
-
-        // sanity check ... there can be an incorrect use of client vs. server
-        // EntityResolver resulting in such condition
-        if (query == this) {
-            return null;
-        }
-
-        return query.getRoot(resolver);
-    }
-
-    /**
-     * @deprecated since 1.2
-     */
-    public Object getRoot() {
-        throw new CayenneRuntimeException("This deprecated method is not implemented");
-    }
-
-    /**
      * Overrides toString() outputting a short string with query class and name.
      */
     public String toString() {
