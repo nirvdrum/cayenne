@@ -600,6 +600,13 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
                             object,
                             parentSnapshot,
                             false);
+
+                    // retain modified parent snapshots, as we will need to compare query
+                    // results against parent state
+                    // if(parentObject.getPersistenceState() !=
+                    // PersistenceState.COMMITTED) {
+                    // getObjectStore().retainSnapshot(object, parentSnapshot);
+                    // }
                 }
             }
             return object;
@@ -1312,7 +1319,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
             return new ArrayList(1);
         }
 
-        return new DataContextSelectAction(this).performQuery(query);
+        return new DataContextSelectAction(this, query).execute();
     }
 
     /**

@@ -80,105 +80,108 @@ import org.objectstyle.cayenne.query.QueryMetadata;
 class DataContextSelectAction {
 
     DataContext context;
+    Query query;
+    QueryMetadata metadata;
 
-    DataContextSelectAction(DataContext context) {
+    DataContextSelectAction(DataContext context, Query query) {
         this.context = context;
+        this.query = query;
+        this.metadata = query.getMetaData(context.getEntityResolver());
     }
 
-    List performQuery(Query query) {
-
-        QueryMetadata metadata = query.getMetaData(context.getEntityResolver());
+    List execute() {
 
         if (metadata.getPageSize() > 0) {
             return new IncrementalFaultList(context, query);
         }
 
-        boolean localCache = QueryMetadata.LOCAL_CACHE.equals(metadata.getCachePolicy());
-        boolean sharedCache = QueryMetadata.SHARED_CACHE
-                .equals(metadata.getCachePolicy());
-        boolean useCache = localCache || sharedCache;
+        // select an appropriate strategy
 
-        String name = query.getName();
+        if (QueryMetadata.LOCAL_CACHE.equals(metadata.getCachePolicy())) {
+            return runWithLocalCache();
+        }
+        else if (QueryMetadata.SHARED_CACHE.equals(metadata.getCachePolicy())) {
+            return runWithSharedCache();
+        }
+        else {
+            return runWithNoCache();
+        }
+    }
 
-        // sanity check
-        if (useCache && name == null) {
+    private List runWithLocalCache() {
+        if (query.getName() == null) {
             throw new CayenneRuntimeException(
                     "Caching of unnamed queries is not supported.");
         }
 
-        // get results from cache...
-        if (!metadata.isRefreshingObjects() && useCache) {
-            List results = null;
-
-            if (localCache) {
-                // results should have been stored as rows or objects when
-                // they were originally cached... do no conversions now
-                results = context.getObjectStore().getCachedQueryResult(query.getName());
+        if (!metadata.isRefreshingObjects()) {
+            List cachedResults = context.getObjectStore().getCachedQueryResult(
+                    query.getName());
+            if (cachedResults != null) {
+                return cachedResults;
             }
-            else if (sharedCache) {
+        }
 
-                List rows = context
-                        .getObjectStore()
-                        .getDataRowCache()
-                        .getCachedSnapshots(query.getName());
-                if (rows != null) {
+        List results = runWithNoCache();
 
+        context.getObjectStore().cacheQueryResult(query.getName(), results);
+        return results;
+    }
+
+    private List runWithSharedCache() {
+
+        if (query.getName() == null) {
+            throw new CayenneRuntimeException(
+                    "Caching of unnamed queries is not supported.");
+        }
+
+        if (!metadata.isRefreshingObjects()) {
+            List cachedRows = context
+                    .getObjectStore()
+                    .getDataRowCache()
+                    .getCachedSnapshots(query.getName());
+
+            if (cachedRows != null) {
+                if (cachedRows.isEmpty()) {
+                    return new ArrayList(1);
+                }
+                else if (metadata.isFetchingDataRows()) {
                     // decorate shared cached lists with immutable list to avoid messing
                     // up the cache
-                    if (rows.size() == 0) {
-                        results = Collections.EMPTY_LIST;
-                    }
-                    else if (metadata.isFetchingDataRows()) {
-                        results = Collections.unmodifiableList(rows);
-                    }
-                    else {
-                        results = context.objectsFromDataRows(
-                                metadata.getObjEntity(),
-                                rows,
-                                false,
-                                metadata.isResolvingInherited());
-                    }
+                    return Collections.unmodifiableList(cachedRows);
+                }
+                else {
+                    return context.objectsFromDataRows(
+                            metadata.getObjEntity(),
+                            cachedRows,
+                            false,
+                            metadata.isResolvingInherited());
                 }
             }
-
-            if (results != null) {
-                return results;
-            }
         }
 
-        // must fetch...
+        // here we need raw data from response, so we can't use 'runWithNoCache'
         QueryResponse response = context.getChannel().performGenericQuery(query);
-
-        List results;
-
-        if (metadata.isFetchingDataRows()) {
-            results = response.getFirstRows(query);
-        }
-        else {
-            results = getResultsAsObjects(query, metadata, response);
-        }
-
-        // cache results if needed
-        if (useCache) {
-            if (localCache) {
-                context.getObjectStore().cacheQueryResult(query.getName(), results);
-            }
-            else if (sharedCache) {
-                context.getObjectStore().getDataRowCache().cacheSnapshots(
-                        query.getName(),
-                        response.getFirstRows(query));
-            }
-        }
+        List results = processResponse(response);
+        context.getObjectStore().getDataRowCache().cacheSnapshots(
+                query.getName(),
+                response.getFirstRows(query));
 
         return results;
     }
 
-    List getResultsAsObjects(
-            Query rootQuery,
-            QueryMetadata metadata,
-            QueryResponse response) {
+    private List runWithNoCache() {
+        QueryResponse response = context.getChannel().performGenericQuery(query);
+        return processResponse(response);
+    }
 
-        List mainRows = response.getFirstRows(rootQuery);
+    private List processResponse(QueryResponse response) {
+
+        List mainRows = response.getFirstRows(query);
+
+        if (metadata.isFetchingDataRows()) {
+            return mainRows;
+        }
 
         if (mainRows.isEmpty()) {
             return new ArrayList(1);
