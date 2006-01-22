@@ -91,16 +91,18 @@ import org.objectstyle.cayenne.validation.ValidationException;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
- * ObjectStore maintains a cache of objects and their snapshots.
- * <p>
- * <strong>Synchronization Note: </strong> Since there is often a need to synchronize on
- * both, ObjectStore and underlying DataRowCache, there must be a consistent
- * synchronization policy to avoid deadlocks. Whenever ObjectStore needs to obtain a lock
- * on DataRowStore, it must obtain a lock on self.
- * </p>
+ * ObjectStore stores objects using their ObjectId as a key. It works as a dedicated
+ * object cache for a DataContext. Users rarely need to access ObjectStore directly, as
+ * DataContext serves as a facade, providing cover methods for most ObjectStore
+ * operations.
  * 
- * @author Andrei Adamchik
+ * @since 1.0
+ * @author Andrus Adamchik
  */
+// Synchronization Note: There is often a need to do double synchronize on an ObjectStore
+// and an underlying DataRowCache. To avoid deadlocks, Cayenne consistently follows the
+// policy of locking an ObjectStore first, and then locking DataRowStore. This pattern
+// must be followed in any new related developments.
 public class ObjectStore implements Serializable, SnapshotEventListener {
 
     private static Logger logObj = Logger.getLogger(ObjectStore.class);
