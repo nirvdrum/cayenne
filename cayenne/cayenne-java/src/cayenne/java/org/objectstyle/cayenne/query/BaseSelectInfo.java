@@ -62,6 +62,10 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
@@ -82,17 +86,62 @@ final class BaseSelectInfo implements SelectInfo, XMLSerializable, Serializable 
     String cachePolicy = SelectInfo.CACHE_POLICY_DEFAULT;
     PrefetchTreeNode prefetchTree;
 
+    transient ObjEntity objEntity;
+    transient DbEntity dbEntity;
+    transient Object lastRoot;
+    transient EntityResolver lastEntityResolver;
+
     /**
      * Copies values of this object to another SelectInfo object.
      */
     void copyFromInfo(SelectInfo info) {
+        this.lastEntityResolver = null;
+        this.lastRoot = null;
+        this.objEntity = null;
+        this.dbEntity = null;
+
         this.fetchingDataRows = info.isFetchingDataRows();
         this.fetchLimit = info.getFetchLimit();
         this.pageSize = info.getPageSize();
         this.refreshingObjects = info.isRefreshingObjects();
         this.resolvingInherited = info.isResolvingInherited();
         this.cachePolicy = info.getCachePolicy();
+
         setPrefetchTree(info.getPrefetchTree());
+    }
+
+    void resolve(Object root, EntityResolver resolver) {
+        if (lastRoot != root || lastEntityResolver != resolver) {
+
+            this.objEntity = null;
+            this.dbEntity = null;
+
+            if (root != null) {
+                if (root instanceof Class) {
+                    this.objEntity = resolver.lookupObjEntity((Class) root);
+                    this.dbEntity = objEntity != null ? objEntity.getDbEntity() : null;
+                }
+                else if (root instanceof ObjEntity) {
+                    this.objEntity = (ObjEntity) root;
+                    this.dbEntity = objEntity.getDbEntity();
+                }
+                else if (root instanceof String) {
+                    this.objEntity = resolver.lookupObjEntity((String) root);
+                    this.dbEntity = objEntity != null ? objEntity.getDbEntity() : null;
+                }
+                else if (root instanceof DbEntity) {
+                    this.objEntity = null;
+                    this.dbEntity = (DbEntity) root;
+                }
+                else if (root instanceof DataObject) {
+                    this.objEntity = resolver.lookupObjEntity((DataObject) root);
+                    this.dbEntity = objEntity != null ? objEntity.getDbEntity() : null;
+                }
+            }
+
+            this.lastRoot = root;
+            this.lastEntityResolver = resolver;
+        }
     }
 
     void initWithProperties(Map properties) {
@@ -171,6 +220,20 @@ final class BaseSelectInfo implements SelectInfo, XMLSerializable, Serializable 
         if (prefetchTree != null) {
             prefetchTree.encodeAsXML(encoder);
         }
+    }
+
+    /**
+     * @since 1.2
+     */
+    public DbEntity getDbEntity() {
+        return dbEntity;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public ObjEntity getObjEntity() {
+        return objEntity;
     }
 
     /**

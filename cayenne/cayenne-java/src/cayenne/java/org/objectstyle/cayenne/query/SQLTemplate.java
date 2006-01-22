@@ -84,7 +84,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * </p>
  * 
  * <pre>
- *              SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
+ *               SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
  * </pre>
  * 
  * <p>
@@ -235,6 +235,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public SelectInfo getSelectInfo(EntityResolver resolver) {
+        selectInfo.resolve(root, resolver);
         return selectInfo;
     }
 

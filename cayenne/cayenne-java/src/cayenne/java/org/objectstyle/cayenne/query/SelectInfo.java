@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne.query;
 
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
+
 /**
  * Provides metadata of a select operation executed via
  * {@link org.objectstyle.cayenne.opp.OPPChannel#performQuery(Query)}.
@@ -117,6 +120,16 @@ public interface SelectInfo {
     public static final String CACHE_POLICY_PROPERTY = "cayenne.GenericSelectQuery.cachePolicy";
 
     public static final String CACHE_POLICY_DEFAULT = NO_CACHE;
+
+    /**
+     * Returns an ObjEntity that describes select result.
+     */
+    ObjEntity getObjEntity();
+
+    /**
+     * Returns DbEntity that describes select operation.
+     */
+    DbEntity getDbEntity();
 
     /**
      * Returns query cache policy, which can be one of {@link #NO_CACHE},

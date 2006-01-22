@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne.query;
 
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
+
 /**
  * A SelectParameters implementation that returns all the defaults.
  * 
@@ -64,6 +67,14 @@ package org.objectstyle.cayenne.query;
 final class DefaultSelectInfo implements SelectInfo {
 
     static final SelectInfo defaultParameters = new DefaultSelectInfo();
+
+    public DbEntity getDbEntity() {
+        return null;
+    }
+
+    public ObjEntity getObjEntity() {
+        return null;
+    }
 
     public String getCachePolicy() {
         return SelectInfo.CACHE_POLICY_DEFAULT;

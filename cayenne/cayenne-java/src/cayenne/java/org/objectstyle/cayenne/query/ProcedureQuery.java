@@ -91,10 +91,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * via OUT parameters and no other result sets). It is still OK if data modification
  * occurs as a side effect. However if the query returns more then one result set, a more
  * generic form should be used:
- * {@link org.objectstyle.cayenne.access.DataContext#performQueries(java.util.Collection, 
- * org.objectstyle.cayenne.access.OperationObserver) DataContextperformQueries(Collection,
- * OperationObserver)}. Use {@link org.objectstyle.cayenne.access.QueryResult}as a
- * convenient generic OperationObserver implementation.
+ * {@link org.objectstyle.cayenne.access.DataContext#performGenericQuery(Query)}.
  * </p>
  * 
  * @author Andrus Adamchik
@@ -180,11 +177,12 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
         setRoot(procedureName);
         setResultClassName(resultType != null ? resultType.getName() : null);
     }
-    
+
     /**
      * @since 1.2
      */
     public SelectInfo getSelectInfo(EntityResolver resolver) {
+        selectInfo.resolve(getResultClass(), resolver);
         return selectInfo;
     }
 
@@ -519,9 +517,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public void addPrefetches(Collection prefetches) {
-        selectInfo.addPrefetches(
-                prefetches,
-                PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
+        selectInfo.addPrefetches(prefetches, PrefetchTreeNode.JOINT_PREFETCH_SEMANTICS);
     }
 
     /**

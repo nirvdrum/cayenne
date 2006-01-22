@@ -58,6 +58,9 @@ package org.objectstyle.cayenne.query;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
+
 /**
  * A wrapper for another SelectInfo allowing to override some but not all properties.
  * 
@@ -82,6 +85,14 @@ class SelectInfoWrapper implements SelectInfo {
 
     boolean overrideExists(String key) {
         return overrides != null && overrides.containsKey(key);
+    }
+
+    public DbEntity getDbEntity() {
+        return info.getDbEntity();
+    }
+
+    public ObjEntity getObjEntity() {
+        return info.getObjEntity();
     }
 
     public String getCachePolicy() {

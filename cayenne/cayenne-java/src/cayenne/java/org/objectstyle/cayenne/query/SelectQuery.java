@@ -83,7 +83,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * @author Andrei Adamchik
  */
 public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
-        SelectInfo, ParameterizedQuery, XMLSerializable {
+        ParameterizedQuery, XMLSerializable {
 
     public static final String DISTINCT_PROPERTY = "cayenne.SelectQuery.distinct";
     public static final boolean DISTINCT_DEFAULT = false;
@@ -186,9 +186,17 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public SelectInfo getSelectInfo(EntityResolver resolver) {
-        // return 'this' instead of 'selectInfo' as there is some logic in deriving select
-        // parameters that BaseSelectInfo is unaware of
-        return this;
+        selectInfo.resolve(root, resolver);
+
+        // must force DataRows if custom attributes are fetched
+        if (isFetchingCustomAttributes()) {
+            SelectInfoWrapper wrapper = new SelectInfoWrapper(selectInfo);
+            wrapper.override(SelectInfo.FETCHING_DATA_ROWS_PROPERTY, Boolean.TRUE);
+            return wrapper;
+        }
+        else {
+            return selectInfo;
+        }
     }
 
     /**
