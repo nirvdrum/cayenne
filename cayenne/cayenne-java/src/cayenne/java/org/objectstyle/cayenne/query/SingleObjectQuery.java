@@ -101,13 +101,6 @@ public class SingleObjectQuery extends IndirectQuery {
     }
 
     /**
-     * Returns entity name stored in the ObjectId.
-     */
-    public Object getRoot(EntityResolver resolver) {
-        return objectId.getEntityName();
-    }
-
-    /**
      * @deprecated since 1.2
      */
     public Object getRoot() {

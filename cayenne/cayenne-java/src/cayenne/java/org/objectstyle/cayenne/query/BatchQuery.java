@@ -123,12 +123,8 @@ public abstract class BatchQuery implements Query {
     }
 
     /**
-     * @since 1.2
+     * @deprecated since 1.2
      */
-    public Object getRoot(EntityResolver resolver) {
-        return dbEntity;
-    }
-
     public void setRoot(Object root) {
         if (root == null || root instanceof DbEntity) {
             this.dbEntity = (DbEntity) root;

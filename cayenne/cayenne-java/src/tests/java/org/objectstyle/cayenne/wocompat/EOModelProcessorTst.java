@@ -64,8 +64,7 @@ public class EOModelProcessorTst extends BasicTestCase {
     }
 
     public void testLoadModelWithDependencies() throws Exception {
-        DataMap map = processor
-                .loadEOModel("wotests/cross-model-relationships.eomodeld");
+        DataMap map = processor.loadEOModel("wotests/cross-model-relationships.eomodeld");
 
         ObjEntity entity = map.getObjEntity("CrossModelRelTest");
         assertNotNull(entity);
@@ -108,12 +107,14 @@ public class EOModelProcessorTst extends BasicTestCase {
 
         // queries
         Query query = map.getQuery("ExhibitType_TestQuery");
+
         assertNotNull(query);
-        assertSame(map.getObjEntity("ExhibitType"), query.getRoot(null));
         assertTrue(query instanceof SelectQuery);
         assertTrue(query instanceof EOQuery);
-
         EOQuery eoQuery = (EOQuery) query;
+
+        assertSame(map.getObjEntity("ExhibitType"), eoQuery.getRoot());
+
         Collection bindings = eoQuery.getBindingNames();
         assertNotNull(bindings);
         assertEquals(3, bindings.size());
@@ -127,7 +128,7 @@ public class EOModelProcessorTst extends BasicTestCase {
         // check obj entities
         ObjEntity customTypes = map.getObjEntity("CustomTypes");
         assertNotNull(customTypes);
-        
+
         ObjAttribute pk = (ObjAttribute) customTypes.getAttribute("pk");
         assertNotNull(pk);
         assertEquals("CustomType1", pk.getType());

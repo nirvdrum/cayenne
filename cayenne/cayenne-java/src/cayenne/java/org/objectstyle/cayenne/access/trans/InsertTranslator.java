@@ -92,7 +92,7 @@ public class InsertTranslator extends QueryAssembler {
     public String createSqlString() throws Exception {
         prepareLists();
         StringBuffer queryBuf = new StringBuffer("INSERT INTO ");
-        DbEntity dbE = getEntityResolver().lookupDbEntity(query);
+        DbEntity dbE = getRootDbEntity();
         queryBuf.append(dbE.getFullyQualifiedName()).append(" (");
 
         int len = columnList.size();
@@ -124,7 +124,7 @@ public class InsertTranslator extends QueryAssembler {
 
     /** Creates 2 matching lists: columns names and values */
     protected void prepareLists() throws Exception {
-        DbEntity dbE = getEntityResolver().lookupDbEntity(query);
+        DbEntity dbE = getRootDbEntity();
         ObjectId oid = insertQuery().getObjectId();
         Map id = (oid != null) ? oid.getIdSnapshot() : null;
 

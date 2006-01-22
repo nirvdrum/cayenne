@@ -53,76 +53,57 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.query;
 
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
 
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SQLTemplate;
-import org.objectstyle.cayenne.query.QueryMetadata;
+public class MockQueryMetadata implements QueryMetadata {
 
-/**
- * @author Andrei Adamchik
- */
-public class SQLTemplateBuilderTst extends TestCase {
-
-    public void testGetQueryType() throws Exception {
-        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
-        assertTrue(builder.getQuery() instanceof SQLTemplate);
+    public ObjEntity getObjEntity() {
+        return null;
     }
 
-    public void testGetQueryName() throws Exception {
-        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
-        builder.setName("xyz");
-
-        assertEquals("xyz", builder.getQuery().getName());
+    public DbEntity getDbEntity() {
+        return null;
     }
 
-    public void testGetQueryRoot() throws Exception {
-        DataMap map = new DataMap();
-        ObjEntity entity = new ObjEntity("A");
-        map.addObjEntity(entity);
-
-        SQLTemplateBuilder builder = new SQLTemplateBuilder();
-        builder.setRoot(map, QueryBuilder.OBJ_ENTITY_ROOT, "A");
-
-        Query query = builder.getQuery();
-        assertTrue(query instanceof SQLTemplate);
-        assertSame(entity, ((SQLTemplate) query).getRoot());
+    public Procedure getProcedure() {
+        return null;
     }
 
-    public void testGetQueryProperties() throws Exception {
-        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
-        builder.addProperty(QueryMetadata.FETCH_LIMIT_PROPERTY, "5");
-
-        Query query = builder.getQuery();
-        assertTrue(query instanceof SQLTemplate);
-        assertEquals(5, ((SQLTemplate) query).getFetchLimit());
-
-        // TODO: test other properties...
+    public DataMap getDataMap() {
+        return null;
     }
 
-    public void testGetQuerySql() throws Exception {
-        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
-        builder.addSql("abc", null);
-
-        SQLTemplate query = (SQLTemplate) builder.getQuery();
-        assertEquals("abc", query.getDefaultTemplate());
+    public String getCachePolicy() {
+        return null;
     }
 
-    public void testGetQueryAdapterSql() throws Exception {
-        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
-        builder.addSql("abc", "adapter");
-
-        SQLTemplate query = (SQLTemplate) builder.getQuery();
-        assertNull(query.getDefaultTemplate());
-        assertEquals("abc", query.getTemplate("adapter"));
+    public boolean isFetchingDataRows() {
+        return false;
     }
 
-    class MockupRootQueryBuilder extends SQLTemplateBuilder {
-
-        public Object getRoot() {
-            return "FakeRoot";
-        }
+    public boolean isRefreshingObjects() {
+        return false;
     }
+
+    public boolean isResolvingInherited() {
+        return false;
+    }
+
+    public int getPageSize() {
+        return 0;
+    }
+
+    public int getFetchLimit() {
+        return 0;
+    }
+
+    public PrefetchTreeNode getPrefetchTree() {
+        return null;
+    }
+
 }

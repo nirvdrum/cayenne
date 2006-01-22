@@ -217,7 +217,7 @@ public class SelectQueryBasicsTst extends TestCase {
         q.setDistinct(true);
 
         SelectQuery q1 = q.queryWithParameters(new HashMap(), true);
-        assertSame(q.getRoot(null), q1.getRoot(null));
+        assertSame(q.getRoot(), q1.getRoot());
         assertEquals(q.isDistinct(), q1.isDistinct());
         assertNull(q1.getQualifier());
     }
@@ -237,7 +237,7 @@ public class SelectQueryBasicsTst extends TestCase {
         params.put("test2", "abc");
         params.put("test3", "xyz");
         SelectQuery q1 = q.queryWithParameters(params, true);
-        assertSame(q.getRoot(null), q1.getRoot(null));
+        assertSame(q.getRoot(), q1.getRoot());
         assertNotNull(q1.getQualifier());
         assertTrue(q1.getQualifier() != q.getQualifier());
     }

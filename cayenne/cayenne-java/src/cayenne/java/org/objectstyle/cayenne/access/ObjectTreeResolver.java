@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.PrefetchProcessor;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
+import org.objectstyle.cayenne.query.QueryMetadata;
 
 /**
  * Processes a number of DataRow sets corresponding to a given prefetch tree, resolving
@@ -82,16 +83,11 @@ import org.objectstyle.cayenne.query.PrefetchTreeNode;
 class ObjectTreeResolver {
 
     DataContext context;
-    ObjEntity rootEntity;
-    boolean refreshObjects;
-    boolean resolveInheritance;
+    QueryMetadata queryMetadata;
 
-    ObjectTreeResolver(DataContext context, ObjEntity rootEntity, boolean refresh,
-            boolean resolveInheritanceHierarchy) {
-        this.rootEntity = rootEntity;
+    ObjectTreeResolver(DataContext context, QueryMetadata queryMetadata) {
+        this.queryMetadata = queryMetadata;
         this.context = context;
-        this.refreshObjects = refresh;
-        this.resolveInheritance = resolveInheritanceHierarchy;
     }
 
     List resolveObjectTree(
@@ -236,16 +232,13 @@ class ObjectTreeResolver {
             }
             else {
                 relationship = null;
-                entity = rootEntity;
+                entity = queryMetadata.getObjEntity();
                 rows = mainResultRows;
             }
 
             node.setDataRows(rows);
-            node.setResolver(new ObjectResolver(
-                    context,
-                    entity,
-                    refreshObjects,
-                    resolveInheritance));
+            node.setResolver(new ObjectResolver(context, entity, queryMetadata
+                    .isRefreshingObjects(), queryMetadata.isResolvingInherited()));
             node.setIncoming(relationship);
 
             if (currentNode != null) {
@@ -304,7 +297,7 @@ class ObjectTreeResolver {
                 context.getObjectStore().snapshotsUpdatedForObjects(
                         objects,
                         ((PrefetchProcessorJointNode) processorNode).getResolvedRows(),
-                        refreshObjects);
+                        queryMetadata.isRefreshingObjects());
             }
             // disjoint prefetch on flattened relationships still requires manual matching
             else if (processorNode.getIncoming() != null
@@ -492,7 +485,7 @@ class ObjectTreeResolver {
                 context.getObjectStore().snapshotsUpdatedForObjects(
                         processorNode.getObjects(),
                         processorNode.getResolvedRows(),
-                        refreshObjects);
+                        queryMetadata.isRefreshingObjects());
                 processorNode.connectToParents();
             }
 

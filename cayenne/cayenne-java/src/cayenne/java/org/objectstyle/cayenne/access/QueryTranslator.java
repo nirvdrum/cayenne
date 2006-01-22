@@ -80,14 +80,14 @@ public abstract class QueryTranslator {
     /** Query being translated. */
     protected Query query;
 
-    /** 
-     * JDBC database connection needed to create PreparedStatement. 
-     * Prior to 1.2 this property was called "con".
+    /**
+     * JDBC database connection needed to create PreparedStatement. Prior to 1.2 this
+     * property was called "con".
      */
     protected Connection connection;
 
-    /** 
-     * Used mainly for name resolution. 
+    /**
+     * Used mainly for name resolution.
      * 
      * @deprecated Since 1.2 entityResolver property is used.
      */
@@ -95,7 +95,7 @@ public abstract class QueryTranslator {
 
     /** Adapter helping to do SQL literal conversions, etc. */
     protected DbAdapter adapter;
-    
+
     /**
      * Provides access to Cayenne mapping info.
      * 
@@ -103,13 +103,12 @@ public abstract class QueryTranslator {
      */
     protected EntityResolver entityResolver;
 
-    /** 
-     * Creates PreparedStatement. <code>logLevel</code> 
-     * parameter is supplied to allow
-     * control of logging of produced SQL. 
+    /**
+     * Creates PreparedStatement. <code>logLevel</code> parameter is supplied to allow
+     * control of logging of produced SQL.
      */
     public abstract PreparedStatement createStatement() throws Exception;
-    
+
     /**
      * @deprecated since 1.2
      */
@@ -126,10 +125,10 @@ public abstract class QueryTranslator {
         this.query = query;
     }
 
-    /** 
+    /**
      * Returns Connection object used by this translator.
      * 
-     * @since 1.2 
+     * @since 1.2
      */
     public Connection getConnection() {
         return connection;
@@ -141,7 +140,7 @@ public abstract class QueryTranslator {
     public void setConnection(Connection connection) {
         this.connection = connection;
     }
-    
+
     /**
      * @deprecated Since 1.2 use getConnection().
      */
@@ -156,7 +155,7 @@ public abstract class QueryTranslator {
         setConnection(con);
     }
 
-    /** 
+    /**
      * Returns QueryEngine used by this translator.
      * 
      * @deprecated Since 1.2 use "getEntityResolver()"
@@ -190,24 +189,20 @@ public abstract class QueryTranslator {
     }
 
     public ObjEntity getRootEntity() {
-        if (query.getRoot(entityResolver) instanceof DbEntity) {
-            return null;
-        }
-
-        return getEntityResolver().lookupObjEntity(query);
+        return query.getMetaData(getEntityResolver()).getObjEntity();
     }
 
     public DbEntity getRootDbEntity() {
-        return getEntityResolver().lookupDbEntity(query);
+        return query.getMetaData(getEntityResolver()).getDbEntity();
     }
-    
+
     /**
      * @since 1.2
      */
     public EntityResolver getEntityResolver() {
         return entityResolver;
     }
-    
+
     /**
      * @since 1.2
      */

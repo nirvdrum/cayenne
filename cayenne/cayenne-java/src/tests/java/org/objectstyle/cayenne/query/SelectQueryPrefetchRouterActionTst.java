@@ -81,7 +81,7 @@ public class SelectQueryPrefetchRouterActionTst extends CayenneTestCase {
 
         PrefetchSelectQuery prefetch = (PrefetchSelectQuery) router.getQueries().get(0);
 
-        assertSame(paintingEntity, prefetch.getRoot(getDomain().getEntityResolver()));
+        assertSame(paintingEntity, prefetch.getRoot());
         assertEquals(Expression.fromString("db:toArtist.ARTIST_NAME = 'abc'"), prefetch
                 .getQualifier());
     }
@@ -101,7 +101,7 @@ public class SelectQueryPrefetchRouterActionTst extends CayenneTestCase {
         assertEquals(1, router.getQueryCount());
 
         PrefetchSelectQuery prefetch = (PrefetchSelectQuery) router.getQueries().get(0);
-        assertSame(paintingEntity, prefetch.getRoot(getDomain().getEntityResolver()));
+        assertSame(paintingEntity, prefetch.getRoot());
         assertEquals(
                 Expression
                         .fromString("db:toArtist.ARTIST_NAME = 'abc' or db:toArtist.ARTIST_NAME = 'xyz'"),
@@ -124,7 +124,7 @@ public class SelectQueryPrefetchRouterActionTst extends CayenneTestCase {
 
         PrefetchSelectQuery prefetch = (PrefetchSelectQuery) router.getQueries().get(0);
 
-        assertSame(galleryEntity, prefetch.getRoot(getDomain().getEntityResolver()));
+        assertSame(galleryEntity, prefetch.getRoot());
         assertEquals(Expression
                 .fromString("db:paintingArray.toArtist.ARTIST_NAME = 'abc'"), prefetch
                 .getQualifier());

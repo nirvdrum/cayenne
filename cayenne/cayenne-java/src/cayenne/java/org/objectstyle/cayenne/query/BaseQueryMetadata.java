@@ -63,9 +63,11 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
@@ -76,7 +78,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * @author Andrus Adamchik
  * @since 1.1
  */
-final class BaseQueryMetadata implements QueryMetadata, XMLSerializable, Serializable {
+class BaseQueryMetadata implements QueryMetadata, XMLSerializable, Serializable {
 
     int fetchLimit = QueryMetadata.FETCH_LIMIT_DEFAULT;
     int pageSize = QueryMetadata.PAGE_SIZE_DEFAULT;
@@ -88,6 +90,7 @@ final class BaseQueryMetadata implements QueryMetadata, XMLSerializable, Seriali
 
     transient ObjEntity objEntity;
     transient DbEntity dbEntity;
+    transient DataMap dataMap;
     transient Object lastRoot;
     transient EntityResolver lastEntityResolver;
 
@@ -99,6 +102,7 @@ final class BaseQueryMetadata implements QueryMetadata, XMLSerializable, Seriali
         this.lastRoot = null;
         this.objEntity = null;
         this.dbEntity = null;
+        this.dataMap = null;
 
         this.fetchingDataRows = info.isFetchingDataRows();
         this.fetchLimit = info.getFetchLimit();
@@ -110,38 +114,56 @@ final class BaseQueryMetadata implements QueryMetadata, XMLSerializable, Seriali
         setPrefetchTree(info.getPrefetchTree());
     }
 
-    void resolve(Object root, EntityResolver resolver) {
+    boolean resolve(Object root, EntityResolver resolver) {
         if (lastRoot != root || lastEntityResolver != resolver) {
 
             this.objEntity = null;
             this.dbEntity = null;
+            this.dataMap = null;
 
             if (root != null) {
                 if (root instanceof Class) {
                     this.objEntity = resolver.lookupObjEntity((Class) root);
-                    this.dbEntity = objEntity != null ? objEntity.getDbEntity() : null;
+
+                    if (this.objEntity != null) {
+                        this.dbEntity = objEntity.getDbEntity();
+                        this.dataMap = objEntity.getDataMap();
+                    }
                 }
                 else if (root instanceof ObjEntity) {
                     this.objEntity = (ObjEntity) root;
                     this.dbEntity = objEntity.getDbEntity();
+                    this.dataMap = objEntity.getDataMap();
                 }
                 else if (root instanceof String) {
                     this.objEntity = resolver.lookupObjEntity((String) root);
-                    this.dbEntity = objEntity != null ? objEntity.getDbEntity() : null;
+                    if (this.objEntity != null) {
+                        this.dbEntity = objEntity.getDbEntity();
+                        this.dataMap = objEntity.getDataMap();
+                    }
                 }
                 else if (root instanceof DbEntity) {
-                    this.objEntity = null;
                     this.dbEntity = (DbEntity) root;
+                    this.dataMap = dbEntity.getDataMap();
+                }
+                else if (root instanceof DataMap) {
+                    this.dataMap = (DataMap) root;
                 }
                 else if (root instanceof Persistent) {
                     this.objEntity = resolver.lookupObjEntity((Persistent) root);
-                    this.dbEntity = objEntity != null ? objEntity.getDbEntity() : null;
+                    if (this.objEntity != null) {
+                        this.dbEntity = objEntity.getDbEntity();
+                        this.dataMap = objEntity.getDataMap();
+                    }
                 }
             }
 
             this.lastRoot = root;
             this.lastEntityResolver = resolver;
+            return true;
         }
+
+        return false;
     }
 
     void initWithProperties(Map properties) {
@@ -152,8 +174,10 @@ final class BaseQueryMetadata implements QueryMetadata, XMLSerializable, Seriali
 
         Object fetchLimit = properties.get(QueryMetadata.FETCH_LIMIT_PROPERTY);
         Object pageSize = properties.get(QueryMetadata.PAGE_SIZE_PROPERTY);
-        Object refreshingObjects = properties.get(QueryMetadata.REFRESHING_OBJECTS_PROPERTY);
-        Object fetchingDataRows = properties.get(QueryMetadata.FETCHING_DATA_ROWS_PROPERTY);
+        Object refreshingObjects = properties
+                .get(QueryMetadata.REFRESHING_OBJECTS_PROPERTY);
+        Object fetchingDataRows = properties
+                .get(QueryMetadata.FETCHING_DATA_ROWS_PROPERTY);
 
         Object resolvingInherited = properties
                 .get(QueryMetadata.RESOLVING_INHERITED_PROPERTY);
@@ -213,13 +237,28 @@ final class BaseQueryMetadata implements QueryMetadata, XMLSerializable, Seriali
             encoder.printProperty(QueryMetadata.PAGE_SIZE_PROPERTY, pageSize);
         }
 
-        if (cachePolicy != null && !QueryMetadata.CACHE_POLICY_DEFAULT.equals(cachePolicy)) {
+        if (cachePolicy != null
+                && !QueryMetadata.CACHE_POLICY_DEFAULT.equals(cachePolicy)) {
             encoder.printProperty(QueryMetadata.CACHE_POLICY_PROPERTY, cachePolicy);
         }
 
         if (prefetchTree != null) {
             prefetchTree.encodeAsXML(encoder);
         }
+    }
+
+    /**
+     * @since 1.2
+     */
+    public DataMap getDataMap() {
+        return dataMap;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public Procedure getProcedure() {
+        return null;
     }
 
     /**

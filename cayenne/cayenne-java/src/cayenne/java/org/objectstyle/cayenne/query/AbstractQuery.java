@@ -108,22 +108,12 @@ public abstract class AbstractQuery implements Query {
     }
 
     /**
-     * Returns the root of this query
+     * Returns the root of this query.
      */
     // note that while "getRoot()" is deprecated in the Query interface, it is still valid
     // in AbstractQuery.
     public Object getRoot() {
         return root;
-    }
-
-    /**
-     * Returns a "root" ivar without any extra lookups. In other words this implementation
-     * is analogous to {@link #getRoot()}.
-     * 
-     * @since 1.2
-     */
-    public Object getRoot(EntityResolver resolver) {
-        return getRoot();
     }
 
     /**
@@ -177,7 +167,7 @@ public abstract class AbstractQuery implements Query {
      * @since 1.2
      */
     public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
-        DataMap map = resolver.lookupDataMap(this);
+        DataMap map = getMetaData(resolver).getDataMap();
 
         if (map == null) {
             throw new CayenneRuntimeException("No DataMap found, can't route query "

@@ -153,14 +153,10 @@ public class QueryChain implements Query {
     }
 
     /**
-     * Returns default select parameters.
+     * Returns default metadata.
      */
     public QueryMetadata getMetaData(EntityResolver resolver) {
         return DefaultQueryMetadata.defaultInfo;
-    }
-
-    public Object getRoot(EntityResolver resolver) {
-        throw new CayenneRuntimeException("QueryChain has no root");
     }
 
     /**

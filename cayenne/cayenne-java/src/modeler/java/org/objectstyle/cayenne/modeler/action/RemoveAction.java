@@ -93,6 +93,7 @@ import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.query.AbstractQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -268,9 +269,8 @@ public class RemoveAction extends CayenneAction {
         // clone to be able to remove within iterator...
         Iterator it = new ArrayList(map.getQueries()).iterator();
         while (it.hasNext()) {
-            Query next = (Query) it.next();
-
-            Object root = next.getRoot(null);
+            AbstractQuery next = (AbstractQuery) it.next();
+            Object root = next.getRoot();
 
             if (root == entity
                     || (root instanceof String && root

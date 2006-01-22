@@ -63,9 +63,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -206,20 +204,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
-
-        // route root
-        DataMap map = resolver.lookupDataMap(this);
-
-        if (map == null) {
-            throw new CayenneRuntimeException("No DataMap found, can't route query "
-                    + this);
-        }
-
-        router.route(router.engineForDataMap(map), this, substitutedQuery != null
-                ? substitutedQuery
-                : this);
-
-        // create queries for DISJOINT prefetches
+        super.route(router, resolver, substitutedQuery);
         routePrefetches(router, resolver);
     }
 

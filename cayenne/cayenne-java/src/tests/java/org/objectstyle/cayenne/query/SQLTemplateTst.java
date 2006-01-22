@@ -78,7 +78,7 @@ public class SQLTemplateTst extends TestCase {
         SQLTemplate c1 = (SQLTemplate) clone;
 
         assertNotSame(o, c1);
-        assertEquals(o.getRoot(null), c1.getRoot(null));
+        assertEquals(o.getRoot(), c1.getRoot());
         assertEquals(o.getDefaultTemplate(), c1.getDefaultTemplate());
     }
 
@@ -90,7 +90,7 @@ public class SQLTemplateTst extends TestCase {
         SQLTemplate c1 = (SQLTemplate) clone;
 
         assertNotSame(o, c1);
-        assertEquals(o.getRoot(null), c1.getRoot(null));
+        assertEquals(o.getRoot(), c1.getRoot());
         assertEquals(o.getDefaultTemplate(), c1.getDefaultTemplate());
 
         // set immutable parameters ... query must recast them to mutable version

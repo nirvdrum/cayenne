@@ -254,7 +254,7 @@ public class ClientServerChannel implements OPPChannel {
             EntityResolver clientResolver = serverContext
                     .getEntityResolver()
                     .getClientEntityResolver();
-            Object root = abstractClientQuery.getRoot(clientResolver);
+            Object root = abstractClientQuery.getRoot();
             if (root instanceof Class) {
                 ObjEntity entity = clientResolver.lookupObjEntity((Class) root);
                 if (entity == null) {

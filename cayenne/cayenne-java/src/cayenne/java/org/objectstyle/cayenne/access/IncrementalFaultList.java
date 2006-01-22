@@ -147,34 +147,34 @@ public class IncrementalFaultList implements List {
      *            a value greater than zero.
      */
     public IncrementalFaultList(DataContext dataContext, Query query) {
-        QueryMetadata info = query.getMetaData(dataContext.getEntityResolver());
-        if (info.getPageSize() <= 0) {
+        QueryMetadata metadata = query.getMetaData(dataContext.getEntityResolver());
+        if (metadata.getPageSize() <= 0) {
             throw new CayenneRuntimeException(
                     "IncrementalFaultList does not support unpaged queries. Query page size is "
-                            + info.getPageSize());
+                            + metadata.getPageSize());
         }
 
         this.elements = Collections.synchronizedList(new ArrayList());
         this.dataContext = dataContext;
-        this.pageSize = info.getPageSize();
-        this.rootEntity = dataContext.getEntityResolver().lookupObjEntity(query);
+        this.pageSize = metadata.getPageSize();
+        this.rootEntity = metadata.getObjEntity();
 
         // create an internal query, it is a partial replica of
         // the original query and will serve as a value holder for
         // various parameters
         this.internalQuery = new SelectQuery();
-        this.internalQuery.setRoot(query.getRoot(dataContext.getEntityResolver()));
-        this.internalQuery.setFetchingDataRows(info.isFetchingDataRows());
-        this.internalQuery.setResolvingInherited(info.isResolvingInherited());
+        this.internalQuery.setRoot(metadata.getObjEntity());
+        this.internalQuery.setFetchingDataRows(metadata.isFetchingDataRows());
+        this.internalQuery.setResolvingInherited(metadata.isResolvingInherited());
 
-        if (info.isFetchingDataRows()) {
+        if (metadata.isFetchingDataRows()) {
             helper = new DataRowListHelper();
         }
         else {
             helper = new DataObjectListHelper();
         }
 
-        if (!info.isFetchingDataRows() && (query instanceof SelectQuery)) {
+        if (!metadata.isFetchingDataRows() && (query instanceof SelectQuery)) {
             SelectQuery select = (SelectQuery) query;
 
             this.internalQuery.setPrefetchTree(select.getPrefetchTree());
@@ -205,7 +205,7 @@ public class IncrementalFaultList implements List {
      */
     protected void fillIn(Query query) {
         QueryMetadata info = query.getMetaData(dataContext.getEntityResolver());
-        
+
         synchronized (elements) {
 
             boolean fetchesDataRows = internalQuery.isFetchingDataRows();

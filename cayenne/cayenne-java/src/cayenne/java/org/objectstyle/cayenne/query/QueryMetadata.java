@@ -55,8 +55,10 @@
  */
 package org.objectstyle.cayenne.query;
 
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
 
 /**
  * Provides a common interface for accessing query metadata.
@@ -121,14 +123,24 @@ public interface QueryMetadata {
     public static final String CACHE_POLICY_DEFAULT = NO_CACHE;
 
     /**
-     * Returns an ObjEntity that describes select result.
+     * Returns an ObjEntity associated with a query or null if no such entity exists.
      */
     ObjEntity getObjEntity();
 
     /**
-     * Returns DbEntity that describes select operation.
+     * Returns a DbEntity associated with a query or null if no such entity exists.
      */
     DbEntity getDbEntity();
+
+    /**
+     * Returns a Procedure associated with a query or null if no such procedure exists.
+     */
+    Procedure getProcedure();
+
+    /**
+     * Returns a DataMap associated with a query or null if no such DataMap exists.
+     */
+    DataMap getDataMap();
 
     /**
      * Returns query cache policy, which can be one of {@link #NO_CACHE},

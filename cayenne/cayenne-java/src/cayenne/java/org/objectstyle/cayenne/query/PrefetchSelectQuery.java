@@ -107,7 +107,7 @@ public class PrefetchSelectQuery extends SelectQuery {
         setParentQuery(parentQuery);
         setPrefetchPath(prefetch);
 
-        ObjEntity entity = resolver.lookupObjEntity(parentQuery);
+        ObjEntity entity = parentQuery.getMetaData(resolver).getObjEntity();
         EntityInheritanceTree inheritanceTree = resolver.lookupInheritanceTree(entity);
 
         Iterator it = entity.resolvePathComponents(prefetch);

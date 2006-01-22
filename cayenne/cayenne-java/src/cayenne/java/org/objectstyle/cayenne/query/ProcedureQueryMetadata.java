@@ -53,76 +53,42 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.query;
 
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.Procedure;
 
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SQLTemplate;
-import org.objectstyle.cayenne.query.QueryMetadata;
+class ProcedureQueryMetadata extends BaseQueryMetadata {
 
-/**
- * @author Andrei Adamchik
- */
-public class SQLTemplateBuilderTst extends TestCase {
+    transient Procedure procedure;
 
-    public void testGetQueryType() throws Exception {
-        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
-        assertTrue(builder.getQuery() instanceof SQLTemplate);
+    public Procedure getProcedure() {
+        return procedure;
     }
 
-    public void testGetQueryName() throws Exception {
-        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
-        builder.setName("xyz");
-
-        assertEquals("xyz", builder.getQuery().getName());
+    void copyFromInfo(QueryMetadata info) {
+        procedure = null;
+        super.copyFromInfo(info);
     }
 
-    public void testGetQueryRoot() throws Exception {
-        DataMap map = new DataMap();
-        ObjEntity entity = new ObjEntity("A");
-        map.addObjEntity(entity);
+    void resolve(Object root, Class rootClass, EntityResolver resolver) {
+        if (super.resolve(rootClass, resolver)) {
+            procedure = null;
 
-        SQLTemplateBuilder builder = new SQLTemplateBuilder();
-        builder.setRoot(map, QueryBuilder.OBJ_ENTITY_ROOT, "A");
+            if (root != null) {
+                if (root instanceof String) {
+                    this.procedure = resolver.lookupProcedure((String) root);
+                }
+                else if (root instanceof Procedure) {
+                    this.procedure = (Procedure) root;
+                }
 
-        Query query = builder.getQuery();
-        assertTrue(query instanceof SQLTemplate);
-        assertSame(entity, ((SQLTemplate) query).getRoot());
-    }
-
-    public void testGetQueryProperties() throws Exception {
-        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
-        builder.addProperty(QueryMetadata.FETCH_LIMIT_PROPERTY, "5");
-
-        Query query = builder.getQuery();
-        assertTrue(query instanceof SQLTemplate);
-        assertEquals(5, ((SQLTemplate) query).getFetchLimit());
-
-        // TODO: test other properties...
-    }
-
-    public void testGetQuerySql() throws Exception {
-        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
-        builder.addSql("abc", null);
-
-        SQLTemplate query = (SQLTemplate) builder.getQuery();
-        assertEquals("abc", query.getDefaultTemplate());
-    }
-
-    public void testGetQueryAdapterSql() throws Exception {
-        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
-        builder.addSql("abc", "adapter");
-
-        SQLTemplate query = (SQLTemplate) builder.getQuery();
-        assertNull(query.getDefaultTemplate());
-        assertEquals("abc", query.getTemplate("adapter"));
-    }
-
-    class MockupRootQueryBuilder extends SQLTemplateBuilder {
-
-        public Object getRoot() {
-            return "FakeRoot";
+                // theoretically procedure can be in one DataMap, while the Java Class
+                // - in another.
+                if (this.procedure != null && this.dataMap == null) {
+                    this.dataMap = procedure.getDataMap();
+                }
+            }
         }
     }
 }

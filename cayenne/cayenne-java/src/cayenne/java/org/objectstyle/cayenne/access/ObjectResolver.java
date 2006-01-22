@@ -88,8 +88,8 @@ class ObjectResolver {
     ObjectResolver(DataContext context, Query query) {
 
         EntityResolver resolver = context.getEntityResolver();
-        QueryMetadata info = query.getMetaData(resolver);
-        init(context, resolver.lookupObjEntity(query), info.isRefreshingObjects(), info
+        QueryMetadata metadata = query.getMetaData(resolver);
+        init(context, metadata.getObjEntity(), metadata.isRefreshingObjects(), metadata
                 .isResolvingInherited());
     }
 

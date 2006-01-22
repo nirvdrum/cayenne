@@ -114,18 +114,9 @@ public interface Query extends Serializable {
     /**
      * Returns the root object of the query.
      * 
-     * @deprecated since 1.2. Use {@link #getRoot(EntityResolver)} instead.
+     * @deprecated since 1.2. Use {@link #getMetaData(EntityResolver)} instead.
      */
     Object getRoot();
-
-    /**
-     * Returns query "root" - a token that can be used to identify what mapping object
-     * this query is related to. A root can be a persistent Java class, an ObjEntity name,
-     * etc. - anything understood by EntityResolver.
-     * 
-     * @since 1.2
-     */
-    Object getRoot(EntityResolver resolver);
 
     /**
      * Sets the root of the query. *

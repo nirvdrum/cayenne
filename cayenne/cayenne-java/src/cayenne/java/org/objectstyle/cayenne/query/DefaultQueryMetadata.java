@@ -55,8 +55,10 @@
  */
 package org.objectstyle.cayenne.query;
 
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
 
 /**
  * A QueryMetadata implementation that returns all the defaults.
@@ -68,11 +70,35 @@ class DefaultQueryMetadata implements QueryMetadata {
 
     static final QueryMetadata defaultInfo = new DefaultQueryMetadata();
 
+    /**
+     * To simplify overriding this implementation checks whether there is a non-null
+     * entity or procedure, and uses its DataMap.
+     */
+    public DataMap getDataMap() {
+        if (getObjEntity() != null) {
+            return getObjEntity().getDataMap();
+        }
+
+        if (getDbEntity() != null) {
+            return getDbEntity().getDataMap();
+        }
+
+        if (getProcedure() != null) {
+            return getProcedure().getDataMap();
+        }
+
+        return null;
+    }
+
     public DbEntity getDbEntity() {
         return null;
     }
 
     public ObjEntity getObjEntity() {
+        return null;
+    }
+
+    public Procedure getProcedure() {
         return null;
     }
 

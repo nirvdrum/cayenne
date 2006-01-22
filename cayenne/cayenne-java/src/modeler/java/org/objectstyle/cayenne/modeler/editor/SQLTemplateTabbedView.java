@@ -117,7 +117,7 @@ public class SQLTemplateTabbedView extends JTabbedPane {
         }
 
         // if no root, reset tabs to show the first panel..
-        if (mediator.getCurrentQuery().getRoot(null) == null) {
+        if (((SQLTemplate) mediator.getCurrentQuery()).getRoot() == null) {
             lastSelectionIndex = 0;
         }
 

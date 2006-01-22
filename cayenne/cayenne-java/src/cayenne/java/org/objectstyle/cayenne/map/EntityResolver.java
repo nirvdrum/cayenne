@@ -407,21 +407,11 @@ public class EntityResolver implements MappingNamespace, Serializable {
 
     /**
      * Searches for DataMap that holds Query root object.
+     * 
+     * @deprecated since 1.2 use 'Query.getMetaData(EntityResolver).getDataMap()'.
      */
     public synchronized DataMap lookupDataMap(Query q) {
-        Object root = q.getRoot(this);
-        if (root instanceof DataMap) {
-            return (DataMap) root;
-        }
-
-        DbEntity entity = lookupDbEntity(q);
-        if (entity != null) {
-            return entity.getDataMap();
-        }
-
-        // try procedure
-        Procedure procedure = lookupProcedure(q);
-        return (procedure != null) ? procedure.getDataMap() : null;
+        return q.getMetaData(this).getDataMap();
     }
 
     /**
@@ -452,6 +442,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
      * passing to lookupDbEntity
      * 
      * @return the root DbEntity of the query
+     * @deprecated since 1.2 use 'Query.getMetaData(EntityResolver).getDbEntity()'
      */
     public synchronized DbEntity lookupDbEntity(Query q) {
         return q.getMetaData(this).getDbEntity();
@@ -516,6 +507,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
      *             reliably possible to map from a DbEntity to an ObjEntity as a DbEntity
      *             may be the source for multiple ObjEntities. It is not safe to rely on
      *             such behaviour).
+     * @deprecated since 1.2 use 'Query.getMetaData(EntityResolver).getObjEntity()'.
      */
     public synchronized ObjEntity lookupObjEntity(Query q) {
         return q.getMetaData(this).getObjEntity();
@@ -532,14 +524,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
     }
 
     public Procedure lookupProcedure(Query q) {
-        Object root = q.getRoot(this);
-        if (root instanceof Procedure) {
-            return (Procedure) root;
-        }
-        else if (root instanceof String) {
-            return this.lookupProcedure((String) root);
-        }
-        return null;
+        return q.getMetaData(this).getProcedure();
     }
 
     public Procedure lookupProcedure(String procedureName) {

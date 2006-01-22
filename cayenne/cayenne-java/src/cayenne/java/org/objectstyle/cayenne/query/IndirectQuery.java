@@ -135,13 +135,6 @@ public abstract class IndirectQuery implements Query {
     }
 
     /**
-     * Delegates root lookup to the replacement query.
-     */
-    public Object getRoot(EntityResolver resolver) {
-        return getReplacementQuery(resolver).getRoot(resolver);
-    }
-
-    /**
      * Throws an exception.
      * 
      * @deprecated since 1.2

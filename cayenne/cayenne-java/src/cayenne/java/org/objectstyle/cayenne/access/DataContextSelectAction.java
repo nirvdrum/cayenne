@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.query.QueryMetadata;
  * A DataContext helper that handles select query execution.
  * 
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 class DataContextSelectAction {
 
@@ -87,20 +87,15 @@ class DataContextSelectAction {
 
     List performQuery(Query query) {
 
-        return performQuery(query, query.getName(), query.getMetaData(
-                context.getEntityResolver()).isRefreshingObjects());
-    }
+        QueryMetadata metadata = query.getMetaData(context.getEntityResolver());
 
-    List performQuery(Query query, String cacheKey, boolean refreshCache) {
-
-        QueryMetadata info = query.getMetaData(context.getEntityResolver());
-
-        if (info.getPageSize() > 0) {
+        if (metadata.getPageSize() > 0) {
             return new IncrementalFaultList(context, query);
         }
 
-        boolean localCache = QueryMetadata.LOCAL_CACHE.equals(info.getCachePolicy());
-        boolean sharedCache = QueryMetadata.SHARED_CACHE.equals(info.getCachePolicy());
+        boolean localCache = QueryMetadata.LOCAL_CACHE.equals(metadata.getCachePolicy());
+        boolean sharedCache = QueryMetadata.SHARED_CACHE
+                .equals(metadata.getCachePolicy());
         boolean useCache = localCache || sharedCache;
 
         String name = query.getName();
@@ -112,20 +107,20 @@ class DataContextSelectAction {
         }
 
         // get results from cache...
-        if (!refreshCache && useCache) {
+        if (!metadata.isRefreshingObjects() && useCache) {
             List results = null;
 
             if (localCache) {
                 // results should have been stored as rows or objects when
                 // they were originally cached... do no conversions now
-                results = context.getObjectStore().getCachedQueryResult(cacheKey);
+                results = context.getObjectStore().getCachedQueryResult(query.getName());
             }
             else if (sharedCache) {
 
                 List rows = context
                         .getObjectStore()
                         .getDataRowCache()
-                        .getCachedSnapshots(cacheKey);
+                        .getCachedSnapshots(query.getName());
                 if (rows != null) {
 
                     // decorate shared cached lists with immutable list to avoid messing
@@ -133,14 +128,15 @@ class DataContextSelectAction {
                     if (rows.size() == 0) {
                         results = Collections.EMPTY_LIST;
                     }
-                    else if (info.isFetchingDataRows()) {
+                    else if (metadata.isFetchingDataRows()) {
                         results = Collections.unmodifiableList(rows);
                     }
                     else {
-                        ObjEntity root = context.getEntityResolver().lookupObjEntity(
-                                query);
-                        results = context.objectsFromDataRows(root, rows, false, info
-                                .isResolvingInherited());
+                        results = context.objectsFromDataRows(
+                                metadata.getObjEntity(),
+                                rows,
+                                false,
+                                metadata.isResolvingInherited());
                     }
                 }
             }
@@ -155,22 +151,21 @@ class DataContextSelectAction {
 
         List results;
 
-        if (info.isFetchingDataRows()) {
+        if (metadata.isFetchingDataRows()) {
             results = response.getFirstRows(query);
         }
         else {
-            results = getResultsAsObjects(query, response, refreshCache, info
-                    .isResolvingInherited());
+            results = getResultsAsObjects(query, metadata, response);
         }
 
         // cache results if needed
         if (useCache) {
             if (localCache) {
-                context.getObjectStore().cacheQueryResult(cacheKey, results);
+                context.getObjectStore().cacheQueryResult(query.getName(), results);
             }
             else if (sharedCache) {
                 context.getObjectStore().getDataRowCache().cacheSnapshots(
-                        cacheKey,
+                        query.getName(),
                         response.getFirstRows(query));
             }
         }
@@ -180,9 +175,8 @@ class DataContextSelectAction {
 
     List getResultsAsObjects(
             Query rootQuery,
-            QueryResponse response,
-            boolean refresh,
-            boolean resolveInheritanceTree) {
+            QueryMetadata metadata,
+            QueryResponse response) {
 
         List mainRows = response.getFirstRows(rootQuery);
 
@@ -190,13 +184,16 @@ class DataContextSelectAction {
             return new ArrayList(1);
         }
 
-        ObjEntity entity = context.getEntityResolver().lookupObjEntity(rootQuery);
-        PrefetchTreeNode prefetchTree = rootQuery.getMetaData(
-                context.getEntityResolver()).getPrefetchTree();
+        ObjEntity entity = metadata.getObjEntity();
+        PrefetchTreeNode prefetchTree = metadata.getPrefetchTree();
 
         // take a shortcut when no prefetches exist...
         if (prefetchTree == null) {
-            return new ObjectResolver(context, entity, refresh, resolveInheritanceTree)
+            return new ObjectResolver(
+                    context,
+                    entity,
+                    metadata.isRefreshingObjects(),
+                    metadata.isResolvingInherited())
                     .synchronizedObjectsFromDataRows(mainRows);
         }
 
@@ -215,11 +212,7 @@ class DataContextSelectAction {
             }
         }
 
-        ObjectTreeResolver resolver = new ObjectTreeResolver(
-                context,
-                entity,
-                refresh,
-                resolveInheritanceTree);
+        ObjectTreeResolver resolver = new ObjectTreeResolver(context, metadata);
 
         // double-sync row processing
         synchronized (context.getObjectStore()) {

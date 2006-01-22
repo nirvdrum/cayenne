@@ -87,7 +87,7 @@ class SelectQueryPrefetchRouterAction implements PrefetchProcessor {
             this.query = query;
             this.router = router;
             this.resolver = resolver;
-            this.entity = resolver.lookupObjEntity(query);
+            this.entity = query.getMetaData(resolver).getObjEntity();
             this.inheritanceTree = resolver.lookupInheritanceTree(entity);
 
             query.getPrefetchTree().traverse(this);

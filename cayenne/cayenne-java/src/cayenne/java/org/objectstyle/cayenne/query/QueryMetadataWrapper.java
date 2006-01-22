@@ -58,8 +58,10 @@ package org.objectstyle.cayenne.query;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
 
 /**
  * A wrapper for a QueryMetadata instance allowing that may override a subset of metadata
@@ -91,6 +93,14 @@ class QueryMetadataWrapper implements QueryMetadata {
 
     boolean overrideExists(String key) {
         return overrides != null && overrides.containsKey(key);
+    }
+
+    public DataMap getDataMap() {
+        return info.getDataMap();
+    }
+
+    public Procedure getProcedure() {
+        return info.getProcedure();
     }
 
     public DbEntity getDbEntity() {

@@ -80,9 +80,12 @@ public class ProcedureQueryValidator extends TreeNodeValidator {
         validateResultType(query, treeNodePath, validator);
     }
 
-    protected void validateRoot(Query query, ProjectPath path, Validator validator) {
+    protected void validateRoot(
+            ProcedureQuery query,
+            ProjectPath path,
+            Validator validator) {
         DataMap map = (DataMap) path.firstInstanceOf(DataMap.class);
-        Object root = query.getRoot(null);
+        Object root = query.getRoot();
 
         if (root == null && map != null) {
             validator.registerWarning("Query has no root", path);

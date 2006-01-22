@@ -155,10 +155,11 @@ public class SelectObserver extends DefaultOperationObserver {
     public List getResultsAsObjects(DataContext dataContext, Query rootQuery) {
 
         QueryMetadata info = rootQuery.getMetaData(dataContext.getEntityResolver());
-
-        ObjEntity rootEntity = dataContext.getEntityResolver().lookupObjEntity(rootQuery);
-        return dataContext.objectsFromDataRows(rootEntity, getResults(rootQuery), info
-                .isRefreshingObjects(), info.isResolvingInherited());
+        return dataContext.objectsFromDataRows(
+                info.getObjEntity(),
+                getResults(rootQuery),
+                info.isRefreshingObjects(),
+                info.isResolvingInherited());
     }
 
     /**

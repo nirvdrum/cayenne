@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
@@ -112,25 +113,25 @@ public class SelectQueryValidator extends TreeNodeValidator {
         }
     }
 
-    protected Entity validateRoot(Query query, ProjectPath path, Validator validator) {
+    protected Entity validateRoot(SelectQuery query, ProjectPath path, Validator validator) {
         DataMap map = (DataMap) path.firstInstanceOf(DataMap.class);
-        if (query.getRoot(null) == null && map != null) {
+        if (query.getRoot() == null && map != null) {
             validator.registerWarning("Query has no root", path);
             return null;
         }
 
-        if (query.getRoot(null) == map) {
+        if (query.getRoot() == map) {
             // map-level query... everything is clean
             return null;
         }
 
         if (map == null) {
             // maybe standalone entity, otherwise bail...
-            return (query.getRoot(null) instanceof Entity) ? (Entity) query.getRoot(null) : null;
+            return (query.getRoot() instanceof Entity) ? (Entity) query.getRoot() : null;
         }
 
         // can't validate Class root - it is likely not accessible from here...
-        if (query.getRoot(null) instanceof Class) {
+        if (query.getRoot() instanceof Class) {
             return null;
         }
 
@@ -141,9 +142,10 @@ public class SelectQueryValidator extends TreeNodeValidator {
             return null;
         }
 
-        Entity entity = parent.getEntityResolver().lookupObjEntity(query);
+        QueryMetadata metadata = query.getMetaData(parent.getEntityResolver());
+        Entity entity = metadata.getObjEntity();
         if (entity == null) {
-            entity = parent.getEntityResolver().lookupDbEntity(query);
+            entity = metadata.getDbEntity();
         }
 
         // if no entity is found register warning and return null

@@ -1422,7 +1422,8 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      *             It shouldn't be in DataContext.
      */
     public void prefetchRelationships(SelectQuery query, List objects) {
-        Collection prefetches = query.getPrefetchTree() != null ? query
+        QueryMetadata metadata = query.getMetaData(getEntityResolver());
+        Collection prefetches = metadata.getPrefetchTree() != null ? query
                 .getPrefetchTree()
                 .nonPhantomNodes() : Collections.EMPTY_LIST;
 
@@ -1430,7 +1431,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
             return;
         }
 
-        ObjEntity entity = getEntityResolver().lookupObjEntity(query);
+        ObjEntity entity = metadata.getObjEntity();
         Iterator prefetchesIt = prefetches.iterator();
         while (prefetchesIt.hasNext()) {
             PrefetchTreeNode prefetch = (PrefetchTreeNode) prefetchesIt.next();
