@@ -56,7 +56,6 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -220,7 +219,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
         Level oldLevel = observerLogger.getLevel();
         observerLogger.setLevel(Level.ERROR);
         try {
-            context.performQueries(Collections.singletonList(q), new QueryResult());
+            context.performGenericQuery(q);
             fail("Query was invalid and was supposed to fail.");
         }
         catch (RuntimeException ex) {

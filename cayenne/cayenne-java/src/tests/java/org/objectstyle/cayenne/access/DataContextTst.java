@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.access;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -252,6 +251,9 @@ public class DataContextTst extends DataContextTestBase {
         assertEquals(1, a1.getPaintingsCount().intValue());
     }
 
+    /**
+     * @deprecated since 1.2 as 'performQueries' is deprecated.
+     */
     public void testPerformQueries() throws Exception {
         createTestData("testGalleries");
 
@@ -344,9 +346,7 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testPerformQuery() throws Exception {
         SelectQuery query = new SelectQuery("Artist");
-        context.performQueries(Collections.singletonList(query), opObserver);
-        List objects = opObserver.rowsForQuery(query);
-
+        List objects = context.performQuery(query);
         assertNotNull(objects);
         assertEquals(artistCount, objects.size());
     }
