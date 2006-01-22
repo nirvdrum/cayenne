@@ -69,9 +69,8 @@ import org.objectstyle.cayenne.util.Util;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class SingleObjectQuery implements Query {
+public class SingleObjectQuery extends IndirectQuery {
 
-    protected String name;
     protected ObjectId objectId;
 
     // needed for hessian serialization
@@ -91,35 +90,7 @@ public class SingleObjectQuery implements Query {
         return objectId;
     }
 
-    /**
-     * Returns default select parameters.
-     */
-    public SelectInfo getSelectInfo(EntityResolver resolver) {
-        return DefaultSelectInfo.defaultParameters;
-    }
-
-    public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
-        // TODO: this query wouldn't take advantage of the cache... may need support at
-        // the framework level to provide the result from cache or add cache access
-        // ability to the query lifecycle API.
-
-        buildReplacementQuery(resolver).route(
-                router,
-                resolver,
-                substitutedQuery != null ? substitutedQuery : this);
-    }
-
-    public SQLAction createSQLAction(SQLActionVisitor visitor) {
-        throw new CayenneRuntimeException(this
-                + " doesn't support its own sql actions. "
-                + "It should've been delegated to another "
-                + "query during resolution or routing phase.");
-    }
-
-    /**
-     * Creates a query that should be run instead of this query.
-     */
-    protected Query buildReplacementQuery(EntityResolver resolver) {
+    protected Query createReplacementQuery(EntityResolver resolver) {
         if (objectId == null) {
             throw new CayenneRuntimeException("Can't resolve query - objectId is null.");
         }
@@ -127,14 +98,6 @@ public class SingleObjectQuery implements Query {
         return new SelectQuery(objectId.getEntityName(), ExpressionFactory.matchAllDbExp(
                 objectId.getIdSnapshot(),
                 Expression.EQUAL_TO));
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     /**
@@ -149,13 +112,6 @@ public class SingleObjectQuery implements Query {
      */
     public Object getRoot() {
         return objectId.getEntityName();
-    }
-
-    /**
-     * @deprecated since 1.2
-     */
-    public void setRoot(Object root) {
-        throw new CayenneRuntimeException("This deprecated method is not implemented");
     }
 
     /**

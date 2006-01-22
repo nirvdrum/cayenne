@@ -94,7 +94,8 @@ public class SQLTemplateBuilderTst extends TestCase {
         builder.addProperty(SelectInfo.FETCH_LIMIT_PROPERTY, "5");
 
         Query query = builder.getQuery();
-        assertEquals(5, query.getSelectInfo(null).getFetchLimit());
+        assertTrue(query instanceof SQLTemplate);
+        assertEquals(5, ((SQLTemplate) query).getFetchLimit());
 
         // TODO: test other properties...
     }

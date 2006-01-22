@@ -77,9 +77,8 @@ import org.objectstyle.cayenne.util.Util;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class NamedQuery implements Query {
+public class NamedQuery extends IndirectQuery {
 
-    protected String name;
     protected String queryName;
     protected Map parameters;
 
@@ -87,7 +86,7 @@ public class NamedQuery implements Query {
     // refresh, override with no-refresh, no override.
     protected Boolean refreshOverride;
 
-    protected transient int hashCode;
+    transient int hashCode;
 
     public NamedQuery(String queryName) {
         this(queryName, null);
@@ -107,20 +106,8 @@ public class NamedQuery implements Query {
         this.parameters = Util.toMap(keys, values);
     }
 
-    /**
-     * Returns the name of this query, which is different from the name this query
-     * <strong>points to</strong>.
-     */
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public SelectInfo getSelectInfo(EntityResolver resolver) {
-        SelectInfo info = resolveQuery(resolver).getSelectInfo(resolver);
+        SelectInfo info = super.getSelectInfo(resolver);
 
         if (refreshOverride == null) {
             return info;
@@ -142,59 +129,12 @@ public class NamedQuery implements Query {
         this.queryName = queryName;
     }
 
-    /**
-     * Resolves a real query for the name and delegates further execution to this query.
-     */
-    public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
-        Query substituteQuery = substituteQuery(resolver);
-
-        substituteQuery.route(router, resolver, substitutedQuery != null
-                ? substitutedQuery
-                : this);
-    }
-
-    /**
-     * Throws an exception as query execution is expected to be delegated to a resolved
-     * named query during routing phase.
-     */
-    public SQLAction createSQLAction(SQLActionVisitor visitor) {
-        throw new CayenneRuntimeException(this
-                + " doesn't support its own sql actions. "
-                + "It should've been delegated to another "
-                + "query during resolution phase.");
-    }
-
-    /**
-     * Returns a query for name, throwing an exception if such query is not mapped in the
-     * EntityResolver.
-     */
-    protected Query resolveQuery(EntityResolver resolver) {
-        Query query = resolver.lookupQuery(getQueryName());
-
-        if (query == null) {
-            throw new CayenneRuntimeException("Can't find named query for name '"
-                    + getQueryName()
-                    + "'");
-        }
-
-        if (query == this) {
-            throw new CayenneRuntimeException("Named query resolves to self: '"
-                    + getQueryName()
-                    + "'");
-        }
-
-        return query;
-    }
-
-    /**
-     * Locates and initializes a substitution query.
-     */
-    protected Query substituteQuery(EntityResolver resolver) {
+    protected Query createReplacementQuery(EntityResolver resolver) {
         Query query = resolveQuery(resolver);
 
         if (query instanceof ParameterizedQuery) {
-            // must process the query even if we have no parameters set, so that unused
-            // parts of qualifier could be pruned.
+            // must process the query even if we have no parameters set, so that
+            // unused parts of qualifier could be pruned.
             Map parameters = (this.parameters != null)
                     ? this.parameters
                     : Collections.EMPTY_MAP;
@@ -238,6 +178,28 @@ public class NamedQuery implements Query {
     }
 
     /**
+     * Returns a query for name, throwing an exception if such query is not mapped in the
+     * EntityResolver.
+     */
+    protected Query resolveQuery(EntityResolver resolver) {
+        Query query = resolver.lookupQuery(getQueryName());
+
+        if (query == null) {
+            throw new CayenneRuntimeException("Can't find named query for name '"
+                    + getQueryName()
+                    + "'");
+        }
+
+        if (query == this) {
+            throw new CayenneRuntimeException("Named query resolves to self: '"
+                    + getQueryName()
+                    + "'");
+        }
+
+        return query;
+    }
+
+    /**
      * Returns the root of the named query obtained from the EntityResolver. If such query
      * does not exist (or if it is the same query as this object), null is returned.
      */
@@ -261,13 +223,6 @@ public class NamedQuery implements Query {
      * @deprecated since 1.2
      */
     public Object getRoot() {
-        throw new CayenneRuntimeException("This deprecated method is not implemented");
-    }
-
-    /**
-     * @deprecated since 1.2
-     */
-    public void setRoot(Object root) {
         throw new CayenneRuntimeException("This deprecated method is not implemented");
     }
 

@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,67 +53,91 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.query;
 
-import junit.framework.TestCase;
-
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectInfo;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
- * @author Andrei Adamchik
+ * A convenience superclass of the queries that resolve into some other queries during the
+ * routing phase. Provides caching of a replacement query.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
  */
-public class SelectQueryBuilderTst extends TestCase {
+public abstract class IndirectQuery implements Query {
 
-    public void testGetQueryType() throws Exception {
-        SelectQueryBuilder builder = new MockupRootQueryBuilder();
-        assertTrue(builder.getQuery() instanceof SelectQuery);
+    protected String name;
+
+    protected transient Query replacementQuery;
+    protected transient EntityResolver lastResolver;
+
+    /**
+     * Gets SelectInfo from the replacement query.
+     */
+    public SelectInfo getSelectInfo(EntityResolver resolver) {
+        return getReplacementQuery(resolver).getSelectInfo(resolver);
     }
 
-    public void testGetQueryName() throws Exception {
-        SelectQueryBuilder builder = new MockupRootQueryBuilder();
-        builder.setName("xyz");
-
-        assertEquals("xyz", builder.getQuery().getName());
+    public String getName() {
+        return name;
     }
 
-    public void testGetQueryRoot() throws Exception {
-        DataMap map = new DataMap();
-        ObjEntity entity = new ObjEntity("A");
-        map.addObjEntity(entity);
-
-        SelectQueryBuilder builder = new SelectQueryBuilder();
-        builder.setRoot(map, QueryBuilder.OBJ_ENTITY_ROOT, "A");
-
-        assertSame(entity, builder.getQuery().getRoot(null));
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void testGetQueryQualifier() throws Exception {
-        SelectQueryBuilder builder = new MockupRootQueryBuilder();
-        builder.setQualifier("abc = 5");
-
-        SelectQuery query = (SelectQuery) builder.getQuery();
-
-        assertEquals(Expression.fromString("abc = 5"), query.getQualifier());
+    /**
+     * Delegates routing to a replacement query.
+     */
+    public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
+        getReplacementQuery(resolver).route(
+                router,
+                resolver,
+                substitutedQuery != null ? substitutedQuery : this);
     }
 
-    public void testGetQueryProperties() throws Exception {
-        SelectQueryBuilder builder = new MockupRootQueryBuilder();
-        builder.addProperty(SelectInfo.FETCH_LIMIT_PROPERTY, "5");
+    /**
+     * Creates a substitute query. An implementor is free to provide an arbitrary
+     * replacement query.
+     */
+    protected abstract Query createReplacementQuery(EntityResolver resolver);
 
-        Query query = builder.getQuery();
-        assertTrue(query instanceof SelectQuery);
-        assertEquals(5, ((SelectQuery) query).getFetchLimit());
-
-        // TODO: test other properties...
-    }
-
-    class MockupRootQueryBuilder extends SelectQueryBuilder {
-
-        public Object getRoot() {
-            return "FakeRoot";
+    /**
+     * Returns a replacement query, creating it on demand and caching it for reuse.
+     */
+    protected Query getReplacementQuery(EntityResolver resolver) {
+        if (replacementQuery == null || lastResolver != resolver) {
+            this.replacementQuery = createReplacementQuery(resolver);
+            this.lastResolver = resolver;
         }
+
+        return replacementQuery;
+    }
+
+    /**
+     * Throws an exception as indirect query should not be executed directly.
+     */
+    public SQLAction createSQLAction(SQLActionVisitor visitor) {
+        throw new CayenneRuntimeException(this.getClass().getName()
+                + " is an indirect query and doesn't support its own sql actions. "
+                + "It should've been delegated to another "
+                + "query during resolution or routing phase.");
+    }
+
+    /**
+     * @deprecated since 1.2
+     */
+    public abstract Object getRoot();
+
+    public abstract Object getRoot(EntityResolver resolver);
+
+    /**
+     * Throws an exception.
+     * 
+     * @deprecated since 1.2
+     */
+    public void setRoot(Object root) {
+        throw new CayenneRuntimeException("This deprecated method is not implemented");
     }
 }

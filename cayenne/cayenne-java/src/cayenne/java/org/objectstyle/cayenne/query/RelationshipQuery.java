@@ -73,9 +73,8 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class RelationshipQuery implements Query {
+public class RelationshipQuery extends IndirectQuery {
 
-    protected String name;
     protected ObjectId objectId;
     protected String relationshipName;
 
@@ -113,27 +112,7 @@ public class RelationshipQuery implements Query {
         return getRelationship(resolver).getTargetEntityName();
     }
 
-    /**
-     * Substitutes this query with a SelectQuery and routes it down the stack.
-     */
-    public void route(QueryRouter router, EntityResolver resolver, Query substitutedQuery) {
-        buildReplacementQuery(resolver).route(
-                router,
-                resolver,
-                substitutedQuery != null ? substitutedQuery : this);
-    }
-
-    /**
-     * Throws an exception as this query is not executable itself.
-     */
-    public SQLAction createSQLAction(SQLActionVisitor visitor) {
-        throw new CayenneRuntimeException(this
-                + " doesn't support its own sql actions. "
-                + "It should've been delegated to another "
-                + "query during resolution phase.");
-    }
-
-    protected Query buildReplacementQuery(EntityResolver resolver) {
+    protected Query createReplacementQuery(EntityResolver resolver) {
         ObjRelationship relationship = getRelationship(resolver);
 
         // build executable select...
@@ -167,32 +146,10 @@ public class RelationshipQuery implements Query {
         return relationship;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Returns default select parameters.
-     */
-    public SelectInfo getSelectInfo(EntityResolver resolver) {
-        return DefaultSelectInfo.defaultParameters;
-    }
-
     /**
      * @deprecated since 1.2
      */
     public Object getRoot() {
-        throw new CayenneRuntimeException("This deprecated method is not implemented");
-    }
-
-    /**
-     * @deprecated since 1.2
-     */
-    public void setRoot(Object root) {
         throw new CayenneRuntimeException("This deprecated method is not implemented");
     }
 
