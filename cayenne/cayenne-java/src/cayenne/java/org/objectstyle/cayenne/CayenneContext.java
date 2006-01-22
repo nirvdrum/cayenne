@@ -462,10 +462,6 @@ public class CayenneContext implements ObjectContext {
         return localObjects;
     }
 
-    public int[] performNonSelectingQuery(Query query) {
-        return channel.performGenericQuery(query).getFirstUpdateCounts(query);
-    }
-
     public QueryResponse performGenericQuery(Query query) {
         return channel.performGenericQuery(query);
     }
