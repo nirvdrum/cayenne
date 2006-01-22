@@ -1244,6 +1244,72 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
     }
 
     /**
+     * Performs a single database select query returning result as a ResultIterator.
+     * Returned ResultIterator will provide access to DataRows.
+     */
+    public ResultIterator performIteratedQuery(Query query) throws CayenneException {
+        // note that for now OPP API does not support cursors (aka ResultIterator), so we
+        // have to go directly to the DataDomain.
+        IteratedSelectObserver observer = new IteratedSelectObserver();
+        getParentDataDomain().performQueries(Collections.singletonList(query), observer);
+        return observer.getResultIterator();
+    }
+
+    /**
+     * Executes a query returning a generic response.
+     * 
+     * @since 1.2
+     */
+    public QueryResponse performGenericQuery(Query query) {
+
+        query = nonNullDelegate().willPerformGenericQuery(this, query);
+        if (query == null) {
+            return new QueryResult();
+        }
+
+        if (this.getChannel() == null) {
+            throw new CayenneRuntimeException(
+                    "Can't run query - parent OPPChannel is not set.");
+        }
+
+        return getChannel().performGenericQuery(query);
+    }
+
+    /**
+     * Performs a single selecting query. Various query setting control the behavior of
+     * this method and the results returned:
+     * <ul>
+     * <li>Query caching policy defines whether the results are retrieved from cache or
+     * fetched from the database. Note that queries that use caching must have a name that
+     * is used as a caching key.</li>
+     * <li>Query refreshing policy controls whether to refresh existing data objects and
+     * ignore any cached values.</li>
+     * <li>Query data rows policy defines whether the result should be returned as
+     * DataObjects or DataRows.</li>
+     * </ul>
+     * <p>
+     * <i>Since 1.2 takes any Query parameter, not just GenericSelectQuery</i>
+     * </p>
+     * 
+     * @return A list of DataObjects or a DataRows, depending on the value returned by
+     *         {@link SelectInfo#isFetchingDataRows()}.
+     */
+    public List performQuery(Query query) {
+        query = nonNullDelegate().willPerformQuery(this, query);
+        if (query == null) {
+            return new ArrayList(1);
+        }
+
+        // this filter should go away when we remove deprecated api from the Delegate.
+        query = filterThroughDelegateDeprecated(query);
+        if (query == null) {
+            return new ArrayList(1);
+        }
+
+        return new DataContextSelectAction(this).performQuery(query);
+    }
+
+    /**
      * Performs a single database query that does not select rows. Returns an array of
      * update counts.
      * 
@@ -1271,36 +1337,6 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      */
     public int[] performNonSelectingQuery(String queryName, Map parameters) {
         return performNonSelectingQuery(new NamedQuery(queryName, parameters));
-    }
-
-    /**
-     * Performs a single database select query returning result as a ResultIterator.
-     * Returned ResultIterator will provide access to DataRows.
-     */
-    public ResultIterator performIteratedQuery(Query query) throws CayenneException {
-        IteratedSelectObserver observer = new IteratedSelectObserver();
-        getParentDataDomain().performQueries(Collections.singletonList(query), observer);
-        return observer.getResultIterator();
-    }
-
-    /**
-     * Executes a query returning a generic response.
-     * 
-     * @since 1.2
-     */
-    public QueryResponse performGenericQuery(Query query) {
-        
-        query = nonNullDelegate().willPerformGenericQuery(this, query);
-        if(query == null) {
-            return new QueryResult();
-        }
-        
-        if (this.getChannel() == null) {
-            throw new CayenneRuntimeException(
-                    "Can't run query - parent OPPChannel is not set.");
-        }
-
-        return getChannel().performGenericQuery(query);
     }
 
     /**
@@ -1427,32 +1463,6 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
                     objects,
                     path);
         }
-    }
-
-    /**
-     * Performs a single selecting query. Various query setting control the behavior of
-     * this method and the results returned:
-     * <ul>
-     * <li>Query caching policy defines whether the results are retrieved from cache or
-     * fetched from the database. Note that queries that use caching must have a name that
-     * is used as a caching key.</li>
-     * <li>Query refreshing policy controls whether to refresh existing data objects and
-     * ignore any cached values.</li>
-     * <li>Query data rows policy defines whether the result should be returned as
-     * DataObjects or DataRows.</li>
-     * </ul>
-     * <p>
-     * <i>Since 1.2 takes any Query parameter, not just GenericSelectQuery</i>
-     * </p>
-     * 
-     * @return A list of DataObjects or a DataRows, depending on the value returned by
-     *         {@link SelectInfo#isFetchingDataRows()}.
-     */
-    public List performQuery(Query query) {
-        query = nonNullDelegate().willPerformQuery(this, query);
-        return query != null
-                ? new DataContextSelectAction(this).performQuery(query)
-                : new ArrayList(1);
     }
 
     /**

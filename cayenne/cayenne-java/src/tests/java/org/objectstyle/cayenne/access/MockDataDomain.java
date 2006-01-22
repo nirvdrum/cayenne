@@ -57,6 +57,10 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.Collection;
+import java.util.Collections;
+
+import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * A mockup DataDomain that delegates all queries to the underlying QueryEngine. Ideally
@@ -64,7 +68,7 @@ import java.util.Collection;
  * should safice. Unfortunately DataContext currently assumes that its parent QueryEngine
  * is a DataDomain...
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class MockDataDomain extends DataDomain {
 
@@ -94,5 +98,11 @@ public class MockDataDomain extends DataDomain {
 
     public void performQueries(Collection queries, OperationObserver observer) {
         engine.performQueries(queries, observer);
+    }
+
+    public QueryResponse performGenericQuery(Query query) {
+        QueryResult response = new QueryResult();
+        performQueries(Collections.singleton(query), response);
+        return response;
     }
 }

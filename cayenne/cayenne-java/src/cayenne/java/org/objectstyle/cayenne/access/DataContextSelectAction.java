@@ -151,16 +151,15 @@ class DataContextSelectAction {
         }
 
         // must fetch...
-        QueryResult observer = new QueryResult();
-        context.performQueries(Collections.singletonList(query), observer);
+        QueryResponse response = context.getChannel().performGenericQuery(query);
 
         List results;
 
         if (info.isFetchingDataRows()) {
-            results = observer.getFirstRows(query);
+            results = response.getFirstRows(query);
         }
         else {
-            results = getResultsAsObjects(query, observer, refreshCache, info
+            results = getResultsAsObjects(query, response, refreshCache, info
                     .isResolvingInherited());
         }
 
@@ -172,7 +171,7 @@ class DataContextSelectAction {
             else if (sharedCache) {
                 context.getObjectStore().getDataRowCache().cacheSnapshots(
                         cacheKey,
-                        observer.getFirstRows(query));
+                        response.getFirstRows(query));
             }
         }
 
