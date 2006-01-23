@@ -466,8 +466,26 @@ public class CayenneContext implements ObjectContext {
         return channel.performGenericQuery(query);
     }
 
+    /**
+     * Resolves an object if it is HOLLOW.
+     */
     public void prepareForAccess(Persistent object, String property) {
-        ensureFaultResolved(object);
+        if (object.getPersistenceState() == PersistenceState.HOLLOW) {
+
+            ObjectId gid = object.getObjectId();
+            List objects = performQuery(new SingleObjectQuery(gid));
+
+            if (objects.size() == 0) {
+                throw new FaultFailureException(
+                        "Error resolving fault, no matching row exists in the database for GlobalID: "
+                                + gid);
+            }
+            else if (objects.size() > 1) {
+                throw new FaultFailureException(
+                        "Error resolving fault, more than one row exists in the database for GlobalID: "
+                                + gid);
+            }
+        }
     }
 
     public void propertyChanged(
@@ -500,28 +518,6 @@ public class CayenneContext implements ObjectContext {
     public Collection newObjects() {
         synchronized (graphManager) {
             return graphManager.dirtyNodes(PersistenceState.NEW);
-        }
-    }
-
-    /**
-     * Checks if an object is HOLLOW and if so, resolves it.
-     */
-    protected void ensureFaultResolved(Persistent object) {
-        if (object.getPersistenceState() == PersistenceState.HOLLOW) {
-
-            ObjectId gid = object.getObjectId();
-            List objects = performQuery(new SingleObjectQuery(gid));
-
-            if (objects.size() == 0) {
-                throw new FaultFailureException(
-                        "Error resolving fault, no matching row exists in the database for GlobalID: "
-                                + gid);
-            }
-            else if (objects.size() > 1) {
-                throw new FaultFailureException(
-                        "Error resolving fault, more than one row exists in the database for GlobalID: "
-                                + gid);
-            }
         }
     }
 
