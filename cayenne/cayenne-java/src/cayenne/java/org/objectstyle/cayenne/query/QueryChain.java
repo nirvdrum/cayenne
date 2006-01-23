@@ -156,7 +156,7 @@ public class QueryChain implements Query {
      * Returns default metadata.
      */
     public QueryMetadata getMetaData(EntityResolver resolver) {
-        return DefaultQueryMetadata.defaultInfo;
+        return DefaultQueryMetadata.defaultMetadata;
     }
 
     /**

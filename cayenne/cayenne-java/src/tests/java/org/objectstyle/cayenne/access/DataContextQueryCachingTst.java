@@ -72,17 +72,19 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
 
     protected DataRowStore dataRowCache;
     protected DataContext context;
-    protected MockQueryEngine engine;
 
     protected void setUp() throws Exception {
         super.setUp();
 
-        // assemble mockup context
-        this.engine = new MockQueryEngine(getDomain());
-        this.dataRowCache = new DataRowStore("test");
-        this.dataRowCache.setNotifyingRemoteListeners(false);
+        context = createDataContextWithSharedCache();
+        dataRowCache = getDomain().getSharedSnapshotCache();
 
-        this.context = mockupDataContext();
+        // the above should clear shared cache before the run, but just in case
+        dataRowCache.clear();
+    }
+
+    protected DataContext createDataContextNoCacheClear() {
+        return getDomain().createDataContext();
     }
 
     public void testLocalCacheDataRowsNoRefresh() throws Exception {
@@ -92,22 +94,29 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         select.setFetchingDataRows(true);
         select.setCachePolicy(QueryMetadata.LOCAL_CACHE);
 
-        List rows = mockupDataRows(2);
-        engine.reset();
-        engine.addExpectedResult(select, rows);
+        MockDataNode engine = MockDataNode.interceptNode(getDomain(), getNode());
 
-        // first run, no cache yet
-        List resultRows = context.performQuery(select);
-        assertEquals(1, engine.getRunCount());
-        assertEquals(rows, resultRows);
-        assertNull(dataRowCache.getCachedSnapshots("c"));
-        assertEquals(rows, context.getObjectStore().getCachedQueryResult("c"));
+        try {
+            List rows = mockupDataRows(2);
+            engine.reset();
+            engine.addExpectedResult(select, rows);
 
-        // now the query with the same name must run from cache
-        engine.reset();
-        List cachedResultRows = context.performQuery(select);
-        assertEquals(0, engine.getRunCount());
-        assertEquals(rows, cachedResultRows);
+            // first run, no cache yet
+            List resultRows = context.performQuery(select);
+            assertEquals(1, engine.getRunCount());
+            assertEquals(rows, resultRows);
+            assertNull(dataRowCache.getCachedSnapshots("c"));
+            assertEquals(rows, context.getObjectStore().getCachedQueryResult("c"));
+
+            // now the query with the same name must run from cache
+            engine.reset();
+            List cachedResultRows = context.performQuery(select);
+            assertEquals(0, engine.getRunCount());
+            assertEquals(rows, cachedResultRows);
+        }
+        finally {
+            engine.stopInterceptNode();
+        }
     }
 
     public void testLocalCacheDataRowsRefresh() throws Exception {
@@ -117,25 +126,33 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         select.setFetchingDataRows(true);
         select.setCachePolicy(QueryMetadata.LOCAL_CACHE);
 
-        // first run, no cache yet
-        List rows1 = mockupDataRows(2);
-        engine.reset();
-        engine.addExpectedResult(select, rows1);
-        List resultRows = context.performQuery(select);
-        assertEquals(1, engine.getRunCount());
-        assertEquals(rows1, resultRows);
-        assertNull(dataRowCache.getCachedSnapshots("c"));
-        assertEquals(rows1, context.getObjectStore().getCachedQueryResult("c"));
+        MockDataNode engine = MockDataNode.interceptNode(getDomain(), getNode());
 
-        // second run, must refresh the cache
-        List rows2 = mockupDataRows(4);
-        engine.reset();
-        engine.addExpectedResult(select, rows2);
-        List freshResultRows = context.performQuery(select);
-        assertEquals(1, engine.getRunCount());
-        assertEquals(rows2, freshResultRows);
-        assertNull(dataRowCache.getCachedSnapshots("c"));
-        assertEquals(rows2, context.getObjectStore().getCachedQueryResult("c"));
+        try {
+
+            // first run, no cache yet
+            List rows1 = mockupDataRows(2);
+            engine.reset();
+            engine.addExpectedResult(select, rows1);
+            List resultRows = context.performQuery(select);
+            assertEquals(1, engine.getRunCount());
+            assertEquals(rows1, resultRows);
+            assertNull(dataRowCache.getCachedSnapshots("c"));
+            assertEquals(rows1, context.getObjectStore().getCachedQueryResult("c"));
+
+            // second run, must refresh the cache
+            List rows2 = mockupDataRows(4);
+            engine.reset();
+            engine.addExpectedResult(select, rows2);
+            List freshResultRows = context.performQuery(select);
+            assertEquals(1, engine.getRunCount());
+            assertEquals(rows2, freshResultRows);
+            assertNull(dataRowCache.getCachedSnapshots("c"));
+            assertEquals(rows2, context.getObjectStore().getCachedQueryResult("c"));
+        }
+        finally {
+            engine.stopInterceptNode();
+        }
     }
 
     public void testSharedCacheDataRowsNoRefresh() throws Exception {
@@ -145,29 +162,36 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         select.setFetchingDataRows(true);
         select.setCachePolicy(QueryMetadata.SHARED_CACHE);
 
-        List rows = mockupDataRows(2);
-        engine.reset();
-        engine.addExpectedResult(select, rows);
+        MockDataNode engine = MockDataNode.interceptNode(getDomain(), getNode());
 
-        // first run, no cache yet
-        List resultRows = context.performQuery(select);
-        assertEquals(1, engine.getRunCount());
-        assertEquals(rows, resultRows);
-        assertNull(context.getObjectStore().getCachedQueryResult("c"));
-        assertEquals(rows, dataRowCache.getCachedSnapshots("c"));
+        try {
+            List rows = mockupDataRows(2);
+            engine.reset();
+            engine.addExpectedResult(select, rows);
 
-        // now the query with the same name must run from cache
-        engine.reset();
-        List cachedResultRows = context.performQuery(select);
-        assertEquals(0, engine.getRunCount());
-        assertEquals(rows, cachedResultRows);
+            // first run, no cache yet
+            List resultRows = context.performQuery(select);
+            assertEquals(1, engine.getRunCount());
+            assertEquals(rows, resultRows);
+            assertNull(context.getObjectStore().getCachedQueryResult("c"));
+            assertEquals(rows, dataRowCache.getCachedSnapshots("c"));
 
-        // query from an alt DataContext must run from cache
-        DataContext altContext = mockupDataContext();
-        engine.reset();
-        List altResultRows = altContext.performQuery(select);
-        assertEquals(0, engine.getRunCount());
-        assertEquals(rows, altResultRows);
+            // now the query with the same name must run from cache
+            engine.reset();
+            List cachedResultRows = context.performQuery(select);
+            assertEquals(0, engine.getRunCount());
+            assertEquals(rows, cachedResultRows);
+
+            // query from an alt DataContext must run from cache
+            DataContext altContext = createDataContextNoCacheClear();
+            engine.reset();
+            List altResultRows = altContext.performQuery(select);
+            assertEquals(0, engine.getRunCount());
+            assertEquals(rows, altResultRows);
+        }
+        finally {
+            engine.stopInterceptNode();
+        }
     }
 
     public void testSharedCacheDataRowsRefresh() throws Exception {
@@ -177,25 +201,32 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         select.setFetchingDataRows(true);
         select.setCachePolicy(QueryMetadata.SHARED_CACHE);
 
-        // first run, no cache yet
-        List rows1 = mockupDataRows(2);
-        engine.reset();
-        engine.addExpectedResult(select, rows1);
-        List resultRows = context.performQuery(select);
-        assertEquals(1, engine.getRunCount());
-        assertEquals(rows1, resultRows);
-        assertEquals(rows1, dataRowCache.getCachedSnapshots("c"));
-        assertNull(context.getObjectStore().getCachedQueryResult("c"));
+        MockDataNode engine = MockDataNode.interceptNode(getDomain(), getNode());
 
-        // second run, must refresh the cache
-        List rows2 = mockupDataRows(5);
-        engine.reset();
-        engine.addExpectedResult(select, rows2);
-        List freshResultRows = context.performQuery(select);
-        assertEquals(1, engine.getRunCount());
-        assertEquals(rows2, freshResultRows);
-        assertEquals(rows2, dataRowCache.getCachedSnapshots("c"));
-        assertNull(context.getObjectStore().getCachedQueryResult("c"));
+        try {
+            // first run, no cache yet
+            List rows1 = mockupDataRows(2);
+            engine.reset();
+            engine.addExpectedResult(select, rows1);
+            List resultRows = context.performQuery(select);
+            assertEquals(1, engine.getRunCount());
+            assertEquals(rows1, resultRows);
+            assertEquals(rows1, dataRowCache.getCachedSnapshots("c"));
+            assertNull(context.getObjectStore().getCachedQueryResult("c"));
+
+            // second run, must refresh the cache
+            List rows2 = mockupDataRows(5);
+            engine.reset();
+            engine.addExpectedResult(select, rows2);
+            List freshResultRows = context.performQuery(select);
+            assertEquals(1, engine.getRunCount());
+            assertEquals(rows2, freshResultRows);
+            assertEquals(rows2, dataRowCache.getCachedSnapshots("c"));
+            assertNull(context.getObjectStore().getCachedQueryResult("c"));
+        }
+        finally {
+            engine.stopInterceptNode();
+        }
     }
 
     public void testLocalCacheDataObjectsRefresh() throws Exception {
@@ -205,27 +236,35 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         select.setFetchingDataRows(false);
         select.setCachePolicy(QueryMetadata.LOCAL_CACHE);
 
-        // first run, no cache yet
-        List rows1 = mockupDataRows(2);
-        engine.reset();
-        engine.addExpectedResult(select, rows1);
-        List resultRows = context.performQuery(select);
-        assertEquals(1, engine.getRunCount());
-        assertEquals(2, resultRows.size());
-        assertTrue(resultRows.get(0) instanceof DataObject);
-        assertNull(dataRowCache.getCachedSnapshots("c"));
-        assertEquals(resultRows, context.getObjectStore().getCachedQueryResult("c"));
+        MockDataNode engine = MockDataNode.interceptNode(getDomain(), getNode());
 
-        // second run, must refresh the cache
-        List rows2 = mockupDataRows(4);
-        engine.reset();
-        engine.addExpectedResult(select, rows2);
-        List freshResultRows = context.performQuery(select);
-        assertEquals(1, engine.getRunCount());
-        assertEquals(4, freshResultRows.size());
-        assertTrue(resultRows.get(0) instanceof DataObject);
-        assertNull(dataRowCache.getCachedSnapshots("c"));
-        assertEquals(freshResultRows, context.getObjectStore().getCachedQueryResult("c"));
+        try {
+            // first run, no cache yet
+            List rows1 = mockupDataRows(2);
+            engine.reset();
+            engine.addExpectedResult(select, rows1);
+            List resultRows = context.performQuery(select);
+            assertEquals(1, engine.getRunCount());
+            assertEquals(2, resultRows.size());
+            assertTrue(resultRows.get(0) instanceof DataObject);
+            assertNull(dataRowCache.getCachedSnapshots("c"));
+            assertEquals(resultRows, context.getObjectStore().getCachedQueryResult("c"));
+
+            // second run, must refresh the cache
+            List rows2 = mockupDataRows(4);
+            engine.reset();
+            engine.addExpectedResult(select, rows2);
+            List freshResultRows = context.performQuery(select);
+            assertEquals(1, engine.getRunCount());
+            assertEquals(4, freshResultRows.size());
+            assertTrue(resultRows.get(0) instanceof DataObject);
+            assertNull(dataRowCache.getCachedSnapshots("c"));
+            assertEquals(freshResultRows, context.getObjectStore().getCachedQueryResult(
+                    "c"));
+        }
+        finally {
+            engine.stopInterceptNode();
+        }
     }
 
     public void testLocalCacheDataObjectsNoRefresh() throws Exception {
@@ -235,23 +274,30 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         select.setFetchingDataRows(false);
         select.setCachePolicy(QueryMetadata.LOCAL_CACHE);
 
-        List rows = mockupDataRows(2);
-        engine.reset();
-        engine.addExpectedResult(select, rows);
+        MockDataNode engine = MockDataNode.interceptNode(getDomain(), getNode());
 
-        // first run, no cache yet
-        List resultRows = context.performQuery(select);
-        assertEquals(1, engine.getRunCount());
-        assertEquals(2, resultRows.size());
-        assertTrue(resultRows.get(0) instanceof DataObject);
-        assertNull(dataRowCache.getCachedSnapshots("c"));
-        assertEquals(resultRows, context.getObjectStore().getCachedQueryResult("c"));
+        try {
+            List rows = mockupDataRows(2);
+            engine.reset();
+            engine.addExpectedResult(select, rows);
 
-        // now the query with the same name must run from cache
-        engine.reset();
-        List cachedResultRows = context.performQuery(select);
-        assertEquals(0, engine.getRunCount());
-        assertEquals(resultRows, cachedResultRows);
+            // first run, no cache yet
+            List resultRows = context.performQuery(select);
+            assertEquals(1, engine.getRunCount());
+            assertEquals(2, resultRows.size());
+            assertTrue(resultRows.get(0) instanceof DataObject);
+            assertNull(dataRowCache.getCachedSnapshots("c"));
+            assertEquals(resultRows, context.getObjectStore().getCachedQueryResult("c"));
+
+            // now the query with the same name must run from cache
+            engine.reset();
+            List cachedResultRows = context.performQuery(select);
+            assertEquals(0, engine.getRunCount());
+            assertEquals(resultRows, cachedResultRows);
+        }
+        finally {
+            engine.stopInterceptNode();
+        }
     }
 
     public void testSharedCacheDataObjectsNoRefresh() throws Exception {
@@ -261,41 +307,39 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         select.setFetchingDataRows(false);
         select.setCachePolicy(QueryMetadata.SHARED_CACHE);
 
-        List rows = mockupDataRows(2);
-        engine.reset();
-        engine.addExpectedResult(select, rows);
+        MockDataNode engine = MockDataNode.interceptNode(getDomain(), getNode());
 
-        // first run, no cache yet
-        List resultRows = context.performQuery(select);
-        assertEquals(1, engine.getRunCount());
-        assertEquals(2, resultRows.size());
-        assertTrue(resultRows.get(0) instanceof DataObject);
-        assertNull(context.getObjectStore().getCachedQueryResult("c"));
-        assertEquals(rows, dataRowCache.getCachedSnapshots("c"));
+        try {
+            List rows = mockupDataRows(2);
+            engine.reset();
+            engine.addExpectedResult(select, rows);
 
-        // now the query with the same name must run from cache
-        engine.reset();
-        List cachedResultRows = context.performQuery(select);
-        assertEquals(0, engine.getRunCount());
-        assertEquals(2, cachedResultRows.size());
-        assertTrue(cachedResultRows.get(0) instanceof DataObject);
+            // first run, no cache yet
+            List resultRows = context.performQuery(select);
+            assertEquals(1, engine.getRunCount());
+            assertEquals(2, resultRows.size());
+            assertTrue(resultRows.get(0) instanceof DataObject);
+            assertNull(context.getObjectStore().getCachedQueryResult("c"));
+            assertEquals(rows, dataRowCache.getCachedSnapshots("c"));
 
-        // query from an alt DataContext must run from cache
-        DataContext altContext = mockupDataContext();
-        engine.reset();
-        List altResultRows = altContext.performQuery(select);
-        assertEquals(0, engine.getRunCount());
-        assertEquals(2, altResultRows.size());
-        assertTrue(altResultRows.get(0) instanceof DataObject);
-    }
+            // now the query with the same name must run from cache
+            engine.reset();
+            List cachedResultRows = context.performQuery(select);
+            assertEquals(0, engine.getRunCount());
+            assertEquals(2, cachedResultRows.size());
+            assertTrue(cachedResultRows.get(0) instanceof DataObject);
 
-    private DataContext mockupDataContext() {
-        DataContext context = new DataContext();
-        context.objectStore = new ObjectStore(dataRowCache);
-        context.usingSharedSnaphsotCache = true;
-        context.setChannel(new MockDataDomain(engine));
-
-        return context;
+            // query from an alt DataContext must run from cache
+            DataContext altContext = createDataContextNoCacheClear();
+            engine.reset();
+            List altResultRows = altContext.performQuery(select);
+            assertEquals(0, engine.getRunCount());
+            assertEquals(2, altResultRows.size());
+            assertTrue(altResultRows.get(0) instanceof DataObject);
+        }
+        finally {
+            engine.stopInterceptNode();
+        }
     }
 
     private List mockupDataRows(int len) {

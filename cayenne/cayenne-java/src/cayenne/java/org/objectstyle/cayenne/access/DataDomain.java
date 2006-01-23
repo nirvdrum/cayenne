@@ -622,8 +622,8 @@ public class DataDomain implements QueryEngine, OPPChannel {
         Transaction.bindThreadTransaction(transaction);
 
         try {
-            new DataDomainQueryAction(this, callback)
-                    .performQuery(new QueryChain(queries));
+            new DataDomainQueryAction(this, new QueryChain(queries), callback)
+                    .performQuery();
         }
         finally {
             Transaction.bindThreadTransaction(old);
@@ -689,10 +689,6 @@ public class DataDomain implements QueryEngine, OPPChannel {
         }
     }
 
-    public String toString() {
-        return new ToStringBuilder(this).append("name", name).toString();
-    }
-
     /**
      * Routes queries to appropriate DataNodes for execution.
      */
@@ -709,7 +705,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
         }
 
         // run ...
-        new DataDomainQueryAction(this, callback).performQuery(new QueryChain(queries));
+        new DataDomainQueryAction(this, new QueryChain(queries), callback).performQuery();
     }
 
     // ****** OPPChannel methods:
@@ -724,10 +720,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
             return createTransaction().performGenericQuery(this, query);
         }
 
-        // run ...
-        QueryResult result = new QueryResult();
-        new DataDomainQueryAction(this, result).performQuery(query);
-        return result;
+        return new DataDomainQueryAction(this, query).execute();
     }
 
     /**
@@ -764,5 +757,9 @@ public class DataDomain implements QueryEngine, OPPChannel {
         }
 
         return null;
+    }
+
+    public String toString() {
+        return new ToStringBuilder(this).append("name", name).toString();
     }
 }

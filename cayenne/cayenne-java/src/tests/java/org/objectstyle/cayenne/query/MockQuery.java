@@ -77,7 +77,7 @@ public class MockQuery implements Query {
     }
 
     public QueryMetadata getMetaData(EntityResolver resolver) {
-        return null;
+        return DefaultQueryMetadata.defaultMetadata;
     }
 
     public boolean isRouteCalled() {

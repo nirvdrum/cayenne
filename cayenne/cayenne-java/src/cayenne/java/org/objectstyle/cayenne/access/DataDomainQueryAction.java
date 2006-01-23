@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -64,8 +65,10 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.QueryRouter;
 
 /**
@@ -79,16 +82,97 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
 
     DataDomain domain;
     OperationObserver callback;
+    Query query;
+    QueryMetadata metadata;
 
     Map queriesByNode;
     Map queriesByExecutedQueries;
 
-    DataDomainQueryAction(DataDomain domain, OperationObserver callback) {
+    /*
+     * A constructor for the "new" way of performing a query via 'execute' with
+     * QueryResponse created internally.
+     */
+    DataDomainQueryAction(DataDomain domain, Query query) {
         this.domain = domain;
+        this.query = query;
+        this.metadata = query.getMetaData(domain.getEntityResolver());
+    }
+
+    /*
+     * A constructor for the "old" way of performing a query via performQuery() with
+     * outside callback. Still needed for cursor results and such.
+     */
+    DataDomainQueryAction(DataDomain domain, Query query, OperationObserver callback) {
+        this(domain, query);
         this.callback = callback;
     }
 
-    void performQuery(Query query) {
+    QueryResponse execute() {
+        // check cache BEFORE routing .. we may need to change that in the future
+        if (QueryMetadata.SHARED_CACHE.equals(metadata.getCachePolicy())) {
+            return getResponseViaCache();
+        }
+        else {
+            return getResponse();
+        }
+    }
+
+    /*
+     * Wraps execution in shared cache checks
+     */
+    private final QueryResponse getResponseViaCache() {
+
+        if (query.getName() == null) {
+            throw new CayenneRuntimeException(
+                    "Caching of unnamed queries is not supported.");
+        }
+
+        DataRowStore cache = domain.getSharedSnapshotCache();
+
+        if (!metadata.isRefreshingObjects()) {
+
+            List cachedRows = cache.getCachedSnapshots(query.getName());
+
+            if (cachedRows != null) {
+                QueryResult cachedResult = new QueryResult();
+
+                if (!cachedRows.isEmpty()) {
+                    // decorate result immutable list to avoid messing up the cache
+                    cachedResult.nextDataRows(query, Collections
+                            .unmodifiableList(cachedRows));
+                }
+
+                return cachedResult;
+            }
+        }
+
+        QueryResponse response = getResponse();
+
+        // TODO: Andrus, 1/22/2006 - cache QueryResponse object instead of a list!
+        cache.cacheSnapshots(query.getName(), response.getFirstRows(query));
+        return response;
+    }
+
+    /*
+     * Gets response from the underlying DataNodes.
+     */
+    private final QueryResponse getResponse() {
+        // sanity check
+        // TODO: Andrus, 1/22/2006 - we need to reconcile somehow external
+        // and internal callback strategies...E.g. by using a callback wrapper...
+        if (callback != null) {
+            throw new CayenneRuntimeException(
+                    "Invalid state, can't run this query with external callback set.");
+        }
+
+        QueryResult response = new QueryResult();
+        this.callback = response;
+
+        performQuery();
+        return response;
+    }
+
+    void performQuery() {
 
         // reset
         queriesByNode = null;

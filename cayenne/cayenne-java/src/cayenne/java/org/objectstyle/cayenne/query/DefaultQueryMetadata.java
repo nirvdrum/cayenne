@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.map.Procedure;
  */
 class DefaultQueryMetadata implements QueryMetadata {
 
-    static final QueryMetadata defaultInfo = new DefaultQueryMetadata();
+    static final QueryMetadata defaultMetadata = new DefaultQueryMetadata();
 
     /**
      * To simplify overriding this implementation checks whether there is a non-null
