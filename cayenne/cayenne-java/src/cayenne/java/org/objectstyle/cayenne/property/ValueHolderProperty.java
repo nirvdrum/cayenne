@@ -91,12 +91,12 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty,
     }
 
     public Object readValueHolder(Object object) throws PropertyAccessException {
-        return readField(object);
+        return accessor.readValue(object);
     }
 
     public void writeValueHolder(Object object, Object valueHolder)
             throws PropertyAccessException {
-        writeField(object, valueHolder);
+        accessor.writeValue(object, null, valueHolder);
     }
 
     public Object readValue(Object object) throws PropertyAccessException {

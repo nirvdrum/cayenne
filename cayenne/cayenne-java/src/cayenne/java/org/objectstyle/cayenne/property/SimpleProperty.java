@@ -91,25 +91,15 @@ public class SimpleProperty implements Property {
     }
 
     public void copyValue(Object from, Object to) throws PropertyAccessException {
-        writeValue(to, readField(to), readField(from));
+        writeValue(to, accessor.readValue(to), accessor.readValue(from));
     }
 
     public Object readValue(Object object) throws PropertyAccessException {
-        return readField(object);
+        return accessor.readValue(object);
     }
 
     public void writeValue(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException {
         accessor.writeValue(object, oldValue, newValue);
-    }
-
-    protected Object readField(Object object) throws PropertyAccessException {
-        return accessor.readValue(object);
-    }
-
-    protected void writeField(Object object, Object newValue)
-            throws PropertyAccessException {
-
-        accessor.writeValue(object, null, newValue);
     }
 }

@@ -55,95 +55,69 @@
  */
 package org.objectstyle.cayenne.property;
 
-import java.util.Collection;
+import org.objectstyle.cayenne.DataObject;
 
 /**
- * Provides access to a property implemented as a Collection Field.
+ * A PropertyAccessor that uses DataObject API to read/write values.
  * 
- * @since 1.2
  * @author Andrus Adamchik
  */
-public abstract class CollectionProperty extends SimpleProperty implements ArcProperty,
-        IndirectProperty {
+public class DataObjectAccessor implements PropertyAccessor {
 
-    protected String reversePropertyName;
+    protected String propertyName;
+    protected Class propertyType;
 
-    public CollectionProperty(PropertyAccessor accessor, String reversePropertyName) {
-        super(accessor);
-        this.reversePropertyName = reversePropertyName;
+    public DataObjectAccessor(String propertyName, Class propertyType) {
+
+        if (propertyName == null) {
+            throw new IllegalArgumentException("Null propertyName");
+        }
+
+        this.propertyName = propertyName;
     }
 
-    public String getReversePropertyName() {
-        return reversePropertyName;
+    public String getPropertyName() {
+        return propertyName;
     }
 
-    public void copyValue(Object from, Object to) throws PropertyAccessException {
-        // TODO: at least invalidate the list somehow..
+    public Class getPropertyType() {
+        return propertyType;
     }
 
-    /**
-     * Injects a List in the object if it hasn't been done yet.
-     */
-    public void prepareForAccess(Object object) throws PropertyAccessException {
-        ensureCollectionSet(object);
-    }
-
-    public Object readValueHolder(Object object) throws PropertyAccessException {
-        return accessor.readValue(object);
-    }
-
-    public void writeValueHolder(Object object, Object valueHolder)
-            throws PropertyAccessException {
-        accessor.writeValue(object, null, valueHolder);
-    }
-
-    /**
-     * Throws an exception, as there is more than one value in a collection described by
-     * this property.
-     */
     public Object readValue(Object object) throws PropertyAccessException {
-        throw new PropertyAccessException(
-                "'readValue' is undefined in ListProperty",
-                this,
-                object);
+        try {
+            return ((DataObject) object).readPropertyDirectly(propertyName);
+        }
+        catch (ClassCastException e) {
+            throw new PropertyAccessException("Object is not a DataObject: '"
+                    + object.getClass().getName()
+                    + "'", this, object, e);
+        }
+        catch (Throwable th) {
+            throw new PropertyAccessException("Error reading DataObject property: "
+                    + propertyName, this, object, th);
+        }
+
+        // TODO - see TODO in 'writeValue'
     }
 
-    /**
-     * Removes teh old value from the collection, adds the new value.
-     */
     public void writeValue(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException {
 
-        Collection collection = ensureCollectionSet(object);
-
-        if (oldValue != null) {
-            collection.remove(oldValue);
+        try {
+            ((DataObject) object).writePropertyDirectly(propertyName, newValue);
+        }
+        catch (ClassCastException e) {
+            throw new PropertyAccessException("Object is not a DataObject: '"
+                    + object.getClass().getName()
+                    + "'", this, object, e);
+        }
+        catch (Throwable th) {
+            throw new PropertyAccessException("Error reading DataObject property: "
+                    + propertyName, this, object, th);
         }
 
-        if (newValue != null) {
-            collection.add(newValue);
-        }
+        // TODO, Andrus, 1/22/2006 - check for the right type? DataObject never did it
+        // itself... Doing a check (and a conversion) may be an easy way to fix CAY-399
     }
-
-    /**
-     * Checks that an object's List field described by this property is set, injecting a
-     * List if needed.
-     */
-    protected Collection ensureCollectionSet(Object object)
-            throws PropertyAccessException {
-
-        Collection collection = (Collection) readValueHolder(object);
-        if (collection == null) {
-            collection = createCollection(object);
-            writeValueHolder(object, collection);
-        }
-
-        return collection;
-    }
-
-    /**
-     * Creates a Collection for an object.
-     */
-    protected abstract Collection createCollection(Object object)
-            throws PropertyAccessException;
 }

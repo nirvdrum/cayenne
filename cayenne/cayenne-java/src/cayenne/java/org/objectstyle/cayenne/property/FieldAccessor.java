@@ -72,9 +72,6 @@ public class FieldAccessor implements PropertyAccessor {
     protected Field field;
     protected Object nullValue;
 
-    /**
-     * Creates a descriptor for a simple bean property.
-     */
     public FieldAccessor(Class objectClass, String propertyName, Class propertyType) {
         // sanity check
         if (objectClass == null) {
