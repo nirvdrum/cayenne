@@ -440,16 +440,15 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-     * Updates underlying DataRowStore. If <code>refresh</code> is true, all snapshots
-     * in <code>snapshots</code> will be loaded into DataRowStore, regardless of the
-     * existing cache state. If <code>refresh</code> is false, only missing snapshots
-     * are loaded. This method is normally called by Cayenne internally to synchronized
-     * snapshots of recently fetched objects.
+     * Updates snapshots in the underlying DataRowStore. If <code>refresh</code> is
+     * true, all snapshots in <code>snapshots</code> will be loaded into DataRowStore,
+     * regardless of the existing cache state. If <code>refresh</code> is false, only
+     * missing snapshots are loaded. This method is normally called internally by the
+     * DataContext owning the ObjectStore to update the caches after a select query.
      * 
-     * @param objects a list of object whose snapshots need to be updated in the
-     *            SnapshotCache
-     * @param snapshots a list of snapshots. Must be the same size and use the same order
-     *            as <code>objects</code> list.
+     * @param objects a list of object whose snapshots need to be updated.
+     * @param snapshots a list of snapshots. Must be of the same length and use the same
+     *            order as <code>objects</code> list.
      * @param refresh controls whether existing cached snapshots should be replaced with
      *            the new ones.
      * @since 1.1
