@@ -81,7 +81,8 @@ public class BaseClassDescriptorTst extends TestCase {
     }
 
     public void testCopyObjectProperties() {
-        FieldProperty property = new FieldProperty(TestBean.class, "string", String.class);
+        FieldAccessor accessor = new FieldAccessor(TestBean.class, "string", String.class);
+        SimpleProperty property = new SimpleProperty(accessor);
         BaseClassDescriptor d1 = new MockBaseClassDescriptor();
 
         d1.declaredProperties.put(property.getPropertyName(), property);

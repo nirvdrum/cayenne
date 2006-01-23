@@ -61,42 +61,33 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * A property descriptor that provides access to an object property implemented as a
- * Field.
+ * A PropertyAccessor that performs direct Field access.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class FieldProperty implements Property {
+public class FieldAccessor implements PropertyAccessor {
 
     protected String propertyName;
     protected Field field;
-
-    /**
-     * A default value used when a null is passed for the primitive field.
-     */
     protected Object nullValue;
-
-    public FieldProperty(Class beanClass, String propertyName) {
-        this(beanClass, propertyName, null);
-    }
 
     /**
      * Creates a descriptor for a simple bean property.
      */
-    public FieldProperty(Class beanClass, String propertyName, Class propertyType) {
+    public FieldAccessor(Class objectClass, String propertyName, Class propertyType) {
         // sanity check
-        if (propertyName == null) {
-            throw new IllegalArgumentException("Null property name");
+        if (objectClass == null) {
+            throw new IllegalArgumentException("Null objectClass");
         }
 
-        if (beanClass == null) {
-            throw new IllegalArgumentException("Null beanClass");
+        if (propertyName == null) {
+            throw new IllegalArgumentException("Null propertyName");
         }
 
         this.propertyName = propertyName;
-        this.field = prepareField(beanClass, propertyName, propertyType);
-        this.nullValue = defaultNullValueForType(field.getType());
+        this.field = prepareField(objectClass, propertyName, propertyType);
+        this.nullValue = PropertyUtils.defaultNullValueForType(field.getType());
     }
 
     public String getPropertyName() {
@@ -107,36 +98,7 @@ public class FieldProperty implements Property {
         return field.getType();
     }
 
-    /**
-     * Returns a value that is used to set the property when the caller passed null
-     * argument. By default this value is "null" for all object types and default (zero or
-     * false) for primitive types.
-     */
-    public Object getNullValue() {
-        return nullValue;
-    }
-
-    /**
-     * Does nothing.
-     */
-    public void prepareForAccess(Object object) throws PropertyAccessException {
-        // noop
-    }
-
-    public void copyValue(Object from, Object to) throws PropertyAccessException {
-        writeValue(to, readField(to), readField(from));
-    }
-
     public Object readValue(Object object) throws PropertyAccessException {
-        return readField(object);
-    }
-
-    public void writeValue(Object object, Object oldValue, Object newValue)
-            throws PropertyAccessException {
-        writeField(object, newValue);
-    }
-
-    protected Object readField(Object object) throws PropertyAccessException {
         try {
             return field.get(object);
         }
@@ -149,9 +111,8 @@ public class FieldProperty implements Property {
         }
     }
 
-    protected void writeField(Object object, Object newValue)
+    public void writeValue(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException {
-
         // this would take care of primitives.
         if (newValue == null) {
             newValue = this.nullValue;
@@ -204,8 +165,8 @@ public class FieldProperty implements Property {
             if (!propertyType.isAssignableFrom(field.getType())) {
 
                 // allow primitive to object conversions...
-                if (!normalizeType(propertyType).isAssignableFrom(
-                        normalizeType(field.getType()))) {
+                if (!PropertyUtils.normalizeType(propertyType).isAssignableFrom(
+                        PropertyUtils.normalizeType(field.getType()))) {
                     throw new CayenneRuntimeException("Expected property type '"
                             + propertyType.getName()
                             + "', got '"
@@ -244,70 +205,4 @@ public class FieldProperty implements Property {
         }
     }
 
-    /**
-     * "Normalizes" passed type, converting primitive types to their object counterparts.
-     */
-    Class normalizeType(Class type) {
-        if (type.isPrimitive()) {
-
-            String className = type.getName();
-            if ("byte".equals(className)) {
-                return Byte.class;
-            }
-            else if ("int".equals(className)) {
-                return Integer.class;
-            }
-            else if ("short".equals(className)) {
-                return Short.class;
-            }
-            else if ("char".equals(className)) {
-                return Character.class;
-            }
-            else if ("double".equals(className)) {
-                return Double.class;
-            }
-            else if ("float".equals(className)) {
-                return Float.class;
-            }
-            else if ("boolean".equals(className)) {
-                return Boolean.class;
-            }
-        }
-
-        return type;
-    }
-
-    /**
-     * Returns default value that should be used for nulls. For non-primitive types, null
-     * is returned. For primitive types a default such as zero or false is returned.
-     */
-    Object defaultNullValueForType(Class type) {
-        if (type.isPrimitive()) {
-
-            String className = type.getName();
-            if ("byte".equals(className)) {
-                return new Byte((byte) 0);
-            }
-            else if ("int".equals(className)) {
-                return new Integer(0);
-            }
-            else if ("short".equals(className)) {
-                return new Short((short) 0);
-            }
-            else if ("char".equals(className)) {
-                return new Character((char) 0);
-            }
-            else if ("double".equals(className)) {
-                return new Double(0d);
-            }
-            else if ("float".equals(className)) {
-                return new Float(0f);
-            }
-            else if ("boolean".equals(className)) {
-                return Boolean.FALSE;
-            }
-        }
-
-        return null;
-    }
 }

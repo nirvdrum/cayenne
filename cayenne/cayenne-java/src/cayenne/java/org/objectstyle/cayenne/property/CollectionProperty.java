@@ -63,14 +63,13 @@ import java.util.Collection;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public abstract class CollectionProperty extends FieldProperty implements ArcProperty,
+public abstract class CollectionProperty extends SimpleProperty implements ArcProperty,
         IndirectProperty {
 
     protected String reversePropertyName;
 
-    public CollectionProperty(Class beanClass, String propertyName,
-            String reversePropertyName) {
-        super(beanClass, propertyName, Collection.class);
+    public CollectionProperty(PropertyAccessor accessor, String reversePropertyName) {
+        super(accessor);
         this.reversePropertyName = reversePropertyName;
     }
 

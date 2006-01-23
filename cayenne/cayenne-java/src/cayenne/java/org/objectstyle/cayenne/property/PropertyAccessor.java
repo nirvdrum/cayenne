@@ -55,35 +55,36 @@
  */
 package org.objectstyle.cayenne.property;
 
-import java.util.Collection;
-
-import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.util.PersistentObjectList;
+import java.io.Serializable;
 
 /**
- * Provides access to a property implemented as a List Field.
+ * An accessor of a property value. Abstracts the actual property implementation. E.g. it
+ * can be a Field, a pair of get/set methods or a DataObject.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ListProperty extends CollectionProperty {
-
-    public ListProperty(PropertyAccessor accessor, String reversePropertyName) {
-        super(accessor, reversePropertyName);
-    }
+public interface PropertyAccessor extends Serializable {
 
     /**
-     * Creates a List for an object. Expects an object to be an instance of Persistent.
+     * Returns property name.
      */
-    protected Collection createCollection(Object object) throws PropertyAccessException {
-        if (!(object instanceof Persistent)) {
+    String getPropertyName();
 
-            throw new PropertyAccessException(
-                    "ValueHolders for non-persistent objects are not supported.",
-                    this,
-                    object);
-        }
+    /**
+     * Returns property Java class.
+     */
+    Class getPropertyType();
 
-        return new PersistentObjectList((Persistent) object, getPropertyName());
-    }
+    /**
+     * Returns a property value of an object.
+     */
+    Object readValue(Object object) throws PropertyAccessException;
+
+    /**
+     * Sets a property value of an object. Old value of the property is specified as a
+     * hint.
+     */
+    void writeValue(Object object, Object oldValue, Object newValue)
+            throws PropertyAccessException;
 }

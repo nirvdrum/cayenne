@@ -55,35 +55,61 @@
  */
 package org.objectstyle.cayenne.property;
 
-import java.util.Collection;
-
-import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.util.PersistentObjectList;
-
 /**
- * Provides access to a property implemented as a List Field.
+ * A property descriptor that provides access to a simple object property, delegating
+ * property read/write operations to an accessor.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ListProperty extends CollectionProperty {
+public class SimpleProperty implements Property {
 
-    public ListProperty(PropertyAccessor accessor, String reversePropertyName) {
-        super(accessor, reversePropertyName);
+    protected PropertyAccessor accessor;
+
+    public SimpleProperty(PropertyAccessor accessor) {
+
+        if (accessor == null) {
+            throw new IllegalArgumentException("Null accessor");
+        }
+
+        this.accessor = accessor;
+    }
+
+    public String getPropertyName() {
+        return accessor.getPropertyName();
+    }
+
+    public Class getPropertyType() {
+        return accessor.getPropertyType();
     }
 
     /**
-     * Creates a List for an object. Expects an object to be an instance of Persistent.
+     * Does nothing.
      */
-    protected Collection createCollection(Object object) throws PropertyAccessException {
-        if (!(object instanceof Persistent)) {
+    public void prepareForAccess(Object object) throws PropertyAccessException {
+        // noop
+    }
 
-            throw new PropertyAccessException(
-                    "ValueHolders for non-persistent objects are not supported.",
-                    this,
-                    object);
-        }
+    public void copyValue(Object from, Object to) throws PropertyAccessException {
+        writeValue(to, readField(to), readField(from));
+    }
 
-        return new PersistentObjectList((Persistent) object, getPropertyName());
+    public Object readValue(Object object) throws PropertyAccessException {
+        return readField(object);
+    }
+
+    public void writeValue(Object object, Object oldValue, Object newValue)
+            throws PropertyAccessException {
+        accessor.writeValue(object, oldValue, newValue);
+    }
+
+    protected Object readField(Object object) throws PropertyAccessException {
+        return accessor.readValue(object);
+    }
+
+    protected void writeField(Object object, Object newValue)
+            throws PropertyAccessException {
+
+        accessor.writeValue(object, null, newValue);
     }
 }

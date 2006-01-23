@@ -87,7 +87,6 @@ import org.objectstyle.cayenne.util.XMLEncoder;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-// TODO: make this a ServerObjectEntity or something...
 public class ObjEntity extends Entity implements ObjEntityListener, ObjAttributeListener,
         ObjRelationshipListener {
 
@@ -117,7 +116,7 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
     protected String clientSuperClassName;
 
     // must be transient - it is desirable to rebuild descriptor when passing entity
-    // between VMs; also Hessian serialization chokes on attempt to deserialize
+    // between VMs; also Hessian serialization chokes on attempt to deserialize a
     // descriptor.
     protected transient ClassDescriptor classDescriptor;
 
@@ -200,7 +199,7 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
 
     /**
      * Returns a ClassDescriptor for this ObjEntity. If class descriptor is null, creates
-     * and caches it on the fly.
+     * it on the fly and caches internally for later reuse.
      * 
      * @since 1.2
      */

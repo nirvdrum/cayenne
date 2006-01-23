@@ -65,27 +65,27 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  */
 public class PropertyAccessException extends CayenneRuntimeException {
 
-    protected Property property;
+    protected PropertyAccessor accessor;
     protected Object source;
 
-    public PropertyAccessException(String message, Property property,
+    public PropertyAccessException(String message, PropertyAccessor accessor,
             Object source) {
-        this(message, property, source, null);
+        this(message, accessor, source, null);
     }
 
-    public PropertyAccessException(String message, Property property,
+    public PropertyAccessException(String message, PropertyAccessor accessor,
             Object source, Throwable cause) {
         super(message, cause);
 
-        this.property = property;
+        this.accessor = accessor;
         this.source = source;
     }
 
     /**
-     * Returns property descriptor that was used to access the property.
+     * Returns property descriptor that was used to access the property. It may be null.
      */
-    public Property getProperty() {
-        return property;
+    public PropertyAccessor getAccessor() {
+        return accessor;
     }
 
     /**

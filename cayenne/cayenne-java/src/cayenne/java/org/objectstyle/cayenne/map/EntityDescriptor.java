@@ -59,14 +59,17 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.property.BaseClassDescriptor;
 import org.objectstyle.cayenne.property.ClassDescriptor;
-import org.objectstyle.cayenne.property.FieldProperty;
+import org.objectstyle.cayenne.property.FieldAccessor;
 import org.objectstyle.cayenne.property.ListProperty;
 import org.objectstyle.cayenne.property.Property;
+import org.objectstyle.cayenne.property.SimpleProperty;
 import org.objectstyle.cayenne.property.ValueHolderProperty;
 
 /**
@@ -144,11 +147,12 @@ public class EntityDescriptor extends BaseClassDescriptor {
         while (it.hasNext()) {
             ObjAttribute attribute = (ObjAttribute) it.next();
 
-            FieldProperty property = new FieldProperty(
+            Class propertyType = attribute.getJavaClass();
+            FieldAccessor accessor = new FieldAccessor(
                     objectClass,
                     attribute.getName(),
-                    attribute.getJavaClass());
-            allDescriptors.put(attribute.getName(), property);
+                    propertyType);
+            allDescriptors.put(attribute.getName(), new SimpleProperty(accessor));
         }
     }
 
@@ -166,14 +170,18 @@ public class EntityDescriptor extends BaseClassDescriptor {
             ObjRelationship relationship = (ObjRelationship) it.next();
 
             if (relationship.isToMany()) {
-                ListProperty property = new ListProperty(objectClass, relationship
-                        .getName(), relationship.getReverseRelationshipName());
+                FieldAccessor accessor = new FieldAccessor(objectClass, relationship
+                        .getName(), List.class);
+
+                ListProperty property = new ListProperty(accessor, relationship
+                        .getReverseRelationshipName());
                 allDescriptors.put(relationship.getName(), property);
             }
             else {
+                FieldAccessor accessor = new FieldAccessor(objectClass, relationship
+                        .getName(), ValueHolder.class);
                 ValueHolderProperty property = new ValueHolderProperty(
-                        objectClass,
-                        relationship.getName(),
+                        accessor,
                         relationship.getReverseRelationshipName());
                 allDescriptors.put(relationship.getName(), property);
             }

@@ -65,15 +65,13 @@ import org.objectstyle.cayenne.util.PersistentObjectHolder;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ValueHolderProperty extends FieldProperty implements ArcProperty,
+public class ValueHolderProperty extends SimpleProperty implements ArcProperty,
         IndirectProperty {
 
     protected String reversePropertyName;
 
-    public ValueHolderProperty(Class beanClass, String propertyName,
-            String reversePropertyName) {
-        super(beanClass, propertyName, ValueHolder.class);
-
+    public ValueHolderProperty(PropertyAccessor accessor, String reversePropertyName) {
+        super(accessor);
         this.reversePropertyName = reversePropertyName;
     }
 

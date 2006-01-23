@@ -235,6 +235,73 @@ public class PropertyUtils {
                 + beanClass.getName());
     }
 
+    /**
+     * "Normalizes" passed type, converting primitive types to their object counterparts.
+     */
+    static Class normalizeType(Class type) {
+        if (type.isPrimitive()) {
+
+            String className = type.getName();
+            if ("byte".equals(className)) {
+                return Byte.class;
+            }
+            else if ("int".equals(className)) {
+                return Integer.class;
+            }
+            else if ("short".equals(className)) {
+                return Short.class;
+            }
+            else if ("char".equals(className)) {
+                return Character.class;
+            }
+            else if ("double".equals(className)) {
+                return Double.class;
+            }
+            else if ("float".equals(className)) {
+                return Float.class;
+            }
+            else if ("boolean".equals(className)) {
+                return Boolean.class;
+            }
+        }
+
+        return type;
+    }
+
+    /**
+     * Returns default value that should be used for nulls. For non-primitive types, null
+     * is returned. For primitive types a default such as zero or false is returned.
+     */
+    static Object defaultNullValueForType(Class type) {
+        if (type.isPrimitive()) {
+
+            String className = type.getName();
+            if ("byte".equals(className)) {
+                return new Byte((byte) 0);
+            }
+            else if ("int".equals(className)) {
+                return new Integer(0);
+            }
+            else if ("short".equals(className)) {
+                return new Short((short) 0);
+            }
+            else if ("char".equals(className)) {
+                return new Character((char) 0);
+            }
+            else if ("double".equals(className)) {
+                return new Double(0d);
+            }
+            else if ("float".equals(className)) {
+                return new Float(0f);
+            }
+            else if ("boolean".equals(className)) {
+                return Boolean.FALSE;
+            }
+        }
+
+        return null;
+    }
+
     private PropertyUtils() {
         super();
     }
