@@ -68,16 +68,13 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * DataRow is a map that holds values retrieved from the database for a given query row.
- * DataRows are used to cache database data snapshots, and as a reference point for
- * tracking DataObject changes.
+ * DataRow a map that holds values retrieved from the database for a given query row.
+ * DataRows are used to cache raw database data and as a reference point for tracking
+ * DataObject changes.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  * @since 1.1
  */
-
-// TODO: Maybe implement "locking" of snapshot after it has been created,
-// since snapshots are expected to be immutable
 public class DataRow extends HashMap {
 
     // "volatile" is supposed to ensure consistency in read and increment operations;
@@ -275,8 +272,8 @@ public class DataRow extends HashMap {
     }
 
     public String toString() {
-        return new ToStringBuilder(this).append("version", version).append(
-                " replaces",
-                replacesVersion).append(" values", super.toString()).toString();
+        return new ToStringBuilder(this).append("values", super.toString()).append(
+                " version",
+                version).append(" replaces", replacesVersion).toString();
     }
 }
