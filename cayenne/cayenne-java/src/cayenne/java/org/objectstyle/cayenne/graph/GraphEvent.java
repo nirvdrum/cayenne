@@ -62,8 +62,8 @@ import org.objectstyle.cayenne.event.CayenneEvent;
  * so the easiest way to process the event is the following:
  * 
  * <pre>
- *   GraphChangeHandler handler = ..;
- *   event.getDiff().apply(handler);
+ *    GraphChangeHandler handler = ..;
+ *    event.getDiff().apply(handler);
  * </pre>
  * 
  * @since 1.2
@@ -71,7 +71,6 @@ import org.objectstyle.cayenne.event.CayenneEvent;
  */
 public class GraphEvent extends CayenneEvent {
 
-    protected int type;
     protected GraphDiff diff;
 
     public GraphEvent(Object source, GraphDiff diff) {
