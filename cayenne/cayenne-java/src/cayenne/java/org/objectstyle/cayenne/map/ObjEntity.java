@@ -205,12 +205,30 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
      */
     public ClassDescriptor getClassDescriptor() {
         if (classDescriptor == null) {
-            ObjEntity superEntity = getSuperEntity();
-            ClassDescriptor superDescriptor = (superEntity != null) ? superEntity
-                    .getClassDescriptor() : null;
-            classDescriptor = new EntityDescriptor(this, superDescriptor);
+            classDescriptor = createClassDescriptor();
         }
         return classDescriptor;
+    }
+
+    /*
+     * An internal factory method that creates a new ClassDescriptor. Uses parent DataMap
+     * factory if possible.
+     * 
+     * @since 1.2
+     */
+    ClassDescriptor createClassDescriptor() {
+        ObjEntity superEntity = getSuperEntity();
+        ClassDescriptor superDescriptor = (superEntity != null) ? superEntity
+                .getClassDescriptor() : null;
+
+        if (getDataMap() != null && getDataMap().getDescriptorFactory() != null) {
+            return getDataMap().getDescriptorFactory().getDescriptor(
+                    this,
+                    superDescriptor);
+        }
+        else {
+            return new EntityDescriptor(this, superDescriptor);
+        }
     }
 
     /**

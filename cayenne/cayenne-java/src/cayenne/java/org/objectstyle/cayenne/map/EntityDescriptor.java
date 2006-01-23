@@ -63,12 +63,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.property.BaseClassDescriptor;
 import org.objectstyle.cayenne.property.ClassDescriptor;
+import org.objectstyle.cayenne.property.DataObjectAccessor;
 import org.objectstyle.cayenne.property.FieldAccessor;
 import org.objectstyle.cayenne.property.ListProperty;
 import org.objectstyle.cayenne.property.Property;
+import org.objectstyle.cayenne.property.PropertyAccessException;
+import org.objectstyle.cayenne.property.PropertyAccessor;
 import org.objectstyle.cayenne.property.SimpleProperty;
 import org.objectstyle.cayenne.property.ValueHolderProperty;
 
@@ -148,10 +152,7 @@ public class EntityDescriptor extends BaseClassDescriptor {
             ObjAttribute attribute = (ObjAttribute) it.next();
 
             Class propertyType = attribute.getJavaClass();
-            FieldAccessor accessor = new FieldAccessor(
-                    objectClass,
-                    attribute.getName(),
-                    propertyType);
+            PropertyAccessor accessor = makeAccessor(attribute.getName(), propertyType);
             allDescriptors.put(attribute.getName(), new SimpleProperty(accessor));
         }
     }
@@ -170,21 +171,47 @@ public class EntityDescriptor extends BaseClassDescriptor {
             ObjRelationship relationship = (ObjRelationship) it.next();
 
             if (relationship.isToMany()) {
-                FieldAccessor accessor = new FieldAccessor(objectClass, relationship
-                        .getName(), List.class);
+
+                PropertyAccessor accessor = makeAccessor(
+                        relationship.getName(),
+                        List.class);
 
                 ListProperty property = new ListProperty(accessor, relationship
                         .getReverseRelationshipName());
                 allDescriptors.put(relationship.getName(), property);
             }
             else {
-                FieldAccessor accessor = new FieldAccessor(objectClass, relationship
-                        .getName(), ValueHolder.class);
+                PropertyAccessor accessor = makeAccessor(
+                        relationship.getName(),
+                        ValueHolder.class);
                 ValueHolderProperty property = new ValueHolderProperty(
                         accessor,
                         relationship.getReverseRelationshipName());
                 allDescriptors.put(relationship.getName(), property);
             }
+        }
+    }
+
+    /*
+     * Creates an accessor for the property. First tries FieldAccessor and then
+     * DataObjectAccessor.
+     */
+    PropertyAccessor makeAccessor(String propertyName, Class propertyType)
+            throws PropertyAccessException {
+        try {
+            return new FieldAccessor(objectClass, propertyName, propertyType);
+        }
+        catch (Throwable th) {
+
+            if (DataObject.class.isAssignableFrom(objectClass)) {
+                return new DataObjectAccessor(propertyName, propertyType);
+            }
+
+            throw new PropertyAccessException("Can't create accessor for property '"
+                    + propertyName
+                    + "' of class '"
+                    + objectClass.getName()
+                    + "'", null, null);
         }
     }
 
