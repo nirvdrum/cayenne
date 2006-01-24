@@ -106,14 +106,6 @@ class DataContextSelectAction {
     }
 
     /*
-     * Gets results directly from the channel.
-     */
-    private List getList() {
-        QueryResponse response = context.getChannel().performGenericQuery(query);
-        return processResponse(response);
-    }
-
-    /*
      * Wraps execution in local cache checks.
      */
     private List getListViaCache() {
@@ -135,9 +127,11 @@ class DataContextSelectAction {
         return results;
     }
 
-    // reads response data...
-    private List processResponse(QueryResponse response) {
-
+    /*
+     * Fetches data directly from the channel.
+     */
+    private List getList() {
+        QueryResponse response = context.getChannel().performGenericQuery(query);
         List mainRows = response.getFirstRows(query);
 
         if (metadata.isFetchingDataRows()) {
