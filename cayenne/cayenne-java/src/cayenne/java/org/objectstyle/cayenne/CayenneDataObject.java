@@ -129,9 +129,8 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
      * 
      * @since 1.2
      */
-    // TODO: maybe move to an already overloaded DataObject interface?
     public ObjEntity getObjEntity() {
-        return (getDataContext() != null) ? getDataContext()
+        return (getObjectContext() != null) ? getObjectContext()
                 .getEntityResolver()
                 .lookupObjEntity(this) : null;
     }

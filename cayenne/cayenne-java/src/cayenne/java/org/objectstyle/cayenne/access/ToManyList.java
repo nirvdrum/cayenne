@@ -66,20 +66,23 @@ import java.util.ListIterator;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.query.RelationshipQuery;
 
 /**
  * A list that holds objects for to-many relationships. All operations, except for
- * resolving the list from DB, are not synchronized. The safest way to implement custom 
+ * resolving the list from DB, are not synchronized. The safest way to implement custom
  * synchronization is to synchronize on parent ObjectStore.
+ * <p>
+ * <i>For more information see <a href="../../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide.</a></i>
+ * </p>
  * 
- * <p><i>For more information see <a href="../../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide.</a></i></p>
- * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class ToManyList implements List, Serializable {
-    private DataObject source;
+
+    private Persistent source;
     private String relationship;
 
     // wrapped objects list
@@ -89,12 +92,12 @@ public class ToManyList implements List, Serializable {
     LinkedList addedToUnresolved;
     LinkedList removedFromUnresolved;
 
-    /** 
+    /**
      * Creates ToManyList.
      * 
      * @since 1.1
      */
-    public ToManyList(DataObject source, String relationship) {
+    public ToManyList(Persistent source, String relationship) {
         if (source == null) {
             throw new NullPointerException("'source' can't be null.");
         }
@@ -116,8 +119,16 @@ public class ToManyList implements List, Serializable {
      * Returns a source object of this relationship.
      * 
      * @since 1.1
+     * @deprecated since 1.2 use 'getRelationshipOwner()'
      */
     public DataObject getSource() {
+        return (DataObject) source;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public Persistent getRelationshipOwner() {
         return source;
     }
 
@@ -261,7 +272,7 @@ public class ToManyList implements List, Serializable {
     }
 
     // ====================================================
-    // Tracking list modifications, and resolving it 
+    // Tracking list modifications, and resolving it
     // on demand
     // ====================================================
 
@@ -282,7 +293,7 @@ public class ToManyList implements List, Serializable {
         if (needsFetch()) {
 
             synchronized (this) {
-                // now that we obtained the lock, check 
+                // now that we obtained the lock, check
                 // if another thread just resolved the list
 
                 if (needsFetch()) {
@@ -300,11 +311,10 @@ public class ToManyList implements List, Serializable {
                                             + source.getObjectId());
                         }
 
-                        RelationshipQuery query = new RelationshipQuery(
-                                source.getObjectId(),
-                                relationship);
+                        RelationshipQuery query = new RelationshipQuery(source
+                                .getObjectId(), relationship);
 
-                        localList = source.getDataContext().performQuery(query);
+                        localList = source.getObjectContext().performQuery(query);
                     }
 
                     mergeLocalChanges(localList);
@@ -341,8 +351,7 @@ public class ToManyList implements List, Serializable {
 
                     if (next instanceof DataObject) {
                         DataObject dataObject = (DataObject) next;
-                        if (dataObject.getPersistenceState()
-                            == PersistenceState.TRANSIENT) {
+                        if (dataObject.getPersistenceState() == PersistenceState.TRANSIENT) {
                             continue;
                         }
                     }

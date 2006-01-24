@@ -178,6 +178,8 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
     // is accessed, and later cached in the context
     protected transient EntityResolver entityResolver;
 
+    transient GraphManager graphManager;
+
     /**
      * Stores user defined properties associated with this DataContext.
      * 
@@ -1750,17 +1752,16 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
         }
     }
 
-    // *** Unfinished stuff
-    // --------------------------------------------------------------------------
-
     /**
-     * Unimplemented in DataContext - this implementation throws exception.
+     * Returns a wrapper around ObjectStore.
      * 
      * @since 1.2
      */
     public GraphManager getGraphManager() {
-        // TODO: ObjectStore must implement GraphManager
-        throw new CayenneRuntimeException("'getGraphManager' is not implemented yet");
-    }
+        if (graphManager == null) {
+            graphManager = new ChildDiffLoader(this);
+        }
 
+        return graphManager;
+    }
 }
