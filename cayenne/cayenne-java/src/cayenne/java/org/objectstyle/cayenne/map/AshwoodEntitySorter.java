@@ -85,12 +85,14 @@ import org.objectstyle.cayenne.access.QueryEngine;
 /**
  * Implements dependency sorting algorithms for ObjEntities, DbEntities and DataObjects.
  * Presently it works for acyclic database schemas with possible multi-reflexive tables.
- * The class uses topological sorting from <a
- * href="http://objectstyle.org/ashwood/">ASHWOOD library</a>.
+ * The class uses topological sorting from the <a
+ * href="http://objectstyle.org/ashwood/">Ashwood library</a>.
  * 
  * @author Andriy Shapochka, Andrus Adamchik
  * @since 1.1
  */
+// TODO: Andrus, 1/23/2006 - there is a dependency on DataContext ... bad as the sorter is
+// in the map package, and also because we may want to use generic ObjectContext API...
 public class AshwoodEntitySorter implements EntitySorter {
 
     protected Collection dataMaps;
@@ -174,6 +176,8 @@ public class AshwoodEntitySorter implements EntitySorter {
     /**
      * Marks this instance as "dirty", so that it will be indexed lazily on the next
      * invocation.
+     * 
+     * @deprecated since 1.2 - unused.
      */
     public void indexSorter(QueryEngine queryEngine) {
         setDataMaps(queryEngine.getEntityResolver().getDataMaps());
@@ -339,9 +343,9 @@ public class AshwoodEntitySorter implements EntitySorter {
         // exception
         if (object.getPersistenceState() != PersistenceState.NEW) {
             DataContext context = object.getDataContext();
-            snapshot = context
-                    .getObjectStore()
-                    .getSnapshot(object.getObjectId(), context.getChannel());
+            snapshot = context.getObjectStore().getSnapshot(
+                    object.getObjectId(),
+                    context.getChannel());
         }
 
         if (snapshot == null) {
