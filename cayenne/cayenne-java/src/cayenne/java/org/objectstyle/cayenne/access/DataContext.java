@@ -76,6 +76,7 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataObjectUtils;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
+import org.objectstyle.cayenne.FaultFailureException;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
@@ -1701,6 +1702,54 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
         }
     }
 
+    /**
+     * Resolves object fault if needed. If a property is not null, it is assumed that the
+     * object will be modified, so object snapshot is retained and object state is
+     * changed.
+     * 
+     * @since 1.2
+     */
+    public void prepareForAccess(Persistent object, String property) {
+
+        if (object.getPersistenceState() == PersistenceState.HOLLOW) {
+
+            if (!(object instanceof DataObject)) {
+                throw new CayenneRuntimeException("Can only resolve DataObjects. Got: "
+                        + object);
+            }
+
+            getObjectStore().resolveHollow((DataObject) object);
+            if (object.getPersistenceState() != PersistenceState.COMMITTED) {
+                throw new FaultFailureException(
+                        "Error resolving fault, no matching row exists in the database for ObjectId: "
+                                + object.getObjectId());
+            }
+        }
+    }
+
+    /**
+     * Retains DataObject snapshot and changes its state if needed.
+     * 
+     * @since 1.2
+     */
+    public void propertyChanged(
+            Persistent object,
+            String property,
+            Object oldValue,
+            Object newValue) {
+
+        if (object.getPersistenceState() == PersistenceState.COMMITTED) {
+
+            if (!(object instanceof DataObject)) {
+                throw new CayenneRuntimeException("Can only handle DataObjects. Got: "
+                        + object);
+            }
+
+            object.setPersistenceState(PersistenceState.MODIFIED);
+            getObjectStore().retainSnapshot((DataObject) object);
+        }
+    }
+
     // *** Unfinished stuff
     // --------------------------------------------------------------------------
 
@@ -1714,28 +1763,4 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
         throw new CayenneRuntimeException("'getGraphManager' is not implemented yet");
     }
 
-    /**
-     * Unimplemented in DataContext - this implementation throws exception.
-     * 
-     * @since 1.2
-     */
-    public void prepareForAccess(Persistent object, String property) {
-        // TODO: implement me
-        throw new CayenneRuntimeException("'prepareForAccess' is not implemented yet.");
-    }
-
-    /**
-     * Unimplemented in DataContext - this implementation throws exception.
-     * 
-     * @since 1.2
-     */
-    public void propertyChanged(
-            Persistent object,
-            String property,
-            Object oldValue,
-            Object newValue) {
-        // TODO: implement me
-        throw new CayenneRuntimeException(
-                "Persistent interface methods are not yet handled.");
-    }
 }

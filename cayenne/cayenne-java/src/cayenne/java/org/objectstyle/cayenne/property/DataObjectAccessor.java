@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.property;
 
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.Fault;
 
 /**
  * A PropertyAccessor that uses DataObject API to read/write values.
@@ -86,7 +87,17 @@ public class DataObjectAccessor implements PropertyAccessor {
 
     public Object readValue(Object object) throws PropertyAccessException {
         try {
-            return ((DataObject) object).readPropertyDirectly(propertyName);
+            
+            DataObject dataObject = (DataObject) object;
+            Object value = dataObject.readPropertyDirectly(propertyName);
+            
+            // resolve faults immediately
+            if (value instanceof Fault) {
+                value = ((Fault) value).resolveFault(dataObject, propertyName);
+                dataObject.writePropertyDirectly(propertyName, value);
+            }
+            
+            return value;
         }
         catch (ClassCastException e) {
             throw new PropertyAccessException("Object is not a DataObject: '"

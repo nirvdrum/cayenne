@@ -95,7 +95,7 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
 
     protected ObjectId objectId;
     protected transient int persistenceState = PersistenceState.TRANSIENT;
-    protected transient DataContext dataContext;
+    protected transient ObjectContext objectContext;
     protected Map values = new HashMap();
 
     /**
@@ -104,14 +104,19 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
      * is registered explicitly with a DataContext.
      */
     public DataContext getDataContext() {
-        return dataContext;
+        if (objectContext == null || objectContext instanceof DataContext) {
+            return (DataContext) objectContext;
+        }
+
+        throw new CayenneRuntimeException("ObjectContext is not a DataContext: "
+                + objectContext);
     }
 
     /**
      * Initializes DataObject's persistence context.
      */
     public void setDataContext(DataContext dataContext) {
-        this.dataContext = dataContext;
+        this.objectContext = dataContext;
 
         if (dataContext == null) {
             this.persistenceState = PersistenceState.TRANSIENT;
@@ -222,18 +227,15 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
      * @since 1.1
      */
     public void resolveFault() {
-        if (getPersistenceState() == PersistenceState.HOLLOW && dataContext != null) {
-            dataContext.getObjectStore().resolveHollow(this);
-            if (getPersistenceState() != PersistenceState.COMMITTED) {
-                throw new FaultFailureException(
-                        "Error resolving fault, no matching row exists in the database for ObjectId: "
-                                + getObjectId());
-            }
+        if (objectContext != null) {
+            objectContext.prepareForAccess(this, null);
         }
     }
 
     public Object readProperty(String propName) {
-        resolveFault();
+        if (objectContext != null) {
+            objectContext.prepareForAccess(this, propName);
+        }
 
         Object object = readPropertyDirectly(propName);
 
@@ -251,16 +253,14 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
     }
 
     public void writeProperty(String propName, Object val) {
-        resolveFault();
+        if (objectContext != null) {
+            objectContext.prepareForAccess(this, propName);
 
-        // 1. retain object snapshot to allow clean changes tracking
-        // 2. change object state
-        if (persistenceState == PersistenceState.COMMITTED) {
-            persistenceState = PersistenceState.MODIFIED;
-            dataContext.getObjectStore().retainSnapshot(this);
+            // note how we notify DataContext of change BEFORE the object is actually
+            // changed... this is needed to take a valid current snapshot
+            Object oldValue = readPropertyDirectly(propName);
+            objectContext.propertyChanged(this, propName, oldValue, val);
         }
-        // else....
-        // other persistence states can't be changed to MODIFIED
 
         writePropertyDirectly(propName, val);
     }
@@ -324,7 +324,7 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
 
             // retaining a snapshot here is wasteful, but we have to do this for
             // consistency (see CAY-213)
-            dataContext.getObjectStore().retainSnapshot(this);
+            getDataContext().getObjectStore().retainSnapshot(this);
         }
 
         if (value != null && setReverse) {
@@ -383,13 +383,13 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
     protected void willConnect(String relationshipName, DataObject dataObject) {
         // first handle most common case - both objects are in the same
         // DataContext or target is null
-        if (dataObject == null || this.getDataContext() == dataObject.getDataContext()) {
+        if (dataObject == null || this.getObjectContext() == dataObject.getObjectContext()) {
             return;
         }
-        else if (this.getDataContext() == null && dataObject.getDataContext() != null) {
+        else if (this.getObjectContext() == null && dataObject.getObjectContext() != null) {
             dataObject.getDataContext().registerNewObject(this);
         }
-        else if (this.getDataContext() != null && dataObject.getDataContext() == null) {
+        else if (this.getObjectContext() != null && dataObject.getObjectContext() == null) {
             this.getDataContext().registerNewObject(dataObject);
         }
         else {
@@ -401,7 +401,7 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
     }
 
     private ObjRelationship getRelationshipNamed(String relName) {
-        return (ObjRelationship) dataContext
+        return (ObjRelationship) objectContext
                 .getEntityResolver()
                 .lookupObjEntity(this)
                 .getRelationship(relName);
@@ -413,7 +413,7 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
      * @param relName name of relationship from this object to <code>val</code>.
      */
     protected void setReverseRelationship(String relName, DataObject val) {
-        ObjRelationship rel = (ObjRelationship) dataContext
+        ObjRelationship rel = (ObjRelationship) objectContext
                 .getEntityResolver()
                 .lookupObjEntity(objectId.getEntityName())
                 .getRelationship(relName);
@@ -432,7 +432,7 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
      */
     protected void unsetReverseRelationship(String relName, DataObject val) {
 
-        EntityResolver resolver = dataContext.getEntityResolver();
+        EntityResolver resolver = objectContext.getEntityResolver();
         ObjEntity entity = resolver.lookupObjEntity(objectId.getEntityName());
 
         if (entity == null) {
@@ -784,19 +784,17 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
      * @since 1.2
      */
     public ObjectContext getObjectContext() {
-        return dataContext;
+        return objectContext;
     }
 
     /**
      * @since 1.2
      */
     public void setObjectContext(ObjectContext objectContext) {
-        if (objectContext == null || objectContext instanceof DataContext) {
-            setDataContext((DataContext) objectContext);
-        }
+        this.objectContext = objectContext;
 
-        throw new IllegalArgumentException(
-                "CayenneDataObject only supports DataContext for ObjectContext, got: "
-                        + objectContext);
+        if (objectContext == null) {
+            this.persistenceState = PersistenceState.TRANSIENT;
+        }
     }
 }

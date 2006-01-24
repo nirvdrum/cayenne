@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SingleObjectQuery;
 
 /**
  * A collection of utility methods to work with DataObjects.
@@ -162,10 +163,10 @@ public final class DataObjectUtils {
      * query. Otherwise a query is built and executed against the database.
      * </p>
      * 
-     * @see #objectForPK(DataContext, ObjectId)
+     * @see #objectForPK(ObjectContext, ObjectId)
      */
     public static DataObject objectForPK(
-            DataContext context,
+            ObjectContext context,
             Class dataObjectClass,
             int pk) {
         return objectForPK(context, buildId(context, dataObjectClass, new Integer(pk)));
@@ -182,7 +183,7 @@ public final class DataObjectUtils {
      * @see #objectForPK(DataContext, ObjectId)
      */
     public static DataObject objectForPK(
-            DataContext context,
+            ObjectContext context,
             Class dataObjectClass,
             Object pk) {
 
@@ -197,10 +198,10 @@ public final class DataObjectUtils {
      * query. Otherwise a query is built and executed against the database.
      * </p>
      * 
-     * @see #objectForPK(DataContext, ObjectId)
+     * @see #objectForPK(ObjectContext, ObjectId)
      */
     public static DataObject objectForPK(
-            DataContext context,
+            ObjectContext context,
             Class dataObjectClass,
             Map pk) {
 
@@ -223,7 +224,10 @@ public final class DataObjectUtils {
      * 
      * @see #objectForPK(DataContext, ObjectId)
      */
-    public static DataObject objectForPK(DataContext context, String objEntityName, int pk) {
+    public static DataObject objectForPK(
+            ObjectContext context,
+            String objEntityName,
+            int pk) {
         return objectForPK(context, buildId(context, objEntityName, new Integer(pk)));
     }
 
@@ -235,10 +239,10 @@ public final class DataObjectUtils {
      * query. Otherwise a query is built and executed against the database.
      * </p>
      * 
-     * @see #objectForPK(DataContext, ObjectId)
+     * @see #objectForPK(ObjectContext, ObjectId)
      */
     public static DataObject objectForPK(
-            DataContext context,
+            ObjectContext context,
             String objEntityName,
             Object pk) {
         return objectForPK(context, buildId(context, objEntityName, pk));
@@ -254,7 +258,10 @@ public final class DataObjectUtils {
      * 
      * @see #objectForPK(DataContext, ObjectId)
      */
-    public static DataObject objectForPK(DataContext context, String objEntityName, Map pk) {
+    public static DataObject objectForPK(
+            ObjectContext context,
+            String objEntityName,
+            Map pk) {
         if (objEntityName == null) {
             throw new IllegalArgumentException("Null ObjEntity name.");
         }
@@ -270,51 +277,69 @@ public final class DataObjectUtils {
      * @return A DataObject that matched the id, null if no matching objects were found
      * @throws CayenneRuntimeException if more than one object matched ObjectId.
      */
-    public static DataObject objectForPK(DataContext context, ObjectId id) {
-        ObjectStore objectStore = context.getObjectStore();
+    public static DataObject objectForPK(ObjectContext context, ObjectId id) {
+        // TODO: Andrus, 1/23/2006 - a temp hack until ObjectStore starts implementing
+        // GraphManager .. we may also need to intercept SingleObjectQueries at the
+        // DataDomain level and provide objects from domain cache.
 
-        // look for cached object first
-        DataObject object = objectStore.getObject(id);
-        if (object != null) {
+        if (!(context instanceof DataContext)) {
+            DataObject object = (DataObject) context.getGraphManager().getNode(id);
+            if (object == null) {
+                object = DataObjectUtils.objectForQuery(
+                        context,
+                        new SingleObjectQuery(id));
+            }
+
             return object;
         }
+        else {
 
-        // CAY-218: check for inheritance... ObjectId maybe wrong
-        // TODO: investigate moving this to the ObjectStore "getObject()" - this should
-        // really be global...
+            DataContext dataContext = (DataContext) context;
+            ObjectStore objectStore = dataContext.getObjectStore();
 
-        ObjEntity entity = context
-                .getEntityResolver()
-                .lookupObjEntity(id.getEntityName());
-        EntityInheritanceTree inheritanceHandler = context
-                .getEntityResolver()
-                .lookupInheritanceTree(entity);
-        if (inheritanceHandler != null) {
-            Collection children = inheritanceHandler.getChildren();
-            if (!children.isEmpty()) {
-                // find cached child
-                Iterator it = children.iterator();
-                while (it.hasNext()) {
-                    EntityInheritanceTree child = (EntityInheritanceTree) it.next();
-                    ObjectId childID = new ObjectId(child.getEntity().getName(), id
-                            .getIdSnapshot());
+            // look for cached object first
+            DataObject object = objectStore.getObject(id);
+            if (object != null) {
+                return object;
+            }
 
-                    DataObject childObject = objectStore.getObject(childID);
-                    if (childObject != null) {
-                        return childObject;
+            // CAY-218: check for inheritance... ObjectId maybe wrong
+            // TODO: investigate moving this to the ObjectStore "getObject()" - this
+            // should
+            // really be global...
+
+            ObjEntity entity = context.getEntityResolver().lookupObjEntity(
+                    id.getEntityName());
+            EntityInheritanceTree inheritanceHandler = context
+                    .getEntityResolver()
+                    .lookupInheritanceTree(entity);
+            if (inheritanceHandler != null) {
+                Collection children = inheritanceHandler.getChildren();
+                if (!children.isEmpty()) {
+                    // find cached child
+                    Iterator it = children.iterator();
+                    while (it.hasNext()) {
+                        EntityInheritanceTree child = (EntityInheritanceTree) it.next();
+                        ObjectId childID = new ObjectId(child.getEntity().getName(), id
+                                .getIdSnapshot());
+
+                        DataObject childObject = objectStore.getObject(childID);
+                        if (childObject != null) {
+                            return childObject;
+                        }
                     }
                 }
             }
+
+            // look in shared cache...
+
+            // TODO: take inheritance into account...
+            DataRow row = objectStore.getSnapshot(id, context.getChannel());
+            return (row != null) ? dataContext.objectFromDataRow(
+                    entity.getJavaClass(),
+                    row,
+                    false) : null;
         }
-
-        // look in shared cache...
-
-        // TODO: take inheritance into account...
-        DataRow row = objectStore.getSnapshot(id, context.getChannel());
-        return (row != null) ? context.objectFromDataRow(
-                entity.getJavaClass(),
-                row,
-                false) : null;
     }
 
     /**
@@ -323,7 +348,7 @@ public final class DataObjectUtils {
      * 
      * @since 1.2
      */
-    public static DataObject objectForQuery(DataContext context, Query query) {
+    public static DataObject objectForQuery(ObjectContext context, Query query) {
         List objects = context.performQuery(query);
 
         if (objects.size() == 0) {
@@ -344,7 +369,7 @@ public final class DataObjectUtils {
         throw new CayenneRuntimeException("Expected DataObject, got: " + o);
     }
 
-    static ObjectId buildId(DataContext context, String objEntityName, Object pk) {
+    static ObjectId buildId(ObjectContext context, String objEntityName, Object pk) {
         if (pk == null) {
             throw new IllegalArgumentException("Null PK");
         }
@@ -375,7 +400,7 @@ public final class DataObjectUtils {
         return new ObjectId(objEntityName, attr.getName(), pk);
     }
 
-    static ObjectId buildId(DataContext context, Class dataObjectClass, Object pk) {
+    static ObjectId buildId(ObjectContext context, Class dataObjectClass, Object pk) {
         if (pk == null) {
             throw new IllegalArgumentException("Null PK");
         }

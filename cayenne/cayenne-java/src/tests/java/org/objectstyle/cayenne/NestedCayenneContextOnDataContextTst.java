@@ -55,7 +55,13 @@
  */
 package org.objectstyle.cayenne;
 
+import java.util.Iterator;
+import java.util.List;
+
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.SingleObjectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class NestedCayenneContextOnDataContextTst extends CayenneTestCase {
@@ -69,72 +75,72 @@ public class NestedCayenneContextOnDataContextTst extends CayenneTestCase {
 
         // test how different object states appear in the child on select
 
-//        DataObject _new = parent.createAndRegisterNewObject(Artist.class);
-//
-//        DataObject hollow = parent.registeredObject(new ObjectId(
-//                "Artist",
-//                Artist.ARTIST_ID_PK_COLUMN,
-//                33001));
-//        DataObject committed = DataObjectUtils.objectForQuery(
-//                parent,
-//                new SingleObjectQuery(new ObjectId(
-//                        "Artist",
-//                        Artist.ARTIST_ID_PK_COLUMN,
-//                        33002)));
-//
-//        int modifiedId = 33003;
-//        Artist modified = (Artist) DataObjectUtils.objectForQuery(
-//                parent,
-//                new SingleObjectQuery(new ObjectId(
-//                        "Artist",
-//                        Artist.ARTIST_ID_PK_COLUMN,
-//                        modifiedId)));
-//        modified.setArtistName("MODDED");
-//        DataObject deleted = DataObjectUtils.objectForQuery(
-//                parent,
-//                new SingleObjectQuery(new ObjectId(
-//                        "Artist",
-//                        Artist.ARTIST_ID_PK_COLUMN,
-//                        33004)));
-//        parent.deleteObject(deleted);
-//
-//        assertEquals(PersistenceState.HOLLOW, hollow.getPersistenceState());
-//        assertEquals(PersistenceState.COMMITTED, committed.getPersistenceState());
-//        assertEquals(PersistenceState.MODIFIED, modified.getPersistenceState());
-//        assertEquals(PersistenceState.DELETED, deleted.getPersistenceState());
-//        assertEquals(PersistenceState.NEW, _new.getPersistenceState());
-//
-//        List objects = child.performQuery(new SelectQuery(Artist.class));
-//        assertEquals("All but NEW object must have been included", 4, objects.size());
-//
-//        Iterator it = objects.iterator();
-//        while (it.hasNext()) {
-//            DataObject next = (DataObject) it.next();
-//            assertEquals(PersistenceState.COMMITTED, next.getPersistenceState());
-//
-//            int id = DataObjectUtils.intPKForObject(next);
-//            if (id == modifiedId) {
-//                assertEquals("MODDED", next.readProperty(Artist.ARTIST_NAME_PROPERTY));
-//            }
-//        }
+        DataObject _new = parent.createAndRegisterNewObject(Artist.class);
+
+        DataObject hollow = parent.registeredObject(new ObjectId(
+                "Artist",
+                Artist.ARTIST_ID_PK_COLUMN,
+                33001));
+        DataObject committed = DataObjectUtils.objectForQuery(
+                parent,
+                new SingleObjectQuery(new ObjectId(
+                        "Artist",
+                        Artist.ARTIST_ID_PK_COLUMN,
+                        33002)));
+
+        int modifiedId = 33003;
+        Artist modified = (Artist) DataObjectUtils.objectForQuery(
+                parent,
+                new SingleObjectQuery(new ObjectId(
+                        "Artist",
+                        Artist.ARTIST_ID_PK_COLUMN,
+                        modifiedId)));
+        modified.setArtistName("MODDED");
+        DataObject deleted = DataObjectUtils.objectForQuery(
+                parent,
+                new SingleObjectQuery(new ObjectId(
+                        "Artist",
+                        Artist.ARTIST_ID_PK_COLUMN,
+                        33004)));
+        parent.deleteObject(deleted);
+
+        assertEquals(PersistenceState.HOLLOW, hollow.getPersistenceState());
+        assertEquals(PersistenceState.COMMITTED, committed.getPersistenceState());
+        assertEquals(PersistenceState.MODIFIED, modified.getPersistenceState());
+        assertEquals(PersistenceState.DELETED, deleted.getPersistenceState());
+        assertEquals(PersistenceState.NEW, _new.getPersistenceState());
+
+        List objects = child.performQuery(new SelectQuery(Artist.class));
+        assertEquals("All but NEW object must have been included", 4, objects.size());
+
+        Iterator it = objects.iterator();
+        while (it.hasNext()) {
+            DataObject next = (DataObject) it.next();
+            assertEquals(PersistenceState.COMMITTED, next.getPersistenceState());
+
+            int id = DataObjectUtils.intPKForObject(next);
+            if (id == modifiedId) {
+                assertEquals("MODDED", next.readProperty(Artist.ARTIST_NAME_PROPERTY));
+            }
+        }
     }
 
     public void testReadToOneRelationship() throws Exception {
         deleteTestData();
         createTestData("testReadRelationship");
 
-        DataContext parent = createDataContext();
-        ObjectContext child = new CayenneContext(parent);
-
-        // test how different object states appear in the child on select
-
-        int hollowTargetSrcId = 33001;
-        int modifiedTargetSrcId = 33002;
-        int deletedTargetSrcId = 33003;
-        int committedTargetSrcId = 33004;
-        int newTargetSrcId = 33005;
-
-//        Painting hollowTargetSrc = (Painting) DataObjectUtils.objectForPK(
+//        DataContext parent = createDataContext();
+//        ObjectContext child = new CayenneContext(parent);
+//
+//        // test how different object states appear in the child on select
+//
+//        int hollowTargetSrcId = 33001;
+//        int modifiedTargetSrcId = 33002;
+//        int deletedTargetSrcId = 33003;
+//        int committedTargetSrcId = 33004;
+//        int newTargetSrcId = 33005;
+//
+//         Painting hollowTargetSrc = (Painting) DataObjectUtils.objectForPK(
 //                parent,
 //                Painting.class,
 //                hollowTargetSrcId);
