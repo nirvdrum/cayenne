@@ -225,6 +225,7 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
 
     /**
      * @since 1.1
+     * @deprecated since 1.2 use 'getObjectContext().prepareForAccess(object)'
      */
     public void resolveFault() {
         if (objectContext != null) {
@@ -383,7 +384,8 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
     protected void willConnect(String relationshipName, DataObject dataObject) {
         // first handle most common case - both objects are in the same
         // DataContext or target is null
-        if (dataObject == null || this.getObjectContext() == dataObject.getObjectContext()) {
+        if (dataObject == null
+                || this.getObjectContext() == dataObject.getObjectContext()) {
             return;
         }
         else if (this.getObjectContext() == null && dataObject.getObjectContext() != null) {

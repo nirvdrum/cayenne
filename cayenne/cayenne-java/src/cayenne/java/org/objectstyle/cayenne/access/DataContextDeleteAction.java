@@ -124,7 +124,8 @@ class DataContextDeleteAction {
 
         // must resolve HOLLOW objects before delete... needed
         // to process relationships and optimistic locking...
-        dataObject.resolveFault();
+
+        dataContext.prepareForAccess(dataObject, null);
 
         if (oldState == PersistenceState.NEW) {
             deleteNew(dataObject, oldState);

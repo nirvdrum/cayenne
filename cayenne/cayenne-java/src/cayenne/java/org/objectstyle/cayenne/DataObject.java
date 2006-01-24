@@ -181,6 +181,7 @@ public interface DataObject extends Persistent {
      * fully resolved.
      * 
      * @since 1.1
+     * @deprecated since 1.2 use 'getObjectContext().prepareForAccess(object)'
      */
     public void resolveFault();
 
