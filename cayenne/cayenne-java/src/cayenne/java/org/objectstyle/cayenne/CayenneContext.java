@@ -412,7 +412,8 @@ public class CayenneContext implements ObjectContext {
         while (it.hasNext()) {
             Persistent object = (Persistent) it.next();
 
-            // sanity check
+            // TODO: Andrus, 1/24/2006 - remove this limitation, just like DataContext did
+            // already...
             if (object.getPersistenceState() != PersistenceState.COMMITTED
                     && object.getPersistenceState() != PersistenceState.HOLLOW) {
                 throw new CayenneRuntimeException(
