@@ -55,11 +55,14 @@
  */
 package org.objectstyle.cayenne.unit;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import junit.framework.AssertionFailedError;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.art.Painting;
+import org.objectstyle.art.PaintingInfo;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -117,6 +120,38 @@ public class TestDataDomainTst extends CayenneTestCase {
         blockQueries();
         try {
             a.getArtistName();
+        }
+        catch (AssertionFailedError e) {
+            // expected...
+            return;
+        }
+        finally {
+            unblockQueries();
+        }
+
+        fail("Must have failed on fault resolution");
+    }
+
+    public void testRelatedFaultFired() {
+        DataContext context = createDataContext();
+        assertSame(getDomain(), context.getParentDataDomain());
+
+        Painting p = (Painting) context.createAndRegisterNewObject(Painting.class);
+        p.setPaintingTitle("aaaa");
+        PaintingInfo pi = (PaintingInfo) context
+                .createAndRegisterNewObject(PaintingInfo.class);
+        pi.setPainting(p);
+        context.commitChanges();
+
+        context.invalidateObjects(Arrays.asList(new Object[] {
+                p, pi
+        }));
+
+        p.getPaintingTitle();
+
+        blockQueries();
+        try {
+            p.getToPaintingInfo().getTextReview();
         }
         catch (AssertionFailedError e) {
             // expected...
