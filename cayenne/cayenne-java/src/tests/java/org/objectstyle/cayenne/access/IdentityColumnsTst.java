@@ -103,12 +103,41 @@ public class IdentityColumnsTst extends CayenneTestCase {
     }
 
     /**
+     * Tests CAY-422 bug.
+     */
+    public void testUnrelatedUpdate() throws Exception {
+        DataContext context = createDataContext();
+        GeneratedColumnTest m = (GeneratedColumnTest) context
+                .createAndRegisterNewObject(GeneratedColumnTest.class);
+
+        m.setName("m");
+
+        GeneratedColumnDep d = (GeneratedColumnDep) context
+                .createAndRegisterNewObject(GeneratedColumnDep.class);
+        d.setName("d");
+        d.setToMaster(m);
+        context.commitChanges();
+
+        context.invalidateObjects(Arrays.asList(new Object[] {
+                m, d
+        }));
+
+        context.prepareForAccess(d, null);
+
+        // this line caused CAY-422 error
+        d.getToMaster();
+
+        d.setName("new name");
+        context.commitChanges();
+    }
+
+    /**
      * Tests that insert in two tables with identity pk does not generate a conflict. See
      * CAY-341 for the original bug.
      */
     public void testMultipleNewObjectsSeparateTables() throws Exception {
         DataContext context = createDataContext();
-        
+
         GeneratedColumnTest idObject1 = (GeneratedColumnTest) context
                 .createAndRegisterNewObject(GeneratedColumnTest.class);
         idObject1.setName("o1");
@@ -190,19 +219,19 @@ public class IdentityColumnsTst extends CayenneTestCase {
             ObjectId id2 = dep2.getObjectId();
 
             // check propagated id
-            Number propagatedID2 = (Number) id2
-                    .getIdSnapshot().get(GeneratedColumnCompKey.PROPAGATED_PK_PK_COLUMN);
+            Number propagatedID2 = (Number) id2.getIdSnapshot().get(
+                    GeneratedColumnCompKey.PROPAGATED_PK_PK_COLUMN);
             assertNotNull(propagatedID2);
             assertEquals(masterId, propagatedID2.intValue());
 
             // check Cayenne-generated ID
-            Number cayenneGeneratedID2 = (Number) id2
-                    .getIdSnapshot().get(GeneratedColumnCompKey.AUTO_PK_PK_COLUMN);
+            Number cayenneGeneratedID2 = (Number) id2.getIdSnapshot().get(
+                    GeneratedColumnCompKey.AUTO_PK_PK_COLUMN);
             assertNotNull(cayenneGeneratedID2);
 
             // check DB-generated ID
-            Number dbGeneratedID2 = (Number) id2
-                    .getIdSnapshot().get(GeneratedColumnCompKey.GENERATED_COLUMN_PK_COLUMN);
+            Number dbGeneratedID2 = (Number) id2.getIdSnapshot().get(
+                    GeneratedColumnCompKey.GENERATED_COLUMN_PK_COLUMN);
             assertNotNull(dbGeneratedID2);
 
             context.invalidateObjects(Arrays.asList(new Object[] {

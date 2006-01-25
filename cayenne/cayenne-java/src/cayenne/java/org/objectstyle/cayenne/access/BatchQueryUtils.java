@@ -359,12 +359,17 @@ final class BatchQueryUtils {
                 Iterator joins = dbRel.getJoins().iterator();
                 while (joins.hasNext()) {
                     DbJoin join = (DbJoin) joins.next();
-                    if (snapshot.get(join.getSourceName()) == null) {
+
+                    String columnName = join.getSourceName();
+
+                    // must check both conditions per CAY-422
+                    if (snapshot.containsKey(columnName)
+                            && snapshot.get(columnName) == null) {
                         if (join.getTarget().isGenerated()) {
                             // setup a factory
                             Object value = new PropagatedValueFactory(targetId, join
                                     .getTargetName());
-                            snapshot.put(join.getSourceName(), value);
+                            snapshot.put(columnName, value);
                         }
                     }
                 }
