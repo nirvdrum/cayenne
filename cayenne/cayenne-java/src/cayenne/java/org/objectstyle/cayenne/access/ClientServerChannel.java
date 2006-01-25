@@ -218,13 +218,13 @@ public class ClientServerChannel implements OPPChannel {
             return new ArrayList(0);
         }
 
-        // detect prefetches... note that we are getting selectInfo from the server query.
+        // detect prefetches... note that we are getting metadata from the server query.
         // Getting it from the client may blow for named queries...
         QueryMetadata info = serverQuery.getMetaData(serverContext.getEntityResolver());
 
         try {
-            return new ServerToClientObjectConverter(objects, serverContext
-                    .getEntityResolver(), info.getPrefetchTree()).getConverted();
+            return new ServerToClientObjectConverter(objects, getEntityResolver(), info
+                    .getPrefetchTree()).getConverted();
         }
         catch (Exception e) {
             throw new CayenneRuntimeException("Error converting to client objects: "

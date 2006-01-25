@@ -80,36 +80,29 @@ class ServerToClientObjectConverter {
 
     Map clientObjectsByOID;
     List converted;
-    EntityResolver resolver;
     EntityResolver clientResolver;
 
-    ServerToClientObjectConverter(List serverObjects, EntityResolver resolver,
+    ServerToClientObjectConverter(List serverObjects, EntityResolver clientResolver,
             PrefetchTreeNode prefetchTree) {
 
         this.clientObjectsByOID = new HashMap();
         this.converted = new ArrayList(serverObjects.size());
-        this.resolver = resolver;
-        this.clientResolver = resolver.getClientEntityResolver();
+        this.clientResolver = clientResolver;
 
         if (!serverObjects.isEmpty()) {
 
-            // note that 'someServerEntity' is an entity located in some unpredictable
+            // note that 'someEntityName' is an entity located in some unpredictable
             // place of object inheritance hierarchy, so it is simply used to resolve
             // prefetches. IT CAN NOT BE USED TO OBTAIN CLASS DESCRIPTORS - THIS HAS TO BE
             // DONE INDIVIDUALLY FOR EACH OBJECT.
-            ObjEntity someServerEntity = resolver.lookupObjEntity(serverObjects
-                    .get(0)
-                    .getClass());
-            if (someServerEntity == null) {
-                String className = (someServerEntity != null) ? someServerEntity
-                        .getName() : "<null>";
-                throw new CayenneRuntimeException("Can't find entity for server class: "
-                        + className);
-            }
+            String someEntityName = ((Persistent) serverObjects.get(0))
+                    .getObjectId()
+                    .getEntityName();
 
             // create traversal map using the client entity
-            new ObjectTraversalMap(clientResolver.lookupObjEntity(someServerEntity
-                    .getName()), prefetchTree).traverse(serverObjects, this);
+            new ObjectTraversalMap(
+                    clientResolver.lookupObjEntity(someEntityName),
+                    prefetchTree).traverse(serverObjects, this);
         }
     }
 
@@ -131,7 +124,7 @@ class ServerToClientObjectConverter {
             // involved and different objects may be of different class.
 
             // TODO: Andrus, 09/24/2005: maybe analyze inheritance tree upfront and build
-            // a smaller lookup map ... and combine with "convertToGlobalID"; can save a
+            // a smaller lookup map ... can save a
             // few CPU cycles on big lists
 
             ObjEntity entity = clientResolver.lookupObjEntity(id.getEntityName());
