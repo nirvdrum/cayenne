@@ -701,7 +701,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         // in the second context
         final Artist altArtist = (Artist) altContext.getObjectStore().getObject(
                 artist.getObjectId());
-        altArtist.resolveFault();
+        altContext.prepareForAccess(altArtist, null);
         assertEquals(PersistenceState.COMMITTED, altArtist.getPersistenceState());
 
         context.invalidateObjects(Collections.singletonList(artist));

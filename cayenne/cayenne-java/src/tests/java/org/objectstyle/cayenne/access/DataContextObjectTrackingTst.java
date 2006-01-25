@@ -267,145 +267,6 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
         }
     }
 
-    public void testLocalObjectsNestedContext() throws Exception {
-        deleteTestData();
-        createTestData("testArtists");
-
-        DataContext context = createDataContext();
-        DataContext childContext = context.createChildDataContext();
-
-        DataObject _new = context.createAndRegisterNewObject(Artist.class);
-
-        DataObject hollow = context.registeredObject(new ObjectId(
-                "Artist",
-                Artist.ARTIST_ID_PK_COLUMN,
-                33001));
-        DataObject committed = DataObjectUtils.objectForQuery(
-                context,
-                new SingleObjectQuery(new ObjectId(
-                        "Artist",
-                        Artist.ARTIST_ID_PK_COLUMN,
-                        33002)));
-
-        int modifiedId = 33003;
-        Artist modified = (Artist) DataObjectUtils.objectForQuery(
-                context,
-                new SingleObjectQuery(new ObjectId(
-                        "Artist",
-                        Artist.ARTIST_ID_PK_COLUMN,
-                        modifiedId)));
-        modified.setArtistName("M1");
-        DataObject deleted = DataObjectUtils.objectForQuery(
-                context,
-                new SingleObjectQuery(new ObjectId(
-                        "Artist",
-                        Artist.ARTIST_ID_PK_COLUMN,
-                        33004)));
-        context.deleteObject(deleted);
-
-        assertEquals(PersistenceState.HOLLOW, hollow.getPersistenceState());
-        assertEquals(PersistenceState.COMMITTED, committed.getPersistenceState());
-        assertEquals(PersistenceState.MODIFIED, modified.getPersistenceState());
-        assertEquals(PersistenceState.DELETED, deleted.getPersistenceState());
-        assertEquals(PersistenceState.NEW, _new.getPersistenceState());
-
-        // now check how objects in different state behave
-
-        blockQueries();
-
-        try {
-
-            List news = childContext.localObjects(Collections.singletonList(_new));
-            assertEquals(1, news.size());
-            DataObject newPeer = (DataObject) news.get(0);
-            assertEquals(PersistenceState.COMMITTED, newPeer.getPersistenceState());
-            assertEquals(_new.getObjectId(), newPeer.getObjectId());
-            assertSame(childContext, newPeer.getDataContext());
-            assertSame(context, _new.getDataContext());
-
-            List hollows = childContext.localObjects(Collections.singletonList(hollow));
-            assertEquals(1, hollows.size());
-            DataObject hollowPeer = (DataObject) hollows.get(0);
-            assertEquals(PersistenceState.HOLLOW, hollowPeer.getPersistenceState());
-            assertEquals(hollow.getObjectId(), hollowPeer.getObjectId());
-            assertSame(childContext, hollowPeer.getDataContext());
-            assertSame(context, hollow.getDataContext());
-
-            List commits = childContext
-                    .localObjects(Collections.singletonList(committed));
-            assertEquals(1, commits.size());
-            DataObject committedPeer = (DataObject) commits.get(0);
-            assertEquals(PersistenceState.COMMITTED, committedPeer.getPersistenceState());
-            assertEquals(committed.getObjectId(), committedPeer.getObjectId());
-            assertSame(childContext, committedPeer.getDataContext());
-            assertSame(context, committed.getDataContext());
-
-            List mods = childContext.localObjects(Collections.singletonList(modified));
-            assertEquals(1, mods.size());
-            Artist modifiedPeer = (Artist) mods.get(0);
-            assertEquals(PersistenceState.COMMITTED, modifiedPeer.getPersistenceState());
-            assertEquals(modified.getObjectId(), modifiedPeer.getObjectId());
-            assertEquals("M1", modifiedPeer.getArtistName());
-            assertSame(childContext, modifiedPeer.getDataContext());
-            assertSame(context, modified.getDataContext());
-
-            List deletes = childContext.localObjects(Collections.singletonList(deleted));
-            assertEquals(1, deletes.size());
-            DataObject deletedPeer = (DataObject) deletes.get(0);
-            assertEquals(PersistenceState.COMMITTED, deletedPeer.getPersistenceState());
-            assertEquals(deleted.getObjectId(), deletedPeer.getObjectId());
-            assertSame(childContext, deletedPeer.getDataContext());
-            assertSame(context, deleted.getDataContext());
-        }
-        finally {
-            unblockQueries();
-        }
-    }
-
-    public void testLocalObjectsNestedContextNoOverride() throws Exception {
-        deleteTestData();
-        createTestData("testArtists");
-
-        DataContext context = createDataContext();
-        DataContext childContext = context.createChildDataContext();
-
-        int modifiedId = 33003;
-        Artist modified = (Artist) DataObjectUtils.objectForQuery(
-                context,
-                new SingleObjectQuery(new ObjectId(
-                        "Artist",
-                        Artist.ARTIST_ID_PK_COLUMN,
-                        modifiedId)));
-        Artist peerModified = (Artist) DataObjectUtils.objectForQuery(
-                childContext,
-                new SingleObjectQuery(new ObjectId(
-                        "Artist",
-                        Artist.ARTIST_ID_PK_COLUMN,
-                        modifiedId)));
-
-        modified.setArtistName("M1");
-        peerModified.setArtistName("M2");
-
-        assertEquals(PersistenceState.MODIFIED, modified.getPersistenceState());
-        assertEquals(PersistenceState.MODIFIED, peerModified.getPersistenceState());
-
-        blockQueries();
-
-        try {
-
-            List mods = childContext.localObjects(Collections.singletonList(modified));
-            assertEquals(1, mods.size());
-            DataObject peerModified2 = (DataObject) mods.get(0);
-            assertSame(peerModified, peerModified2);
-            assertEquals(PersistenceState.MODIFIED, peerModified2.getPersistenceState());
-            assertEquals("M2", peerModified.getArtistName());
-            assertEquals("M1", modified.getArtistName());
-        }
-        finally {
-            unblockQueries();
-        }
-    }
-
     public void testLocalObjectsPeerContextDifferentEntities() throws Exception {
         deleteTestData();
         createTestData("testMix");
@@ -446,7 +307,7 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
             unblockQueries();
         }
     }
-    
+
     public void testLocalObjectsPeerContextDifferentContexts() throws Exception {
         deleteTestData();
         createTestData("testMix");
@@ -482,7 +343,7 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
             assertEquals(2, locals.size());
 
             Iterator it = locals.iterator();
-            while(it.hasNext()) {
+            while (it.hasNext()) {
                 DataObject o = (DataObject) it.next();
                 assertSame(peerContext, o.getDataContext());
             }

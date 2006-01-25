@@ -63,11 +63,12 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class ToManyListTst extends CayenneTestCase {
+
     protected DataContext context;
 
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         context = createDataContext();
     }
 
@@ -85,9 +86,8 @@ public class ToManyListTst extends CayenneTestCase {
 
     public void testNewAddRemove() throws Exception {
         ToManyList list = createForNewArtist();
-        assertFalse(
-            "Expected resolved list when created with a new object",
-            list.needsFetch());
+        assertFalse("Expected resolved list when created with a new object", list
+                .needsFetch());
         assertEquals(0, list.size());
 
         Painting p1 = (Painting) context.createAndRegisterNewObject(Painting.class);
@@ -107,7 +107,8 @@ public class ToManyListTst extends CayenneTestCase {
 
         // immediately tag Artist as MODIFIED, since we are messing up with relationship
         // bypassing normal CayenneDataObject methods
-         ((Artist) list.getSource()).setPersistenceState(PersistenceState.MODIFIED);
+        ((Artist) list.getRelationshipOwner())
+                .setPersistenceState(PersistenceState.MODIFIED);
 
         assertTrue("List must be unresolved for an existing object", list.needsFetch());
 
@@ -122,9 +123,8 @@ public class ToManyListTst extends CayenneTestCase {
         assertTrue(list.addedToUnresolved.contains(p2));
 
         list.remove(p1);
-        assertTrue(
-            "List must be unresolved when removing an object...",
-            list.needsFetch());
+        assertTrue("List must be unresolved when removing an object...", list
+                .needsFetch());
         assertFalse(list.addedToUnresolved.contains(p1));
         assertTrue(list.removedFromUnresolved.contains(p1));
 
@@ -141,15 +141,16 @@ public class ToManyListTst extends CayenneTestCase {
         Painting p1 = (Painting) context.createAndRegisterNewObject(Painting.class);
         p1.setPaintingTitle("p1");
 
-        // list being tested is a separate copy from 
+        // list being tested is a separate copy from
         // the relationship list that Artist has, so adding a painting
         // here will not add the painting to the array being tested
-         ((Artist) list.getSource()).addToPaintingArray(p1);
+        ((Artist) list.getRelationshipOwner()).addToPaintingArray(p1);
         context.commitChanges();
 
         // immediately tag Artist as MODIFIED, since we are messing up with relationship
         // bypassing normal CayenneDataObject methods
-         ((Artist) list.getSource()).setPersistenceState(PersistenceState.MODIFIED);
+        ((Artist) list.getRelationshipOwner())
+                .setPersistenceState(PersistenceState.MODIFIED);
 
         assertTrue("List must be unresolved...", list.needsFetch());
         list.add(p1);
@@ -177,16 +178,17 @@ public class ToManyListTst extends CayenneTestCase {
         Painting p2 = (Painting) context.createAndRegisterNewObject(Painting.class);
         p2.setPaintingTitle("p2");
 
-        // list being tested is a separate copy from 
+        // list being tested is a separate copy from
         // the relationship list that Artist has, so adding a painting
         // here will not add the painting to the array being tested
-         ((Artist) list.getSource()).addToPaintingArray(p1);
-        ((Artist) list.getSource()).addToPaintingArray(p2);
+        ((Artist) list.getRelationshipOwner()).addToPaintingArray(p1);
+        ((Artist) list.getRelationshipOwner()).addToPaintingArray(p2);
         context.commitChanges();
 
         // immediately tag Artist as MODIFIED, since we are messing up with relationship
         // bypassing normal CayenneDataObject methods
-         ((Artist) list.getSource()).setPersistenceState(PersistenceState.MODIFIED);
+        ((Artist) list.getRelationshipOwner())
+                .setPersistenceState(PersistenceState.MODIFIED);
 
         assertTrue("List must be unresolved...", list.needsFetch());
         list.add(p1);
@@ -196,14 +198,14 @@ public class ToManyListTst extends CayenneTestCase {
         assertTrue(list.addedToUnresolved.contains(p1));
 
         // now delete p2 and resolve list
-         ((Artist) list.getSource()).removeFromPaintingArray(p2);
+        ((Artist) list.getRelationshipOwner()).removeFromPaintingArray(p2);
         context.deleteObject(p2);
         context.commitChanges();
 
         assertTrue("List must be unresolved...", list.needsFetch());
         assertTrue(
-            "List must be unresolved when an object was deleted externally...",
-            list.needsFetch());
+                "List must be unresolved when an object was deleted externally...",
+                list.needsFetch());
         assertTrue(list.addedToUnresolved.contains(p2));
         assertTrue(list.addedToUnresolved.contains(p1));
 
@@ -212,9 +214,8 @@ public class ToManyListTst extends CayenneTestCase {
         assertFalse("List must be resolved after checking a size...", list.needsFetch());
         assertEquals("Deleted object must have been purged...", 1, size);
         assertTrue(list.objectList.contains(p1));
-        assertFalse(
-            "Deleted object must have been purged...",
-            list.objectList.contains(p2));
+        assertFalse("Deleted object must have been purged...", list.objectList
+                .contains(p2));
     }
 
     public void testRealRelationship() throws Exception {

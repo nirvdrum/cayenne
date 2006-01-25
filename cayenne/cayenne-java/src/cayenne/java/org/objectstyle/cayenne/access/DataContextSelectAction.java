@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
@@ -131,6 +132,23 @@ class DataContextSelectAction {
      * Fetches data directly from the channel.
      */
     private List getList() {
+        if (context.getChannel() instanceof ObjectContext) {
+            return getListFromObjectContext();
+        }
+        else {
+            return getListFromChannel();
+        }
+    }
+
+    private List getListFromObjectContext() {
+        List parentObjects = context.getChannel().performQuery(query);
+
+        // TODO: handle refreshing...
+
+        return context.localObjects(parentObjects);
+    }
+
+    private List getListFromChannel() {
         QueryResponse response = context.getChannel().performGenericQuery(query);
         List mainRows = response.getFirstRows(query);
 

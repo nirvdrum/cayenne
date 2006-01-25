@@ -563,12 +563,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
         // must synchronize on ObjectStore since we must read and write atomically
         synchronized (getObjectStore()) {
             DataObject object = objectStore.getObject(oid);
-            if (object == null) {
-
-                DataObject parentObject = objectFromParentChannel(oid);
-                if (parentObject == null && oid.isTemporary()) {
-                    return null;
-                }
+            if (object == null && !oid.isTemporary()) {
 
                 ObjEntity entity = getEntityResolver().lookupObjEntity(
                         oid.getEntityName());
@@ -591,63 +586,30 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
                 object.setDataContext(this);
                 objectStore.addObject(object);
 
-                // in a nested DataContext, we need to connect this object with parent
-                if (parentObject != null) {
-                    DataRow parentSnapshot = parentObject
-                            .getDataContext()
-                            .currentSnapshot(parentObject);
-
-                    // this may or may not reset the state to COMMITTED
-                    DataRowUtils.refreshObjectWithSnapshot(
-                            entity,
-                            object,
-                            parentSnapshot,
-                            false);
-
-                    // retain modified parent snapshots, as we will need to compare query
-                    // results against parent state
-                    // if(parentObject.getPersistenceState() !=
-                    // PersistenceState.COMMITTED) {
-                    // getObjectStore().retainSnapshot(object, parentSnapshot);
-                    // }
-                }
             }
             return object;
         }
     }
 
     /**
-     * Looks up a registered object in the channel hierarchy.
-     * 
-     * @since 1.2
-     */
-    DataObject objectFromParentChannel(ObjectId oid) {
-        if (channel instanceof DataContext) {
-            DataContext parent = (DataContext) channel;
-            DataObject parentObject = parent.registeredObject(oid);
-
-            // treat HOLLOW as unknown...
-            if (parentObject.getPersistenceState() != PersistenceState.HOLLOW) {
-                return parentObject;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Creates or gets from cache a DataRow reflecting current object state.
+     * Returns a DataRow reflecting current, possibly uncommitted, object state.
+     * <p>
+     * <strong>Warning:</strong> This method will return a partial snapshot if an object
+     * or one of its related objects that propagate their keys to this object have
+     * temporary ids. DO NOT USE this method if you expect a DataRow to represent a
+     * complete object state.
+     * </p>
      * 
      * @since 1.1
      */
-    public DataRow currentSnapshot(DataObject anObject) {
-        ObjEntity entity = getEntityResolver().lookupObjEntity(anObject);
+    public DataRow currentSnapshot(DataObject object) {
+        ObjEntity entity = getEntityResolver().lookupObjEntity(object);
 
         // for a HOLLOW object return snapshot from cache
-        if (anObject.getPersistenceState() == PersistenceState.HOLLOW
-                && anObject.getDataContext() != null) {
+        if (object.getPersistenceState() == PersistenceState.HOLLOW
+                && object.getDataContext() != null) {
 
-            ObjectId id = anObject.getObjectId();
+            ObjectId id = object.getObjectId();
             return getObjectStore().getSnapshot(id, this.getChannel());
         }
 
@@ -660,7 +622,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
             ObjAttribute objAttr = (ObjAttribute) entry.getValue();
 
             // processing compound attributes correctly
-            snapshot.put(objAttr.getDbAttributePath(), anObject
+            snapshot.put(objAttr.getDbAttributePath(), object
                     .readPropertyDirectly(attrName));
         }
 
@@ -674,7 +636,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
                 continue;
             }
 
-            Object targetObject = anObject.readPropertyDirectly(rel.getName());
+            Object targetObject = object.readPropertyDirectly(rel.getName());
             if (targetObject == null) {
                 continue;
             }
@@ -683,12 +645,12 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
             // to avoid unneeded fault triggering
             if (targetObject instanceof Fault) {
                 DataRow storedSnapshot = getObjectStore().getSnapshot(
-                        anObject.getObjectId(),
+                        object.getObjectId(),
                         getChannel());
                 if (storedSnapshot == null) {
                     throw new CayenneRuntimeException(
                             "No matching objects found for ObjectId "
-                                    + anObject.getObjectId()
+                                    + object.getObjectId()
                                     + ". Object may have been deleted externally.");
                 }
 
@@ -708,7 +670,8 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
             DataObject target = (DataObject) targetObject;
             Map idParts = target.getObjectId().getIdSnapshot();
 
-            // this may happen in uncommitted objects
+            // this may happen in uncommitted objects - see the warning in the JavaDoc of
+            // this method.
             if (idParts.isEmpty()) {
                 continue;
             }
@@ -722,7 +685,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
         // we should ignore any object id values if a corresponding attribute
         // is a part of relationship "toMasterPK", since those values have been
         // set above when db relationships where processed.
-        Map thisIdParts = anObject.getObjectId().getIdSnapshot();
+        Map thisIdParts = object.getObjectId().getIdSnapshot();
         if (thisIdParts != null) {
 
             // put only those that do not exist in the map

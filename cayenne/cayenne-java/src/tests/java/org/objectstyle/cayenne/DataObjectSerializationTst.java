@@ -101,8 +101,8 @@ public class DataObjectSerializationTst extends CayenneTestCase {
         // test that to-many relationships are initialized
         ToManyList paintings = (ToManyList) deserialized.getPaintingArray();
         assertNotNull(paintings);
-        assertNotNull(paintings.getSource());
-        assertSame(deserialized, paintings.getSource());
+        assertNotNull(paintings.getRelationshipOwner());
+        assertSame(deserialized, paintings.getRelationshipOwner());
         assertEquals(0, paintings.size());
     }
 

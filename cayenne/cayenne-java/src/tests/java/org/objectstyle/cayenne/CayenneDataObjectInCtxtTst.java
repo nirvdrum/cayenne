@@ -100,6 +100,9 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         assertEquals("Painting", e1.getName());
     }
 
+    /**
+     * @deprecated since 1.2
+     */
     public void testResolveFault() {
         DataContext context = createDataContext();
 
@@ -113,6 +116,9 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         assertEquals("a", o1.readPropertyDirectly("artistName"));
     }
 
+    /**
+     * @deprecated since 1.2
+     */
     public void testResolveFaultFailure() {
         DataContext context = createDataContext();
 

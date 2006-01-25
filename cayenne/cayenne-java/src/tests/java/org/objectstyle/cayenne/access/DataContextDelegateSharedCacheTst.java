@@ -263,8 +263,6 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
     /**
      * Test case to prove that delegate method is invoked on an unsuccessful fault
      * resolution.
-     * 
-     * @throws Exception
      */
     public void testShouldProcessDeleteOnResolveFault() throws Exception {
         // two contexts being tested
@@ -289,7 +287,7 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         // attempt to resolve
 
         try {
-            noSuchArtist.resolveFault();
+            context.prepareForAccess(noSuchArtist, null);
         }
         catch (CayenneRuntimeException ex) {
             // expected, as fault resolving failed...

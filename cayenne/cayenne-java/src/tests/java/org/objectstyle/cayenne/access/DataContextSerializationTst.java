@@ -214,8 +214,8 @@ public class DataContextSerializationTst extends CayenneTestCase {
         // There is no special handling to update relationship lists
         // after deserialization is done in DataContext...Somehow Java sets
         // a transient ivar of ToManyList...
-        assertNotNull(paintings.getSource());
-        assertSame(deserializedArtist, paintings.getSource());
+        assertNotNull(paintings.getRelationshipOwner());
+        assertSame(deserializedArtist, paintings.getRelationshipOwner());
         assertEquals(0, paintings.size());
     }
 

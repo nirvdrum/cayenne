@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,7 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -83,6 +85,39 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DataContextExtrasTst extends CayenneTestCase {
+
+    public void testResolveFault() {
+        DataContext context = createDataContext();
+
+        Artist o1 = (Artist) context.createAndRegisterNewObject(Artist.class);
+        o1.setArtistName("a");
+        context.commitChanges();
+
+        context.invalidateObjects(Collections.singleton(o1));
+        assertEquals(PersistenceState.HOLLOW, o1.getPersistenceState());
+        assertNull(o1.readPropertyDirectly("artistName"));
+
+        context.prepareForAccess(o1, null);
+        assertEquals(PersistenceState.COMMITTED, o1.getPersistenceState());
+        assertEquals("a", o1.readPropertyDirectly("artistName"));
+    }
+
+    public void testResolveFaultFailure() {
+        DataContext context = createDataContext();
+
+        DataObject o1 = context.registeredObject(new ObjectId(
+                "Artist",
+                Artist.ARTIST_ID_PK_COLUMN,
+                new Integer(234)));
+
+        try {
+            context.prepareForAccess(o1, null);
+            fail("Must blow on non-existing fault.");
+        }
+        catch (CayenneRuntimeException ex) {
+
+        }
+    }
 
     public void testUserPropertiesLazyInit() {
         DataContext context = createDataContext();
