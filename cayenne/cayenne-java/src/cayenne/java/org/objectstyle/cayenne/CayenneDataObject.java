@@ -58,6 +58,7 @@ package org.objectstyle.cayenne;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -455,39 +456,49 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
      * A variation of "toString" method, that may be more efficient in some cases. For
      * example when printing a list of objects into the same String.
      */
-    public StringBuffer toStringBuffer(StringBuffer buf, boolean fullDesc) {
-        // log all properties
-        buf.append('{');
+    public StringBuffer toStringBuffer(StringBuffer buffer, boolean fullDesc) {
+        String id = (objectId != null) ? objectId.toString() : "<no id>";
+        String state = PersistenceState.persistenceStateName(persistenceState);
 
-        if (fullDesc)
-            appendProperties(buf);
+        buffer.append('{').append(id).append("; ").append(state).append("; ");
 
-        buf.append("<oid: ").append(objectId).append("; state: ").append(
-                PersistenceState.persistenceStateName(persistenceState)).append(">}\n");
-        return buf;
-    }
-
-    protected void appendProperties(StringBuffer buf) {
-        buf.append("[");
-        Iterator it = values.keySet().iterator();
-        while (it.hasNext()) {
-            Object key = it.next();
-            buf.append('\t').append(key).append(" => ");
-            Object val = values.get(key);
-
-            if (val instanceof CayenneDataObject) {
-                ((CayenneDataObject) val).toStringBuffer(buf, false);
-            }
-            else if (val instanceof List) {
-                buf.append('(').append(val.getClass().getName()).append(')');
-            }
-            else
-                buf.append(val);
-
-            buf.append('\n');
+        if (fullDesc) {
+            appendProperties(buffer);
         }
 
-        buf.append("]");
+        buffer.append("}");
+        return buffer;
+    }
+
+    protected void appendProperties(StringBuffer buffer) {
+        buffer.append("[");
+        Iterator it = values.entrySet().iterator();
+
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+
+            buffer.append(entry.getKey()).append("=>");
+            Object value = entry.getValue();
+
+            if (value instanceof Persistent) {
+                buffer.append('{').append(((Persistent) value).getObjectId()).append('}');
+            }
+            else if (value instanceof Collection) {
+                buffer.append("(..)");
+            }
+            else if (value instanceof Fault) {
+                buffer.append('?');
+            }
+            else {
+                buffer.append(value);
+            }
+
+            if (it.hasNext()) {
+                buffer.append("; ");
+            }
+        }
+
+        buffer.append("]");
     }
 
     public String toString() {
