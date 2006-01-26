@@ -127,7 +127,7 @@ import org.objectstyle.cayenne.util.Util;
  * <p>
  * Each DataObject can belong only to a single DataContext. To create a replica of an
  * object from a different DataContext in a local context, use
- * {@link #localObjects(java.util.List)}method.
+ * {@link #localObject(ObjectId, Persistent)} method.
  * <p>
  * <i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide. </a> </i>
@@ -685,15 +685,12 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * original DataObject context. If it is a peer or parent, you won't see any
      * uncommitted changes from the original context.
      * <p>
-     * Based on the description above, the only limitation of this method is that it can
-     * not transfer NEW objects to a peer or parent DataContext (but can to a child DC).
-     * If such condition is encountered, CayenneRuntimeException is thrown.
-     * </p>
-     * <p>
      * Note that the objects in the list do not have to be of the same type or even from
      * the same DataContext.
      * 
      * @since 1.0.3
+     * @deprecated since 1.2 - use {@link #localObject(ObjectId, Persistent)} to specify
+     *             how each local object should be handled.
      */
     public List localObjects(List objects) {
         List localObjects = new ArrayList(objects.size());

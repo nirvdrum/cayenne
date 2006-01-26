@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.pref;
 
-import java.util.Collections;
-
 import org.objectstyle.cayenne.access.DataContext;
 
 /**
@@ -97,8 +95,7 @@ public abstract class CayennePreferenceEditor implements PreferenceEditor {
             return object;
         }
 
-        return (Domain) getEditingContext().localObjects(
-                Collections.singletonList(object)).get(0);
+        return (Domain) getEditingContext().localObject(object.getObjectId(), null);
     }
 
     public PreferenceDetail createDetail(Domain domain, String key) {

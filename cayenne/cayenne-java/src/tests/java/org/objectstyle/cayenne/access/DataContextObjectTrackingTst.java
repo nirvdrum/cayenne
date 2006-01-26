@@ -127,7 +127,7 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
         assertNotNull(context.getObjectStore().getObject(oid));
     }
 
-    public void testLocalObjectsPeerContext() throws Exception {
+    public void testLocalObjectPeerContextMap() throws Exception {
         deleteTestData();
         createTestData("testArtists");
 
@@ -190,36 +190,32 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
 
         try {
 
-            List hollows = peerContext.localObjects(Collections.singletonList(hollow));
-            assertEquals(1, hollows.size());
-            DataObject hollowPeer = (DataObject) hollows.get(0);
+            Persistent hollowPeer = peerContext.localObject(hollow.getObjectId(), null);
             assertEquals(PersistenceState.HOLLOW, hollowPeer.getPersistenceState());
             assertEquals(hollow.getObjectId(), hollowPeer.getObjectId());
-            assertSame(peerContext, hollowPeer.getDataContext());
+            assertSame(peerContext, hollowPeer.getObjectContext());
             assertSame(context, hollow.getObjectContext());
 
-            List commits = peerContext.localObjects(Collections.singletonList(committed));
-            assertEquals(1, commits.size());
-            DataObject committedPeer = (DataObject) commits.get(0);
+            Persistent committedPeer = peerContext.localObject(
+                    committed.getObjectId(),
+                    null);
             assertEquals(PersistenceState.HOLLOW, committedPeer.getPersistenceState());
             assertEquals(committed.getObjectId(), committedPeer.getObjectId());
-            assertSame(peerContext, committedPeer.getDataContext());
+            assertSame(peerContext, committedPeer.getObjectContext());
             assertSame(context, committed.getDataContext());
 
-            List mods = peerContext.localObjects(Collections.singletonList(modified));
-            assertEquals(1, mods.size());
-            DataObject modifiedPeer = (DataObject) mods.get(0);
+            Persistent modifiedPeer = peerContext.localObject(
+                    modified.getObjectId(),
+                    null);
             assertEquals(PersistenceState.HOLLOW, modifiedPeer.getPersistenceState());
             assertEquals(modified.getObjectId(), modifiedPeer.getObjectId());
-            assertSame(peerContext, modifiedPeer.getDataContext());
+            assertSame(peerContext, modifiedPeer.getObjectContext());
             assertSame(context, modified.getDataContext());
 
-            List deletes = peerContext.localObjects(Collections.singletonList(deleted));
-            assertEquals(1, deletes.size());
-            DataObject deletedPeer = (DataObject) deletes.get(0);
+            Persistent deletedPeer = peerContext.localObject(deleted.getObjectId(), null);
             assertEquals(PersistenceState.HOLLOW, deletedPeer.getPersistenceState());
             assertEquals(deleted.getObjectId(), deletedPeer.getObjectId());
-            assertSame(peerContext, deletedPeer.getDataContext());
+            assertSame(peerContext, deletedPeer.getObjectContext());
             assertSame(context, deleted.getDataContext());
         }
         finally {
@@ -227,7 +223,7 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
         }
     }
 
-    public void testLocalObjectsPeerContextNoOverride() throws Exception {
+    public void testLocalObjectPeerContextNoOverride() throws Exception {
         deleteTestData();
         createTestData("testArtists");
 
@@ -260,9 +256,10 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
 
         try {
 
-            List mods = peerContext.localObjects(Collections.singletonList(modified));
-            assertEquals(1, mods.size());
-            DataObject peerModified2 = (DataObject) mods.get(0);
+            Persistent peerModified2 = peerContext.localObject(
+                    modified.getObjectId(),
+                    null);
+
             assertSame(peerModified, peerModified2);
             assertEquals(PersistenceState.MODIFIED, peerModified2.getPersistenceState());
             assertEquals("M2", peerModified.getArtistName());
@@ -273,6 +270,9 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
         }
     }
 
+    /**
+     * @deprecated since 1.2 as localObjects is deprecated.
+     */
     public void testLocalObjectsPeerContextDifferentEntities() throws Exception {
         deleteTestData();
         createTestData("testMix");
@@ -314,6 +314,9 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
         }
     }
 
+    /**
+     * @deprecated since 1.2 as localObjects is deprecated.
+     */
     public void testLocalObjectsPeerContextDifferentContexts() throws Exception {
         deleteTestData();
         createTestData("testMix");
