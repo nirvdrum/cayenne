@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.property.DataObjectAccessor;
 import org.objectstyle.cayenne.property.FieldAccessor;
 import org.objectstyle.cayenne.property.ListProperty;
+import org.objectstyle.cayenne.property.PersistentObjectProperty;
 import org.objectstyle.cayenne.property.Property;
 import org.objectstyle.cayenne.property.PropertyAccessException;
 import org.objectstyle.cayenne.property.PropertyAccessor;
@@ -85,6 +86,8 @@ import org.objectstyle.cayenne.property.ValueHolderProperty;
 public class EntityDescriptor extends BaseClassDescriptor {
 
     protected ObjEntity entity;
+
+    transient boolean dataObject;
 
     /**
      * Creates and compiles a class descriptor for a given entity. A second optional
@@ -132,6 +135,7 @@ public class EntityDescriptor extends BaseClassDescriptor {
 
         // init class
         this.objectClass = entity.getJavaClass();
+        this.dataObject = DataObject.class.isAssignableFrom(objectClass);
 
         // init property descriptors...
         Map allDescriptors = new HashMap();
@@ -181,13 +185,25 @@ public class EntityDescriptor extends BaseClassDescriptor {
                 allDescriptors.put(relationship.getName(), property);
             }
             else {
-                PropertyAccessor accessor = makeAccessor(
-                        relationship.getName(),
-                        ValueHolder.class);
-                ValueHolderProperty property = new ValueHolderProperty(
-                        accessor,
-                        relationship.getReverseRelationshipName());
-                allDescriptors.put(relationship.getName(), property);
+
+                if (dataObject) {
+                    ObjEntity targetEntity = (ObjEntity) relationship.getTargetEntity();
+                    PropertyAccessor accessor = makeAccessor(
+                            relationship.getName(),
+                            targetEntity.getJavaClass());
+                    allDescriptors.put(
+                            relationship.getName(),
+                            new PersistentObjectProperty(accessor));
+                }
+                else {
+                    PropertyAccessor accessor = makeAccessor(
+                            relationship.getName(),
+                            ValueHolder.class);
+                    ValueHolderProperty property = new ValueHolderProperty(
+                            accessor,
+                            relationship.getReverseRelationshipName());
+                    allDescriptors.put(relationship.getName(), property);
+                }
             }
         }
     }
@@ -203,7 +219,7 @@ public class EntityDescriptor extends BaseClassDescriptor {
         }
         catch (Throwable th) {
 
-            if (DataObject.class.isAssignableFrom(objectClass)) {
+            if (dataObject) {
                 return new DataObjectAccessor(propertyName, propertyType);
             }
 
