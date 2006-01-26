@@ -116,7 +116,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
      */
     public void testCreateSqlString3() throws Exception {
         ObjectId id = new ObjectId("Artist", "ARTIST_ID", 35);
-        Artist a1 = (Artist) createDataContext().registeredObject(id);
+        Artist a1 = (Artist) createDataContext().localObject(id, null);
 
         // query with qualifier and ordering
         SelectQuery q = new SelectQuery(ArtistAssets.class, ExpressionFactory.matchExp(

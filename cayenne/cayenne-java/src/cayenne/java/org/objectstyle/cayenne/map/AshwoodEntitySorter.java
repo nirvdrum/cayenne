@@ -335,25 +335,25 @@ public class AshwoodEntitySorter implements EntitySorter {
             DataObject object,
             ObjRelationship toOneRel,
             String targetEntityName) {
-        DbRelationship finalRel = (DbRelationship) toOneRel.getDbRelationships().get(0);
 
+        DbRelationship finalRel = (DbRelationship) toOneRel.getDbRelationships().get(0);
         DataRow snapshot = null;
+        DataContext context = object.getDataContext();
 
         // IMPORTANT: don't try to get snapshots for new objects, this will result in
         // exception
         if (object.getPersistenceState() != PersistenceState.NEW) {
-            DataContext context = object.getDataContext();
             snapshot = context.getObjectStore().getSnapshot(
                     object.getObjectId(),
                     context.getChannel());
         }
 
         if (snapshot == null) {
-            snapshot = object.getDataContext().currentSnapshot(object);
+            snapshot = context.currentSnapshot(object);
         }
 
         ObjectId id = snapshot.createTargetObjectId(targetEntityName, finalRel);
-        return (id != null) ? object.getDataContext().registeredObject(id) : null;
+        return (id != null) ? (DataObject) context.localObject(id, null) : null;
     }
 
     protected Comparator getDbEntityComparator(boolean dependantFirst) {

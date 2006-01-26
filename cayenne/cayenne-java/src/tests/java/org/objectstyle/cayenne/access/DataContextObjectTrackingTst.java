@@ -63,12 +63,12 @@ import java.util.List;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataObjectUtils;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -138,10 +138,10 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
 
         DataObject _new = context.createAndRegisterNewObject(Artist.class);
 
-        DataObject hollow = context.registeredObject(new ObjectId(
+        Persistent hollow = context.localObject(new ObjectId(
                 "Artist",
                 Artist.ARTIST_ID_PK_COLUMN,
-                33001));
+                33001), null);
         DataObject committed = DataObjectUtils.objectForQuery(
                 context,
                 new SingleObjectQuery(new ObjectId(
@@ -172,13 +172,19 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
         assertEquals(PersistenceState.NEW, _new.getPersistenceState());
 
         // now check how objects in different state behave
-        try {
-            peerContext.localObjects(Collections.singletonList(_new));
-            fail("A presence of new object should have triggered an exception");
-        }
-        catch (CayenneRuntimeException e) {
-            // expected
-        }
+
+        // on the one hand sticking an alien NEW object to a peer DataContext doesn't look
+        // like a good idea, on the other hand the code detecting whether a given context
+        // is a child of another context breaks OPPChannel encapsulation (i.e. using
+        // "instanceof" to check OPPChannel type will make it impossible to use Proxies).
+
+        // try {
+        // peerContext.localObjects(Collections.singletonList(_new));
+        // fail("A presence of new object should have triggered an exception");
+        // }
+        // catch (CayenneRuntimeException e) {
+        // // expected
+        // }
 
         blockQueries();
 
@@ -190,7 +196,7 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
             assertEquals(PersistenceState.HOLLOW, hollowPeer.getPersistenceState());
             assertEquals(hollow.getObjectId(), hollowPeer.getObjectId());
             assertSame(peerContext, hollowPeer.getDataContext());
-            assertSame(context, hollow.getDataContext());
+            assertSame(context, hollow.getObjectContext());
 
             List commits = peerContext.localObjects(Collections.singletonList(committed));
             assertEquals(1, commits.size());

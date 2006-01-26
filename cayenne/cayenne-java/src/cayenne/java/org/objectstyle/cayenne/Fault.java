@@ -173,7 +173,7 @@ public abstract class Fault implements Serializable {
                 return DataObjectUtils.objectForPK(context, id);
             }
             else {
-                return context.registeredObject(id);
+                return context.localObject(id, null);
             }
         }
     }

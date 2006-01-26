@@ -112,7 +112,7 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
 
         Artist a1 = newArtist();
         assertEquals(a1.getObjectId(), ctxt
-                .registeredObject(a1.getObjectId())
+                .localObject(a1.getObjectId(), null)
                 .getObjectId());
 
         PaintingInfo pi1 = newPaintingInfo();

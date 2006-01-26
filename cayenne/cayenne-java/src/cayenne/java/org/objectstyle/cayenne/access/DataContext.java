@@ -99,6 +99,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.opp.SyncCommand;
+import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
@@ -558,37 +559,11 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * <li>If the ObjectId is temporary, null is returned; if it is permanent, a HOLLOW
      * object (aka fault) is created and returned.</li>
      * </ul>
+     * 
+     * @deprecated since 1.2 use 'localObject(id, null)'
      */
-    public DataObject registeredObject(ObjectId oid) {
-        // must synchronize on ObjectStore since we must read and write atomically
-        synchronized (getObjectStore()) {
-            DataObject object = objectStore.getObject(oid);
-            if (object == null && !oid.isTemporary()) {
-
-                ObjEntity entity = getEntityResolver().lookupObjEntity(
-                        oid.getEntityName());
-
-                if (entity == null) {
-                    throw new CayenneRuntimeException("Entity not mapped for ObjectId: "
-                            + oid);
-                }
-
-                try {
-                    object = (DataObject) entity.getJavaClass().newInstance();
-                }
-                catch (Exception ex) {
-                    throw new CayenneRuntimeException("Error creating object for id "
-                            + oid, ex);
-                }
-
-                object.setObjectId(oid);
-                object.setPersistenceState(PersistenceState.HOLLOW);
-                object.setDataContext(this);
-                objectStore.addObject(object);
-
-            }
-            return object;
-        }
+    public DataObject registeredObject(ObjectId id) {
+        return (DataObject) localObject(id, null);
     }
 
     /**
@@ -731,17 +706,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
                 throw new CayenneRuntimeException("Null object");
             }
 
-            DataObject localObject = (object.getDataContext() != this)
-                    ? registeredObject(object.getObjectId())
-                    : object;
-
-            if (localObject == null) {
-                throw new CayenneRuntimeException(
-                        "Can't map an object to this DataContext. Failed object:"
-                                + object);
-            }
-
-            localObjects.add(localObject);
+            localObjects.add(localObject(object.getObjectId(), null));
         }
 
         return localObjects;
@@ -1726,5 +1691,105 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
         }
 
         return graphManager;
+    }
+
+    /**
+     * Returns an object local to this DataContext and matching the ObjectId. If
+     * <code>prototype</code> is not null, local object is refreshed with the prototype
+     * values.
+     * <p>
+     * Note that this method may have a side effect on the prototype object. If a
+     * prototype object is not registered with any ObjectContext at all, it will be
+     * registered with this context. This prevents an unneeded copy operation when objects
+     * are served from a channel that is not a context itself. In this case the state of
+     * the prototype object is set to NEW if the ObjectId is temporary or COMMITTED
+     * otherwise.
+     * </p>
+     * 
+     * @since 1.2
+     */
+    public Persistent localObject(ObjectId id, Persistent prototype) {
+
+        // ****** Warning: when changing the code below, don't forget to change
+        // CayenneContext's implementation which right now relies on copy/paste "reuse"
+
+        if (id == null) {
+            throw new IllegalArgumentException("Null ObjectId");
+        }
+
+        // note that per-object ClassDescriptor lookup is needed as even if all
+        // objects where fetched as a part of the same query, as they may belong to
+        // different subclasses
+        ClassDescriptor descriptor = getEntityResolver().lookupObjEntity(
+                id.getEntityName()).getClassDescriptor();
+
+        GraphManager graphManager = getGraphManager();
+        Persistent cachedObject = (Persistent) graphManager.getNode(id);
+
+        // 1. use cached object
+        if (cachedObject != null) {
+
+            // TODO: Andrus, 1/24/2006 implement smart merge for modified objects...
+            if (cachedObject.getPersistenceState() != PersistenceState.MODIFIED
+                    && cachedObject.getPersistenceState() != PersistenceState.DELETED) {
+
+                if (prototype != null) {
+                    descriptor.prepareForAccess(cachedObject);
+
+                    // TODO: Andrus, 1/24/2006 - this operation causes an unexpected fetch
+                    // on one-to-one relationship - investigate....
+                    descriptor.copyProperties(prototype, cachedObject);
+                }
+            }
+
+            return cachedObject;
+        }
+        // 2. use source as a target
+        // 'null' ObjectContext can happen when the objects are fetched from the
+        // channel that is not an ObjectContext
+        else if (prototype != null
+                && (prototype.getObjectContext() == null || prototype.getObjectContext() == this)) {
+
+            prototype.setPersistenceState(id.isTemporary()
+                    ? PersistenceState.NEW
+                    : PersistenceState.COMMITTED);
+
+            prototype.setObjectContext(this);
+            prototype.setObjectId(id);
+            graphManager.registerNode(id, prototype);
+            descriptor.prepareForAccess(prototype);
+
+            return prototype;
+        }
+        // 3. create a copy of the source
+        else {
+
+            // Andrus, 1/26/2006 - note that there is a tricky case of a temporary object
+            // passed from peer DataContext... In the past we used to throw an exception
+            // or return null. Now that we can have a valid (but generally
+            // indistinguishible) case of such object passed from parent, we let it
+            // slip... Not sure what's the best way of handling it that does not involve
+            // breaking encapsulation of the OPPChannel to detect where in the hierarchy
+            // this context is.
+
+            Persistent localObject = (Persistent) descriptor.createObject();
+
+            localObject.setObjectContext(this);
+            localObject.setObjectId(id);
+
+            graphManager.registerNode(id, localObject);
+
+            if (prototype != null
+                    && prototype.getPersistenceState() != PersistenceState.HOLLOW) {
+                localObject.setPersistenceState(PersistenceState.COMMITTED);
+                descriptor.prepareForAccess(localObject);
+                descriptor.copyProperties(prototype, localObject);
+            }
+            else {
+                localObject.setPersistenceState(PersistenceState.HOLLOW);
+            }
+
+            return localObject;
+        }
     }
 }

@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.property;
 
-import java.util.Collections;
-
 import org.objectstyle.cayenne.Persistent;
 
 /**
@@ -75,17 +73,18 @@ public class PersistentObjectProperty extends SimpleProperty {
     public void copyValue(Object from, Object to) throws PropertyAccessException {
         Object newValue = accessor.readValue(from);
 
+        // must obtain the value from the local context
         if (newValue instanceof Persistent) {
             if (to instanceof Persistent) {
                 Persistent newPersistent = (Persistent) newValue;
                 Persistent toPersistent = (Persistent) to;
 
                 if (newPersistent.getObjectContext() != toPersistent.getObjectContext()) {
-                    newValue = newPersistent.getObjectContext().localObjects(
-                            Collections.singletonList(newPersistent)).get(0);
+                    newValue = toPersistent.getObjectContext().localObject(
+                            newPersistent.getObjectId(),
+                            newPersistent);
                 }
             }
-
         }
 
         writeValue(to, accessor.readValue(to), newValue);

@@ -79,7 +79,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         Expression e = ExpressionFactory.matchExp("toArtist", a1);
         SelectQuery q = new SelectQuery("ROPainting", e);
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         List paints = ctxt.performQuery(q);
         assertEquals(1, paints.size());
 
@@ -101,7 +101,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         Expression e = ExpressionFactory.matchExp("toArtist", a1);
         SelectQuery q = new SelectQuery("ROPainting", e);
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         List paints = ctxt.performQuery(q);
         assertEquals(1, paints.size());
 
@@ -110,9 +110,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
 
         // trigger fetch
         rop1.getToArtist().getArtistName();
-        assertEquals(
-            PersistenceState.COMMITTED,
-            rop1.getToArtist().getPersistenceState());
+        assertEquals(PersistenceState.COMMITTED, rop1.getToArtist().getPersistenceState());
     }
 
     public void testSelectViaRelationship() throws Exception {
@@ -126,9 +124,9 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         // do select
         Expression e = ExpressionFactory.matchExp("toArtist", a1);
         SelectQuery q = new SelectQuery("Painting", e);
-        //q.setLoggingLevel(Level.ERROR);
+        // q.setLoggingLevel(Level.ERROR);
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         List paints = ctxt.performQuery(q);
         assertEquals(1, paints.size());
         assertSame(p1, paints.get(0));
@@ -151,7 +149,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         Expression e = ExpressionFactory.matchExp("paintingArray.toGallery", g1);
         SelectQuery q = new SelectQuery("Artist", e);
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         List artists = ctxt.performQuery(q);
         assertEquals(1, artists.size());
         assertSame(a1, artists.get(0));
@@ -161,7 +159,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         Artist a1 = newArtist();
         Painting p1 = newPainting();
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         p1.setToArtist(a1);
 
         // test before save
@@ -193,7 +191,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         Painting p2 = fetchPainting();
         Gallery g2 = p2.getToGallery();
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         p2.setToGallery(null);
 
         // test before save
@@ -231,7 +229,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
 
         Gallery g22 = newGallery();
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         p2.setToGallery(g22);
 
         // test before save
@@ -253,9 +251,9 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
 
     public void testSavedAdd() throws Exception {
         Painting p1 = newPainting();
-        assertEquals(
-            p1.getObjectId(),
-            ctxt.registeredObject(p1.getObjectId()).getObjectId());
+        assertEquals(p1.getObjectId(), ctxt
+                .localObject(p1.getObjectId(), null)
+                .getObjectId());
         assertTrue(ctxt.hasChanges());
 
         // do save
@@ -268,7 +266,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
 
         Gallery g2 = newGallery();
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         p2.setToGallery(g2);
 
         // test before save

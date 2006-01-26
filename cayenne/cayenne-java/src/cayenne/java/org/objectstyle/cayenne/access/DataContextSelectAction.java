@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
@@ -217,7 +218,15 @@ class DataContextSelectAction {
 
     private List getListFromObjectContext() {
         List parentObjects = context.getChannel().performQuery(query);
-        return new LocalObjectConverter(parentObjects, context).getTargetObjects();
+        List childObjects = new ArrayList(parentObjects.size());
+        Iterator it = parentObjects.iterator();
+        while (it.hasNext()) {
+            Persistent parentObject = (Persistent) it.next();
+            childObjects.add(context
+                    .localObject(parentObject.getObjectId(), parentObject));
+        }
+        
+        return childObjects;
     }
 
     private List getListFromChannel() {

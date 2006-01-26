@@ -238,8 +238,7 @@ class DataRowUtils {
                 ObjectId id = snapshot.createTargetObjectId(
                         rel.getTargetEntityName(),
                         dbRelationship);
-                DataObject target = (id != null) ? context.registeredObject(id) : null;
-
+                Object target = (id != null) ? context.localObject(id, null) : null;
                 object.writePropertyDirectly(rel.getName(), target);
             }
         }

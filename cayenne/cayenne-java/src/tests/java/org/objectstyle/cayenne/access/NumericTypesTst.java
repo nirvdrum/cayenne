@@ -213,7 +213,7 @@ public class NumericTypesTst extends CayenneTestCase {
 
         Map map = Collections.singletonMap("DECIMAL_PK", new BigDecimal("1.25"));
         ObjectId syntheticId = new ObjectId("DecimalPKTest", map);
-        assertSame(object, context.registeredObject(syntheticId));
+        assertSame(object, context.localObject(syntheticId, null));
     }
 
     public void testDecimalPK1() throws Exception {
@@ -228,6 +228,6 @@ public class NumericTypesTst extends CayenneTestCase {
 
         Map map = Collections.singletonMap("DECIMAL_PK", new Double(1.25));
         ObjectId syntheticId = new ObjectId("DecimalPKTest1", map);
-        assertSame(object, context.registeredObject(syntheticId));
+        assertSame(object, context.localObject(syntheticId, null));
     }
 }

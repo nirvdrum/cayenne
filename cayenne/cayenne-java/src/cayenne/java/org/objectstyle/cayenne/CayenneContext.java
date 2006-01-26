@@ -55,9 +55,7 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -405,62 +403,92 @@ public class CayenneContext implements ObjectContext {
      * or in HOLLOW state.</i>
      * </p>
      */
-    public List localObjects(List objects) {
-        List localObjects = new ArrayList(objects.size());
+    public Persistent localObject(ObjectId id, Persistent prototype) {
 
-        Iterator it = objects.iterator();
-        while (it.hasNext()) {
-            Persistent object = (Persistent) it.next();
+        // TODO: Andrus, 1/26/2006 - this implementation is copied verbatim from
+        // DataContext. Somehow need to pull out the common code or implement inherirance
 
-            // TODO: Andrus, 1/24/2006 - remove this limitation, just like DataContext did
-            // already...
-            if (object.getPersistenceState() != PersistenceState.COMMITTED
-                    && object.getPersistenceState() != PersistenceState.HOLLOW) {
-                throw new CayenneRuntimeException(
-                        "Only COMMITTED and HOLLOW objects can be transferred between contexts. "
-                                + "Invalid object state '"
-                                + PersistenceState.persistenceStateName(object
-                                        .getPersistenceState())
-                                + "', ObjectId: "
-                                + object.getObjectId());
-            }
+        // ****** Copied from DataContext - start *******
 
-            if (object.getObjectContext() == this) {
-                localObjects.add(object);
-                continue;
-            }
-
-            ObjectId id = object.getObjectId();
-            Object localObject = internalGraphManager().getNode(id);
-
-            if (localObject == null) {
-                if (id == null) {
-                    throw new CayenneRuntimeException(
-                            "Can't transfer an object without ObjectId to an ObjectContext.");
-                }
-
-                // TODO: Andrus, 12/28/2005 - should we copy all the values if the source
-                // is not HOLLOW?
-                ObjEntity entity = getEntityResolver()
-                        .lookupObjEntity(id.getEntityName());
-                if (entity == null) {
-                    throw new CayenneRuntimeException("Unmapped entity: "
-                            + id.getEntityName());
-                }
-                localObject = createFault(entity, id);
-
-                // copy committed values...
-                if (object.getPersistenceState() == PersistenceState.COMMITTED) {
-                    entity.getClassDescriptor().copyProperties(object, localObject);
-                    ((Persistent) localObject)
-                            .setPersistenceState(PersistenceState.COMMITTED);
-                }
-            }
-
-            localObjects.add(localObject);
+        if (id == null) {
+            throw new IllegalArgumentException("Null ObjectId");
         }
 
-        return localObjects;
+        // note that per-object ClassDescriptor lookup is needed as even if all
+        // objects where fetched as a part of the same query, as they may belong to
+        // different subclasses
+        ClassDescriptor descriptor = getEntityResolver().lookupObjEntity(
+                id.getEntityName()).getClassDescriptor();
+
+        GraphManager graphManager = getGraphManager();
+        Persistent cachedObject = (Persistent) graphManager.getNode(id);
+
+        // 1. use cached object
+        if (cachedObject != null) {
+
+            // TODO: Andrus, 1/24/2006 implement smart merge for modified objects...
+            if (cachedObject.getPersistenceState() != PersistenceState.MODIFIED
+                    && cachedObject.getPersistenceState() != PersistenceState.DELETED) {
+
+                if (prototype != null) {
+                    descriptor.prepareForAccess(cachedObject);
+
+                    // TODO: Andrus, 1/24/2006 - this operation causes an unexpected fetch
+                    // on one-to-one relationship - investigate....
+                    descriptor.copyProperties(prototype, cachedObject);
+                }
+            }
+
+            return cachedObject;
+        }
+        // 2. use source as a target
+        // 'null' ObjectContext can happen when the objects are fetched from the
+        // channel that is not an ObjectContext
+        else if (prototype != null
+                && (prototype.getObjectContext() == null || prototype.getObjectContext() == this)) {
+
+            prototype.setPersistenceState(id.isTemporary()
+                    ? PersistenceState.NEW
+                    : PersistenceState.COMMITTED);
+
+            prototype.setObjectContext(this);
+            prototype.setObjectId(id);
+            graphManager.registerNode(id, prototype);
+            descriptor.prepareForAccess(prototype);
+
+            return prototype;
+        }
+        // 3. create a copy of the source
+        else {
+
+            // Andrus, 1/26/2006 - note that there is a tricky case of a temporary object
+            // passed from peer DataContext... In the past we used to throw an exception
+            // or return null. Now that we can have a valid (but generally
+            // indistinguishible) case of such object passed from parent, we let it
+            // slip... Not sure what's the best way of handling it that does not involve
+            // breaking encapsulation of the OPPChannel to detect where in the hierarchy
+            // this context is.
+
+            Persistent localObject = (Persistent) descriptor.createObject();
+
+            localObject.setObjectContext(this);
+            localObject.setObjectId(id);
+
+            graphManager.registerNode(id, localObject);
+
+            if (prototype != null) {
+                localObject.setPersistenceState(PersistenceState.COMMITTED);
+                descriptor.prepareForAccess(localObject);
+                descriptor.copyProperties(prototype, localObject);
+            }
+            else {
+                localObject.setPersistenceState(PersistenceState.HOLLOW);
+            }
+
+            return localObject;
+        }
+
+        // ****** Copied from DataContext - end *******
     }
 
     public QueryResponse performGenericQuery(Query query) {

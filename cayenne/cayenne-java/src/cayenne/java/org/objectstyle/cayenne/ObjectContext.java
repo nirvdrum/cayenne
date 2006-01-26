@@ -122,10 +122,11 @@ public interface ObjectContext extends Serializable {
     Collection uncommittedObjects();
 
     /**
-     * Converts a list of Persistent objects registered in some other ObjectContext to a
-     * list of objects local to this ObjectContext.
+     * Returns an object local to this ObjectContext and matching the ObjectId. If
+     * <code>prototype</code> is not null, local object is refreshed with the prototype
+     * values.
      */
-    List localObjects(List objects);
+    Persistent localObject(ObjectId id, Persistent prototype);
 
     /**
      * Creates a new persistent object scheduled to be inserted on next commit.

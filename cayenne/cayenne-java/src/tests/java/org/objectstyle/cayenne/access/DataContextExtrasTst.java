@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
@@ -105,10 +106,10 @@ public class DataContextExtrasTst extends CayenneTestCase {
     public void testResolveFaultFailure() {
         DataContext context = createDataContext();
 
-        DataObject o1 = context.registeredObject(new ObjectId(
+        Persistent o1 = context.localObject(new ObjectId(
                 "Artist",
                 Artist.ARTIST_ID_PK_COLUMN,
-                new Integer(234)));
+                new Integer(234)), null);
 
         try {
             context.prepareForAccess(o1, null);

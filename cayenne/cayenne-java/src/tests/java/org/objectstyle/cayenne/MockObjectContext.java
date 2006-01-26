@@ -77,7 +77,7 @@ public class MockObjectContext implements ObjectContext {
     public EntityResolver getEntityResolver() {
         return null;
     }
-    
+
     public OPPChannel getChannel() {
         return null;
     }
@@ -86,7 +86,7 @@ public class MockObjectContext implements ObjectContext {
         return null;
     }
 
-    public List localObjects(List objects) {
+    public Persistent localObject(ObjectId id, Persistent prototype) {
         return null;
     }
 

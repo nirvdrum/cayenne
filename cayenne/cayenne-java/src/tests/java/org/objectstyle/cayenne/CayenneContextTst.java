@@ -102,7 +102,7 @@ public class CayenneContextTst extends CayenneTestCase {
         assertSame(channel, context.getChannel());
     }
 
-    public void testLocalObjects() {
+    public void testLocalObject() {
 
         MockOPPChannel channel = new MockOPPChannel();
         CayenneContext src = new CayenneContext(channel);
@@ -138,13 +138,11 @@ public class CayenneContextTst extends CayenneTestCase {
                 .getEntityResolver()
                 .getClientEntityResolver());
 
-        List targets = target.localObjects(sources);
-        assertNotNull(targets);
-        assertEquals(sources.size(), targets.size());
-
         for (int i = 0; i < sources.size(); i++) {
             Persistent srcObject = (Persistent) sources.get(i);
-            Persistent targetObject = (Persistent) targets.get(i);
+            Persistent targetObject = target.localObject(
+                    srcObject.getObjectId(),
+                    srcObject);
 
             assertSame(target, targetObject.getObjectContext());
             assertSame(src, srcObject.getObjectContext());

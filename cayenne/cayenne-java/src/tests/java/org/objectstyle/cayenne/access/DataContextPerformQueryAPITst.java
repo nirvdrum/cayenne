@@ -92,10 +92,10 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
 
         // fetch artist
         DataContext context = createDataContext();
-        Artist a = (Artist) context.registeredObject(new ObjectId(
+        Artist a = (Artist) context.localObject(new ObjectId(
                 "Artist",
                 Artist.ARTIST_ID_PK_COLUMN,
-                33018));
+                33018), null);
         Map parameters = Collections.singletonMap("artist", a);
 
         List paintings = createDataContext()
@@ -152,10 +152,10 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
         assertEquals(1, counts.length);
         assertEquals(1, counts[0]);
 
-        Painting p = (Painting) context.registeredObject(new ObjectId(
+        Painting p = (Painting) context.localObject(new ObjectId(
                 "Painting",
                 Painting.PAINTING_ID_PK_COLUMN,
-                512));
+                512), null);
         assertEquals("No Painting Like This", p.getPaintingTitle());
     }
 
@@ -175,10 +175,10 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
         assertEquals(1, counts.length);
         assertEquals(1, counts[0]);
 
-        Painting p = (Painting) context.registeredObject(new ObjectId(
+        Painting p = (Painting) context.localObject(new ObjectId(
                 "Painting",
                 Painting.PAINTING_ID_PK_COLUMN,
-                300));
+                300), null);
         assertEquals("Go Figure", p.getPaintingTitle());
     }
 }

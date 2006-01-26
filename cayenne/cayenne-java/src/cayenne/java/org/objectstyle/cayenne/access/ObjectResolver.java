@@ -238,7 +238,7 @@ class ObjectResolver {
         ObjectId anId = row.createObjectId(objectEntity);
 
         // this will create a HOLLOW object if it is not registered yet
-        DataObject object = context.registeredObject(anId);
+        DataObject object = (DataObject) context.localObject(anId, null);
 
         // deal with object state
         int state = object.getPersistenceState();
