@@ -70,7 +70,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.net.URL;
@@ -91,8 +90,6 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
@@ -262,25 +259,7 @@ public class Util {
      * and returns the result to the user.
      */
     public static Throwable unwindException(Throwable th) {
-        if (th instanceof CayenneException) {
-            CayenneException e = (CayenneException) th;
-            if (e.getCause() != null && e.getCause() != e) {
-                return unwindException(e.getCause());
-            }
-        }
-        else if (th instanceof CayenneRuntimeException) {
-            CayenneRuntimeException e = (CayenneRuntimeException) th;
-            if (e.getCause() != null && e.getCause() != e) {
-                return unwindException(e.getCause());
-            }
-        }
-        else if (th instanceof InvocationTargetException) {
-            InvocationTargetException e = (InvocationTargetException) th;
-            if (e.getTargetException() != null) {
-                return unwindException(e.getTargetException());
-            }
-        }
-        else if (th instanceof SAXException) {
+        if (th instanceof SAXException) {
             SAXException sax = (SAXException) th;
             if (sax.getException() != null) {
                 return unwindException(sax.getException());
@@ -291,6 +270,9 @@ public class Util {
             if (sql.getNextException() != null) {
                 return unwindException(sql.getNextException());
             }
+        }
+        else if (th.getCause() != null) {
+            return unwindException(th.getCause());
         }
 
         return th;
@@ -580,13 +562,13 @@ public class Util {
     public static String sqlPatternToRegex(String pattern, boolean ignoreCase) {
         return RegexUtil.sqlPatternToRegex(pattern);
     }
-    
+
     /**
      * @since 1.2
      */
     public static Pattern sqlPatternToPattern(String pattern, boolean ignoreCase) {
         String preprocessed = RegexUtil.sqlPatternToRegex(pattern);
-        
+
         int flag = (ignoreCase) ? Pattern.CASE_INSENSITIVE : 0;
         return Pattern.compile(preprocessed, flag);
     }
@@ -608,15 +590,14 @@ public class Util {
      * 
      * @since 1.2
      */
-    public static Class getJavaClass(String className)
-            throws ClassNotFoundException {
+    public static Class getJavaClass(String className) throws ClassNotFoundException {
 
         // is there a better way to get array class from string name?
 
         if (className == null) {
             throw new ClassNotFoundException("Null class name");
         }
-        
+
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         if (classLoader == null) {
