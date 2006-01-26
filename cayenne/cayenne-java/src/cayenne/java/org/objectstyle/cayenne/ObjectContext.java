@@ -125,6 +125,11 @@ public interface ObjectContext extends Serializable {
      * Returns an object local to this ObjectContext and matching the ObjectId. If
      * <code>prototype</code> is not null, local object is refreshed with the prototype
      * values.
+     * <p>
+     * This method can do both "mapping" (i.e. finding an object with the same id in this
+     * context) and "synchronization" (i.e. updating the state of the found object with
+     * the state of the prototype object).
+     * </p>
      */
     Persistent localObject(ObjectId id, Persistent prototype);
 
