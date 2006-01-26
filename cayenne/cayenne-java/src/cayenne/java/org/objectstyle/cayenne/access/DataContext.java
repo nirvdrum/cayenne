@@ -1716,13 +1716,13 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
     }
 
     /**
-     * Returns a wrapper around ObjectStore.
+     * Returns a GraphManager decorator of the ObjectStore.
      * 
      * @since 1.2
      */
     public GraphManager getGraphManager() {
         if (graphManager == null) {
-            graphManager = new ChildDiffLoader(this);
+            graphManager = new DataContextGraphManager(this);
         }
 
         return graphManager;

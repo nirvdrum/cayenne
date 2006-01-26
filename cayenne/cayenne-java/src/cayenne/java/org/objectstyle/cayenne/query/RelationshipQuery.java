@@ -77,6 +77,7 @@ public class RelationshipQuery extends IndirectQuery {
 
     protected ObjectId objectId;
     protected String relationshipName;
+    protected boolean refreshing;
 
     // exists for deserialization with Hessian
     private RelationshipQuery() {
@@ -87,6 +88,11 @@ public class RelationshipQuery extends IndirectQuery {
      * Creates a RelationshipQuery based on source object ObjectId and relationship name.
      */
     public RelationshipQuery(ObjectId objectID, String relationshipName) {
+        this(objectID, relationshipName, true);
+    }
+
+    public RelationshipQuery(ObjectId objectID, String relationshipName,
+            boolean refreshing) {
         if (objectID == null) {
             throw new CayenneRuntimeException("Null objectID");
         }
@@ -98,10 +104,15 @@ public class RelationshipQuery extends IndirectQuery {
 
         this.objectId = objectID;
         this.relationshipName = relationshipName;
+        this.refreshing = refreshing;
     }
 
     public ObjectId getObjectId() {
         return objectId;
+    }
+
+    public boolean isRefreshing() {
+        return refreshing;
     }
 
     public String getRelationshipName() {
@@ -115,7 +126,11 @@ public class RelationshipQuery extends IndirectQuery {
         Expression qualifier = ExpressionFactory.matchDbExp(relationship
                 .getReverseDbRelationshipPath(), objectId);
 
-        return new SelectQuery((ObjEntity) relationship.getTargetEntity(), qualifier);
+        SelectQuery query = new SelectQuery(
+                (ObjEntity) relationship.getTargetEntity(),
+                qualifier);
+        query.setRefreshingObjects(refreshing);
+        return query;
     }
 
     /**

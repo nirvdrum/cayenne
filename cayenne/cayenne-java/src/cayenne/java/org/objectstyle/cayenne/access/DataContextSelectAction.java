@@ -63,13 +63,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
+import org.objectstyle.cayenne.query.RelationshipQuery;
+import org.objectstyle.cayenne.query.SingleObjectQuery;
 
 /**
  * A DataContext helper that handles select query execution.
@@ -77,11 +82,16 @@ import org.objectstyle.cayenne.query.QueryMetadata;
  * @since 1.2
  * @author Andrus Adamchik
  */
+// TODO: Andrus, 1/25/2006 - some sort of generic chainOfCommand implementation is due.
+// commons-chain?
 class DataContextSelectAction {
+
+    static final boolean DONE = true;
 
     DataContext context;
     Query query;
     QueryMetadata metadata;
+    List result;
 
     DataContextSelectAction(DataContext context, Query query) {
         this.context = context;
@@ -98,12 +108,77 @@ class DataContextSelectAction {
             return new IncrementalFaultList(context, query);
         }
 
+        // intercept object and relationship queries that can be served from cache.
+        if (interceptOIDQuery() == DONE) {
+            return this.result;
+        }
+
+        if (interceptRelationshipQuery() == DONE) {
+            return this.result;
+        }
+
+        // intercept explicitly cached queries
         if (QueryMetadata.LOCAL_CACHE.equals(metadata.getCachePolicy())) {
             return getListViaCache();
         }
-        else {
-            return getList();
+
+        return getList();
+    }
+
+    private boolean interceptOIDQuery() {
+        if (query instanceof SingleObjectQuery) {
+            SingleObjectQuery oidQuery = (SingleObjectQuery) query;
+            if (!oidQuery.isRefreshing()) {
+                Object object = context.getGraphManager().getNode(oidQuery.getObjectId());
+                if (object != null) {
+                    this.result = new ArrayList(1);
+                    this.result.add(object);
+                    return DONE;
+                }
+            }
         }
+
+        return !DONE;
+    }
+
+    private boolean interceptRelationshipQuery() {
+        if (query instanceof RelationshipQuery) {
+            RelationshipQuery relationshipQuery = (RelationshipQuery) query;
+            if (!relationshipQuery.isRefreshing()) {
+
+                ObjectId id = relationshipQuery.getObjectId();
+
+                DataObject object = (DataObject) context.getGraphManager().getNode(id);
+
+                if (object != null) {
+
+                    // can't do 'readProperty' (or use ClassDescriptor at this point) as
+                    // this will result in an infinite loop...
+                    Object related = object.readPropertyDirectly(relationshipQuery
+                            .getRelationshipName());
+
+                    if (!(related instanceof Fault)) {
+                        // null to-one
+                        if (related == null) {
+                            this.result = new ArrayList(1);
+                        }
+                        // to-many
+                        else if (related instanceof List) {
+                            this.result = (List) related;
+                        }
+                        // non-null to-one
+                        else {
+                            this.result = new ArrayList(1);
+                            this.result.add(object);
+                        }
+
+                        return DONE;
+                    }
+                }
+            }
+        }
+
+        return !DONE;
     }
 
     /*
@@ -142,10 +217,7 @@ class DataContextSelectAction {
 
     private List getListFromObjectContext() {
         List parentObjects = context.getChannel().performQuery(query);
-
-        // TODO: handle refreshing...
-
-        return context.localObjects(parentObjects);
+        return new LocalObjectConverter(parentObjects, context).getTargetObjects();
     }
 
     private List getListFromChannel() {

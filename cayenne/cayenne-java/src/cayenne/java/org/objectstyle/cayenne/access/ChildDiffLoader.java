@@ -55,14 +55,11 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.graph.GraphManager;
+import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Relationship;
 
@@ -73,57 +70,12 @@ import org.objectstyle.cayenne.map.Relationship;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class ChildDiffLoader implements GraphManager {
+class ChildDiffLoader implements GraphChangeHandler {
 
     DataContext context;
 
     ChildDiffLoader(DataContext context) {
         this.context = context;
-    }
-
-    public Object getNode(Object nodeId) {
-        return context.registeredObject((ObjectId) nodeId);
-    }
-
-    public Collection registeredNodes() {
-        return context.getObjectStore().getObjects();
-    }
-
-    public void registerNode(Object nodeId, Object nodeObject) {
-        context.getObjectStore().addObject((DataObject) nodeObject);
-    }
-
-    public Object unregisterNode(Object nodeId) {
-        Object object = getNode(nodeId);
-        if (object != null) {
-            context.getObjectStore().objectsUnregistered(Collections.singleton(object));
-        }
-
-        return object;
-    }
-
-    /**
-     * Does nothing.
-     */
-    public void graphCommitAborted() {
-    }
-
-    /**
-     * Does nothing.
-     */
-    public void graphCommitStarted() {
-    }
-
-    /**
-     * Does nothing.
-     */
-    public void graphCommitted() {
-    }
-
-    /**
-     * Does nothing.
-     */
-    public void graphRolledback() {
     }
 
     public void nodeIdChanged(Object nodeId, Object newId) {

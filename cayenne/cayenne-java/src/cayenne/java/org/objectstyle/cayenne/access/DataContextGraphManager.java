@@ -53,41 +53,102 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.property;
+package org.objectstyle.cayenne.access;
 
+import java.util.Collection;
 import java.util.Collections;
 
-import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.graph.GraphManager;
 
 /**
- * An extension of SimpleProperty that makes sure that Persistent values are properly
- * transferred between contexts on copy.
+ * A GraphManager wrapper around an ObjectStore.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class PersistentObjectProperty extends SimpleProperty {
+class DataContextGraphManager implements GraphManager {
 
-    public PersistentObjectProperty(PropertyAccessor accessor) {
-        super(accessor);
+    DataContext context;
+
+    DataContextGraphManager(DataContext context) {
+        this.context = context;
     }
 
-    public void copyValue(Object from, Object to) throws PropertyAccessException {
-        Object newValue = accessor.readValue(from);
+    public Object getNode(Object nodeId) {
+        // note that we are not useing DataContext.registeredObject(..). If it is not
+        // registered we are expected to return null.
+        return context.getObjectStore().getObject((ObjectId) nodeId);
+    }
 
-        if (newValue instanceof Persistent) {
-            if (to instanceof Persistent) {
-                Persistent newPersistent = (Persistent) newValue;
-                Persistent toPersistent = (Persistent) to;
+    public Collection registeredNodes() {
+        return context.getObjectStore().getObjects();
+    }
 
-                if (newPersistent.getObjectContext() != toPersistent.getObjectContext()) {
-                    newValue = newPersistent.getObjectContext().localObjects(
-                            Collections.singletonList(newPersistent)).get(0);
-                }
-            }
+    public void registerNode(Object nodeId, Object nodeObject) {
+        context.getObjectStore().addObject((DataObject) nodeObject);
+    }
 
+    public Object unregisterNode(Object nodeId) {
+        Object object = getNode(nodeId);
+        if (object != null) {
+            context.getObjectStore().objectsUnregistered(Collections.singleton(object));
         }
 
-        writeValue(to, accessor.readValue(to), newValue);
+        return object;
+    }
+
+    /**
+     * Does nothing.
+     */
+    public void graphCommitAborted() {
+    }
+
+    /**
+     * Does nothing.
+     */
+    public void graphCommitStarted() {
+    }
+
+    /**
+     * Does nothing.
+     */
+    public void graphCommitted() {
+    }
+
+    /**
+     * Does nothing.
+     */
+    public void graphRolledback() {
+    }
+
+    public void nodeIdChanged(Object nodeId, Object newId) {
+        // noop
+    }
+
+    public void nodeCreated(Object nodeId) {
+        // noop
+    }
+
+    public void nodeRemoved(Object nodeId) {
+        // noop
+    }
+
+    public void nodePropertyChanged(
+            Object nodeId,
+            String property,
+            Object oldValue,
+            Object newValue) {
+
+        // noop
+    }
+
+    public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
+        // noop
+    }
+
+    public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
+        // noop
     }
 }

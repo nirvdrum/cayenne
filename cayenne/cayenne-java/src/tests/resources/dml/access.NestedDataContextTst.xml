@@ -74,7 +74,7 @@
 	<!-- Data Sets -->
 	<!-- ======================================= -->	
 	
-	<bean id="testSelect" class="java.util.ArrayList">
+	<bean id="testArtists" class="java.util.ArrayList">
 		<constructor-arg>
 			<list>
 				<ref bean="A1"/>

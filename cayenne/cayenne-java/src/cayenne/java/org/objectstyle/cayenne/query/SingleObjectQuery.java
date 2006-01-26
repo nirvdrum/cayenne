@@ -72,18 +72,27 @@ import org.objectstyle.cayenne.util.Util;
 public class SingleObjectQuery extends IndirectQuery {
 
     protected ObjectId objectId;
+    protected boolean refreshing;
 
     // needed for hessian serialization
     private SingleObjectQuery() {
 
     }
 
+    /**
+     * Creates a refreshing SingleObjectQuery.
+     */
     public SingleObjectQuery(ObjectId objectID) {
+        this(objectID, true);
+    }
+
+    public SingleObjectQuery(ObjectId objectID, boolean refreshing) {
         if (objectID == null) {
             throw new NullPointerException("Null objectID");
         }
 
         this.objectId = objectID;
+        this.refreshing = refreshing;
     }
 
     public ObjectId getObjectId() {
@@ -95,9 +104,10 @@ public class SingleObjectQuery extends IndirectQuery {
             throw new CayenneRuntimeException("Can't resolve query - objectId is null.");
         }
 
-        return new SelectQuery(objectId.getEntityName(), ExpressionFactory.matchAllDbExp(
-                objectId.getIdSnapshot(),
-                Expression.EQUAL_TO));
+        SelectQuery query = new SelectQuery(objectId.getEntityName(), ExpressionFactory
+                .matchAllDbExp(objectId.getIdSnapshot(), Expression.EQUAL_TO));
+        query.setRefreshingObjects(refreshing);
+        return query;
     }
 
     /**
@@ -105,6 +115,10 @@ public class SingleObjectQuery extends IndirectQuery {
      */
     public Object getRoot() {
         return objectId.getEntityName();
+    }
+
+    public boolean isRefreshing() {
+        return refreshing;
     }
 
     /**
