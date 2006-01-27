@@ -65,8 +65,7 @@ import org.objectstyle.cayenne.util.PersistentObjectHolder;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ValueHolderProperty extends SimpleProperty implements ArcProperty,
-        IndirectProperty {
+public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
 
     protected String reversePropertyName;
 
@@ -90,25 +89,16 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty,
         ensureValueHolderSet(object);
     }
 
-    public Object readValueHolder(Object object) throws PropertyAccessException {
-        return accessor.readValue(object);
-    }
-
-    public void writeValueHolder(Object object, Object valueHolder)
-            throws PropertyAccessException {
-        accessor.writeValue(object, null, valueHolder);
-    }
-
     public Object readValue(Object object) throws PropertyAccessException {
         ensureValueHolderSet(object);
-        return ((ValueHolder) readValueHolder(object)).getValue(null);
+        return ((ValueHolder) accessor.readValue(object)).getValue(null);
     }
 
     public void writeValue(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException {
 
         ensureValueHolderSet(object);
-        ((ValueHolder) readValueHolder(object)).setInitialValue(null, newValue);
+        ((ValueHolder) accessor.readValue(object)).setInitialValue(null, newValue);
     }
 
     /**
@@ -116,8 +106,8 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty,
      * injecting a ValueHolder if needed.
      */
     protected void ensureValueHolderSet(Object object) throws PropertyAccessException {
-        if (readValueHolder(object) == null) {
-            writeValueHolder(object, createValueHolder(object));
+        if (accessor.readValue(object) == null) {
+            accessor.writeValue(object, null, createValueHolder(object));
         }
     }
 

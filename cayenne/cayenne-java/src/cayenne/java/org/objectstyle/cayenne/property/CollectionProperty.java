@@ -63,8 +63,7 @@ import java.util.Collection;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public abstract class CollectionProperty extends SimpleProperty implements ArcProperty,
-        IndirectProperty {
+public abstract class CollectionProperty extends SimpleProperty implements ArcProperty {
 
     protected String reversePropertyName;
 
@@ -86,15 +85,6 @@ public abstract class CollectionProperty extends SimpleProperty implements ArcPr
      */
     public void prepareForAccess(Object object) throws PropertyAccessException {
         ensureCollectionSet(object);
-    }
-
-    public Object readValueHolder(Object object) throws PropertyAccessException {
-        return accessor.readValue(object);
-    }
-
-    public void writeValueHolder(Object object, Object valueHolder)
-            throws PropertyAccessException {
-        accessor.writeValue(object, null, valueHolder);
     }
 
     /**
@@ -132,10 +122,10 @@ public abstract class CollectionProperty extends SimpleProperty implements ArcPr
     protected Collection ensureCollectionSet(Object object)
             throws PropertyAccessException {
 
-        Collection collection = (Collection) readValueHolder(object);
+        Collection collection = (Collection) accessor.readValue(object);
         if (collection == null) {
             collection = createCollection(object);
-            writeValueHolder(object, collection);
+            accessor.writeValue(object, null, collection);
         }
 
         return collection;
