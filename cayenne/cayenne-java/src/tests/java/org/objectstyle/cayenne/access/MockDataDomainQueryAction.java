@@ -55,11 +55,11 @@
  */
 package org.objectstyle.cayenne.access;
 
-import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.unit.TestDataDomain;
 
 /**
  * A DataDomainQueryAction that can be configured to block queries that are not run from
@@ -69,18 +69,13 @@ import org.objectstyle.cayenne.query.Query;
  */
 public class MockDataDomainQueryAction extends DataDomainQueryAction {
 
-    protected boolean blockingQueries;
-
-    public MockDataDomainQueryAction(DataDomain domain, Query query,
-            OperationObserver callback, boolean blockingQueries) {
+    public MockDataDomainQueryAction(TestDataDomain domain, Query query,
+            OperationObserver callback) {
         super(domain, query, callback);
-        this.blockingQueries = blockingQueries;
     }
 
-    public MockDataDomainQueryAction(DataDomain domain, Query query,
-            boolean blockingQueries) {
+    public MockDataDomainQueryAction(TestDataDomain domain, Query query) {
         super(domain, query);
-        this.blockingQueries = blockingQueries;
     }
 
     public QueryResponse execute() {
@@ -92,15 +87,7 @@ public class MockDataDomainQueryAction extends DataDomainQueryAction {
         super.performQuery();
     }
 
-    public boolean isBlockingQueries() {
-        return blockingQueries;
-    }
-
-    public void setBlockingQueries(boolean blockingQueries) {
-        this.blockingQueries = blockingQueries;
-    }
-
     protected void checkQueryAllowed() throws AssertionFailedError {
-        Assert.assertFalse("Query is unexpected.", blockingQueries);
+        ((TestDataDomain) domain).checkQueryAllowed();
     }
 }

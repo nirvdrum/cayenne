@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.query.Query;
 public class TestDataDomain extends DataDomain {
 
     protected boolean blockingQueries;
+    protected int queryCount;
 
     public TestDataDomain(String name) {
         super(name);
@@ -78,6 +79,14 @@ public class TestDataDomain extends DataDomain {
 
     public TestDataDomain(String name, Map properties) {
         super(name, properties);
+    }
+
+    public void restartQueryCounter() {
+        queryCount = 0;
+    }
+
+    public int getQueryCount() {
+        return queryCount;
     }
 
     public boolean isBlockingQueries() {
@@ -95,7 +104,7 @@ public class TestDataDomain extends DataDomain {
             return createTransaction().performGenericQuery(this, query);
         }
 
-        return new MockDataDomainQueryAction(this, query, blockingQueries).execute();
+        return new MockDataDomainQueryAction(this, query).execute();
     }
 
     public void performQueries(Collection queries, OperationObserver callback) {
@@ -103,7 +112,9 @@ public class TestDataDomain extends DataDomain {
         super.performQueries(queries, callback);
     }
 
-    protected void checkQueryAllowed() throws AssertionFailedError {
+    public void checkQueryAllowed() throws AssertionFailedError {
         Assert.assertFalse("Query is unexpected.", blockingQueries);
+
+        queryCount++;
     }
 }
