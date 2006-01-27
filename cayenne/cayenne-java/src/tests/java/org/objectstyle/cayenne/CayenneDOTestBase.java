@@ -82,7 +82,7 @@ public class CayenneDOTestBase extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         deleteTestData();
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
     }
 
     protected Exhibit newExhibit(Gallery gallery) {
