@@ -53,31 +53,43 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit;
-
-import java.util.Collection;
-import java.util.Map;
+package org.objectstyle.cayenne.access;
 
 import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.MockDataDomainQueryAction;
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.query.Query;
 
-public class TestDataDomain extends DataDomain {
+/**
+ * A DataDomainQueryAction that can be configured to block queries that are not run from
+ * cache.
+ * 
+ * @author Andrus Adamchik
+ */
+public class MockDataDomainQueryAction extends DataDomainQueryAction {
 
     protected boolean blockingQueries;
 
-    public TestDataDomain(String name) {
-        super(name);
+    public MockDataDomainQueryAction(DataDomain domain, Query query,
+            OperationObserver callback, boolean blockingQueries) {
+        super(domain, query, callback);
+        this.blockingQueries = blockingQueries;
     }
 
-    public TestDataDomain(String name, Map properties) {
-        super(name, properties);
+    public MockDataDomainQueryAction(DataDomain domain, Query query,
+            boolean blockingQueries) {
+        super(domain, query);
+        this.blockingQueries = blockingQueries;
+    }
+
+    public QueryResponse execute() {
+        return super.execute();
+    }
+
+    void performQuery() {
+        checkQueryAllowed();
+        super.performQuery();
     }
 
     public boolean isBlockingQueries() {
@@ -86,21 +98,6 @@ public class TestDataDomain extends DataDomain {
 
     public void setBlockingQueries(boolean blockingQueries) {
         this.blockingQueries = blockingQueries;
-    }
-
-    public QueryResponse performGenericQuery(Query query) {
-        // wrap in transaction if no Transaction context exists
-        Transaction transaction = Transaction.getThreadTransaction();
-        if (transaction == null) {
-            return createTransaction().performGenericQuery(this, query);
-        }
-
-        return new MockDataDomainQueryAction(this, query, blockingQueries).execute();
-    }
-
-    public void performQueries(Collection queries, OperationObserver callback) {
-        checkQueryAllowed();
-        super.performQueries(queries, callback);
     }
 
     protected void checkQueryAllowed() throws AssertionFailedError {
