@@ -471,6 +471,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             int size = objects.size();
             for (int i = 0; i < size; i++) {
                 DataObject object = (DataObject) objects.get(i);
+                
+                // skip HOLLOW objects as they likely were created from partial snapshots
+                if(object.getPersistenceState() == PersistenceState.HOLLOW) {
+                    continue;
+                }
+                
                 ObjectId oid = object.getObjectId();
 
                 // add snapshots if refresh is forced, or if a snapshot is

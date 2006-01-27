@@ -178,9 +178,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
         assertTrue(context.getObjectStore().getObjects().contains(obj));
         assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
 
-        assertNotNull(context.getObjectStore().getSnapshot(
-                obj.getObjectId(),
-                context.getChannel()));
+        assertNull(context.getObjectStore().getCachedSnapshot(obj.getObjectId()));
     }
 
     public void testPartialObjectFromDataRow() {
@@ -192,9 +190,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
         assertNotNull(obj);
         assertTrue(context.getObjectStore().getObjects().contains(obj));
         assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
-        assertNotNull(context.getObjectStore().getSnapshot(
-                obj.getObjectId(),
-                context.getChannel()));
+        assertNull(context.getObjectStore().getCachedSnapshot(obj.getObjectId()));
     }
 
     public void testFullObjectFromDataRow() {
