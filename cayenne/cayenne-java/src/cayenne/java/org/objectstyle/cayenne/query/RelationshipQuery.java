@@ -107,6 +107,24 @@ public class RelationshipQuery extends IndirectQuery {
         this.refreshing = refreshing;
     }
 
+    /**
+     * Returns query metadata object.
+     */
+    // return metadata without creating replacement, as this is not always possible to
+    // create replacement (one-way relationships, etc.)
+    public QueryMetadata getMetaData(final EntityResolver resolver) {
+        return new DefaultQueryMetadata() {
+
+            public boolean isRefreshingObjects() {
+                return refreshing;
+            }
+
+            public ObjEntity getObjEntity() {
+                return (ObjEntity) getRelationship(resolver).getTargetEntity();
+            }
+        };
+    }
+
     public ObjectId getObjectId() {
         return objectId;
     }
@@ -136,7 +154,7 @@ public class RelationshipQuery extends IndirectQuery {
     /**
      * Returns a non-null relationship object for this query.
      */
-    protected ObjRelationship getRelationship(EntityResolver resolver) {
+    public ObjRelationship getRelationship(EntityResolver resolver) {
         if (objectId == null) {
             throw new CayenneRuntimeException("Can't resolve query - objectID is null.");
         }
