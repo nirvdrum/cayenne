@@ -55,17 +55,13 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
@@ -278,68 +274,7 @@ public final class DataObjectUtils {
      * @throws CayenneRuntimeException if more than one object matched ObjectId.
      */
     public static DataObject objectForPK(ObjectContext context, ObjectId id) {
-        // TODO: Andrus, 1/23/2006 - a temp hack until ObjectStore starts implementing
-        // GraphManager .. we may also need to intercept SingleObjectQueries at the
-        // DataDomain level and provide objects from domain cache.
-
-        if (!(context instanceof DataContext)) {
-            DataObject object = (DataObject) context.getGraphManager().getNode(id);
-            if (object == null) {
-                object = DataObjectUtils.objectForQuery(
-                        context,
-                        new SingleObjectQuery(id));
-            }
-
-            return object;
-        }
-        else {
-
-            DataContext dataContext = (DataContext) context;
-            ObjectStore objectStore = dataContext.getObjectStore();
-
-            // look for cached object first
-            DataObject object = objectStore.getObject(id);
-            if (object != null) {
-                return object;
-            }
-
-            // CAY-218: check for inheritance... ObjectId maybe wrong
-            // TODO: investigate moving this to the ObjectStore "getObject()" - this
-            // should
-            // really be global...
-
-            ObjEntity entity = context.getEntityResolver().lookupObjEntity(
-                    id.getEntityName());
-            EntityInheritanceTree inheritanceHandler = context
-                    .getEntityResolver()
-                    .lookupInheritanceTree(entity);
-            if (inheritanceHandler != null) {
-                Collection children = inheritanceHandler.getChildren();
-                if (!children.isEmpty()) {
-                    // find cached child
-                    Iterator it = children.iterator();
-                    while (it.hasNext()) {
-                        EntityInheritanceTree child = (EntityInheritanceTree) it.next();
-                        ObjectId childID = new ObjectId(child.getEntity().getName(), id
-                                .getIdSnapshot());
-
-                        DataObject childObject = objectStore.getObject(childID);
-                        if (childObject != null) {
-                            return childObject;
-                        }
-                    }
-                }
-            }
-
-            // look in shared cache...
-
-            // TODO: take inheritance into account...
-            DataRow row = objectStore.getSnapshot(id, context.getChannel());
-            return (row != null) ? dataContext.objectFromDataRow(
-                    entity.getJavaClass(),
-                    row,
-                    false) : null;
-        }
+        return DataObjectUtils.objectForQuery(context, new SingleObjectQuery(id, false));
     }
 
     /**
