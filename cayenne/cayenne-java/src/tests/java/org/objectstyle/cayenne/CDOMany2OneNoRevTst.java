@@ -55,56 +55,45 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.List;
+import java.util.Arrays;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting1;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * Tests DataObjects with no reverse relationships.
  * 
  * @author Andrei Adamchik
  */
-public class CDOMany2OneNoRevTst extends CayenneDOTestBase {
-
-    /**
-     * @see org.objectstyle.cayenne.CayenneDOTestBase#newPainting()
-     */
-    protected Painting1 newPainting1() {
-        Painting1 p1 = (Painting1) ctxt.createAndRegisterNewObject("Painting1");
-        p1.setPaintingTitle(paintingName);
-        return p1;
-    }
-
-    protected Painting1 fetchPainting1() {
-        SelectQuery q =
-            new SelectQuery(
-                "Painting1",
-                ExpressionFactory.matchExp("paintingTitle", paintingName));
-        List pts = ctxt.performQuery(q);
-        return (pts.size() > 0) ? (Painting1) pts.get(0) : null;
-    }
+public class CDOMany2OneNoRevTst extends CayenneTestCase {
 
     public void testNewAdd() throws Exception {
-        Artist a1 = newArtist();
-        Painting1 p1 = newPainting1();
+        deleteTestData();
 
-        // *** TESTING THIS *** 
+        DataContext context = createDataContext();
+
+        Artist a1 = (Artist) context.createAndRegisterNewObject("Artist");
+        a1.setArtistName("a");
+        Painting1 p1 = (Painting1) context.createAndRegisterNewObject("Painting1");
+        p1.setPaintingTitle("p");
+
+        // *** TESTING THIS ***
         p1.setToArtist(a1);
 
-        // test before save
         assertSame(a1, p1.getToArtist());
 
-        // do save
-        ctxt.commitChanges();
-        ctxt = createDataContext();
+        context.commitChanges();
+        ObjectId aid = a1.getObjectId();
+        ObjectId pid = p1.getObjectId();
+        context.invalidateObjects(Arrays.asList(new Object[] {
+                a1, p1
+        }));
 
-        // test database data
-        Painting1 p2 = fetchPainting1();
+        Painting1 p2 = (Painting1) DataObjectUtils.objectForPK(context, pid);
         Artist a2 = p2.getToArtist();
         assertNotNull(a2);
-        assertEquals(artistName, a2.getArtistName());
+        assertEquals(aid, a2.getObjectId());
     }
 }
