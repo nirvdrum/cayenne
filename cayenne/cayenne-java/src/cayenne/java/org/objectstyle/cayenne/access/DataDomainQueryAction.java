@@ -249,7 +249,9 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
 
         QueryResponse response = getResponse();
 
-        // TODO: Andrus, 1/22/2006 - cache QueryResponse object instead of a list!
+        // TODO: Andrus, 1/22/2006 - cache QueryResponse object instead of a list! However
+        // to do that we need to make sure that all queries that support caching can work
+        // as HashMap keys, so that the result could be decoded by the caller.
         cache.cacheSnapshots(query.getName(), response.getFirstRows(query));
         return response;
     }
