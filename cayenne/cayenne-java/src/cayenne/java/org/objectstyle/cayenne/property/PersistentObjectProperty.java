@@ -70,6 +70,10 @@ public class PersistentObjectProperty extends SimpleProperty {
         super(accessor);
     }
 
+    /**
+     * Copies a property value that is itself a persistent object from one object to
+     * another. If the new value is fault, fault will be copied to the target.
+     */
     public void copyValue(Object from, Object to) throws PropertyAccessException {
         Object newValue = accessor.readValue(from);
 

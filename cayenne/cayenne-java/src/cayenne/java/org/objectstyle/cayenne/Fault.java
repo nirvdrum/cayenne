@@ -60,10 +60,6 @@ import java.util.List;
 
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ToManyList;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.RelationshipQuery;
 
 /**
@@ -116,64 +112,27 @@ public abstract class Fault implements Serializable {
          */
         public Object resolveFault(DataObject sourceObject, String relationshipName) {
             DataContext context = sourceObject.getDataContext();
-            EntityResolver resolver = context.getEntityResolver();
 
-            ObjEntity entity = resolver.lookupObjEntity(sourceObject);
-            ObjRelationship relationship = (ObjRelationship) entity
-                    .getRelationship(relationshipName);
-
-            // create HOLLOW object if we can, or do a fetch if we can't
-            // criteria that requires fully resolving an object are:
-
-            // 1. Target ObjectId can't be fully expressed using the values
-            // from source object snapshot or
-            // 2. Target object has subclasses, and it is not clear which class
-            // to instantiate.
-
-            if (relationship.isSourceIndependentFromTargetChange()) {
-
-                // can't create HOLLOW, do a fetch
-
-                RelationshipQuery query = new RelationshipQuery(sourceObject
-                        .getObjectId(), relationship.getName());
-                List objects = context.performQuery(query);
-
-                if (objects.isEmpty()) {
-                    return null;
-                }
-                else if (objects.size() == 1) {
-                    return objects.get(0);
-                }
-                else {
-                    throw new CayenneRuntimeException("Error resolving to-one fault. "
-                            + "More than one object found. "
-                            + "Fault entity: "
-                            + relationship.getTargetEntityName());
-                }
-            }
-
-            // get ObjectId...
-            DbRelationship dbRel = (DbRelationship) relationship
-                    .getDbRelationships()
-                    .get(0);
-
-            ObjectId id = context.getObjectStore().getSnapshot(
+            RelationshipQuery query = new RelationshipQuery(
                     sourceObject.getObjectId(),
-                    context.getChannel()).createTargetObjectId(
-                    relationship.getTargetEntityName(),
-                    dbRel);
+                    relationshipName,
+                    false);
 
-            if (id == null) {
+            List objects = context.performQuery(query);
+
+            if (objects.isEmpty()) {
                 return null;
             }
-
-            if (resolver
-                    .lookupInheritanceTree((ObjEntity) relationship.getTargetEntity()) != null) {
-                // this should find a correct subclass if we have inheritance case....
-                return DataObjectUtils.objectForPK(context, id);
+            else if (objects.size() == 1) {
+                return objects.get(0);
             }
             else {
-                return context.localObject(id, null);
+                throw new CayenneRuntimeException("Error resolving to-one fault. "
+                        + "More than one object found. "
+                        + "Source Id: "
+                        + sourceObject.getObjectId()
+                        + ", relationship: "
+                        + relationshipName);
             }
         }
     }

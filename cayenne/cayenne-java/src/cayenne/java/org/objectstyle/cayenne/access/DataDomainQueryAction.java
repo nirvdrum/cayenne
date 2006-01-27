@@ -65,11 +65,18 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.QueryRouter;
+import org.objectstyle.cayenne.query.RelationshipQuery;
+import org.objectstyle.cayenne.query.SingleObjectQuery;
 
 /**
  * Performs query routing and execution. During execution phase intercepts callbacks to
@@ -80,10 +87,13 @@ import org.objectstyle.cayenne.query.QueryRouter;
  */
 class DataDomainQueryAction implements QueryRouter, OperationObserver {
 
+    static final boolean DONE = true;
+
     DataDomain domain;
     OperationObserver callback;
     Query query;
     QueryMetadata metadata;
+    QueryResponse result;
 
     Map queriesByNode;
     Map queriesByExecutedQueries;
@@ -108,13 +118,104 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
     }
 
     QueryResponse execute() {
-        // check cache BEFORE routing .. we may need to change that in the future
-        if (QueryMetadata.SHARED_CACHE.equals(metadata.getCachePolicy())) {
-            return getResponseViaCache();
+
+        if (domain.isSharedCacheEnabled()) {
+            // intercept object and relationship queries that can be served from cache.
+            if (interceptOIDQuery() == DONE) {
+                return this.result;
+            }
+
+            if (interceptRelationshipQuery() == DONE) {
+                return this.result;
+            }
+
+            // check cache BEFORE routing .. we may need to change that in the future
+            if (QueryMetadata.SHARED_CACHE.equals(metadata.getCachePolicy())) {
+                return getResponseViaCache();
+            }
         }
-        else {
-            return getResponse();
+
+        return getResponse();
+    }
+
+    private boolean interceptOIDQuery() {
+        if (query instanceof SingleObjectQuery) {
+            SingleObjectQuery oidQuery = (SingleObjectQuery) query;
+            if (!oidQuery.isRefreshing()) {
+                DataRow row = domain.getSharedSnapshotCache().getCachedSnapshot(
+                        oidQuery.getObjectId());
+                if (row != null) {
+                    QueryResult result = new QueryResult();
+                    result.nextDataRows(query, Collections.singletonList(row));
+                    this.result = result;
+                    return DONE;
+                }
+            }
         }
+
+        return !DONE;
+    }
+
+    private boolean interceptRelationshipQuery() {
+
+        if (query instanceof RelationshipQuery) {
+
+            RelationshipQuery relationshipQuery = (RelationshipQuery) query;
+            if (relationshipQuery.isRefreshing()) {
+                return !DONE;
+            }
+
+            ObjRelationship relationship = relationshipQuery.getRelationship(domain
+                    .getEntityResolver());
+
+            // check if we can derive target PK from FK... this implies that the
+            // relationship is to-one
+            if (relationship.isSourceIndependentFromTargetChange()) {
+                return !DONE;
+            }
+
+            // target may be a subclass of a given entity, so we can't guess it here.
+            if (domain.getEntityResolver().lookupInheritanceTree(
+                    (ObjEntity) relationship.getTargetEntity()) != null) {
+                return !DONE;
+            }
+
+            DataRow sourceRow = domain.getSharedSnapshotCache().getCachedSnapshot(
+                    relationshipQuery.getObjectId());
+
+            if (sourceRow == null) {
+                return !DONE;
+            }
+
+            // we can assume that there is one and only one DbRelationship as
+            // we previously checked that
+            // "!isSourceIndependentFromTargetChange"
+            DbRelationship dbRelationship = (DbRelationship) relationship
+                    .getDbRelationships()
+                    .get(0);
+
+            ObjectId targetId = sourceRow.createTargetObjectId(relationship
+                    .getTargetEntityName(), dbRelationship);
+
+            if (targetId == null) {
+                return !DONE;
+            }
+
+            DataRow targetRow = domain.getSharedSnapshotCache().getCachedSnapshot(
+                    targetId);
+
+            // if we have a target object in the cache - return it, if not - return
+            // partial snapshot that would allow callers to create a HOLLOW object.
+            DataRow resultRow = targetRow != null ? targetRow : new DataRow(targetId
+                    .getIdSnapshot());
+
+            QueryResult result = new QueryResult();
+            result.nextDataRows(query, Collections.singletonList(resultRow));
+            this.result = result;
+            return DONE;
+        }
+
+        return !DONE;
     }
 
     /*
