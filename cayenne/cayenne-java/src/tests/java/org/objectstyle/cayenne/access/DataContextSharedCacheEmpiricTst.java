@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -28,8 +28,8 @@ public class DataContextSharedCacheEmpiricTst extends CayenneTestCase {
 
         DataRowStore cache = new DataRowStore("cacheTest");
 
-        c1 = new DataContext((OPPChannel) getDomain(), new ObjectStore(cache));
-        c2 = new DataContext((OPPChannel) getDomain(), new ObjectStore(cache));
+        c1 = new DataContext((DataChannel) getDomain(), new ObjectStore(cache));
+        c2 = new DataContext((DataChannel) getDomain(), new ObjectStore(cache));
 
         // prepare a single artist record
         SQLTemplate insert = new SQLTemplate(

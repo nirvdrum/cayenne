@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.opp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.event.EventManager;
@@ -70,7 +71,7 @@ import org.objectstyle.cayenne.query.Query;
  * 
  * @author Andrus Adamchik
  */
-public class MockOPPChannel implements OPPChannel {
+public class MockOPPChannel implements DataChannel {
 
     protected EntityResolver resolver;
     protected List requestObjects = new ArrayList();
@@ -116,17 +117,17 @@ public class MockOPPChannel implements OPPChannel {
         return requestObjects;
     }
 
-    public GraphDiff synchronize(SyncCommand sync) {
-        requestObjects.add(sync);
+    public GraphDiff onSync(ObjectContext context, int syncType, GraphDiff contextChanges) {
+        requestObjects.add(contextChanges);
         return commitResponse;
     }
 
-    public QueryResponse performGenericQuery(Query query) {
+    public QueryResponse onQuery(ObjectContext context, Query query) {
         requestObjects.add(query);
         return genericResponse;
     }
 
-    public List performQuery(ObjectContext context, Query query) {
+    public List onSelect(ObjectContext context, Query query) {
         requestObjects.add(query);
         return selectResponse;
     }

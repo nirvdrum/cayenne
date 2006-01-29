@@ -62,7 +62,7 @@ import java.io.Serializable;
  * 
  * @since 1.2
  * @author Andrus Adamchik
- * @see org.objectstyle.cayenne.opp.OPPChannel
+ * @see org.objectstyle.cayenne.DataChannel
  */
 public interface OPPMessage extends Serializable {
 

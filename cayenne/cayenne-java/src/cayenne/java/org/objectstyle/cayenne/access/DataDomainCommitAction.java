@@ -69,6 +69,7 @@ import java.util.Set;
 import org.apache.commons.collections.map.LinkedMap;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -79,7 +80,6 @@ import org.objectstyle.cayenne.map.EntitySorter;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.query.DeleteBatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -114,15 +114,15 @@ class DataDomainCommitAction {
         this.domain = domain;
     }
 
-    GraphDiff commit(SyncCommand sync) {
+    GraphDiff commit(ObjectContext objectContext, GraphDiff diff) {
 
-        if (!(sync.getSource() instanceof DataContext)) {
+        if (!(objectContext instanceof DataContext)) {
             throw new CayenneRuntimeException(
                     "No support for committing ObjectContexts that are not DataContexts. Unsupported context: "
-                            + sync.getSource());
+                            + context);
         }
 
-        this.context = (DataContext) sync.getSource();
+        this.context = (DataContext) objectContext;
 
         // note that there is no syncing on the object store itself. This is caller's
         // responsibility.

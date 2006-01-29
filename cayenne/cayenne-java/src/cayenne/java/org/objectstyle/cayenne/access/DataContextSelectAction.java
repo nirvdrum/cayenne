@@ -197,6 +197,6 @@ class DataContextSelectAction {
      * Fetches data from the channel.
      */
     private List getList() {
-        return context.getChannel().performQuery(context, query);
+        return context.getChannel().onSelect(context, query);
     }
 }

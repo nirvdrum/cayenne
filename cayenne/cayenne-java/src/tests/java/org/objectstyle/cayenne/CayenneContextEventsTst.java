@@ -64,20 +64,22 @@ import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.graph.GraphEventListener;
 import org.objectstyle.cayenne.graph.MockGraphEventListener;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
-import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SyncCommand;
 
 public class CayenneContextEventsTst extends TestCase {
 
     public void testDispatchEventsEnabled() {
         final EventManager manager = new EventManager(0);
-        OPPChannel channel = new MockOPPChannel() {
+        DataChannel channel = new MockOPPChannel() {
 
             public EventManager getEventManager() {
                 return manager;
             }
 
-            public GraphDiff synchronize(SyncCommand message) {
+            public GraphDiff onSync(
+                    ObjectContext context,
+                    int syncType,
+                    GraphDiff contextChanges) {
+
                 return new CompoundDiff();
             }
         };
@@ -108,13 +110,17 @@ public class CayenneContextEventsTst extends TestCase {
 
     public void testDispatchEventsDisabled() {
         final EventManager manager = new EventManager(0);
-        OPPChannel channel = new MockOPPChannel() {
+        DataChannel channel = new MockOPPChannel() {
 
             public EventManager getEventManager() {
                 return manager;
             }
 
-            public GraphDiff synchronize(SyncCommand message) {
+            public GraphDiff onSync(
+                    ObjectContext context,
+                    int syncType,
+                    GraphDiff contextChanges) {
+
                 return new CompoundDiff();
             }
         };

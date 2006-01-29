@@ -103,7 +103,7 @@ class DataDomainSelectAction {
 
     List execute() {
 
-        QueryResponse response = domain.performGenericQuery(query);
+        QueryResponse response = domain.onQuery(context, query);
         List mainRows = response.getFirstRows(query);
 
         if (metadata.isFetchingDataRows()) {

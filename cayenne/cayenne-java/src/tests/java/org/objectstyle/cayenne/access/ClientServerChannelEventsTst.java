@@ -55,12 +55,11 @@
  */
 package org.objectstyle.cayenne.access;
 
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
-import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
@@ -82,11 +81,11 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
                 listener,
                 "notificationPosted",
                 GraphEvent.class,
-                OPPChannel.GRAPH_COMMITTED_SUBJECT,
+                DataChannel.GRAPH_COMMITTED_SUBJECT,
                 channel);
 
         GraphDiff diff = new NodeCreateOperation(new ObjectId("MtTable1"));
-        channel.synchronize(new SyncCommand(null, SyncCommand.COMMIT_TYPE, diff));
+        channel.onSync(null, DataChannel.COMMIT_SYNC_TYPE, diff);
 
         assertTrue(listener.notificationPosted);
     }
@@ -100,11 +99,11 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
                 listener,
                 "notificationPosted",
                 GraphEvent.class,
-                OPPChannel.GRAPH_CHANGED_SUBJECT,
+                DataChannel.GRAPH_CHANGED_SUBJECT,
                 channel);
 
         GraphDiff diff = new NodeCreateOperation(new ObjectId("MtTable1"));
-        channel.synchronize(new SyncCommand(null, SyncCommand.FLUSH_TYPE, diff));
+        channel.onSync(null, DataChannel.FLUSH_SYNC_TYPE, diff);
         assertTrue(listener.notificationPosted);
     }
 
@@ -114,16 +113,16 @@ public class ClientServerChannelEventsTst extends CayenneTestCase {
         ClientServerChannel channel = new ClientServerChannel(getDomain(), true);
 
         GraphDiff diff = new NodeCreateOperation(new ObjectId("MtTable1"));
-        channel.synchronize(new SyncCommand(null, SyncCommand.FLUSH_TYPE, diff));
+        channel.onSync(null, DataChannel.FLUSH_SYNC_TYPE, diff);
 
         channel.getEventManager().addListener(
                 listener,
                 "notificationPosted",
                 GraphEvent.class,
-                OPPChannel.GRAPH_ROLLEDBACK_SUBJECT,
+                DataChannel.GRAPH_ROLLEDBACK_SUBJECT,
                 channel);
 
-        channel.synchronize(new SyncCommand(null, SyncCommand.ROLLBACK_TYPE, null));
+        channel.onSync(null, DataChannel.ROLLBACK_SYNC_TYPE, null);
         assertTrue(listener.notificationPosted);
     }
 

@@ -53,58 +53,67 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.opp;
+package org.objectstyle.cayenne;
 
-import junit.framework.TestCase;
+import java.util.List;
 
-import org.objectstyle.cayenne.MockObjectContext;
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.graph.CompoundDiff;
+import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.graph.NodeCreateOperation;
-import org.objectstyle.cayenne.opp.hessian.HessianUtil;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.Query;
 
-public class SyncCommandTst extends TestCase {
+/**
+ * DataChannel is an abstraction used by ObjectContexts to obtain mapping metadata and
+ * access a persistent store. There is rarely a need to use it directly.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+public interface DataChannel {
 
-    public void testConstructor() {
-        ObjectContext source = new MockObjectContext();
-        GraphDiff diff = new CompoundDiff();
-        SyncCommand message = new SyncCommand(source, SyncCommand.FLUSH_TYPE, diff);
+    public static final int FLUSH_SYNC_TYPE = 1;
+    public static final int COMMIT_SYNC_TYPE = 2;
+    public static final int ROLLBACK_SYNC_TYPE = 3;
 
-        assertSame(source, message.getSource());
-        assertEquals(SyncCommand.FLUSH_TYPE, message.getType());
-        assertSame(diff, message.getSenderChanges());
-    }
+    public static final EventSubject GRAPH_CHANGED_SUBJECT = EventSubject.getSubject(
+            DataChannel.class,
+            "graphChanged");
 
-    public void testHessianSerialization() throws Exception {
-        // id must be a serializable object; source doesn't have to be
-        ObjectContext source = new MockObjectContext();
-        GraphDiff diff = new NodeCreateOperation("id-string");
-        SyncCommand message = new SyncCommand(source, SyncCommand.FLUSH_TYPE, diff);
+    public static final EventSubject GRAPH_COMMITTED_SUBJECT = EventSubject.getSubject(
+            DataChannel.class,
+            "graphCommitted");
 
-        Object d = HessianUtil.cloneViaHessianSerialization(message);
-        assertNotNull(d);
-        assertTrue(d instanceof SyncCommand);
+    public static final EventSubject GRAPH_ROLLEDBACK_SUBJECT = EventSubject.getSubject(
+            DataChannel.class,
+            "graphRolledback");
 
-        SyncCommand ds = (SyncCommand) d;
-        assertNull(ds.getSource());
-        assertEquals(message.getType(), ds.getType());
-        assertNotNull(ds.getSenderChanges());
-    }
+    /**
+     * Returns an EventManager associated with this channel. Channel may return null if
+     * EventManager is not available for any reason.
+     */
+    EventManager getEventManager();
 
-    public void testConstructorInvalid() {
-        ObjectContext source = new MockObjectContext();
-        new SyncCommand(source, SyncCommand.FLUSH_TYPE, new CompoundDiff());
-        new SyncCommand(source, SyncCommand.COMMIT_TYPE, new CompoundDiff());
-        new SyncCommand(null, SyncCommand.ROLLBACK_TYPE, new CompoundDiff());
+    /**
+     * Returns an EntityResolver instance that contains runtime mapping information.
+     */
+    EntityResolver getEntityResolver();
 
-        int bogusType = 45678;
-        try {
-            new SyncCommand(source, bogusType, new CompoundDiff());
-            fail("invalid type was allowed to go unnoticed...");
-        }
-        catch (IllegalArgumentException e) {
+    /**
+     * Selects objects for the query, registering them with the ObjectContext if it is
+     * provided.
+     */
+    List onSelect(ObjectContext context, Query query);
 
-        }
-    }
+    /**
+     * Runs a query, returning generic response.
+     */
+    QueryResponse onQuery(ObjectContext context, Query query);
+
+    /**
+     * Processes synchronization request from a child ObjectContext, returning a GraphDiff
+     * that describes changes to objects made on the receiving end as a result of
+     * syncronization.
+     */
+    GraphDiff onSync(ObjectContext context, int syncType, GraphDiff contextChanges);
 }

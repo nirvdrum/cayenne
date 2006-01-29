@@ -61,6 +61,7 @@ import java.util.Map;
 import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.MockDataDomainQueryAction;
@@ -97,11 +98,12 @@ public class TestDataDomain extends DataDomain {
         this.blockingQueries = blockingQueries;
     }
 
-    public QueryResponse performGenericQuery(Query query) {
+    public QueryResponse onQuery(ObjectContext context, Query query) {
+
         // wrap in transaction if no Transaction context exists
         Transaction transaction = Transaction.getThreadTransaction();
         if (transaction == null) {
-            return createTransaction().performGenericQuery(this, query);
+            return createTransaction().onQuery(context, this, query);
         }
 
         return new MockDataDomainQueryAction(this, query).execute();

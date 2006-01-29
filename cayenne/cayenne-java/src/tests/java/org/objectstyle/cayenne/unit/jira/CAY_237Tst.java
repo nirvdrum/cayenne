@@ -57,11 +57,11 @@ package org.objectstyle.cayenne.unit.jira;
 
 import java.util.List;
 
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataRowStore;
 import org.objectstyle.cayenne.access.ObjectStore;
-import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.testdo.relationship.DeleteRuleFlatA;
 import org.objectstyle.cayenne.testdo.relationship.DeleteRuleFlatB;
 import org.objectstyle.cayenne.unit.RelationshipTestCase;
@@ -78,7 +78,7 @@ public class CAY_237Tst extends RelationshipTestCase {
     public void testRollbackInsert() throws Exception {
         DataDomain domain = getDomain();
         TestObjectStore os = new TestObjectStore(domain.getSharedSnapshotCache());
-        DataContext context = new DataContext((OPPChannel) domain, os);
+        DataContext context = new DataContext((DataChannel) domain, os);
 
         DeleteRuleFlatA a = (DeleteRuleFlatA) context
                 .createAndRegisterNewObject(DeleteRuleFlatA.class);
@@ -98,7 +98,7 @@ public class CAY_237Tst extends RelationshipTestCase {
     public void testRollbackDelete() throws Exception {
         DataDomain domain = getDomain();
         TestObjectStore os = new TestObjectStore(domain.getSharedSnapshotCache());
-        DataContext context = new DataContext((OPPChannel) domain, os);
+        DataContext context = new DataContext((DataChannel) domain, os);
 
         DeleteRuleFlatA a = (DeleteRuleFlatA) context
                 .createAndRegisterNewObject(DeleteRuleFlatA.class);

@@ -58,12 +58,12 @@ package org.objectstyle.cayenne.access;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneContext;
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.access.ClientServerChannel;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.opp.OPPServerChannel;
 import org.objectstyle.cayenne.opp.LocalConnection;
-import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
@@ -211,7 +211,7 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
      * adapter with Hessian serialization.
      */
     protected CayenneContext buildContext() {
-        OPPChannel handler = new ClientServerChannel(getDomain());
+        DataChannel handler = new ClientServerChannel(getDomain());
         LocalConnection connector = new LocalConnection(
                 handler,
                 LocalConnection.HESSIAN_SERIALIZATION);

@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.DataChannel;
 
 /**
  * An interface for creating DataContexts.
@@ -72,5 +72,5 @@ public interface DataContextFactory {
      * @param parent parent QueryEngine used to communicate with the data source.
      * @param objectStore ObjectStore used by DataContext.
      */
-    DataContext createDataContext(OPPChannel parent, ObjectStore objectStore);
+    DataContext createDataContext(DataChannel parent, ObjectStore objectStore);
 }

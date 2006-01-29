@@ -70,13 +70,13 @@ import org.apache.commons.collections.map.LRUMap;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.event.EventBridge;
 import org.objectstyle.cayenne.event.EventBridgeFactory;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
-import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
 
@@ -317,11 +317,11 @@ public class DataRowStore implements Serializable {
      * If not, a provided QueryEngine is used to fetch it from the database. If there is
      * no database row for a given id, null is returned.
      * 
-     * @deprecated since 1.2 use {@link #getSnapshot(ObjectId, OPPChannel)}.
+     * @deprecated since 1.2 use {@link #getSnapshot(ObjectId, DataChannel)}.
      */
     public synchronized DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
-        if (engine instanceof OPPChannel) {
-            return getSnapshot(oid, (OPPChannel) engine);
+        if (engine instanceof DataChannel) {
+            return getSnapshot(oid, (DataChannel) engine);
         }
         else if(engine instanceof DataContext) {
             return getSnapshot(oid, ((DataContext) engine).getChannel());
@@ -337,7 +337,7 @@ public class DataRowStore implements Serializable {
      * 
      * @since 1.2
      */
-    public synchronized DataRow getSnapshot(ObjectId oid, OPPChannel channel) {
+    public synchronized DataRow getSnapshot(ObjectId oid, DataChannel channel) {
 
         // try cache
         DataRow cachedSnapshot = getCachedSnapshot(oid);
@@ -352,7 +352,7 @@ public class DataRowStore implements Serializable {
         // try getting it from database
 
         Query query = new SingleObjectQuery(oid, true, true);
-        List results = channel.performQuery(null, query);
+        List results = channel.onSelect(null, query);
 
         if (results.size() > 1) {
             throw new CayenneRuntimeException("More than 1 object found for ObjectId "

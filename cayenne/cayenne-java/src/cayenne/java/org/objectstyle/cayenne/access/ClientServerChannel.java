@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.event.EventManager;
@@ -67,8 +68,6 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.query.AbstractQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
@@ -80,7 +79,7 @@ import org.objectstyle.cayenne.query.QueryMetadata;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ClientServerChannel implements OPPChannel {
+public class ClientServerChannel implements DataChannel {
 
     protected DataContext serverContext;
     protected boolean lifecycleEventsEnabled;
@@ -113,19 +112,19 @@ public class ClientServerChannel implements OPPChannel {
         this.lifecycleEventsEnabled = lifecycleEventsEnabled;
     }
 
-    public GraphDiff synchronize(SyncCommand sync) {
+    public GraphDiff onSync(ObjectContext context, int syncType, GraphDiff contextChanges) {
 
         // sync client changes
-        switch (sync.getType()) {
-            case SyncCommand.ROLLBACK_TYPE:
-                return onRollback(sync.getSenderChanges());
-            case SyncCommand.FLUSH_TYPE:
-                return onFlush(sync.getSenderChanges());
-            case SyncCommand.COMMIT_TYPE:
-                return onCommit(sync.getSenderChanges());
+        switch (syncType) {
+            case DataChannel.ROLLBACK_SYNC_TYPE:
+                return onRollback(contextChanges);
+            case DataChannel.FLUSH_SYNC_TYPE:
+                return onFlush(contextChanges);
+            case DataChannel.COMMIT_SYNC_TYPE:
+                return onCommit(contextChanges);
             default:
                 throw new CayenneRuntimeException("Unrecognized SyncMessage type: "
-                        + sync.getType());
+                        + syncType);
         }
     }
 
@@ -139,7 +138,7 @@ public class ClientServerChannel implements OPPChannel {
                 if (eventManager != null) {
                     eventManager.postEvent(
                             new GraphEvent(this, null),
-                            OPPChannel.GRAPH_ROLLEDBACK_SUBJECT);
+                            DataChannel.GRAPH_ROLLEDBACK_SUBJECT);
                 }
             }
         }
@@ -159,7 +158,7 @@ public class ClientServerChannel implements OPPChannel {
             if (eventManager != null) {
                 eventManager.postEvent(
                         new GraphEvent(this, childDiff),
-                        OPPChannel.GRAPH_CHANGED_SUBJECT);
+                        DataChannel.GRAPH_CHANGED_SUBJECT);
             }
         }
 
@@ -196,18 +195,18 @@ public class ClientServerChannel implements OPPChannel {
 
                 eventManager.postEvent(
                         new GraphEvent(this, notification),
-                        OPPChannel.GRAPH_COMMITTED_SUBJECT);
+                        DataChannel.GRAPH_COMMITTED_SUBJECT);
             }
         }
 
         return returnClientDiff;
     }
 
-    public QueryResponse performGenericQuery(Query query) {
+    public QueryResponse onQuery(ObjectContext context, Query query) {
         return serverContext.performGenericQuery(rewriteQuery(query));
     }
 
-    public List performQuery(ObjectContext context, Query query) {
+    public List onSelect(ObjectContext context, Query query) {
         Query serverQuery = rewriteQuery(query);
 
         List objects = serverContext.performQuery(serverQuery);

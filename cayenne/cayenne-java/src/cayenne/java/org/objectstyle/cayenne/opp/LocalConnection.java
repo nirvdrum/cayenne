@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.opp;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.event.EventBridge;
 import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 import org.objectstyle.cayenne.util.Util;
@@ -73,13 +74,13 @@ public class LocalConnection extends BaseConnection {
     public static final int JAVA_SERIALIZATION = 1;
     public static final int HESSIAN_SERIALIZATION = 2;
 
-    protected OPPChannel channel;
+    protected DataChannel channel;
     protected int serializationPolicy;
 
     /**
      * Creates LocalConnector with specified handler and no serialization.
      */
-    public LocalConnection(OPPChannel handler) {
+    public LocalConnection(DataChannel handler) {
         this(handler, NO_SERIALIZATION);
     }
 
@@ -87,7 +88,7 @@ public class LocalConnection extends BaseConnection {
      * Creates a LocalConnector with specified handler and serialization policy. Valid
      * policies are defined as final static int field in this class.
      */
-    public LocalConnection(OPPChannel handler, int serializationPolicy) {
+    public LocalConnection(DataChannel handler, int serializationPolicy) {
         this.channel = handler;
 
         // convert invalid policy to NO_SER..
@@ -105,7 +106,7 @@ public class LocalConnection extends BaseConnection {
     /**
      * Returns wrapped OPPChannel.
      */
-    public OPPChannel getChannel() {
+    public DataChannel getChannel() {
         return channel;
     }
 

@@ -63,8 +63,9 @@ import java.util.List;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataChannel;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -197,7 +198,7 @@ public abstract class Transaction {
      * 
      * @since 1.2
      */
-    public QueryResponse performGenericQuery(OPPChannel channel, Query query)
+    public QueryResponse onQuery(ObjectContext context, DataChannel channel, Query query)
             throws CayenneRuntimeException {
 
         Transaction old = Transaction.getThreadTransaction();
@@ -205,7 +206,7 @@ public abstract class Transaction {
 
         try {
             // implicit begin..
-            QueryResponse response = channel.performGenericQuery(query);
+            QueryResponse response = channel.onQuery(context, query);
             commit();
             return response;
         }

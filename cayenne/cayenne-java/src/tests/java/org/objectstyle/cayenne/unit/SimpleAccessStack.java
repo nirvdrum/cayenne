@@ -122,7 +122,7 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
     public void createTestData(Class testCase, String testName, Map parameters)
             throws Exception {
         Query query = dataSetFactory.getDataSetQuery(testCase, testName, parameters);
-        getDataDomain().performGenericQuery(query);
+        getDataDomain().onQuery(null, query);
     }
 
     /**

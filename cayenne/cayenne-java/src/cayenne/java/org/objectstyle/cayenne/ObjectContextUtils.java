@@ -59,7 +59,6 @@ import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.graph.GraphEventListener;
-import org.objectstyle.cayenne.opp.OPPChannel;
 
 /**
  * Various ObjectContext-related utility methods.
@@ -77,8 +76,8 @@ public class ObjectContextUtils {
     };
 
     static final EventSubject[] CHANNEL_SUBJECTS = new EventSubject[] {
-            OPPChannel.GRAPH_CHANGED_SUBJECT, OPPChannel.GRAPH_COMMITTED_SUBJECT,
-            OPPChannel.GRAPH_ROLLEDBACK_SUBJECT
+            DataChannel.GRAPH_CHANGED_SUBJECT, DataChannel.GRAPH_COMMITTED_SUBJECT,
+            DataChannel.GRAPH_ROLLEDBACK_SUBJECT
     };
 
     /**
@@ -89,7 +88,7 @@ public class ObjectContextUtils {
      *         support events.
      */
     public static boolean listenForContextEvents(
-            OPPChannel channel,
+            DataChannel channel,
             GraphEventListener listener) {
 
         EventManager manager = channel.getEventManager();
@@ -133,7 +132,7 @@ public class ObjectContextUtils {
      *         support events.
      */
     public static boolean listenForChannelEvents(
-            OPPChannel channel,
+            DataChannel channel,
             GraphEventListener listener) {
 
         EventManager manager = channel.getEventManager();

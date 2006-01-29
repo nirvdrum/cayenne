@@ -64,6 +64,7 @@ import java.util.Map;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.event.EventBridge;
 import org.objectstyle.cayenne.event.EventBridgeFactory;
 
@@ -78,8 +79,8 @@ import org.objectstyle.cayenne.event.EventBridgeFactory;
 public class OPPRemoteSession implements Serializable {
 
     static final Collection SUBJECTS = Arrays.asList(new Object[] {
-            OPPChannel.GRAPH_CHANGED_SUBJECT, OPPChannel.GRAPH_COMMITTED_SUBJECT,
-            OPPChannel.GRAPH_ROLLEDBACK_SUBJECT
+            DataChannel.GRAPH_CHANGED_SUBJECT, DataChannel.GRAPH_COMMITTED_SUBJECT,
+            DataChannel.GRAPH_ROLLEDBACK_SUBJECT
     });
 
     protected String name;

@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
@@ -86,7 +87,6 @@ import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
 import org.objectstyle.cayenne.graph.NodePropertyChangeOperation;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.validation.ValidationException;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
@@ -824,7 +824,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * CayenneRuntimeException.
      * 
      * @since 1.1
-     * @deprecated since 1.2. Use {@link #getSnapshot(ObjectId, OPPChannel)} instead.
+     * @deprecated since 1.2. Use {@link #getSnapshot(ObjectId, DataChannel)} instead.
      */
     public synchronized DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
         DataRow retained = getRetainedSnapshot(oid);
@@ -839,7 +839,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * 
      * @since 1.2
      */
-    public synchronized DataRow getSnapshot(ObjectId oid, OPPChannel channel) {
+    public synchronized DataRow getSnapshot(ObjectId oid, DataChannel channel) {
         DataRow retained = getRetainedSnapshot(oid);
         if (retained != null) {
             return retained;

@@ -66,14 +66,13 @@ import java.util.TreeMap;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryChain;
 import org.objectstyle.cayenne.util.Util;
@@ -90,7 +89,7 @@ import org.objectstyle.cayenne.util.Util;
  * 
  * @author Andrus Adamchik
  */
-public class DataDomain implements QueryEngine, OPPChannel {
+public class DataDomain implements QueryEngine, DataChannel {
 
     private static final Logger logObj = Logger.getLogger(DataDomain.class);
 
@@ -536,7 +535,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
 
         DataContext context;
         if (null == dataContextFactory) {
-            context = new DataContext((OPPChannel) this, new ObjectStore(snapshotCache));
+            context = new DataContext((DataChannel) this, new ObjectStore(snapshotCache));
         }
         else {
             context = dataContextFactory.createDataContext(this, new ObjectStore(
@@ -709,18 +708,18 @@ public class DataDomain implements QueryEngine, OPPChannel {
         new DataDomainQueryAction(this, new QueryChain(queries), callback).performQuery();
     }
 
-    // ****** OPPChannel methods:
+    // ****** DataChannel methods:
 
     /**
      * Runs query returning generic QueryResponse.
      * 
      * @since 1.2
      */
-    public QueryResponse performGenericQuery(Query query) {
+    public QueryResponse onQuery(ObjectContext context, Query query) {
         // wrap in transaction if no Transaction context exists
         Transaction transaction = Transaction.getThreadTransaction();
         if (transaction == null) {
-            return createTransaction().performGenericQuery(this, query);
+            return createTransaction().onQuery(context, this, query);
         }
 
         return new DataDomainQueryAction(this, query).execute();
@@ -732,7 +731,7 @@ public class DataDomain implements QueryEngine, OPPChannel {
      * 
      * @since 1.2
      */
-    public List performQuery(ObjectContext context, Query query) {
+    public List onSelect(ObjectContext context, Query query) {
         return new DataDomainSelectAction(this, context, query).execute();
     }
 
@@ -752,14 +751,14 @@ public class DataDomain implements QueryEngine, OPPChannel {
      * 
      * @since 1.2
      */
-    public GraphDiff synchronize(SyncCommand sync) {
+    public GraphDiff onSync(ObjectContext context, int syncType, GraphDiff contextChanges) {
 
         // ignore all but commit messages
-        if (sync.getType() == SyncCommand.COMMIT_TYPE) {
+        if (syncType == DataChannel.COMMIT_SYNC_TYPE) {
             // TODO: Andrus, 12/13/2005 - see TODO under
             // DataContext.doCommitChanges() -
             // PK generation needs to be done here...
-            return new DataDomainCommitAction(this).commit(sync);
+            return new DataDomainCommitAction(this).commit(context, contextChanges);
         }
 
         return null;

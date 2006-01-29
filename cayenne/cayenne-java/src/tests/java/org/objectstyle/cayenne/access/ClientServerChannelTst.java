@@ -60,6 +60,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
+import org.objectstyle.cayenne.DataChannel;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
@@ -67,7 +69,6 @@ import org.objectstyle.cayenne.graph.NodeCreateOperation;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.opp.QueryMessage;
-import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -108,18 +109,13 @@ public class ClientServerChannelTst extends CayenneTestCase {
 
         // no changes...
         ClientServerChannel channel = new ClientServerChannel(context, false);
-        channel.synchronize(new SyncCommand(
-                context,
-                SyncCommand.COMMIT_TYPE,
-                new MockGraphDiff()));
+        channel.onSync(context, DataChannel.COMMIT_SYNC_TYPE, new MockGraphDiff());
 
         assertEquals(0, context.performQuery(query).size());
 
         // introduce changes
-        channel.synchronize(new SyncCommand(
-                context,
-                SyncCommand.COMMIT_TYPE,
-                new NodeCreateOperation(new ObjectId("MtTable1"))));
+        channel.onSync(context, DataChannel.COMMIT_SYNC_TYPE, new NodeCreateOperation(
+                new ObjectId("MtTable1")));
 
         assertEquals(1, context.performQuery(query).size());
     }
@@ -129,7 +125,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
 
         DataContext context = createDataContext();
 
-        List results = new ClientServerChannel(context, false).performQuery(
+        List results = new ClientServerChannel(context, false).onSelect(
                 null,
                 new SelectQuery("MtTable1"));
 
@@ -162,7 +158,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
 
         DataContext context = createDataContext();
 
-        List results = new ClientServerChannel(context, false).performQuery(
+        List results = new ClientServerChannel(context, false).onSelect(
                 null,
                 new SelectQuery("MtTable3"));
 
@@ -194,7 +190,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
         SelectQuery query = new SelectQuery(ClientMtTable1.class);
         query.setResolvingInherited(true);
 
-        List results = new ClientServerChannel(context, false).performQuery(null, query);
+        List results = new ClientServerChannel(context, false).onSelect(null, query);
 
         assertNotNull(results);
         assertEquals(1, results.size());
@@ -208,21 +204,21 @@ public class ClientServerChannelTst extends CayenneTestCase {
         assertEquals("sub1", clientObject.getGlobalAttribute1());
     }
 
-    public void testOnGenericQuery() {
+    public void testOnQuery() {
 
         final boolean[] genericDone = new boolean[1];
         MockOPPChannel parent = new MockOPPChannel(new EntityResolver()) {
 
-            public QueryResponse performGenericQuery(Query query) {
+            public QueryResponse onQuery(ObjectContext context, Query query) {
                 genericDone[0] = true;
-                return super.performGenericQuery(query);
+                return super.onQuery(context, query);
             }
         };
         DataContext context = new DataContext(parent, new ObjectStore(
                 new MockDataRowStore()));
 
         QueryMessage message = new QueryMessage(new MockQuery());
-        new ClientServerChannel(context, false).performGenericQuery(message.getQuery());
+        new ClientServerChannel(context, false).onQuery(null, message.getQuery());
         assertTrue(genericDone[0]);
     }
 }

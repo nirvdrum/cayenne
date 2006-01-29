@@ -72,6 +72,7 @@ import org.apache.commons.collections.Factory;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataObjectUtils;
 import org.objectstyle.cayenne.DataRow;
@@ -97,8 +98,6 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
@@ -139,7 +138,7 @@ import org.objectstyle.cayenne.util.Util;
  * 
  * @author Andrus Adamchik
  */
-public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Serializable {
+public class DataContext implements ObjectContext, DataChannel, QueryEngine, Serializable {
 
     // DataContext events
     public static final EventSubject WILL_COMMIT = EventSubject.getSubject(
@@ -173,7 +172,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
     protected boolean validatingObjectsOnCommit;
     protected ObjectStore objectStore;
 
-    protected transient OPPChannel channel;
+    protected transient DataChannel channel;
 
     // note that entity resolver is initialized from the parent channel the first time it
     // is accessed, and later cached in the context
@@ -283,7 +282,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * Creates a new DataContext that is not attached to the Cayenne stack.
      */
     public DataContext() {
-        this((OPPChannel) null, null);
+        this((DataChannel) null, null);
     }
 
     /**
@@ -293,13 +292,13 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * @since 1.1
      * @param parent parent QueryEngine used to communicate with the data source.
      * @param objectStore ObjectStore used by DataContext.
-     * @deprecated since 1.2 - use {@link #DataContext(OPPChannel, ObjectStore)}
+     * @deprecated since 1.2 - use {@link #DataContext(DataChannel, ObjectStore)}
      *             constructor instead. Note that DataDomain is both an OPPChannel and a
      *             QueryEngine, so you may need to do a cast:
      *             <code>new DataContext((OPPChannel) domain, objectStore)</code>.
      */
     public DataContext(QueryEngine parent, ObjectStore objectStore) {
-        this((OPPChannel) parent, objectStore);
+        this((DataChannel) parent, objectStore);
     }
 
     /**
@@ -307,7 +306,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * 
      * @since 1.2
      */
-    public DataContext(OPPChannel channel, ObjectStore objectStore) {
+    public DataContext(DataChannel channel, ObjectStore objectStore) {
         // use a setter to properly initialize EntityResolver
         setChannel(channel);
 
@@ -345,7 +344,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
 
         DataContext child = factory != null ? factory
                 .createDataContext(this, objectStore) : new DataContext(
-                (OPPChannel) this,
+                (DataChannel) this,
                 objectStore);
 
         child.setValidatingObjectsOnCommit(isValidatingObjectsOnCommit());
@@ -388,8 +387,8 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * @deprecated since 1.2, use setChannel instead.
      */
     public void setParent(QueryEngine parent) {
-        if (parent == null || parent instanceof OPPChannel) {
-            setChannel((OPPChannel) parent);
+        if (parent == null || parent instanceof DataChannel) {
+            setChannel((DataChannel) parent);
         }
         else {
             throw new CayenneRuntimeException(
@@ -402,14 +401,14 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
      * 
      * @since 1.2
      */
-    public OPPChannel getChannel() {
+    public DataChannel getChannel() {
         return channel;
     }
 
     /**
      * @since 1.2
      */
-    public void setChannel(OPPChannel channel) {
+    public void setChannel(DataChannel channel) {
         if (this.channel != channel) {
             this.channel = channel;
 
@@ -1062,7 +1061,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
         getObjectStore().objectsRolledBack();
 
         if (channel != null) {
-            channel.synchronize(new SyncCommand(this, SyncCommand.ROLLBACK_TYPE));
+            channel.onSync(this, DataChannel.ROLLBACK_SYNC_TYPE, null);
         }
     }
 
@@ -1112,8 +1111,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
                     // TODO: Andrus, 12/06/2005 - this is a violation of OPP rules, as we
                     // do not pass changes down the stack. Instead this code assumes that
                     // a channel will get them directly from the context.
-                    return getChannel().synchronize(
-                            new SyncCommand(this, SyncCommand.COMMIT_TYPE, null));
+                    return getChannel().onSync(this, DataChannel.COMMIT_SYNC_TYPE, null);
                 }
                 // needed to unwrap OptimisticLockExceptions
                 catch (CayenneRuntimeException ex) {
@@ -1144,22 +1142,23 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
     }
 
     /**
-     * Processes a SyncCommand.
+     * An implementation of a {@link DataChannel} method that is used by child contexts to
+     * synchronize state with this context. Not intended for direct use.
      * 
      * @since 1.2
      */
-    public GraphDiff synchronize(SyncCommand sync) {
+    public GraphDiff onSync(ObjectContext context, int syncType, GraphDiff contextChanges) {
         // sync client changes
-        switch (sync.getType()) {
-            case SyncCommand.ROLLBACK_TYPE:
+        switch (syncType) {
+            case DataChannel.ROLLBACK_SYNC_TYPE:
                 return syncRollback();
-            case SyncCommand.FLUSH_TYPE:
-                return syncFlush(sync.getSenderChanges());
-            case SyncCommand.COMMIT_TYPE:
-                return syncCommit(sync.getSenderChanges());
+            case DataChannel.FLUSH_SYNC_TYPE:
+                return syncFlush(contextChanges);
+            case DataChannel.COMMIT_SYNC_TYPE:
+                return syncCommit(contextChanges);
             default:
                 throw new CayenneRuntimeException("Unrecognized SyncMessage type: "
-                        + sync.getType());
+                        + syncType);
         }
     }
 
@@ -1213,7 +1212,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
                     "Can't run query - parent OPPChannel is not set.");
         }
 
-        return getChannel().performGenericQuery(query);
+        return getChannel().onQuery(this, query);
     }
 
     /**
@@ -1250,7 +1249,23 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
         return new DataContextSelectAction(this, query).execute();
     }
 
-    public List performQuery(ObjectContext context, Query query) {
+    /**
+     * An implementation of a {@link DataChannel} method that is used by child contexts to
+     * execute queries. Not intended for direct use.
+     * 
+     * @since 1.2
+     */
+    public QueryResponse onQuery(ObjectContext context, Query query) {
+        return getChannel().onQuery(context, query);
+    }
+
+    /**
+     * An implementation of a {@link DataChannel} method that is used by child contexts to
+     * select objects. Not intended for direct use.
+     * 
+     * @since 1.2
+     */
+    public List onSelect(ObjectContext context, Query query) {
 
         List results = performQuery(query);
 
@@ -1259,7 +1274,7 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
                 && context != this
                 && !results.isEmpty()
                 && !query.getMetaData(getEntityResolver()).isFetchingDataRows()) {
-            
+
             List childObjects = new ArrayList(results.size());
             Iterator it = results.iterator();
             while (it.hasNext()) {
@@ -1590,9 +1605,9 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
 
         // 2. read parent or its name
         Object value = in.readObject();
-        if (value instanceof OPPChannel) {
+        if (value instanceof DataChannel) {
             // A real QueryEngine object - use it
-            this.channel = (OPPChannel) value;
+            this.channel = (DataChannel) value;
         }
         else if (value instanceof String) {
             // The name of a DataDomain - use it

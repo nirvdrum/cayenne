@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne.opp;
 
+import org.objectstyle.cayenne.DataChannel;
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.graph.GraphDiff;
 
 /**
  * A message used for synchronization of the child with parent. It defines a few types of
@@ -67,29 +70,50 @@ package org.objectstyle.cayenne.opp;
  */
 public class SyncMessage implements OPPMessage {
 
-    protected SyncCommand sync;
+    protected transient ObjectContext source;
+    protected int type;
+    protected GraphDiff senderChanges;
 
     // private constructor for Hessian deserialization
     private SyncMessage() {
 
     }
 
-    public SyncMessage(SyncCommand sync) {
-        this.sync = sync;
+    public SyncMessage(ObjectContext source, int syncType, GraphDiff senderChanges) {
+        // validate type
+        if (syncType != DataChannel.FLUSH_SYNC_TYPE
+                && syncType != DataChannel.COMMIT_SYNC_TYPE
+                && syncType != DataChannel.ROLLBACK_SYNC_TYPE) {
+            throw new IllegalArgumentException("'type' is invalid: " + syncType);
+        }
+
+        this.source = source;
+        this.type = syncType;
+        this.senderChanges = senderChanges;
     }
-    
-    public SyncCommand getSync() {
-        return sync;
+
+    /**
+     * Returns a source of SyncMessage.
+     */
+    public ObjectContext getSource() {
+        return source;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public GraphDiff getSenderChanges() {
+        return senderChanges;
     }
 
     public String toString() {
-        int type = sync != null ? sync.getType() : -1;
         switch (type) {
-            case SyncCommand.FLUSH_TYPE:
+            case DataChannel.FLUSH_SYNC_TYPE:
                 return "Sync-flush";
-            case SyncCommand.COMMIT_TYPE:
+            case DataChannel.COMMIT_SYNC_TYPE:
                 return "Sync-commit";
-            case SyncCommand.ROLLBACK_TYPE:
+            case DataChannel.ROLLBACK_SYNC_TYPE:
                 return "Sync-rollback";
             default:
                 return "Sync-unknown";

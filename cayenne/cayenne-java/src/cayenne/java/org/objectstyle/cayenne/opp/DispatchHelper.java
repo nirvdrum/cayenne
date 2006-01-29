@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.opp;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataChannel;
 
 /**
  * A helper class to match message types with OPPChannel methods.
@@ -65,25 +66,23 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  */
 class DispatchHelper {
 
-    static Object dispatch(OPPChannel channel, OPPMessage message) {
+    static Object dispatch(DataChannel channel, OPPMessage message) {
         // Andrus, 12/08/2005: originally OPPMessage implemented self-dispatch logic,
-        // later replaced with this ugly if/else. Motivation was that "dispatch" wasn't
+        // later replaced with if/else. Motivation was that "dispatch" wasn't
         // called consistently (since OPPChannel methods are accessed directly, bypassing
         // dispatch in many cases). Also I had a vague security concern about letting an
         // unknown message to do its own processing...
 
-        // TODO: Andrus, 12/08/2005, now that there is no message self-dispatch, we need
-        // an extension mechanism for possible custom messages.
-
         // do most common messages first...
         if (message instanceof ObjectSelectMessage) {
-            return channel.performQuery(null, ((ObjectSelectMessage) message).getQuery());
+            return channel.onSelect(null, ((ObjectSelectMessage) message).getQuery());
         }
         else if (message instanceof QueryMessage) {
-            return channel.performGenericQuery(((QueryMessage) message).getQuery());
+            return channel.onQuery(null, ((QueryMessage) message).getQuery());
         }
         else if (message instanceof SyncMessage) {
-            return channel.synchronize(((SyncMessage) message).getSync());
+            SyncMessage sync = (SyncMessage) message;
+            return channel.onSync(null, sync.getType(), sync.getSenderChanges());
         }
         else if (message instanceof BootstrapMessage) {
             return channel.getEntityResolver();

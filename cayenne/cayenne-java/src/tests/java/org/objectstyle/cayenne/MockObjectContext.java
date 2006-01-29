@@ -60,7 +60,6 @@ import java.util.List;
 
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.opp.OPPChannel;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -78,7 +77,7 @@ public class MockObjectContext implements ObjectContext {
         return null;
     }
 
-    public OPPChannel getChannel() {
+    public DataChannel getChannel() {
         return null;
     }
 

@@ -55,11 +55,11 @@
  */
 package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.DataChannel;
 
 public class MockDataContextFactory implements DataContextFactory {
 
-    public DataContext createDataContext(OPPChannel parent, ObjectStore objectStore) {
+    public DataContext createDataContext(DataChannel parent, ObjectStore objectStore) {
         return null;
     }
 }

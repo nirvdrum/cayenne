@@ -64,8 +64,6 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.opp.OPPChannel;
-import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
@@ -82,7 +80,7 @@ public class CayenneContext implements ObjectContext {
 
     // if we are to pass CayenneContext around, channel should be left alone and
     // reinjected later if needed
-    protected transient OPPChannel channel;
+    protected transient DataChannel channel;
     protected EntityResolver entityResolver;
 
     ObjectContextGraphManager graphManager;
@@ -108,7 +106,7 @@ public class CayenneContext implements ObjectContext {
      * CayenneContext created using this constructor WILL NOT broadcast graph change
      * events.
      */
-    public CayenneContext(OPPChannel channel) {
+    public CayenneContext(DataChannel channel) {
         this(channel, false, false);
     }
 
@@ -117,7 +115,7 @@ public class CayenneContext implements ObjectContext {
      * <code>graphEventsEnabled</code> is true, this context will broadcast GraphEvents
      * using ObjectContext.GRAPH_CHANGE_SUBJECT.
      */
-    public CayenneContext(OPPChannel channel, boolean changeEventsEnabled,
+    public CayenneContext(DataChannel channel, boolean changeEventsEnabled,
             boolean syncEventsEnabled) {
 
         this.graphAction = new CayenneContextGraphAction(this);
@@ -129,14 +127,14 @@ public class CayenneContext implements ObjectContext {
         setChannel(channel);
     }
 
-    public OPPChannel getChannel() {
+    public DataChannel getChannel() {
         return channel;
     }
 
     /**
      * Sets the context channel, setting up a listener for channel events.
      */
-    public void setChannel(OPPChannel channel) {
+    public void setChannel(DataChannel channel) {
         if (this.channel != channel) {
 
             if (this.mergeHandler != null) {
@@ -231,10 +229,8 @@ public class CayenneContext implements ObjectContext {
                 graphManager.graphCommitStarted();
 
                 try {
-                    commitDiff = channel.synchronize(new SyncCommand(
-                            this,
-                            SyncCommand.COMMIT_TYPE,
-                            graphManager.getDiffsSinceLastFlush()));
+                    commitDiff = channel.onSync(this, DataChannel.COMMIT_SYNC_TYPE, graphManager
+                                    .getDiffsSinceLastFlush());
                 }
                 catch (Throwable th) {
                     graphManager.graphCommitAborted();
@@ -261,11 +257,7 @@ public class CayenneContext implements ObjectContext {
                 GraphDiff diff = graphManager.getDiffs();
                 graphManager.graphReverted();
 
-                channel
-                        .synchronize(new SyncCommand(
-                                this,
-                                SyncCommand.ROLLBACK_TYPE,
-                                diff));
+                channel.onSync(this, DataChannel.ROLLBACK_SYNC_TYPE, diff);
             }
         }
     }
@@ -275,7 +267,7 @@ public class CayenneContext implements ObjectContext {
             if (graphManager.hasChangesSinceLastFlush()) {
                 GraphDiff diff = graphManager.getDiffsSinceLastFlush();
                 graphManager.graphFlushed();
-                channel.synchronize(new SyncCommand(this, SyncCommand.FLUSH_TYPE, diff));
+                channel.onSync(this, DataChannel.FLUSH_SYNC_TYPE, diff);
             }
         }
     }
@@ -334,7 +326,7 @@ public class CayenneContext implements ObjectContext {
     }
 
     public List performQuery(Query query) {
-        List objects = channel.performQuery(this, query);
+        List objects = channel.onSelect(this, query);
         if (objects.isEmpty()) {
             return objects;
         }
@@ -492,7 +484,7 @@ public class CayenneContext implements ObjectContext {
     }
 
     public QueryResponse performGenericQuery(Query query) {
-        return channel.performGenericQuery(query);
+        return channel.onQuery(this, query);
     }
 
     /**

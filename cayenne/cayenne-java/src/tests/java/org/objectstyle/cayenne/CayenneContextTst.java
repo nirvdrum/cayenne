@@ -70,7 +70,6 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.MockOPPChannel;
-import org.objectstyle.cayenne.opp.SyncCommand;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
@@ -183,7 +182,7 @@ public class CayenneContextTst extends CayenneTestCase {
 
         // expect a sync/commit chain
         Object mainMessage = channel.getRequestObjects().iterator().next();
-        assertTrue(mainMessage instanceof SyncCommand);
+        assertTrue(mainMessage instanceof GraphDiff);
     }
 
     public void testCommitChangesNew() {
@@ -196,7 +195,11 @@ public class CayenneContextTst extends CayenneTestCase {
 
         MockOPPChannel channel = new MockOPPChannel() {
 
-            public GraphDiff synchronize(SyncCommand message) {
+            public GraphDiff onSync(
+                    ObjectContext context,
+                    int syncType,
+                    GraphDiff contextChanges) {
+
                 return diff;
             }
 

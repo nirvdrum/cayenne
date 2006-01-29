@@ -1,22 +1,22 @@
 package org.objectstyle.cayenne.opp;
 
-import org.objectstyle.cayenne.opp.OPPChannel;
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.opp.OPPMessage;
 
 public class MockOPPMessage implements OPPMessage {
 
-    OPPChannel lastChannel;
+    DataChannel lastChannel;
 
     public MockOPPMessage() {
 
     }
 
-    public Object dispatch(OPPChannel channel) {
+    public Object dispatch(DataChannel channel) {
         this.lastChannel = channel;
         return null;
     }
     
-    public OPPChannel getLastChannel() {
+    public DataChannel getLastChannel() {
         return lastChannel;
     }
 } 

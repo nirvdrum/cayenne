@@ -61,6 +61,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.access.ClientServerChannel;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -167,9 +168,9 @@ public class BaseRemoteService implements OPPRemoteService {
 
         logObj.debug("processMessage, sessionId: " + sessionId);
 
-        OPPChannel handler;
+        DataChannel handler;
         synchronized (sessionChannels) {
-            handler = (OPPChannel) sessionChannels.get(sessionId);
+            handler = (DataChannel) sessionChannels.get(sessionId);
         }
 
         if (handler == null) {
@@ -199,7 +200,7 @@ public class BaseRemoteService implements OPPRemoteService {
 
         // block server-side channel events - clients will communicate their changes in a
         // peer-to-peer fashion.
-        OPPChannel channel = new ClientServerChannel(domain, false);
+        DataChannel channel = new ClientServerChannel(domain, false);
 
         // TODO (Andrus, 10/15/2005) This will result in a memory leak as there is no
         // session timeout; must attach context to the HttpSession. Not entirely sure how

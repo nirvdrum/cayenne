@@ -61,6 +61,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.event.EventBridge;
@@ -78,7 +79,7 @@ import org.objectstyle.cayenne.query.Query;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class OPPServerChannel implements OPPChannel {
+public class OPPServerChannel implements DataChannel {
 
     private static final Log logger = LogFactory.getLog(OPPServerChannel.class);
 
@@ -115,29 +116,33 @@ public class OPPServerChannel implements OPPChannel {
         return eventManager;
     }
 
-    public List performQuery(ObjectContext context, Query query) {
+    public List onSelect(ObjectContext context, Query query) {
         return (List) send(new ObjectSelectMessage(query), List.class);
     }
 
-    public QueryResponse performGenericQuery(Query query) {
+    public QueryResponse onQuery(ObjectContext context, Query query) {
         return (QueryResponse) send(new QueryMessage(query), QueryResponse.class);
     }
 
-    public GraphDiff synchronize(SyncCommand sync) {
-        GraphDiff replyDiff = (GraphDiff) send(new SyncMessage(sync), GraphDiff.class);
+    public GraphDiff onSync(ObjectContext context, int syncType, GraphDiff contextChanges) {
+
+        GraphDiff replyDiff = (GraphDiff) send(new SyncMessage(
+                context,
+                syncType,
+                contextChanges), GraphDiff.class);
 
         if (channelEventsEnabled) {
             EventSubject subject;
 
-            switch (sync.getType()) {
-                case SyncCommand.ROLLBACK_TYPE:
-                    subject = OPPChannel.GRAPH_ROLLEDBACK_SUBJECT;
+            switch (syncType) {
+                case DataChannel.ROLLBACK_SYNC_TYPE:
+                    subject = DataChannel.GRAPH_ROLLEDBACK_SUBJECT;
                     break;
-                case SyncCommand.FLUSH_TYPE:
-                    subject = OPPChannel.GRAPH_CHANGED_SUBJECT;
+                case DataChannel.FLUSH_SYNC_TYPE:
+                    subject = DataChannel.GRAPH_CHANGED_SUBJECT;
                     break;
-                case SyncCommand.COMMIT_TYPE:
-                    subject = OPPChannel.GRAPH_COMMITTED_SUBJECT;
+                case DataChannel.COMMIT_SYNC_TYPE:
+                    subject = DataChannel.GRAPH_COMMITTED_SUBJECT;
                     break;
                 default:
                     subject = null;
@@ -147,23 +152,21 @@ public class OPPServerChannel implements OPPChannel {
 
                 // combine message sender changes and message receiver changes into a
                 // single event
-                boolean sentNoop = sync.getSenderChanges() == null
-                        || sync.getSenderChanges().isNoop();
+                boolean sentNoop = contextChanges == null || contextChanges.isNoop();
                 boolean receivedNoop = replyDiff == null || replyDiff.isNoop();
 
                 if (!sentNoop || !receivedNoop) {
                     CompoundDiff notification = new CompoundDiff();
 
                     if (!sentNoop) {
-                        notification.add(sync.getSenderChanges());
+                        notification.add(contextChanges);
                     }
 
                     if (!receivedNoop) {
                         notification.add(replyDiff);
                     }
 
-                    Object eventSource = (sync.getSource() != null) ? (Object) sync
-                            .getSource() : this;
+                    Object eventSource = (context != null) ? (Object) context : this;
                     GraphEvent e = new GraphEvent(eventSource, notification);
                     e.setPostedBy(this);
                     eventManager.postEvent(e, subject);
