@@ -57,21 +57,12 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.Fault;
-import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.PrefetchSelectQuery;
-import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.RelationshipQuery;
@@ -83,8 +74,6 @@ import org.objectstyle.cayenne.query.SingleObjectQuery;
  * @since 1.2
  * @author Andrus Adamchik
  */
-// TODO: Andrus, 1/25/2006 - some sort of generic chainOfCommand implementation is due.
-// commons-chain?
 class DataContextSelectAction {
 
     static final boolean DONE = true;
@@ -205,77 +194,9 @@ class DataContextSelectAction {
     }
 
     /*
-     * Fetches data directly from the channel.
+     * Fetches data from the channel.
      */
     private List getList() {
-        if (context.getChannel() instanceof ObjectContext) {
-            return getListFromObjectContext();
-        }
-        else {
-            return getListFromChannel();
-        }
-    }
-
-    private List getListFromObjectContext() {
-        List parentObjects = context.getChannel().performQuery(query);
-        List childObjects = new ArrayList(parentObjects.size());
-        Iterator it = parentObjects.iterator();
-        while (it.hasNext()) {
-            Persistent parentObject = (Persistent) it.next();
-            childObjects.add(context
-                    .localObject(parentObject.getObjectId(), parentObject));
-        }
-        
-        return childObjects;
-    }
-
-    private List getListFromChannel() {
-        QueryResponse response = context.getChannel().performGenericQuery(query);
-        List mainRows = response.getFirstRows(query);
-
-        if (metadata.isFetchingDataRows()) {
-            return mainRows;
-        }
-
-        if (mainRows.isEmpty()) {
-            return new ArrayList(1);
-        }
-
-        ObjEntity entity = metadata.getObjEntity();
-        PrefetchTreeNode prefetchTree = metadata.getPrefetchTree();
-
-        // take a shortcut when no prefetches exist...
-        if (prefetchTree == null) {
-            return new ObjectResolver(
-                    context,
-                    entity,
-                    metadata.isRefreshingObjects(),
-                    metadata.isResolvingInherited())
-                    .synchronizedObjectsFromDataRows(mainRows);
-        }
-
-        // map results to prefetch paths
-        Map rowsByPath = new HashMap();
-
-        // find result set
-        Iterator it = response.allQueries().iterator();
-
-        while (it.hasNext()) {
-            Query q = (Query) it.next();
-
-            if (q instanceof PrefetchSelectQuery) {
-                PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) q;
-                rowsByPath.put(prefetchQuery.getPrefetchPath(), response.getFirstRows(q));
-            }
-        }
-
-        ObjectTreeResolver resolver = new ObjectTreeResolver(context, metadata);
-
-        // double-sync row processing
-        synchronized (context.getObjectStore()) {
-            synchronized (context.getObjectStore().getDataRowCache()) {
-                return resolver.resolveObjectTree(prefetchTree, mainRows, rowsByPath);
-            }
-        }
+        return context.getChannel().performQuery(context, query);
     }
 }

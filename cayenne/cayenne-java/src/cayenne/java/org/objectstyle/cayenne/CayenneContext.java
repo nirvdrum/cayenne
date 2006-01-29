@@ -334,7 +334,7 @@ public class CayenneContext implements ObjectContext {
     }
 
     public List performQuery(Query query) {
-        List objects = channel.performQuery(query);
+        List objects = channel.performQuery(this, query);
         if (objects.isEmpty()) {
             return objects;
         }

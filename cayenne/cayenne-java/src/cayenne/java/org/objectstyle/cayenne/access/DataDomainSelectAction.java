@@ -53,44 +53,96 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.opp;
+package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.PrefetchSelectQuery;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryMetadata;
 
 /**
- * A helper class to match message types with OPPChannel methods.
- * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class DispatchHelper {
+class DataDomainSelectAction {
 
-    static Object dispatch(OPPChannel channel, OPPMessage message) {
-        // Andrus, 12/08/2005: originally OPPMessage implemented self-dispatch logic,
-        // later replaced with this ugly if/else. Motivation was that "dispatch" wasn't
-        // called consistently (since OPPChannel methods are accessed directly, bypassing
-        // dispatch in many cases). Also I had a vague security concern about letting an
-        // unknown message to do its own processing...
+    DataDomain domain;
+    DataContext context;
+    Query query;
+    QueryMetadata metadata;
 
-        // TODO: Andrus, 12/08/2005, now that there is no message self-dispatch, we need
-        // an extension mechanism for possible custom messages.
+    DataDomainSelectAction(DataDomain domain, ObjectContext context, Query query) {
 
-        // do most common messages first...
-        if (message instanceof ObjectSelectMessage) {
-            return channel.performQuery(null, ((ObjectSelectMessage) message).getQuery());
+        this.domain = domain;
+        this.context = (DataContext) context;
+        this.query = query;
+        this.metadata = query.getMetaData(domain.getEntityResolver());
+
+        // sanity check
+        if (!metadata.isFetchingDataRows()) {
+            if (context == null) {
+                throw new IllegalArgumentException(
+                        "Null context for query fetching DataObjects.");
+            }
+            else if (!(context instanceof DataContext)) {
+                throw new IllegalArgumentException(
+                        "DataDomain can only select into DataContext. Unsupported context: "
+                                + context);
+            }
         }
-        else if (message instanceof QueryMessage) {
-            return channel.performGenericQuery(((QueryMessage) message).getQuery());
+    }
+
+    List execute() {
+
+        QueryResponse response = domain.performGenericQuery(query);
+        List mainRows = response.getFirstRows(query);
+
+        if (metadata.isFetchingDataRows()) {
+            return mainRows;
         }
-        else if (message instanceof SyncMessage) {
-            return channel.synchronize(((SyncMessage) message).getSync());
+
+        if (mainRows.isEmpty()) {
+            return new ArrayList(1);
         }
-        else if (message instanceof BootstrapMessage) {
-            return channel.getEntityResolver();
+
+        ObjEntity entity = metadata.getObjEntity();
+        PrefetchTreeNode prefetchTree = metadata.getPrefetchTree();
+
+        // take a shortcut when no prefetches exist...
+        if (prefetchTree == null) {
+            return new ObjectResolver(
+                    context,
+                    entity,
+                    metadata.isRefreshingObjects(),
+                    metadata.isResolvingInherited())
+                    .synchronizedObjectsFromDataRows(mainRows);
         }
-        else {
-            throw new CayenneRuntimeException(
-                    "Message dispatch error. Unsupported message: " + message);
+
+        // map results to prefetch paths
+        Map rowsByPath = new HashMap();
+
+        // find result set
+        Iterator it = response.allQueries().iterator();
+
+        while (it.hasNext()) {
+            Query q = (Query) it.next();
+
+            if (q instanceof PrefetchSelectQuery) {
+                PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) q;
+                rowsByPath.put(prefetchQuery.getPrefetchPath(), response.getFirstRows(q));
+            }
         }
+
+        ObjectTreeResolver resolver = new ObjectTreeResolver(context, metadata);
+        return resolver.resolveObjectTree(prefetchTree, mainRows, rowsByPath);
     }
 }

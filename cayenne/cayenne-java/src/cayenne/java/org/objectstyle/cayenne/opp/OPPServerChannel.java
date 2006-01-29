@@ -61,6 +61,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.event.EventBridge;
 import org.objectstyle.cayenne.event.EventManager;
@@ -114,7 +115,7 @@ public class OPPServerChannel implements OPPChannel {
         return eventManager;
     }
 
-    public List performQuery(Query query) {
+    public List performQuery(ObjectContext context, Query query) {
         return (List) send(new ObjectSelectMessage(query), List.class);
     }
 

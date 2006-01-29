@@ -73,6 +73,7 @@ public class SingleObjectQuery extends IndirectQuery {
 
     protected ObjectId objectId;
     protected boolean refreshing;
+    protected boolean fetchingDataRows;
 
     // needed for hessian serialization
     private SingleObjectQuery() {
@@ -83,16 +84,18 @@ public class SingleObjectQuery extends IndirectQuery {
      * Creates a refreshing SingleObjectQuery.
      */
     public SingleObjectQuery(ObjectId objectID) {
-        this(objectID, true);
+        this(objectID, false, true);
     }
 
-    public SingleObjectQuery(ObjectId objectID, boolean refreshing) {
+    public SingleObjectQuery(ObjectId objectID, boolean fetchingDataRows,
+            boolean refreshing) {
         if (objectID == null) {
             throw new NullPointerException("Null objectID");
         }
 
         this.objectId = objectID;
         this.refreshing = refreshing;
+        this.fetchingDataRows = fetchingDataRows;
     }
 
     public ObjectId getObjectId() {
@@ -107,6 +110,7 @@ public class SingleObjectQuery extends IndirectQuery {
         SelectQuery query = new SelectQuery(objectId.getEntityName(), ExpressionFactory
                 .matchAllDbExp(objectId.getIdSnapshot(), Expression.EQUAL_TO));
         query.setRefreshingObjects(refreshing);
+        query.setFetchingDataRows(fetchingDataRows);
         return query;
     }
 
@@ -119,6 +123,10 @@ public class SingleObjectQuery extends IndirectQuery {
 
     public boolean isRefreshing() {
         return refreshing;
+    }
+
+    public boolean isFetchingDataRows() {
+        return fetchingDataRows;
     }
 
     /**

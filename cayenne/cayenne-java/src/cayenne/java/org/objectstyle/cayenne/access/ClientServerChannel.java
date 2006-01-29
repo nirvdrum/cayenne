@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.CompoundDiff;
@@ -206,8 +207,7 @@ public class ClientServerChannel implements OPPChannel {
         return serverContext.performGenericQuery(rewriteQuery(query));
     }
 
-    public List performQuery(Query query) {
-
+    public List performQuery(ObjectContext context, Query query) {
         Query serverQuery = rewriteQuery(query);
 
         List objects = serverContext.performQuery(serverQuery);

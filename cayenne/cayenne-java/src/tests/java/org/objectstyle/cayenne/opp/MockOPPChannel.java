@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.opp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
@@ -125,7 +126,7 @@ public class MockOPPChannel implements OPPChannel {
         return genericResponse;
     }
 
-    public List performQuery(Query query) {
+    public List performQuery(ObjectContext context, Query query) {
         requestObjects.add(query);
         return selectResponse;
     }

@@ -1250,6 +1250,29 @@ public class DataContext implements ObjectContext, OPPChannel, QueryEngine, Seri
         return new DataContextSelectAction(this, query).execute();
     }
 
+    public List performQuery(ObjectContext context, Query query) {
+
+        List results = performQuery(query);
+
+        // stick results in another context
+        if (context != null
+                && context != this
+                && !results.isEmpty()
+                && !query.getMetaData(getEntityResolver()).isFetchingDataRows()) {
+            
+            List childObjects = new ArrayList(results.size());
+            Iterator it = results.iterator();
+            while (it.hasNext()) {
+                Persistent object = (Persistent) it.next();
+                childObjects.add(context.localObject(object.getObjectId(), object));
+            }
+
+            results = childObjects;
+        }
+
+        return results;
+    }
+
     /**
      * Performs a single database query that does not select rows. Returns an array of
      * update counts.

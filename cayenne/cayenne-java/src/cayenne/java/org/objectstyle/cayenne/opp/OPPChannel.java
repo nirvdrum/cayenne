@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.opp;
 
 import java.util.List;
 
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
@@ -109,7 +110,7 @@ public interface OPPChannel {
      * returns raw query data (data rows and update counts), and the caller is free to
      * process this data any way it needs.
      */
-    List performQuery(Query query);
+    List performQuery(ObjectContext context, Query query);
 
     /**
      * Processes a query.

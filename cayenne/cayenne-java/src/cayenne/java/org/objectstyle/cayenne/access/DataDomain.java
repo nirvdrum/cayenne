@@ -66,6 +66,7 @@ import java.util.TreeMap;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
@@ -711,6 +712,8 @@ public class DataDomain implements QueryEngine, OPPChannel {
     // ****** OPPChannel methods:
 
     /**
+     * Runs query returning generic QueryResponse.
+     * 
      * @since 1.2
      */
     public QueryResponse performGenericQuery(Query query) {
@@ -724,15 +727,18 @@ public class DataDomain implements QueryEngine, OPPChannel {
     }
 
     /**
-     * Performs a selecting query. Note that DataDomain can't convert results to
-     * DataObjects, so results are always returned as DataRows.
+     * Performs a selecting query, registering objects returned by the query (if any) with
+     * the provided ObjectContext.
      * 
      * @since 1.2
      */
-    public List performQuery(Query query) {
-        return performGenericQuery(query).getFirstRows(query);
+    public List performQuery(ObjectContext context, Query query) {
+        return new DataDomainSelectAction(this, context, query).execute();
     }
 
+    /**
+     * Returns an EntityResolver that stores mapping information for this domain.
+     */
     public EntityResolver getEntityResolver() {
         if (entityResolver == null) {
             createEntityResolver();

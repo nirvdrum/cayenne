@@ -274,7 +274,10 @@ public final class DataObjectUtils {
      * @throws CayenneRuntimeException if more than one object matched ObjectId.
      */
     public static DataObject objectForPK(ObjectContext context, ObjectId id) {
-        return DataObjectUtils.objectForQuery(context, new SingleObjectQuery(id, false));
+        return DataObjectUtils.objectForQuery(context, new SingleObjectQuery(
+                id,
+                false,
+                false));
     }
 
     /**
