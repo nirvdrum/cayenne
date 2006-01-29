@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.opp;
 
 /**
- * A message sent to OPPChannel to request Cayenne mapping info.
+ * A message sent to a remote service to request Cayenne mapping info.
  * 
  * @since 1.2
  * @author Andrus Adamchik

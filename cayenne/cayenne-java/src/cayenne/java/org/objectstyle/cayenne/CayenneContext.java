@@ -70,8 +70,8 @@ import org.objectstyle.cayenne.query.SingleObjectQuery;
 
 /**
  * A default generic implementation of ObjectContext suitable for accessing Cayenne from
- * either an ORM or a client tiers. Communicates with Cayenne persistence stack by sending
- * OPP messages via a parent OPPChannel.
+ * either an ORM or a client tiers. Communicates with Cayenne via a
+ * {@link org.objectstyle.cayenne.DataChannel}.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -229,8 +229,10 @@ public class CayenneContext implements ObjectContext {
                 graphManager.graphCommitStarted();
 
                 try {
-                    commitDiff = channel.onSync(this, DataChannel.COMMIT_SYNC_TYPE, graphManager
-                                    .getDiffsSinceLastFlush());
+                    commitDiff = channel.onSync(
+                            this,
+                            DataChannel.COMMIT_SYNC_TYPE,
+                            graphManager.getDiffsSinceLastFlush());
                 }
                 catch (Throwable th) {
                     graphManager.graphCommitAborted();
@@ -458,7 +460,7 @@ public class CayenneContext implements ObjectContext {
             // or return null. Now that we can have a valid (but generally
             // indistinguishible) case of such object passed from parent, we let it
             // slip... Not sure what's the best way of handling it that does not involve
-            // breaking encapsulation of the OPPChannel to detect where in the hierarchy
+            // breaking encapsulation of the DataChannel to detect where in the hierarchy
             // this context is.
 
             Persistent localObject = (Persistent) descriptor.createObject();
