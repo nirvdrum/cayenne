@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.QueryResponse;
@@ -78,9 +79,12 @@ import org.objectstyle.cayenne.util.Util;
  */
 public class QueryResult extends DefaultOperationObserver implements QueryResponse {
 
-    protected LinkedHashMap queries = new LinkedHashMap();
+    // a map with order of iteration == to the order of insertion
+    protected Map queries = new LinkedHashMap();
 
-    /** Clears any previously collected information. */
+    /**
+     * Clears any previously collected information.
+     */
     public void clear() {
         queries.clear();
     }
@@ -310,4 +314,5 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
         throw new CayenneRuntimeException("Iterated results are not supported by "
                 + this.getClass().getName());
     }
+
 }
