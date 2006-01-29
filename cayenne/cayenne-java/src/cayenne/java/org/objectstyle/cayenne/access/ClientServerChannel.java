@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
 
 /**
- * An OPPChannel adapter that connects client ObjectContext children to a server
+ * A DataChannel adapter that connects client ObjectContext children to a server
  * ObjectContext.
  * 
  * @since 1.2

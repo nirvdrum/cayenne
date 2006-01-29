@@ -82,9 +82,9 @@ public class ObjectContextUtils {
 
     /**
      * Utility method that sets up a GraphChangeListener to be notified when GraphEvents
-     * occur in any ObjectContext that shares a given OPPChannel and the channel itself.
+     * occur in any ObjectContext that shares a given DataChannel and the channel itself.
      * 
-     * @return false if an OPPChannel doesn't have an EventManager and therefore does not
+     * @return false if the DataChannel doesn't have an EventManager and therefore does not
      *         support events.
      */
     public static boolean listenForContextEvents(
@@ -125,10 +125,10 @@ public class ObjectContextUtils {
     }
 
     /**
-     * Utility method that sets up a GraphChangeListener to be notified when OPPChannel
+     * Utility method that sets up a GraphChangeListener to be notified when DataChannel
      * posts an event.
      * 
-     * @return false if an OPPChannel doesn't have an EventManager and therefore does not
+     * @return false if an DataChannel doesn't have an EventManager and therefore does not
      *         support events.
      */
     public static boolean listenForChannelEvents(

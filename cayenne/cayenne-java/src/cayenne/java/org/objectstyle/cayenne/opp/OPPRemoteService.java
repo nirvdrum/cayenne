@@ -68,7 +68,7 @@ import java.rmi.RemoteException;
 public interface OPPRemoteService extends Remote {
 
     /**
-     * Establishes a dedicated session with Cayenne OPPChannel, returning session id.
+     * Establishes a dedicated session with Cayenne DataChannel, returning session id.
      */
     OPPRemoteSession establishSession() throws RemoteException;
 

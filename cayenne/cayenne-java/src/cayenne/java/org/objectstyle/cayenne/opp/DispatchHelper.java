@@ -59,7 +59,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataChannel;
 
 /**
- * A helper class to match message types with OPPChannel methods.
+ * A helper class to match message types with DataChannel methods.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -69,7 +69,7 @@ class DispatchHelper {
     static Object dispatch(DataChannel channel, OPPMessage message) {
         // Andrus, 12/08/2005: originally OPPMessage implemented self-dispatch logic,
         // later replaced with if/else. Motivation was that "dispatch" wasn't
-        // called consistently (since OPPChannel methods are accessed directly, bypassing
+        // called consistently (since DataChannel methods are accessed directly, bypassing
         // dispatch in many cases). Also I had a vague security concern about letting an
         // unknown message to do its own processing...
 

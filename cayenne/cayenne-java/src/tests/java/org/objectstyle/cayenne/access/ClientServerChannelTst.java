@@ -61,13 +61,13 @@ import java.util.Map;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.objectstyle.cayenne.DataChannel;
+import org.objectstyle.cayenne.MockDataChannel;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.opp.QueryMessage;
 import org.objectstyle.cayenne.query.MockQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -207,7 +207,7 @@ public class ClientServerChannelTst extends CayenneTestCase {
     public void testOnQuery() {
 
         final boolean[] genericDone = new boolean[1];
-        MockOPPChannel parent = new MockOPPChannel(new EntityResolver()) {
+        MockDataChannel parent = new MockDataChannel(new EntityResolver()) {
 
             public QueryResponse onQuery(ObjectContext context, Query query) {
                 genericDone[0] = true;

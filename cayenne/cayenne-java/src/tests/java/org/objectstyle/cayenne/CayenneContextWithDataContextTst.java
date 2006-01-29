@@ -60,7 +60,6 @@ import java.util.List;
 
 import org.objectstyle.cayenne.access.ClientServerChannel;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
@@ -87,7 +86,7 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         inflated.setObjectId(gid);
         inflated.setGlobalAttribute1("abc");
 
-        MockOPPChannel channel = new MockOPPChannel(Arrays.asList(new Object[] {
+        MockDataChannel channel = new MockDataChannel(Arrays.asList(new Object[] {
             inflated
         }));
 
@@ -121,7 +120,7 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
 
     public void testNewObjectShouldInflateHolders() {
 
-        CayenneContext context = new CayenneContext(new MockOPPChannel());
+        CayenneContext context = new CayenneContext(new MockDataChannel());
         context.setEntityResolver(getDomain()
                 .getEntityResolver()
                 .getClientEntityResolver());

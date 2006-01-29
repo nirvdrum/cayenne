@@ -171,12 +171,12 @@ public interface ObjectContext extends Serializable {
     void flushChanges();
 
     /**
-     * Resets all changes made to the objects in the ObjectContext, and recursively all
-     * parent contexts on the other end of the OPPChannel.
+     * Resets all changes made to the objects in the DataChannel, and recursively all
+     * parent contexts on the other end of the DataChannel.
      * <h4>Difference Between "revertChanges" And "rollbackChanges"</h4>
      * <p>
      * Revert is an operation local to this ObjectContext, that doesn't affect parent
-     * contexts on the other end of the OPPChannel. "Revert" means "undo all changes made
+     * contexts on the other end of the DataChannel. "Revert" means "undo all changes made
      * to this context to make the context look like its parent".
      * </p>
      * <p>
@@ -189,11 +189,11 @@ public interface ObjectContext extends Serializable {
 
     /**
      * Resets changes made to the objects in the ObjectContext since the last sync with
-     * OPPChannel.
+     * DataChannel.
      * <h4>Difference Between "revertChanges" And "rollbackChanges"</h4>
      * <p>
      * Revert is an operation local to this ObjectContext, that doesn't affect parent
-     * contexts on the other end of the OPPChannel. "Revert" means "undo all changes made
+     * contexts on the other end of the DataChannel. "Revert" means "undo all changes made
      * to this context to make the context look like its parent".
      * </p>
      * <p>
@@ -220,7 +220,7 @@ public interface ObjectContext extends Serializable {
     GraphManager getGraphManager();
 
     /**
-     * Returns an OPPChannel used by this context.
+     * Returns an DataChannel used by this context.
      */
     DataChannel getChannel();
 }

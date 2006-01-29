@@ -133,7 +133,7 @@ import org.objectstyle.cayenne.util.Util;
  * </p>
  * <p>
  * <i>Note that all QueryEngine interface methods are deprecated in the DataContext. Since
- * 1.2 release DataContext implements ObjectContext and OPPChannel interfaces.</i>
+ * 1.2 release DataContext implements ObjectContext and DataChannel interfaces.</i>
  * </p>
  * 
  * @author Andrus Adamchik
@@ -293,16 +293,16 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * @param parent parent QueryEngine used to communicate with the data source.
      * @param objectStore ObjectStore used by DataContext.
      * @deprecated since 1.2 - use {@link #DataContext(DataChannel, ObjectStore)}
-     *             constructor instead. Note that DataDomain is both an OPPChannel and a
+     *             constructor instead. Note that DataDomain is both a DataChannel and a
      *             QueryEngine, so you may need to do a cast:
-     *             <code>new DataContext((OPPChannel) domain, objectStore)</code>.
+     *             <code>new DataContext((DataChannel) domain, objectStore)</code>.
      */
     public DataContext(QueryEngine parent, ObjectStore objectStore) {
         this((DataChannel) parent, objectStore);
     }
 
     /**
-     * Creates a new DataContext with parent OPPChannel and ObjectStore.
+     * Creates a new DataContext with parent DataChannel and ObjectStore.
      * 
      * @since 1.2
      */
@@ -392,12 +392,12 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
         }
         else {
             throw new CayenneRuntimeException(
-                    "Only parents that implement OPPChannel are supported.");
+                    "Only parents that implement DataChannel are supported.");
         }
     }
 
     /**
-     * Returns parent OPPChannel, that is normally a DataDomain or another DataContext.
+     * Returns parent DataChannel, that is normally a DataDomain or another DataContext.
      * 
      * @since 1.2
      */
@@ -424,7 +424,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * returned.
      * 
      * @return DataDomain that is a direct or indirect parent of this DataContext in the
-     *         OPPChannel hierarchy.
+     *         DataChannel hierarchy.
      * @since 1.1
      */
     public DataDomain getParentDataDomain() {
@@ -1008,7 +1008,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * 
      * @since 1.1
      * @deprecated since 1.2 DataContext's QueryEngine implementation is replaced by
-     *             OPPChannel. Use "getParentDataDomain().lookupDataNode(..)".
+     *             DataChannel. Use "getParentDataDomain().lookupDataNode(..)".
      */
     public DataNode lookupDataNode(DataMap dataMap) {
 
@@ -1209,7 +1209,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
 
         if (this.getChannel() == null) {
             throw new CayenneRuntimeException(
-                    "Can't run query - parent OPPChannel is not set.");
+                    "Can't run query - parent DataChannel is not set.");
         }
 
         return getChannel().onQuery(this, query);
@@ -1322,7 +1322,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * Executes all queries in collection.
      * 
      * @deprecated since 1.2 DataContext's QueryEngine implementation is replaced by
-     *             OPPChannel.
+     *             DataChannel.
      */
     public void performQueries(Collection queries, OperationObserver callback) {
 
@@ -1365,7 +1365,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * @since 1.1
      * @deprecated since 1.2. Use Transaction.bindThreadTransaction(..) to provide custom
      *             transactions, besides DataContext's QueryEngine implementation is
-     *             replaced by OPPChannel.
+     *             replaced by DataChannel.
      */
     public void performQueries(
             Collection queries,
@@ -1472,7 +1472,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
 
     /**
      * Returns EntityResolver. EntityResolver can be null if DataContext has not been
-     * attached to an OPPChannel.
+     * attached to an DataChannel.
      */
     public EntityResolver getEntityResolver() {
         awakeFromDeserialization();
@@ -1804,7 +1804,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
             // or return null. Now that we can have a valid (but generally
             // indistinguishible) case of such object passed from parent, we let it
             // slip... Not sure what's the best way of handling it that does not involve
-            // breaking encapsulation of the OPPChannel to detect where in the hierarchy
+            // breaking encapsulation of the DataChannel to detect where in the hierarchy
             // this context is.
 
             Persistent localObject = (Persistent) descriptor.createObject();

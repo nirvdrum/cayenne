@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.opp;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.MockDataChannel;
 import org.objectstyle.cayenne.map.EntityResolver;
 
 import junit.framework.TestCase;
@@ -64,13 +65,13 @@ public class DispatchHelperTst extends TestCase {
 
     public void testBootstrapMessage() {
         EntityResolver resolver = new EntityResolver();
-        MockOPPChannel channel = new MockOPPChannel(resolver);
+        MockDataChannel channel = new MockDataChannel(resolver);
         assertSame(resolver, DispatchHelper.dispatch(channel, new BootstrapMessage()));
     }
 
     public void testUnknownMessage() {
         try {
-            DispatchHelper.dispatch(new MockOPPChannel(), new MockOPPMessage());
+            DispatchHelper.dispatch(new MockDataChannel(), new MockOPPMessage());
             fail("Unknown message must have failed");
         }
         catch (CayenneRuntimeException e) {

@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.opp;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * A message passed to an OPPChannel to request a query execution with result returned as
+ * A message passed to a DataChannel to request a query execution with result returned as
  * QueryResponse.
  * 
  * @since 1.2

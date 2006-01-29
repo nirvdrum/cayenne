@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.opp;
 
 import org.objectstyle.cayenne.DataChannel;
+import org.objectstyle.cayenne.MockDataChannel;
 import org.objectstyle.cayenne.opp.LocalConnection;
 
 import junit.framework.TestCase;
@@ -66,12 +67,12 @@ import junit.framework.TestCase;
 public class LocalConnectionTst extends TestCase {
 
     public void testConstructors() {
-        DataChannel handler1 = new MockOPPChannel();
+        DataChannel handler1 = new MockDataChannel();
         LocalConnection connector1 = new LocalConnection(handler1);
         assertFalse(connector1.isSerializingMessages());
         assertSame(handler1, connector1.getChannel());
 
-        DataChannel handler2 = new MockOPPChannel();
+        DataChannel handler2 = new MockDataChannel();
         LocalConnection connector2 = new LocalConnection(
                 handler2,
                 LocalConnection.JAVA_SERIALIZATION);

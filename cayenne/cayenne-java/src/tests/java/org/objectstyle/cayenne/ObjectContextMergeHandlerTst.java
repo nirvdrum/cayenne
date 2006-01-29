@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne;
 
 import org.objectstyle.cayenne.graph.GraphEvent;
-import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -71,7 +70,7 @@ public class ObjectContextMergeHandlerTst extends CayenneTestCase {
     }
 
     public void testShouldProcessEvent() {
-        DataChannel channel = new MockOPPChannel();
+        DataChannel channel = new MockDataChannel();
         CayenneContext context = new CayenneContext(channel);
 
         ObjectContextMergeHandler handler = new ObjectContextMergeHandler(context);
@@ -93,7 +92,7 @@ public class ObjectContextMergeHandlerTst extends CayenneTestCase {
 
         // 3. Another channel initiated the sync:
         // postedBy == ? && source != channel
-        GraphEvent e3 = new GraphEvent(new MockOPPChannel(), new Object(), null);
+        GraphEvent e3 = new GraphEvent(new MockDataChannel(), new Object(), null);
         assertFalse(handler.shouldProcessEvent(e3));
 
         // 4. inactive
@@ -103,7 +102,7 @@ public class ObjectContextMergeHandlerTst extends CayenneTestCase {
     }
 
     public void testNodePropertyChanged() {
-        DataChannel channel = new MockOPPChannel(getDomain()
+        DataChannel channel = new MockDataChannel(getDomain()
                 .getEntityResolver()
                 .getClientEntityResolver());
 

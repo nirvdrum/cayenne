@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.opp;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * A message sent to OPPChannel to request a list of objects matching a query.
+ * A message sent to DataChannel to request a list of objects matching a query.
  * 
  * @since 1.2
  * @author Andrus Adamchik

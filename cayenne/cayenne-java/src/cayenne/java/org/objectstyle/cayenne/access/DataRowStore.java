@@ -327,12 +327,12 @@ public class DataRowStore implements Serializable {
             return getSnapshot(oid, ((DataContext) engine).getChannel());
         }
 
-        throw new CayenneRuntimeException("QueryEngine is not an OPPChannel or DataContext: " + engine);
+        throw new CayenneRuntimeException("QueryEngine is not an DataChannel or DataContext: " + engine);
     }
 
     /**
      * Returns a snapshot for ObjectId. If snapshot is currently cached, it is returned.
-     * If not, a provided OPPChannel is used to fetch it from the database. If there is no
+     * If not, a provided DataChannel is used to fetch it from the database. If there is no
      * database row for a given id, null is returned.
      * 
      * @since 1.2

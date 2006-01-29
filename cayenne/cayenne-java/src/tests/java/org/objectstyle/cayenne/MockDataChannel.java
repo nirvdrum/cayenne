@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.opp;
+package org.objectstyle.cayenne;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.query.Query;
  * 
  * @author Andrus Adamchik
  */
-public class MockOPPChannel implements DataChannel {
+public class MockDataChannel implements DataChannel {
 
     protected EntityResolver resolver;
     protected List requestObjects = new ArrayList();
@@ -79,29 +79,29 @@ public class MockOPPChannel implements DataChannel {
     protected List selectResponse;
     protected QueryResponse genericResponse;
 
-    public MockOPPChannel() {
+    public MockDataChannel() {
 
     }
 
-    public MockOPPChannel(GraphDiff commitResponse) {
+    public MockDataChannel(GraphDiff commitResponse) {
         this.commitResponse = commitResponse;
     }
 
-    public MockOPPChannel(List selectResponse) {
+    public MockDataChannel(List selectResponse) {
         this.selectResponse = selectResponse;
     }
 
-    public MockOPPChannel(EntityResolver entityResolver, List selectResponse) {
+    public MockDataChannel(EntityResolver entityResolver, List selectResponse) {
         this.selectResponse = selectResponse;
         this.resolver = entityResolver;
     }
 
-    public MockOPPChannel(EntityResolver entityResolver, QueryResponse genericResponse) {
+    public MockDataChannel(EntityResolver entityResolver, QueryResponse genericResponse) {
         this.genericResponse = genericResponse;
         this.resolver = entityResolver;
     }
 
-    public MockOPPChannel(EntityResolver resolver) {
+    public MockDataChannel(EntityResolver resolver) {
         this.resolver = resolver;
     }
 

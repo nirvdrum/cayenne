@@ -69,7 +69,6 @@ import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.opp.MockOPPChannel;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
@@ -96,14 +95,14 @@ public class CayenneContextTst extends CayenneTestCase {
         assertNotNull(context.getGraphManager());
         assertNull(context.getChannel());
 
-        MockOPPChannel channel = new MockOPPChannel();
+        MockDataChannel channel = new MockDataChannel();
         context.setChannel(channel);
         assertSame(channel, context.getChannel());
     }
 
     public void testLocalObject() {
 
-        MockOPPChannel channel = new MockOPPChannel();
+        MockDataChannel channel = new MockDataChannel();
         CayenneContext src = new CayenneContext(channel);
         src.setEntityResolver(getDomain().getEntityResolver().getClientEntityResolver());
 
@@ -152,7 +151,7 @@ public class CayenneContextTst extends CayenneTestCase {
     }
 
     public void testChannel() {
-        MockOPPChannel channel = new MockOPPChannel();
+        MockDataChannel channel = new MockDataChannel();
         CayenneContext context = new CayenneContext(channel);
 
         assertSame(channel, context.getChannel());
@@ -160,7 +159,7 @@ public class CayenneContextTst extends CayenneTestCase {
 
     public void testCommitUnchanged() {
 
-        MockOPPChannel channel = new MockOPPChannel();
+        MockDataChannel channel = new MockDataChannel();
         CayenneContext context = new CayenneContext(channel);
 
         // no context changes so no connector access is expected
@@ -170,7 +169,7 @@ public class CayenneContextTst extends CayenneTestCase {
 
     public void testCommitCommandExecuted() {
 
-        MockOPPChannel channel = new MockOPPChannel(new MockGraphDiff());
+        MockDataChannel channel = new MockDataChannel(new MockGraphDiff());
         CayenneContext context = new CayenneContext(channel);
 
         // test that a command is being sent via connector on commit...
@@ -193,7 +192,7 @@ public class CayenneContextTst extends CayenneTestCase {
         // test that ids that are passed back are actually propagated to the right
         // objects...
 
-        MockOPPChannel channel = new MockOPPChannel() {
+        MockDataChannel channel = new MockDataChannel() {
 
             public GraphDiff onSync(
                     ObjectContext context,
@@ -234,7 +233,7 @@ public class CayenneContextTst extends CayenneTestCase {
         ObjectId oid1 = new ObjectId("test_entity");
         o1.setObjectId(oid1);
 
-        MockOPPChannel channel = new MockOPPChannel(Arrays.asList(new Object[] {
+        MockDataChannel channel = new MockDataChannel(Arrays.asList(new Object[] {
             o1
         }));
 
@@ -278,7 +277,7 @@ public class CayenneContextTst extends CayenneTestCase {
         // another object with the same GID ... we must merge it with cached and return
         // cached object instead of the one fetched
         MockPersistentObject o2 = new MockPersistentObject(oid);
-        MockOPPChannel channel = new MockOPPChannel(Arrays.asList(new Object[] {
+        MockDataChannel channel = new MockDataChannel(Arrays.asList(new Object[] {
             o2
         }));
 
@@ -310,7 +309,7 @@ public class CayenneContextTst extends CayenneTestCase {
         // another object with the same GID ... we must merge it with cached and return
         // cached object instead of the one fetched
         MockPersistentObject o2 = new MockPersistentObject(oid);
-        MockOPPChannel channel = new MockOPPChannel(Arrays.asList(new Object[] {
+        MockDataChannel channel = new MockDataChannel(Arrays.asList(new Object[] {
             o2
         }));
 
@@ -324,7 +323,7 @@ public class CayenneContextTst extends CayenneTestCase {
 
     public void testNewObject() {
 
-        CayenneContext context = new CayenneContext(new MockOPPChannel());
+        CayenneContext context = new CayenneContext(new MockDataChannel());
 
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
@@ -360,7 +359,7 @@ public class CayenneContextTst extends CayenneTestCase {
 
     public void testDeleteObject() {
 
-        CayenneContext context = new CayenneContext(new MockOPPChannel());
+        CayenneContext context = new CayenneContext(new MockDataChannel());
         ObjEntity entity = new ObjEntity("test_entity");
         entity.setClassName(MockPersistentObject.class.getName());
 

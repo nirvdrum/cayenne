@@ -74,7 +74,8 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * An OPPChannel implementation that accesses an OPP server via an OPPConnection.
+ * A {@link org.objectstyle.cayenne.DataChannel} implementation that accesses an OPP
+ * server via an OPPConnection.
  * 
  * @since 1.2
  * @author Andrus Adamchik

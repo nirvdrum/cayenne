@@ -175,8 +175,8 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
 
         // on the one hand sticking an alien NEW object to a peer DataContext doesn't look
         // like a good idea, on the other hand the code detecting whether a given context
-        // is a child of another context breaks OPPChannel encapsulation (i.e. using
-        // "instanceof" to check OPPChannel type will make it impossible to use Proxies).
+        // is a child of another context breaks DataChannel encapsulation (i.e. using
+        // "instanceof" to check DataChannel type will make it impossible to use Proxies).
 
         // try {
         // peerContext.localObjects(Collections.singletonList(_new));

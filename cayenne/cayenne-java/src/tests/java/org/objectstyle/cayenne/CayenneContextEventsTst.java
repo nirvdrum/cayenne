@@ -63,13 +63,12 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.graph.GraphEventListener;
 import org.objectstyle.cayenne.graph.MockGraphEventListener;
-import org.objectstyle.cayenne.opp.MockOPPChannel;
 
 public class CayenneContextEventsTst extends TestCase {
 
     public void testDispatchEventsEnabled() {
         final EventManager manager = new EventManager(0);
-        DataChannel channel = new MockOPPChannel() {
+        DataChannel channel = new MockDataChannel() {
 
             public EventManager getEventManager() {
                 return manager;
@@ -110,7 +109,7 @@ public class CayenneContextEventsTst extends TestCase {
 
     public void testDispatchEventsDisabled() {
         final EventManager manager = new EventManager(0);
-        DataChannel channel = new MockOPPChannel() {
+        DataChannel channel = new MockDataChannel() {
 
             public EventManager getEventManager() {
                 return manager;

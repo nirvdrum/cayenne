@@ -179,7 +179,7 @@ public class CayenneContext implements ObjectContext {
     /**
      * Returns an EntityResolver that provides mapping information needed for
      * CayenneContext operation. If EntityResolver is not set, this method would obtain
-     * and cache one from the underlying OPPChannel by sending BootstrapMessage.
+     * and cache one from the underlying DataChannel.
      */
     public EntityResolver getEntityResolver() {
         // load entity resolver on demand

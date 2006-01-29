@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * An OPPConnection that connects to an OPPChannel. Used as an emulator of a remote
+ * An OPPConnection that connects to a DataChannel. Used as an emulator of a remote
  * service. Emulation includes serialization/deserialization of objects.
  * 
  * @since 1.2
@@ -104,7 +104,7 @@ public class LocalConnection extends BaseConnection {
     }
 
     /**
-     * Returns wrapped OPPChannel.
+     * Returns wrapped DataChannel.
      */
     public DataChannel getChannel() {
         return channel;
