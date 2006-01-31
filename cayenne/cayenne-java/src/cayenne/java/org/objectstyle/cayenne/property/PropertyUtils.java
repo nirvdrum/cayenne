@@ -61,6 +61,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -181,13 +182,28 @@ public class PropertyUtils {
                 object.getClass(),
                 pathSegment);
 
-        Method reader = descriptor.getReadMethod();
+        if (descriptor != null) {
+            Method reader = descriptor.getReadMethod();
 
-        if (reader == null) {
-            throw new IntrospectionException("Unreadable property '" + pathSegment + "'");
+            if (reader == null) {
+                throw new IntrospectionException("Unreadable property '"
+                        + pathSegment
+                        + "'");
+            }
+
+            return reader.invoke(object, null);
         }
-
-        return reader.invoke(object, null);
+        // note that Map has two traditional bean properties - 'empty' and 'class', so
+        // do a check here only after descriptor lookup failed.
+        else if (object instanceof Map) {
+            return ((Map) object).get(pathSegment);
+        }
+        else {
+            throw new IntrospectionException("No property '"
+                    + pathSegment
+                    + "' found in class "
+                    + object.getClass().getName());
+        }
     }
 
     static void setSimpleProperty(Object object, String pathSegment, Object value)
@@ -198,22 +214,37 @@ public class PropertyUtils {
                 object.getClass(),
                 pathSegment);
 
-        Method writer = descriptor.getWriteMethod();
+        if (descriptor != null) {
+            Method writer = descriptor.getWriteMethod();
 
-        if (writer == null) {
-            throw new IntrospectionException("Unwritable property '" + pathSegment + "'");
+            if (writer == null) {
+                throw new IntrospectionException("Unwritable property '"
+                        + pathSegment
+                        + "'");
+            }
+
+            // do basic conversions
+
+            value = Converter.getConverter(descriptor.getPropertyType()).convert(
+                    value,
+                    descriptor.getPropertyType());
+
+            // set
+            writer.invoke(object, new Object[] {
+                value
+            });
         }
-
-        // do basic conversions
-
-        value = Converter.getConverter(descriptor.getPropertyType()).convert(
-                value,
-                descriptor.getPropertyType());
-
-        // set
-        writer.invoke(object, new Object[] {
-            value
-        });
+        // note that Map has two traditional bean properties - 'empty' and 'class', so
+        // do a check here only after descriptor lookup failed.
+        else if (object instanceof Map) {
+            ((Map) object).put(pathSegment, value);
+        }
+        else {
+            throw new IntrospectionException("No property '"
+                    + pathSegment
+                    + "' found in class "
+                    + object.getClass().getName());
+        }
     }
 
     static PropertyDescriptor getPropertyDescriptor(Class beanClass, String propertyName)
@@ -229,10 +260,7 @@ public class PropertyUtils {
             }
         }
 
-        throw new IntrospectionException("No property '"
-                + propertyName
-                + "' found in class "
-                + beanClass.getName());
+        return null;
     }
 
     /**
