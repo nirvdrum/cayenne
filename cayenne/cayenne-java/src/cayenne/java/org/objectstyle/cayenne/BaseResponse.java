@@ -82,7 +82,7 @@ public class BaseResponse implements QueryResponse, Serializable {
      * Creates a BaseResponse with a single result list.
      */
     public BaseResponse(List list) {
-        results = new ArrayList();
+        results = new ArrayList(1);
         addResultList(list);
     }
 

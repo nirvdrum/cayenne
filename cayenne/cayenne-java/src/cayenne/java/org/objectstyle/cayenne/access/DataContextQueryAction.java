@@ -57,34 +57,42 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.cayenne.BaseResponse;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.Fault;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.RelationshipQuery;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
 
 /**
- * A DataContext helper that handles select query execution.
+ * A DataContext helper that handles query execution.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class DataContextSelectAction {
+class DataContextQueryAction {
 
     static final boolean DONE = true;
 
+    ObjectContext queryContext;
     DataContext context;
     Query query;
     QueryMetadata metadata;
-    List result;
 
-    DataContextSelectAction(DataContext context, Query query) {
+    QueryResponse response;
+
+    DataContextQueryAction(ObjectContext queryContext, DataContext context, Query query) {
         this.context = context;
+        this.queryContext = queryContext != context ? queryContext : null;
         this.query = query;
         this.metadata = query.getMetaData(context.getEntityResolver());
     }
@@ -92,27 +100,72 @@ class DataContextSelectAction {
     /**
      * Selects an appropriate select execution strategy and runs the query.
      */
-    List execute() {
+    QueryResponse execute() {
 
+        if (interceptPaginatedQuery() != DONE) {
+            if (interceptOIDQuery() != DONE) {
+                if (interceptRelationshipQuery() != DONE) {
+                    if (interceptLocalCache() != DONE) {
+                        runQuery();
+                    }
+                }
+            }
+        }
+
+        interceptObjectConversion();
+
+        return response;
+    }
+
+    private void interceptObjectConversion() {
+
+        if (queryContext != null && !metadata.isFetchingDataRows()) {
+
+            // rewrite response to contain objects from the query context
+
+            response.reset();
+            BaseResponse childResponse = new BaseResponse();
+
+            while (response.next()) {
+                if (response.isList()) {
+
+                    List objects = response.currentList();
+                    if (objects.isEmpty()) {
+                        childResponse.addResultList(objects);
+                    }
+                    else {
+
+                        // TODO: Andrus 1/31/2006 - InrementalFaultList is not properly
+                        // transferred between contexts....
+
+                        List childObjects = new ArrayList(objects.size());
+                        Iterator it = objects.iterator();
+                        while (it.hasNext()) {
+                            Persistent object = (Persistent) it.next();
+                            childObjects.add(queryContext.localObject(object
+                                    .getObjectId(), object));
+                        }
+
+                        childResponse.addResultList(childObjects);
+                    }
+                }
+                else {
+                    childResponse.addBatchUpdateCount(response.currentUpdateCount());
+                }
+            }
+
+            response = childResponse;
+        }
+
+    }
+
+    private boolean interceptPaginatedQuery() {
         if (metadata.getPageSize() > 0) {
-            return new IncrementalFaultList(context, query);
+            response = new BaseResponse(new IncrementalFaultList(context, query));
+            return DONE;
         }
 
-        // intercept object and relationship queries that can be served from cache.
-        if (interceptOIDQuery() == DONE) {
-            return this.result;
-        }
-
-        if (interceptRelationshipQuery() == DONE) {
-            return this.result;
-        }
-
-        // intercept explicitly cached queries
-        if (QueryMetadata.LOCAL_CACHE.equals(metadata.getCachePolicy())) {
-            return getListViaCache();
-        }
-
-        return getList();
+        return !DONE;
     }
 
     private boolean interceptOIDQuery() {
@@ -121,8 +174,9 @@ class DataContextSelectAction {
             if (!oidQuery.isRefreshing()) {
                 Object object = context.getGraphManager().getNode(oidQuery.getObjectId());
                 if (object != null) {
-                    this.result = new ArrayList(1);
-                    this.result.add(object);
+                    List result = new ArrayList(1);
+                    result.add(object);
+                    this.response = new BaseResponse(result);
                     return DONE;
                 }
             }
@@ -132,9 +186,21 @@ class DataContextSelectAction {
     }
 
     private boolean interceptRelationshipQuery() {
+
         if (query instanceof RelationshipQuery) {
             RelationshipQuery relationshipQuery = (RelationshipQuery) query;
             if (!relationshipQuery.isRefreshing()) {
+
+                // don't intercept to-many relationships if fetch is done to the same
+                // context as the root context of this action - this will result in an
+                // infinite loop.
+
+                if (queryContext == null
+                        && relationshipQuery
+                                .getRelationship(context.getEntityResolver())
+                                .isToMany()) {
+                    return !DONE;
+                }
 
                 ObjectId id = relationshipQuery.getObjectId();
 
@@ -148,19 +214,23 @@ class DataContextSelectAction {
                             .getRelationshipName());
 
                     if (!(related instanceof Fault)) {
+                        List result;
+
                         // null to-one
                         if (related == null) {
-                            this.result = new ArrayList(1);
+                            result = new ArrayList(1);
                         }
                         // to-many
                         else if (related instanceof List) {
-                            this.result = (List) related;
+                            result = (List) related;
                         }
                         // non-null to-one
                         else {
-                            this.result = new ArrayList(1);
-                            this.result.add(object);
+                            result = new ArrayList(1);
+                            result.add(object);
                         }
+
+                        this.response = new BaseResponse(result);
 
                         return DONE;
                     }
@@ -174,7 +244,11 @@ class DataContextSelectAction {
     /*
      * Wraps execution in local cache checks.
      */
-    private List getListViaCache() {
+    private boolean interceptLocalCache() {
+        if (!QueryMetadata.LOCAL_CACHE.equals(metadata.getCachePolicy())) {
+            return !DONE;
+        }
+
         if (query.getName() == null) {
             throw new CayenneRuntimeException(
                     "Caching of unnamed queries is not supported.");
@@ -184,20 +258,20 @@ class DataContextSelectAction {
             List cachedResults = context.getObjectStore().getCachedQueryResult(
                     query.getName());
             if (cachedResults != null) {
-                return cachedResults;
+                response = new BaseResponse(cachedResults);
+                return DONE;
             }
         }
 
-        List results = getList();
-        context.getObjectStore().cacheQueryResult(query.getName(), results);
-        return results;
+        runQuery();
+        context.getObjectStore().cacheQueryResult(query.getName(), response.firstList());
+        return DONE;
     }
 
     /*
      * Fetches data from the channel.
      */
-    private List getList() {
-        List list = context.getChannel().onQuery(context, query).firstList();
-        return list != null ? list : new ArrayList(1);
+    private void runQuery() {
+        this.response = context.getChannel().onQuery(context, query);
     }
 }

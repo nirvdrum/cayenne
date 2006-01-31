@@ -401,4 +401,88 @@ public class NestedDataContextTst extends CayenneTestCase {
             unblockQueries();
         }
     }
+
+    public void testPrefetchingToOne() throws Exception {
+        deleteTestData();
+        createTestData("testPrefetching");
+
+        DataContext parent = createDataContext();
+        DataContext child = parent.createChildDataContext();
+
+        ObjectId prefetchedId = new ObjectId(
+                "Artist",
+                Artist.ARTIST_ID_PK_COLUMN,
+                new Integer(33001));
+
+        SelectQuery q = new SelectQuery(Painting.class);
+        q.addOrdering(Painting.PAINTING_TITLE_PROPERTY, true);
+        q.addPrefetch(Painting.TO_ARTIST_PROPERTY);
+
+        List results = child.performQuery(q);
+
+        blockQueries();
+        try {
+            assertEquals(2, results.size());
+            Iterator it = results.iterator();
+            while (it.hasNext()) {
+                Painting o = (Painting) it.next();
+                assertEquals(PersistenceState.COMMITTED, o.getPersistenceState());
+                assertSame(child, o.getObjectContext());
+
+                Artist o1 = o.getToArtist();
+                assertNotNull(o1);
+                assertEquals(PersistenceState.COMMITTED, o1.getPersistenceState());
+                assertSame(child, o1.getObjectContext());
+                assertEquals(prefetchedId, o1.getObjectId());
+            }
+        }
+        finally {
+            unblockQueries();
+        }
+    }
+
+    public void testPrefetchingToMany() throws Exception {
+        deleteTestData();
+        createTestData("testPrefetching");
+
+        DataContext parent = createDataContext();
+        DataContext child = parent.createChildDataContext();
+
+        SelectQuery q = new SelectQuery(Artist.class);
+        q.addOrdering(Artist.ARTIST_NAME_PROPERTY, true);
+        q.addPrefetch(Artist.PAINTING_ARRAY_PROPERTY);
+
+        List results = child.performQuery(q);
+
+        blockQueries();
+        try {
+
+            Artist o1 = (Artist) results.get(0);
+            assertEquals(PersistenceState.COMMITTED, o1.getPersistenceState());
+            assertSame(child, o1.getObjectContext());
+
+            List children1 = o1.getPaintingArray();
+
+            assertEquals(2, children1.size());
+            Iterator it = children1.iterator();
+            while (it.hasNext()) {
+                Painting o = (Painting) it.next();
+                assertEquals(PersistenceState.COMMITTED, o.getPersistenceState());
+                assertSame(child, o.getObjectContext());
+
+                assertEquals(o1, o.getToArtist());
+            }
+
+            Artist o2 = (Artist) results.get(1);
+            assertEquals(PersistenceState.COMMITTED, o2.getPersistenceState());
+            assertSame(child, o2.getObjectContext());
+
+            List children2 = o2.getPaintingArray();
+
+            assertEquals(0, children2.size());
+        }
+        finally {
+            unblockQueries();
+        }
+    }
 }

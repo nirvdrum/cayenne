@@ -42,6 +42,13 @@
 		</value></constructor-arg>
 	</bean>
 	
+	<bean id="P11" class="org.objectstyle.cayenne.unit.util.UpdatingSQLTemplate">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.art.Painting</value></constructor-arg>
+		<constructor-arg><value>
+		INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) VALUES (33006, 'P_artist6', 33001, 3000)
+		</value></constructor-arg>
+	</bean>
+	
 	<bean id="P2" class="org.objectstyle.cayenne.unit.util.UpdatingSQLTemplate">
 		<constructor-arg type="java.lang.Class"><value>org.objectstyle.art.Painting</value></constructor-arg>
 		<constructor-arg><value>
@@ -97,6 +104,17 @@
 				<ref bean="P3"/>
 				<ref bean="P4"/>
 				<ref bean="P5"/>
+			</list>
+		</constructor-arg>
+	</bean>
+	
+	<bean id="testPrefetching" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<ref bean="A1"/>
+				<ref bean="A2"/>
+				<ref bean="P1"/>
+				<ref bean="P11"/>
 			</list>
 		</constructor-arg>
 	</bean>

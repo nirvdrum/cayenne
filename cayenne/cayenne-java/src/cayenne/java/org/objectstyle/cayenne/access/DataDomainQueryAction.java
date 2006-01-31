@@ -267,6 +267,8 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
     /*
      * Gets response from the underlying DataNodes.
      */
+    // the only reason why this method is non-private is to create mockup subclasses for
+    // test cases that intercept this call.
     void runQuery() {
 
         // reset

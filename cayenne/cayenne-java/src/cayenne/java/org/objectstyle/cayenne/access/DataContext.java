@@ -1213,7 +1213,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
                     "Can't run query - parent DataChannel is not set.");
         }
 
-        return getChannel().onQuery(this, query);
+        return onQuery(this, query);
     }
 
     /**
@@ -1247,7 +1247,8 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
             return new ArrayList(1);
         }
 
-        return new DataContextSelectAction(this, query).execute();
+        List result = onQuery(this, query).firstList();
+        return result != null ? result : new ArrayList(1);
     }
 
     /**
@@ -1257,47 +1258,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * @since 1.2
      */
     public QueryResponse onQuery(ObjectContext context, Query query) {
-        QueryResponse response = getChannel().onQuery(this, query);
-
-        if (context != null
-                && context != this
-                && !query.getMetaData(getEntityResolver()).isFetchingDataRows()) {
-
-            // rewrite response to contain objects from the child context
-
-            response.reset();
-            BaseResponse childResponse = new BaseResponse();
-
-            while (response.next()) {
-                if (response.isList()) {
-
-                    List objects = response.currentList();
-                    if (objects.isEmpty()) {
-                        childResponse.addResultList(objects);
-                    }
-                    else {
-
-                        List childObjects = new ArrayList(objects.size());
-                        Iterator it = objects.iterator();
-                        while (it.hasNext()) {
-                            Persistent object = (Persistent) it.next();
-                            childObjects.add(context.localObject(
-                                    object.getObjectId(),
-                                    object));
-                        }
-
-                        childResponse.addResultList(childObjects);
-                    }
-                }
-                else {
-                    childResponse.addBatchUpdateCount(response.currentUpdateCount());
-                }
-            }
-
-            response = childResponse;
-        }
-
-        return response;
+        return new DataContextQueryAction(context, this, query).execute();
     }
 
     /**
