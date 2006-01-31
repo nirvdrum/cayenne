@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import org.objectstyle.cayenne.BaseResponse;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ObjectContext;
@@ -203,32 +203,52 @@ public class ClientServerChannel implements DataChannel {
     }
 
     public QueryResponse onQuery(ObjectContext context, Query query) {
-        return serverContext.performGenericQuery(rewriteQuery(query));
-    }
 
-    public List onSelect(ObjectContext context, Query query) {
         Query serverQuery = rewriteQuery(query);
+        QueryResponse response = serverContext.onQuery(null, serverQuery);
 
-        List objects = serverContext.performQuery(serverQuery);
-
-        // create client objects for a list of server object
-
-        if (objects.isEmpty()) {
-            return new ArrayList(0);
-        }
-
-        // detect prefetches... note that we are getting metadata from the server query.
-        // Getting it from the client may blow for named queries...
         QueryMetadata info = serverQuery.getMetaData(serverContext.getEntityResolver());
+        if (!info.isFetchingDataRows()) {
 
-        try {
-            return new ServerToClientObjectConverter(objects, getEntityResolver(), info
-                    .getPrefetchTree()).getConverted();
+            // rewrite response to contain client objects
+
+            BaseResponse clientResponse = new BaseResponse();
+            response.reset();
+
+            while (response.next()) {
+                if (response.isList()) {
+                    List serverObjects = response.currentList();
+
+                    if (serverObjects.isEmpty()) {
+                        clientResponse.addResultList(serverObjects);
+                    }
+                    else {
+
+                        try {
+                            List clientObjects = new ServerToClientObjectConverter(
+                                    serverObjects,
+                                    getEntityResolver(),
+                                    info.getPrefetchTree()).getConverted();
+
+                            clientResponse.addResultList(clientObjects);
+                        }
+                        catch (Exception e) {
+                            throw new CayenneRuntimeException(
+                                    "Error converting to client objects: "
+                                            + e.getLocalizedMessage(),
+                                    e);
+                        }
+                    }
+                }
+                else {
+                    clientResponse.addBatchUpdateCount(response.currentUpdateCount());
+                }
+            }
+
+            response = clientResponse;
         }
-        catch (Exception e) {
-            throw new CayenneRuntimeException("Error converting to client objects: "
-                    + e.getLocalizedMessage(), e);
-        }
+
+        return response;
     }
 
     public EntityResolver getEntityResolver() {

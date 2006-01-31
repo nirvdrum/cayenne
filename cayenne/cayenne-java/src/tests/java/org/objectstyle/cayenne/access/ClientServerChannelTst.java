@@ -125,9 +125,14 @@ public class ClientServerChannelTst extends CayenneTestCase {
 
         DataContext context = createDataContext();
 
-        List results = new ClientServerChannel(context, false).onSelect(
+        Query query = new SelectQuery("MtTable1");
+        QueryResponse response = new ClientServerChannel(context, false).onQuery(
                 null,
-                new SelectQuery("MtTable1"));
+                query);
+
+        assertNotNull(response);
+
+        List results = response.firstList();
 
         assertNotNull(results);
         assertEquals(1, results.size());
@@ -158,9 +163,14 @@ public class ClientServerChannelTst extends CayenneTestCase {
 
         DataContext context = createDataContext();
 
-        List results = new ClientServerChannel(context, false).onSelect(
+        Query query = new SelectQuery("MtTable3");
+        QueryResponse response = new ClientServerChannel(context, false).onQuery(
                 null,
-                new SelectQuery("MtTable3"));
+                query);
+
+        assertNotNull(response);
+
+        List results = response.firstList();
 
         assertNotNull(results);
         assertEquals(1, results.size());
@@ -190,7 +200,13 @@ public class ClientServerChannelTst extends CayenneTestCase {
         SelectQuery query = new SelectQuery(ClientMtTable1.class);
         query.setResolvingInherited(true);
 
-        List results = new ClientServerChannel(context, false).onSelect(null, query);
+        QueryResponse response = new ClientServerChannel(context, false).onQuery(
+                null,
+                query);
+
+        assertNotNull(response);
+
+        List results = response.firstList();
 
         assertNotNull(results);
         assertEquals(1, results.size());

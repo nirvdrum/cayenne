@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.access;
 
 import junit.framework.AssertionFailedError;
 
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.unit.TestDataDomain;
@@ -69,22 +70,21 @@ import org.objectstyle.cayenne.unit.TestDataDomain;
  */
 public class MockDataDomainQueryAction extends DataDomainQueryAction {
 
-    public MockDataDomainQueryAction(TestDataDomain domain, Query query,
-            OperationObserver callback) {
-        super(domain, query, callback);
+    public MockDataDomainQueryAction(ObjectContext context, TestDataDomain domain,
+            Query query) {
+        super(context, domain, query);
     }
 
-    public MockDataDomainQueryAction(TestDataDomain domain, Query query) {
-        super(domain, query);
-    }
-
+    /**
+     * Exposing super as a public method.
+     */
     public QueryResponse execute() {
         return super.execute();
     }
 
-    void performQuery() {
+    void runQuery() {
         checkQueryAllowed();
-        super.performQuery();
+        super.runQuery();
     }
 
     protected void checkQueryAllowed() throws AssertionFailedError {

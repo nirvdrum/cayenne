@@ -55,12 +55,11 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.objectstyle.cayenne.access.ClientServerChannel;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.opp.LocalConnection;
+import org.objectstyle.cayenne.opp.OPPConnection;
+import org.objectstyle.cayenne.opp.OPPServerChannel;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
@@ -76,46 +75,6 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         return CayenneTestResources
                 .getResources()
                 .getAccessStack(MULTI_TIER_ACCESS_STACK);
-    }
-
-    public void testBeforePropertyReadShouldInflateHollow() {
-
-        ObjectId gid = new ObjectId("MtTable1", "a", "b");
-        final ClientMtTable1 inflated = new ClientMtTable1();
-        inflated.setPersistenceState(PersistenceState.COMMITTED);
-        inflated.setObjectId(gid);
-        inflated.setGlobalAttribute1("abc");
-
-        MockDataChannel channel = new MockDataChannel(Arrays.asList(new Object[] {
-            inflated
-        }));
-
-        // check that a HOLLOW object is infalted on "beforePropertyRead"
-        ClientMtTable1 hollow = new ClientMtTable1();
-        hollow.setPersistenceState(PersistenceState.HOLLOW);
-        hollow.setObjectId(gid);
-
-        final boolean[] selectExecuted = new boolean[1];
-        CayenneContext context = new CayenneContext(channel) {
-
-            public List performQuery(Query query) {
-                selectExecuted[0] = true;
-                return super.performQuery(query);
-            }
-        };
-
-        context.setEntityResolver(getDomain()
-                .getEntityResolver()
-                .getClientEntityResolver());
-
-        context.graphManager.registerNode(hollow.getObjectId(), hollow);
-
-        // testing this...
-        context.prepareForAccess(hollow, ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY);
-        assertTrue(selectExecuted[0]);
-        assertEquals(inflated.getGlobalAttribute1Direct(), hollow
-                .getGlobalAttribute1Direct());
-        assertEquals(PersistenceState.COMMITTED, hollow.getPersistenceState());
     }
 
     public void testNewObjectShouldInflateHolders() {
@@ -142,7 +101,11 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
     public void testCreateFault() throws Exception {
         createTestData("prepare");
 
-        CayenneContext context = new CayenneContext(new ClientServerChannel(getDomain()));
+        // must attach to the real channel...
+        OPPConnection connection = new LocalConnection(new ClientServerChannel(getDomain()));
+        OPPServerChannel channel = new OPPServerChannel(connection);
+        
+        CayenneContext context = new CayenneContext(channel);
         ObjectId id = new ObjectId("MtTable1", MtTable1.TABLE1_ID_PK_COLUMN, new Integer(
                 1));
         ObjEntity entity = getObjEntity("MtTable1").getClientEntity();

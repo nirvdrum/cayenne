@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.ListIterator;
 
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
@@ -327,66 +327,12 @@ public class CayenneContext implements ObjectContext {
         }
     }
 
+    /**
+     * Runs a query, returning result as list.
+     */
     public List performQuery(Query query) {
-        List objects = channel.onSelect(this, query);
-        if (objects.isEmpty()) {
-            return objects;
-        }
-
-        // postprocess fetched objects...
-
-        ListIterator it = objects.listIterator();
-
-        synchronized (graphManager) {
-            while (it.hasNext()) {
-
-                Persistent fetchedObject = (Persistent) it.next();
-
-                // sanity check
-                if (fetchedObject.getObjectId() == null) {
-                    throw new CayenneRuntimeException(
-                            "Server returned an object without an id: " + fetchedObject);
-                }
-
-                Persistent cachedObject = (Persistent) graphManager.getNode(fetchedObject
-                        .getObjectId());
-
-                if (cachedObject != null) {
-
-                    // TODO: implement smart merge for modified objects...
-                    if (cachedObject.getPersistenceState() != PersistenceState.MODIFIED) {
-
-                        // refresh existing object...
-
-                        // lookup descriptor on the spot - we can be dealing with a mix of
-                        // different objects in the inheritance hierarchy...
-                        ClassDescriptor descriptor = getClassDescriptor(cachedObject);
-
-                        if (cachedObject.getPersistenceState() == PersistenceState.HOLLOW) {
-                            cachedObject.setPersistenceState(PersistenceState.COMMITTED);
-                            descriptor.prepareForAccess(cachedObject);
-                        }
-
-                        descriptor.copyProperties(fetchedObject, cachedObject);
-                    }
-
-                    it.set(cachedObject);
-                }
-                else {
-
-                    // lookup descriptor on the spot - we can deal with a mix of different
-                    // objects in the hierarchy...
-                    ClassDescriptor descriptor = getClassDescriptor(fetchedObject);
-
-                    fetchedObject.setPersistenceState(PersistenceState.COMMITTED);
-                    fetchedObject.setObjectContext(this);
-                    descriptor.prepareForAccess(fetchedObject);
-                    graphManager.registerNode(fetchedObject.getObjectId(), fetchedObject);
-                }
-            }
-        }
-
-        return objects;
+        List list = getChannel().onQuery(this, query).firstList();
+        return list != null ? list : new ArrayList(1);
     }
 
     /**
@@ -544,7 +490,7 @@ public class CayenneContext implements ObjectContext {
         }
     }
 
-    protected ClassDescriptor getClassDescriptor(Persistent object) {
+    ClassDescriptor getClassDescriptor(Persistent object) {
         ObjEntity entity = getEntityResolver().lookupObjEntity(
                 object.getObjectId().getEntityName());
         return entity.getClassDescriptor();

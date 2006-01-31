@@ -59,7 +59,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -622,8 +621,8 @@ public class DataDomain implements QueryEngine, DataChannel {
         Transaction.bindThreadTransaction(transaction);
 
         try {
-            new DataDomainQueryAction(this, new QueryChain(queries), callback)
-                    .performQuery();
+            new DataDomainLegacyQueryAction(this, new QueryChain(queries), callback)
+                    .execute();
         }
         finally {
             Transaction.bindThreadTransaction(old);
@@ -704,8 +703,8 @@ public class DataDomain implements QueryEngine, DataChannel {
             return;
         }
 
-        // run ...
-        new DataDomainQueryAction(this, new QueryChain(queries), callback).performQuery();
+        new DataDomainLegacyQueryAction(this, new QueryChain(queries), callback)
+                .execute();
     }
 
     // ****** DataChannel methods:
@@ -722,17 +721,7 @@ public class DataDomain implements QueryEngine, DataChannel {
             return createTransaction().onQuery(context, this, query);
         }
 
-        return new DataDomainQueryAction(this, query).execute();
-    }
-
-    /**
-     * Performs a selecting query, registering objects returned by the query (if any) with
-     * the provided ObjectContext.
-     * 
-     * @since 1.2
-     */
-    public List onSelect(ObjectContext context, Query query) {
-        return new DataDomainSelectAction(this, context, query).execute();
+        return new DataDomainQueryAction(context, this, query).execute();
     }
 
     /**

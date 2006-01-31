@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.List;
-
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.graph.GraphDiff;
@@ -98,12 +96,6 @@ public interface DataChannel {
      * Returns an EntityResolver instance that contains runtime mapping information.
      */
     EntityResolver getEntityResolver();
-
-    /**
-     * Selects objects for the query, registering them with the ObjectContext if it is
-     * provided.
-     */
-    List onSelect(ObjectContext context, Query query);
 
     /**
      * Runs a query, returning generic response.

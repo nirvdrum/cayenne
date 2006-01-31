@@ -70,6 +70,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.Factory;
 import org.apache.log4j.Level;
+import org.objectstyle.cayenne.BaseResponse;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataChannel;
@@ -1204,7 +1205,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
 
         query = nonNullDelegate().willPerformGenericQuery(this, query);
         if (query == null) {
-            return new QueryResult();
+            return new BaseResponse();
         }
 
         if (this.getChannel() == null) {
@@ -1256,36 +1257,47 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * @since 1.2
      */
     public QueryResponse onQuery(ObjectContext context, Query query) {
-        return getChannel().onQuery(context, query);
-    }
+        QueryResponse response = getChannel().onQuery(this, query);
 
-    /**
-     * An implementation of a {@link DataChannel} method that is used by child contexts to
-     * select objects. Not intended for direct use.
-     * 
-     * @since 1.2
-     */
-    public List onSelect(ObjectContext context, Query query) {
-
-        List results = performQuery(query);
-
-        // stick results in another context
         if (context != null
                 && context != this
-                && !results.isEmpty()
                 && !query.getMetaData(getEntityResolver()).isFetchingDataRows()) {
 
-            List childObjects = new ArrayList(results.size());
-            Iterator it = results.iterator();
-            while (it.hasNext()) {
-                Persistent object = (Persistent) it.next();
-                childObjects.add(context.localObject(object.getObjectId(), object));
+            // rewrite response to contain objects from the child context
+
+            response.reset();
+            BaseResponse childResponse = new BaseResponse();
+
+            while (response.next()) {
+                if (response.isList()) {
+
+                    List objects = response.currentList();
+                    if (objects.isEmpty()) {
+                        childResponse.addResultList(objects);
+                    }
+                    else {
+
+                        List childObjects = new ArrayList(objects.size());
+                        Iterator it = objects.iterator();
+                        while (it.hasNext()) {
+                            Persistent object = (Persistent) it.next();
+                            childObjects.add(context.localObject(
+                                    object.getObjectId(),
+                                    object));
+                        }
+
+                        childResponse.addResultList(childObjects);
+                    }
+                }
+                else {
+                    childResponse.addBatchUpdateCount(response.currentUpdateCount());
+                }
             }
 
-            results = childObjects;
+            response = childResponse;
         }
 
-        return results;
+        return response;
     }
 
     /**
@@ -1295,7 +1307,8 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * @since 1.1
      */
     public int[] performNonSelectingQuery(Query query) {
-        return performGenericQuery(query).getFirstUpdateCounts(query);
+        int[] count = performGenericQuery(query).firstUpdateCount();
+        return count != null ? count : new int[0];
     }
 
     /**

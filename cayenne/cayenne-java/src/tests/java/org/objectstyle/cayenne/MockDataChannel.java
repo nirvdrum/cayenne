@@ -76,8 +76,7 @@ public class MockDataChannel implements DataChannel {
     protected EntityResolver resolver;
     protected List requestObjects = new ArrayList();
     protected GraphDiff commitResponse;
-    protected List selectResponse;
-    protected QueryResponse genericResponse;
+    protected QueryResponse response;
 
     public MockDataChannel() {
 
@@ -88,21 +87,21 @@ public class MockDataChannel implements DataChannel {
     }
 
     public MockDataChannel(List selectResponse) {
-        this.selectResponse = selectResponse;
+        this.response = new BaseResponse(selectResponse);
     }
 
     public MockDataChannel(EntityResolver entityResolver, List selectResponse) {
-        this.selectResponse = selectResponse;
+        this(selectResponse);
         this.resolver = entityResolver;
     }
 
-    public MockDataChannel(EntityResolver entityResolver, QueryResponse genericResponse) {
-        this.genericResponse = genericResponse;
+    public MockDataChannel(EntityResolver entityResolver, QueryResponse response) {
         this.resolver = entityResolver;
+        this.response = response;
     }
 
     public MockDataChannel(EntityResolver resolver) {
-        this.resolver = resolver;
+        this(resolver, new BaseResponse());
     }
 
     public EventManager getEventManager() {
@@ -124,12 +123,7 @@ public class MockDataChannel implements DataChannel {
 
     public QueryResponse onQuery(ObjectContext context, Query query) {
         requestObjects.add(query);
-        return genericResponse;
-    }
-
-    public List onSelect(ObjectContext context, Query query) {
-        requestObjects.add(query);
-        return selectResponse;
+        return response;
     }
 
     public EntityResolver getEntityResolver() {

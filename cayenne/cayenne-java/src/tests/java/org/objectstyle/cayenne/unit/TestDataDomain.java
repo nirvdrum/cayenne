@@ -106,12 +106,23 @@ public class TestDataDomain extends DataDomain {
             return createTransaction().onQuery(context, this, query);
         }
 
-        return new MockDataDomainQueryAction(this, query).execute();
+        return new MockDataDomainQueryAction(context, this, query).execute();
     }
 
     public void performQueries(Collection queries, OperationObserver callback) {
         checkQueryAllowed();
         super.performQueries(queries, callback);
+    }
+
+    /**
+     * @deprecated since 1.2, as the super method is also deprecated.
+     */
+    public void performQueries(
+            Collection queries,
+            OperationObserver callback,
+            Transaction transaction) {
+        checkQueryAllowed();
+        super.performQueries(queries, callback, transaction);
     }
 
     public void checkQueryAllowed() throws AssertionFailedError {

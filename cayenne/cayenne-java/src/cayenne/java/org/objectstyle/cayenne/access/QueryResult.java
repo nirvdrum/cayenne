@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -65,7 +64,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
@@ -76,8 +74,9 @@ import org.objectstyle.cayenne.util.Util;
  * as ProcedureQueries.
  * 
  * @author Andrus Adamchik
+ * @deprecated since 1.2 QueryResult is obsolete.
  */
-public class QueryResult extends DefaultOperationObserver implements QueryResponse {
+public class QueryResult extends DefaultOperationObserver {
 
     // a map with order of iteration == to the order of insertion
     protected Map queries = new LinkedHashMap();
@@ -91,21 +90,9 @@ public class QueryResult extends DefaultOperationObserver implements QueryRespon
 
     /**
      * Returns an iterator over all executed queries in the order they were executed.
-     * 
-     * @deprecated since 1.2 this method is redundant. Use {@link #allQueries()} instead.
      */
     public Iterator getQueries() {
         return queries.keySet().iterator();
-    }
-
-    /**
-     * Returns an immutable collection of all executed queries. Iteration order over the
-     * collection corresponds to the order in which the queries where executed.
-     * 
-     * @since 1.2
-     */
-    public Collection allQueries() {
-        return Collections.unmodifiableCollection(queries.keySet());
     }
 
     /**

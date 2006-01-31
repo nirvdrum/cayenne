@@ -55,43 +55,131 @@
  */
 package org.objectstyle.cayenne;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-import org.objectstyle.cayenne.query.Query;
+/**
+ * A simple serializable implementation of QueryResponse.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+public class BaseResponse implements QueryResponse, Serializable {
 
-public class MockQueryResponse implements QueryResponse {
+    protected List results;
 
-    List firstRows = new ArrayList();
+    protected transient int currentIndex;
 
-    public MockQueryResponse() {
-
+    /**
+     * Creates an empty BaseResponse.
+     */
+    public BaseResponse() {
+        results = new ArrayList();
     }
 
-    public MockQueryResponse(Map firstRow) {
+    /**
+     * Creates a BaseResponse with a single result list.
+     */
+    public BaseResponse(List list) {
+        results = new ArrayList();
+        addResultList(list);
+    }
 
-        if (!(firstRow instanceof DataRow)) {
-            firstRow = new DataRow(firstRow);
+    /**
+     * Creates a response that it a shallow copy of another response.
+     */
+    public BaseResponse(QueryResponse response) {
+
+        results = new ArrayList(response.size());
+
+        response.reset();
+        while (response.next()) {
+            if (response.isList()) {
+                addResultList(response.currentList());
+            }
+            else {
+                addBatchUpdateCount(response.currentUpdateCount());
+            }
+        }
+    }
+
+    public List firstList() {
+        for (reset(); next();) {
+            if (isList()) {
+                return currentList();
+            }
         }
 
-        firstRows.add(firstRow);
-    }
-
-    public Collection allQueries() {
         return null;
     }
 
-    public List getResults(Query query) {
+    public int[] firstUpdateCount() {
+        for (reset(); next();) {
+            if (!isList()) {
+                return currentUpdateCount();
+            }
+        }
+
         return null;
     }
 
-    public int[] getFirstUpdateCounts(Query query) {
-        return new int[0];
+    public List currentList() {
+        return (List) results.get(currentIndex - 1);
     }
 
-    public List getFirstRows(Query query) {
-        return firstRows;
+    public int[] currentUpdateCount() {
+        return (int[]) results.get(currentIndex - 1);
+    }
+
+    public boolean isList() {
+        return results.get(currentIndex - 1) instanceof List;
+    }
+
+    public boolean next() {
+        return ++currentIndex <= results.size();
+    }
+
+    public void reset() {
+        // use a zero-based index, not -1, as this will simplify serialization handling
+        currentIndex = 0;
+    }
+
+    public int size() {
+        return results.size();
+    }
+
+    /**
+     * Clears any previously collected information.
+     */
+    public void clear() {
+        results.clear();
+    }
+
+    public void addBatchUpdateCount(int[] resultCount) {
+
+        if (resultCount != null) {
+            results.add(resultCount);
+        }
+    }
+
+    public void addUpdateCount(int resultCount) {
+        results.add(new int[] {
+            resultCount
+        });
+    }
+
+    public void addResultList(List list) {
+        this.results.add(list);
+    }
+
+    /**
+     * Replaces previously stored result with a new result.
+     */
+    public void replaceResult(Object oldResult, Object newResult) {
+        int index = results.indexOf(oldResult);
+        if (index >= 0) {
+            results.set(index, newResult);
+        }
     }
 }

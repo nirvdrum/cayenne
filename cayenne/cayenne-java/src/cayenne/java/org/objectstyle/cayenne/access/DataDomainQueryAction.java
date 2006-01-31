@@ -64,19 +64,25 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Level;
+import org.objectstyle.cayenne.BaseResponse;
+import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.PrefetchSelectQuery;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.QueryRouter;
 import org.objectstyle.cayenne.query.RelationshipQuery;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Performs query routing and execution. During execution phase intercepts callbacks to
@@ -89,12 +95,14 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
 
     static final boolean DONE = true;
 
+    DataContext context;
     DataDomain domain;
-    OperationObserver callback;
+    DataRowStore cache;
     Query query;
     QueryMetadata metadata;
-    QueryResponse result;
 
+    BaseResponse response;
+    Map prefetchResultsByPath;
     Map queriesByNode;
     Map queriesByExecutedQueries;
 
@@ -102,52 +110,49 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
      * A constructor for the "new" way of performing a query via 'execute' with
      * QueryResponse created internally.
      */
-    DataDomainQueryAction(DataDomain domain, Query query) {
+    DataDomainQueryAction(ObjectContext context, DataDomain domain, Query query) {
+        if (context != null && !(context instanceof DataContext)) {
+            throw new IllegalArgumentException(
+                    "DataDomain can only work with DataContext. "
+                            + "Unsupported context type: "
+                            + context);
+        }
+
         this.domain = domain;
         this.query = query;
         this.metadata = query.getMetaData(domain.getEntityResolver());
-    }
+        this.context = (DataContext) context;
 
-    /*
-     * A constructor for the "old" way of performing a query via performQuery() with
-     * outside callback. Still needed for cursor results and such.
-     */
-    DataDomainQueryAction(DataDomain domain, Query query, OperationObserver callback) {
-        this(domain, query);
-        this.callback = callback;
+        // cache may be shared or unique for the ObjectContext
+        this.cache = this.context != null ? this.context
+                .getObjectStore()
+                .getDataRowCache() : domain.getSharedSnapshotCache();
     }
 
     QueryResponse execute() {
 
-        if (domain.isSharedCacheEnabled()) {
-            // intercept object and relationship queries that can be served from cache.
-            if (interceptOIDQuery() == DONE) {
-                return this.result;
-            }
-
-            if (interceptRelationshipQuery() == DONE) {
-                return this.result;
-            }
-
-            // check cache BEFORE routing .. we may need to change that in the future
-            if (QueryMetadata.SHARED_CACHE.equals(metadata.getCachePolicy())) {
-                return getResponseViaCache();
+        // run chain...
+        if (interceptOIDQuery() != DONE) {
+            if (interceptRelationshipQuery() != DONE) {
+                if (interceptSharedCache() != DONE) {
+                    runQuery();
+                }
             }
         }
 
-        return getResponse();
+        // turn results to objects
+        interceptObjectConversion();
+
+        return response;
     }
 
     private boolean interceptOIDQuery() {
         if (query instanceof SingleObjectQuery) {
             SingleObjectQuery oidQuery = (SingleObjectQuery) query;
             if (!oidQuery.isRefreshing()) {
-                DataRow row = domain.getSharedSnapshotCache().getCachedSnapshot(
-                        oidQuery.getObjectId());
+                DataRow row = cache.getCachedSnapshot(oidQuery.getObjectId());
                 if (row != null) {
-                    QueryResult result = new QueryResult();
-                    result.nextDataRows(query, Collections.singletonList(row));
-                    this.result = result;
+                    this.response = new BaseResponse(Collections.singletonList(row));
                     return DONE;
                 }
             }
@@ -174,14 +179,7 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
                 return !DONE;
             }
 
-            // target may be a subclass of a given entity, so we can't guess it here.
-            if (domain.getEntityResolver().lookupInheritanceTree(
-                    (ObjEntity) relationship.getTargetEntity()) != null) {
-                return !DONE;
-            }
-
-            DataRow sourceRow = domain.getSharedSnapshotCache().getCachedSnapshot(
-                    relationshipQuery.getObjectId());
+            DataRow sourceRow = cache.getCachedSnapshot(relationshipQuery.getObjectId());
 
             if (sourceRow == null) {
                 return !DONE;
@@ -201,17 +199,26 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
                 return !DONE;
             }
 
-            DataRow targetRow = domain.getSharedSnapshotCache().getCachedSnapshot(
-                    targetId);
+            DataRow targetRow = cache.getCachedSnapshot(targetId);
 
-            // if we have a target object in the cache - return it, if not - return
-            // partial snapshot that would allow callers to create a HOLLOW object.
-            DataRow resultRow = targetRow != null ? targetRow : new DataRow(targetId
-                    .getIdSnapshot());
+            DataRow resultRow;
 
-            QueryResult result = new QueryResult();
-            result.nextDataRows(query, Collections.singletonList(resultRow));
-            this.result = result;
+            if (targetRow != null) {
+                resultRow = targetRow;
+            }
+            // if no inheritance involved, we can return a valid partial row made from
+            // the target Id alone...
+            else if (domain.getEntityResolver().lookupInheritanceTree(
+                    (ObjEntity) relationship.getTargetEntity()) == null) {
+
+                resultRow = new DataRow(targetId.getIdSnapshot());
+            }
+            else {
+                // can't guess the right target...
+                return !DONE;
+            }
+
+            this.response = new BaseResponse(Collections.singletonList(resultRow));
             return DONE;
         }
 
@@ -221,65 +228,56 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
     /*
      * Wraps execution in shared cache checks
      */
-    private final QueryResponse getResponseViaCache() {
+    private final boolean interceptSharedCache() {
+
+        if (!QueryMetadata.SHARED_CACHE.equals(metadata.getCachePolicy())) {
+            return !DONE;
+        }
 
         if (query.getName() == null) {
             throw new CayenneRuntimeException(
-                    "Caching of unnamed queries is not supported.");
+                    "Caching of unnamed queries is not supported. Query: " + query);
         }
-
-        DataRowStore cache = domain.getSharedSnapshotCache();
 
         if (!metadata.isRefreshingObjects()) {
 
             List cachedRows = cache.getCachedSnapshots(query.getName());
 
             if (cachedRows != null) {
-                QueryResult cachedResult = new QueryResult();
+                this.response = new BaseResponse();
 
-                if (!cachedRows.isEmpty()) {
-                    // decorate result immutable list to avoid messing up the cache
-                    cachedResult.nextDataRows(query, Collections
-                            .unmodifiableList(cachedRows));
-                }
-
-                return cachedResult;
+                // decorate result immutable list to avoid messing up the cache
+                response.addResultList(Collections.unmodifiableList(cachedRows));
+                return DONE;
             }
         }
 
-        QueryResponse response = getResponse();
+        runQuery();
 
-        // TODO: Andrus, 1/22/2006 - cache QueryResponse object instead of a list! However
-        // to do that we need to make sure that all queries that support caching can work
-        // as HashMap keys, so that the result could be decoded by the caller.
-        cache.cacheSnapshots(query.getName(), response.getFirstRows(query));
-        return response;
+        // TODO: Andrus, 1/22/2006 - cache QueryResponse object instead of a list!
+
+        List list = response.firstList();
+        if (list != null) {
+            cache.cacheSnapshots(query.getName(), list);
+        }
+
+        return DONE;
     }
 
     /*
      * Gets response from the underlying DataNodes.
      */
-    private final QueryResponse getResponse() {
-        // sanity check
-        // TODO: Andrus, 1/22/2006 - we need to reconcile somehow external
-        // and internal callback strategies...E.g. by using a callback wrapper...
-        if (callback != null) {
-            throw new CayenneRuntimeException(
-                    "Invalid state, can't run this query with external callback set.");
-        }
-
-        QueryResult response = new QueryResult();
-        this.callback = response;
-
-        performQuery();
-        return response;
-    }
-
-    void performQuery() {
+    void runQuery() {
 
         // reset
-        queriesByNode = null;
-        queriesByExecutedQueries = null;
+        this.response = new BaseResponse();
+        this.queriesByNode = null;
+        this.queriesByExecutedQueries = null;
+
+        // whether this is null or not will driver further decisions on how to process
+        // prefetched rows
+        this.prefetchResultsByPath = metadata.getPrefetchTree() != null
+                && !metadata.isFetchingDataRows() ? new HashMap() : null;
 
         // categorize queries by node and by "executable" query...
         query.route(this, domain.getEntityResolver(), null);
@@ -292,6 +290,39 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
                 QueryEngine nextNode = (QueryEngine) entry.getKey();
                 Collection nodeQueries = (Collection) entry.getValue();
                 nextNode.performQueries(nodeQueries, this);
+            }
+        }
+    }
+
+    private void interceptObjectConversion() {
+
+        if (context != null && !metadata.isFetchingDataRows()) {
+
+            List mainRows = response.firstList();
+            if (mainRows != null && !mainRows.isEmpty()) {
+
+                List objects;
+                ObjEntity entity = metadata.getObjEntity();
+                PrefetchTreeNode prefetchTree = metadata.getPrefetchTree();
+
+                // take a shortcut when no prefetches exist...
+                if (prefetchTree == null) {
+                    objects = new ObjectResolver(context, entity, metadata
+                            .isRefreshingObjects(), metadata.isResolvingInherited())
+                            .synchronizedObjectsFromDataRows(mainRows);
+                }
+                else {
+
+                    ObjectTreeResolver resolver = new ObjectTreeResolver(
+                            context,
+                            metadata);
+                    objects = resolver.resolveObjectTree(
+                            prefetchTree,
+                            mainRows,
+                            prefetchResultsByPath);
+                }
+
+                response.replaceResult(mainRows, objects);
             }
         }
     }
@@ -340,51 +371,57 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
     }
 
     public void nextCount(Query query, int resultCount) {
-        callback.nextCount(queryForExecutedQuery(query), resultCount);
+        response.addUpdateCount(resultCount);
     }
 
     public void nextBatchCount(Query query, int[] resultCount) {
-        callback.nextBatchCount(queryForExecutedQuery(query), resultCount);
+        response.addBatchUpdateCount(resultCount);
     }
 
     public void nextDataRows(Query query, List dataRows) {
-        callback.nextDataRows(queryForExecutedQuery(query), dataRows);
+
+        // exclude prefetched rows in the main result
+        if (prefetchResultsByPath != null && query instanceof PrefetchSelectQuery) {
+            PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) query;
+            prefetchResultsByPath.put(prefetchQuery.getPrefetchPath(), dataRows);
+        }
+        else {
+            response.addResultList(dataRows);
+        }
     }
 
     public void nextDataRows(Query q, ResultIterator it) {
-        callback.nextDataRows(queryForExecutedQuery(q), it);
+        throw new CayenneRuntimeException("Invalid attempt to fetch a cursor.");
     }
 
     public void nextGeneratedDataRows(Query query, ResultIterator keysIterator) {
-        callback.nextGeneratedDataRows(queryForExecutedQuery(query), keysIterator);
+        if (keysIterator != null) {
+            try {
+                nextDataRows(query, keysIterator.dataRows(true));
+            }
+            catch (CayenneException ex) {
+                // don't throw here....
+                nextQueryException(query, ex);
+            }
+        }
     }
 
     public void nextQueryException(Query query, Exception ex) {
-        callback.nextQueryException(queryForExecutedQuery(query), ex);
+        throw new CayenneRuntimeException("Query exception.", Util.unwindException(ex));
     }
 
     public void nextGlobalException(Exception e) {
-        callback.nextGlobalException(e);
+        throw new CayenneRuntimeException("Global exception.", Util.unwindException(e));
     }
 
     /**
      * @deprecated since 1.2, as corresponding interface method is deprecated too.
      */
     public Level getLoggingLevel() {
-        return callback.getLoggingLevel();
+        return QueryLogger.DEFAULT_LOG_LEVEL;
     }
 
     public boolean isIteratedResult() {
-        return callback.isIteratedResult();
-    }
-
-    Query queryForExecutedQuery(Query executedQuery) {
-        Query q = null;
-
-        if (queriesByExecutedQueries != null) {
-            q = (Query) queriesByExecutedQueries.get(executedQuery);
-        }
-
-        return q != null ? q : executedQuery;
+        return false;
     }
 }

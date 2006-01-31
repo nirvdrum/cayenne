@@ -53,96 +53,101 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.PrefetchSelectQuery;
-import org.objectstyle.cayenne.query.PrefetchTreeNode;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.QueryMetadata;
+import org.objectstyle.cayenne.opp.hessian.HessianUtil;
+import org.objectstyle.cayenne.util.Util;
 
-/**
- * @since 1.2
- * @author Andrus Adamchik
- */
-class DataDomainSelectAction {
+import junit.framework.TestCase;
 
-    DataDomain domain;
-    DataContext context;
-    Query query;
-    QueryMetadata metadata;
+public class BaseResponseTst extends TestCase {
 
-    DataDomainSelectAction(DataDomain domain, ObjectContext context, Query query) {
+    public void testCreation() throws Exception {
+        List list = new ArrayList();
+        list.add(new HashMap());
 
-        this.domain = domain;
-        this.context = (DataContext) context;
-        this.query = query;
-        this.metadata = query.getMetaData(domain.getEntityResolver());
+        BaseResponse r = new BaseResponse();
+        r.addBatchUpdateCount(new int[] {
+                1, 2, 3
+        });
+        r.addResultList(list);
 
-        // sanity check
-        if (!metadata.isFetchingDataRows()) {
-            if (context == null) {
-                throw new IllegalArgumentException(
-                        "Null context for query fetching DataObjects.");
-            }
-            else if (!(context instanceof DataContext)) {
-                throw new IllegalArgumentException(
-                        "DataDomain can only select into DataContext. Unsupported context: "
-                                + context);
-            }
-        }
+        assertEquals(2, r.size());
+
+        assertTrue(r.next());
+        assertFalse(r.isList());
+
+        int[] srInt = r.currentUpdateCount();
+        assertEquals(3, srInt.length);
+        assertEquals(2, srInt[1]);
+
+        assertTrue(r.next());
+        assertTrue(r.isList());
+
+        assertEquals(list, r.currentList());
+
+        assertFalse(r.next());
     }
 
-    List execute() {
+    public void testSerialization() throws Exception {
+        List list = new ArrayList();
+        list.add(new HashMap());
 
-        QueryResponse response = domain.onQuery(context, query);
-        List mainRows = response.getFirstRows(query);
+        BaseResponse r = new BaseResponse();
+        r.addBatchUpdateCount(new int[] {
+                1, 2, 3
+        });
+        r.addResultList(list);
 
-        if (metadata.isFetchingDataRows()) {
-            return mainRows;
-        }
+        BaseResponse sr = (BaseResponse) Util.cloneViaSerialization(r);
+        assertNotNull(sr);
+        assertEquals(2, sr.size());
 
-        if (mainRows.isEmpty()) {
-            return new ArrayList(1);
-        }
+        assertTrue(sr.next());
+        assertFalse(sr.isList());
 
-        ObjEntity entity = metadata.getObjEntity();
-        PrefetchTreeNode prefetchTree = metadata.getPrefetchTree();
+        int[] srInt = sr.currentUpdateCount();
+        assertEquals(3, srInt.length);
+        assertEquals(2, srInt[1]);
 
-        // take a shortcut when no prefetches exist...
-        if (prefetchTree == null) {
-            return new ObjectResolver(
-                    context,
-                    entity,
-                    metadata.isRefreshingObjects(),
-                    metadata.isResolvingInherited())
-                    .synchronizedObjectsFromDataRows(mainRows);
-        }
+        assertTrue(sr.next());
+        assertTrue(sr.isList());
 
-        // map results to prefetch paths
-        Map rowsByPath = new HashMap();
+        assertEquals(list, sr.currentList());
 
-        // find result set
-        Iterator it = response.allQueries().iterator();
+        assertFalse(sr.next());
+    }
+    
+    public void testSerializationWithHessian() throws Exception {
+        List list = new ArrayList();
+        list.add(new HashMap());
 
-        while (it.hasNext()) {
-            Query q = (Query) it.next();
+        BaseResponse r = new BaseResponse();
+        r.addBatchUpdateCount(new int[] {
+                1, 2, 3
+        });
+        r.addResultList(list);
 
-            if (q instanceof PrefetchSelectQuery) {
-                PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) q;
-                rowsByPath.put(prefetchQuery.getPrefetchPath(), response.getFirstRows(q));
-            }
-        }
+        BaseResponse sr = (BaseResponse) HessianUtil.cloneViaHessianSerialization(r);
+        assertNotNull(sr);
+        assertEquals(2, sr.size());
 
-        ObjectTreeResolver resolver = new ObjectTreeResolver(context, metadata);
-        return resolver.resolveObjectTree(prefetchTree, mainRows, rowsByPath);
+        assertTrue(sr.next());
+        assertFalse(sr.isList());
+
+        int[] srInt = sr.currentUpdateCount();
+        assertEquals(3, srInt.length);
+        assertEquals(2, srInt[1]);
+
+        assertTrue(sr.next());
+        assertTrue(sr.isList());
+
+        assertEquals(list, sr.currentList());
+
+        assertFalse(sr.next());
     }
 }

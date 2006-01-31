@@ -74,10 +74,7 @@ class DispatchHelper {
         // unknown message to do its own processing...
 
         // do most common messages first...
-        if (message instanceof ObjectSelectMessage) {
-            return channel.onSelect(null, ((ObjectSelectMessage) message).getQuery());
-        }
-        else if (message instanceof QueryMessage) {
+        if (message instanceof QueryMessage) {
             return channel.onQuery(null, ((QueryMessage) message).getQuery());
         }
         else if (message instanceof SyncMessage) {

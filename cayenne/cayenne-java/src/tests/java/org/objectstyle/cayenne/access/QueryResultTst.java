@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -70,6 +69,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
 
 /**
+ * @deprecated since 1.2
  * @author Andrei Adamchik
  */
 public class QueryResultTst extends TestCase {
@@ -91,12 +91,9 @@ public class QueryResultTst extends TestCase {
         for (int i = 0; i < queries.length; i++) {
             result.nextCount(queries[i], i);
         }
-        Collection c = result.allQueries();
-        assertNotNull(c);
-        assertFalse(c.isEmpty());
 
         int ind = 0;
-        Iterator it = c.iterator();
+        Iterator it = result.getQueries();
         while (it.hasNext()) {
             assertSame(queries[ind], it.next());
             ind++;
@@ -118,7 +115,9 @@ public class QueryResultTst extends TestCase {
 
         result.nextCount(q1, 1);
         result.nextCount(q2, 1);
-        result.nextBatchCount(q3, new int[] {1});
+        result.nextBatchCount(q3, new int[] {
+            1
+        });
         result.nextDataRows(q4, new ArrayList());
         result.nextCount(q5, 1);
         result.nextCount(q6, 1);
@@ -127,7 +126,7 @@ public class QueryResultTst extends TestCase {
                 q1, q2, q3, q4, q5, q6
         };
 
-        Iterator it = result.allQueries().iterator();
+        Iterator it = result.getQueries();
         for (int i = 0; i < orderedArray.length; i++) {
             assertTrue(it.hasNext());
             assertSame("Unexpected query at index " + i, orderedArray[i], it.next());
@@ -144,7 +143,7 @@ public class QueryResultTst extends TestCase {
         result.nextDataRows(queries[0], Collections.EMPTY_LIST);
         result.nextCount(queries[0], 5);
 
-        Iterator it = result.allQueries().iterator();
+        Iterator it = result.getQueries();
         Query q = (Query) it.next();
 
         List rows = result.getRows(q);

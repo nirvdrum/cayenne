@@ -352,7 +352,7 @@ public class DataRowStore implements Serializable {
         // try getting it from database
 
         Query query = new SingleObjectQuery(oid, true, true);
-        List results = channel.onSelect(null, query);
+        List results = channel.onQuery(null, query).firstList();
 
         if (results.size() > 1) {
             throw new CayenneRuntimeException("More than 1 object found for ObjectId "

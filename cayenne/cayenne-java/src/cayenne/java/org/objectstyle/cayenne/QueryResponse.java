@@ -55,52 +55,89 @@
  */
 package org.objectstyle.cayenne;
 
-import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
 
-import org.objectstyle.cayenne.query.Query;
-
 /**
- * Encapsulates results of query execution. A caller can use QueryResponse to inspect and
- * process <i>full</i> results of the query. QueryResponse can contain a mix of object or
- * data row collections and update counts. Such complex results are common when using
- * stored procedures or batches.
+ * Represents a result of query execution. It potentially contain a mix of update counts
+ * and lists of selected values. Provides API somewhat similar to java.util.Iterator or
+ * java.sql.ResultSet for scanning through the individual results.
+ * <p>
+ * An example of iterating through a response:
+ * </p>
+ * 
+ * <pre>
+ * QueryResponse response = context.performGenericQuery(query);
+ * for (response.reset(); response.next();) {
+ *     if (response.isList()) {
+ *         List list = response.currentList();
+ *         // ...
+ *     }
+ *     else {
+ *         int[] updateCounts = reponse.currentUpdateCount();
+ *         // ...
+ *     }
+ * }
+ * </pre>
+ * 
+ * <p>
+ * In case the structure of the result is known, and only a single list or an update count
+ * is expected, there is a simpler API to access them:
+ * </p>
+ * 
+ * <pre>
+ * QueryResponse response = context.performGenericQuery(query);
+ * List list = response.firstList();
+ * int[] count = response.firstUpdateCount();
+ * </pre>
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface QueryResponse extends Serializable {
+public interface QueryResponse {
 
     /**
-     * Returns all queries whose results weere included in response.
+     * Returns a number of results in the response.
      */
-    Collection allQueries();
+    int size();
 
     /**
-     * Returns a collection of results for a single Query in the order they were provided
-     * by Cayenne stack. Collection can contain List objects (for selecting queries) and
-     * java.lang.Number values for the update counts.
-     * <p>
-     * This is the most extreme case. Usually queries return a single result or a single
-     * update count, so consider using <code>getFirstRows(Query)</code> or
-     * <code>getFirstUpdateCount(Query)</code> instead.
-     * </p>
+     * Returns whether current iteration result is a list or an update count.
      */
-    List getResults(Query query);
+    boolean isList();
 
     /**
-     * Returns the first batch of update counts for the query. If the first update is not
-     * a batch, it is still returned as an int[1] array. Returns an int[0] if no updates
-     * were executed for the query. This is a shortcut to simplify extracting update count
-     * in the most common case when it is known that the query resulted only one update.
+     * Returns a List under the current iterator position. Use {@link #isList()} to check
+     * the result type before calling this method.
      */
-    int[] getFirstUpdateCounts(Query query);
+    List currentList();
 
     /**
-     * Returns the first results for the query. This is a shortcut to simplify extracting
-     * a result in the most common case when it is known that the query resulted only one
-     * update.
+     * Returns an update count under the current iterator position. Returned value is an
+     * int[] to accomodate batch queries. For a regular update result, the value will be
+     * an int[1]. Use {@link #isList()} to check the result type before calling this
+     * method.
      */
-    public List getFirstRows(Query query);
+    int[] currentUpdateCount();
+
+    /**
+     * Rewinds response iterator to the next result, returning true if it is available.
+     */
+    boolean next();
+
+    /**
+     * Restarts response iterator.
+     */
+    void reset();
+
+    /**
+     * A utility method for quickly retrieving the first list in the response. Note that
+     * this method resets current iterator to an undefined state.
+     */
+    List firstList();
+
+    /**
+     * A utility method for quickly retrieving the first update count from the response.
+     * Note that this method resets current iterator to an undefined state.
+     */
+    int[] firstUpdateCount();
 }

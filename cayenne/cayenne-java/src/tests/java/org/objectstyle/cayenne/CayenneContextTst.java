@@ -69,7 +69,9 @@ import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.NamedQuery;
+import org.objectstyle.cayenne.opp.MockOPPConnection;
+import org.objectstyle.cayenne.opp.OPPServerChannel;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
 import org.objectstyle.cayenne.unit.AccessStack;
@@ -228,99 +230,6 @@ public class CayenneContextTst extends CayenneTestCase {
         assertSame(object, context.graphManager.getNode(newObjectId));
     }
 
-    public void testPerformSelectQuery() {
-        final MockPersistentObject o1 = new MockPersistentObject();
-        ObjectId oid1 = new ObjectId("test_entity");
-        o1.setObjectId(oid1);
-
-        MockDataChannel channel = new MockDataChannel(Arrays.asList(new Object[] {
-            o1
-        }));
-
-        CayenneContext context = new CayenneContext(channel);
-        ObjEntity entity = new ObjEntity("test_entity");
-        entity.setClassName(MockPersistentObject.class.getName());
-
-        DataMap dataMap = new DataMap("test");
-        dataMap.addObjEntity(entity);
-        Collection entities = Collections.singleton(dataMap);
-        context.setEntityResolver(new EntityResolver(entities));
-
-        List list = context.performQuery(new NamedQuery("dummy"));
-        assertNotNull(list);
-        assertEquals(1, list.size());
-        assertTrue(list.contains(o1));
-
-        // ObjectContext must be injected
-        assertEquals(context, o1.getObjectContext());
-        assertSame(o1, context.graphManager.getNode(oid1));
-    }
-
-    public void testPerformSelectQueryOverrideCached() {
-        ObjEntity entity = new ObjEntity("test_entity");
-        entity.setClassName(MockPersistentObject.class.getName());
-
-        DataMap dataMap = new DataMap("test");
-        dataMap.addObjEntity(entity);
-        Collection entities = Collections.singleton(dataMap);
-        EntityResolver resolver = new EntityResolver(entities);
-
-        CayenneContext context = new CayenneContext();
-        context.setEntityResolver(resolver);
-
-        ObjectId oid = new ObjectId("test_entity", "x", "y");
-
-        MockPersistentObject o1 = new MockPersistentObject(oid);
-        context.graphManager.registerNode(oid, o1);
-        assertSame(o1, context.getGraphManager().getNode(oid));
-
-        // another object with the same GID ... we must merge it with cached and return
-        // cached object instead of the one fetched
-        MockPersistentObject o2 = new MockPersistentObject(oid);
-        MockDataChannel channel = new MockDataChannel(Arrays.asList(new Object[] {
-            o2
-        }));
-
-        context.setChannel(channel);
-        List list = context.performQuery(new NamedQuery("dummy"));
-        assertNotNull(list);
-        assertEquals(1, list.size());
-        assertTrue("Expected cached object, got: " + list, list.contains(o1));
-        assertSame(o1, context.graphManager.getNode(oid));
-    }
-
-    public void testPerformSelectQueryOverrideModifiedCached() {
-        ObjEntity entity = new ObjEntity("test_entity");
-        entity.setClassName(MockPersistentObject.class.getName());
-        DataMap dataMap = new DataMap("test");
-        dataMap.addObjEntity(entity);
-        Collection entities = Collections.singleton(dataMap);
-        EntityResolver resolver = new EntityResolver(entities);
-        CayenneContext context = new CayenneContext();
-        context.setEntityResolver(resolver);
-
-        ObjectId oid = new ObjectId("test_entity", "x", "y");
-
-        MockPersistentObject o1 = new MockPersistentObject(oid);
-        o1.setPersistenceState(PersistenceState.MODIFIED);
-        context.graphManager.registerNode(oid, o1);
-        assertSame(o1, context.getGraphManager().getNode(oid));
-
-        // another object with the same GID ... we must merge it with cached and return
-        // cached object instead of the one fetched
-        MockPersistentObject o2 = new MockPersistentObject(oid);
-        MockDataChannel channel = new MockDataChannel(Arrays.asList(new Object[] {
-            o2
-        }));
-
-        context.setChannel(channel);
-        List list = context.performQuery(new NamedQuery("dummy"));
-        assertNotNull(list);
-        assertEquals(1, list.size());
-        assertTrue("Expected cached object, got: " + list, list.contains(o1));
-        assertSame(o1, context.graphManager.getNode(oid));
-    }
-
     public void testNewObject() {
 
         CayenneContext context = new CayenneContext(new MockDataChannel());
@@ -401,4 +310,47 @@ public class CayenneContextTst extends CayenneTestCase {
         context.deleteObject(deleted);
         assertEquals(PersistenceState.DELETED, committed.getPersistenceState());
     }
+    
+    public void testBeforePropertyReadShouldInflateHollow() {
+
+        ObjectId gid = new ObjectId("MtTable1", "a", "b");
+        final ClientMtTable1 inflated = new ClientMtTable1();
+        inflated.setPersistenceState(PersistenceState.COMMITTED);
+        inflated.setObjectId(gid);
+        inflated.setGlobalAttribute1("abc");
+
+        MockOPPConnection connection = new MockOPPConnection(new BaseResponse(Arrays
+                .asList(new Object[] {
+                    inflated
+                })));
+        OPPServerChannel channel = new OPPServerChannel(connection);
+
+        // check that a HOLLOW object is infalted on "beforePropertyRead"
+        ClientMtTable1 hollow = new ClientMtTable1();
+        hollow.setPersistenceState(PersistenceState.HOLLOW);
+        hollow.setObjectId(gid);
+
+        final boolean[] selectExecuted = new boolean[1];
+        CayenneContext context = new CayenneContext(channel) {
+
+            public List performQuery(Query query) {
+                selectExecuted[0] = true;
+                return super.performQuery(query);
+            }
+        };
+
+        context.setEntityResolver(getDomain()
+                .getEntityResolver()
+                .getClientEntityResolver());
+
+        context.graphManager.registerNode(hollow.getObjectId(), hollow);
+
+        // testing this...
+        context.prepareForAccess(hollow, ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY);
+        assertTrue(selectExecuted[0]);
+        assertEquals(inflated.getGlobalAttribute1Direct(), hollow
+                .getGlobalAttribute1Direct());
+        assertEquals(PersistenceState.COMMITTED, hollow.getPersistenceState());
+    }
+
 }
