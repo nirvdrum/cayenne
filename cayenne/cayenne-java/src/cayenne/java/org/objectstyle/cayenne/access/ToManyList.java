@@ -63,7 +63,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
@@ -303,18 +302,11 @@ public class ToManyList implements List, Serializable {
                         localList = new LinkedList();
                     }
                     else {
-                        if (source.getObjectId().isTemporary()) {
-                            throw new CayenneRuntimeException(
-                                    "Can't resolve relationship '"
-                                            + relationship
-                                            + "' for temporary id: "
-                                            + source.getObjectId());
-                        }
-
-                        RelationshipQuery query = new RelationshipQuery(source
-                                .getObjectId(), relationship);
-
-                        localList = source.getObjectContext().performQuery(query);
+                        localList = source.getObjectContext().performQuery(
+                                new RelationshipQuery(
+                                        source.getObjectId(),
+                                        relationship,
+                                        false));
                     }
 
                     mergeLocalChanges(localList);

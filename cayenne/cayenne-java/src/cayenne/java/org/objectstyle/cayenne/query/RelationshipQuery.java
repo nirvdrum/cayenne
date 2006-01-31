@@ -138,6 +138,14 @@ public class RelationshipQuery extends IndirectQuery {
     }
 
     protected Query createReplacementQuery(EntityResolver resolver) {
+
+        if (objectId.isTemporary() && !objectId.isReplacementIdAttached()) {
+            throw new CayenneRuntimeException("Can't build a query for relationship '"
+                    + relationshipName
+                    + "' for temporary id: "
+                    + objectId);
+        }
+
         ObjRelationship relationship = getRelationship(resolver);
 
         // build executable select...

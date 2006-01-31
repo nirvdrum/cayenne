@@ -61,6 +61,7 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -98,6 +99,24 @@ public class SingleObjectQuery extends IndirectQuery {
         this.fetchingDataRows = fetchingDataRows;
     }
 
+    /**
+     * Returns query metadata object.
+     */
+    // return metadata without creating replacement, as this is not always possible to
+    // create replacement (e.g. temp ObjectId).
+    public QueryMetadata getMetaData(final EntityResolver resolver) {
+        return new DefaultQueryMetadata() {
+
+            public boolean isRefreshingObjects() {
+                return refreshing;
+            }
+
+            public ObjEntity getObjEntity() {
+                return resolver.lookupObjEntity(objectId.getEntityName());
+            }
+        };
+    }
+
     public ObjectId getObjectId() {
         return objectId;
     }
@@ -105,6 +124,11 @@ public class SingleObjectQuery extends IndirectQuery {
     protected Query createReplacementQuery(EntityResolver resolver) {
         if (objectId == null) {
             throw new CayenneRuntimeException("Can't resolve query - objectId is null.");
+        }
+
+        if (objectId.isTemporary() && !objectId.isReplacementIdAttached()) {
+            throw new CayenneRuntimeException("Can't build a query for temporary id: "
+                    + objectId);
         }
 
         SelectQuery query = new SelectQuery(objectId.getEntityName(), ExpressionFactory
