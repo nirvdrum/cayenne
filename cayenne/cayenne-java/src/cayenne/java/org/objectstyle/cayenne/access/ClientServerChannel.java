@@ -205,6 +205,8 @@ public class ClientServerChannel implements DataChannel {
     public QueryResponse onQuery(ObjectContext context, Query query) {
 
         Query serverQuery = rewriteQuery(query);
+
+        // assuming context is null as we are sending results to the server...
         QueryResponse response = serverContext.onQuery(null, serverQuery);
 
         QueryMetadata info = serverQuery.getMetaData(serverContext.getEntityResolver());

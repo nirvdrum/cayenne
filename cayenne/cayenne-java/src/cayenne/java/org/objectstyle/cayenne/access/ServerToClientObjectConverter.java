@@ -175,7 +175,7 @@ class ServerToClientObjectConverter {
             // resolved ... let it stay a fault.
 
             // TODO (Andrus 09/19/2005): at least hook up to-one reverse relationships...
-            // This would do no harm at all and can potentailly save more than a few trips
+            // This would do no harm at all and can potentially save more than a few trips
             // to the server.
         }
     }

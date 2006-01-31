@@ -79,6 +79,7 @@ import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.QueryMetadata;
 
 /**
  * A {@link org.objectstyle.cayenne.DataChannel} implementation that accesses an OPP
@@ -137,89 +138,92 @@ public class OPPServerChannel implements DataChannel {
             // **** notice using EntityResolver from the context, as this channel does not
             // cache it...
             EntityResolver resolver = context.getEntityResolver();
+            QueryMetadata info = query.getMetaData(resolver);
+            
+            if (!info.isFetchingDataRows()) {
 
-            BaseResponse childResponse = new BaseResponse();
-            response.reset();
+                BaseResponse childResponse = new BaseResponse();
+                response.reset();
 
-            while (response.next()) {
-                if (response.isList()) {
+                while (response.next()) {
+                    if (response.isList()) {
 
-                    List objects = response.currentList();
-                    // can't use query metadata to figure out objects vs. rows... so sniff
-                    // it from result...
-                    if (objects.isEmpty() || !(objects.get(0) instanceof Persistent)) {
-                        childResponse.addResultList(objects);
-                    }
-                    else {
+                        List objects = response.currentList();
 
-                        // TODO: Andrus, 1/30/2006 Prefetches!!!!
+                        if (objects.isEmpty()) {
+                            childResponse.addResultList(objects);
+                        }
+                        else {
 
-                        List childObjects = new ArrayList(objects.size());
-                        Iterator it = objects.iterator();
-                        while (it.hasNext()) {
-                            Persistent object = (Persistent) it.next();
-                            ObjectId id = object.getObjectId();
+                            List childObjects = new ArrayList(objects.size());
+                            Iterator it = objects.iterator();
+                            while (it.hasNext()) {
+                                Persistent object = (Persistent) it.next();
+                                ObjectId id = object.getObjectId();
 
-                            // sanity check
-                            if (id == null) {
-                                throw new CayenneRuntimeException(
-                                        "Server returned an object without an id: "
-                                                + object);
-                            }
+                                // sanity check
+                                if (id == null) {
+                                    throw new CayenneRuntimeException(
+                                            "Server returned an object without an id: "
+                                                    + object);
+                                }
 
-                            Persistent cachedObject = (Persistent) context
-                                    .getGraphManager()
-                                    .getNode(id);
+                                Persistent cachedObject = (Persistent) context
+                                        .getGraphManager()
+                                        .getNode(id);
 
-                            if (cachedObject != null) {
+                                if (cachedObject != null) {
 
-                                // TODO: implement smart merge for modified objects...
-                                if (cachedObject.getPersistenceState() != PersistenceState.MODIFIED) {
+                                    // TODO: implement smart merge for modified objects...
+                                    if (cachedObject.getPersistenceState() != PersistenceState.MODIFIED) {
 
-                                    // refresh existing object...
+                                        // refresh existing object...
 
-                                    // lookup descriptor on the spot - we can be
-                                    // dealing with a mix of different objects in the
-                                    // inheritance hierarchy...
+                                        // lookup descriptor on the spot - we can be
+                                        // dealing with a mix of different objects in the
+                                        // inheritance hierarchy...
+                                        ClassDescriptor descriptor = resolver
+                                                .getObjEntity(id.getEntityName())
+                                                .getClassDescriptor();
+
+                                        if (cachedObject.getPersistenceState() == PersistenceState.HOLLOW) {
+                                            cachedObject
+                                                    .setPersistenceState(PersistenceState.COMMITTED);
+                                            descriptor.prepareForAccess(cachedObject);
+                                        }
+
+                                        descriptor.copyProperties(object, cachedObject);
+                                    }
+
+                                    childObjects.add(cachedObject);
+                                }
+                                else {
+
+                                    // lookup descriptor on the spot - we can deal with a
+                                    // mix of different objects in the hierarchy...
                                     ClassDescriptor descriptor = resolver.getObjEntity(
                                             id.getEntityName()).getClassDescriptor();
 
-                                    if (cachedObject.getPersistenceState() == PersistenceState.HOLLOW) {
-                                        cachedObject
-                                                .setPersistenceState(PersistenceState.COMMITTED);
-                                        descriptor.prepareForAccess(cachedObject);
-                                    }
-
-                                    descriptor.copyProperties(object, cachedObject);
+                                    object
+                                            .setPersistenceState(PersistenceState.COMMITTED);
+                                    object.setObjectContext(context);
+                                    descriptor.prepareForAccess(object);
+                                    context.getGraphManager().registerNode(id, object);
+                                    childObjects.add(object);
                                 }
 
-                                childObjects.add(cachedObject);
-                            }
-                            else {
-
-                                // lookup descriptor on the spot - we can deal with a
-                                // mix of different objects in the hierarchy...
-                                ClassDescriptor descriptor = resolver.getObjEntity(
-                                        id.getEntityName()).getClassDescriptor();
-
-                                object.setPersistenceState(PersistenceState.COMMITTED);
-                                object.setObjectContext(context);
-                                descriptor.prepareForAccess(object);
-                                context.getGraphManager().registerNode(id, object);
-                                childObjects.add(object);
                             }
 
+                            childResponse.addResultList(childObjects);
                         }
-
-                        childResponse.addResultList(childObjects);
+                    }
+                    else {
+                        childResponse.addBatchUpdateCount(response.currentUpdateCount());
                     }
                 }
-                else {
-                    childResponse.addBatchUpdateCount(response.currentUpdateCount());
-                }
-            }
 
-            response = childResponse;
+                response = childResponse;
+            }
         }
 
         return response;

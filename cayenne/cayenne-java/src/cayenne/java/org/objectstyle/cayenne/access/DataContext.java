@@ -1778,14 +1778,12 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
         if (cachedObject != null) {
 
             // TODO: Andrus, 1/24/2006 implement smart merge for modified objects...
-            if (cachedObject.getPersistenceState() != PersistenceState.MODIFIED
+            if (cachedObject != prototype
+                    && cachedObject.getPersistenceState() != PersistenceState.MODIFIED
                     && cachedObject.getPersistenceState() != PersistenceState.DELETED) {
 
                 if (prototype != null) {
                     descriptor.prepareForAccess(cachedObject);
-
-                    // TODO: Andrus, 1/24/2006 - this operation causes an unexpected fetch
-                    // on one-to-one relationship - investigate....
                     descriptor.copyProperties(prototype, cachedObject);
                 }
             }

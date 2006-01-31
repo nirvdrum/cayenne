@@ -226,7 +226,7 @@ public class DataMap implements Serializable, XMLSerializable, MappingNamespace,
      * 
      * @since 1.2
      */
-    public DataMap getClientDataMap() {
+    public DataMap getClientDataMap(EntityResolver serverResolver) {
         if (!isClientSupported()) {
             return null;
         }
@@ -248,6 +248,10 @@ public class DataMap implements Serializable, XMLSerializable, MappingNamespace,
             Query q = (Query) queries.next();
             NamedQuery proxy = new NamedQuery(q.getName());
             proxy.setName(q.getName());
+
+            // resolve metadata so that client could access it without knowing about the
+            // server query.
+            proxy.setMetadata(proxy.getMetaData(serverResolver));
             clientMap.addQuery(proxy);
         }
 

@@ -86,6 +86,8 @@ public class NamedQuery extends IndirectQuery {
     // refresh, override with no-refresh, no override.
     protected Boolean refreshOverride;
 
+    protected QueryMetadata metadata;
+
     transient int hashCode;
 
     public NamedQuery(String queryName) {
@@ -107,6 +109,12 @@ public class NamedQuery extends IndirectQuery {
     }
 
     public QueryMetadata getMetaData(EntityResolver resolver) {
+
+        // if metadata was set explicitly, use it...
+        if (this.metadata != null) {
+            return this.metadata;
+        }
+
         QueryMetadata info = super.getMetaData(resolver);
 
         if (refreshOverride == null) {
@@ -218,6 +226,22 @@ public class NamedQuery extends IndirectQuery {
      */
     public void setRefreshOverride(Boolean refreshOverride) {
         this.refreshOverride = refreshOverride;
+    }
+
+    /**
+     * Returns explicitly set metadata or null if this query should rely on its substitute
+     * query to obtain metadata.
+     */
+    public QueryMetadata getMetadata() {
+        return metadata;
+    }
+
+    /**
+     * Set metadata or null if this query should rely on its substitute query to obtain
+     * metadata.
+     */
+    public void setMetadata(QueryMetadata metadata) {
+        this.metadata = metadata;
     }
 
     /**

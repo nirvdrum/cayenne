@@ -139,7 +139,7 @@ public class EntityResolver implements MappingNamespace, Serializable {
                     Iterator it = getDataMaps().iterator();
                     while (it.hasNext()) {
                         DataMap map = (DataMap) it.next();
-                        DataMap clientMap = map.getClientDataMap();
+                        DataMap clientMap = map.getClientDataMap(this);
 
                         if (clientMap != null) {
                             resolver.addDataMap(clientMap);
