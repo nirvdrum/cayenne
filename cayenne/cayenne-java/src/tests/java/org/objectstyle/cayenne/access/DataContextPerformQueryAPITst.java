@@ -65,6 +65,7 @@ import java.util.Map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
@@ -180,5 +181,20 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
                 Painting.PAINTING_ID_PK_COLUMN,
                 300), null);
         assertEquals("Go Figure", p.getPaintingTitle());
+    }
+
+    public void testPerfomQueryNonSelecting() throws Exception {
+        DataContext context = createDataContext();
+        Artist a = (Artist) context.createAndRegisterNewObject(Artist.class);
+        a.setArtistName("aa");
+        context.commitChanges();
+        
+        SQLTemplate q = new SQLTemplate(Artist.class, "DELETE FROM ARTIST");
+
+        // this way of executing a query makes no sense, but it shouldn't blow either...
+        List result = context.performQuery(q);
+
+        assertNotNull(result);
+        assertEquals(0, result.size());
     }
 }
