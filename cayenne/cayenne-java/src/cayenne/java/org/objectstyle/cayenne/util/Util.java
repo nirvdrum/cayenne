@@ -632,6 +632,19 @@ public class Util {
                 else if ("boolean".equals(className)) {
                     return Boolean.TYPE;
                 }
+                // try inner class often specified with "." instead of $
+                else {
+                    int dot = className.lastIndexOf('.');
+                    if(dot > 0 && dot + 1 < className.length()) {
+                        className = className.substring(0, dot) + "$" + className.substring(dot + 1);
+                        try {
+                            return Class.forName(className, true, classLoader);
+                        }
+                        catch (ClassNotFoundException nestedE) {
+                            // ignore, throw the original exception...
+                        }
+                    }
+                }
 
                 throw e;
             }

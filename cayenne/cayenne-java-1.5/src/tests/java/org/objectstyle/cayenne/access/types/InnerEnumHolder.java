@@ -55,52 +55,9 @@
  */
 package org.objectstyle.cayenne.access.types;
 
-import junit.framework.TestCase;
+public class InnerEnumHolder {
 
-public class ExtendedTypeMapEnumsTst extends TestCase {
-
-    public void testSupportsEnums() {
-        ExtendedTypeMap map = new ExtendedTypeMap();
-        assertNotNull(map.enumTypeConstructor);
-    }
-
-    public void testGetDefaultType1_5() {
-        ExtendedTypeMap map = new ExtendedTypeMap();
-
-        assertNull(map.getDefaultType(Object.class.getName()));
-
-        ExtendedType type = map.getDefaultType(MockEnum.class.getName());
-        assertTrue(type instanceof EnumType);
-        assertEquals(MockEnum.class, ((EnumType) type).enumClass);
-
-        ExtendedType type2 = map.getDefaultType(MockEnum2.class.getName());
-        assertNotSame(type, type2);
-    }
-
-    public void testGetDefaultType1_5InnerEnum() {
-        ExtendedTypeMap map = new ExtendedTypeMap();
-
-        ExtendedType type = map.getDefaultType(InnerEnumHolder.InnerEnum.class.getName());
-        assertTrue(type instanceof EnumType);
-        assertEquals(InnerEnumHolder.InnerEnum.class, ((EnumType) type).enumClass);
-        
-        // use a string name with $
-        ExtendedType type1 = map.getDefaultType(InnerEnumHolder.class.getName() + "$InnerEnum");
-        assertNotNull(type1);
-        assertSame(type.getClassName(), type1.getClassName());
-        
-        // use a string name with .
-        ExtendedType type2 = map.getDefaultType(InnerEnumHolder.class.getName() + ".InnerEnum");
-        assertNotNull(type2);
-        assertSame(type.getClassName(), type2.getClassName());
-    }
-
-    public void testGetDefaultType1_4() {
-        ExtendedTypeMap map = new ExtendedTypeMap();
-        map.enumTypeConstructor = null;
-
-        assertNull(map.getDefaultType(Object.class.getName()));
-        assertNull(map.getDefaultType(MockEnum.class.getName()));
-        assertNull(map.getDefaultType(MockEnum2.class.getName()));
+    public static enum InnerEnum {
+        a, b, c, d
     }
 }
