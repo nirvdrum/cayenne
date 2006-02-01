@@ -174,15 +174,15 @@ public class EntityDescriptor extends BaseClassDescriptor {
 
             ObjRelationship relationship = (ObjRelationship) it.next();
 
+            Property property;
             if (relationship.isToMany()) {
 
                 PropertyAccessor accessor = makeAccessor(
                         relationship.getName(),
                         List.class);
 
-                ListProperty property = new ListProperty(accessor, relationship
+                property = new ListProperty(accessor, relationship
                         .getReverseRelationshipName());
-                allDescriptors.put(relationship.getName(), property);
             }
             else {
 
@@ -191,20 +191,19 @@ public class EntityDescriptor extends BaseClassDescriptor {
                     PropertyAccessor accessor = makeAccessor(
                             relationship.getName(),
                             targetEntity.getJavaClass());
-                    allDescriptors.put(
-                            relationship.getName(),
-                            new PersistentObjectProperty(accessor));
+                    property = new PersistentObjectProperty(accessor, relationship
+                            .getReverseRelationshipName());
                 }
                 else {
                     PropertyAccessor accessor = makeAccessor(
                             relationship.getName(),
                             ValueHolder.class);
-                    ValueHolderProperty property = new ValueHolderProperty(
-                            accessor,
-                            relationship.getReverseRelationshipName());
-                    allDescriptors.put(relationship.getName(), property);
+                    property = new ValueHolderProperty(accessor, relationship
+                            .getReverseRelationshipName());
                 }
             }
+
+            allDescriptors.put(relationship.getName(), property);
         }
     }
 

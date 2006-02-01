@@ -64,10 +64,13 @@ import org.objectstyle.cayenne.Persistent;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class PersistentObjectProperty extends SimpleProperty {
+public class PersistentObjectProperty extends SimpleProperty implements ArcProperty {
 
-    public PersistentObjectProperty(PropertyAccessor accessor) {
+    protected String reversePropertyName;
+
+    public PersistentObjectProperty(PropertyAccessor accessor, String reversePropertyName) {
         super(accessor);
+        this.reversePropertyName = reversePropertyName;
     }
 
     /**
@@ -92,5 +95,9 @@ public class PersistentObjectProperty extends SimpleProperty {
         }
 
         writeValue(to, accessor.readValue(to), newValue);
+    }
+
+    public String getReversePropertyName() {
+        return reversePropertyName;
     }
 }
