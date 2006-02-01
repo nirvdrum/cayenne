@@ -92,7 +92,7 @@ public class BaseClassDescriptorTst extends TestCase {
 
         TestBean to = new TestBean();
 
-        d1.copyProperties(from, to);
+        d1.shallowCopy(from, to);
         assertEquals("123", to.getString());
     }
 }

@@ -181,20 +181,20 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
     }
 
     /**
-     * Invokes 'copyProperties' of a super descriptor and then invokes 'copyProperty' of
-     * each declared property.
+     * Copies object properties from one object to another. Invokes 'shallowCopy' of a
+     * super descriptor and then invokes 'shallowCopy' of each declared property.
      */
-    public void copyProperties(Object from, Object to) throws PropertyAccessException {
+    public void shallowCopy(Object from, Object to) throws PropertyAccessException {
 
         // do super first
         if (getSuperclassDescriptor() != null) {
-            getSuperclassDescriptor().copyProperties(from, to);
+            getSuperclassDescriptor().shallowCopy(from, to);
         }
 
         Iterator it = declaredProperties.values().iterator();
         while (it.hasNext()) {
             Property property = (Property) it.next();
-            property.copyValue(from, to);
+            property.shallowCopy(from, to);
         }
     }
 }

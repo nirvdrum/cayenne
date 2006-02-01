@@ -1745,7 +1745,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
 
                 if (prototype != null) {
                     descriptor.prepareForAccess(cachedObject);
-                    descriptor.copyProperties(prototype, cachedObject);
+                    descriptor.shallowCopy(prototype, cachedObject);
                 }
             }
 
@@ -1790,7 +1790,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
                     && prototype.getPersistenceState() != PersistenceState.HOLLOW) {
                 localObject.setPersistenceState(PersistenceState.COMMITTED);
                 descriptor.prepareForAccess(localObject);
-                descriptor.copyProperties(prototype, localObject);
+                descriptor.shallowCopy(prototype, localObject);
             }
             else {
                 localObject.setPersistenceState(PersistenceState.HOLLOW);

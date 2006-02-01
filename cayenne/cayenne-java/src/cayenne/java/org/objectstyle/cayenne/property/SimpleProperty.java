@@ -90,7 +90,7 @@ public class SimpleProperty implements Property {
         // noop
     }
 
-    public void copyValue(Object from, Object to) throws PropertyAccessException {
+    public void shallowCopy(Object from, Object to) throws PropertyAccessException {
         writeValue(to, accessor.readValue(to), accessor.readValue(from));
     }
 

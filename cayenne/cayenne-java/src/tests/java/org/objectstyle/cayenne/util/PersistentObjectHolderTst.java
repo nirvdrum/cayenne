@@ -53,51 +53,53 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.property;
+package org.objectstyle.cayenne.util;
 
-import org.objectstyle.cayenne.Persistent;
+import junit.framework.TestCase;
 
-/**
- * An extension of SimpleProperty that makes sure that Persistent values are properly
- * transferred between contexts on copy.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public class PersistentObjectProperty extends SimpleProperty implements ArcProperty {
+import org.objectstyle.cayenne.MockObjectContext;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.graph.GraphMap;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
 
-    protected String reversePropertyName;
+public class PersistentObjectHolderTst extends TestCase {
 
-    public PersistentObjectProperty(PropertyAccessor accessor, String reversePropertyName) {
-        super(accessor);
-        this.reversePropertyName = reversePropertyName;
+    public void testSetInitialValue() {
+
+        MockObjectContext context = new MockObjectContext(new GraphMap());
+
+        ClientMtTable2 o = new ClientMtTable2();
+        o.setPersistenceState(PersistenceState.COMMITTED);
+        o.setObjectContext(context);
+        PersistentObjectHolder holder = new PersistentObjectHolder(
+                o,
+                ClientMtTable2.TABLE1_PROPERTY);
+
+        assertTrue(holder.isFault());
+        ClientMtTable1 o1 = new ClientMtTable1();
+        holder.setInitialValue(ClientMtTable1.class, o1);
+
+        assertFalse(holder.isFault());
+        assertSame(o1, holder.value);
     }
 
-    /**
-     * Copies a property value that is itself a persistent object from one object to
-     * another. If the new value is fault, fault will be copied to the target.
-     */
-    public void shallowCopy(Object from, Object to) throws PropertyAccessException {
-        Object newValue = accessor.readValue(from);
+    public void testInvalidate() {
+        MockObjectContext context = new MockObjectContext(new GraphMap());
 
-        // must obtain the value from the local context
-        if (newValue instanceof Persistent) {
-            if (to instanceof Persistent) {
-                Persistent newPersistent = (Persistent) newValue;
-                Persistent toPersistent = (Persistent) to;
+        ClientMtTable2 o = new ClientMtTable2();
+        o.setPersistenceState(PersistenceState.COMMITTED);
+        o.setObjectContext(context);
+        PersistentObjectHolder holder = new PersistentObjectHolder(
+                o,
+                ClientMtTable2.TABLE1_PROPERTY);
 
-                if (newPersistent.getObjectContext() != toPersistent.getObjectContext()) {
-                    newValue = toPersistent.getObjectContext().localObject(
-                            newPersistent.getObjectId(),
-                            newPersistent);
-                }
-            }
-        }
+        assertTrue(holder.isFault());
+        ClientMtTable1 o1 = new ClientMtTable1();
+        holder.setInitialValue(ClientMtTable1.class, o1);
 
-        writeValue(to, accessor.readValue(to), newValue);
-    }
-
-    public String getReversePropertyName() {
-        return reversePropertyName;
+        holder.invalidate();
+        assertTrue(holder.isFault());
+        assertNull(holder.value);
     }
 }

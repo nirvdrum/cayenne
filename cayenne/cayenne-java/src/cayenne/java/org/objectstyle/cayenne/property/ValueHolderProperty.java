@@ -78,8 +78,17 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
         return reversePropertyName;
     }
 
-    public void copyValue(Object from, Object to) throws PropertyAccessException {
-        // TODO: at least invalidate the ValueHolder somehow..
+    public void shallowCopy(Object from, Object to) throws PropertyAccessException {
+        ValueHolder toHolder = ensureValueHolderSet(to);
+        ValueHolder fromHolder = ensureValueHolderSet(from);
+
+        if (fromHolder.isFault()) {
+            toHolder.invalidate();
+        }
+        else {
+            toHolder.setInitialValue(getPropertyType(), fromHolder
+                    .getValue(getPropertyType()));
+        }
     }
 
     /**
@@ -90,25 +99,31 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
     }
 
     public Object readValue(Object object) throws PropertyAccessException {
-        ensureValueHolderSet(object);
-        return ((ValueHolder) accessor.readValue(object)).getValue(null);
+        ValueHolder holder = ensureValueHolderSet(object);
+        return holder.getValue(null);
     }
 
     public void writeValue(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException {
 
-        ensureValueHolderSet(object);
-        ((ValueHolder) accessor.readValue(object)).setInitialValue(null, newValue);
+        ValueHolder holder = ensureValueHolderSet(object);
+        holder.setInitialValue(null, newValue);
     }
 
     /**
      * Checks that an object's ValueHolder field described by this property is set,
      * injecting a ValueHolder if needed.
      */
-    protected void ensureValueHolderSet(Object object) throws PropertyAccessException {
-        if (accessor.readValue(object) == null) {
-            accessor.writeValue(object, null, createValueHolder(object));
+    protected ValueHolder ensureValueHolderSet(Object object)
+            throws PropertyAccessException {
+
+        ValueHolder holder = (ValueHolder) accessor.readValue(object);
+        if (holder == null) {
+            holder = createValueHolder(object);
+            accessor.writeValue(object, null, holder);
         }
+
+        return holder;
     }
 
     /**

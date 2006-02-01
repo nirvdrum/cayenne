@@ -107,4 +107,11 @@ public interface ValueHolder extends Serializable {
      * trigger fault resolution.
      */
     Object setInitialValue(Class valueClass, Object value) throws CayenneRuntimeException;
+
+    boolean isFault();
+
+    /**
+     * Turns a ValueHolder into a fault.
+     */
+    void invalidate();
 }

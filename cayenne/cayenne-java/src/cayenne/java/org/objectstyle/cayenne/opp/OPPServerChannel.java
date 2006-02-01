@@ -192,7 +192,7 @@ public class OPPServerChannel implements DataChannel {
                                             descriptor.prepareForAccess(cachedObject);
                                         }
 
-                                        descriptor.copyProperties(object, cachedObject);
+                                        descriptor.shallowCopy(object, cachedObject);
                                     }
 
                                     childObjects.add(cachedObject);

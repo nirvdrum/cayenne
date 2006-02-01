@@ -69,8 +69,14 @@ import org.objectstyle.cayenne.query.Query;
  */
 public class MockObjectContext implements ObjectContext {
 
+    protected GraphManager graphManager;
+
     public MockObjectContext() {
         super();
+    }
+
+    public MockObjectContext(GraphManager graphManager) {
+        this.graphManager = graphManager;
     }
 
     public EntityResolver getEntityResolver() {
@@ -82,7 +88,7 @@ public class MockObjectContext implements ObjectContext {
     }
 
     public GraphManager getGraphManager() {
-        return null;
+        return graphManager;
     }
 
     public Persistent localObject(ObjectId id, Persistent prototype) {

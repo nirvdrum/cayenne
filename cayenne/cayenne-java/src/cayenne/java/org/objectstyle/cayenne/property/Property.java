@@ -18,5 +18,5 @@ public interface Property extends PropertyAccessor {
     /**
      * Copies a property value from one object to another.
      */
-    void copyValue(Object from, Object to) throws PropertyAccessException;
+    void shallowCopy(Object from, Object to) throws PropertyAccessException;
 }

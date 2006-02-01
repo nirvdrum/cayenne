@@ -59,6 +59,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.FaultFailureException;
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.ValueHolder;
 
@@ -91,6 +92,11 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
         return fault;
     }
 
+    public void invalidate() {
+        fault = true;
+        value = null;
+    }
+
     /**
      * Returns a value resolving it via a query on the first call to this method.
      */
@@ -110,17 +116,13 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
     public synchronized Object setValue(Class valueClass, Object value)
             throws CayenneRuntimeException {
 
-        typeSafetyCheck(valueClass, value);
-
         if (fault) {
             resolve();
         }
 
-        Object oldValue = this.value;
+        Object oldValue = setInitialValue(valueClass, value);
 
         if (oldValue != value) {
-            this.value = value;
-
             // notify ObjectContext
             if (relationshipOwner.getObjectContext() != null) {
                 relationshipOwner.getObjectContext().propertyChanged(
@@ -139,12 +141,52 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
 
         typeSafetyCheck(valueClass, value);
 
+        // must obtain the value from the local context
+        if (value instanceof Persistent) {
+            value = connect((Persistent) value);
+        }
+
         Object oldValue = this.value;
 
         this.value = value;
         this.fault = false;
 
         return oldValue;
+    }
+
+    /**
+     * Returns an object that should be stored as a value in this ValueHolder, ensuring
+     * that it is registered with the same context.
+     */
+    protected Object connect(Persistent persistent) {
+
+        if (persistent == null) {
+            return null;
+        }
+
+        ObjectContext context = relationshipOwner.getObjectContext();
+
+        if (context == persistent.getObjectContext()) {
+            return persistent;
+        }
+
+        if (context != null) {
+            if (persistent.getObjectContext() == null) {
+                context.getGraphManager().registerNode(
+                        persistent.getObjectId(),
+                        persistent);
+                return persistent;
+            }
+            else {
+                return context.localObject(persistent.getObjectId(), persistent);
+            }
+        }
+        else {
+            throw new CayenneRuntimeException(
+                    "Cannot set object as destination of relationship "
+                            + relationshipName
+                            + " because it is in a different ObjectContext");
+        }
     }
 
     /**

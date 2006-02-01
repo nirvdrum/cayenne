@@ -66,7 +66,7 @@ public class MockClassDescriptor implements ClassDescriptor {
     public void prepareForAccess(Object object) throws PropertyAccessException {
     }
 
-    public void copyProperties(Object from, Object to) throws PropertyAccessException {
+    public void shallowCopy(Object from, Object to) throws PropertyAccessException {
     }
 
     public Property getDeclaredProperty(String propertyName) {

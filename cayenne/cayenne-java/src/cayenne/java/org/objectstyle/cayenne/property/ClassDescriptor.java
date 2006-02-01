@@ -65,7 +65,6 @@ import java.util.Collection;
  * @since 1.2
  * @author Andrus Adamchik
  */
-// TODO: replace ObjectFactory with ClassDescriptor...
 public interface ClassDescriptor extends Serializable {
 
     /**
@@ -91,9 +90,9 @@ public interface ClassDescriptor extends Serializable {
     void prepareForAccess(Object object) throws PropertyAccessException;
 
     /**
-     * Copies persistent properties of one object to another.
+     * Copies object properties from one object to another. 
      */
-    void copyProperties(Object from, Object to) throws PropertyAccessException;
+    void shallowCopy(Object from, Object to) throws PropertyAccessException;
 
     /**
      * Returns a Java Bean property descriptor matching property name or null if no such

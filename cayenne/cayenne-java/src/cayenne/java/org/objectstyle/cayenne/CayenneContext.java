@@ -373,7 +373,7 @@ public class CayenneContext implements ObjectContext {
 
                 if (prototype != null) {
                     descriptor.prepareForAccess(cachedObject);
-                    descriptor.copyProperties(prototype, cachedObject);
+                    descriptor.shallowCopy(prototype, cachedObject);
                 }
             }
 
@@ -417,7 +417,7 @@ public class CayenneContext implements ObjectContext {
             if (prototype != null) {
                 localObject.setPersistenceState(PersistenceState.COMMITTED);
                 descriptor.prepareForAccess(localObject);
-                descriptor.copyProperties(prototype, localObject);
+                descriptor.shallowCopy(prototype, localObject);
             }
             else {
                 localObject.setPersistenceState(PersistenceState.HOLLOW);

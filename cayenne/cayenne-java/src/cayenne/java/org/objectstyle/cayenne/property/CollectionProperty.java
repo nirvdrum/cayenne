@@ -76,7 +76,7 @@ public abstract class CollectionProperty extends SimpleProperty implements ArcPr
         return reversePropertyName;
     }
 
-    public void copyValue(Object from, Object to) throws PropertyAccessException {
+    public void shallowCopy(Object from, Object to) throws PropertyAccessException {
         // TODO: at least invalidate the list somehow..
     }
 
