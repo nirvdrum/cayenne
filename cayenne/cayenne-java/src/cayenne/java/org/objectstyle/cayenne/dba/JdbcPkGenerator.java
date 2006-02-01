@@ -69,10 +69,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
+import org.objectstyle.cayenne.access.ResultIterator;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbKeyGenerator;
@@ -372,7 +374,7 @@ public class JdbcPkGenerator implements PkGenerator {
 
         PkRetrieveProcessor observer = new PkRetrieveProcessor(ent.getName());
         node.performQueries(queries, observer);
-        return observer.getNextId();
+        return observer.getId();
     }
 
     /**
@@ -402,65 +404,84 @@ public class JdbcPkGenerator implements PkGenerator {
         pkCache.clear();
     }
 
-    /** OperationObserver for primary key retrieval. */
-    protected class PkRetrieveProcessor extends DefaultOperationObserver {
+    /**
+     * OperationObserver for primary key retrieval.
+     */
+    final class PkRetrieveProcessor implements OperationObserver {
 
-        protected boolean success;
-        protected Integer nextId;
-        protected String entName;
+        Number id;
+        String entityName;
 
-        public PkRetrieveProcessor(String entName) {
-            this.entName = entName;
+        PkRetrieveProcessor(String entityName) {
+            this.entityName = entityName;
         }
 
-        public int getNextId() {
-            if (nextId != null) {
-                return nextId.intValue();
+        /**
+         * @deprecated since 1.2 super is deprecated
+         */
+        public Level getLoggingLevel() {
+            return null;
+        }
+
+        public boolean isIteratedResult() {
+            return false;
+        }
+
+        public int getId() {
+            if (id == null) {
+                throw new CayenneRuntimeException("No key was retrieved for entity "
+                        + entityName);
             }
-            else {
-                throw new CayenneRuntimeException("No key was retrieved.");
-            }
+
+            return id.intValue();
         }
 
         public void nextDataRows(Query query, List dataRows) {
-            super.nextDataRows(query, dataRows);
 
             // process selected object, issue an update query
             if (dataRows == null || dataRows.size() == 0) {
                 throw new CayenneRuntimeException(
-                        "Error generating PK : entity not supported: " + entName);
+                        "Error generating PK : entity not supported: " + entityName);
             }
+
             if (dataRows.size() > 1) {
                 throw new CayenneRuntimeException(
-                        "Error generating PK : too many rows for entity: " + entName);
+                        "Error generating PK : too many rows for entity: " + entityName);
             }
 
             Map lastPk = (Map) dataRows.get(0);
-            nextId = (Integer) lastPk.get("NEXT_ID");
-            if (nextId == null) {
-                throw new CayenneRuntimeException("Error generating PK : null nextId.");
-            }
+            id = (Number) lastPk.get("NEXT_ID");
         }
 
         public void nextCount(Query query, int resultCount) {
-            super.nextCount(query, resultCount);
+            if (resultCount != 1) {
+                throw new CayenneRuntimeException("Error generating PK for entity '"
+                        + entityName
+                        + "': update count is wrong - "
+                        + resultCount);
+            }
+        }
 
-            if (resultCount != 1)
-                throw new CayenneRuntimeException(
-                        "Error generating PK : update count is wrong: " + resultCount);
+        public void nextBatchCount(Query query, int[] resultCount) {
+        }
+
+        public void nextGeneratedDataRows(Query query, ResultIterator keysIterator) {
+        }
+
+        public void nextDataRows(Query q, ResultIterator it) {
         }
 
         public void nextQueryException(Query query, Exception ex) {
-            super.nextQueryException(query, ex);
 
             throw new CayenneRuntimeException("Error generating PK for entity '"
-                    + entName
+                    + entityName
                     + "'.", ex);
         }
 
         public void nextGlobalException(Exception ex) {
-            super.nextGlobalException(ex);
-            throw new CayenneRuntimeException("Error generating PK.", ex);
+
+            throw new CayenneRuntimeException("Error generating PK for entity: "
+                    + entityName, ex);
         }
     }
 }

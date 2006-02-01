@@ -77,8 +77,7 @@ import org.objectstyle.cayenne.util.Util;
  * events and exceptions.
  * <p>
  * <i>This operation observer is unsafe to use in application, since it doesn't rethrow
- * the exceptions immediately, and may cause the database to hang. Use
- * {@link org.objectstyle.cayenne.access.QueryResult}instead. </i>
+ * the exceptions immediately, and may cause the database to hang.</i>
  * </p>
  * 
  * @author Andrei Adamchik
