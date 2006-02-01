@@ -66,10 +66,17 @@ import java.util.Collection;
 public abstract class CollectionProperty extends SimpleProperty implements ArcProperty {
 
     protected String reversePropertyName;
+    protected ClassDescriptor targetDescriptor;
 
-    public CollectionProperty(PropertyAccessor accessor, String reversePropertyName) {
+    public CollectionProperty(PropertyAccessor accessor,
+            ClassDescriptor targetDescriptor, String reversePropertyName) {
         super(accessor);
+        this.targetDescriptor = targetDescriptor;
         this.reversePropertyName = reversePropertyName;
+    }
+
+    public ClassDescriptor getTargetDescriptor() {
+        return targetDescriptor;
     }
 
     public String getReversePropertyName() {

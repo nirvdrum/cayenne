@@ -205,7 +205,7 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
      */
     public ClassDescriptor getClassDescriptor() {
         if (classDescriptor == null) {
-            classDescriptor = createClassDescriptor();
+            prepareClassDescriptor();
         }
         return classDescriptor;
     }
@@ -216,18 +216,24 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
      * 
      * @since 1.2
      */
-    ClassDescriptor createClassDescriptor() {
+    void prepareClassDescriptor() {
         ObjEntity superEntity = getSuperEntity();
         ClassDescriptor superDescriptor = (superEntity != null) ? superEntity
                 .getClassDescriptor() : null;
 
         if (getDataMap() != null && getDataMap().getDescriptorFactory() != null) {
-            return getDataMap().getDescriptorFactory().getDescriptor(
+            this.classDescriptor = getDataMap().getDescriptorFactory().getDescriptor(
                     this,
                     superDescriptor);
         }
         else {
-            return new EntityDescriptor(this, superDescriptor);
+            EntityDescriptor descriptor = new EntityDescriptor(this, superDescriptor);
+            this.classDescriptor = descriptor;
+
+            // compile AFTER the ivar is set ... this will preclude endless loops when
+            // attempting to compile arc properties, that requires an access to the target
+            // entity descriptor...
+            descriptor.compile();
         }
     }
 

@@ -68,8 +68,9 @@ import org.objectstyle.cayenne.util.PersistentObjectList;
  */
 public class ListProperty extends CollectionProperty {
 
-    public ListProperty(PropertyAccessor accessor, String reversePropertyName) {
-        super(accessor, reversePropertyName);
+    public ListProperty(PropertyAccessor accessor, ClassDescriptor targetDescriptor,
+            String reversePropertyName) {
+        super(accessor, targetDescriptor, reversePropertyName);
     }
 
     /**

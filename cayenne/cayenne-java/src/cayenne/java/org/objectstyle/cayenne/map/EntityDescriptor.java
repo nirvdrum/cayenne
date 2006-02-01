@@ -96,8 +96,6 @@ public class EntityDescriptor extends BaseClassDescriptor {
     public EntityDescriptor(ObjEntity entity, ClassDescriptor superclassDescriptor) {
         super(superclassDescriptor);
         this.entity = entity;
-
-        compile();
     }
 
     /**
@@ -124,10 +122,10 @@ public class EntityDescriptor extends BaseClassDescriptor {
     }
 
     /**
-     * Prepares the descriptor. A descriptor must be compiled before it can operate.
-     * "compile" is internally called in constructor and also after deserialization.
+     * Prepares the descriptor. A descriptor must be explicitly compiled before it can
+     * operate.
      */
-    protected void compile() {
+    public void compile() {
         if (entity == null) {
             throw new IllegalStateException(
                     "Entity is not initialized, can't index descriptor.");
@@ -173,6 +171,9 @@ public class EntityDescriptor extends BaseClassDescriptor {
         while (it.hasNext()) {
 
             ObjRelationship relationship = (ObjRelationship) it.next();
+            ClassDescriptor targetDescriptor = ((ObjEntity) relationship
+                    .getTargetEntity()).getClassDescriptor();
+            String reverseName = relationship.getReverseRelationshipName();
 
             Property property;
             if (relationship.isToMany()) {
@@ -181,8 +182,7 @@ public class EntityDescriptor extends BaseClassDescriptor {
                         relationship.getName(),
                         List.class);
 
-                property = new ListProperty(accessor, relationship
-                        .getReverseRelationshipName());
+                property = new ListProperty(accessor, targetDescriptor, reverseName);
             }
             else {
 
@@ -191,15 +191,19 @@ public class EntityDescriptor extends BaseClassDescriptor {
                     PropertyAccessor accessor = makeAccessor(
                             relationship.getName(),
                             targetEntity.getJavaClass());
-                    property = new PersistentObjectProperty(accessor, relationship
-                            .getReverseRelationshipName());
+                    property = new PersistentObjectProperty(
+                            accessor,
+                            targetDescriptor,
+                            reverseName);
                 }
                 else {
                     PropertyAccessor accessor = makeAccessor(
                             relationship.getName(),
                             ValueHolder.class);
-                    property = new ValueHolderProperty(accessor, relationship
-                            .getReverseRelationshipName());
+                    property = new ValueHolderProperty(
+                            accessor,
+                            targetDescriptor,
+                            reverseName);
                 }
             }
 

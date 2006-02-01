@@ -69,11 +69,13 @@ public class EntityDescriptorTst extends TestCase {
         e1.setClassName(String.class.getName());
 
         EntityDescriptor d1 = new EntityDescriptor(e1, null);
+        d1.compile();
         assertNull(d1.getSuperclassDescriptor());
 
         BaseClassDescriptor mockSuper = new BaseClassDescriptor(null) {
         };
         EntityDescriptor d2 = new EntityDescriptor(e1, mockSuper);
+        d2.compile();
         assertSame(mockSuper, d2.getSuperclassDescriptor());
     }
 
@@ -83,6 +85,7 @@ public class EntityDescriptorTst extends TestCase {
 
         // compilation must be done in constructor...
         EntityDescriptor d1 = new EntityDescriptor(e1, null);
+        d1.compile();
         assertTrue(d1.isValid());
     }
 
@@ -123,6 +126,7 @@ public class EntityDescriptorTst extends TestCase {
         e1.addRelationship(toMany);
 
         EntityDescriptor d1 = new EntityDescriptor(e1, null);
+        d1.compile();
 
         assertSame(e1, d1.getEntity());
         assertNotNull(d1.getObjectClass());

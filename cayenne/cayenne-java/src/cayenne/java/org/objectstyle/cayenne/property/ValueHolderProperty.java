@@ -68,10 +68,17 @@ import org.objectstyle.cayenne.util.PersistentObjectHolder;
 public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
 
     protected String reversePropertyName;
+    protected ClassDescriptor targetDescriptor;
 
-    public ValueHolderProperty(PropertyAccessor accessor, String reversePropertyName) {
+    public ValueHolderProperty(PropertyAccessor accessor,
+            ClassDescriptor targetDescriptor, String reversePropertyName) {
         super(accessor);
+        this.targetDescriptor = targetDescriptor;
         this.reversePropertyName = reversePropertyName;
+    }
+
+    public ClassDescriptor getTargetDescriptor() {
+        return targetDescriptor;
     }
 
     public String getReversePropertyName() {

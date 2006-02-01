@@ -55,8 +55,12 @@
  */
 package org.objectstyle.cayenne.map;
 
+import org.objectstyle.cayenne.property.ArcProperty;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.property.MockClassDescriptor;
+import org.objectstyle.cayenne.property.Property;
+import org.objectstyle.cayenne.testdo.mt.MtTable1;
+import org.objectstyle.cayenne.testdo.mt.MtTable2;
 import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
@@ -116,6 +120,25 @@ public class ObjEntityClassDescriptorTst extends CayenneTestCase {
         ClassDescriptor descriptor1 = entity.getClassDescriptor();
         assertNotNull(descriptor1);
         assertNotSame(descriptor, descriptor1);
+    }
+
+    public void testArcProperties() {
+        ObjEntity entity = getServerEntity("MtTable1");
+        entity.setClassDescriptor(null);
+
+        ObjEntity entity2 = getServerEntity("MtTable2");
+        entity2.setClassDescriptor(null);
+
+        ClassDescriptor descriptor = entity.getClassDescriptor();
+        assertNotNull(descriptor);
+
+        Property p = descriptor.getProperty(MtTable1.TABLE2ARRAY_PROPERTY);
+        assertTrue(p instanceof ArcProperty);
+
+        ClassDescriptor target = ((ArcProperty) p).getTargetDescriptor();
+        assertNotNull(target);
+        assertSame(entity2.getClassDescriptor(), target);
+        assertEquals(MtTable2.TABLE1_PROPERTY, ((ArcProperty) p).getReversePropertyName());
     }
 
     protected ObjEntity getServerEntity(String name) {
