@@ -68,7 +68,9 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  */
 public class IDUtil {
 
-    private static volatile int currentId = Integer.MIN_VALUE;
+    // this id sequence doesn't have to be very long... it only addresses the need to feel
+    // the gap within the same timestamp millisecond
+    private static volatile byte currentId = Byte.MIN_VALUE;
     private static MessageDigest md;
     private static byte[] ipAddress;
 
@@ -163,6 +165,28 @@ public class IDUtil {
         return bytes;
     }
 
+    public static final byte[] pseudoUniqueByteSequence8() {
+        byte[] bytes = new byte[8];
+
+        // bytes 0 - incrementing #
+        // bytes 1..3 - timestamp high bytes
+        // bytes 4..7 - IP address
+
+        bytes[0] = nextId();
+
+        long t = System.currentTimeMillis();
+        
+        // append 3 high bytes
+        for (int i = 0; i < 3; ++i) {
+            int off = (3 - i) * 8;
+            bytes[i + 1] = (byte) ((t & (0xff << off)) >>> off);
+        }
+
+        System.arraycopy(ipAddress, 0, bytes, 4, 4);
+
+        return bytes;
+    }
+
     /**
      * @return A pseudo unique 16-byte array.
      */
@@ -191,9 +215,9 @@ public class IDUtil {
         }
     }
 
-    private static final int nextId() {
-        if (currentId >= Integer.MAX_VALUE - 100) {
-            currentId = Integer.MIN_VALUE;
+    private static final byte nextId() {
+        if (currentId >= Byte.MAX_VALUE - 1) {
+            currentId = Byte.MIN_VALUE;
         }
 
         return currentId++;

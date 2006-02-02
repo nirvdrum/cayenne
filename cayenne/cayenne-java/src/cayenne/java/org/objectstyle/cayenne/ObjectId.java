@@ -117,7 +117,7 @@ public class ObjectId implements Serializable {
      */
     public ObjectId(String entityName) {
         this.entityName = entityName;
-        this.key = IDUtil.pseudoUniqueByteSequence16();
+        this.key = IDUtil.pseudoUniqueByteSequence8();
     }
 
     /**
