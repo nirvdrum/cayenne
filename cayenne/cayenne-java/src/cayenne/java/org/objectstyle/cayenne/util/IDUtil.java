@@ -64,11 +64,11 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 /**
  * helper class to generate pseudo-GUID sequences.
  * 
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class IDUtil {
 
-    private static volatile long currentId = Long.MIN_VALUE;
+    private static volatile int currentId = Integer.MIN_VALUE;
     private static MessageDigest md;
     private static byte[] ipAddress;
 
@@ -102,7 +102,7 @@ public class IDUtil {
         buffer.append(digits.charAt((byteValue >>> 4) & 0xF));
         buffer.append(digits.charAt(byteValue & 0xF));
     }
-    
+
     /**
      * @param length the length of returned byte[]
      * @return A pseudo-unique byte array of the specified length. Length must be at least
@@ -136,33 +136,77 @@ public class IDUtil {
         return bytes;
     }
 
+    public synchronized static byte[] pseudoUniqueSecureByteSequence(int length) {
+        if (length < 16) {
+            throw new IllegalArgumentException(
+                    "Can't generate unique byte sequence shorter than 16 bytes: "
+                            + length);
+        }
+
+        if (length == 16) {
+            return pseudoUniqueSecureByteSequence16();
+        }
+
+        byte[] bytes = new byte[length];
+        for (int i = 0; i <= length - 16; i += 16) {
+            byte[] nextSequence = pseudoUniqueSecureByteSequence16();
+            System.arraycopy(nextSequence, 0, bytes, i, 16);
+        }
+
+        // leftovers?
+        int leftoverLen = length % 16;
+        if (leftoverLen > 0) {
+            byte[] nextSequence = pseudoUniqueSecureByteSequence16();
+            System.arraycopy(nextSequence, 0, bytes, length - leftoverLen, leftoverLen);
+        }
+
+        return bytes;
+    }
+
     /**
      * @return A pseudo unique 16-byte array.
      */
-    public static byte[] pseudoUniqueByteSequence16() {
-        byte[] bytes = new byte[20];
+    public static final byte[] pseudoUniqueByteSequence16() {
+        byte[] bytes = new byte[16];
 
-        // copy IP at the end of array ... everything else will be done inside a
-        // synchronized block.
-        System.arraycopy(ipAddress, 0, bytes, 16, ipAddress.length);
+        // bytes 0..3 - incrementing #
+        // bytes 4..11 - timestamp
+        // bytes 12..15 - IP address
+
+        appendIntBytes(bytes, 0, nextId());
+        appendLongBytes(bytes, 4, System.currentTimeMillis());
+        System.arraycopy(ipAddress, 0, bytes, 12, 4);
+
+        return bytes;
+    }
+
+    /**
+     * @return A pseudo unique digested 16-byte array.
+     */
+    public static byte[] pseudoUniqueSecureByteSequence16() {
+        byte[] bytes = pseudoUniqueByteSequence16();
 
         synchronized (md) {
-            // spend some time so that the next call would return the different timestamp
-            try {
-                Thread.sleep(1);
-            }
-            catch (InterruptedException e) {
-                // ignoring...
-            }
-
-            appendLongBytes(bytes, 0, System.currentTimeMillis());
-            appendLongBytes(bytes, 8, currentId++);
-
             return md.digest(bytes);
         }
     }
 
-    private static void appendLongBytes(byte[] bytes, int offset, long value) {
+    private static final int nextId() {
+        if (currentId >= Integer.MAX_VALUE - 100) {
+            currentId = Integer.MIN_VALUE;
+        }
+
+        return currentId++;
+    }
+
+    private static final void appendIntBytes(byte[] bytes, int offset, int value) {
+        for (int i = 0; i < 4; ++i) {
+            int off = (3 - i) * 8;
+            bytes[i + offset] = (byte) ((value & (0xff << off)) >>> off);
+        }
+    }
+
+    private static final void appendLongBytes(byte[] bytes, int offset, long value) {
         for (int i = 0; i < 8; ++i) {
             int off = (7 - i) * 8;
             bytes[i + offset] = (byte) ((value & (0xff << off)) >>> off);

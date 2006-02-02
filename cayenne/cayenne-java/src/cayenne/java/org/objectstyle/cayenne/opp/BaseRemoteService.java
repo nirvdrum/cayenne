@@ -217,7 +217,7 @@ public class BaseRemoteService implements OPPRemoteService {
     }
 
     String makeId() {
-        byte[] bytes = IDUtil.pseudoUniqueByteSequence(32);
+        byte[] bytes = IDUtil.pseudoUniqueSecureByteSequence(32);
 
         // use safe encoding... not that it matters to Hessian, but it is more readable
         // this way..
