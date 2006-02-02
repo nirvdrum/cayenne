@@ -343,7 +343,7 @@ public class JdbcPkGenerator implements PkGenerator {
             DbAttribute pk = (DbAttribute) pkColumns.get(0);
             if (pk.getMaxLength() > 0
                     && (pk.getType() == Types.BINARY || pk.getType() == Types.VARBINARY)) {
-                return IDUtil.pseudoUniqueByteSequence(pk.getMaxLength());
+                return IDUtil.pseudoUniqueSecureByteSequence(pk.getMaxLength());
             }
         }
 
