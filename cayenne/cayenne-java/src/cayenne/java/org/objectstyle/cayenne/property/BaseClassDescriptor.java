@@ -62,6 +62,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.graph.GraphManager;
 
 /**
  * A superclass of Cayenne ClassDescriptors. Defines all main bean descriptor parameters
@@ -72,11 +75,17 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  */
 public abstract class BaseClassDescriptor implements ClassDescriptor {
 
+    static final Integer HOLLOW_STATE = new Integer(PersistenceState.HOLLOW);
+    static final Integer COMMITTED_STATE = new Integer(PersistenceState.COMMITTED);
+
     protected ClassDescriptor superclassDescriptor;
 
     // compiled properties ... all declared as transient
     protected transient Class objectClass;
     protected transient Map declaredProperties;
+    protected transient PropertyAccessor objectIdProperty;
+    protected transient PropertyAccessor contextProperty;
+    protected transient PropertyAccessor persistentStateProperty;
 
     /**
      * Creates an uncompiled BaseClassDescriptor. Subclasses may add a call to "compile"
@@ -90,7 +99,11 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
      * Returns true if a descriptor is initialized and ready for operation.
      */
     public boolean isValid() {
-        return objectClass != null && declaredProperties != null;
+        return objectClass != null
+                && declaredProperties != null
+                && objectIdProperty != null
+                && contextProperty != null
+                && persistentStateProperty != null;
     }
 
     public Class getObjectClass() {
@@ -180,6 +193,29 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         }
     }
 
+    protected Object readObjectId(Object object) {
+        return objectIdProperty.readValue(object);
+    }
+
+    /**
+     * Creates a persistent object, initializaing it with an id and context (but not
+     * registering it in the context).
+     */
+    protected Object makePersistentObject(ObjectContext context, Object id) {
+        Object object = createObject();
+
+        objectIdProperty.writeValue(object, null, id);
+        contextProperty.writeValue(object, null, context);
+        persistentStateProperty.writeValue(object, null, HOLLOW_STATE);
+
+        prepareForAccess(object);
+        return object;
+    }
+
+    protected void writeObjectId(Object object, Object id) {
+        objectIdProperty.writeValue(object, null, id);
+    }
+
     /**
      * Copies object properties from one object to another. Invokes 'shallowCopy' of a
      * super descriptor and then invokes 'shallowCopy' of each declared property.
@@ -195,6 +231,65 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         while (it.hasNext()) {
             Property property = (Property) it.next();
             property.shallowCopy(from, to);
+        }
+    }
+
+    public Object deepMerge(ObjectContext context, Object object, GraphManager mergeMap)
+            throws PropertyAccessException {
+
+        Object id = readObjectId(object);
+        if (id == null) {
+            throw new PropertyAccessException(
+                    "Object without a defined id can't be merged",
+                    objectIdProperty,
+                    object);
+        }
+
+        // object presence in the mergeMap indicates that it requires no further
+        // processing
+        Object targetObject = mergeMap.getNode(id);
+        if (targetObject != null) {
+            return targetObject;
+        }
+
+        targetObject = context.getGraphManager().getNode(id);
+
+        if (targetObject == null) {
+            // TODO: (Andrus, 2/1/2006) note that here we always create a copy of an
+            // object. This creates a major inefficiency when unattached objects are
+            // deserialized from the remote channel, but this is needed for consistency
+            // ... I can't see a better *generic* way of handling this issue, but maybe
+            // when no prefetches are involved, we can take a shortcut and register an
+            // object without copying?
+            targetObject = makePersistentObject(context, id);
+
+            context.getGraphManager().registerNode(id, targetObject);
+            mergeMap.registerNode(id, targetObject);
+        }
+
+        deepCopy(context, object, targetObject, mergeMap);
+        return targetObject;
+    }
+
+    public void deepCopy(
+            ObjectContext context,
+            Object from,
+            Object to,
+            GraphManager mergeMap) {
+
+        if (getSuperclassDescriptor() != null) {
+            getSuperclassDescriptor().deepCopy(context, from, to, mergeMap);
+        }
+
+        Iterator it = declaredProperties.values().iterator();
+        while (it.hasNext()) {
+            Property property = (Property) it.next();
+            property.deepCopy(context, from, to, mergeMap);
+        }
+
+        int state = ((Number) persistentStateProperty.readValue(to)).intValue();
+        if (state == PersistenceState.HOLLOW) {
+            persistentStateProperty.writeValue(to, new Integer(state), COMMITTED_STATE);
         }
     }
 }

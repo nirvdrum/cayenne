@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.PersistentObject;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.property.MockClassDescriptor;
@@ -114,7 +115,7 @@ public class ObjEntityTst extends CayenneTestCase {
 
     public void testClassDescriptor() {
         ObjEntity e1 = new ObjEntity("e1");
-        e1.setClassName(Object.class.getName());
+        e1.setClassName(PersistentObject.class.getName());
 
         // class descriptor must be built on demand...
         ClassDescriptor descriptor = e1.getClassDescriptor();
@@ -131,12 +132,12 @@ public class ObjEntityTst extends CayenneTestCase {
         DataMap map = new DataMap();
 
         ObjEntity e1 = new ObjEntity("e1");
-        e1.setClassName(Object.class.getName());
+        e1.setClassName(CayenneDataObject.class.getName());
         map.addObjEntity(e1);
 
         // test that super descriptor is set
         ObjEntity e2 = new ObjEntity("e2");
-        e2.setClassName(String.class.getName());
+        e2.setClassName(Artist.class.getName());
         map.addObjEntity(e2);
         e2.setSuperEntityName(e1.getName());
 

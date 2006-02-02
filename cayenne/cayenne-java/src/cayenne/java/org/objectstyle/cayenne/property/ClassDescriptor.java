@@ -58,6 +58,9 @@ package org.objectstyle.cayenne.property;
 import java.io.Serializable;
 import java.util.Collection;
 
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.graph.GraphManager;
+
 /**
  * Provides access to a set of persistent properties of a Java Bean and methods for
  * manipulating such bean.
@@ -90,9 +93,17 @@ public interface ClassDescriptor extends Serializable {
     void prepareForAccess(Object object) throws PropertyAccessException;
 
     /**
-     * Copies object properties from one object to another. 
+     * Copies object properties from one object to another.
      */
     void shallowCopy(Object from, Object to) throws PropertyAccessException;
+
+    void deepCopy(ObjectContext context, Object from, Object to, GraphManager mergeMap);
+
+    /**
+     * Merges an object to another context.
+     */
+    Object deepMerge(ObjectContext context, Object object, GraphManager mergeMap)
+            throws PropertyAccessException;
 
     /**
      * Returns a Java Bean property descriptor matching property name or null if no such

@@ -55,8 +55,10 @@
  */
 package org.objectstyle.cayenne.property;
 
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.ValueHolder;
+import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.util.PersistentObjectHolder;
 
 /**
@@ -86,15 +88,30 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
     }
 
     public void shallowCopy(Object from, Object to) throws PropertyAccessException {
-        ValueHolder toHolder = ensureValueHolderSet(to);
-        ValueHolder fromHolder = ensureValueHolderSet(from);
+        // noop
+    }
 
-        if (fromHolder.isFault()) {
+    public void deepCopy(
+            ObjectContext context,
+            Object from,
+            Object to,
+            GraphManager mergeMap) {
+        
+        ValueHolder toHolder = ensureValueHolderSet(to);
+
+        // do not set FROM holder if it is null
+        ValueHolder fromHolder = (ValueHolder) accessor.readValue(from);
+
+        if (fromHolder == null || fromHolder.isFault()) {
             toHolder.invalidate();
         }
         else {
-            toHolder.setInitialValue(getPropertyType(), fromHolder
-                    .getValue(getPropertyType()));
+            Object target = fromHolder.getValue(null);
+
+            if (target != null) {
+                target = getTargetDescriptor().deepMerge(context, target, mergeMap);
+            }
+            toHolder.setInitialValue(null, target);
         }
     }
 

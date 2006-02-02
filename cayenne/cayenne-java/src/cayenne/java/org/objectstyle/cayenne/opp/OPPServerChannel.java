@@ -67,7 +67,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.event.EventBridge;
@@ -76,6 +75,8 @@ import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
+import org.objectstyle.cayenne.graph.GraphManager;
+import org.objectstyle.cayenne.graph.GraphMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.Query;
@@ -139,7 +140,7 @@ public class OPPServerChannel implements DataChannel {
             // cache it...
             EntityResolver resolver = context.getEntityResolver();
             QueryMetadata info = query.getMetaData(resolver);
-            
+
             if (!info.isFetchingDataRows()) {
 
                 BaseResponse childResponse = new BaseResponse();
@@ -156,6 +157,7 @@ public class OPPServerChannel implements DataChannel {
                         else {
 
                             List childObjects = new ArrayList(objects.size());
+                            GraphManager mergeContext = new GraphMap();
                             Iterator it = objects.iterator();
                             while (it.hasNext()) {
                                 Persistent object = (Persistent) it.next();
@@ -168,50 +170,13 @@ public class OPPServerChannel implements DataChannel {
                                                     + object);
                                 }
 
-                                Persistent cachedObject = (Persistent) context
-                                        .getGraphManager()
-                                        .getNode(id);
+                                ClassDescriptor descriptor = resolver.getObjEntity(
+                                        id.getEntityName()).getClassDescriptor();
 
-                                if (cachedObject != null) {
-
-                                    // TODO: implement smart merge for modified objects...
-                                    if (cachedObject.getPersistenceState() != PersistenceState.MODIFIED) {
-
-                                        // refresh existing object...
-
-                                        // lookup descriptor on the spot - we can be
-                                        // dealing with a mix of different objects in the
-                                        // inheritance hierarchy...
-                                        ClassDescriptor descriptor = resolver
-                                                .getObjEntity(id.getEntityName())
-                                                .getClassDescriptor();
-
-                                        if (cachedObject.getPersistenceState() == PersistenceState.HOLLOW) {
-                                            cachedObject
-                                                    .setPersistenceState(PersistenceState.COMMITTED);
-                                            descriptor.prepareForAccess(cachedObject);
-                                        }
-
-                                        descriptor.shallowCopy(object, cachedObject);
-                                    }
-
-                                    childObjects.add(cachedObject);
-                                }
-                                else {
-
-                                    // lookup descriptor on the spot - we can deal with a
-                                    // mix of different objects in the hierarchy...
-                                    ClassDescriptor descriptor = resolver.getObjEntity(
-                                            id.getEntityName()).getClassDescriptor();
-
-                                    object
-                                            .setPersistenceState(PersistenceState.COMMITTED);
-                                    object.setObjectContext(context);
-                                    descriptor.prepareForAccess(object);
-                                    context.getGraphManager().registerNode(id, object);
-                                    childObjects.add(object);
-                                }
-
+                                childObjects.add(descriptor.deepMerge(
+                                        context,
+                                        object,
+                                        mergeContext));
                             }
 
                             childResponse.addResultList(childObjects);

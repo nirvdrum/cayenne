@@ -60,6 +60,7 @@ import java.util.Collections;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 
@@ -67,7 +68,7 @@ public class ClientEntityResolverTst extends TestCase {
 
     public void testSerializabilityWithHessian() throws Exception {
         ObjEntity entity = new ObjEntity("test_entity");
-        entity.setClassName("java.lang.String");
+        entity.setClassName(Artist.class.getName());
 
         DataMap dataMap = new DataMap("test");
         dataMap.addObjEntity(entity);

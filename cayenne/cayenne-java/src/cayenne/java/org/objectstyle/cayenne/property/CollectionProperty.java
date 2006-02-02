@@ -57,8 +57,11 @@ package org.objectstyle.cayenne.property;
 
 import java.util.Collection;
 
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.graph.GraphManager;
+
 /**
- * Provides access to a property implemented as a Collection Field.
+ * Provides access to a property implemented as a Collection.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -84,8 +87,14 @@ public abstract class CollectionProperty extends SimpleProperty implements ArcPr
     }
 
     public void shallowCopy(Object from, Object to) throws PropertyAccessException {
-        // TODO: at least invalidate the list somehow..
+        // noop
     }
+
+    public abstract void deepCopy(
+            ObjectContext context,
+            Object from,
+            Object to,
+            GraphManager mergeMap);
 
     /**
      * Injects a List in the object if it hasn't been done yet.

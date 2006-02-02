@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne.property;
 
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.graph.GraphManager;
+
 /**
  * A property descriptor that provides access to a simple object property, delegating
  * property read/write operations to an accessor.
@@ -92,6 +95,17 @@ public class SimpleProperty implements Property {
 
     public void shallowCopy(Object from, Object to) throws PropertyAccessException {
         writeValue(to, accessor.readValue(to), accessor.readValue(from));
+    }
+
+    /**
+     * Does the same thing as 'shallowCopy'.
+     */
+    public void deepCopy(
+            ObjectContext context,
+            Object from,
+            Object to,
+            GraphManager mergeMap) {
+        shallowCopy(from, to);
     }
 
     public Object readValue(Object object) throws PropertyAccessException {

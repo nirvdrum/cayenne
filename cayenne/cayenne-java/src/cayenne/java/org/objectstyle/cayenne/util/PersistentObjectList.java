@@ -110,7 +110,7 @@ public class PersistentObjectList extends RelationshipFault implements List {
     /**
      * Turns itself into a fault, thus forcing a refresh on the next access.
      */
-    public void invalidateObjectList() {
+    public void invalidate() {
         setObjectList(null);
     }
 

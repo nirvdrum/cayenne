@@ -55,9 +55,14 @@
  */
 package org.objectstyle.cayenne.property;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
+import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.util.PersistentObjectList;
 
 /**
@@ -86,5 +91,31 @@ public class ListProperty extends CollectionProperty {
         }
 
         return new PersistentObjectList((Persistent) object, getPropertyName());
+    }
+
+    public void deepCopy(
+            ObjectContext context,
+            Object from,
+            Object to,
+            GraphManager mergeMap) {
+
+        PersistentObjectList toHolder = (PersistentObjectList) ensureCollectionSet(to);
+
+        // do not init fromHolder if it is not set...
+        PersistentObjectList fromHolder = (PersistentObjectList) accessor.readValue(from);
+
+        if (fromHolder == null || fromHolder.isFault()) {
+            toHolder.invalidate();
+        }
+        else {
+            List objects = new ArrayList(fromHolder.size());
+
+            Iterator it = fromHolder.iterator();
+            while (it.hasNext()) {
+                objects.add(targetDescriptor.deepMerge(context, it.next(), mergeMap));
+            }
+
+            toHolder.setObjectList(objects);
+        }
     }
 }

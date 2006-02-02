@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.CayenneContext;
 import org.objectstyle.cayenne.MockPersistentObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -100,11 +101,13 @@ public class OPPServerChannelTst extends CayenneTestCase {
         List list = response.firstList();
         assertNotNull(list);
         assertEquals(1, list.size());
-        assertTrue(list.contains(o1));
+        Persistent o1_1 = (Persistent) list.get(0);
+        
+        assertEquals(o1.getObjectId(), o1_1.getObjectId());
 
         // ObjectContext must be injected
-        assertEquals(context, o1.getObjectContext());
-        assertSame(o1, context.getGraphManager().getNode(oid1));
+        assertEquals(context, o1_1.getObjectContext());
+        assertSame(o1_1, context.getGraphManager().getNode(oid1));
     }
 
     public void testOnQuerySelectOverrideCached() {

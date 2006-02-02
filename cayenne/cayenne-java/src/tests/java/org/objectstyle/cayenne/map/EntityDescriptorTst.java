@@ -57,7 +57,10 @@ package org.objectstyle.cayenne.map;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.CayenneDataObject;
+import org.objectstyle.cayenne.PersistentObject;
 import org.objectstyle.cayenne.property.BaseClassDescriptor;
+import org.objectstyle.cayenne.property.PropertyAccessException;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
 import org.objectstyle.cayenne.util.Util;
@@ -69,19 +72,17 @@ public class EntityDescriptorTst extends TestCase {
         e1.setClassName(String.class.getName());
 
         EntityDescriptor d1 = new EntityDescriptor(e1, null);
-        d1.compile();
         assertNull(d1.getSuperclassDescriptor());
 
         BaseClassDescriptor mockSuper = new BaseClassDescriptor(null) {
         };
         EntityDescriptor d2 = new EntityDescriptor(e1, mockSuper);
-        d2.compile();
         assertSame(mockSuper, d2.getSuperclassDescriptor());
     }
 
     public void testCompile() {
         ObjEntity e1 = new ObjEntity("TestEntity");
-        e1.setClassName(Integer.class.getName());
+        e1.setClassName(CayenneDataObject.class.getName());
 
         // compilation must be done in constructor...
         EntityDescriptor d1 = new EntityDescriptor(e1, null);
@@ -89,9 +90,25 @@ public class EntityDescriptorTst extends TestCase {
         assertTrue(d1.isValid());
     }
 
+    public void testCompileNonPersistent() {
+        ObjEntity e1 = new ObjEntity("TestEntity");
+        e1.setClassName(Object.class.getName());
+
+        // compilation must be done in constructor...
+        EntityDescriptor d1 = new EntityDescriptor(e1, null);
+
+        try {
+            d1.compile();
+            fail("Should not be able to compile an class that does not define ObjectId");
+        }
+        catch (PropertyAccessException e) {
+            // expected
+        }
+    }
+
     public void testCompileOnDeserialization() throws Exception {
         ObjEntity e1 = new ObjEntity("TestEntity");
-        e1.setClassName(Integer.class.getName());
+        e1.setClassName(PersistentObject.class.getName());
 
         EntityDescriptor d1 = new EntityDescriptor(e1, null);
 

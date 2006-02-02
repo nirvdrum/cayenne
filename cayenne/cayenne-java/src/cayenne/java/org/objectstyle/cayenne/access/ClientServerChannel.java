@@ -215,9 +215,8 @@ public class ClientServerChannel implements DataChannel {
             // rewrite response to contain client objects
 
             BaseResponse clientResponse = new BaseResponse();
-            response.reset();
 
-            while (response.next()) {
+            for (response.reset(); response.next();) {
                 if (response.isList()) {
                     List serverObjects = response.currentList();
 
