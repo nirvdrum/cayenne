@@ -195,7 +195,7 @@ public class ToManyList implements List, Serializable, ValueHolder {
     // Standard List Methods.
     // ====================================================
     public boolean add(Object o) {
-        return (needsFetch()) ? addLocal(o) : objectList.add(o);
+        return (isFault()) ? addLocal(o) : objectList.add(o);
     }
 
     public void add(int index, Object element) {
@@ -271,7 +271,7 @@ public class ToManyList implements List, Serializable, ValueHolder {
     }
 
     public boolean remove(Object o) {
-        return (needsFetch()) ? removeLocal(o) : objectList.remove(o);
+        return (isFault()) ? removeLocal(o) : objectList.remove(o);
     }
 
     public boolean removeAll(Collection c) {
@@ -321,13 +321,13 @@ public class ToManyList implements List, Serializable, ValueHolder {
      * Returns internal objects list resolving it if needed.
      */
     List resolvedObjectList() {
-        if (needsFetch()) {
+        if (isFault()) {
 
             synchronized (this) {
                 // now that we obtained the lock, check
                 // if another thread just resolved the list
 
-                if (needsFetch()) {
+                if (isFault()) {
                     List localList;
 
                     if (isTransientSource()) {

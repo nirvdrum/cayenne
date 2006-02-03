@@ -123,7 +123,7 @@ public class IncrementalFaultListPrefetchTst extends DataContextTestBase {
             Artist a = (Artist) result.get(i);
 
             ToManyList paintings = (ToManyList) a.getPaintingArray();
-            assertFalse(paintings.needsFetch());
+            assertFalse(paintings.isFault());
             assertEquals(1, paintings.size());
         }
     }

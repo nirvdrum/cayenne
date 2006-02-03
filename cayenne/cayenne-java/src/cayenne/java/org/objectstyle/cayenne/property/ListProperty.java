@@ -118,7 +118,7 @@ public class ListProperty extends CollectionProperty {
                 objects.add(targetDescriptor.deepMerge(context, it.next(), mergeMap));
             }
 
-            toHolder.setValue(objects);
+            toHolder.setInitialValue(objects);
         }
     }
 }

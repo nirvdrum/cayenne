@@ -175,7 +175,7 @@ public class JointPrefetchTst extends CayenneTestCase {
                 ToManyList list = (ToManyList) a.getPaintingArray();
 
                 assertNotNull(list);
-                assertFalse(list.needsFetch());
+                assertFalse(list.isFault());
                 assertTrue(list.size() > 0);
 
                 Iterator children = list.iterator();
@@ -302,7 +302,7 @@ public class JointPrefetchTst extends CayenneTestCase {
                 ToManyList list = (ToManyList) a.getPaintingArray();
 
                 assertNotNull(list);
-                assertFalse(list.needsFetch());
+                assertFalse(list.isFault());
                 assertTrue(list.size() > 0);
 
                 Iterator children = list.iterator();
@@ -345,7 +345,7 @@ public class JointPrefetchTst extends CayenneTestCase {
             ToManyList list = (ToManyList) a.getPaintingArray();
 
             assertNotNull(list);
-            assertFalse(list.needsFetch());
+            assertFalse(list.isFault());
             assertEquals(2, list.size());
 
             Iterator children = list.iterator();
@@ -400,7 +400,7 @@ public class JointPrefetchTst extends CayenneTestCase {
                 assertNotNull(list);
 
                 // intermediate relationship is not fetched...
-                assertTrue(list.needsFetch());
+                assertTrue(list.isFault());
             }
 
             // however both galleries must be in memory...

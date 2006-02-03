@@ -101,7 +101,7 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
                 ToManyList list = (ToManyList) a.getGroupArray();
 
                 assertNotNull(list);
-                assertFalse("artist's groups not resolved: " + a, list.needsFetch());
+                assertFalse("artist's groups not resolved: " + a, list.isFault());
                 assertTrue(list.size() > 0);
 
                 Iterator children = list.iterator();
@@ -144,7 +144,7 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
 
                 ToManyList list = (ToManyList) a.getGroupArray();
                 assertNotNull(list);
-                assertFalse("artist's groups not resolved: " + a, list.needsFetch());
+                assertFalse("artist's groups not resolved: " + a, list.isFault());
                 assertTrue(list.size() > 0);
 
                 Iterator children = list.iterator();
@@ -186,7 +186,7 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
                 ToManyList list = (ToManyList) a.getGroupArray();
 
                 assertNotNull(list);
-                assertFalse("artist's groups not resolved: " + a, list.needsFetch());
+                assertFalse("artist's groups not resolved: " + a, list.isFault());
                 assertTrue(list.size() > 0);
 
                 Iterator children = list.iterator();
@@ -232,7 +232,7 @@ public class FlattenedPrefetchTst extends CayenneTestCase {
 
                 ToManyList list = (ToManyList) a.getGroupArray();
                 assertNotNull(list);
-                assertFalse("artist's groups not resolved: " + a, list.needsFetch());
+                assertFalse("artist's groups not resolved: " + a, list.isFault());
                 assertTrue(list.size() > 0);
 
                 Iterator children = list.iterator();

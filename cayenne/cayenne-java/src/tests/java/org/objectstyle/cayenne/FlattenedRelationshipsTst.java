@@ -113,7 +113,7 @@ public class FlattenedRelationshipsTst extends RelationshipTestCase {
 
         assertEquals("t01", fresh01.getName());
         ToManyList related = (ToManyList) fresh01.getFt3OverComplex();
-        assertTrue(related.needsFetch());
+        assertTrue(related.isFault());
 
         assertEquals(2, related.size());
     }
@@ -134,7 +134,7 @@ public class FlattenedRelationshipsTst extends RelationshipTestCase {
 
         assertEquals("ft12", ft1.getName());
         ToManyList related = (ToManyList) ft1.getFt3OverComplex();
-        assertTrue(related.needsFetch());
+        assertTrue(related.isFault());
 
         assertEquals(2, related.size());
 
