@@ -80,12 +80,12 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
 
     protected ClassDescriptor superclassDescriptor;
 
-    // compiled properties ... all declared as transient
-    protected transient Class objectClass;
-    protected transient Map declaredProperties;
-    protected transient PropertyAccessor objectIdProperty;
-    protected transient PropertyAccessor contextProperty;
-    protected transient PropertyAccessor persistentStateProperty;
+    // compiled properties ...
+    protected Class objectClass;
+    protected Map declaredProperties;
+    protected PropertyAccessor objectIdProperty;
+    protected PropertyAccessor contextProperty;
+    protected PropertyAccessor persistentStateProperty;
 
     /**
      * Creates an uncompiled BaseClassDescriptor. Subclasses may add a call to "compile"

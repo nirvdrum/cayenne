@@ -59,7 +59,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.ClientServerChannel;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.opp.LocalConnection;
 import org.objectstyle.cayenne.opp.OPPConnection;
 import org.objectstyle.cayenne.opp.OPPServerChannel;
@@ -115,9 +114,8 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         CayenneContext context = new CayenneContext(channel);
         ObjectId id = new ObjectId("MtTable1", MtTable1.TABLE1_ID_PK_COLUMN, new Integer(
                 1));
-        ObjEntity entity = context.getEntityResolver().getObjEntity("MtTable1");
 
-        Object fault = context.createFault(entity, id);
+        Object fault = context.createFault(id);
         assertTrue(fault instanceof ClientMtTable1);
 
         ClientMtTable1 o = (ClientMtTable1) fault;
@@ -143,9 +141,8 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         CayenneContext context = new CayenneContext(new ClientServerChannel(getDomain()));
         ObjectId id = new ObjectId("MtTable1", MtTable1.TABLE1_ID_PK_COLUMN, new Integer(
                 2));
-        ObjEntity entity = context.getEntityResolver().getObjEntity("MtTable1");
 
-        Object fault = context.createFault(entity, id);
+        Object fault = context.createFault(id);
         assertTrue(fault instanceof ClientMtTable1);
 
         ClientMtTable1 o = (ClientMtTable1) fault;

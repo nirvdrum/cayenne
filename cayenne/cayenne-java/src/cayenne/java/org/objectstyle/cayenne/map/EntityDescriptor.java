@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -90,7 +88,8 @@ public class EntityDescriptor extends BaseClassDescriptor {
 
     protected ObjEntity entity;
 
-    transient boolean dataObject;
+    // compiled property
+    boolean dataObject;
 
     /**
      * Creates and compiles a class descriptor for a given entity. A second optional
@@ -128,7 +127,7 @@ public class EntityDescriptor extends BaseClassDescriptor {
      * Prepares the descriptor. A descriptor must be explicitly compiled before it can
      * operate.
      */
-    public void compile() {
+    public void compile(EntityResolver resolver) {
         if (entity == null) {
             throw new IllegalStateException(
                     "Entity is not initialized, can't index descriptor.");
@@ -147,7 +146,7 @@ public class EntityDescriptor extends BaseClassDescriptor {
         // init property descriptors...
         Map allDescriptors = new HashMap();
         compileAttributes(allDescriptors);
-        compileRelationships(allDescriptors);
+        compileRelationships(resolver, allDescriptors);
 
         this.declaredProperties = allDescriptors;
     }
@@ -173,15 +172,15 @@ public class EntityDescriptor extends BaseClassDescriptor {
      * ValueHolderProperty and to-many - to CollectionProperty. Called internally from
      * "compile" method.
      */
-    protected void compileRelationships(Map allDescriptors) {
+    protected void compileRelationships(EntityResolver resolver, Map allDescriptors) {
 
         // only include this entity relationships and skip superclasses...
         Iterator it = entity.getDeclaredRelationships().iterator();
         while (it.hasNext()) {
 
             ObjRelationship relationship = (ObjRelationship) it.next();
-            ClassDescriptor targetDescriptor = ((ObjEntity) relationship
-                    .getTargetEntity()).getClassDescriptor();
+            ClassDescriptor targetDescriptor = resolver.getClassDescriptor(relationship
+                    .getTargetEntityName());
             String reverseName = relationship.getReverseRelationshipName();
 
             Property property;
@@ -260,17 +259,5 @@ public class EntityDescriptor extends BaseClassDescriptor {
         return new ToStringBuilder(this).append("entity", entityName).append(
                 "objectClass",
                 className).toString();
-    }
-
-    /**
-     * Deserialization method that recompiles the descriptor.
-     */
-    private void readObject(ObjectInputStream in) throws IOException,
-            ClassNotFoundException {
-
-        in.defaultReadObject();
-        compile();
-
-        // TODO: it won't preserve customizations...
     }
 }

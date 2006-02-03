@@ -75,7 +75,7 @@ public class ClientEntityResolverTst extends TestCase {
         Collection entities = Collections.singleton(dataMap);
         EntityResolver resolver = new EntityResolver(entities);
 
-        // simple case
+        // 1. simple case
         Object c1 = HessianUtil.cloneViaHessianSerialization(resolver);
 
         assertNotNull(c1);
@@ -86,15 +86,15 @@ public class ClientEntityResolverTst extends TestCase {
         assertEquals(1, cr1.getObjEntities().size());
         assertNotNull(cr1.getObjEntity(entity.getName()));
 
-        // with descriptors resolved...
-        assertNotNull(entity.getClassDescriptor());
+        // 2. with descriptors resolved...
+        assertNotNull(resolver.getClassDescriptor(entity.getName()));
 
         EntityResolver cr2 = (EntityResolver) HessianUtil
                 .cloneViaHessianSerialization(resolver);
         assertNotNull(cr2);
         assertEquals(1, cr2.getObjEntities().size());
         assertNotNull(cr2.getObjEntity(entity.getName()));
-        assertNotNull(cr2.getObjEntity(entity.getName()).getClassDescriptor());
+        assertNotNull(cr2.getClassDescriptor(entity.getName()));
     }
 
     public void testConstructor() {

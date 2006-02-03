@@ -69,13 +69,14 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.property.ClassDescriptor;
+import org.objectstyle.cayenne.property.ClassDescriptorFactory;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * Represents a virtual shared namespace for zero or more DataMaps. EntityResolver is used
- * by Cayenne runtime and in addition to EntityNamespace interface methods implements
- * other convenience lookups, resolving entities for Queries, Java classes, etc. DataMaps
- * can be added or removed dynamically at runtime.
+ * Represents a virtual shared namespace for zero or more DataMaps. Unlike DataMap,
+ * EntityResolver is intended to work as a runtime container of mapping. DataMaps can be
+ * added or removed dynamically at runtime.
  * <p>
  * EntityResolver is thread-safe.
  * </p>
@@ -96,6 +97,10 @@ public class EntityResolver implements MappingNamespace, Serializable {
     protected List maps;
     protected Map entityInheritanceCache;
     protected EntityResolver clientEntityResolver;
+
+    // must be transient, as resolver may get deserialized in another VM, and descriptor
+    // recompilation will be desired.
+    protected transient ClassDescriptorFactory classDescriptorFactory;
 
     /**
      * Creates new EntityResolver.
@@ -215,6 +220,20 @@ public class EntityResolver implements MappingNamespace, Serializable {
 
     public Query getQuery(String name) {
         return lookupQuery(name);
+    }
+
+    /**
+     * Returns ClassDescriptor for the ObjEntity matching the name. Returns null if no
+     * matching entity exists.
+     * 
+     * @since 1.2
+     */
+    public synchronized ClassDescriptor getClassDescriptor(String entityName) {
+        if (entityName == null) {
+            throw new IllegalArgumentException("Null entityName");
+        }
+
+        return getClassDescriptorFactory().getDescriptor(entityName);
     }
 
     public synchronized void addDataMap(DataMap map) {
@@ -633,5 +652,28 @@ public class EntityResolver implements MappingNamespace, Serializable {
         }
 
         return (ObjEntity) result;
+    }
+
+    /**
+     * Returns a factory for ClassDescriptors used by Cayenne stack. This method is
+     * guaranteed to return non null value. If the factory hasn't been set explicitly, it
+     * initializes default {@link EntityDescriptorFactory}.
+     * 
+     * @since 1.2
+     */
+    public ClassDescriptorFactory getClassDescriptorFactory() {
+        if (classDescriptorFactory == null) {
+            this.classDescriptorFactory = new EntityDescriptorFactory(this);
+        }
+        return classDescriptorFactory;
+    }
+
+    /**
+     * Sets a factory for ClassDescriptors used by Cayenne stack.
+     * 
+     * @since 1.2
+     */
+    public void setClassDescriptorFactory(ClassDescriptorFactory descriptorFactory) {
+        this.classDescriptorFactory = descriptorFactory;
     }
 }

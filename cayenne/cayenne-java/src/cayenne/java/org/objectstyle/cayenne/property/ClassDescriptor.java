@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.property;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 import org.objectstyle.cayenne.ObjectContext;
@@ -68,7 +67,7 @@ import org.objectstyle.cayenne.graph.GraphManager;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface ClassDescriptor extends Serializable {
+public interface ClassDescriptor {
 
     /**
      * Returns a bean class mapped by this descriptor.

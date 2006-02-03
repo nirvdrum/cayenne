@@ -324,7 +324,7 @@ public class CayenneContext implements ObjectContext {
         }
 
         synchronized (graphManager) {
-            return createNewObject(entity, new ObjectId(entity.getName()));
+            return createNewObject(new ObjectId(entity.getName()));
         }
     }
 
@@ -368,8 +368,8 @@ public class CayenneContext implements ObjectContext {
         // note that per-object ClassDescriptor lookup is needed as even if all
         // objects where fetched as a part of the same query, as they may belong to
         // different subclasses
-        ClassDescriptor descriptor = getEntityResolver().lookupObjEntity(
-                id.getEntityName()).getClassDescriptor();
+        ClassDescriptor descriptor = getEntityResolver().getClassDescriptor(
+                id.getEntityName());
 
         GraphManager graphManager = getGraphManager();
         Persistent cachedObject = (Persistent) graphManager.getNode(id);
@@ -495,16 +495,12 @@ public class CayenneContext implements ObjectContext {
         }
     }
 
-    ClassDescriptor getClassDescriptor(Persistent object) {
-        ObjEntity entity = getEntityResolver().lookupObjEntity(
-                object.getObjectId().getEntityName());
-        return entity.getClassDescriptor();
-    }
+   
 
     // ****** non-public methods ******
 
-    Persistent createNewObject(ObjEntity entity, ObjectId id) {
-        ClassDescriptor descriptor = entity.getClassDescriptor();
+    Persistent createNewObject(ObjectId id) {
+        ClassDescriptor descriptor = getEntityResolver().getClassDescriptor(id.getEntityName());
 
         Persistent object = (Persistent) descriptor.createObject();
 
@@ -519,8 +515,8 @@ public class CayenneContext implements ObjectContext {
         return object;
     }
 
-    Persistent createFault(ObjEntity entity, ObjectId id) {
-        ClassDescriptor descriptor = entity.getClassDescriptor();
+    Persistent createFault(ObjectId id) {
+        ClassDescriptor descriptor = getEntityResolver().getClassDescriptor(id.getEntityName());
 
         Persistent object = (Persistent) descriptor.createObject();
 

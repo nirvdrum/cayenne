@@ -170,8 +170,7 @@ public class OPPServerChannel implements DataChannel {
                                                     + object);
                                 }
 
-                                ClassDescriptor descriptor = resolver.getObjEntity(
-                                        id.getEntityName()).getClassDescriptor();
+                                ClassDescriptor descriptor = resolver.getClassDescriptor(id.getEntityName());
 
                                 childObjects.add(descriptor.deepMerge(
                                         context,

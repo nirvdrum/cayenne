@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.map;
 import org.objectstyle.cayenne.property.ArcProperty;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.property.MockClassDescriptor;
+import org.objectstyle.cayenne.property.MockClassDescriptorFactory;
 import org.objectstyle.cayenne.property.Property;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
 import org.objectstyle.cayenne.testdo.mt.MtTable2;
@@ -65,7 +66,7 @@ import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
 
-public class ObjEntityClassDescriptorTst extends CayenneTestCase {
+public class EntityResolverClassDescriptorTst extends CayenneTestCase {
 
     /**
      * Configures multi-tier stack as we want to access descriptors in different tiers...
@@ -77,59 +78,41 @@ public class ObjEntityClassDescriptorTst extends CayenneTestCase {
     }
 
     public void testServerDescriptorCaching() {
-        ObjEntity entity = getServerEntity("MtTable1");
-        entity.setClassDescriptor(null);
+        EntityResolver resolver = getDomain().getEntityResolver();
+        resolver.setClassDescriptorFactory(null);
 
-        ClassDescriptor descriptor = entity.getClassDescriptor();
+        ClassDescriptor descriptor = resolver.getClassDescriptor("MtTable1");
         assertNotNull(descriptor);
-        assertSame(descriptor, entity.getClassDescriptor());
-        entity.setClassDescriptor(null);
+        assertSame(descriptor, resolver.getClassDescriptor("MtTable1"));
+        resolver.setClassDescriptorFactory(null);
 
-        ClassDescriptor descriptor1 = entity.getClassDescriptor();
+        ClassDescriptor descriptor1 = resolver.getClassDescriptor("MtTable1");
         assertNotNull(descriptor1);
         assertNotSame(descriptor, descriptor1);
     }
 
     public void testServerDescriptorFactory() {
-        ObjEntity entity = getServerEntity("MtTable1");
-        entity.setClassDescriptor(null);
+        EntityResolver resolver = getDomain().getEntityResolver();
+        resolver.setClassDescriptorFactory(null);
 
         MockClassDescriptor mockDescriptor = new MockClassDescriptor();
-        entity.getDataMap().setDescriptorFactory(
-                new MockClassDescriptorFactory(mockDescriptor));
-
+        resolver
+                .setClassDescriptorFactory(new MockClassDescriptorFactory(mockDescriptor));
         try {
-            ClassDescriptor descriptor = entity.getClassDescriptor();
+            ClassDescriptor descriptor = resolver.getClassDescriptor("MtTable1");
             assertNotNull(descriptor);
             assertSame(mockDescriptor, descriptor);
         }
         finally {
-            entity.getDataMap().setDescriptorFactory(null);
+            resolver.setClassDescriptorFactory(null);
         }
     }
 
-    public void testClientDescriptorCaching() {
-        ObjEntity entity = getClientEntity("MtTable1");
-        entity.setClassDescriptor(null);
-
-        ClassDescriptor descriptor = entity.getClassDescriptor();
-        assertNotNull(descriptor);
-        assertSame(descriptor, entity.getClassDescriptor());
-        entity.setClassDescriptor(null);
-
-        ClassDescriptor descriptor1 = entity.getClassDescriptor();
-        assertNotNull(descriptor1);
-        assertNotSame(descriptor, descriptor1);
-    }
-
     public void testArcProperties() {
-        ObjEntity entity = getServerEntity("MtTable1");
-        entity.setClassDescriptor(null);
+        EntityResolver resolver = getDomain().getEntityResolver();
+        resolver.setClassDescriptorFactory(null);
 
-        ObjEntity entity2 = getServerEntity("MtTable2");
-        entity2.setClassDescriptor(null);
-
-        ClassDescriptor descriptor = entity.getClassDescriptor();
+        ClassDescriptor descriptor = resolver.getClassDescriptor("MtTable1");
         assertNotNull(descriptor);
 
         Property p = descriptor.getProperty(MtTable1.TABLE2ARRAY_PROPERTY);
@@ -137,16 +120,7 @@ public class ObjEntityClassDescriptorTst extends CayenneTestCase {
 
         ClassDescriptor target = ((ArcProperty) p).getTargetDescriptor();
         assertNotNull(target);
-        assertSame(entity2.getClassDescriptor(), target);
+        assertSame(resolver.getClassDescriptor("MtTable2"), target);
         assertEquals(MtTable2.TABLE1_PROPERTY, ((ArcProperty) p).getReversePropertyName());
-    }
-
-    protected ObjEntity getServerEntity(String name) {
-        return getDomain().getEntityResolver().getObjEntity(name);
-    }
-
-    protected ObjEntity getClientEntity(String name) {
-        return getDomain().getEntityResolver().getClientEntityResolver().getObjEntity(
-                name);
     }
 }

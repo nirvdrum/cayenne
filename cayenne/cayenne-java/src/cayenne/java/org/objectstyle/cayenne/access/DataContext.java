@@ -1729,8 +1729,8 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
         // note that per-object ClassDescriptor lookup is needed as even if all
         // objects where fetched as a part of the same query, as they may belong to
         // different subclasses
-        ClassDescriptor descriptor = getEntityResolver().lookupObjEntity(
-                id.getEntityName()).getClassDescriptor();
+        ClassDescriptor descriptor = getEntityResolver().getClassDescriptor(
+                id.getEntityName());
 
         GraphManager graphManager = getGraphManager();
         Persistent cachedObject = (Persistent) graphManager.getNode(id);

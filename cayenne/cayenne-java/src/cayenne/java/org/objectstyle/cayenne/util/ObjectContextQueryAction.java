@@ -204,8 +204,7 @@ public class ObjectContextQueryAction {
 
                     ClassDescriptor descriptor = actingContext
                             .getEntityResolver()
-                            .getObjEntity(id.getEntityName())
-                            .getClassDescriptor();
+                            .getClassDescriptor(id.getEntityName());
                     Object related = descriptor
                             .getProperty(relationshipQuery.getRelationshipName())
                             .readPropertyDirectly(object);

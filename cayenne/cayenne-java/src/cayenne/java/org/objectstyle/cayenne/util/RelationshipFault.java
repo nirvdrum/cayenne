@@ -147,8 +147,8 @@ public abstract class RelationshipFault {
         ObjRelationship reverse = relationship.getReverseRelationship();
 
         if (reverse != null && !reverse.isToMany()) {
-            Property property = ((ObjEntity) reverse.getSourceEntity())
-                    .getClassDescriptor()
+            Property property = resolver
+                    .getClassDescriptor(reverse.getSourceEntity().getName())
                     .getProperty(reverse.getName());
 
             Iterator it = resolved.iterator();

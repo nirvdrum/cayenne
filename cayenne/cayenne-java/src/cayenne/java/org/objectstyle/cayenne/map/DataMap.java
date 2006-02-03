@@ -137,14 +137,6 @@ public class DataMap implements Serializable, XMLSerializable, MappingNamespace,
      */
     public static final String DEFAULT_LOCK_TYPE_PROPERTY = "defaultLockType";
 
-    /**
-     * Defines the name of the property for the name of the {@link ClassDescriptorFactory}
-     * class.
-     * 
-     * @since 1.2
-     */
-    public static final String CLASS_DESCRIPTOR_FACTORY_PROPERTY = "descriptorFactory";
-
     protected String name;
     protected String location;
     protected MappingNamespace namespace;
@@ -154,7 +146,6 @@ public class DataMap implements Serializable, XMLSerializable, MappingNamespace,
     protected String defaultSuperclass;
     protected int defaultLockType;
 
-    protected ClassDescriptorFactory descriptorFactory;
     protected boolean clientSupported;
     protected String defaultClientPackage;
 
@@ -949,24 +940,6 @@ public class DataMap implements Serializable, XMLSerializable, MappingNamespace,
      */
     public void setDefaultSuperclass(String defaultSuperclass) {
         this.defaultSuperclass = defaultSuperclass;
-    }
-
-    /**
-     * Returns a factory for ClassDescriptors used by Cayenne stack.
-     * 
-     * @since 1.2
-     */
-    public ClassDescriptorFactory getDescriptorFactory() {
-        return descriptorFactory;
-    }
-
-    /**
-     * Sets a factory for ClassDescriptors used by Cayenne stack.
-     * 
-     * @since 1.2
-     */
-    public void setDescriptorFactory(ClassDescriptorFactory descriptorFactory) {
-        this.descriptorFactory = descriptorFactory;
     }
 
     /**

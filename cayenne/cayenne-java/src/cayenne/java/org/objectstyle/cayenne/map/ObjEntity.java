@@ -75,7 +75,6 @@ import org.objectstyle.cayenne.map.event.ObjAttributeListener;
 import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
-import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.util.CayenneMapEntry;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
@@ -85,7 +84,7 @@ import org.objectstyle.cayenne.util.XMLEncoder;
  * information about the Java class itself, as well as its mapping to the DbEntity layer.
  * 
  * @author Misha Shengaout
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class ObjEntity extends Entity implements ObjEntityListener, ObjAttributeListener,
         ObjRelationshipListener {
@@ -114,11 +113,6 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
     protected boolean serverOnly;
     protected String clientClassName;
     protected String clientSuperClassName;
-
-    // must be transient - it is desirable to rebuild descriptor when passing entity
-    // between VMs; also Hessian serialization chokes on attempt to deserialize a
-    // descriptor.
-    protected transient ClassDescriptor classDescriptor;
 
     public ObjEntity() {
         this(null);
@@ -195,55 +189,6 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
 
         encoder.indent(-1);
         encoder.println("</obj-entity>");
-    }
-
-    /**
-     * Returns a ClassDescriptor for this ObjEntity. If class descriptor is null, creates
-     * it on the fly and caches internally for later reuse.
-     * 
-     * @since 1.2
-     */
-    public ClassDescriptor getClassDescriptor() {
-        if (classDescriptor == null) {
-            prepareClassDescriptor();
-        }
-        return classDescriptor;
-    }
-
-    /*
-     * An internal factory method that creates a new ClassDescriptor. Uses parent DataMap
-     * factory if possible.
-     * 
-     * @since 1.2
-     */
-    void prepareClassDescriptor() {
-        ObjEntity superEntity = getSuperEntity();
-        ClassDescriptor superDescriptor = (superEntity != null) ? superEntity
-                .getClassDescriptor() : null;
-
-        if (getDataMap() != null && getDataMap().getDescriptorFactory() != null) {
-            this.classDescriptor = getDataMap().getDescriptorFactory().getDescriptor(
-                    this,
-                    superDescriptor);
-        }
-        else {
-            EntityDescriptor descriptor = new EntityDescriptor(this, superDescriptor);
-            this.classDescriptor = descriptor;
-
-            // compile AFTER the ivar is set ... this will preclude endless loops when
-            // attempting to compile arc properties, that requires an access to the target
-            // entity descriptor...
-            descriptor.compile();
-        }
-    }
-
-    /**
-     * Sets ClassDescriptor of this entity overriding the default one.
-     * 
-     * @since 1.2
-     */
-    public void setClassDescriptor(ClassDescriptor classDescriptor) {
-        this.classDescriptor = classDescriptor;
     }
 
     /**

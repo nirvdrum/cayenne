@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.property.ArcProperty;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.property.Property;
@@ -127,13 +126,13 @@ class ServerToClientObjectConverter {
             // a smaller lookup map ... can save a
             // few CPU cycles on big lists
 
-            ObjEntity entity = clientResolver.lookupObjEntity(id.getEntityName());
-            if (entity == null) {
-                throw new CayenneRuntimeException("No client entity mapped for name: "
-                        + id.getEntityName());
+            ClassDescriptor descriptor = clientResolver.getClassDescriptor(id
+                    .getEntityName());
+            if (descriptor == null) {
+                throw new CayenneRuntimeException(
+                        "No client descriptor exists for entity: " + id.getEntityName());
             }
 
-            ClassDescriptor descriptor = entity.getClassDescriptor();
             clientObject = (Persistent) descriptor.createObject();
             clientObject.setObjectId(id);
 
@@ -142,8 +141,8 @@ class ServerToClientObjectConverter {
             while (it.hasNext()) {
                 Property property = descriptor.getProperty((String) it.next());
                 if (!(property instanceof ArcProperty)) {
-                    property.writePropertyDirectly(clientObject, null, object.readProperty(property
-                            .getPropertyName()));
+                    property.writePropertyDirectly(clientObject, null, object
+                            .readProperty(property.getPropertyName()));
                 }
             }
             clientObjectsByOID.put(object.getObjectId(), clientObject);
@@ -165,8 +164,8 @@ class ServerToClientObjectConverter {
                                 + parent.getObjectId());
             }
 
-            ObjEntity parentEntity = (ObjEntity) node.incoming.getSourceEntity();
-            ClassDescriptor parentDescriptor = parentEntity.getClassDescriptor();
+            ClassDescriptor parentDescriptor = clientResolver
+                    .getClassDescriptor(node.incoming.getSourceEntity().getName());
 
             Property arcProperty = parentDescriptor.getProperty(node.incoming.getName());
             arcProperty.writePropertyDirectly(clientParentObject, null, clientObject);

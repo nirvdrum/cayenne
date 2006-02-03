@@ -58,31 +58,28 @@ package org.objectstyle.cayenne.map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.PersistentObject;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.property.ClassDescriptor;
-import org.objectstyle.cayenne.property.MockClassDescriptor;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.util.Util;
 
 public class ObjEntityTst extends CayenneTestCase {
-    
+
     public void testGeneric() {
         ObjEntity e1 = new ObjEntity("e1");
         assertTrue(e1.isGeneric());
-        
+
         e1.setClassName("SomeClass");
         assertFalse(e1.isGeneric());
-        
+
         DataMap m = new DataMap("X");
         m.setDefaultSuperclass("SomeClass");
         m.addObjEntity(e1);
-        
+
         assertTrue(e1.isGeneric());
-        
+
         e1.setClassName("SomeOtherClass");
         assertFalse(e1.isGeneric());
-        
+
         e1.setClassName(CayenneDataObject.class.getName());
         assertTrue(e1.isGeneric());
     }
@@ -111,39 +108,6 @@ public class ObjEntityTst extends CayenneTestCase {
 
         e1.setServerOnly(true);
         assertFalse(e1.isClientAllowed());
-    }
-
-    public void testClassDescriptor() {
-        ObjEntity e1 = new ObjEntity("e1");
-        e1.setClassName(PersistentObject.class.getName());
-
-        // class descriptor must be built on demand...
-        ClassDescriptor descriptor = e1.getClassDescriptor();
-        assertNotNull(descriptor);
-        assertNull(descriptor.getSuperclassDescriptor());
-
-        // test that we can reset it to a custom value
-        ClassDescriptor customDescriptor = new MockClassDescriptor();
-        e1.setClassDescriptor(customDescriptor);
-        assertSame(customDescriptor, e1.getClassDescriptor());
-    }
-
-    public void testClassDescriptorWithSuperEntity() {
-        DataMap map = new DataMap();
-
-        ObjEntity e1 = new ObjEntity("e1");
-        e1.setClassName(CayenneDataObject.class.getName());
-        map.addObjEntity(e1);
-
-        // test that super descriptor is set
-        ObjEntity e2 = new ObjEntity("e2");
-        e2.setClassName(Artist.class.getName());
-        map.addObjEntity(e2);
-        e2.setSuperEntityName(e1.getName());
-
-        ClassDescriptor descriptor = e2.getClassDescriptor();
-        assertNotNull(descriptor);
-        assertNotNull(descriptor.getSuperclassDescriptor());
     }
 
     public void testGetClientEntity() {

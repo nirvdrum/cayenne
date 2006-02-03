@@ -88,7 +88,8 @@ class CayenneContextGraphAction {
         // translate ObjectContext generic property change callback to GraphManager terms
         // (simple properties vs. relationships)
 
-        ClassDescriptor descriptor = context.getClassDescriptor(object);
+        ClassDescriptor descriptor = context.getEntityResolver().getClassDescriptor(
+                object.getObjectId().getEntityName());
         Property property = descriptor.getProperty(propertyName);
 
         // relationship property
@@ -186,7 +187,9 @@ class CayenneContextGraphAction {
 
         String reverseName = property.getReversePropertyName();
         if (reverseName != null) {
-            ClassDescriptor reverseDescriptor = context.getClassDescriptor(targetObject);
+            ClassDescriptor reverseDescriptor = context
+                    .getEntityResolver()
+                    .getClassDescriptor(targetObject.getObjectId().getEntityName());
             reverseDescriptor.getProperty(reverseName).writePropertyDirectly(
                     targetObject,
                     null,
@@ -208,7 +211,9 @@ class CayenneContextGraphAction {
 
         String reverseName = property.getReversePropertyName();
         if (reverseName != null) {
-            ClassDescriptor reverseDescriptor = context.getClassDescriptor(targetObject);
+            ClassDescriptor reverseDescriptor = context
+                    .getEntityResolver()
+                    .getClassDescriptor(targetObject.getObjectId().getEntityName());
             reverseDescriptor.getProperty(reverseName).writePropertyDirectly(
                     targetObject,
                     sourceObject,

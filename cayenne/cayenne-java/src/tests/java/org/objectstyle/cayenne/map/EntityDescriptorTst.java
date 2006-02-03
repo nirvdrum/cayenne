@@ -58,12 +58,10 @@ package org.objectstyle.cayenne.map;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.CayenneDataObject;
-import org.objectstyle.cayenne.PersistentObject;
 import org.objectstyle.cayenne.property.BaseClassDescriptor;
 import org.objectstyle.cayenne.property.PropertyAccessException;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
-import org.objectstyle.cayenne.util.Util;
 
 public class EntityDescriptorTst extends TestCase {
 
@@ -86,7 +84,7 @@ public class EntityDescriptorTst extends TestCase {
 
         // compilation must be done in constructor...
         EntityDescriptor d1 = new EntityDescriptor(e1, null);
-        d1.compile();
+        d1.compile(new EntityResolver());
         assertTrue(d1.isValid());
     }
 
@@ -98,7 +96,7 @@ public class EntityDescriptorTst extends TestCase {
         EntityDescriptor d1 = new EntityDescriptor(e1, null);
 
         try {
-            d1.compile();
+            d1.compile(new EntityResolver());
             fail("Should not be able to compile an class that does not define ObjectId");
         }
         catch (PropertyAccessException e) {
@@ -106,21 +104,7 @@ public class EntityDescriptorTst extends TestCase {
         }
     }
 
-    public void testCompileOnDeserialization() throws Exception {
-        ObjEntity e1 = new ObjEntity("TestEntity");
-        e1.setClassName(PersistentObject.class.getName());
-
-        EntityDescriptor d1 = new EntityDescriptor(e1, null);
-
-        EntityDescriptor d2 = (EntityDescriptor) Util.cloneViaSerialization(d1);
-        assertNotSame(d1, d2);
-
-        // must recompile self on deserilaization
-        assertTrue(d2.isValid());
-
-        assertEquals(e1.getName(), d2.getEntity().getName());
-    }
-
+    
     public void testProperties() {
         DataMap map = new DataMap();
 
@@ -143,7 +127,7 @@ public class EntityDescriptorTst extends TestCase {
         e1.addRelationship(toMany);
 
         EntityDescriptor d1 = new EntityDescriptor(e1, null);
-        d1.compile();
+        d1.compile(new EntityResolver());
 
         assertSame(e1, d1.getEntity());
         assertNotNull(d1.getObjectClass());

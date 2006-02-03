@@ -53,20 +53,20 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.property;
 
 import org.objectstyle.cayenne.property.ClassDescriptor;
+import org.objectstyle.cayenne.property.ClassDescriptorFactory;
 
-/**
- * A factory of {@link ClassDescriptor} instances.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public interface ClassDescriptorFactory {
+public class MockClassDescriptorFactory implements ClassDescriptorFactory {
 
-    /**
-     * Returns a ClassDescriptor instance for a given entity.
-     */
-    ClassDescriptor getDescriptor(ObjEntity entity, ClassDescriptor superclassDescriptor);
+    ClassDescriptor descriptor;
+
+    public MockClassDescriptorFactory(ClassDescriptor descriptor) {
+        this.descriptor = descriptor;
+    }
+
+    public ClassDescriptor getDescriptor(String entityName) {
+        return descriptor;
+    }
 }

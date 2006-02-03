@@ -59,8 +59,8 @@ import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.graph.GraphEventListener;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.property.ArcProperty;
+import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.property.Property;
 import org.objectstyle.cayenne.util.Util;
 
@@ -204,7 +204,7 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
     }
 
     public void nodeCreated(Object nodeId) {
-        context.createNewObject(entityForId(nodeId), (ObjectId) nodeId);
+        context.createNewObject((ObjectId) nodeId);
     }
 
     public void nodeRemoved(Object nodeId) {
@@ -243,14 +243,12 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
 
         Object source = context.internalGraphManager().getNode(nodeId);
         if (source == null) {
-            source = context.createFault(entityForId(nodeId), (ObjectId) nodeId);
+            source = context.createFault((ObjectId) nodeId);
         }
 
         Object target = context.internalGraphManager().getNode(targetNodeId);
         if (target == null) {
-            target = context.createFault(
-                    entityForId(targetNodeId),
-                    (ObjectId) targetNodeId);
+            target = context.createFault((ObjectId) targetNodeId);
         }
 
         // TODO (Andrus, 10/17/2005) - check for local modifications to avoid
@@ -280,14 +278,12 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
 
         Object source = context.internalGraphManager().getNode(nodeId);
         if (source == null) {
-            source = context.createFault(entityForId(nodeId), (ObjectId) nodeId);
+            source = context.createFault((ObjectId) nodeId);
         }
 
         Object target = context.internalGraphManager().getNode(targetNodeId);
         if (target == null) {
-            target = context.createFault(
-                    entityForId(targetNodeId),
-                    (ObjectId) targetNodeId);
+            target = context.createFault((ObjectId) targetNodeId);
         }
 
         // (see "TODO" in 'arcCreated')
@@ -307,12 +303,9 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
     }
 
     private Property propertyForId(Object nodeId, String propertyName) {
-        return entityForId(nodeId).getClassDescriptor().getProperty(propertyName);
-    }
-
-    private ObjEntity entityForId(Object nodeId) {
-        return context.getEntityResolver().lookupObjEntity(
+        ClassDescriptor descriptor = context.getEntityResolver().getClassDescriptor(
                 ((ObjectId) nodeId).getEntityName());
+        return descriptor.getProperty(propertyName);
     }
 
     // Returns true if this object is active; an event came from our channel, but did not

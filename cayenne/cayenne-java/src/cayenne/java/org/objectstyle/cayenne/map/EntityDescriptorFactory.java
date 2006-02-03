@@ -55,64 +55,76 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.DataObjectUtils;
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.graph.GraphMap;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.objectstyle.cayenne.property.ClassDescriptor;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.property.ClassDescriptorFactory;
 
-public class EntityDescriptorMergeTst extends CayenneTestCase {
+/**
+ * A caching descriptor factory that creates ClassDescriptors based on Cayenne mapping
+ * information.
+ * <p>
+ * <i>Synchronization note: This implementation is NOT synchronized, and requires external
+ * synchronization if used in a multi-threaded environment.</i>
+ * </p>
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+public class EntityDescriptorFactory implements ClassDescriptorFactory {
 
-    public void testDeepMergeNonExistent() {
+    protected EntityResolver resolver;
+    protected Map classDescriptors;
 
-        ClassDescriptor d = getDomain().getEntityResolver().getClassDescriptor("Artist");
-
-        DataContext context = createDataContext();
-        DataContext context1 = createDataContext();
-
-        Artist a = (Artist) context.createAndRegisterNewObject(Artist.class);
-        a.setArtistName("AAA");
-        context.commitChanges();
-
-        blockQueries();
-        try {
-            Artist a2 = (Artist) d.deepMerge(context1, a, new GraphMap());
-            assertNotNull(a2);
-            assertEquals(PersistenceState.COMMITTED, a2.getPersistenceState());
-            assertEquals(a.getArtistName(), a2.getArtistName());
-        }
-        finally {
-            unblockQueries();
-        }
+    public EntityDescriptorFactory(EntityResolver resolver) {
+        this.resolver = resolver;
     }
 
-    public void testDeepMergeModified() {
+    public ClassDescriptor getDescriptor(String entityName) {
 
-        ClassDescriptor d = getDomain().getEntityResolver().getClassDescriptor("Artist");
-
-        DataContext context = createDataContext();
-        DataContext context1 = createDataContext();
-
-        Artist a = (Artist) context.createAndRegisterNewObject(Artist.class);
-        a.setArtistName("AAA");
-        context.commitChanges();
-
-        Artist a1 = (Artist) DataObjectUtils.objectForPK(context1, a.getObjectId());
-        a1.setArtistName("BBB");
-
-        blockQueries();
-        try {
-            Artist a2 = (Artist) d.deepMerge(context1, a, new GraphMap());
-            assertNotNull(a2);
-            assertEquals(PersistenceState.MODIFIED, a2.getPersistenceState());
-            assertSame(a1, a2);
-            assertEquals("BBB", a2.getArtistName());
+        if (classDescriptors == null) {
+            classDescriptors = new HashMap();
         }
-        finally {
-            unblockQueries();
+        else {
+
+            ClassDescriptor descriptor = (ClassDescriptor) classDescriptors
+                    .get(entityName);
+            if (descriptor != null) {
+                return descriptor;
+            }
         }
+
+        EntityDescriptor entityDescriptor = createDescriptor(entityName);
+
+        if (entityDescriptor == null) {
+            return null;
+        }
+
+        classDescriptors.put(entityName, entityDescriptor);
+
+        // compile after caching to avoid infinite loops during ArcProperty compilation
+        entityDescriptor.compile(resolver);
+        return entityDescriptor;
     }
 
+    /**
+     * Creates a new descriptor that is not compiled. Compilation is intentionally
+     * deferred until after the descriptor is cached, as it triggers creation of related
+     * entity descriptors and may result in an endless loop.
+     */
+    protected EntityDescriptor createDescriptor(String entityName) {
+        ObjEntity entity = resolver.getObjEntity(entityName);
+        if (entity == null) {
+            return null;
+        }
+
+        String superEntityName = entity.getSuperEntityName();
+
+        ClassDescriptor superDescriptor = (superEntityName != null) ? resolver
+                .getClassDescriptor(superEntityName) : null;
+
+        // return uncompiled
+        return new EntityDescriptor(entity, superDescriptor);
+    }
 }
