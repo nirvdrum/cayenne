@@ -74,7 +74,6 @@ import org.objectstyle.cayenne.util.Util;
  * as ProcedureQueries.
  * 
  * @author Andrus Adamchik
- * @deprecated since 1.2 QueryResult is obsolete.
  */
 public class QueryResult extends DefaultOperationObserver {
 
