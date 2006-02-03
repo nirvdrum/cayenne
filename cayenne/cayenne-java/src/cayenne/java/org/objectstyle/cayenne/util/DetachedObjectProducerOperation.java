@@ -53,30 +53,88 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.property;
+package org.objectstyle.cayenne.util;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.property.ArcProperty;
+import org.objectstyle.cayenne.property.ObjectGraphVisitor;
+import org.objectstyle.cayenne.property.Property;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
 
 /**
- * A Property that represents an "arc" connecting source node to the target node in the
- * graph.
+ * An operation that produces a detached object tree with subgraph delineated per optional
+ * PrefetchTreeNode.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface ArcProperty extends Property {
+public class DetachedObjectProducerOperation implements ObjectGraphVisitor {
 
-    /**
-     * Returns a name of the reverse arc. Returns null if no reverse arc exists.
-     */
-    String getReversePropertyName();
+    protected Map mergeMap;
+    protected Map children;
 
-    /**
-     * Returns a ClassDescriptor for the type of graph nodes pointed to by this arc
-     * property.
-     */
-    ClassDescriptor getTargetDescriptor(Class targetObjectClass);
+    public DetachedObjectProducerOperation(PrefetchTreeNode tree) {
+        this(tree, new HashMap());
+    }
 
-    /**
-     * Returns whether a target node connected to a given object is an unresolved fault.
-     */
-    boolean isFaultTarget(Object object);
+    protected DetachedObjectProducerOperation(PrefetchTreeNode tree, Map sharedMergeMap) {
+        this.mergeMap = sharedMergeMap;
+
+        // traverse the tree to build child operations
+        if (tree != null && tree.hasChildren()) {
+            children = new HashMap();
+            Iterator it = tree.getChildren().iterator();
+            while (it.hasNext()) {
+                PrefetchTreeNode child = (PrefetchTreeNode) it.next();
+                children.put(child.getName(), new DetachedObjectProducerOperation(child));
+            }
+        }
+    }
+
+    public boolean visitSimpleProperty(Property property) {
+        return true;
+    }
+
+    public boolean visitToOneArcProperty(ArcProperty property, Object targetValue) {
+        return children != null && children.containsKey(property.getPropertyName());
+    }
+
+    public boolean visitToManyArcProperty(ArcProperty property, Object targetValue) {
+        return visitToOneArcProperty(property, targetValue);
+    }
+
+    public ObjectGraphVisitor getChildVisitor(ArcProperty property) {
+        if (children == null) {
+            throw new CayenneRuntimeException("Visiting arc property '"
+                    + property.getPropertyName()
+                    + "' is not allowed.");
+        }
+
+        ObjectGraphVisitor child = (ObjectGraphVisitor) children.get(property
+                .getPropertyName());
+        if (child == null) {
+            throw new CayenneRuntimeException("Visiting arc property '"
+                    + property.getPropertyName()
+                    + "' is not allowed.");
+        }
+
+        return child;
+    }
+
+    public ObjectContext getContext() {
+        return null;
+    }
+
+    public Object getVisitedObject(Object id) {
+        return mergeMap.get(id);
+    }
+
+    public void objectVisited(Object id, Object object) {
+        mergeMap.put(id, object);
+    }
 }

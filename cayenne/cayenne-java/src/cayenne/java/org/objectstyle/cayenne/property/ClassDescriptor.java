@@ -57,9 +57,6 @@ package org.objectstyle.cayenne.property;
 
 import java.util.Collection;
 
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.graph.GraphManager;
-
 /**
  * Provides access to a set of persistent properties of a Java Bean and methods for
  * manipulating such bean.
@@ -108,30 +105,20 @@ public interface ClassDescriptor {
     void shallowMerge(Object from, Object to) throws PropertyAccessException;
 
     /**
-     * Takes an object and merges the provided ObjectContext. Merge operation is cascaded
-     * to all accessible (i.e. resolved) related objects. Returns a merged instance
+     * Takes an object and merges into the context provided by the ObjectGraphVisitor.
+     * Merge operation reach is defined by the visitor. Returns a merged instance
      * belonging to the provided context.
-     * 
-     * @param context ObjectContext to merge the object to.
-     * @param object Object to merge
-     * @param mergeMap an object map that provides a "context" of this operation, ensuring
-     *            object uniquing. All ClassDescriptors and properties participating in
-     *            the merge must register resolved objects in the mergeMap.
      */
-    Object deepMerge(ObjectContext context, Object object, GraphManager mergeMap)
+    Object deepMerge(Object object, ObjectGraphVisitor visitor)
             throws PropertyAccessException;
 
     /**
-     * A method similar to {@link #deepMerge(ObjectContext, Object, GraphManager)} that
-     * merges object properties from one object to another known object. This method is
-     * normally used internally by 'deepMerge' implementors to cascade property merging to
-     * related objects.
+     * A method similar to {@link #deepMerge(Object, ObjectGraphVisitor)} that merges
+     * object properties from one object to another known object. This method is normally
+     * used internally by 'deepMerge' implementors to cascade property merging to related
+     * objects.
      */
-    void deepPropertyMerge(
-            ObjectContext context,
-            Object from,
-            Object to,
-            GraphManager mergeMap);
+    void deepPropertyMerge(Object from, Object to, ObjectGraphVisitor visitor);
 
     /**
      * Returns a Java Bean property descriptor matching property name or null if no such

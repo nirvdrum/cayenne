@@ -59,9 +59,9 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataObjectUtils;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.graph.GraphMap;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.util.DeepMergeOperation;
 
 public class EntityDescriptorMergeTst extends CayenneTestCase {
 
@@ -78,7 +78,7 @@ public class EntityDescriptorMergeTst extends CayenneTestCase {
 
         blockQueries();
         try {
-            Artist a2 = (Artist) d.deepMerge(context1, a, new GraphMap());
+            Artist a2 = (Artist) d.deepMerge(a, new DeepMergeOperation(context1));
             assertNotNull(a2);
             assertEquals(PersistenceState.COMMITTED, a2.getPersistenceState());
             assertEquals(a.getArtistName(), a2.getArtistName());
@@ -104,7 +104,7 @@ public class EntityDescriptorMergeTst extends CayenneTestCase {
 
         blockQueries();
         try {
-            Artist a2 = (Artist) d.deepMerge(context1, a, new GraphMap());
+            Artist a2 = (Artist) d.deepMerge(a, new DeepMergeOperation(context1));
             assertNotNull(a2);
             assertEquals(PersistenceState.MODIFIED, a2.getPersistenceState());
             assertSame(a1, a2);

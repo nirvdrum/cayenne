@@ -58,10 +58,7 @@ package org.objectstyle.cayenne.property;
 import java.util.Collection;
 
 import org.objectstyle.cayenne.Fault;
-import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.access.ToManyList;
-import org.objectstyle.cayenne.graph.GraphManager;
 
 /**
  * A list property that is intended to work with
@@ -86,17 +83,8 @@ public class ToManyListProperty extends ListProperty {
                     object);
         }
 
-        return new ToManyList((Persistent) object, getPropertyName());
-    }
-
-    public void deepMerge(
-            ObjectContext context,
-            Object from,
-            Object to,
-            GraphManager mergeMap) {
-        // take faults into account
-        if (!(accessor.readPropertyDirectly(from) instanceof Fault)) {
-            super.deepMerge(context, from, to, mergeMap);
-        }
+        return (Collection) Fault.getToManyFault().resolveFault(
+                (Persistent) object,
+                getPropertyName());
     }
 }

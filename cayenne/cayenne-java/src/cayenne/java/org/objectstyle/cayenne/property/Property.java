@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.property;
 
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.graph.GraphManager;
 
 /**
  * Defines bean property API used by Cayenne to access object data, do faulting and graph
@@ -78,5 +76,5 @@ public interface Property extends PropertyAccessor {
      */
     void shallowMerge(Object from, Object to) throws PropertyAccessException;
 
-    void deepMerge(ObjectContext context, Object from, Object to, GraphManager mergeMap);
+    void deepMerge(Object from, Object to, ObjectGraphVisitor visitor);
 }

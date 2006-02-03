@@ -57,9 +57,6 @@ package org.objectstyle.cayenne.property;
 
 import java.util.Collection;
 
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.graph.GraphManager;
-
 public class MockClassDescriptor implements ClassDescriptor {
 
     public Object createObject() {
@@ -76,16 +73,12 @@ public class MockClassDescriptor implements ClassDescriptor {
     public void shallowMerge(Object from, Object to) throws PropertyAccessException {
     }
 
-    public void deepPropertyMerge(
-            ObjectContext context,
-            Object from,
-            Object to,
-            GraphManager mergeMap) {
-    }
-
-    public Object deepMerge(ObjectContext context, Object object, GraphManager mergeMap)
+    public Object deepMerge(Object object, ObjectGraphVisitor visitor)
             throws PropertyAccessException {
         return null;
+    }
+
+    public void deepPropertyMerge(Object from, Object to, ObjectGraphVisitor visitor) {
     }
 
     public Property getDeclaredProperty(String propertyName) {

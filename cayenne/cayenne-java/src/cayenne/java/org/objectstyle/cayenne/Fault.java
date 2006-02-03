@@ -58,7 +58,6 @@ package org.objectstyle.cayenne;
 import java.io.Serializable;
 import java.util.List;
 
-import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.query.RelationshipQuery;
 
@@ -93,14 +92,14 @@ public abstract class Fault implements Serializable {
     /**
      * Returns an object for a given source object and relationship.
      */
-    public abstract Object resolveFault(DataObject sourceObject, String relationshipName);
+    public abstract Object resolveFault(Persistent sourceObject, String relationshipName);
 
     final static class ToManyFault extends Fault {
 
         /**
          * Resolves this fault to a List of objects.
          */
-        public Object resolveFault(DataObject sourceObject, String relationshipName) {
+        public Object resolveFault(Persistent sourceObject, String relationshipName) {
             return new ToManyList(sourceObject, relationshipName);
         }
     }
@@ -110,8 +109,8 @@ public abstract class Fault implements Serializable {
         /**
          * Resolves this fault to a DataObject.
          */
-        public Object resolveFault(DataObject sourceObject, String relationshipName) {
-            DataContext context = sourceObject.getDataContext();
+        public Object resolveFault(Persistent sourceObject, String relationshipName) {
+            ObjectContext context = sourceObject.getObjectContext();
 
             RelationshipQuery query = new RelationshipQuery(
                     sourceObject.getObjectId(),

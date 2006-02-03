@@ -58,12 +58,10 @@ package org.objectstyle.cayenne.property;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
-import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.ValueHolder;
-import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.util.PersistentObjectList;
 
 /**
@@ -94,34 +92,38 @@ public class ListProperty extends CollectionProperty {
         return new PersistentObjectList((Persistent) object, getPropertyName());
     }
 
-    public void deepMerge(
-            ObjectContext context,
-            Object from,
-            Object to,
-            GraphManager mergeMap) {
+    public boolean isFaultTarget(Object object) {
+        Object target = accessor.readPropertyDirectly(object);
+        return target == null
+                || target instanceof Fault
+                || ((ValueHolder) target).isFault();
+    }
 
-        // assume values implement List and ValueHolder ... this means we can support both
-        // ToManyList and PersistentObjectList.
-        ValueHolder toHolder = (ValueHolder) ensureCollectionSet(to);
+    public void deepMerge(Object from, Object to, ObjectGraphVisitor visitor) {
 
-        // do not init fromHolder if it is not set...
-        List fromHolder = (List) accessor.readPropertyDirectly(from);
+        if (visitor.visitToManyArcProperty(this, from)) {
 
-        if (fromHolder == null || ((ValueHolder) fromHolder).isFault()) {
-            toHolder.invalidate();
-        }
-        else {
-            List objects = new ArrayList(fromHolder.size());
+            ValueHolder toHolder = (ValueHolder) ensureCollectionSet(to);
+
+            Collection fromHolder = ensureCollectionSet(from);
+            Collection objects = new ArrayList(fromHolder.size());
 
             Iterator it = fromHolder.iterator();
             while (it.hasNext()) {
                 Object next = it.next();
                 Object merged = (next != null) ? getTargetDescriptor(next.getClass())
-                        .deepMerge(context, next, mergeMap) : null;
+                        .deepMerge(next, visitor.getChildVisitor(this)) : null;
                 objects.add(merged);
             }
 
             toHolder.setInitialValue(objects);
+        }
+        else {
+            Object target = accessor.readPropertyDirectly(to);
+
+            if (target instanceof ValueHolder) {
+                ((ValueHolder) target).invalidate();
+            }
         }
     }
 }

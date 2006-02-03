@@ -55,28 +55,31 @@
  */
 package org.objectstyle.cayenne.property;
 
+import org.objectstyle.cayenne.ObjectContext;
+
 /**
- * A Property that represents an "arc" connecting source node to the target node in the
- * graph.
+ * A hierarchical visitor interface for object graph traversal. It provides traversal
+ * context and a definition of traversal span.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface ArcProperty extends Property {
+public interface ObjectGraphVisitor {
+
+    boolean visitSimpleProperty(Property property);
+
+    boolean visitToOneArcProperty(ArcProperty property, Object object);
+
+    boolean visitToManyArcProperty(ArcProperty property, Object object);
 
     /**
-     * Returns a name of the reverse arc. Returns null if no reverse arc exists.
+     * Returns a child visitor to visit the target node of the ArcProperty.
      */
-    String getReversePropertyName();
+    ObjectGraphVisitor getChildVisitor(ArcProperty property);
 
-    /**
-     * Returns a ClassDescriptor for the type of graph nodes pointed to by this arc
-     * property.
-     */
-    ClassDescriptor getTargetDescriptor(Class targetObjectClass);
+    ObjectContext getContext();
 
-    /**
-     * Returns whether a target node connected to a given object is an unresolved fault.
-     */
-    boolean isFaultTarget(Object object);
+    Object getVisitedObject(Object id);
+
+    void objectVisited(Object id, Object object);
 }

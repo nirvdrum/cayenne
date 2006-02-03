@@ -75,12 +75,11 @@ import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
-import org.objectstyle.cayenne.graph.GraphManager;
-import org.objectstyle.cayenne.graph.GraphMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
+import org.objectstyle.cayenne.util.DeepMergeOperation;
 
 /**
  * A {@link org.objectstyle.cayenne.DataChannel} implementation that accesses an OPP
@@ -157,7 +156,8 @@ public class OPPServerChannel implements DataChannel {
                         else {
 
                             List childObjects = new ArrayList(objects.size());
-                            GraphManager mergeContext = new GraphMap();
+                            DeepMergeOperation mergeContext = new DeepMergeOperation(
+                                    context);
                             Iterator it = objects.iterator();
                             while (it.hasNext()) {
                                 Persistent object = (Persistent) it.next();
@@ -170,10 +170,10 @@ public class OPPServerChannel implements DataChannel {
                                                     + object);
                                 }
 
-                                ClassDescriptor descriptor = resolver.getClassDescriptor(id.getEntityName());
+                                ClassDescriptor descriptor = resolver
+                                        .getClassDescriptor(id.getEntityName());
 
                                 childObjects.add(descriptor.deepMerge(
-                                        context,
                                         object,
                                         mergeContext));
                             }

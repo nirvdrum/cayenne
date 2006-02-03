@@ -56,8 +56,6 @@
 package org.objectstyle.cayenne.property;
 
 import org.objectstyle.cayenne.Fault;
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.graph.GraphManager;
 
 /**
  * An extension of SimpleProperty for accessing Persistent objects.
@@ -82,6 +80,11 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
         return baseTargetDescriptor.resolveDescriptor(objectClass);
     }
 
+    public boolean isFaultTarget(Object object) {
+        Object target = accessor.readPropertyDirectly(object);
+        return target instanceof Fault;
+    }
+
     /**
      * Copies a property value that is itself a persistent object from one object to
      * another. If the new value is fault, fault will be copied to the target.
@@ -99,21 +102,25 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
         }
     }
 
-    public void deepMerge(
-            ObjectContext context,
-            Object from,
-            Object to,
-            GraphManager mergeMap) {
+    public void deepMerge(Object from, Object to, ObjectGraphVisitor visitor) {
 
-        Object fromValue = accessor.readPropertyDirectly(from);
+        if (visitor.visitToOneArcProperty(this, from)) {
 
-        if (!(fromValue instanceof Fault) && from != null) {
-            fromValue = getTargetDescriptor(from.getClass()).deepMerge(
-                    context,
-                    fromValue,
-                    mergeMap);
+            Object fromValue = accessor.readPropertyDirectly(from);
+            Object toValue = null;
+
+            if (fromValue != null) {
+                toValue = getTargetDescriptor(from.getClass()).deepMerge(
+                        fromValue,
+                        visitor.getChildVisitor(this));
+            }
+
+            writePropertyDirectly(to, accessor.readPropertyDirectly(to), toValue);
         }
-        writePropertyDirectly(to, accessor.readPropertyDirectly(to), fromValue);
+        else {
+            writePropertyDirectly(to, accessor.readPropertyDirectly(to), Fault
+                    .getToOneFault());
+        }
     }
 
     public String getReversePropertyName() {

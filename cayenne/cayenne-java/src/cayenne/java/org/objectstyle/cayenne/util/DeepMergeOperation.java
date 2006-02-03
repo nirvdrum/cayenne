@@ -53,30 +53,58 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.property;
+package org.objectstyle.cayenne.util;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.property.ArcProperty;
+import org.objectstyle.cayenne.property.ObjectGraphVisitor;
+import org.objectstyle.cayenne.property.Property;
 
 /**
- * A Property that represents an "arc" connecting source node to the target node in the
- * graph.
+ * An operation that performs object graph deep merge, terminating merge at unresolved
+ * nodes.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public interface ArcProperty extends Property {
+public class DeepMergeOperation implements ObjectGraphVisitor {
 
-    /**
-     * Returns a name of the reverse arc. Returns null if no reverse arc exists.
-     */
-    String getReversePropertyName();
+    protected ObjectContext context;
+    protected Map mergeMap;
 
-    /**
-     * Returns a ClassDescriptor for the type of graph nodes pointed to by this arc
-     * property.
-     */
-    ClassDescriptor getTargetDescriptor(Class targetObjectClass);
+    public DeepMergeOperation(ObjectContext context) {
+        this.context = context;
+        this.mergeMap = new HashMap();
+    }
 
-    /**
-     * Returns whether a target node connected to a given object is an unresolved fault.
-     */
-    boolean isFaultTarget(Object object);
+    public boolean visitSimpleProperty(Property property) {
+        return true;
+    }
+
+    public boolean visitToOneArcProperty(ArcProperty property, Object object) {
+        return !property.isFaultTarget(object);
+    }
+
+    public boolean visitToManyArcProperty(ArcProperty property, Object object) {
+        return visitToOneArcProperty(property, object);
+    }
+
+    public ObjectContext getContext() {
+        return context;
+    }
+
+    public ObjectGraphVisitor getChildVisitor(ArcProperty property) {
+        return this;
+    }
+
+    public Object getVisitedObject(Object id) {
+        return mergeMap.get(id);
+    }
+
+    public void objectVisited(Object id, Object object) {
+        mergeMap.put(id, object);
+    }
 }

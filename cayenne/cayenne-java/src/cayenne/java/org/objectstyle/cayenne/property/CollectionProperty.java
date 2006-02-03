@@ -57,8 +57,7 @@ package org.objectstyle.cayenne.property;
 
 import java.util.Collection;
 
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.graph.GraphManager;
+import org.objectstyle.cayenne.Fault;
 
 /**
  * Provides access to a property implemented as a Collection.
@@ -90,11 +89,7 @@ public abstract class CollectionProperty extends SimpleProperty implements ArcPr
         // noop
     }
 
-    public abstract void deepMerge(
-            ObjectContext context,
-            Object from,
-            Object to,
-            GraphManager mergeMap);
+    public abstract void deepMerge(Object from, Object to, ObjectGraphVisitor visitor);
 
     /**
      * Injects a List in the object if it hasn't been done yet.
@@ -127,13 +122,14 @@ public abstract class CollectionProperty extends SimpleProperty implements ArcPr
     protected Collection ensureCollectionSet(Object object)
             throws PropertyAccessException {
 
-        Collection collection = (Collection) accessor.readPropertyDirectly(object);
-        if (collection == null) {
-            collection = createCollection(object);
-            accessor.writePropertyDirectly(object, null, collection);
+        Object value = accessor.readPropertyDirectly(object);
+
+        if (value == null || value instanceof Fault) {
+            value = createCollection(object);
+            accessor.writePropertyDirectly(object, null, value);
         }
 
-        return collection;
+        return (Collection) value;
     }
 
     /**

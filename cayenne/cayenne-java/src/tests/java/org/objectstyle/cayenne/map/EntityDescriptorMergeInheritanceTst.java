@@ -59,19 +59,20 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.graph.GraphMap;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.testdo.inherit.Department;
 import org.objectstyle.cayenne.testdo.inherit.Employee;
 import org.objectstyle.cayenne.testdo.inherit.Manager;
 import org.objectstyle.cayenne.unit.PeopleTestCase;
+import org.objectstyle.cayenne.util.DeepMergeOperation;
 
 public class EntityDescriptorMergeInheritanceTst extends PeopleTestCase {
 
     public void testDeepMergeExistingSubclass() {
 
-        ClassDescriptor d = getDomain().getEntityResolver().getClassDescriptor("Department");
+        ClassDescriptor d = getDomain().getEntityResolver().getClassDescriptor(
+                "Department");
 
         DataContext context = createDataContext();
         DataContext context1 = createDataContext();
@@ -98,13 +99,14 @@ public class EntityDescriptorMergeInheritanceTst extends PeopleTestCase {
         // need to make sure source relationship is resolved as a result of some Ashwood
         // strangeness...
         d1.getEmployees().size();
-        
+
         // resolve Employees
         context1.performQuery(new SelectQuery(Employee.class));
 
         blockQueries();
         try {
-            Department d2 = (Department) d.deepMerge(context1, d1, new GraphMap());
+            Department d2 = (Department) d
+                    .deepMerge(d1, new DeepMergeOperation(context1));
             assertNotNull(d2);
             assertEquals(PersistenceState.COMMITTED, d2.getPersistenceState());
 
@@ -123,10 +125,11 @@ public class EntityDescriptorMergeInheritanceTst extends PeopleTestCase {
             unblockQueries();
         }
     }
-    
+
     public void testDeepMergeNonExistentSubclass() {
 
-        ClassDescriptor d = getDomain().getEntityResolver().getClassDescriptor("Department");
+        ClassDescriptor d = getDomain().getEntityResolver().getClassDescriptor(
+                "Department");
         DataContext context = createDataContext();
         DataContext context1 = createDataContext();
 
@@ -155,7 +158,8 @@ public class EntityDescriptorMergeInheritanceTst extends PeopleTestCase {
 
         blockQueries();
         try {
-            Department d2 = (Department) d.deepMerge(context1, d1, new GraphMap());
+            Department d2 = (Department) d
+                    .deepMerge(d1, new DeepMergeOperation(context1));
             assertNotNull(d2);
             assertEquals(PersistenceState.COMMITTED, d2.getPersistenceState());
 

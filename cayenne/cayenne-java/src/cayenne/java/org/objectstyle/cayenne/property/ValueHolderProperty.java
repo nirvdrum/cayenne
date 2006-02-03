@@ -55,10 +55,8 @@
  */
 package org.objectstyle.cayenne.property;
 
-import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.ValueHolder;
-import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.util.PersistentObjectHolder;
 
 /**
@@ -95,30 +93,29 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
         // noop
     }
 
-    public void deepMerge(
-            ObjectContext context,
-            Object from,
-            Object to,
-            GraphManager mergeMap) {
+    public boolean isFaultTarget(Object object) {
+        ValueHolder holder = (ValueHolder) accessor.readPropertyDirectly(object);
+        return holder == null || holder.isFault();
+    }
+
+    public void deepMerge(Object from, Object to, ObjectGraphVisitor visitor) {
 
         ValueHolder toHolder = ensureValueHolderSet(to);
 
-        // do not set FROM holder if it is null
-        ValueHolder fromHolder = (ValueHolder) accessor.readPropertyDirectly(from);
+        if (visitor.visitToOneArcProperty(this, from)) {
 
-        if (fromHolder == null || fromHolder.isFault()) {
-            toHolder.invalidate();
-        }
-        else {
+            ValueHolder fromHolder = ensureValueHolderSet(from);
             Object target = fromHolder.getValue();
 
             if (target != null) {
                 target = getTargetDescriptor(target.getClass()).deepMerge(
-                        context,
                         target,
-                        mergeMap);
+                        visitor.getChildVisitor(this));
             }
             toHolder.setInitialValue(target);
+        }
+        else {
+            toHolder.invalidate();
         }
     }
 

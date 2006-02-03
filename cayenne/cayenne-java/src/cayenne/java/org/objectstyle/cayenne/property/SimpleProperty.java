@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.property;
 
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.graph.GraphManager;
 
 /**
  * A property descriptor that provides access to a simple object property, delegating
@@ -94,18 +92,18 @@ public class SimpleProperty implements Property {
     }
 
     public void shallowMerge(Object from, Object to) throws PropertyAccessException {
-        writePropertyDirectly(to, accessor.readPropertyDirectly(to), accessor.readPropertyDirectly(from));
+        writePropertyDirectly(to, accessor.readPropertyDirectly(to), accessor
+                .readPropertyDirectly(from));
     }
 
     /**
-     * Does the same thing as 'shallowCopy'.
+     * Checks the visitor and if the merge is allowed, calls
+     * {@link #shallowMerge(Object, Object)}.
      */
-    public void deepMerge(
-            ObjectContext context,
-            Object from,
-            Object to,
-            GraphManager mergeMap) {
-        shallowMerge(from, to);
+    public void deepMerge(Object from, Object to, ObjectGraphVisitor visitor) {
+        if (visitor.visitSimpleProperty(this)) {
+            shallowMerge(from, to);
+        }
     }
 
     public Object readPropertyDirectly(Object object) throws PropertyAccessException {

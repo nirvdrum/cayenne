@@ -64,7 +64,6 @@ import java.util.Map;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.graph.GraphManager;
 
 /**
  * A superclass of Cayenne ClassDescriptors. Defines all main bean descriptor parameters
@@ -75,6 +74,7 @@ import org.objectstyle.cayenne.graph.GraphManager;
  */
 public abstract class BaseClassDescriptor implements ClassDescriptor {
 
+    static final Integer TRANSIENT_STATE = new Integer(PersistenceState.TRANSIENT);
     static final Integer HOLLOW_STATE = new Integer(PersistenceState.HOLLOW);
     static final Integer COMMITTED_STATE = new Integer(PersistenceState.COMMITTED);
 
@@ -231,8 +231,15 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         Object object = createObject();
 
         objectIdProperty.writePropertyDirectly(object, null, id);
-        contextProperty.writePropertyDirectly(object, null, context);
-        persistentStateProperty.writePropertyDirectly(object, null, HOLLOW_STATE);
+
+        if (context != null) {
+            contextProperty.writePropertyDirectly(object, null, context);
+            persistentStateProperty.writePropertyDirectly(object, null, HOLLOW_STATE);
+            context.getGraphManager().registerNode(id, object);
+        }
+        else {
+            persistentStateProperty.writePropertyDirectly(object, null, TRANSIENT_STATE);
+        }
 
         prepareForAccess(object);
         return object;
@@ -260,7 +267,7 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         }
     }
 
-    public Object deepMerge(ObjectContext context, Object object, GraphManager mergeMap)
+    public Object deepMerge(Object object, ObjectGraphVisitor visitor)
             throws PropertyAccessException {
 
         Object id = readObjectId(object);
@@ -273,12 +280,14 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
 
         // object presence in the mergeMap indicates that it requires no further
         // processing
-        Object targetObject = mergeMap.getNode(id);
+        Object targetObject = visitor.getVisitedObject(id);
         if (targetObject != null) {
             return targetObject;
         }
 
-        targetObject = context.getGraphManager().getNode(id);
+        if (visitor.getContext() != null) {
+            targetObject = visitor.getContext().getGraphManager().getNode(id);
+        }
 
         if (targetObject == null) {
             // TODO: (Andrus, 2/1/2006) note that here we always create a copy of an
@@ -287,21 +296,16 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
             // ... I can't see a better *generic* way of handling this issue, but maybe
             // when no prefetches are involved, we can take a shortcut and register an
             // object without copying?
-            targetObject = makePersistentObject(context, id);
-
-            context.getGraphManager().registerNode(id, targetObject);
-            mergeMap.registerNode(id, targetObject);
+            targetObject = makePersistentObject(visitor.getContext(), id);
         }
 
-        deepPropertyMerge(context, object, targetObject, mergeMap);
+        visitor.objectVisited(id, targetObject);
+
+        deepPropertyMerge(object, targetObject, visitor);
         return targetObject;
     }
 
-    public void deepPropertyMerge(
-            ObjectContext context,
-            Object from,
-            Object to,
-            GraphManager mergeMap) {
+    public void deepPropertyMerge(Object from, Object to, ObjectGraphVisitor visitor) {
 
         int state = ((Number) persistentStateProperty.readPropertyDirectly(to))
                 .intValue();
@@ -315,13 +319,13 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         }
 
         if (getSuperclassDescriptor() != null) {
-            getSuperclassDescriptor().deepPropertyMerge(context, from, to, mergeMap);
+            getSuperclassDescriptor().deepPropertyMerge(from, to, visitor);
         }
 
         Iterator it = declaredProperties.values().iterator();
         while (it.hasNext()) {
             Property property = (Property) it.next();
-            property.deepMerge(context, from, to, mergeMap);
+            property.deepMerge(from, to, visitor);
         }
 
         if (state == PersistenceState.HOLLOW) {
