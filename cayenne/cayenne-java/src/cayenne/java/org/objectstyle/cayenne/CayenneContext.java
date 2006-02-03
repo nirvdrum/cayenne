@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.util.ObjectContextQueryAction;
 
 /**
  * A default generic implementation of ObjectContext suitable for accessing Cayenne from
@@ -331,8 +332,18 @@ public class CayenneContext implements ObjectContext {
      * Runs a query, returning result as list.
      */
     public List performQuery(Query query) {
-        List list = getChannel().onQuery(this, query).firstList();
-        return list != null ? list : new ArrayList(1);
+        List result = onQuery(this, query).firstList();
+        return result != null ? result : new ArrayList(1);
+    }
+
+    public QueryResponse performGenericQuery(Query query) {
+        return onQuery(this, query);
+    }
+
+    // TODO: Andrus, 2/2/2006 - make public once CayenneContext is officially declared to
+    // support DataChannel API.
+    QueryResponse onQuery(ObjectContext context, Query query) {
+        return new ObjectContextQueryAction(this, context, query).execute();
     }
 
     /**
@@ -427,10 +438,6 @@ public class CayenneContext implements ObjectContext {
         }
 
         // ****** Copied from DataContext - end *******
-    }
-
-    public QueryResponse performGenericQuery(Query query) {
-        return channel.onQuery(this, query);
     }
 
     /**

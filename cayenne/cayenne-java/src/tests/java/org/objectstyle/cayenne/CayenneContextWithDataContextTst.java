@@ -64,6 +64,7 @@ import org.objectstyle.cayenne.opp.LocalConnection;
 import org.objectstyle.cayenne.opp.OPPConnection;
 import org.objectstyle.cayenne.opp.OPPServerChannel;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.SingleObjectQuery;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
@@ -264,9 +265,50 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
     // List children2 = o2.getTable2Array();
     //
     // assertEquals(0, children2.size());
-    //        }
-    //        finally {
-    //            connection.setBlockingMessages(false);
-    //        }
-    //    }
+    // }
+    // finally {
+    // connection.setBlockingMessages(false);
+    // }
+    // }
+
+    public void testOIDQueryInterception() throws Exception {
+
+        deleteTestData();
+
+        TestLocalConnection connection = new TestLocalConnection(new ClientServerChannel(
+                getDomain()));
+        OPPServerChannel channel = new OPPServerChannel(connection);
+        CayenneContext context = new CayenneContext(channel);
+
+        ClientMtTable1 o = (ClientMtTable1) context.newObject(ClientMtTable1.class);
+        o.setGlobalAttribute1("aaa");
+
+        // fetch new
+        SingleObjectQuery q1 = new SingleObjectQuery(o.getObjectId(), false, false);
+
+        connection.setBlockingMessages(true);
+        try {
+            List objects = context.performQuery(q1);
+            assertEquals(1, objects.size());
+            assertSame(o, objects.get(0));
+        }
+        finally {
+            connection.setBlockingMessages(false);
+        }
+
+        context.commitChanges();
+
+        // fetch committed
+        SingleObjectQuery q2 = new SingleObjectQuery(o.getObjectId(), false, false);
+
+        connection.setBlockingMessages(true);
+        try {
+            List objects = context.performQuery(q2);
+            assertEquals(1, objects.size());
+            assertSame(o, objects.get(0));
+        }
+        finally {
+            connection.setBlockingMessages(false);
+        }
+    }
 }
