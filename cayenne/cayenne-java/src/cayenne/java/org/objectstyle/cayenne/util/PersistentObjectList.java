@@ -61,9 +61,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.ValueHolder;
 
 /**
  * A list of persistent objects lazily resolved on the first access.
@@ -71,7 +73,7 @@ import org.objectstyle.cayenne.Persistent;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class PersistentObjectList extends RelationshipFault implements List {
+public class PersistentObjectList extends RelationshipFault implements List, ValueHolder {
 
     // wrapped objects list
     protected List objectList;
@@ -112,6 +114,27 @@ public class PersistentObjectList extends RelationshipFault implements List {
      */
     public void invalidate() {
         setObjectList(null);
+    }
+
+    public Object setInitialValue(Object value) throws CayenneRuntimeException {
+        if (value == null || value instanceof List) {
+            Object old = this.objectList;
+            setObjectList((List) value);
+            return old;
+        }
+        else {
+            throw new CayenneRuntimeException("Value must be a list, got: "
+                    + value.getClass().getName());
+        }
+    }
+
+    public Object getValue() throws CayenneRuntimeException {
+        return resolvedObjectList();
+    }
+
+    public Object setValue(Object value) throws CayenneRuntimeException {
+        resolvedObjectList();
+        return setInitialValue(objectList);
     }
 
     public void setObjectList(List objectList) {
