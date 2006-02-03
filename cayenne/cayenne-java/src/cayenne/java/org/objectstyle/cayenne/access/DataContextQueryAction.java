@@ -123,10 +123,9 @@ class DataContextQueryAction {
 
             // rewrite response to contain objects from the query context
 
-            response.reset();
             BaseResponse childResponse = new BaseResponse();
 
-            while (response.next()) {
+            for (response.reset(); response.next();) {
                 if (response.isList()) {
 
                     List objects = response.currentList();
