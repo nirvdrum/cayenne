@@ -1258,7 +1258,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * @since 1.2
      */
     public QueryResponse onQuery(ObjectContext context, Query query) {
-        return new DataContextQueryAction(context, this, query).execute();
+        return new DataContextQueryAction(this, context, query).execute();
     }
 
     /**

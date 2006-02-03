@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,55 +53,35 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
 package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.BaseResponse;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
-import org.objectstyle.cayenne.query.RelationshipQuery;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.util.ObjectContextQueryAction;
 
 /**
- * A DataContext helper that handles query execution.
+ * A DataContext-specific version of
+ * {@link org.objectstyle.cayenne.util.ObjectContextQueryAction}.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-class DataContextQueryAction {
+// TODO: Andrus, 2/2/2006 - all these DataContext extensions should become available to
+// CayenneContext as well....
+class DataContextQueryAction extends ObjectContextQueryAction {
 
-    static final boolean DONE = true;
-
-    ObjectContext queryContext;
-    DataContext context;
-    Query query;
-    QueryMetadata metadata;
-
-    QueryResponse response;
-
-    DataContextQueryAction(ObjectContext queryContext, DataContext context, Query query) {
-        this.context = context;
-        this.queryContext = queryContext != context ? queryContext : null;
-        this.query = query;
-        this.metadata = query.getMetaData(context.getEntityResolver());
+    public DataContextQueryAction(DataContext actingContext, ObjectContext targetContext,
+            Query query) {
+        super(actingContext, targetContext, query);
     }
 
-    /**
-     * Selects an appropriate select execution strategy and runs the query.
-     */
-    QueryResponse execute() {
-
+    public QueryResponse execute() {
         if (interceptPaginatedQuery() != DONE) {
             if (interceptOIDQuery() != DONE) {
                 if (interceptRelationshipQuery() != DONE) {
@@ -113,128 +93,15 @@ class DataContextQueryAction {
         }
 
         interceptObjectConversion();
-
         return response;
-    }
-
-    private void interceptObjectConversion() {
-
-        if (queryContext != null && !metadata.isFetchingDataRows()) {
-
-            // rewrite response to contain objects from the query context
-
-            BaseResponse childResponse = new BaseResponse();
-
-            for (response.reset(); response.next();) {
-                if (response.isList()) {
-
-                    List objects = response.currentList();
-                    if (objects.isEmpty()) {
-                        childResponse.addResultList(objects);
-                    }
-                    else {
-
-                        // TODO: Andrus 1/31/2006 - InrementalFaultList is not properly
-                        // transferred between contexts....
-
-                        List childObjects = new ArrayList(objects.size());
-                        Iterator it = objects.iterator();
-                        while (it.hasNext()) {
-                            Persistent object = (Persistent) it.next();
-                            childObjects.add(queryContext.localObject(object
-                                    .getObjectId(), object));
-                        }
-
-                        childResponse.addResultList(childObjects);
-                    }
-                }
-                else {
-                    childResponse.addBatchUpdateCount(response.currentUpdateCount());
-                }
-            }
-
-            response = childResponse;
-        }
-
     }
 
     private boolean interceptPaginatedQuery() {
         if (metadata.getPageSize() > 0) {
-            response = new BaseResponse(new IncrementalFaultList(context, query));
+            response = new BaseResponse(new IncrementalFaultList(
+                    (DataContext) actingContext,
+                    query));
             return DONE;
-        }
-
-        return !DONE;
-    }
-
-    private boolean interceptOIDQuery() {
-        if (query instanceof SingleObjectQuery) {
-            SingleObjectQuery oidQuery = (SingleObjectQuery) query;
-            if (!oidQuery.isRefreshing()) {
-                Object object = context.getGraphManager().getNode(oidQuery.getObjectId());
-                if (object != null) {
-                    List result = new ArrayList(1);
-                    result.add(object);
-                    this.response = new BaseResponse(result);
-                    return DONE;
-                }
-            }
-        }
-
-        return !DONE;
-    }
-
-    private boolean interceptRelationshipQuery() {
-
-        if (query instanceof RelationshipQuery) {
-            RelationshipQuery relationshipQuery = (RelationshipQuery) query;
-            if (!relationshipQuery.isRefreshing()) {
-
-                // don't intercept to-many relationships if fetch is done to the same
-                // context as the root context of this action - this will result in an
-                // infinite loop.
-
-                if (queryContext == null
-                        && relationshipQuery
-                                .getRelationship(context.getEntityResolver())
-                                .isToMany()) {
-                    return !DONE;
-                }
-
-                ObjectId id = relationshipQuery.getObjectId();
-
-                DataObject object = (DataObject) context.getGraphManager().getNode(id);
-
-                if (object != null) {
-
-                    // can't do 'readProperty' (or use ClassDescriptor at this point) as
-                    // this will result in an infinite loop...
-                    Object related = object.readPropertyDirectly(relationshipQuery
-                            .getRelationshipName());
-
-                    if (!(related instanceof Fault)) {
-                        List result;
-
-                        // null to-one
-                        if (related == null) {
-                            result = new ArrayList(1);
-                        }
-                        // to-many
-                        else if (related instanceof List) {
-                            result = (List) related;
-                        }
-                        // non-null to-one
-                        else {
-                            result = new ArrayList(1);
-                            result.add(related);
-                        }
-
-                        this.response = new BaseResponse(result);
-
-                        return DONE;
-                    }
-                }
-            }
         }
 
         return !DONE;
@@ -253,9 +120,10 @@ class DataContextQueryAction {
                     "Caching of unnamed queries is not supported.");
         }
 
+        ObjectStore objectStore = ((DataContext) actingContext).getObjectStore();
         if (!metadata.isRefreshingObjects()) {
-            List cachedResults = context.getObjectStore().getCachedQueryResult(
-                    query.getName());
+
+            List cachedResults = objectStore.getCachedQueryResult(query.getName());
             if (cachedResults != null) {
                 response = new BaseResponse(cachedResults);
                 return DONE;
@@ -263,14 +131,7 @@ class DataContextQueryAction {
         }
 
         runQuery();
-        context.getObjectStore().cacheQueryResult(query.getName(), response.firstList());
+        objectStore.cacheQueryResult(query.getName(), response.firstList());
         return DONE;
-    }
-
-    /*
-     * Fetches data from the channel.
-     */
-    private void runQuery() {
-        this.response = context.getChannel().onQuery(context, query);
     }
 }
