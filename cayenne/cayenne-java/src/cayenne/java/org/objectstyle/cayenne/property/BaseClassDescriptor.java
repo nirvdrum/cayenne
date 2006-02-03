@@ -86,6 +86,7 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
     protected PropertyAccessor objectIdProperty;
     protected PropertyAccessor contextProperty;
     protected PropertyAccessor persistentStateProperty;
+    protected Map subclassDescriptors;
 
     /**
      * Creates an uncompiled BaseClassDescriptor. Subclasses may add a call to "compile"
@@ -108,6 +109,21 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
 
     public Class getObjectClass() {
         return objectClass;
+    }
+
+    public ClassDescriptor resolveDescriptor(Class objectClass) {
+        if (objectClass == null) {
+            throw new IllegalArgumentException("Null objectClass");
+        }
+
+        if (subclassDescriptors == null) {
+            return this;
+        }
+
+        ClassDescriptor subclassDescriptor = (ClassDescriptor) subclassDescriptors
+                .get(objectClass.getName());
+
+        return subclassDescriptor != null ? subclassDescriptor : this;
     }
 
     /**

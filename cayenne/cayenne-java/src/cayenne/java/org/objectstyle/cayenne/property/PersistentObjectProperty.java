@@ -68,18 +68,18 @@ import org.objectstyle.cayenne.graph.GraphManager;
 public class PersistentObjectProperty extends SimpleProperty implements ArcProperty {
 
     protected String reversePropertyName;
-    protected ClassDescriptor targetDescriptor;
+    protected ClassDescriptor baseTargetDescriptor;
 
     public PersistentObjectProperty(PropertyAccessor accessor,
-            ClassDescriptor targetDescriptor, String reversePropertyName) {
+            ClassDescriptor baseTargetDescriptor, String reversePropertyName) {
 
         super(accessor);
-        this.targetDescriptor = targetDescriptor;
+        this.baseTargetDescriptor = baseTargetDescriptor;
         this.reversePropertyName = reversePropertyName;
     }
 
-    public ClassDescriptor getTargetDescriptor() {
-        return targetDescriptor;
+    public ClassDescriptor getTargetDescriptor(Class objectClass) {
+        return baseTargetDescriptor.resolveDescriptor(objectClass);
     }
 
     /**
@@ -87,14 +87,15 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
      * another. If the new value is fault, fault will be copied to the target.
      */
     public void shallowMerge(Object from, Object to) throws PropertyAccessException {
-        
+
         Object fromValue = accessor.readPropertyDirectly(from);
-        
-        if(fromValue == null) {
+
+        if (fromValue == null) {
             writePropertyDirectly(to, accessor.readPropertyDirectly(to), null);
         }
         else {
-            writePropertyDirectly(to, accessor.readPropertyDirectly(to), Fault.getToOneFault());
+            writePropertyDirectly(to, accessor.readPropertyDirectly(to), Fault
+                    .getToOneFault());
         }
     }
 
@@ -103,11 +104,14 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
             Object from,
             Object to,
             GraphManager mergeMap) {
-        
+
         Object fromValue = accessor.readPropertyDirectly(from);
 
         if (!(fromValue instanceof Fault) && from != null) {
-            fromValue = getTargetDescriptor().deepMerge(context, fromValue, mergeMap);
+            fromValue = getTargetDescriptor(from.getClass()).deepMerge(
+                    context,
+                    fromValue,
+                    mergeMap);
         }
         writePropertyDirectly(to, accessor.readPropertyDirectly(to), fromValue);
     }

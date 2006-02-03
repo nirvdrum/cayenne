@@ -73,5 +73,5 @@ public interface ArcProperty extends Property {
      * Returns a ClassDescriptor for the type of graph nodes pointed to by this arc
      * property.
      */
-    ClassDescriptor getTargetDescriptor();
+    ClassDescriptor getTargetDescriptor(Class targetObjectClass);
 }

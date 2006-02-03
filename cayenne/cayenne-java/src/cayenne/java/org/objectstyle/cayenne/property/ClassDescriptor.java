@@ -81,6 +81,16 @@ public interface ClassDescriptor {
     ClassDescriptor getSuperclassDescriptor();
 
     /**
+     * Returns the most "specialized" descriptor for a given class. This method assumes
+     * that the following is true:
+     * 
+     * <pre>
+     * this.getObjectClass().isAssignableFrom(objectClass)
+     * </pre>
+     */
+    ClassDescriptor resolveDescriptor(Class objectClass);
+
+    /**
      * Creates a new instance of a class described by this object.
      */
     Object createObject();

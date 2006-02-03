@@ -66,6 +66,10 @@ public class MockClassDescriptor implements ClassDescriptor {
         return null;
     }
 
+    public ClassDescriptor resolveDescriptor(Class objectClass) {
+        return this;
+    }
+
     public void prepareForAccess(Object object) throws PropertyAccessException {
     }
 

@@ -88,8 +88,8 @@ public class EntityDescriptor extends BaseClassDescriptor {
 
     protected ObjEntity entity;
 
-    // compiled property
-    boolean dataObject;
+    // compiled properties
+    protected boolean dataObject;
 
     /**
      * Creates and compiles a class descriptor for a given entity. A second optional
@@ -149,6 +149,32 @@ public class EntityDescriptor extends BaseClassDescriptor {
         compileRelationships(resolver, allDescriptors);
 
         this.declaredProperties = allDescriptors;
+
+        // init subclass lookup tree
+        EntityInheritanceTree inheritanceTree = resolver.lookupInheritanceTree(entity);
+        if (inheritanceTree == null) {
+            this.subclassDescriptors = null;
+        }
+        else {
+            Map subclassMapping = new HashMap();
+            compileSubclassMapping(resolver, subclassMapping, inheritanceTree);
+            this.subclassDescriptors = subclassMapping;
+        }
+    }
+
+    protected void compileSubclassMapping(
+            EntityResolver resolver,
+            Map subclassDescriptors,
+            EntityInheritanceTree treeNode) {
+        ObjEntity entity = treeNode.getEntity();
+        ClassDescriptor descriptor = resolver.getClassDescriptor(entity.getName());
+        subclassDescriptors.put(entity.getClassName(), descriptor);
+
+        Iterator it = treeNode.getChildren().iterator();
+        while (it.hasNext()) {
+            EntityInheritanceTree child = (EntityInheritanceTree) it.next();
+            compileSubclassMapping(resolver, subclassDescriptors, child);
+        }
     }
 
     /**

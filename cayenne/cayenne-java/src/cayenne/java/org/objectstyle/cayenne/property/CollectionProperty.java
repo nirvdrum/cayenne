@@ -69,17 +69,17 @@ import org.objectstyle.cayenne.graph.GraphManager;
 public abstract class CollectionProperty extends SimpleProperty implements ArcProperty {
 
     protected String reversePropertyName;
-    protected ClassDescriptor targetDescriptor;
+    protected ClassDescriptor baseTargetDescriptor;
 
     public CollectionProperty(PropertyAccessor accessor,
-            ClassDescriptor targetDescriptor, String reversePropertyName) {
+            ClassDescriptor baseTargetDescriptor, String reversePropertyName) {
         super(accessor);
-        this.targetDescriptor = targetDescriptor;
+        this.baseTargetDescriptor = baseTargetDescriptor;
         this.reversePropertyName = reversePropertyName;
     }
 
-    public ClassDescriptor getTargetDescriptor() {
-        return targetDescriptor;
+    public ClassDescriptor getTargetDescriptor(Class objectClass) {
+        return baseTargetDescriptor.resolveDescriptor(objectClass);
     }
 
     public String getReversePropertyName() {

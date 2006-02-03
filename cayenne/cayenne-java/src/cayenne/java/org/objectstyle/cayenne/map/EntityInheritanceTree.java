@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * of an ObjEntity and its subentities.
  * 
  * @since 1.1
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class EntityInheritanceTree {
     protected ObjEntity entity;
