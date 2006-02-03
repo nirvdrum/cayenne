@@ -123,6 +123,16 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         ClassDescriptor subclassDescriptor = (ClassDescriptor) subclassDescriptors
                 .get(objectClass.getName());
 
+        // ascend via the class hierarchy (only doing it if there are multiple choices)
+        if (subclassDescriptor == null) {
+            Class currentClass = objectClass;
+            while (subclassDescriptor == null
+                    && (currentClass = currentClass.getSuperclass()) != null) {
+                subclassDescriptor = (ClassDescriptor) subclassDescriptors
+                        .get(currentClass.getName());
+            }
+        }
+
         return subclassDescriptor != null ? subclassDescriptor : this;
     }
 
