@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.map;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.DataObjectUtils;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.graph.GraphMap;
@@ -64,7 +65,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class EntityDescriptorMergeTst extends CayenneTestCase {
 
-    public void testDeepMergeCommitted() {
+    public void testDeepMergeNonExistent() {
 
         ClassDescriptor d = getObjEntity("Artist").getClassDescriptor();
 
@@ -81,6 +82,33 @@ public class EntityDescriptorMergeTst extends CayenneTestCase {
             assertNotNull(a2);
             assertEquals(PersistenceState.COMMITTED, a2.getPersistenceState());
             assertEquals(a.getArtistName(), a2.getArtistName());
+        }
+        finally {
+            unblockQueries();
+        }
+    }
+
+    public void testDeepMergeModified() {
+
+        ClassDescriptor d = getObjEntity("Artist").getClassDescriptor();
+
+        DataContext context = createDataContext();
+        DataContext context1 = createDataContext();
+
+        Artist a = (Artist) context.createAndRegisterNewObject(Artist.class);
+        a.setArtistName("AAA");
+        context.commitChanges();
+
+        Artist a1 = (Artist) DataObjectUtils.objectForPK(context1, a.getObjectId());
+        a1.setArtistName("BBB");
+
+        blockQueries();
+        try {
+            Artist a2 = (Artist) d.deepMerge(context1, a, new GraphMap());
+            assertNotNull(a2);
+            assertEquals(PersistenceState.MODIFIED, a2.getPersistenceState());
+            assertSame(a1, a2);
+            assertEquals("BBB", a2.getArtistName());
         }
         finally {
             unblockQueries();

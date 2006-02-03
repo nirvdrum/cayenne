@@ -277,6 +277,17 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
             Object to,
             GraphManager mergeMap) {
 
+        int state = ((Number) persistentStateProperty.readPropertyDirectly(to))
+                .intValue();
+
+        // we can't override resolved properties of this object if it is dirty and by
+        // 'deepMerge' operation definition we shouldn't touch faults ... hence, get out
+        if (state == PersistenceState.NEW
+                || state == PersistenceState.MODIFIED
+                || state == PersistenceState.DELETED) {
+            return;
+        }
+
         if (getSuperclassDescriptor() != null) {
             getSuperclassDescriptor().deepPropertyMerge(context, from, to, mergeMap);
         }
@@ -287,9 +298,11 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
             property.deepMerge(context, from, to, mergeMap);
         }
 
-        int state = ((Number) persistentStateProperty.readPropertyDirectly(to)).intValue();
         if (state == PersistenceState.HOLLOW) {
-            persistentStateProperty.writePropertyDirectly(to, new Integer(state), COMMITTED_STATE);
+            persistentStateProperty.writePropertyDirectly(
+                    to,
+                    new Integer(state),
+                    COMMITTED_STATE);
         }
     }
 }
