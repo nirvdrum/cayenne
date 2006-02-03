@@ -99,8 +99,7 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
     /**
      * Returns a value resolving it via a query on the first call to this method.
      */
-    public Object getValue(Class valueClass) throws CayenneRuntimeException {
-        typeSafetyCheck(valueClass, value);
+    public Object getValue() throws CayenneRuntimeException {
 
         if (fault) {
             resolve();
@@ -112,14 +111,13 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
     /**
      * Sets an object value, marking this ValueHolder as resolved.
      */
-    public synchronized Object setValue(Class valueClass, Object value)
-            throws CayenneRuntimeException {
+    public synchronized Object setValue(Object value) throws CayenneRuntimeException {
 
         if (fault) {
             resolve();
         }
 
-        Object oldValue = setInitialValue(valueClass, value);
+        Object oldValue = setInitialValue(value);
 
         if (oldValue != value) {
             // notify ObjectContext
@@ -135,10 +133,7 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
         return oldValue;
     }
 
-    public Object setInitialValue(Class valueClass, Object value)
-            throws CayenneRuntimeException {
-
-        typeSafetyCheck(valueClass, value);
+    public Object setInitialValue(Object value) throws CayenneRuntimeException {
 
         // must obtain the value from the local context
         if (value instanceof Persistent) {
@@ -171,20 +166,6 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
         }
 
         return persistent;
-    }
-
-    /**
-     * Performs a type-safety check on the value. A value must be of the specified class
-     * or its sublcass or implement specified interface. Otherwise CayenneRuntimeException
-     * is thrown.
-     */
-    protected void typeSafetyCheck(Class valueClass, Object value) {
-        if (valueClass != null && value != null && !(valueClass.isInstance(value))) {
-            throw new CayenneRuntimeException("Expected value of class '"
-                    + valueClass.getName()
-                    + "', got: "
-                    + value.getClass().getName());
-        }
     }
 
     /**

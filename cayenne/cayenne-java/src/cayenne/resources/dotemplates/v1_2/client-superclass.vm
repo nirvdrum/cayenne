@@ -115,7 +115,7 @@ public class ${entityUtils.superClassName} extends ${entityUtils.baseClassName} 
             objectContext.prepareForAccess(this, "${rel.Name}");
         }
         
-        return ($importUtils.formatJavaType(${rel.TargetEntity.ClientClassName})) ${rel.Name}.getValue(${importUtils.formatJavaType($rel.TargetEntity.ClientClassName)}.class);
+        return ($importUtils.formatJavaType(${rel.TargetEntity.ClientClassName})) ${rel.Name}.getValue();
     }
 #if ( !${objEntity.isReadOnly()} && !$rel.ReadOnly )
     public void set${stringUtils.capitalized($rel.Name)}(${importUtils.formatJavaType($rel.TargetEntity.ClientClassName)} $stringUtils.formatVariableName(${rel.Name})) {
@@ -123,7 +123,7 @@ public class ${entityUtils.superClassName} extends ${entityUtils.baseClassName} 
             objectContext.prepareForAccess(this, "${rel.Name}");
         }
         
-        this.${stringUtils.formatVariableName($rel.Name)}.setValue(${importUtils.formatJavaType($rel.TargetEntity.ClientClassName)}.class, ${stringUtils.formatVariableName($rel.Name)});
+        this.${stringUtils.formatVariableName($rel.Name)}.setValue(${stringUtils.formatVariableName($rel.Name)});
     }
 #end
 #end

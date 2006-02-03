@@ -108,7 +108,7 @@ public class PersistentObjectInContextTst extends CayenneTestCase {
 
             PersistentObjectHolder holder = (PersistentObjectHolder) t2.getTable1Direct();
             assertFalse(holder.isFault());
-            assertSame(t1, holder.getValue(ClientMtTable1.class));
+            assertSame(t1, holder.getValue());
         }
     }
 }

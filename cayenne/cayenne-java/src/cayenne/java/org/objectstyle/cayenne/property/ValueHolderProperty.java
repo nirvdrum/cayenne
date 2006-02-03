@@ -78,6 +78,10 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
         this.targetDescriptor = targetDescriptor;
         this.reversePropertyName = reversePropertyName;
     }
+    
+    public Class getPropertyType() {
+        return targetDescriptor.getObjectClass();
+    }
 
     public ClassDescriptor getTargetDescriptor() {
         return targetDescriptor;
@@ -106,12 +110,12 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
             toHolder.invalidate();
         }
         else {
-            Object target = fromHolder.getValue(null);
+            Object target = fromHolder.getValue();
 
             if (target != null) {
                 target = getTargetDescriptor().deepMerge(context, target, mergeMap);
             }
-            toHolder.setInitialValue(null, target);
+            toHolder.setInitialValue(target);
         }
     }
 
@@ -124,14 +128,14 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
 
     public Object readPropertyDirectly(Object object) throws PropertyAccessException {
         ValueHolder holder = (ValueHolder) accessor.readPropertyDirectly(object);
-        return (holder != null) ? holder.getValue(null) : null;
+        return (holder != null) ? holder.getValue() : null;
     }
 
     public void writePropertyDirectly(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException {
 
         ValueHolder holder = ensureValueHolderSet(object);
-        holder.setInitialValue(null, newValue);
+        holder.setInitialValue(newValue);
     }
 
     /**

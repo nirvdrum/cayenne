@@ -84,29 +84,22 @@ public interface ValueHolder extends Serializable {
 
     /**
      * Returns an object stored by this ValueHolder.
-     * 
-     * @param valueClass A class expected for the returned value. A value must be of the
-     *            specified class or its sublcass or implement specified interface.
-     *            Otherwise CayenneRuntimeException is thrown.
      */
-    Object getValue(Class valueClass) throws CayenneRuntimeException;
+    Object getValue() throws CayenneRuntimeException;
 
     /**
      * Sets an object stored by this ValueHolder.
      * 
-     * @param valueClass A class expected for the set value. A value must be of the
-     *            specified class or its sublcass or implement specified interface.
-     *            Otherwise CayenneRuntimeException is thrown.
      * @param value a new value of the ValueHolder.
      * @return a previous value saved in the ValueHolder.
      */
-    Object setValue(Class valueClass, Object value) throws CayenneRuntimeException;
+    Object setValue(Object value) throws CayenneRuntimeException;
 
     /**
      * Initializes ValueHolder with some value. Unlike setValue, this method shouldn't
      * trigger fault resolution.
      */
-    Object setInitialValue(Class valueClass, Object value) throws CayenneRuntimeException;
+    Object setInitialValue(Object value) throws CayenneRuntimeException;
 
     boolean isFault();
 

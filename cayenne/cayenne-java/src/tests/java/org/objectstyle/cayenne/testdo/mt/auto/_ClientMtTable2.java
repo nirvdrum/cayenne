@@ -44,14 +44,14 @@ public class _ClientMtTable2 extends PersistentObject {
             objectContext.prepareForAccess(this, "table1");
         }
         
-        return (ClientMtTable1) table1.getValue(ClientMtTable1.class);
+        return (ClientMtTable1) table1.getValue();
     }
     public void setTable1(ClientMtTable1 table1) {
         if(objectContext != null) {
             objectContext.prepareForAccess(this, "table1");
         }
         
-        this.table1.setValue(ClientMtTable1.class, table1);
+        this.table1.setValue(table1);
     }
     
 }

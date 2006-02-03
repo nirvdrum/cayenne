@@ -79,7 +79,7 @@ public class PersistentObjectHolderTst extends TestCase {
         assertTrue(holder.isFault());
         ClientMtTable1 o1 = new ClientMtTable1();
         o1.setObjectContext(context);
-        holder.setInitialValue(ClientMtTable1.class, o1);
+        holder.setInitialValue(o1);
 
         assertFalse(holder.isFault());
         assertSame(o1, holder.value);
@@ -98,7 +98,7 @@ public class PersistentObjectHolderTst extends TestCase {
         assertTrue(holder.isFault());
         ClientMtTable1 o1 = new ClientMtTable1();
         o1.setObjectContext(context);
-        holder.setInitialValue(ClientMtTable1.class, o1);
+        holder.setInitialValue(o1);
 
         holder.invalidate();
         assertTrue(holder.isFault());

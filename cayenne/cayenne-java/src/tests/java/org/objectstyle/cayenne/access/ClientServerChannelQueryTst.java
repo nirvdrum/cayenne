@@ -181,8 +181,7 @@ public class ClientServerChannelQueryTst extends CayenneTestCase {
         PersistentObjectHolder objectHolder = (PersistentObjectHolder) holder;
         assertFalse(objectHolder.isFault());
 
-        ClientMtTable1 target = (ClientMtTable1) objectHolder
-                .getValue(ClientMtTable1.class);
+        ClientMtTable1 target = (ClientMtTable1) objectHolder.getValue();
         assertNotNull(target);
     }
 
