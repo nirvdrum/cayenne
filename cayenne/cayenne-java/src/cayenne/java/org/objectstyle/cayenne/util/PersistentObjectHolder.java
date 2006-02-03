@@ -59,7 +59,6 @@ import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.FaultFailureException;
-import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.ValueHolder;
 
@@ -164,29 +163,14 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
             return null;
         }
 
-        ObjectContext context = relationshipOwner.getObjectContext();
-
-        if (context == persistent.getObjectContext()) {
-            return persistent;
-        }
-
-        if (context != null) {
-            if (persistent.getObjectContext() == null) {
-                context.getGraphManager().registerNode(
-                        persistent.getObjectId(),
-                        persistent);
-                return persistent;
-            }
-            else {
-                return context.localObject(persistent.getObjectId(), persistent);
-            }
-        }
-        else {
+        if (relationshipOwner.getObjectContext() != persistent.getObjectContext()) {
             throw new CayenneRuntimeException(
                     "Cannot set object as destination of relationship "
                             + relationshipName
                             + " because it is in a different ObjectContext");
         }
+
+        return persistent;
     }
 
     /**
