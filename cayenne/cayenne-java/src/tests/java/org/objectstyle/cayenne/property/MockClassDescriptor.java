@@ -69,10 +69,10 @@ public class MockClassDescriptor implements ClassDescriptor {
     public void prepareForAccess(Object object) throws PropertyAccessException {
     }
 
-    public void shallowCopy(Object from, Object to) throws PropertyAccessException {
+    public void shallowMerge(Object from, Object to) throws PropertyAccessException {
     }
 
-    public void deepCopy(
+    public void deepPropertyMerge(
             ObjectContext context,
             Object from,
             Object to,

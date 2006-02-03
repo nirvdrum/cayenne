@@ -62,6 +62,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.graph.GraphManager;
 import org.objectstyle.cayenne.util.PersistentObjectList;
 
@@ -93,18 +94,20 @@ public class ListProperty extends CollectionProperty {
         return new PersistentObjectList((Persistent) object, getPropertyName());
     }
 
-    public void deepCopy(
+    public void deepMerge(
             ObjectContext context,
             Object from,
             Object to,
             GraphManager mergeMap) {
 
-        PersistentObjectList toHolder = (PersistentObjectList) ensureCollectionSet(to);
+        // assume values implement List and ValueHolder ... this means we can support both
+        // ToManyList and PersistentObjectList.
+        ValueHolder toHolder = (ValueHolder) ensureCollectionSet(to);
 
         // do not init fromHolder if it is not set...
-        PersistentObjectList fromHolder = (PersistentObjectList) accessor.readPropertyDirectly(from);
+        List fromHolder = (List) accessor.readPropertyDirectly(from);
 
-        if (fromHolder == null || fromHolder.isFault()) {
+        if (fromHolder == null || ((ValueHolder) fromHolder).isFault()) {
             toHolder.invalidate();
         }
         else {
@@ -115,7 +118,7 @@ public class ListProperty extends CollectionProperty {
                 objects.add(targetDescriptor.deepMerge(context, it.next(), mergeMap));
             }
 
-            toHolder.setObjectList(objects);
+            toHolder.setValue(objects);
         }
     }
 }

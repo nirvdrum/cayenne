@@ -220,17 +220,17 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
      * Copies object properties from one object to another. Invokes 'shallowCopy' of a
      * super descriptor and then invokes 'shallowCopy' of each declared property.
      */
-    public void shallowCopy(Object from, Object to) throws PropertyAccessException {
+    public void shallowMerge(Object from, Object to) throws PropertyAccessException {
 
         // do super first
         if (getSuperclassDescriptor() != null) {
-            getSuperclassDescriptor().shallowCopy(from, to);
+            getSuperclassDescriptor().shallowMerge(from, to);
         }
 
         Iterator it = declaredProperties.values().iterator();
         while (it.hasNext()) {
             Property property = (Property) it.next();
-            property.shallowCopy(from, to);
+            property.shallowMerge(from, to);
         }
     }
 
@@ -267,24 +267,24 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
             mergeMap.registerNode(id, targetObject);
         }
 
-        deepCopy(context, object, targetObject, mergeMap);
+        deepPropertyMerge(context, object, targetObject, mergeMap);
         return targetObject;
     }
 
-    public void deepCopy(
+    public void deepPropertyMerge(
             ObjectContext context,
             Object from,
             Object to,
             GraphManager mergeMap) {
 
         if (getSuperclassDescriptor() != null) {
-            getSuperclassDescriptor().deepCopy(context, from, to, mergeMap);
+            getSuperclassDescriptor().deepPropertyMerge(context, from, to, mergeMap);
         }
 
         Iterator it = declaredProperties.values().iterator();
         while (it.hasNext()) {
             Property property = (Property) it.next();
-            property.deepCopy(context, from, to, mergeMap);
+            property.deepMerge(context, from, to, mergeMap);
         }
 
         int state = ((Number) persistentStateProperty.readPropertyDirectly(to)).intValue();

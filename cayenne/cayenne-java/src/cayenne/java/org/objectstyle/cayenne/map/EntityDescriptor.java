@@ -77,6 +77,7 @@ import org.objectstyle.cayenne.property.Property;
 import org.objectstyle.cayenne.property.PropertyAccessException;
 import org.objectstyle.cayenne.property.PropertyAccessor;
 import org.objectstyle.cayenne.property.SimpleProperty;
+import org.objectstyle.cayenne.property.ToManyListProperty;
 import org.objectstyle.cayenne.property.ValueHolderProperty;
 
 /**
@@ -190,7 +191,15 @@ public class EntityDescriptor extends BaseClassDescriptor {
                         relationship.getName(),
                         List.class);
 
-                property = new ListProperty(accessor, targetDescriptor, reverseName);
+                if (dataObject) {
+                    property = new ToManyListProperty(
+                            accessor,
+                            targetDescriptor,
+                            reverseName);
+                }
+                else {
+                    property = new ListProperty(accessor, targetDescriptor, reverseName);
+                }
             }
             else {
 

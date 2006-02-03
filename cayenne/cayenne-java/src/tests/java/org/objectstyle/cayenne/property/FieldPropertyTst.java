@@ -141,7 +141,7 @@ public class FieldPropertyTst extends TestCase {
 
         TestBean to = new TestBean();
 
-        property.shallowCopy(from, to);
+        property.shallowMerge(from, to);
         assertEquals("123", to.getString());
     }
 }

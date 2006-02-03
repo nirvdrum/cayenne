@@ -93,19 +93,19 @@ public class SimpleProperty implements Property {
         // noop
     }
 
-    public void shallowCopy(Object from, Object to) throws PropertyAccessException {
+    public void shallowMerge(Object from, Object to) throws PropertyAccessException {
         writePropertyDirectly(to, accessor.readPropertyDirectly(to), accessor.readPropertyDirectly(from));
     }
 
     /**
      * Does the same thing as 'shallowCopy'.
      */
-    public void deepCopy(
+    public void deepMerge(
             ObjectContext context,
             Object from,
             Object to,
             GraphManager mergeMap) {
-        shallowCopy(from, to);
+        shallowMerge(from, to);
     }
 
     public Object readPropertyDirectly(Object object) throws PropertyAccessException {

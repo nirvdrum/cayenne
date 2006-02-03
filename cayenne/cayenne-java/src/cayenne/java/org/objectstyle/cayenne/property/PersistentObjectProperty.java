@@ -86,7 +86,7 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
      * Copies a property value that is itself a persistent object from one object to
      * another. If the new value is fault, fault will be copied to the target.
      */
-    public void shallowCopy(Object from, Object to) throws PropertyAccessException {
+    public void shallowMerge(Object from, Object to) throws PropertyAccessException {
         
         Object fromValue = accessor.readPropertyDirectly(from);
         
@@ -98,7 +98,7 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
         }
     }
 
-    public void deepCopy(
+    public void deepMerge(
             ObjectContext context,
             Object from,
             Object to,

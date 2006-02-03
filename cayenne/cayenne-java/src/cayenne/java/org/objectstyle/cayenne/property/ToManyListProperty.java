@@ -55,44 +55,48 @@
  */
 package org.objectstyle.cayenne.property;
 
-import junit.framework.TestCase;
+import java.util.Collection;
 
-import org.objectstyle.cayenne.unit.util.TestBean;
+import org.objectstyle.cayenne.Fault;
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.access.ToManyList;
+import org.objectstyle.cayenne.graph.GraphManager;
 
-public class BaseClassDescriptorTst extends TestCase {
+/**
+ * A list property that is intended to work with
+ * {@link org.objectstyle.cayenne.access.ToManyList}.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+public class ToManyListProperty extends ListProperty {
 
-    public void testConstructor() {
-        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
-        };
-        assertNull(d1.getSuperclassDescriptor());
-
-        BaseClassDescriptor d2 = new BaseClassDescriptor(d1) {
-        };
-        assertNull(d1.getSuperclassDescriptor());
-        assertSame(d1, d2.getSuperclassDescriptor());
+    public ToManyListProperty(PropertyAccessor accessor,
+            ClassDescriptor targetDescriptor, String reversePropertyName) {
+        super(accessor, targetDescriptor, reversePropertyName);
     }
 
-    public void testValid() { // by default BaseClassDescriptor is not compiled...
-        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
-        };
+    protected Collection createCollection(Object object) throws PropertyAccessException {
+        if (!(object instanceof Persistent)) {
 
-        // by default BaseClassDescriptor is not compiled...
-        assertFalse(d1.isValid());
+            throw new PropertyAccessException(
+                    "ValueHolders for non-persistent objects are not supported.",
+                    this,
+                    object);
+        }
+
+        return new ToManyList((Persistent) object, getPropertyName());
     }
 
-    public void testCopyObjectProperties() {
-        FieldAccessor accessor = new FieldAccessor(TestBean.class, "string", String.class);
-        SimpleProperty property = new SimpleProperty(accessor);
-        BaseClassDescriptor d1 = new MockBaseClassDescriptor();
-
-        d1.declaredProperties.put(property.getPropertyName(), property);
-
-        TestBean from = new TestBean();
-        from.setString("123");
-
-        TestBean to = new TestBean();
-
-        d1.shallowMerge(from, to);
-        assertEquals("123", to.getString());
+    public void deepMerge(
+            ObjectContext context,
+            Object from,
+            Object to,
+            GraphManager mergeMap) {
+        // take faults into account
+        if (!(accessor.readPropertyDirectly(from) instanceof Fault)) {
+            super.deepMerge(context, from, to, mergeMap);
+        }
     }
 }

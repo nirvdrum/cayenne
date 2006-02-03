@@ -91,11 +91,11 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
         return reversePropertyName;
     }
 
-    public void shallowCopy(Object from, Object to) throws PropertyAccessException {
+    public void shallowMerge(Object from, Object to) throws PropertyAccessException {
         // noop
     }
 
-    public void deepCopy(
+    public void deepMerge(
             ObjectContext context,
             Object from,
             Object to,

@@ -93,17 +93,36 @@ public interface ClassDescriptor extends Serializable {
     void prepareForAccess(Object object) throws PropertyAccessException;
 
     /**
-     * Copies object properties from one object to another.
+     * Merges object properties from one object to another, avoiding traversal of the
+     * ArcProperties.
      */
-    void shallowCopy(Object from, Object to) throws PropertyAccessException;
-
-    void deepCopy(ObjectContext context, Object from, Object to, GraphManager mergeMap);
+    void shallowMerge(Object from, Object to) throws PropertyAccessException;
 
     /**
-     * Merges an object to another context.
+     * Takes an object and merges the provided ObjectContext. Merge operation is cascaded
+     * to all accessible (i.e. resolved) related objects. Returns a merged instance
+     * belonging to the provided context.
+     * 
+     * @param context ObjectContext to merge the object to.
+     * @param object Object to merge
+     * @param mergeMap an object map that provides a "context" of this operation, ensuring
+     *            object uniquing. All ClassDescriptors and properties participating in
+     *            the merge must register resolved objects in the mergeMap.
      */
     Object deepMerge(ObjectContext context, Object object, GraphManager mergeMap)
             throws PropertyAccessException;
+
+    /**
+     * A method similar to {@link #deepMerge(ObjectContext, Object, GraphManager)} that
+     * merges object properties from one object to another known object. This method is
+     * normally used internally by 'deepMerge' implementors to cascade property merging to
+     * related objects.
+     */
+    void deepPropertyMerge(
+            ObjectContext context,
+            Object from,
+            Object to,
+            GraphManager mergeMap);
 
     /**
      * Returns a Java Bean property descriptor matching property name or null if no such

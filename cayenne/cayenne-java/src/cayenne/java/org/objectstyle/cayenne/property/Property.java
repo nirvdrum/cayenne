@@ -76,7 +76,7 @@ public interface Property extends PropertyAccessor {
     /**
      * Copies a property value from one object to another.
      */
-    void shallowCopy(Object from, Object to) throws PropertyAccessException;
+    void shallowMerge(Object from, Object to) throws PropertyAccessException;
 
-    void deepCopy(ObjectContext context, Object from, Object to, GraphManager mergeMap);
+    void deepMerge(ObjectContext context, Object from, Object to, GraphManager mergeMap);
 }

@@ -86,11 +86,11 @@ public abstract class CollectionProperty extends SimpleProperty implements ArcPr
         return reversePropertyName;
     }
 
-    public void shallowCopy(Object from, Object to) throws PropertyAccessException {
+    public void shallowMerge(Object from, Object to) throws PropertyAccessException {
         // noop
     }
 
-    public abstract void deepCopy(
+    public abstract void deepMerge(
             ObjectContext context,
             Object from,
             Object to,

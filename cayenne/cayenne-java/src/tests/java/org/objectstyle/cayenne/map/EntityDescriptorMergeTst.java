@@ -53,46 +53,38 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.property;
+package org.objectstyle.cayenne.map;
 
-import junit.framework.TestCase;
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.graph.GraphMap;
+import org.objectstyle.cayenne.property.ClassDescriptor;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-import org.objectstyle.cayenne.unit.util.TestBean;
+public class EntityDescriptorMergeTst extends CayenneTestCase {
 
-public class BaseClassDescriptorTst extends TestCase {
+    public void testDeepMergeCommitted() {
 
-    public void testConstructor() {
-        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
-        };
-        assertNull(d1.getSuperclassDescriptor());
+        ClassDescriptor d = getObjEntity("Artist").getClassDescriptor();
 
-        BaseClassDescriptor d2 = new BaseClassDescriptor(d1) {
-        };
-        assertNull(d1.getSuperclassDescriptor());
-        assertSame(d1, d2.getSuperclassDescriptor());
+        DataContext context = createDataContext();
+        DataContext context1 = createDataContext();
+
+        Artist a = (Artist) context.createAndRegisterNewObject(Artist.class);
+        a.setArtistName("AAA");
+        context.commitChanges();
+
+        blockQueries();
+        try {
+            Artist a2 = (Artist) d.deepMerge(context1, a, new GraphMap());
+            assertNotNull(a2);
+            assertEquals(PersistenceState.COMMITTED, a2.getPersistenceState());
+            assertEquals(a.getArtistName(), a2.getArtistName());
+        }
+        finally {
+            unblockQueries();
+        }
     }
 
-    public void testValid() { // by default BaseClassDescriptor is not compiled...
-        BaseClassDescriptor d1 = new BaseClassDescriptor(null) {
-        };
-
-        // by default BaseClassDescriptor is not compiled...
-        assertFalse(d1.isValid());
-    }
-
-    public void testCopyObjectProperties() {
-        FieldAccessor accessor = new FieldAccessor(TestBean.class, "string", String.class);
-        SimpleProperty property = new SimpleProperty(accessor);
-        BaseClassDescriptor d1 = new MockBaseClassDescriptor();
-
-        d1.declaredProperties.put(property.getPropertyName(), property);
-
-        TestBean from = new TestBean();
-        from.setString("123");
-
-        TestBean to = new TestBean();
-
-        d1.shallowMerge(from, to);
-        assertEquals("123", to.getString());
-    }
 }
