@@ -95,7 +95,7 @@ public class FieldAccessor implements PropertyAccessor {
         return field.getType();
     }
 
-    public Object readValue(Object object) throws PropertyAccessException {
+    public Object readPropertyDirectly(Object object) throws PropertyAccessException {
         try {
             return field.get(object);
         }
@@ -108,7 +108,7 @@ public class FieldAccessor implements PropertyAccessor {
         }
     }
 
-    public void writeValue(Object object, Object oldValue, Object newValue)
+    public void writePropertyDirectly(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException {
         // this would take care of primitives.
         if (newValue == null) {

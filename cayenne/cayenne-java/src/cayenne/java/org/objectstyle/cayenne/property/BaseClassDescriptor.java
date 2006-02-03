@@ -194,7 +194,7 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
     }
 
     protected Object readObjectId(Object object) {
-        return objectIdProperty.readValue(object);
+        return objectIdProperty.readPropertyDirectly(object);
     }
 
     /**
@@ -204,16 +204,16 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
     protected Object makePersistentObject(ObjectContext context, Object id) {
         Object object = createObject();
 
-        objectIdProperty.writeValue(object, null, id);
-        contextProperty.writeValue(object, null, context);
-        persistentStateProperty.writeValue(object, null, HOLLOW_STATE);
+        objectIdProperty.writePropertyDirectly(object, null, id);
+        contextProperty.writePropertyDirectly(object, null, context);
+        persistentStateProperty.writePropertyDirectly(object, null, HOLLOW_STATE);
 
         prepareForAccess(object);
         return object;
     }
 
     protected void writeObjectId(Object object, Object id) {
-        objectIdProperty.writeValue(object, null, id);
+        objectIdProperty.writePropertyDirectly(object, null, id);
     }
 
     /**
@@ -287,9 +287,9 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
             property.deepCopy(context, from, to, mergeMap);
         }
 
-        int state = ((Number) persistentStateProperty.readValue(to)).intValue();
+        int state = ((Number) persistentStateProperty.readPropertyDirectly(to)).intValue();
         if (state == PersistenceState.HOLLOW) {
-            persistentStateProperty.writeValue(to, new Integer(state), COMMITTED_STATE);
+            persistentStateProperty.writePropertyDirectly(to, new Integer(state), COMMITTED_STATE);
         }
     }
 }

@@ -102,7 +102,7 @@ public class ListProperty extends CollectionProperty {
         PersistentObjectList toHolder = (PersistentObjectList) ensureCollectionSet(to);
 
         // do not init fromHolder if it is not set...
-        PersistentObjectList fromHolder = (PersistentObjectList) accessor.readValue(from);
+        PersistentObjectList fromHolder = (PersistentObjectList) accessor.readPropertyDirectly(from);
 
         if (fromHolder == null || fromHolder.isFault()) {
             toHolder.invalidate();

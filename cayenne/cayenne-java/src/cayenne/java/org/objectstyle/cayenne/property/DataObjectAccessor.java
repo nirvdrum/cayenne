@@ -88,7 +88,7 @@ public class DataObjectAccessor implements PropertyAccessor {
      * Reads the value without disturbing DataObject state. I.e. no Fault resolving occurs
      * here.
      */
-    public Object readValue(Object object) throws PropertyAccessException {
+    public Object readPropertyDirectly(Object object) throws PropertyAccessException {
         try {
 
             DataObject dataObject = (DataObject) object;
@@ -107,7 +107,7 @@ public class DataObjectAccessor implements PropertyAccessor {
         // TODO - see TODO in 'writeValue'
     }
 
-    public void writeValue(Object object, Object oldValue, Object newValue)
+    public void writePropertyDirectly(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException {
 
         try {

@@ -227,7 +227,7 @@ class DataContextQueryAction {
                         // non-null to-one
                         else {
                             result = new ArrayList(1);
-                            result.add(object);
+                            result.add(related);
                         }
 
                         this.response = new BaseResponse(result);

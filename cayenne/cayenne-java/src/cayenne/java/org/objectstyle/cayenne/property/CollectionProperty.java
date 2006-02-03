@@ -107,7 +107,7 @@ public abstract class CollectionProperty extends SimpleProperty implements ArcPr
      * Throws an exception, as there is more than one value in a collection described by
      * this property.
      */
-    public Object readValue(Object object) throws PropertyAccessException {
+    public Object readPropertyDirectly(Object object) throws PropertyAccessException {
         throw new PropertyAccessException(
                 "'readValue' is undefined in ListProperty",
                 this,
@@ -117,7 +117,7 @@ public abstract class CollectionProperty extends SimpleProperty implements ArcPr
     /**
      * Removes teh old value from the collection, adds the new value.
      */
-    public void writeValue(Object object, Object oldValue, Object newValue)
+    public void writePropertyDirectly(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException {
 
         Collection collection = ensureCollectionSet(object);
@@ -138,10 +138,10 @@ public abstract class CollectionProperty extends SimpleProperty implements ArcPr
     protected Collection ensureCollectionSet(Object object)
             throws PropertyAccessException {
 
-        Collection collection = (Collection) accessor.readValue(object);
+        Collection collection = (Collection) accessor.readPropertyDirectly(object);
         if (collection == null) {
             collection = createCollection(object);
-            accessor.writeValue(object, null, collection);
+            accessor.writePropertyDirectly(object, null, collection);
         }
 
         return collection;

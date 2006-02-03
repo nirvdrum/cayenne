@@ -187,7 +187,7 @@ class CayenneContextGraphAction {
         String reverseName = property.getReversePropertyName();
         if (reverseName != null) {
             ClassDescriptor reverseDescriptor = context.getClassDescriptor(targetObject);
-            reverseDescriptor.getProperty(reverseName).writeValue(
+            reverseDescriptor.getProperty(reverseName).writePropertyDirectly(
                     targetObject,
                     null,
                     sourceObject);
@@ -209,7 +209,7 @@ class CayenneContextGraphAction {
         String reverseName = property.getReversePropertyName();
         if (reverseName != null) {
             ClassDescriptor reverseDescriptor = context.getClassDescriptor(targetObject);
-            reverseDescriptor.getProperty(reverseName).writeValue(
+            reverseDescriptor.getProperty(reverseName).writePropertyDirectly(
                     targetObject,
                     sourceObject,
                     null);

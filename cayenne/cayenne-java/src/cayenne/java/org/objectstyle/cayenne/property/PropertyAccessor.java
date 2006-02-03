@@ -77,14 +77,14 @@ public interface PropertyAccessor extends Serializable {
     Class getPropertyType();
 
     /**
-     * Returns a property value of an object.
+     * Returns a property value of an object without disturbing the object fault status.
      */
-    Object readValue(Object object) throws PropertyAccessException;
+    Object readPropertyDirectly(Object object) throws PropertyAccessException;
 
     /**
-     * Sets a property value of an object. Old value of the property is specified as a
-     * hint.
+     * Sets a property value of an object without disturbing the object fault status. Old
+     * value of the property is specified as a hint.
      */
-    void writeValue(Object object, Object oldValue, Object newValue)
+    void writePropertyDirectly(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException;
 }

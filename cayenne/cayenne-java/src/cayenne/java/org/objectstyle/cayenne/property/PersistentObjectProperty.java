@@ -55,11 +55,12 @@
  */
 package org.objectstyle.cayenne.property;
 
-import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.Fault;
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.graph.GraphManager;
 
 /**
- * An extension of SimpleProperty that makes sure that Persistent values are properly
- * transferred between contexts on copy.
+ * An extension of SimpleProperty for accessing Persistent objects.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -71,7 +72,7 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
 
     public PersistentObjectProperty(PropertyAccessor accessor,
             ClassDescriptor targetDescriptor, String reversePropertyName) {
-        
+
         super(accessor);
         this.targetDescriptor = targetDescriptor;
         this.reversePropertyName = reversePropertyName;
@@ -86,23 +87,29 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
      * another. If the new value is fault, fault will be copied to the target.
      */
     public void shallowCopy(Object from, Object to) throws PropertyAccessException {
-        Object newValue = accessor.readValue(from);
-
-        // must obtain the value from the local context
-        if (newValue instanceof Persistent) {
-            if (to instanceof Persistent) {
-                Persistent newPersistent = (Persistent) newValue;
-                Persistent toPersistent = (Persistent) to;
-
-                if (newPersistent.getObjectContext() != toPersistent.getObjectContext()) {
-                    newValue = toPersistent.getObjectContext().localObject(
-                            newPersistent.getObjectId(),
-                            newPersistent);
-                }
-            }
+        
+        Object fromValue = accessor.readPropertyDirectly(from);
+        
+        if(fromValue == null) {
+            writePropertyDirectly(to, accessor.readPropertyDirectly(to), null);
         }
+        else {
+            writePropertyDirectly(to, accessor.readPropertyDirectly(to), Fault.getToOneFault());
+        }
+    }
 
-        writeValue(to, accessor.readValue(to), newValue);
+    public void deepCopy(
+            ObjectContext context,
+            Object from,
+            Object to,
+            GraphManager mergeMap) {
+        
+        Object fromValue = accessor.readPropertyDirectly(from);
+
+        if (!(fromValue instanceof Fault) && from != null) {
+            fromValue = getTargetDescriptor().deepMerge(context, fromValue, mergeMap);
+        }
+        writePropertyDirectly(to, accessor.readPropertyDirectly(to), fromValue);
     }
 
     public String getReversePropertyName() {

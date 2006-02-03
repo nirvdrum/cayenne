@@ -100,7 +100,7 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
         ValueHolder toHolder = ensureValueHolderSet(to);
 
         // do not set FROM holder if it is null
-        ValueHolder fromHolder = (ValueHolder) accessor.readValue(from);
+        ValueHolder fromHolder = (ValueHolder) accessor.readPropertyDirectly(from);
 
         if (fromHolder == null || fromHolder.isFault()) {
             toHolder.invalidate();
@@ -122,12 +122,12 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
         ensureValueHolderSet(object);
     }
 
-    public Object readValue(Object object) throws PropertyAccessException {
-        ValueHolder holder = ensureValueHolderSet(object);
-        return holder.getValue(null);
+    public Object readPropertyDirectly(Object object) throws PropertyAccessException {
+        ValueHolder holder = (ValueHolder) accessor.readPropertyDirectly(object);
+        return (holder != null) ? holder.getValue(null) : null;
     }
 
-    public void writeValue(Object object, Object oldValue, Object newValue)
+    public void writePropertyDirectly(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException {
 
         ValueHolder holder = ensureValueHolderSet(object);
@@ -141,10 +141,10 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
     protected ValueHolder ensureValueHolderSet(Object object)
             throws PropertyAccessException {
 
-        ValueHolder holder = (ValueHolder) accessor.readValue(object);
+        ValueHolder holder = (ValueHolder) accessor.readPropertyDirectly(object);
         if (holder == null) {
             holder = createValueHolder(object);
-            accessor.writeValue(object, null, holder);
+            accessor.writePropertyDirectly(object, null, holder);
         }
 
         return holder;

@@ -150,7 +150,7 @@ public abstract class RelationshipFault {
 
             Iterator it = resolved.iterator();
             while (it.hasNext()) {
-                property.writeValue(it.next(), null, relationshipOwner);
+                property.writePropertyDirectly(it.next(), null, relationshipOwner);
             }
         }
 

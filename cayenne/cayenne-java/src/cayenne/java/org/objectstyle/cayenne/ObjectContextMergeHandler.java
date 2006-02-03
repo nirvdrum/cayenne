@@ -225,9 +225,9 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
 
             // do not override local changes....
             Property p = propertyForId(nodeId, property);
-            if (Util.nullSafeEquals(p.readValue(object), oldValue)) {
+            if (Util.nullSafeEquals(p.readPropertyDirectly(object), oldValue)) {
 
-                p.writeValue(object, oldValue, newValue);
+                p.writePropertyDirectly(object, oldValue, newValue);
                 context.internalGraphAction().handleSimplePropertyChange(
                         (Persistent) object,
                         property,
@@ -259,7 +259,7 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
         ArcProperty p = (ArcProperty) propertyForId(nodeId, arcId.toString());
 
         // TODO (Andrus, 10/17/2005) handle ordered lists...
-        p.writeValue(source, null, target);
+        p.writePropertyDirectly(source, null, target);
 
         try {
             context.internalGraphAction().handleArcPropertyChange(
@@ -292,7 +292,7 @@ class ObjectContextMergeHandler implements GraphChangeHandler, GraphEventListene
 
         // (see "TODO" in 'arcCreated')
         ArcProperty p = (ArcProperty) propertyForId(nodeId, arcId.toString());
-        p.writeValue(source, target, null);
+        p.writePropertyDirectly(source, target, null);
 
         try {
             context.internalGraphAction().handleArcPropertyChange(

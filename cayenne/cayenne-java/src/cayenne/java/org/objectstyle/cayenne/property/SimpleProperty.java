@@ -94,7 +94,7 @@ public class SimpleProperty implements Property {
     }
 
     public void shallowCopy(Object from, Object to) throws PropertyAccessException {
-        writeValue(to, accessor.readValue(to), accessor.readValue(from));
+        writePropertyDirectly(to, accessor.readPropertyDirectly(to), accessor.readPropertyDirectly(from));
     }
 
     /**
@@ -108,12 +108,12 @@ public class SimpleProperty implements Property {
         shallowCopy(from, to);
     }
 
-    public Object readValue(Object object) throws PropertyAccessException {
-        return accessor.readValue(object);
+    public Object readPropertyDirectly(Object object) throws PropertyAccessException {
+        return accessor.readPropertyDirectly(object);
     }
 
-    public void writeValue(Object object, Object oldValue, Object newValue)
+    public void writePropertyDirectly(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException {
-        accessor.writeValue(object, oldValue, newValue);
+        accessor.writePropertyDirectly(object, oldValue, newValue);
     }
 }

@@ -80,7 +80,7 @@ public class FieldPropertyTst extends TestCase {
         TestBean object = new TestBean();
         object.setString("abc");
 
-        assertEquals("abc", property.readValue(object));
+        assertEquals("abc", property.readPropertyDirectly(object));
     }
 
     public void testWriteValue() {
@@ -90,7 +90,7 @@ public class FieldPropertyTst extends TestCase {
         // string
         new SimpleProperty(
                 new FieldAccessor(TestFields.class, "stringField", String.class))
-                .writeValue(object, null, "aaa");
+                .writePropertyDirectly(object, null, "aaa");
         assertEquals("aaa", object.stringField);
 
         // primitive array
@@ -100,7 +100,7 @@ public class FieldPropertyTst extends TestCase {
         new SimpleProperty(new FieldAccessor(
                 TestFields.class,
                 "byteArrayField",
-                byte[].class)).writeValue(object, null, bytes);
+                byte[].class)).writePropertyDirectly(object, null, bytes);
         assertSame(bytes, object.byteArrayField);
 
         // object array
@@ -110,7 +110,7 @@ public class FieldPropertyTst extends TestCase {
         new SimpleProperty(new FieldAccessor(
                 TestFields.class,
                 "stringArrayField",
-                String[].class)).writeValue(object, null, strings);
+                String[].class)).writePropertyDirectly(object, null, strings);
         assertSame(strings, object.stringArrayField);
     }
 
@@ -120,13 +120,13 @@ public class FieldPropertyTst extends TestCase {
 
         // primitive int .. write non-null
         new SimpleProperty(new FieldAccessor(TestFields.class, "intField", Integer.TYPE))
-                .writeValue(object, null, new Integer(6));
+                .writePropertyDirectly(object, null, new Integer(6));
         assertEquals(6, object.intField);
 
         // primitive int .. write null
         object.intField = 55;
         new SimpleProperty(new FieldAccessor(TestFields.class, "intField", Integer.TYPE))
-                .writeValue(object, null, null);
+                .writePropertyDirectly(object, null, null);
 
         assertEquals(0, object.intField);
     }

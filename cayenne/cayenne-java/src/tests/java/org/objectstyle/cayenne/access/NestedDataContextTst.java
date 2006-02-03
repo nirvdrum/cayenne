@@ -366,6 +366,7 @@ public class NestedDataContextTst extends CayenneTestCase {
             Painting childHollowTargetSrc = (Painting) childSources.get(0);
             assertSame(child, childHollowTargetSrc.getObjectContext());
             Artist childHollowTarget = childHollowTargetSrc.getToArtist();
+            assertNotNull(childHollowTarget);
             assertEquals(PersistenceState.HOLLOW, childHollowTarget.getPersistenceState());
             assertSame(child, childHollowTarget.getObjectContext());
 

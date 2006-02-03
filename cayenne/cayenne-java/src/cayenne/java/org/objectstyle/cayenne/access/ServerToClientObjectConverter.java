@@ -142,7 +142,7 @@ class ServerToClientObjectConverter {
             while (it.hasNext()) {
                 Property property = descriptor.getProperty((String) it.next());
                 if (!(property instanceof ArcProperty)) {
-                    property.writeValue(clientObject, null, object.readProperty(property
+                    property.writePropertyDirectly(clientObject, null, object.readProperty(property
                             .getPropertyName()));
                 }
             }
@@ -169,7 +169,7 @@ class ServerToClientObjectConverter {
             ClassDescriptor parentDescriptor = parentEntity.getClassDescriptor();
 
             Property arcProperty = parentDescriptor.getProperty(node.incoming.getName());
-            arcProperty.writeValue(clientParentObject, null, clientObject);
+            arcProperty.writePropertyDirectly(clientParentObject, null, clientObject);
 
             // don't write reverse property ... in case it is a list, we don't want it
             // resolved ... let it stay a fault.
