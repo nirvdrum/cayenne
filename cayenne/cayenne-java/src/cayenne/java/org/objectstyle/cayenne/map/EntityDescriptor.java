@@ -140,8 +140,8 @@ public class EntityDescriptor extends BaseClassDescriptor {
         // TODO: instead of using 'makeAccessor' that tries a field and then a DataObject,
         // use field and then get/set instead.
         this.objectIdProperty = makeAccessor("objectId", ObjectId.class);
-        this.contextProperty = makeAccessor("objectContext", ObjectContext.class);
-        this.persistentStateProperty = makeAccessor("persistenceState", Integer.TYPE);
+        this.objectContextProperty = makeAccessor("objectContext", ObjectContext.class);
+        this.persistenceStateProperty = makeAccessor("persistenceState", Integer.TYPE);
 
         // init property descriptors...
         Map allDescriptors = new HashMap();

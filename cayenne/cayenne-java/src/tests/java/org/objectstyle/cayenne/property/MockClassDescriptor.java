@@ -66,6 +66,18 @@ public class MockClassDescriptor implements ClassDescriptor {
     public ClassDescriptor resolveDescriptor(Class objectClass) {
         return this;
     }
+    
+    public PropertyAccessor getObjectContextProperty() {
+        return null;
+    }
+    
+    public PropertyAccessor getObjectIdProperty() {
+        return null;
+    }
+    
+    public PropertyAccessor getPersistenceStateProperty() {
+        return null;
+    }
 
     public void prepareForAccess(Object object) throws PropertyAccessException {
     }

@@ -84,8 +84,8 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
     protected Class objectClass;
     protected Map declaredProperties;
     protected PropertyAccessor objectIdProperty;
-    protected PropertyAccessor contextProperty;
-    protected PropertyAccessor persistentStateProperty;
+    protected PropertyAccessor objectContextProperty;
+    protected PropertyAccessor persistenceStateProperty;
     protected Map subclassDescriptors;
 
     /**
@@ -103,8 +103,8 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         return objectClass != null
                 && declaredProperties != null
                 && objectIdProperty != null
-                && contextProperty != null
-                && persistentStateProperty != null;
+                && objectContextProperty != null
+                && persistenceStateProperty != null;
     }
 
     public Class getObjectClass() {
@@ -182,6 +182,21 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         return superclassDescriptor;
     }
 
+    
+    public PropertyAccessor getObjectContextProperty() {
+        return objectContextProperty;
+    }
+
+    
+    public PropertyAccessor getObjectIdProperty() {
+        return objectIdProperty;
+    }
+
+    
+    public PropertyAccessor getPersistenceStateProperty() {
+        return persistenceStateProperty;
+    }
+
     /**
      * Creates a new instance of a class described by this object.
      */
@@ -233,12 +248,12 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         objectIdProperty.writePropertyDirectly(object, null, id);
 
         if (context != null) {
-            contextProperty.writePropertyDirectly(object, null, context);
-            persistentStateProperty.writePropertyDirectly(object, null, HOLLOW_STATE);
+            objectContextProperty.writePropertyDirectly(object, null, context);
+            persistenceStateProperty.writePropertyDirectly(object, null, HOLLOW_STATE);
             context.getGraphManager().registerNode(id, object);
         }
         else {
-            persistentStateProperty.writePropertyDirectly(object, null, TRANSIENT_STATE);
+            persistenceStateProperty.writePropertyDirectly(object, null, TRANSIENT_STATE);
         }
 
         prepareForAccess(object);
@@ -307,7 +322,7 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
 
     public void deepPropertyMerge(Object from, Object to, ObjectGraphVisitor visitor) {
 
-        int state = ((Number) persistentStateProperty.readPropertyDirectly(to))
+        int state = ((Number) persistenceStateProperty.readPropertyDirectly(to))
                 .intValue();
 
         // we can't override resolved properties of this object if it is dirty and by
@@ -329,7 +344,7 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         }
 
         if (state == PersistenceState.HOLLOW) {
-            persistentStateProperty.writePropertyDirectly(
+            persistenceStateProperty.writePropertyDirectly(
                     to,
                     new Integer(state),
                     COMMITTED_STATE);

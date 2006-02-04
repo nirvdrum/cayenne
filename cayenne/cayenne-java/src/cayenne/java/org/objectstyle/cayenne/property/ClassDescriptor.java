@@ -65,6 +65,12 @@ import java.util.Collection;
  * @author Andrus Adamchik
  */
 public interface ClassDescriptor {
+    
+    PropertyAccessor getObjectIdProperty();
+    
+    PropertyAccessor getPersistenceStateProperty();
+    
+    PropertyAccessor getObjectContextProperty();
 
     /**
      * Returns a bean class mapped by this descriptor.
