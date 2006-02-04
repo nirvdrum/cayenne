@@ -68,21 +68,21 @@ import org.objectstyle.cayenne.util.PersistentObjectHolder;
 public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
 
     protected String reversePropertyName;
-    protected ClassDescriptor baseTargetDescriptor;
+    protected ClassDescriptor targetDescriptor;
 
     public ValueHolderProperty(PropertyAccessor accessor,
-            ClassDescriptor baseTargetDescriptor, String reversePropertyName) {
+            ClassDescriptor targetDescriptor, String reversePropertyName) {
         super(accessor);
-        this.baseTargetDescriptor = baseTargetDescriptor;
+        this.targetDescriptor = targetDescriptor;
         this.reversePropertyName = reversePropertyName;
     }
 
     public Class getPropertyType() {
-        return baseTargetDescriptor.getObjectClass();
+        return targetDescriptor.getObjectClass();
     }
 
-    public ClassDescriptor getTargetDescriptor(Class objectClass) {
-        return baseTargetDescriptor.resolveDescriptor(objectClass);
+    public ClassDescriptor getTargetDescriptor() {
+        return targetDescriptor;
     }
 
     public String getReversePropertyName() {
@@ -108,9 +108,9 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
             Object target = fromHolder.getValue();
 
             if (target != null) {
-                target = getTargetDescriptor(target.getClass()).deepMerge(
-                        target,
-                        visitor.getChildVisitor(this));
+                target = getTargetDescriptor()
+                        .resolveDescriptor(target.getClass())
+                        .deepMerge(target, visitor.getChildVisitor(this));
             }
             toHolder.setInitialValue(target);
         }

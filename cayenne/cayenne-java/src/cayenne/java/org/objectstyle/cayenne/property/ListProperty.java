@@ -111,8 +111,11 @@ public class ListProperty extends CollectionProperty {
             Iterator it = fromHolder.iterator();
             while (it.hasNext()) {
                 Object next = it.next();
-                Object merged = (next != null) ? getTargetDescriptor(next.getClass())
-                        .deepMerge(next, visitor.getChildVisitor(this)) : null;
+                Object merged = (next != null)
+                        ? getTargetDescriptor()
+                                .resolveDescriptor(next.getClass())
+                                .deepMerge(next, visitor.getChildVisitor(this))
+                        : null;
                 objects.add(merged);
             }
 

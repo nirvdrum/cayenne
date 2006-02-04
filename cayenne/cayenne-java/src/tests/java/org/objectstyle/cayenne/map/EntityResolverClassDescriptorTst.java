@@ -118,7 +118,7 @@ public class EntityResolverClassDescriptorTst extends CayenneTestCase {
         Property p = descriptor.getProperty(MtTable1.TABLE2ARRAY_PROPERTY);
         assertTrue(p instanceof ArcProperty);
 
-        ClassDescriptor target = ((ArcProperty) p).getTargetDescriptor(MtTable2.class);
+        ClassDescriptor target = ((ArcProperty) p).getTargetDescriptor();
         assertNotNull(target);
         assertSame(resolver.getClassDescriptor("MtTable2"), target);
         assertEquals(MtTable2.TABLE1_PROPERTY, ((ArcProperty) p).getReversePropertyName());

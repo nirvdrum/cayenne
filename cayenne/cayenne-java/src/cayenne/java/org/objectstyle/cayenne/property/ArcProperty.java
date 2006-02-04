@@ -71,9 +71,12 @@ public interface ArcProperty extends Property {
 
     /**
      * Returns a ClassDescriptor for the type of graph nodes pointed to by this arc
-     * property.
+     * property. Note that considering that a target object may be a subclass of the class
+     * handled by the descriptor, users of this method may need to call
+     * {@link ClassDescriptor#resolveDescriptor(Class)} before using the descriptor to
+     * access objects.
      */
-    ClassDescriptor getTargetDescriptor(Class targetObjectClass);
+    ClassDescriptor getTargetDescriptor();
 
     /**
      * Returns whether a target node connected to a given object is an unresolved fault.

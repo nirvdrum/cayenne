@@ -66,18 +66,18 @@ import org.objectstyle.cayenne.Fault;
 public class PersistentObjectProperty extends SimpleProperty implements ArcProperty {
 
     protected String reversePropertyName;
-    protected ClassDescriptor baseTargetDescriptor;
+    protected ClassDescriptor targetDescriptor;
 
     public PersistentObjectProperty(PropertyAccessor accessor,
-            ClassDescriptor baseTargetDescriptor, String reversePropertyName) {
+            ClassDescriptor targetDescriptor, String reversePropertyName) {
 
         super(accessor);
-        this.baseTargetDescriptor = baseTargetDescriptor;
+        this.targetDescriptor = targetDescriptor;
         this.reversePropertyName = reversePropertyName;
     }
 
-    public ClassDescriptor getTargetDescriptor(Class objectClass) {
-        return baseTargetDescriptor.resolveDescriptor(objectClass);
+    public ClassDescriptor getTargetDescriptor() {
+        return targetDescriptor;
     }
 
     public boolean isFaultTarget(Object object) {
@@ -110,9 +110,9 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
             Object toValue = null;
 
             if (fromValue != null) {
-                toValue = getTargetDescriptor(from.getClass()).deepMerge(
-                        fromValue,
-                        visitor.getChildVisitor(this));
+                toValue = getTargetDescriptor()
+                        .resolveDescriptor(from.getClass())
+                        .deepMerge(fromValue, visitor.getChildVisitor(this));
             }
 
             writePropertyDirectly(to, accessor.readPropertyDirectly(to), toValue);
