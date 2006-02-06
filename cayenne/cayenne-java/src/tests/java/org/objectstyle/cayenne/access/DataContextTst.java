@@ -558,7 +558,9 @@ public class DataContextTst extends DataContextTestBase {
                 .getDataNodes()
                 .iterator()
                 .next();
-        PoolManager manager = (PoolManager) node.getDataSource();
+        
+        // access DS directly as 'getDataSource' returns a wrapper.
+        PoolManager manager = (PoolManager) node.dataSource;
         manager.setMaxConnections(manager.getMaxConnections() + delta);
     }
 

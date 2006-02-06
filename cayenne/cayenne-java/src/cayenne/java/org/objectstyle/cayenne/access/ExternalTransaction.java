@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.access;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneException;
@@ -86,36 +85,30 @@ class ExternalTransaction extends Transaction {
         }
 
         status = Transaction.STATUS_ACTIVE;
-
-        // most Cayenne apps are single datanode,
-        // there will be few that have more than 2, esp. in a single tran
-        connections = new ArrayList(2);
     }
 
-    public synchronized void addConnection(Connection connection)
-            throws IllegalStateException, SQLException, CayenneException {
+    public boolean addConnection(String name, Connection connection) throws SQLException {
+        if (super.addConnection(name, connection)) {
 
-        // implicitly begin transaction
-        if (status == Transaction.STATUS_NO_TRANSACTION) {
-            begin();
-        }
+            // implicitly begin transaction
+            if (status == Transaction.STATUS_NO_TRANSACTION) {
+                begin();
+            }
 
-        if (delegate != null && !delegate.willAddConnection(this, connection)) {
-            return;
-        }
+            if (status != Transaction.STATUS_ACTIVE) {
+                throw new IllegalStateException(
+                        "Transaction must have 'STATUS_ACTIVE' to add a connection. "
+                                + "Current status: "
+                                + Transaction.decodeStatus(status));
+            }
 
-        if (status != Transaction.STATUS_ACTIVE) {
-            throw new IllegalStateException(
-                    "Transaction must have 'STATUS_ACTIVE' to add a connection. "
-                            + "Current status: "
-                            + Transaction.decodeStatus(status));
-        }
-
-        if (!connections.contains(connection)) {
-            // may need to fix connection properties
             fixConnectionState(connection);
-            connections.add(connection);
+            return true;
         }
+        else {
+            return false;
+        }
+
     }
 
     public void commit() throws IllegalStateException, SQLException, CayenneException {
@@ -202,7 +195,7 @@ class ExternalTransaction extends Transaction {
             return;
         }
 
-        Iterator it = connections.iterator();
+        Iterator it = connections.values().iterator();
         while (it.hasNext()) {
             try {
 

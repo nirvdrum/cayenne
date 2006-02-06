@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.io.PrintWriter;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -113,6 +114,8 @@ public class DataNode implements QueryEngine {
     protected EntitySorter entitySorter;
     protected Map dataMaps;
 
+    TransactionDataSource readThroughDataSource;
+
     /**
      * Creates a new unnamed DataNode.
      */
@@ -126,6 +129,7 @@ public class DataNode implements QueryEngine {
     public DataNode(String name) {
         this.name = name;
         this.dataMaps = new HashMap();
+        this.readThroughDataSource = new TransactionDataSource();
 
         // since 1.2 we always implement entity sorting, regardless of the underlying DB
         // as the right order is needed for deferred PK propagation (and maybe other
@@ -204,7 +208,7 @@ public class DataNode implements QueryEngine {
      * Returns DataSource used by this DataNode to obtain connections.
      */
     public DataSource getDataSource() {
-        return dataSource;
+        return dataSource != null ? readThroughDataSource : null;
     }
 
     public void setDataSource(DataSource dataSource) {
@@ -295,7 +299,6 @@ public class DataNode implements QueryEngine {
 
             // check out connection
             connection = this.getDataSource().getConnection();
-            transaction.addConnection(connection);
         }
         // catch stuff like connection allocation errors, etc...
         catch (Exception globalEx) {
@@ -564,4 +567,61 @@ public class DataNode implements QueryEngine {
         }
     }
 
+    // a read-through DataSource that ensures returning the same connection within
+    // transaction.
+    final class TransactionDataSource implements DataSource {
+
+        final String CONNECTION_RESOURCE_PREFIX = "DataNode.Connection.";
+
+        public Connection getConnection() throws SQLException {
+            Transaction t = Transaction.getThreadTransaction();
+            if (t != null) {
+                String key = CONNECTION_RESOURCE_PREFIX + name;
+                Connection c = (Connection) t.getConnection(key);
+                if (c != null) {
+                    return c;
+                }
+
+                c = dataSource.getConnection();
+                t.addConnection(key, c);
+                return c;
+            }
+
+            return dataSource.getConnection();
+        }
+
+        public Connection getConnection(String username, String password)
+                throws SQLException {
+            Transaction t = Transaction.getThreadTransaction();
+            if (t != null) {
+                String key = CONNECTION_RESOURCE_PREFIX + name;
+                Connection c = (Connection) t.getConnection(key);
+                if (c != null) {
+                    return c;
+                }
+
+                c = dataSource.getConnection(username, password);
+                t.addConnection(key, c);
+                return c;
+            }
+
+            return dataSource.getConnection(username, password);
+        }
+
+        public int getLoginTimeout() throws SQLException {
+            return dataSource.getLoginTimeout();
+        }
+
+        public PrintWriter getLogWriter() throws SQLException {
+            return dataSource.getLogWriter();
+        }
+
+        public void setLoginTimeout(int seconds) throws SQLException {
+            dataSource.setLoginTimeout(seconds);
+        }
+
+        public void setLogWriter(PrintWriter out) throws SQLException {
+            dataSource.setLogWriter(out);
+        }
+    }
 }

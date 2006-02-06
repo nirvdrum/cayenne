@@ -98,7 +98,7 @@ class InternalTransaction extends ExternalTransaction {
 
         if (connections != null && connections.size() > 0) {
             Throwable deferredException = null;
-            Iterator it = connections.iterator();
+            Iterator it = connections.values().iterator();
             while (it.hasNext()) {
                 Connection connection = (Connection) it.next();
                 try {
@@ -147,7 +147,7 @@ class InternalTransaction extends ExternalTransaction {
         if (connections != null && connections.size() > 0) {
             Throwable deferredException = null;
 
-            Iterator it = connections.iterator();
+            Iterator it = connections.values().iterator();
             while (it.hasNext()) {
                 Connection connection = (Connection) it.next();
 

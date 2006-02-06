@@ -58,7 +58,8 @@ package org.objectstyle.cayenne.access;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
@@ -89,10 +90,6 @@ public abstract class Transaction {
 
         }
 
-        public void addConnection(Connection connection) {
-
-        }
-
         public void commit() {
 
         }
@@ -110,7 +107,7 @@ public abstract class Transaction {
     public static final int STATUS_NO_TRANSACTION = 6;
     public static final int STATUS_MARKED_ROLLEDBACK = 7;
 
-    protected List connections;
+    protected Map connections;
     protected int status;
     protected TransactionDelegate delegate;
 
@@ -327,12 +324,39 @@ public abstract class Transaction {
      */
     public abstract void begin();
 
-    public abstract void addConnection(Connection connection)
-            throws IllegalStateException, SQLException, CayenneException;
+    /**
+     * @deprecated since 1.2 use {@link #addConnection(String, Object)}
+     */
+    public void addConnection(Connection connection) throws IllegalStateException,
+            SQLException, CayenneException {
+        addConnection("x" + System.currentTimeMillis(), connection);
+    }
 
     public abstract void commit() throws IllegalStateException, SQLException,
             CayenneException;
 
     public abstract void rollback() throws IllegalStateException, SQLException,
             CayenneException;
+
+    /**
+     * @since 1.2
+     */
+    public Connection getConnection(String name) {
+        return (connections != null) ? (Connection) connections.get(name) : null;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public boolean addConnection(String name, Connection connection) throws SQLException {
+        if (delegate != null && !delegate.willAddConnection(this, connection)) {
+            return false;
+        }
+
+        if (connections == null) {
+            connections = new HashMap();
+        }
+
+        return connections.put(name, connection) != connection;
+    }
 }
