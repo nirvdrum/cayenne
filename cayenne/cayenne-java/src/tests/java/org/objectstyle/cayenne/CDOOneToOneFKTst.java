@@ -55,24 +55,54 @@
  */
 package org.objectstyle.cayenne;
 
+import java.util.Arrays;
+
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.testdo.relationship.ToOneFK1;
 import org.objectstyle.cayenne.testdo.relationship.ToOneFK2;
 import org.objectstyle.cayenne.unit.RelationshipTestCase;
 
 /**
- * Tests the behavior of one-to-one relationship where to-one
- * is pointing to an FK.
+ * Tests the behavior of one-to-one relationship where to-one is pointing to an FK.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
 public class CDOOneToOneFKTst extends RelationshipTestCase {
+
     protected DataContext context;
 
     protected void setUp() throws Exception {
         deleteTestData();
         context = createDataContext();
+    }
+
+    public void testReadRelationship() {
+        ToOneFK2 src = (ToOneFK2) context.createAndRegisterNewObject(ToOneFK2.class);
+        ToOneFK1 target = (ToOneFK1) context.createAndRegisterNewObject(ToOneFK1.class);
+        src.setToOneToFK(target);
+        context.commitChanges();
+
+        context.invalidateObjects(Arrays.asList(new Object[] {
+                src, target
+        }));
+
+        ToOneFK2 src1 = (ToOneFK2) DataObjectUtils
+                .objectForPK(context, src.getObjectId());
+        assertNotNull(src1.getToOneToFK());
+        // resolve HOLLOW
+        assertSame(src1, src1.getToOneToFK().getToPK());
+
+        context.invalidateObjects(Arrays.asList(new Object[] {
+                src1, src1.getToOneToFK()
+        }));
+
+        ToOneFK1 target2 = (ToOneFK1) DataObjectUtils.objectForPK(context, target
+                .getObjectId());
+        assertNotNull(target2.getToPK());
+
+        // resolve HOLLOW
+        assertSame(target2, target2.getToPK().getToOneToFK());
     }
 
     public void test2Null() throws Exception {
@@ -107,13 +137,13 @@ public class CDOOneToOneFKTst extends RelationshipTestCase {
 
         ToOneFK1 target = (ToOneFK1) context.createAndRegisterNewObject(ToOneFK1.class);
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         src.setToOneToFK(target);
 
         // test before save
         assertSame(target, src.getToOneToFK());
 
-        // do save 
+        // do save
         context.commitChanges();
         context = createDataContext();
 
@@ -129,13 +159,13 @@ public class CDOOneToOneFKTst extends RelationshipTestCase {
         ToOneFK2 src = (ToOneFK2) context.createAndRegisterNewObject(ToOneFK2.class);
         ToOneFK1 target = (ToOneFK1) context.createAndRegisterNewObject(ToOneFK1.class);
 
-        // *** TESTING THIS *** 
+        // *** TESTING THIS ***
         src.setToOneToFK(target);
 
         // test before save
         assertSame(target, src.getToOneToFK());
 
-        // do save 
+        // do save
         context.commitChanges();
         context = createDataContext();
 
@@ -149,32 +179,20 @@ public class CDOOneToOneFKTst extends RelationshipTestCase {
 
     // technically replacing a related object with a new one is possible...
     // though this seems pretty evil...
-    /*  public void testReplace() throws Exception {
-          ToOneFK2 src = (ToOneFK2) context.createAndRegisterNewObject(ToOneFK2.class);
-          ToOneFK1 target = (ToOneFK1) context.createAndRegisterNewObject(ToOneFK1.class);
-    
-          src.setToOneToFK(target);
-          assertSame(target, src.getToOneToFK());
-          context.commitChanges();
-    
-          // replace target
-          ToOneFK1 target1 = (ToOneFK1) context.createAndRegisterNewObject(ToOneFK1.class);
-          src.setToOneToFK(target1);
-          assertSame(target1, src.getToOneToFK());
-    
-          // delete an old target, since the column is not nullable...
-          context.deleteObject(target);
-          context.commitChanges();
-    
-          context = createDataContext();
-    
-          // test database data
-          ToOneFK2 src2 = (ToOneFK2) context.refetchObject(src.getObjectId());
-          ToOneFK1 target2 = src2.getToOneToFK();
-          assertNotNull(target2);
-          assertEquals(src.getObjectId(), src2.getObjectId());
-          assertEquals(target1.getObjectId(), target2.getObjectId());
-      } */
+    /*
+     * public void testReplace() throws Exception { ToOneFK2 src = (ToOneFK2)
+     * context.createAndRegisterNewObject(ToOneFK2.class); ToOneFK1 target = (ToOneFK1)
+     * context.createAndRegisterNewObject(ToOneFK1.class); src.setToOneToFK(target);
+     * assertSame(target, src.getToOneToFK()); context.commitChanges(); // replace target
+     * ToOneFK1 target1 = (ToOneFK1) context.createAndRegisterNewObject(ToOneFK1.class);
+     * src.setToOneToFK(target1); assertSame(target1, src.getToOneToFK()); // delete an
+     * old target, since the column is not nullable... context.deleteObject(target);
+     * context.commitChanges(); context = createDataContext(); // test database data
+     * ToOneFK2 src2 = (ToOneFK2) context.refetchObject(src.getObjectId()); ToOneFK1
+     * target2 = src2.getToOneToFK(); assertNotNull(target2);
+     * assertEquals(src.getObjectId(), src2.getObjectId());
+     * assertEquals(target1.getObjectId(), target2.getObjectId()); }
+     */
 
     public void testTakeObjectSnapshotDependentFault() throws Exception {
         ToOneFK2 src = (ToOneFK2) context.createAndRegisterNewObject(ToOneFK2.class);
@@ -186,7 +204,7 @@ public class CDOOneToOneFKTst extends RelationshipTestCase {
 
         assertTrue(src2.readPropertyDirectly("toOneToFK") instanceof Fault);
 
-        // test that taking a snapshot does not trigger a fault, and generally works well 
+        // test that taking a snapshot does not trigger a fault, and generally works well
         context.currentSnapshot(src2);
         assertTrue(src2.readPropertyDirectly("toOneToFK") instanceof Fault);
     }

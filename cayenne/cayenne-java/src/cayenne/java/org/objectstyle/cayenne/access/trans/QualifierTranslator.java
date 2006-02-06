@@ -185,6 +185,11 @@ public class QualifierTranslator
 
         boolean first = true;
         DbRelationship relationship = objectMatchTranslator.getRelationship();
+        
+        if(!relationship.isToMany() && !relationship.isToPK()) {
+            queryAssembler.dbRelationshipAdded(relationship);
+        }
+        
         Iterator it = objectMatchTranslator.keys();
         while (it.hasNext()) {
             if (first) {

@@ -444,7 +444,7 @@
 	<obj-relationship name="painting" source="PaintingInfo" target="Painting" deleteRule="Nullify" db-relationship-path="painting"/>
 	<obj-relationship name="paintingArray" source="ROArtist" target="Painting" deleteRule="Deny" db-relationship-path="paintingArray"/>
 	<obj-relationship name="toArtist" source="ROPainting" target="Artist" deleteRule="Nullify" db-relationship-path="toArtist"/>
-	<query name="NonSelectingQuery" factory="org.objectstyle.cayenne.map.SQLTemplateBuilder" root="data-map" root-name="testmap" selecting="false">
+	<query name="NonSelectingQuery" factory="org.objectstyle.cayenne.map.SQLTemplateBuilder" root="data-map" root-name="testmap">
 		<sql><![CDATA[INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE)
 VALUES (512, 'No Painting Like This', 12.5)]]></sql>
 		<sql adapter-class="org.objectstyle.cayenne.dba.db2.DB2Adapter"><![CDATA[INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE) VALUES (512, 'No Painting Like This', 12.5)]]></sql>
@@ -454,7 +454,7 @@ VALUES (512, 'No Painting Like This', 12.5)]]></sql>
 		<qualifier><![CDATA[toArtist = $artist]]></qualifier>
 		<ordering><![CDATA[paintingTitle]]></ordering>
 	</query>
-	<query name="ParameterizedNonSelectingQuery" factory="org.objectstyle.cayenne.map.SQLTemplateBuilder" root="data-map" root-name="testmap" selecting="false">
+	<query name="ParameterizedNonSelectingQuery" factory="org.objectstyle.cayenne.map.SQLTemplateBuilder" root="data-map" root-name="testmap">
 		<sql><![CDATA[INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE)
 VALUES (#bind($id), #bind($title), #bind($price))]]></sql>
 		<sql adapter-class="org.objectstyle.cayenne.dba.db2.DB2Adapter"><![CDATA[INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE) values (#bind($id), #bind($title), #bind($price))]]></sql>

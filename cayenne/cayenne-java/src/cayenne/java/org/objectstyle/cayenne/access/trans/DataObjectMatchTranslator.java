@@ -104,7 +104,7 @@ public class DataObjectMatchTranslator {
         this.relationship = rel;
         attributes = new HashMap(rel.getJoins().size() * 2);
 
-        if (rel.isToMany()) {
+        if (rel.isToMany() || !rel.isToPK()) {
 
             // match on target PK
             DbEntity ent = (DbEntity) rel.getTargetEntity();
