@@ -63,6 +63,7 @@ import org.objectstyle.art.GeneratedColumnCompMaster;
 import org.objectstyle.art.GeneratedColumnDep;
 import org.objectstyle.art.GeneratedColumnTest;
 import org.objectstyle.art.GeneratedColumnTest2;
+import org.objectstyle.art.MeaningfulGeneratedColumnTest;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataObjectUtils;
 import org.objectstyle.cayenne.ObjectId;
@@ -318,5 +319,17 @@ public class IdentityColumnsTst extends CayenneTestCase {
         assertNotNull(DataObjectUtils
                 .objectForPK(context, GeneratedColumnTest.class, id1));
         assertNotNull(DataObjectUtils.objectForPK(context, GeneratedColumnDep.class, id2));
+    }
+
+    public void testMeaningfulPK() throws Exception {
+        DataContext context = createDataContext();
+
+        MeaningfulGeneratedColumnTest o = (MeaningfulGeneratedColumnTest) context
+                .createAndRegisterNewObject(MeaningfulGeneratedColumnTest.class);
+        o.setName("o1");
+        o.setGeneratedColumn(new Integer(2));
+
+        context.commitChanges();
+        assertNotNull(o.getGeneratedColumn());
     }
 }
