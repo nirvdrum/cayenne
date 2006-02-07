@@ -327,9 +327,15 @@ public class IdentityColumnsTst extends CayenneTestCase {
         MeaningfulGeneratedColumnTest o = (MeaningfulGeneratedColumnTest) context
                 .createAndRegisterNewObject(MeaningfulGeneratedColumnTest.class);
         o.setName("o1");
-        o.setGeneratedColumn(new Integer(2));
+        o.setGeneratedColumn(new Integer(33333));
 
         context.commitChanges();
         assertNotNull(o.getGeneratedColumn());
+
+        // Note - this only *appears* to work, but the following assertion will fail. For
+        // now we address the issue by giving a warning in the modeler that generated PKs
+        // can't be meaningful.
+        // assertEquals(new Integer(33333), o.getObjectId().getIdSnapshot().get(
+        // MeaningfulGeneratedColumnTest.GENERATED_COLUMN_PK_COLUMN));
     }
 }

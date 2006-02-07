@@ -108,5 +108,12 @@ public class ObjAttributeValidator extends TreeNodeValidator {
         if (attribute.getDbAttribute() == null) {
             validator.registerWarning("ObjAttribute has no DbAttribute mapping.", path);
         }
+        // can't support generated meaningful attributes for now; besides they don't make
+        // sense.
+        else if (attribute.getDbAttribute().isPrimaryKey()
+                && attribute.getDbAttribute().isGenerated()) {
+            validator.registerWarning("ObjAttribute is mapped to a generated PK: "
+                    + attribute.getDbAttributeName(), path);
+        }
     }
 }
