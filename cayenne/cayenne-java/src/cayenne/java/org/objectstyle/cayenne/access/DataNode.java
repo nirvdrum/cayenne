@@ -578,6 +578,10 @@ public class DataNode implements QueryEngine {
             if (t != null) {
                 String key = CONNECTION_RESOURCE_PREFIX + name;
                 Connection c = (Connection) t.getConnection(key);
+
+                // need to check for 'isClosed' as some DataSource users (such as
+                // AutoAdapter) are Transaction-unaware and manage connections themselves
+                // as they should...
                 if (c != null && !c.isClosed()) {
                     return c;
                 }
@@ -596,6 +600,9 @@ public class DataNode implements QueryEngine {
             if (t != null) {
                 String key = CONNECTION_RESOURCE_PREFIX + name;
                 Connection c = (Connection) t.getConnection(key);
+                // need to check for 'isClosed' as some DataSource users (such as
+                // AutoAdapter) are Transaction-unaware and manage connections themselves
+                // as they should...
                 if (c != null && !c.isClosed()) {
                     return c;
                 }
