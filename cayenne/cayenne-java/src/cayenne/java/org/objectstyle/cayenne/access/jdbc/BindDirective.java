@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access.jdbc;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.apache.velocity.context.InternalContextAdapter;
 import org.apache.velocity.exception.MethodInvocationException;
@@ -155,7 +156,22 @@ public class BindDirective extends Directive {
         throws IOException {
 
         bind(context, binding);
-        writer.write('?');
+        
+        if (binding.getValue() instanceof Collection) {
+            Collection bindingList = (Collection) binding.getValue();
+            for (Iterator bindingIter = bindingList.iterator(); bindingIter.hasNext(); ) {
+                
+                bindingIter.next();
+                writer.write('?');
+                
+                if (bindingIter.hasNext()) {
+                    writer.write(',');
+                }
+                
+            }
+        } else {
+            writer.write('?');
+        }
     }
 
     protected Object getChild(InternalContextAdapter context, Node node, int i)
@@ -174,7 +190,15 @@ public class BindDirective extends Directive {
                 SQLTemplateProcessor.BINDINGS_LIST_KEY);
 
         if (bindings != null) {
-            bindings.add(binding);
+            
+            if (binding.getValue() instanceof Collection) {
+                Collection bindingList = (Collection) binding.getValue();
+                for (Iterator bindingIter = bindingList.iterator(); bindingIter.hasNext(); ) {
+                    bindings.add(new ParameterBinding(bindingIter.next(), binding.getJdbcType(), binding.getPrecision()));
+                }
+            } else {
+                bindings.add(binding);
+            }
         }
     }
 }

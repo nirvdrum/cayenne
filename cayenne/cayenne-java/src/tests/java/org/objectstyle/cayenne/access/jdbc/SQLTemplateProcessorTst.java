@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.access.jdbc;
 
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,8 +74,7 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
     public void testProcessTemplateUnchanged1() throws Exception {
         String sqlTemplate = "SELECT * FROM ME";
 
-        SQLStatement compiled =
-            new SQLTemplateProcessor().processTemplate(
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
                 sqlTemplate,
                 Collections.EMPTY_MAP);
 
@@ -85,8 +85,7 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
     public void testProcessTemplateUnchanged2() throws Exception {
         String sqlTemplate = "SELECT a.b as XYZ FROM $SYSTEM_TABLE";
 
-        SQLStatement compiled =
-            new SQLTemplateProcessor().processTemplate(
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
                 sqlTemplate,
                 Collections.EMPTY_MAP);
 
@@ -98,8 +97,9 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
         String sqlTemplate = "SELECT * FROM ME WHERE $a";
 
         Map map = Collections.singletonMap("a", "VALUE_OF_A");
-        SQLStatement compiled =
-            new SQLTemplateProcessor().processTemplate(sqlTemplate, map);
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
+                sqlTemplate,
+                map);
 
         assertEquals("SELECT * FROM ME WHERE VALUE_OF_A", compiled.getSql());
 
@@ -108,16 +108,15 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
     }
 
     public void testProcessTemplateBind() throws Exception {
-        String sqlTemplate =
-            "SELECT * FROM ME WHERE "
+        String sqlTemplate = "SELECT * FROM ME WHERE "
                 + "COLUMN1 = #bind($a 'VARCHAR') AND COLUMN2 = #bind($b 'INTEGER')";
         Map map = Collections.singletonMap("a", "VALUE_OF_A");
-        SQLStatement compiled =
-            new SQLTemplateProcessor().processTemplate(sqlTemplate, map);
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
+                sqlTemplate,
+                map);
 
-        assertEquals(
-            "SELECT * FROM ME WHERE COLUMN1 = ? AND COLUMN2 = ?",
-            compiled.getSql());
+        assertEquals("SELECT * FROM ME WHERE COLUMN1 = ? AND COLUMN2 = ?", compiled
+                .getSql());
         assertEquals(2, compiled.getBindings().length);
         assertBindingValue("VALUE_OF_A", compiled.getBindings()[0]);
         assertBindingValue(null, compiled.getBindings()[1]);
@@ -127,8 +126,9 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
         String sqlTemplate = "SELECT * FROM ME WHERE COLUMN1 = #bind($a)";
         Map map = Collections.singletonMap("a", "VALUE_OF_A");
 
-        SQLStatement compiled =
-            new SQLTemplateProcessor().processTemplate(sqlTemplate, map);
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
+                sqlTemplate,
+                map);
 
         assertEquals(1, compiled.getBindings().length);
         assertBindingType(Types.VARCHAR, compiled.getBindings()[0]);
@@ -138,8 +138,9 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
         String sqlTemplate = "SELECT * FROM ME WHERE COLUMN1 = #bind($a)";
         Map map = Collections.singletonMap("a", new Integer(4));
 
-        SQLStatement compiled =
-            new SQLTemplateProcessor().processTemplate(sqlTemplate, map);
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
+                sqlTemplate,
+                map);
 
         assertEquals(1, compiled.getBindings().length);
         assertBindingType(Types.INTEGER, compiled.getBindings()[0]);
@@ -148,8 +149,7 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
     public void testProcessTemplateBindEqual() throws Exception {
         String sqlTemplate = "SELECT * FROM ME WHERE COLUMN #bindEqual($a 'VARCHAR')";
 
-        SQLStatement compiled =
-            new SQLTemplateProcessor().processTemplate(
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
                 sqlTemplate,
                 Collections.EMPTY_MAP);
 
@@ -168,8 +168,7 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
     public void testProcessTemplateBindNotEqual() throws Exception {
         String sqlTemplate = "SELECT * FROM ME WHERE COLUMN #bindNotEqual($a 'VARCHAR')";
 
-        SQLStatement compiled =
-            new SQLTemplateProcessor().processTemplate(
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
                 sqlTemplate,
                 Collections.EMPTY_MAP);
 
@@ -186,16 +185,16 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
     }
 
     public void testProcessTemplateID() throws Exception {
-        String sqlTemplate =
-            "SELECT * FROM ME WHERE COLUMN1 = #bind($helper.cayenneExp($a, 'db:ID_COLUMN'))";
+        String sqlTemplate = "SELECT * FROM ME WHERE COLUMN1 = #bind($helper.cayenneExp($a, 'db:ID_COLUMN'))";
 
         DataObject dataObject = new CayenneDataObject();
         dataObject.setObjectId(new ObjectId("T", "ID_COLUMN", 5));
 
         Map map = Collections.singletonMap("a", dataObject);
 
-        SQLStatement compiled =
-            new SQLTemplateProcessor().processTemplate(sqlTemplate, map);
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
+                sqlTemplate,
+                map);
 
         assertEquals("SELECT * FROM ME WHERE COLUMN1 = ?", compiled.getSql());
         assertEquals(1, compiled.getBindings().length);
@@ -203,8 +202,7 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
     }
 
     public void testProcessTemplateNotEqualID() throws Exception {
-        String sqlTemplate =
-            "SELECT * FROM ME WHERE "
+        String sqlTemplate = "SELECT * FROM ME WHERE "
                 + "COLUMN1 #bindNotEqual($helper.cayenneExp($a, 'db:ID_COLUMN1')) "
                 + "AND COLUMN2 #bindNotEqual($helper.cayenneExp($a, 'db:ID_COLUMN2'))";
 
@@ -217,12 +215,12 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
 
         Map map = Collections.singletonMap("a", dataObject);
 
-        SQLStatement compiled =
-            new SQLTemplateProcessor().processTemplate(sqlTemplate, map);
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
+                sqlTemplate,
+                map);
 
-        assertEquals(
-            "SELECT * FROM ME WHERE COLUMN1 <> ? AND COLUMN2 <> ?",
-            compiled.getSql());
+        assertEquals("SELECT * FROM ME WHERE COLUMN1 <> ? AND COLUMN2 <> ?", compiled
+                .getSql());
         assertEquals(2, compiled.getBindings().length);
         assertBindingValue(new Integer(3), compiled.getBindings()[0]);
         assertBindingValue("aaa", compiled.getBindings()[1]);
@@ -233,20 +231,40 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
 
         Map map = Collections.singletonMap("a", "VALUE_OF_A");
 
-        SQLStatement compiled =
-            new SQLTemplateProcessor().processTemplate(sqlTemplate, map);
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
+                sqlTemplate,
+                map);
 
         assertEquals("SELECT * FROM ME  WHERE COLUMN1 > ?", compiled.getSql());
         assertEquals(1, compiled.getBindings().length);
         assertBindingValue("VALUE_OF_A", compiled.getBindings()[0]);
 
-        compiled =
-            new SQLTemplateProcessor().processTemplate(
+        compiled = new SQLTemplateProcessor().processTemplate(
                 sqlTemplate,
                 Collections.EMPTY_MAP);
 
         assertEquals("SELECT * FROM ME ", compiled.getSql());
         assertEquals(0, compiled.getBindings().length);
+    }
+
+    public void testProcessTemplateBindCollection() throws Exception {
+        String sqlTemplate = "SELECT * FROM ME WHERE COLUMN IN (#bind($list 'VARCHAR'))";
+
+        Map map = new HashMap();
+        map.put("list", Arrays.asList(new Object[] {
+                "a", "b", "c"
+        }));
+        SQLStatement compiled = new SQLTemplateProcessor().processTemplate(
+                sqlTemplate,
+                map);
+
+        assertEquals("SELECT * FROM ME WHERE COLUMN IN (?,?,?)", compiled.getSql());
+        assertEquals(3, compiled.getBindings().length);
+
+        compiled = new SQLTemplateProcessor().processTemplate(sqlTemplate, map);
+        assertBindingValue("a", compiled.getBindings()[0]);
+        assertBindingValue("b", compiled.getBindings()[1]);
+        assertBindingValue("c", compiled.getBindings()[2]);
     }
 
     protected void assertBindingValue(Object expectedValue, Object binding) {
