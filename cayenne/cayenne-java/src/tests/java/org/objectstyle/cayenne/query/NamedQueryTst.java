@@ -10,20 +10,14 @@ public class NamedQueryTst extends TestCase {
     public void testName() {
         NamedQuery query = new NamedQuery("abc");
 
-        assertNull(query.getName());
-
+        assertEquals("abc", query.getName());
         query.setName("123");
         assertEquals("123", query.getName());
     }
 
     public void testQueryName() {
         NamedQuery query = new NamedQuery("abc");
-        assertEquals("abc", query.getQueryName());
-        assertNull(query.getName());
-
-        query.setQueryName("xyz");
-        assertEquals("xyz", query.getQueryName());
-        assertNull(query.getName());
+        assertEquals("abc", query.getName());
     }
 
     public void testSerializability() throws Exception {
@@ -35,7 +29,6 @@ public class NamedQueryTst extends TestCase {
 
         assertNotSame(o, c1);
         assertEquals(o.getName(), c1.getName());
-        assertEquals(o.getQueryName(), c1.getQueryName());
     }
 
     public void testSerializabilityWithHessian() throws Exception {
@@ -46,7 +39,7 @@ public class NamedQueryTst extends TestCase {
         NamedQuery c1 = (NamedQuery) clone;
 
         assertNotSame(o, c1);
-        assertEquals(o.getQueryName(), c1.getQueryName());
+        assertEquals(o.getName(), c1.getName());
     }
 
     /**
@@ -80,10 +73,10 @@ public class NamedQueryTst extends TestCase {
 
         assertTrue(q1.equals(q2));
         assertEquals(q1.hashCode(), q2.hashCode());
-        
+
         assertFalse(q1.equals(q3));
         assertFalse(q1.hashCode() == q3.hashCode());
-        
+
         assertFalse(q1.equals(q4));
         assertFalse(q1.hashCode() == q4.hashCode());
     }

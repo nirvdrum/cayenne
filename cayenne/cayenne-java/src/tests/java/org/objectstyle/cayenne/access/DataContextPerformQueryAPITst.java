@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 public class DataContextPerformQueryAPITst extends CayenneTestCase {
 
@@ -188,7 +188,7 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
         Artist a = (Artist) context.createAndRegisterNewObject(Artist.class);
         a.setArtistName("aa");
         context.commitChanges();
-        
+
         SQLTemplate q = new SQLTemplate(Artist.class, "DELETE FROM ARTIST");
 
         // this way of executing a query makes no sense, but it shouldn't blow either...
@@ -196,5 +196,44 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
 
         assertNotNull(result);
         assertEquals(0, result.size());
+    }
+
+    public void testObjectQueryWithLocalCache() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
+
+        DataContext context = createDataContext();
+        List artists = context.performQuery("QueryWithLocalCache", true);
+        assertEquals(25, artists.size());
+
+        blockQueries();
+
+        try {
+            List artists1 = context.performQuery("QueryWithLocalCache", false);
+            assertEquals(25, artists1.size());
+        }
+        finally {
+            unblockQueries();
+        }
+    }
+
+    public void testObjectQueryWithSharedCache() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists", null);
+
+        DataContext context = createDataContext();
+        List artists = context.performQuery("QueryWithSharedCache", true);
+        assertEquals(25, artists.size());
+
+        blockQueries();
+
+        try {
+            List artists1 = context
+                    .getParentDataDomain()
+                    .createDataContext()
+                    .performQuery("QueryWithSharedCache", false);
+            assertEquals(25, artists1.size());
+        }
+        finally {
+            unblockQueries();
+        }
     }
 }

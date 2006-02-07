@@ -79,7 +79,6 @@ import org.objectstyle.cayenne.util.Util;
  */
 public class NamedQuery extends IndirectQuery {
 
-    protected String queryName;
     protected Map parameters;
 
     // using Boolean instead of boolean to implement "trinary" logic - override with
@@ -90,12 +89,12 @@ public class NamedQuery extends IndirectQuery {
 
     transient int hashCode;
 
-    public NamedQuery(String queryName) {
-        this(queryName, null);
+    public NamedQuery(String name) {
+        this(name, null);
     }
 
-    public NamedQuery(String queryName, Map parameters) {
-        this.queryName = queryName;
+    public NamedQuery(String name, Map parameters) {
+        this.name = name;
         this.parameters = parameters;
     }
 
@@ -103,8 +102,8 @@ public class NamedQuery extends IndirectQuery {
      * Creates NamedQuery with parameters passed as two matching arrays of keys and
      * values.
      */
-    public NamedQuery(String queryName, String[] keys, Object[] values) {
-        this.queryName = queryName;
+    public NamedQuery(String name, String[] keys, Object[] values) {
+        this.name = name;
         this.parameters = Util.toMap(keys, values);
     }
 
@@ -124,17 +123,6 @@ public class NamedQuery extends IndirectQuery {
         QueryMetadataWrapper wrapper = new QueryMetadataWrapper(info);
         wrapper.override(QueryMetadata.REFRESHING_OBJECTS_PROPERTY, refreshOverride);
         return wrapper;
-    }
-
-    /**
-     * Returns the name of the query this query points to.
-     */
-    public String getQueryName() {
-        return queryName;
-    }
-
-    public void setQueryName(String queryName) {
-        this.queryName = queryName;
     }
 
     protected Query createReplacementQuery(EntityResolver resolver) {
@@ -190,17 +178,17 @@ public class NamedQuery extends IndirectQuery {
      * EntityResolver.
      */
     protected Query resolveQuery(EntityResolver resolver) {
-        Query query = resolver.lookupQuery(getQueryName());
+        Query query = resolver.lookupQuery(getName());
 
         if (query == null) {
             throw new CayenneRuntimeException("Can't find named query for name '"
-                    + getQueryName()
+                    + getName()
                     + "'");
         }
 
         if (query == this) {
             throw new CayenneRuntimeException("Named query resolves to self: '"
-                    + getQueryName()
+                    + getName()
                     + "'");
         }
 
@@ -259,7 +247,7 @@ public class NamedQuery extends IndirectQuery {
 
         NamedQuery query = (NamedQuery) object;
 
-        if (!Util.nullSafeEquals(queryName, query.getQueryName())) {
+        if (!Util.nullSafeEquals(name, query.getName())) {
             return false;
         }
 
@@ -309,8 +297,8 @@ public class NamedQuery extends IndirectQuery {
 
             HashCodeBuilder builder = new HashCodeBuilder(13, 17);
 
-            if (queryName != null) {
-                builder.append(queryName.hashCode());
+            if (name != null) {
+                builder.append(name.hashCode());
             }
 
             if (parameters != null) {

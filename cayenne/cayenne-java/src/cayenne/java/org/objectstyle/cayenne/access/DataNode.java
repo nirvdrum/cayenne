@@ -578,7 +578,7 @@ public class DataNode implements QueryEngine {
             if (t != null) {
                 String key = CONNECTION_RESOURCE_PREFIX + name;
                 Connection c = (Connection) t.getConnection(key);
-                if (c != null) {
+                if (c != null && !c.isClosed()) {
                     return c;
                 }
 
@@ -596,7 +596,7 @@ public class DataNode implements QueryEngine {
             if (t != null) {
                 String key = CONNECTION_RESOURCE_PREFIX + name;
                 Connection c = (Connection) t.getConnection(key);
-                if (c != null) {
+                if (c != null && !c.isClosed()) {
                     return c;
                 }
 

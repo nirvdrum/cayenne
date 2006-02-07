@@ -461,6 +461,9 @@ VALUES (#bind($id), #bind($title), #bind($price))]]></sql>
 	</query>
 	<query name="ProcedureQuery" factory="org.objectstyle.cayenne.map.ProcedureQueryBuilder" root="procedure" root-name="cayenne_tst_select_proc" result-type="org.objectstyle.art.Artist">
 	</query>
+	<query name="QueryWithLocalCache" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Artist">
+		<property name="cayenne.GenericSelectQuery.cachePolicy" value="localcache"/>
+	</query>
 	<query name="QueryWithOrdering" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Artist">
 		<ordering descending="true" ignore-case="true"><![CDATA[artistName]]></ordering>
 		<ordering><![CDATA[dateOfBirth]]></ordering>
@@ -470,5 +473,8 @@ VALUES (#bind($id), #bind($title), #bind($price))]]></sql>
 	</query>
 	<query name="QueryWithQualifier" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Artist">
 		<qualifier><![CDATA[artistName = $param1]]></qualifier>
+	</query>
+	<query name="QueryWithSharedCache" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Artist">
+		<property name="cayenne.GenericSelectQuery.cachePolicy" value="sharedcache"/>
 	</query>
 </data-map>
