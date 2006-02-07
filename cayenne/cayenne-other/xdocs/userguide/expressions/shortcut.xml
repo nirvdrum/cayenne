@@ -79,7 +79,27 @@
             <li>public static Expression <b>notLikeIgnoreCaseExp</b>(String pathSpec, Object value)<br/>
             <p></p>
             </li>
-        </ul>		
+        </ul>
+			
+		<p>As was mentioned  <a href="path.html">earlier</a>, the type of a second Object argument depends on
+			the type of property path points to. It is important to mention that paths that end with a
+			relationship name (both to-one and to-many) can be matched against DataObjects, thus removing the
+			need to know PK or FK values when building expressions. This behavior is not specific to ExpressionFactory,
+			it works the same way with <code>Expression.fromString(..)</code> as well.
+		</p>
+			
+			<source>import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
+...
+
+// find artist paintings (if we don't want to use relationship for whatever reason)
+
+Artist a = ...;
+Expression qual = ExpressionFactory.matchExp("toArtist", a);
+SelectQuery select = new SelectQuery(Painting.class, qual);
+</source>
+				
 		</subsection>
 		
 		<subsection name="10.3.2 Chaining Expressions">

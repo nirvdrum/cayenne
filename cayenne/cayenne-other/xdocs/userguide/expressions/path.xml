@@ -55,7 +55,18 @@
              	<p>Though database path expressions are widely used by Cayenne framework internally, they are
              	rarely used in applications. There are only a few cases when their explicit use is justified.      	
              	</p>
+			
+			<subsection name="10.1.1 Matching Path Expressions">
+				<p>As described in the following chapters a path expression is usually matched against some value (see for
+					example <a href="shortcut.html">ExpressionFactory API</a> - the first argument to each method is a path, 
+					and a second - an Object value that is matched against the path).
+				Such value type must be compatible with the type of the property pointed to by the path.  
+				E.g. <code>toArtist.artistName</code> can only be matched against a String,
+				and <code>toArtist</code> - against instances of Artist.
+				</p>
+			</subsection>
 		</subsection>
+		
     </section>
 </body>
 </document>
