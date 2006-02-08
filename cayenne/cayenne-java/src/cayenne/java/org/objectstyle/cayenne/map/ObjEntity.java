@@ -64,7 +64,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.collections.Transformer;
-import org.objectstyle.cayenne.CayenneDataObject;
+
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
@@ -92,6 +92,8 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
     final public static int LOCK_TYPE_NONE = 0;
     final public static int LOCK_TYPE_OPTIMISTIC = 1;
 
+    // do not import CayenneDataObject as it introduces unneeded client dependency
+    static final String CAYENNE_DATA_OBJECT_CLASS = "org.objectstyle.cayenne.CayenneDataObject";
     /**
      * A collection of default "generic" entity classes excluded from class generation.
      * 
@@ -99,7 +101,7 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
      */
     protected static final Collection DEFAULT_GENERIC_CLASSES = Arrays
             .asList(new String[] {
-                CayenneDataObject.class.getName()
+                CAYENNE_DATA_OBJECT_CLASS
             });
 
     protected String superClassName;
@@ -255,7 +257,7 @@ public class ObjEntity extends Entity implements ObjEntityListener, ObjAttribute
         }
 
         if (name == null) {
-            name = CayenneDataObject.class.getName();
+            name = CAYENNE_DATA_OBJECT_CLASS;
         }
 
         try {
