@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src/pdf/java"/>
+	<classpathentry kind="src" path="src/tools/java"/>
 	<classpathentry kind="src" path="platform-macosx/src/java"/>
 	<classpathentry kind="lib" path="lib/itext-1.2.jar"/>
 	<classpathentry kind="var" path="JRE_LIB_15"/>

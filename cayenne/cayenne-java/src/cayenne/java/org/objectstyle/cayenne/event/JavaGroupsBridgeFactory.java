@@ -60,7 +60,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.property.PropertyUtils;
 
@@ -72,8 +71,6 @@ import org.objectstyle.cayenne.property.PropertyUtils;
  * @author Andrei Adamchik
  */
 public class JavaGroupsBridgeFactory implements EventBridgeFactory {
-
-    private static Logger logObj = Logger.getLogger(JavaGroupsBridgeFactory.class);
 
     public static final String MCAST_ADDRESS_DEFAULT = "228.0.0.5";
     public static final String MCAST_PORT_DEFAULT = "22222";
@@ -120,8 +117,6 @@ public class JavaGroupsBridgeFactory implements EventBridgeFactory {
     }
 
     private EventBridge createNoopBridge() {
-        logObj
-                .warn("*** Remote events disabled. Reason: JGroups is not available. Download JGroups from http://www.jgroups.org/");
         return new NoopEventBridge();
     }
 
@@ -133,7 +128,6 @@ public class JavaGroupsBridgeFactory implements EventBridgeFactory {
         // create JavaGroupsBridge using reflection to avoid triggering
         // ClassNotFound exceptions due to JavaGroups absence.
 
-        
         try {
             Constructor c = Class.forName(
                     "org.objectstyle.cayenne.event.JavaGroupsBridge").getConstructor(

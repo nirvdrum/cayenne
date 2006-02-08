@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.event;
 import java.io.Serializable;
 import java.util.Collection;
 
-import org.apache.log4j.Logger;
 import org.jgroups.Channel;
 import org.jgroups.JChannel;
 import org.jgroups.Message;
@@ -66,14 +65,13 @@ import org.jgroups.MessageListener;
 import org.jgroups.blocks.PullPushAdapter;
 
 /**
- * Implementation of EventBridge that passes and receives events via JavaGroups 
+ * Implementation of EventBridge that passes and receives events via JavaGroups
  * communication software.
  * 
  * @author Andrei Adamchik
  * @since 1.1
  */
 public class JavaGroupsBridge extends EventBridge implements MessageListener {
-    private static Logger logObj = Logger.getLogger(JavaGroupsBridge.class);
 
     // TODO: Meaning of "state" in JGroups is not yet clear to me
     protected byte[] state;
@@ -90,7 +88,7 @@ public class JavaGroupsBridge extends EventBridge implements MessageListener {
     public JavaGroupsBridge(EventSubject localSubject, String externalSubject) {
         super(localSubject, externalSubject);
     }
-    
+
     /**
      * @since 1.2
      */
@@ -136,43 +134,36 @@ public class JavaGroupsBridge extends EventBridge implements MessageListener {
      */
     public void receive(Message message) {
         try {
-            if (logObj.isDebugEnabled()) {
-                logObj.debug("Received Message from: " + message.getSrc());
-            }
-
             CayenneEvent event = messageObjectToEvent((Serializable) message.getObject());
             if (event != null) {
-                if (logObj.isDebugEnabled()) {
-                    logObj.debug("Received CayenneEvent: " + event.getClass().getName());
-                }
 
                 onExternalEvent(event);
             }
-        } catch (Exception ex) {
-            logObj.info("Exception while processing message: ", ex);
         }
-
+        catch (Exception ex) {
+            // TODO: Andrus, 2/8/2006 logging... Log4J was removed to make this usable on
+            // the client
+        }
     }
 
     protected void startupExternal() throws Exception {
-        // TODO: need to do more research to figure out the best default transport settings
+        // TODO: need to do more research to figure out the best default transport
+        // settings
         // to avoid fragmentation, etc.
 
         // if config file is set, use it, otherwise use a default
         // set of properties, trying to configure multicast address and port
         if (configURL != null) {
-            logObj.debug("creating channel with configuration from " + configURL);
             channel = new JChannel(configURL);
-        } else {
+        }
+        else {
             String configString = buildConfigString();
-            logObj.debug("creating channel with properties: " + configString);
             channel = new JChannel(configString);
         }
 
         // Important - discard messages from self
         channel.setOpt(Channel.LOCAL, Boolean.FALSE);
         channel.connect(externalSubject);
-        logObj.debug("channel connected.");
 
         if (receivesExternalEvents()) {
             adapter = new PullPushAdapter(channel, this);
@@ -180,8 +171,8 @@ public class JavaGroupsBridge extends EventBridge implements MessageListener {
     }
 
     /**
-     * Creates JavaGroups configuration String, using preconfigured
-     * multicast port and address. 
+     * Creates JavaGroups configuration String, using preconfigured multicast port and
+     * address.
      */
     protected String buildConfigString() {
         if (multicastAddress == null) {
@@ -193,18 +184,18 @@ public class JavaGroupsBridge extends EventBridge implements MessageListener {
         }
 
         return "UDP(mcast_addr="
-            + multicastAddress
-            + ";mcast_port="
-            + multicastPort
-            + ";ip_ttl=32):"
-            + "PING(timeout=3000;num_initial_members=6):"
-            + "FD(timeout=3000):"
-            + "VERIFY_SUSPECT(timeout=1500):"
-            + "pbcast.NAKACK(gc_lag=10;retransmit_timeout=600,1200,2400,4800):"
-            + "pbcast.STABLE(desired_avg_gossip=10000):"
-            + "FRAG:"
-            + "pbcast.GMS(join_timeout=5000;join_retry_timeout=2000;"
-            + "shun=true;print_local_addr=false)";
+                + multicastAddress
+                + ";mcast_port="
+                + multicastPort
+                + ";ip_ttl=32):"
+                + "PING(timeout=3000;num_initial_members=6):"
+                + "FD(timeout=3000):"
+                + "VERIFY_SUSPECT(timeout=1500):"
+                + "pbcast.NAKACK(gc_lag=10;retransmit_timeout=600,1200,2400,4800):"
+                + "pbcast.STABLE(desired_avg_gossip=10000):"
+                + "FRAG:"
+                + "pbcast.GMS(join_timeout=5000;join_retry_timeout=2000;"
+                + "shun=true;print_local_addr=false)";
     }
 
     protected void shutdownExternal() throws Exception {
@@ -214,31 +205,31 @@ public class JavaGroupsBridge extends EventBridge implements MessageListener {
             }
 
             channel.close();
-        } finally {
+        }
+        finally {
             adapter = null;
             channel = null;
         }
     }
 
     protected void sendExternalEvent(CayenneEvent localEvent) throws Exception {
-        logObj.debug("Sending event remotely: " + localEvent);
         Message message = new Message(null, null, eventToMessageObject(localEvent));
         channel.send(message);
     }
 
     /**
-     * Converts CayenneEvent to a serializable object that will be sent via JMS. 
-     * Default implementation simply returns the event, but subclasses can customize
-     * this behavior.
+     * Converts CayenneEvent to a serializable object that will be sent via JMS. Default
+     * implementation simply returns the event, but subclasses can customize this
+     * behavior.
      */
     protected Serializable eventToMessageObject(CayenneEvent event) throws Exception {
         return event;
     }
 
     /**
-     * Converts a Serializable instance to CayenneEvent. Returns null if the object
-     * is not supported. Default implementation simply tries to cast the object to
-     * CayenneEvent, but subclasses can customize this behavior.
+     * Converts a Serializable instance to CayenneEvent. Returns null if the object is not
+     * supported. Default implementation simply tries to cast the object to CayenneEvent,
+     * but subclasses can customize this behavior.
      */
     protected CayenneEvent messageObjectToEvent(Serializable object) throws Exception {
         return (object instanceof CayenneEvent) ? (CayenneEvent) object : null;

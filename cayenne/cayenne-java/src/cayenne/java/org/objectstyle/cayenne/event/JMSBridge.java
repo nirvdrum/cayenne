@@ -74,7 +74,6 @@ import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.IDUtil;
 
 /**
@@ -86,8 +85,6 @@ import org.objectstyle.cayenne.util.IDUtil;
  * @since 1.1
  */
 public class JMSBridge extends EventBridge implements MessageListener {
-
-    private static Logger logObj = Logger.getLogger(JMSBridge.class);
 
     static final String VM_ID = new String(IDUtil.pseudoUniqueByteSequence16());
     static final String VM_ID_PROPERRTY = "VM_ID";
@@ -120,39 +117,27 @@ public class JMSBridge extends EventBridge implements MessageListener {
         try {
             Object vmID = message.getObjectProperty(JMSBridge.VM_ID_PROPERRTY);
             if (JMSBridge.VM_ID.equals(vmID)) {
-                logObj.debug("Message from same VM ignoring.");
                 return;
             }
 
             if (!(message instanceof ObjectMessage)) {
-                if (logObj.isDebugEnabled()) {
-                    logObj.debug("Unsupported message, ignoring: " + vmID);
-                }
-
                 return;
             }
 
             ObjectMessage objectMessage = (ObjectMessage) message;
             CayenneEvent event = messageObjectToEvent(objectMessage.getObject());
             if (event != null) {
-                if (logObj.isDebugEnabled()) {
-                    logObj.debug("Received CayenneEvent: "
-                            + event.getClass().getName()
-                            + ", id: "
-                            + vmID);
-                }
-
                 onExternalEvent(event);
             }
 
         }
         catch (MessageFormatException mfex) {
-            Exception linkedException = mfex.getLinkedException();
-            Exception logException = (linkedException != null) ? linkedException : mfex;
-            logObj.info("Message Format Exception: ", logException);
+            // TODO: Andrus, 2/8/2006 logging... Log4J was removed to make this usable on
+            // the client
         }
         catch (Exception ex) {
-            logObj.info("Exception while processing message: ", ex);
+            // TODO: Andrus, 2/8/2006 logging... Log4J was removed to make this usable on
+            // the client
         }
     }
 
@@ -282,7 +267,6 @@ public class JMSBridge extends EventBridge implements MessageListener {
     }
 
     protected void sendExternalEvent(CayenneEvent localEvent) throws Exception {
-        logObj.debug("Sending event remotely: " + localEvent);
         ObjectMessage message = sendSession
                 .createObjectMessage(eventToMessageObject(localEvent));
         message.setObjectProperty(JMSBridge.VM_ID_PROPERRTY, JMSBridge.VM_ID);

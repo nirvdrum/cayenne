@@ -48,6 +48,10 @@
 		<pathelement path="${cayenne.other}/src/pdf/java"/>
 	</path>
 	
+	<path id="srcpath-tools">
+		<pathelement path="${cayenne.other}/src/tools/java"/>
+	</path>
+	
 	<path id="srcpath-macosx">
 		<pathelement path="${cayenne.other}/platform-macosx/src/java"/>
 	</path>

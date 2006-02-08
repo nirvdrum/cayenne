@@ -8,6 +8,7 @@
 	<property name="core.build" value="${build}/cayenne-1_4/classes"/>
 	<property name="core.build.1_5" value="${build}/cayenne-1_5/classes"/>
 	<property name="core.build.deps" value="${build}/cayenne-1_4/deps"/>
+	<property name="core.build.tools" value="${build}/tools/classes"/>
 	<property name="core.src" value="${cayenne.java}/src/cayenne/java"/>
 	<property name="core.src.1_5" value="${cayenne.java.1_5}/src/cayenne/java"/>
 	<property name="core.bin" value="${cayenne.java}/src/cayenne/bin"/>
@@ -86,10 +87,37 @@
 	</target>
 	
 	<!-- ========================================== -->
-	<!-- Build Cayenne Jar files.                   -->
+	<!-- Create jars and test their validity.       -->
 	<!-- ========================================== -->
-	<target name="jar" depends="compile,prepare-deps">
+	<target name="jar" depends="build-jar">
+		<compile-1_4 destdir="${core.build.tools}" srcref="srcpath-tools"
+			classpathref="classpath-lib"/>
 		
+		<java classname="org.objectstyle.cayenne.tools.ant.JarChecker" fork="true" failonerror="true">
+			<arg value="${dist}/lib/cayenne-client-nodeps.jar"/>
+			
+			<classpath>
+				<pathelement path="${core.build.tools}"/>
+				<pathelement path="${dist}/lib/cayenne-client-nodeps.jar"/>
+				
+				<!-- required dependencies -->
+				<pathelement path="${cayenne.java}/lib/${commons.collections.jar}"/>
+				<pathelement path="${cayenne.java}/lib/${commons.logging.jar}"/>
+				<pathelement path="${cayenne.java}/lib/${commons.lang.jar}"/>
+				<pathelement path="${cayenne.java}/lib/${hessian.jar}"/>
+				
+				<!-- optional dependencies -->
+				<pathelement path="${cayenne.java}/lib/${jms.jar}"/>
+				<pathelement path="${cayenne.java}/lib/${smack.jar}"/>
+				<pathelement path="${cayenne.java}/lib/${jgroups.jar}"/>
+			</classpath>
+		</java>
+	</target>
+	
+	<!-- ========================================== -->
+	<!-- Create Cayenne Jar files.                   -->
+	<!-- ========================================== -->
+	<target name="build-jar" depends="compile,prepare-deps">
 		<mkdir dir="${dist}/lib"/>
 		
 		<!-- server nodeps jar -->
@@ -122,11 +150,6 @@
 				<!-- EntityResolver relies on DataObject
 				<exclude name="org/objectstyle/cayenne/DataObject.class"/>
 				-->
-				<exclude name="org/objectstyle/cayenne/CayenneDataObject.class"/>
-				<exclude
-					name="org/objectstyle/cayenne/util/ResourceLocator.class"/>
-				<exclude
-					name="org/objectstyle/cayenne/util/WebApplicationResourceLocator.class"/>
 				<exclude name="org/objectstyle/cayenne/access/**"/>
 				<exclude name="org/objectstyle/cayenne/conf/**"/>
 				<exclude name="org/objectstyle/cayenne/conn/**"/>
@@ -137,10 +160,23 @@
 				<exclude name="org/objectstyle/cayenne/service/**"/>
 				<exclude name="org/objectstyle/cayenne/tools/**"/>
 				<exclude name="org/objectstyle/cayenne/wocompat/**"/>
+				<exclude name="org/objectstyle/cayenne/CayenneDataObject.class"/>
+				<exclude
+					name="org/objectstyle/cayenne/util/ResourceLocator.class"/>
+				<exclude
+					name="org/objectstyle/cayenne/util/WebApplicationResourceLocator.class"/>
+				<exclude
+					name="org/objectstyle/cayenne/map/AshwoodEntitySorter.class"/>
 				<exclude
 					name="org/objectstyle/cayenne/opp/hessian/HessianServlet.class"/>
 				<exclude
+					name="org/objectstyle/cayenne/opp/hessian/HessianService.class"/>
+				<exclude
 					name="org/objectstyle/cayenne/opp/hessian/HessianServiceHandler.class"/>
+				<exclude
+					name="org/objectstyle/cayenne/opp/BaseRemoteService.class"/>
+				<exclude
+					name="org/objectstyle/cayenne/util/ResourceLocator*"/>
 				<exclude name=".cayenne/**"/>
 				<exclude name="dotemplates/**"/>
 			</fileset>

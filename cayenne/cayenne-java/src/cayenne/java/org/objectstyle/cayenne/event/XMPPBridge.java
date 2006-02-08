@@ -81,7 +81,7 @@ import org.objectstyle.cayenne.util.Util;
  * controlled networks). Also it provides lots of additional information for free, such as
  * presence, and much more.
  * <p>
- * This implememtation is based on Smack XMPP client library from JiveSoftware.
+ * This implementation is based on Smack XMPP client library from JiveSoftware.
  * </p>
  * 
  * @since 1.2
