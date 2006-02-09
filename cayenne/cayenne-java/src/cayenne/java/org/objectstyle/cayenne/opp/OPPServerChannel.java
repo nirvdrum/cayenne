@@ -160,9 +160,6 @@ public class OPPServerChannel implements DataChannel {
 
                             // subclass descriptors will be resolved on the fly... here
                             // find objects base descriptor.
-                            ClassDescriptor descriptor = resolver.getClassDescriptor(info
-                                    .getObjEntity()
-                                    .getName());
                             Iterator it = objects.iterator();
                             while (it.hasNext()) {
                                 Persistent object = (Persistent) it.next();
@@ -174,6 +171,12 @@ public class OPPServerChannel implements DataChannel {
                                             "Server returned an object without an id: "
                                                     + object);
                                 }
+
+                                // have to resolve descriptor here for every object, as
+                                // often a query will not have any info indicating the
+                                // entity type
+                                ClassDescriptor descriptor = resolver
+                                        .getClassDescriptor(id.getEntityName());
 
                                 childObjects.add(merger.merge(object, descriptor));
                             }
