@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.Fault;
 public abstract class AbstractCollectionProperty extends SimpleProperty implements
         CollectionProperty {
 
-    protected String reverseName;
+    protected String complimentaryReverseArcName;
     protected ClassDescriptor targetDescriptor;
 
     public AbstractCollectionProperty(ClassDescriptor owner,
@@ -76,7 +76,7 @@ public abstract class AbstractCollectionProperty extends SimpleProperty implemen
             String reverseName) {
         super(owner, accessor);
         this.targetDescriptor = targetDescriptor;
-        this.reverseName = reverseName;
+        this.complimentaryReverseArcName = reverseName;
     }
 
     public Object readProperty(Object object) throws PropertyAccessException {
@@ -92,8 +92,8 @@ public abstract class AbstractCollectionProperty extends SimpleProperty implemen
         return targetDescriptor;
     }
 
-    public String getReverseName() {
-        return reverseName;
+    public ArcProperty getComplimentaryReverseArc() {
+        return (ArcProperty) targetDescriptor.getProperty(complimentaryReverseArcName);
     }
 
     public void shallowMerge(Object from, Object to) throws PropertyAccessException {

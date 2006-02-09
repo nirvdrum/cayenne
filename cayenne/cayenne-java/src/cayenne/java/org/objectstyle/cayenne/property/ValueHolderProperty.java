@@ -67,14 +67,14 @@ import org.objectstyle.cayenne.util.PersistentObjectHolder;
  */
 public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
 
-    protected String reverseName;
+    protected String complimentaryReverseArcName;
     protected ClassDescriptor targetDescriptor;
 
     public ValueHolderProperty(ClassDescriptor owner, ClassDescriptor targetDescriptor,
             PropertyAccessor accessor, String reverseName) {
         super(owner, accessor);
         this.targetDescriptor = targetDescriptor;
-        this.reverseName = reverseName;
+        this.complimentaryReverseArcName = reverseName;
     }
 
     public boolean visit(PropertyVisitor visitor) {
@@ -85,8 +85,8 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
         return targetDescriptor;
     }
 
-    public String getReverseName() {
-        return reverseName;
+    public ArcProperty getComplimentaryReverseArc() {
+        return (ArcProperty) targetDescriptor.getProperty(complimentaryReverseArcName);
     }
 
     public boolean isFaultTarget(Object object) {

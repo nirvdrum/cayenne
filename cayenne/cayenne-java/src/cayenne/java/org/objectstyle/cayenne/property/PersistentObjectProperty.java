@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.Persistent;
  */
 public class PersistentObjectProperty extends SimpleProperty implements ArcProperty {
 
-    protected String reverseName;
+    protected String complimentaryReverseArcName;
     protected ClassDescriptor targetDescriptor;
 
     public PersistentObjectProperty(ClassDescriptor owner,
@@ -75,7 +75,11 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
 
         super(owner, accessor);
         this.targetDescriptor = targetDescriptor;
-        this.reverseName = reverseName;
+        this.complimentaryReverseArcName = reverseName;
+    }
+
+    public ArcProperty getComplimentaryReverseArc() {
+        return (ArcProperty) targetDescriptor.getProperty(complimentaryReverseArcName);
     }
 
     public ClassDescriptor getTargetDescriptor() {
@@ -138,7 +142,4 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
         }
     }
 
-    public String getReverseName() {
-        return reverseName;
-    }
 }

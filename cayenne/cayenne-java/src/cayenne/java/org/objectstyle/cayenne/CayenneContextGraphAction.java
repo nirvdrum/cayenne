@@ -185,12 +185,9 @@ class CayenneContextGraphAction {
             Persistent sourceObject,
             Persistent targetObject) {
 
-        String reverseName = property.getReverseName();
-        if (reverseName != null) {
-            ClassDescriptor reverseDescriptor = context
-                    .getEntityResolver()
-                    .getClassDescriptor(targetObject.getObjectId().getEntityName());
-            reverseDescriptor.getProperty(reverseName).writePropertyDirectly(
+        ArcProperty reverseArc = property.getComplimentaryReverseArc();
+        if (reverseArc != null) {
+            reverseArc.writePropertyDirectly(
                     targetObject,
                     null,
                     sourceObject);
@@ -198,7 +195,7 @@ class CayenneContextGraphAction {
             context.getGraphManager().arcCreated(
                     targetObject.getObjectId(),
                     sourceObject.getObjectId(),
-                    reverseName);
+                    reverseArc.getName());
 
             markAsDirty(targetObject);
         }
@@ -209,12 +206,9 @@ class CayenneContextGraphAction {
             Persistent sourceObject,
             Persistent targetObject) {
 
-        String reverseName = property.getReverseName();
-        if (reverseName != null) {
-            ClassDescriptor reverseDescriptor = context
-                    .getEntityResolver()
-                    .getClassDescriptor(targetObject.getObjectId().getEntityName());
-            reverseDescriptor.getProperty(reverseName).writePropertyDirectly(
+        ArcProperty reverseArc = property.getComplimentaryReverseArc();
+        if (reverseArc != null) {
+            reverseArc.writePropertyDirectly(
                     targetObject,
                     sourceObject,
                     null);
@@ -222,7 +216,7 @@ class CayenneContextGraphAction {
             context.getGraphManager().arcDeleted(
                     targetObject.getObjectId(),
                     sourceObject.getObjectId(),
-                    reverseName);
+                    reverseArc.getName());
 
             markAsDirty(targetObject);
         }

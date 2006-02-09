@@ -65,9 +65,9 @@ package org.objectstyle.cayenne.property;
 public interface ArcProperty extends Property {
 
     /**
-     * Returns a name of the reverse arc. Returns null if no reverse arc exists.
+     * Returns a complimentary reverse ArcProperty or null if no reverse arc exists.
      */
-    String getReverseName();
+    ArcProperty getComplimentaryReverseArc();
 
     /**
      * Returns a ClassDescriptor for the type of graph nodes pointed to by this arc
