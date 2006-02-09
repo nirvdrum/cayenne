@@ -78,13 +78,11 @@ public class SimpleProperty implements Property {
     }
 
     public Object readProperty(Object object) throws PropertyAccessException {
-        owner.prepareForAccess(object);
         return readPropertyDirectly(object);
     }
 
     public void writeProperty(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException {
-        owner.prepareForAccess(object);
         writePropertyDirectly(object, oldValue, newValue);
     }
 
@@ -99,7 +97,7 @@ public class SimpleProperty implements Property {
     /**
      * Does nothing.
      */
-    public void prepareForAccess(Object object) throws PropertyAccessException {
+    public void injectValueHolder(Object object) throws PropertyAccessException {
         // noop
     }
 

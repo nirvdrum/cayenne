@@ -86,7 +86,6 @@ public class ValueHolderProperty extends AbstractSingleObjectArcProperty {
     }
 
     public Object readProperty(Object object) throws PropertyAccessException {
-        owner.prepareForAccess(object);
         return ensureValueHolderSet(object).getValue();
     }
 
@@ -104,8 +103,6 @@ public class ValueHolderProperty extends AbstractSingleObjectArcProperty {
 
     public void writeProperty(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException {
-
-        owner.prepareForAccess(object);
         ensureValueHolderSet(object).setValue(newValue);
     }
 
@@ -116,7 +113,7 @@ public class ValueHolderProperty extends AbstractSingleObjectArcProperty {
     /**
      * Injects a ValueHolder in the object if it hasn't been done yet.
      */
-    public void prepareForAccess(Object object) throws PropertyAccessException {
+    public void injectValueHolder(Object object) throws PropertyAccessException {
         ensureValueHolderSet(object);
     }
 

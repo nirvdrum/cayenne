@@ -79,10 +79,11 @@ public interface Property extends PropertyAccessor {
     boolean visit(PropertyVisitor visitor);
 
     /**
-     * Performs any needed processing right before object property is accessed for read or
-     * write.
+     * If a property is implemented as a ValueHolder, this operation would create an
+     * unfaulted value holder and inject it into the object, if an object doesn't have it
+     * set yet.
      */
-    void prepareForAccess(Object object) throws PropertyAccessException;
+    void injectValueHolder(Object object) throws PropertyAccessException;
 
     /**
      * Copies a property value from one object to another.

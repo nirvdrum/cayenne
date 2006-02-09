@@ -83,7 +83,7 @@ public class MockClassDescriptor implements ClassDescriptor {
         return null;
     }
 
-    public void prepareForAccess(Object object) throws PropertyAccessException {
+    public void injectValueHolders(Object object) throws PropertyAccessException {
     }
 
     public void shallowMerge(Object from, Object to) throws PropertyAccessException {

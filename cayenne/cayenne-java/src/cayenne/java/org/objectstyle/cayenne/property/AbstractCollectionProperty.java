@@ -76,7 +76,6 @@ public abstract class AbstractCollectionProperty extends AbstractSingleObjectArc
     }
 
     public Object readProperty(Object object) throws PropertyAccessException {
-        owner.prepareForAccess(object);
         return ensureCollectionValueHolderSet(object);
     }
 
@@ -142,7 +141,7 @@ public abstract class AbstractCollectionProperty extends AbstractSingleObjectArc
     /**
      * Injects a List in the object if it hasn't been done yet.
      */
-    public void prepareForAccess(Object object) throws PropertyAccessException {
+    public void injectValueHolder(Object object) throws PropertyAccessException {
         ensureCollectionValueHolderSet(object);
     }
 

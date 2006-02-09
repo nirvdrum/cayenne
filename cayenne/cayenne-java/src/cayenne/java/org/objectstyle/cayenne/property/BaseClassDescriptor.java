@@ -190,17 +190,17 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
      * Invokes 'prepareForAccess' of a super descriptor and then invokes
      * 'prepareForAccess' of each declared property.
      */
-    public void prepareForAccess(Object object) throws PropertyAccessException {
+    public void injectValueHolders(Object object) throws PropertyAccessException {
 
         // do super first
         if (getSuperclassDescriptor() != null) {
-            getSuperclassDescriptor().prepareForAccess(object);
+            getSuperclassDescriptor().injectValueHolders(object);
         }
 
         Iterator it = declaredProperties.values().iterator();
         while (it.hasNext()) {
             Property property = (Property) it.next();
-            property.prepareForAccess(object);
+            property.injectValueHolder(object);
         }
     }
 

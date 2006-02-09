@@ -96,7 +96,7 @@ public interface ClassDescriptor {
      * Prepares object properties for access. This may include injection of value holders
      * into the object and such.
      */
-    void prepareForAccess(Object object) throws PropertyAccessException;
+    void injectValueHolders(Object object) throws PropertyAccessException;
 
     /**
      * Merges object properties from one object to another, avoiding traversal of the

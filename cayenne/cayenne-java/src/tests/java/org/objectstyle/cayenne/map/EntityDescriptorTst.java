@@ -59,7 +59,6 @@ import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.property.BaseClassDescriptor;
-import org.objectstyle.cayenne.property.PropertyAccessException;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
 
@@ -88,23 +87,6 @@ public class EntityDescriptorTst extends TestCase {
         assertTrue(d1.isValid());
     }
 
-    public void testCompileNonPersistent() {
-        ObjEntity e1 = new ObjEntity("TestEntity");
-        e1.setClassName(Object.class.getName());
-
-        // compilation must be done in constructor...
-        EntityDescriptor d1 = new EntityDescriptor(e1, null);
-
-        try {
-            d1.compile(new EntityResolver());
-            fail("Should not be able to compile an class that does not define ObjectId");
-        }
-        catch (PropertyAccessException e) {
-            // expected
-        }
-    }
-
-    
     public void testProperties() {
         DataMap map = new DataMap();
 

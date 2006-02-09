@@ -1744,7 +1744,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
                     && cachedObject.getPersistenceState() != PersistenceState.DELETED) {
 
                 if (prototype != null) {
-                    descriptor.prepareForAccess(cachedObject);
+                    descriptor.injectValueHolders(cachedObject);
                     descriptor.shallowMerge(prototype, cachedObject);
                 }
             }
@@ -1764,7 +1764,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
             prototype.setObjectContext(this);
             prototype.setObjectId(id);
             graphManager.registerNode(id, prototype);
-            descriptor.prepareForAccess(prototype);
+            descriptor.injectValueHolders(prototype);
 
             return prototype;
         }
@@ -1789,7 +1789,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
             if (prototype != null
                     && prototype.getPersistenceState() != PersistenceState.HOLLOW) {
                 localObject.setPersistenceState(PersistenceState.COMMITTED);
-                descriptor.prepareForAccess(localObject);
+                descriptor.injectValueHolders(localObject);
                 descriptor.shallowMerge(prototype, localObject);
             }
             else {

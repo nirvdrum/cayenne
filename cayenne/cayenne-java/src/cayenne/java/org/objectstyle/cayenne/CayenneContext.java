@@ -383,7 +383,7 @@ public class CayenneContext implements ObjectContext {
                     && cachedObject.getPersistenceState() != PersistenceState.DELETED) {
 
                 if (prototype != null) {
-                    descriptor.prepareForAccess(cachedObject);
+                    descriptor.injectValueHolders(cachedObject);
                     descriptor.shallowMerge(prototype, cachedObject);
                     cachedObject.setPersistenceState(PersistenceState.COMMITTED);
                 }
@@ -404,7 +404,7 @@ public class CayenneContext implements ObjectContext {
             prototype.setObjectContext(this);
             prototype.setObjectId(id);
             graphManager.registerNode(id, prototype);
-            descriptor.prepareForAccess(prototype);
+            descriptor.injectValueHolders(prototype);
 
             return prototype;
         }
@@ -428,7 +428,7 @@ public class CayenneContext implements ObjectContext {
 
             if (prototype != null) {
                 localObject.setPersistenceState(PersistenceState.COMMITTED);
-                descriptor.prepareForAccess(localObject);
+                descriptor.injectValueHolders(localObject);
                 descriptor.shallowMerge(prototype, localObject);
             }
             else {
@@ -509,7 +509,7 @@ public class CayenneContext implements ObjectContext {
         object.setObjectContext(this);
         object.setObjectId(id);
 
-        descriptor.prepareForAccess(object);
+        descriptor.injectValueHolders(object);
         graphManager.registerNode(object.getObjectId(), object);
         graphManager.nodeCreated(object.getObjectId());
 
@@ -527,7 +527,7 @@ public class CayenneContext implements ObjectContext {
 
         // note that this must be called AFTER setting persistence state, otherwise we'd
         // get ValueHolders incorrectly marked as resolved
-        descriptor.prepareForAccess(object);
+        descriptor.injectValueHolders(object);
 
         graphManager.registerNode(id, object);
 
