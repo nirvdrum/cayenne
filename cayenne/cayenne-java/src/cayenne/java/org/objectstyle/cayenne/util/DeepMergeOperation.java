@@ -85,7 +85,7 @@ public class DeepMergeOperation implements ObjectGraphVisitor {
     }
 
     public boolean visitToOneArcProperty(ArcProperty property, Object object) {
-        return !property.isFaultTarget(object);
+        return !property.isFault(object);
     }
 
     public boolean visitToManyArcProperty(ArcProperty property, Object object) {

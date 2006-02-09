@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.property;
 
+
 /**
  * A property representing a collection of objects.
  * 
@@ -63,4 +64,7 @@ package org.objectstyle.cayenne.property;
  */
 public interface CollectionProperty extends ArcProperty {
 
+    public void addTarget(Object source, Object target, boolean setReverse);
+
+    public void removeTarget(Object source, Object target, boolean setReverse);
 }

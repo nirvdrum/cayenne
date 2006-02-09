@@ -92,7 +92,7 @@ public class ListProperty extends AbstractCollectionProperty {
         return new PersistentObjectList((Persistent) object, getName());
     }
 
-    public boolean isFaultTarget(Object object) {
+    public boolean isFault(Object object) {
         Object target = accessor.readPropertyDirectly(object);
         return target == null
                 || target instanceof Fault

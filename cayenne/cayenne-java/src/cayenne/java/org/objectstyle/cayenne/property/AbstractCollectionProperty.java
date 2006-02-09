@@ -65,18 +65,13 @@ import org.objectstyle.cayenne.Fault;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public abstract class AbstractCollectionProperty extends SimpleProperty implements
-        CollectionProperty {
-
-    protected String complimentaryReverseArcName;
-    protected ClassDescriptor targetDescriptor;
+public abstract class AbstractCollectionProperty extends AbstractSingleObjectArcProperty
+        implements CollectionProperty {
 
     public AbstractCollectionProperty(ClassDescriptor owner,
             ClassDescriptor targetDescriptor, PropertyAccessor accessor,
             String reverseName) {
-        super(owner, accessor);
-        this.targetDescriptor = targetDescriptor;
-        this.complimentaryReverseArcName = reverseName;
+        super(owner, targetDescriptor, accessor, reverseName);
     }
 
     public Object readProperty(Object object) throws PropertyAccessException {
@@ -84,16 +79,45 @@ public abstract class AbstractCollectionProperty extends SimpleProperty implemen
         return ensureCollectionSet(object);
     }
 
+    public void addTarget(Object source, Object target, boolean setReverse) {
+        if (target == null) {
+            throw new NullPointerException("Attempt to add null object.");
+        }
+
+        // TODO, Andrus, 2/9/2006 - CayenneDataObject differences:
+        // * invokes "willConnect"
+        // * has a callback to ObjectStore to handle flattened
+        // * has a callback to ObjectStore to retain snapshot
+        // * changes object state to modified
+
+        // Now do the rest of the normal handling (regardless of whether it was
+        // flattened or not)
+        Collection collection = (Collection) readProperty(source);
+        collection.add(target);
+
+        if (target != null && setReverse) {
+            setReverse(source, null, target);
+        }
+    }
+
+    public void removeTarget(Object source, Object target, boolean setReverse) {
+
+        // TODO, Andrus, 2/9/2006 - CayenneDataObject differences:
+        // * has a callback to ObjectStore to handle flattened
+        // * changes object state to modified
+
+        // Now do the rest of the normal handling (regardless of whether it was
+        // flattened or not)
+        Collection collection = (Collection) readProperty(source);
+        collection.remove(target);
+
+        if (target != null && setReverse) {
+            setReverse(source, target, null);
+        }
+    }
+
     public boolean visit(PropertyVisitor visitor) {
         return visitor.visitCollectionArc(this);
-    }
-
-    public ClassDescriptor getTargetDescriptor() {
-        return targetDescriptor;
-    }
-
-    public ArcProperty getComplimentaryReverseArc() {
-        return (ArcProperty) targetDescriptor.getProperty(complimentaryReverseArcName);
     }
 
     public void shallowMerge(Object from, Object to) throws PropertyAccessException {

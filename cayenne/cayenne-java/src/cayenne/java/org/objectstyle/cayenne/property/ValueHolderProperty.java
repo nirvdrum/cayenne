@@ -65,31 +65,14 @@ import org.objectstyle.cayenne.util.PersistentObjectHolder;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
-
-    protected String complimentaryReverseArcName;
-    protected ClassDescriptor targetDescriptor;
+public class ValueHolderProperty extends AbstractSingleObjectArcProperty {
 
     public ValueHolderProperty(ClassDescriptor owner, ClassDescriptor targetDescriptor,
             PropertyAccessor accessor, String reverseName) {
-        super(owner, accessor);
-        this.targetDescriptor = targetDescriptor;
-        this.complimentaryReverseArcName = reverseName;
+        super(owner, targetDescriptor, accessor, reverseName);
     }
 
-    public boolean visit(PropertyVisitor visitor) {
-        return visitor.visitSimpleArc(this);
-    }
-
-    public ClassDescriptor getTargetDescriptor() {
-        return targetDescriptor;
-    }
-
-    public ArcProperty getComplimentaryReverseArc() {
-        return (ArcProperty) targetDescriptor.getProperty(complimentaryReverseArcName);
-    }
-
-    public boolean isFaultTarget(Object object) {
+    public boolean isFault(Object object) {
         ValueHolder holder = (ValueHolder) accessor.readPropertyDirectly(object);
         return holder == null || holder.isFault();
     }

@@ -64,29 +64,15 @@ import org.objectstyle.cayenne.Persistent;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class PersistentObjectProperty extends SimpleProperty implements ArcProperty {
-
-    protected String complimentaryReverseArcName;
-    protected ClassDescriptor targetDescriptor;
+public class PersistentObjectProperty extends AbstractSingleObjectArcProperty {
 
     public PersistentObjectProperty(ClassDescriptor owner,
             ClassDescriptor targetDescriptor, PropertyAccessor accessor,
             String reverseName) {
-
-        super(owner, accessor);
-        this.targetDescriptor = targetDescriptor;
-        this.complimentaryReverseArcName = reverseName;
+        super(owner, targetDescriptor, accessor, reverseName);
     }
 
-    public ArcProperty getComplimentaryReverseArc() {
-        return (ArcProperty) targetDescriptor.getProperty(complimentaryReverseArcName);
-    }
-
-    public ClassDescriptor getTargetDescriptor() {
-        return targetDescriptor;
-    }
-
-    public boolean isFaultTarget(Object object) {
+    public boolean isFault(Object object) {
         Object target = accessor.readPropertyDirectly(object);
         return target instanceof Fault;
     }
@@ -141,5 +127,4 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
                     .getToOneFault());
         }
     }
-
 }

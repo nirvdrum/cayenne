@@ -64,7 +64,7 @@ public interface PropertyVisitor {
 
     boolean visitProperty(Property property);
 
-    boolean visitSimpleArc(ArcProperty property);
+    boolean visitSingleObjectArc(SingleObjectArcProperty property);
 
     boolean visitCollectionArc(CollectionProperty property);
 }
