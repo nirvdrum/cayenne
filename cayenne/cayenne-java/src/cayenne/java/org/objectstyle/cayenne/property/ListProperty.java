@@ -113,7 +113,7 @@ public class ListProperty extends AbstractCollectionProperty {
                 Object next = it.next();
                 Object merged = (next != null)
                         ? getTargetDescriptor()
-                                .resolveDescriptor(next.getClass())
+                                .getSubclassDescriptor(next.getClass())
                                 .deepMerge(next, visitor.getChildVisitor(this))
                         : null;
                 objects.add(merged);

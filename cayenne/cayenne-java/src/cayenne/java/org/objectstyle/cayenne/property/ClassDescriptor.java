@@ -91,7 +91,7 @@ public interface ClassDescriptor {
      * this.getObjectClass().isAssignableFrom(objectClass)
      * </pre>
      */
-    ClassDescriptor resolveDescriptor(Class objectClass);
+    ClassDescriptor getSubclassDescriptor(Class objectClass);
 
     /**
      * Creates a new instance of a class described by this object.

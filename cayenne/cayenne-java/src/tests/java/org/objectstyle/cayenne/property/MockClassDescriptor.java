@@ -67,7 +67,7 @@ public class MockClassDescriptor implements ClassDescriptor {
         return null;
     }
 
-    public ClassDescriptor resolveDescriptor(Class objectClass) {
+    public ClassDescriptor getSubclassDescriptor(Class objectClass) {
         return this;
     }
 

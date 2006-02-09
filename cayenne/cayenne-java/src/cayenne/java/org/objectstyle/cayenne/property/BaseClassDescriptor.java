@@ -109,7 +109,7 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         return objectClass;
     }
 
-    public ClassDescriptor resolveDescriptor(Class objectClass) {
+    public ClassDescriptor getSubclassDescriptor(Class objectClass) {
         if (objectClass == null) {
             throw new IllegalArgumentException("Null objectClass");
         }

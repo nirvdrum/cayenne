@@ -109,7 +109,7 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
 
             if (target != null) {
                 target = getTargetDescriptor()
-                        .resolveDescriptor(target.getClass())
+                        .getSubclassDescriptor(target.getClass())
                         .deepMerge(target, visitor.getChildVisitor(this));
             }
             toHolder.setInitialValue(target);

@@ -111,7 +111,7 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
 
             if (fromValue != null) {
                 toValue = getTargetDescriptor()
-                        .resolveDescriptor(from.getClass())
+                        .getSubclassDescriptor(from.getClass())
                         .deepMerge(fromValue, visitor.getChildVisitor(this));
             }
 
