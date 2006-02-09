@@ -55,86 +55,12 @@
  */
 package org.objectstyle.cayenne.property;
 
-import java.util.Collection;
-
-import org.objectstyle.cayenne.Fault;
-
 /**
- * Provides access to a property implemented as a Collection.
+ * A property representing a collection of objects.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public abstract class CollectionProperty extends SimpleProperty implements ArcProperty {
+public interface CollectionProperty extends ArcProperty {
 
-    protected String reversePropertyName;
-    protected ClassDescriptor targetDescriptor;
-
-    public CollectionProperty(PropertyAccessor accessor,
-            ClassDescriptor targetDescriptor, String reversePropertyName) {
-        super(accessor);
-        this.targetDescriptor = targetDescriptor;
-        this.reversePropertyName = reversePropertyName;
-    }
-
-    public ClassDescriptor getTargetDescriptor() {
-        return targetDescriptor;
-    }
-
-    public String getReversePropertyName() {
-        return reversePropertyName;
-    }
-
-    public void shallowMerge(Object from, Object to) throws PropertyAccessException {
-        // noop
-    }
-
-    public abstract void deepMerge(Object from, Object to, ObjectGraphVisitor visitor);
-
-    /**
-     * Injects a List in the object if it hasn't been done yet.
-     */
-    public void prepareForAccess(Object object) throws PropertyAccessException {
-        ensureCollectionSet(object);
-    }
-
-    /**
-     * Removes teh old value from the collection, adds the new value.
-     */
-    public void writePropertyDirectly(Object object, Object oldValue, Object newValue)
-            throws PropertyAccessException {
-
-        Collection collection = ensureCollectionSet(object);
-
-        if (oldValue != null) {
-            collection.remove(oldValue);
-        }
-
-        if (newValue != null) {
-            collection.add(newValue);
-        }
-    }
-
-    /**
-     * Checks that an object's List field described by this property is set, injecting a
-     * List if needed.
-     */
-    protected Collection ensureCollectionSet(Object object)
-            throws PropertyAccessException {
-
-        Object value = accessor.readPropertyDirectly(object);
-
-        if (value == null || value instanceof Fault) {
-            value = createCollection(object);
-            accessor.writePropertyDirectly(object, null, value);
-        }
-
-        return (Collection) value;
-    }
-
-    /**
-     * Creates a Collection for an object.
-     */
-    protected abstract Collection createCollection(Object object)
-            throws PropertyAccessException;
 }

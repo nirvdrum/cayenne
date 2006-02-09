@@ -68,7 +68,6 @@ public class FieldPropertyTst extends TestCase {
                 String.class));
 
         assertEquals("string", property.getPropertyName());
-        assertEquals(String.class.getName(), property.getPropertyType().getName());
     }
 
     public void testGet() {

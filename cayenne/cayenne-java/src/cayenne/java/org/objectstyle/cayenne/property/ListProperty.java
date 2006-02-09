@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.util.PersistentObjectList;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class ListProperty extends CollectionProperty {
+public class ListProperty extends AbstractCollectionProperty {
 
     public ListProperty(PropertyAccessor accessor, ClassDescriptor targetDescriptor,
             String reversePropertyName) {

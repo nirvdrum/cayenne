@@ -64,6 +64,8 @@ package org.objectstyle.cayenne.property;
  * @author Andrus Adamchik
  */
 public interface Property extends PropertyAccessor {
+    
+    boolean visit(PropertyVisitor visitor);
 
     /**
      * Performs any needed processing right before object property is accessed for read or

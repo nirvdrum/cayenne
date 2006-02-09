@@ -65,9 +65,8 @@ import org.objectstyle.cayenne.DataObject;
 public class DataObjectAccessor implements PropertyAccessor {
 
     protected String propertyName;
-    protected Class propertyType;
 
-    public DataObjectAccessor(String propertyName, Class propertyType) {
+    public DataObjectAccessor(String propertyName) {
 
         if (propertyName == null) {
             throw new IllegalArgumentException("Null propertyName");
@@ -78,10 +77,6 @@ public class DataObjectAccessor implements PropertyAccessor {
 
     public String getPropertyName() {
         return propertyName;
-    }
-
-    public Class getPropertyType() {
-        return propertyType;
     }
 
     /**

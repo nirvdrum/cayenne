@@ -91,10 +91,6 @@ public class FieldAccessor implements PropertyAccessor {
         return propertyName;
     }
 
-    public Class getPropertyType() {
-        return field.getType();
-    }
-
     public Object readPropertyDirectly(Object object) throws PropertyAccessException {
         try {
             return field.get(object);

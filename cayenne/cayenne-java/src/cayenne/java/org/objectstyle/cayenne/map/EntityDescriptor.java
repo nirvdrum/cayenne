@@ -265,7 +265,7 @@ public class EntityDescriptor extends BaseClassDescriptor {
         catch (Throwable th) {
 
             if (dataObject) {
-                return new DataObjectAccessor(propertyName, propertyType);
+                return new DataObjectAccessor(propertyName);
             }
 
             throw new PropertyAccessException("Can't create accessor for property '"

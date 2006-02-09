@@ -56,61 +56,15 @@
 package org.objectstyle.cayenne.property;
 
 /**
- * A property descriptor that provides access to a simple object property, delegating
- * property read/write operations to an accessor.
+ * Defines an operation that uses a ClassDescriptor.
  * 
- * @since 1.2
- * @author Andrus Adamchik
+ * @author
  */
-public class SimpleProperty implements Property {
+public interface PropertyVisitor {
 
-    protected PropertyAccessor accessor;
+    boolean visitProperty(Property property);
 
-    public SimpleProperty(PropertyAccessor accessor) {
+    boolean visitSimpleArc(ArcProperty property);
 
-        if (accessor == null) {
-            throw new IllegalArgumentException("Null accessor");
-        }
-
-        this.accessor = accessor;
-    }
-
-    public String getPropertyName() {
-        return accessor.getPropertyName();
-    }
-    
-    public boolean visit(PropertyVisitor visitor) {
-        return visitor.visitProperty(this);
-    }
-
-    /**
-     * Does nothing.
-     */
-    public void prepareForAccess(Object object) throws PropertyAccessException {
-        // noop
-    }
-
-    public void shallowMerge(Object from, Object to) throws PropertyAccessException {
-        writePropertyDirectly(to, accessor.readPropertyDirectly(to), accessor
-                .readPropertyDirectly(from));
-    }
-
-    /**
-     * Checks the visitor and if the merge is allowed, calls
-     * {@link #shallowMerge(Object, Object)}.
-     */
-    public void deepMerge(Object from, Object to, ObjectGraphVisitor visitor) {
-        if (visitor.visitSimpleProperty(this)) {
-            shallowMerge(from, to);
-        }
-    }
-
-    public Object readPropertyDirectly(Object object) throws PropertyAccessException {
-        return accessor.readPropertyDirectly(object);
-    }
-
-    public void writePropertyDirectly(Object object, Object oldValue, Object newValue)
-            throws PropertyAccessException {
-        accessor.writePropertyDirectly(object, oldValue, newValue);
-    }
+    boolean visitCollectionArc(CollectionProperty property);
 }

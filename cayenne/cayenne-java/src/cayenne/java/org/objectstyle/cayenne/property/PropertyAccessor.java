@@ -72,11 +72,6 @@ public interface PropertyAccessor extends Serializable {
     String getPropertyName();
 
     /**
-     * Returns property Java class.
-     */
-    Class getPropertyType();
-
-    /**
      * Returns a property value of an object without disturbing the object fault status.
      */
     Object readPropertyDirectly(Object object) throws PropertyAccessException;

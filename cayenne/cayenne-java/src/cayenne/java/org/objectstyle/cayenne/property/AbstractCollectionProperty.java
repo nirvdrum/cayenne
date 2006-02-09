@@ -55,62 +55,91 @@
  */
 package org.objectstyle.cayenne.property;
 
+import java.util.Collection;
+
+import org.objectstyle.cayenne.Fault;
+
 /**
- * A property descriptor that provides access to a simple object property, delegating
- * property read/write operations to an accessor.
+ * Provides access to a property implemented as a Collection.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class SimpleProperty implements Property {
+public abstract class AbstractCollectionProperty extends SimpleProperty implements
+        CollectionProperty {
 
-    protected PropertyAccessor accessor;
+    protected String reversePropertyName;
+    protected ClassDescriptor targetDescriptor;
 
-    public SimpleProperty(PropertyAccessor accessor) {
-
-        if (accessor == null) {
-            throw new IllegalArgumentException("Null accessor");
-        }
-
-        this.accessor = accessor;
-    }
-
-    public String getPropertyName() {
-        return accessor.getPropertyName();
+    public AbstractCollectionProperty(PropertyAccessor accessor,
+            ClassDescriptor targetDescriptor, String reversePropertyName) {
+        super(accessor);
+        this.targetDescriptor = targetDescriptor;
+        this.reversePropertyName = reversePropertyName;
     }
     
     public boolean visit(PropertyVisitor visitor) {
-        return visitor.visitProperty(this);
+        return visitor.visitCollectionArc(this);
     }
 
-    /**
-     * Does nothing.
-     */
-    public void prepareForAccess(Object object) throws PropertyAccessException {
-        // noop
+    public ClassDescriptor getTargetDescriptor() {
+        return targetDescriptor;
+    }
+
+    public String getReversePropertyName() {
+        return reversePropertyName;
     }
 
     public void shallowMerge(Object from, Object to) throws PropertyAccessException {
-        writePropertyDirectly(to, accessor.readPropertyDirectly(to), accessor
-                .readPropertyDirectly(from));
+        // noop
+    }
+
+    public abstract void deepMerge(Object from, Object to, ObjectGraphVisitor visitor);
+
+    /**
+     * Injects a List in the object if it hasn't been done yet.
+     */
+    public void prepareForAccess(Object object) throws PropertyAccessException {
+        ensureCollectionSet(object);
     }
 
     /**
-     * Checks the visitor and if the merge is allowed, calls
-     * {@link #shallowMerge(Object, Object)}.
+     * Removes teh old value from the collection, adds the new value.
      */
-    public void deepMerge(Object from, Object to, ObjectGraphVisitor visitor) {
-        if (visitor.visitSimpleProperty(this)) {
-            shallowMerge(from, to);
+    public void writePropertyDirectly(Object object, Object oldValue, Object newValue)
+            throws PropertyAccessException {
+
+        Collection collection = ensureCollectionSet(object);
+
+        if (oldValue != null) {
+            collection.remove(oldValue);
+        }
+
+        if (newValue != null) {
+            collection.add(newValue);
         }
     }
 
-    public Object readPropertyDirectly(Object object) throws PropertyAccessException {
-        return accessor.readPropertyDirectly(object);
+    /**
+     * Checks that an object's List field described by this property is set, injecting a
+     * List if needed.
+     */
+    protected Collection ensureCollectionSet(Object object)
+            throws PropertyAccessException {
+
+        Object value = accessor.readPropertyDirectly(object);
+
+        if (value == null || value instanceof Fault) {
+            value = createCollection(object);
+            accessor.writePropertyDirectly(object, null, value);
+        }
+
+        return (Collection) value;
     }
 
-    public void writePropertyDirectly(Object object, Object oldValue, Object newValue)
-            throws PropertyAccessException {
-        accessor.writePropertyDirectly(object, oldValue, newValue);
-    }
+    /**
+     * Creates a Collection for an object.
+     */
+    protected abstract Collection createCollection(Object object)
+            throws PropertyAccessException;
 }

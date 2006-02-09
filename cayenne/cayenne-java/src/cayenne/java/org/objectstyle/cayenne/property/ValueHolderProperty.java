@@ -77,8 +77,8 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
         this.reversePropertyName = reversePropertyName;
     }
 
-    public Class getPropertyType() {
-        return targetDescriptor.getObjectClass();
+    public boolean visit(PropertyVisitor visitor) {
+        return visitor.visitSimpleArc(this);
     }
 
     public ClassDescriptor getTargetDescriptor() {
