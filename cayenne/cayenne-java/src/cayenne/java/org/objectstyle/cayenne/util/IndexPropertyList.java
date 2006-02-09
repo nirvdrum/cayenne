@@ -62,6 +62,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.property.PropertyUtils;
 
 /**
@@ -78,7 +79,7 @@ import org.objectstyle.cayenne.property.PropertyUtils;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class IndexPropertyList extends AbstractList {
+public class IndexPropertyList extends AbstractList implements ValueHolder {
 
     /**
      * A default gap maintained between elements index property values. Gaps bigger than 1
@@ -123,6 +124,37 @@ public class IndexPropertyList extends AbstractList {
         // be lazy - don't sort here, as (a) it may never be needed and (b) a list can be
         // a Cayenne fault, so resolving it too early is undesirable
         this.dirty = sortNeeded;
+    }
+
+    ValueHolder getWrappedValueHolder() {
+        return (list instanceof ValueHolder) ? (ValueHolder) list : null;
+    }
+
+    public boolean isFault() {
+        ValueHolder h = getWrappedValueHolder();
+        return (h != null) ? h.isFault() : false;
+    }
+
+    public Object setInitialValue(Object value) throws CayenneRuntimeException {
+        ValueHolder h = getWrappedValueHolder();
+        return h != null ? h.setInitialValue(value) : null;
+    }
+
+    public Object setValue(Object value) throws CayenneRuntimeException {
+        ValueHolder h = getWrappedValueHolder();
+        return h != null ? h.setValue(value) : null;
+    }
+
+    public Object getValue() throws CayenneRuntimeException {
+        ValueHolder h = getWrappedValueHolder();
+        return h != null ? h.getValue() : null;
+    }
+
+    public void invalidate() {
+        ValueHolder h = getWrappedValueHolder();
+        if (h != null) {
+            h.invalidate();
+        }
     }
 
     /**

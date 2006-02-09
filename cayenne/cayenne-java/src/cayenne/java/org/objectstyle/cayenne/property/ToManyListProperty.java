@@ -55,10 +55,9 @@
  */
 package org.objectstyle.cayenne.property;
 
-import java.util.Collection;
-
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.ValueHolder;
 
 /**
  * A list property that is intended to work with
@@ -74,7 +73,8 @@ public class ToManyListProperty extends ListProperty {
         super(owner, targetDescriptor, accessor, reverseName);
     }
 
-    protected Collection createCollection(Object object) throws PropertyAccessException {
+    protected ValueHolder createCollectionValueHolder(Object object)
+            throws PropertyAccessException {
         if (!(object instanceof Persistent)) {
 
             throw new PropertyAccessException(
@@ -83,7 +83,7 @@ public class ToManyListProperty extends ListProperty {
                     object);
         }
 
-        return (Collection) Fault.getToManyFault().resolveFault(
+        return (ValueHolder) Fault.getToManyFault().resolveFault(
                 (Persistent) object,
                 getName());
     }

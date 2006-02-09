@@ -80,7 +80,8 @@ public class ListProperty extends AbstractCollectionProperty {
     /**
      * Creates a List for an object. Expects an object to be an instance of Persistent.
      */
-    protected Collection createCollection(Object object) throws PropertyAccessException {
+    protected ValueHolder createCollectionValueHolder(Object object)
+            throws PropertyAccessException {
         if (!(object instanceof Persistent)) {
 
             throw new PropertyAccessException(
@@ -103,9 +104,9 @@ public class ListProperty extends AbstractCollectionProperty {
 
         if (visitor.visitToManyArcProperty(this, from)) {
 
-            ValueHolder toHolder = (ValueHolder) ensureCollectionSet(to);
+            ValueHolder toHolder = ensureCollectionValueHolderSet(to);
 
-            Collection fromHolder = ensureCollectionSet(from);
+            Collection fromHolder = (Collection) ensureCollectionValueHolderSet(from);
             Collection objects = new ArrayList(fromHolder.size());
 
             Iterator it = fromHolder.iterator();

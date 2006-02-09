@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.property;
 import java.util.Collection;
 
 import org.objectstyle.cayenne.Fault;
+import org.objectstyle.cayenne.ValueHolder;
 
 /**
  * A generic superclass of CollectionProperty implementations.
@@ -76,7 +77,21 @@ public abstract class AbstractCollectionProperty extends AbstractSingleObjectArc
 
     public Object readProperty(Object object) throws PropertyAccessException {
         owner.prepareForAccess(object);
-        return ensureCollectionSet(object);
+        return ensureCollectionValueHolderSet(object);
+    }
+
+    /**
+     * Wraps list in a value holder that performs lazy faulting.
+     */
+    public void writePropertyDirectly(Object object, Object oldValue, Object newValue)
+            throws PropertyAccessException {
+        ValueHolder holder = (ValueHolder) accessor.readPropertyDirectly(object);
+        if (holder == null) {
+            holder = createCollectionValueHolder(object);
+            accessor.writePropertyDirectly(object, null, holder);
+        }
+
+        holder.setInitialValue(newValue);
     }
 
     public void addTarget(Object source, Object target, boolean setReverse) {
@@ -130,29 +145,29 @@ public abstract class AbstractCollectionProperty extends AbstractSingleObjectArc
      * Injects a List in the object if it hasn't been done yet.
      */
     public void prepareForAccess(Object object) throws PropertyAccessException {
-        ensureCollectionSet(object);
+        ensureCollectionValueHolderSet(object);
     }
 
     /**
      * Checks that an object's List field described by this property is set, injecting a
      * List if needed.
      */
-    protected Collection ensureCollectionSet(Object object)
+    protected ValueHolder ensureCollectionValueHolderSet(Object object)
             throws PropertyAccessException {
 
         Object value = accessor.readPropertyDirectly(object);
 
         if (value == null || value instanceof Fault) {
-            value = createCollection(object);
+            value = createCollectionValueHolder(object);
             accessor.writePropertyDirectly(object, null, value);
         }
 
-        return (Collection) value;
+        return (ValueHolder) value;
     }
 
     /**
      * Creates a Collection for an object.
      */
-    protected abstract Collection createCollection(Object object)
+    protected abstract ValueHolder createCollectionValueHolder(Object object)
             throws PropertyAccessException;
 }

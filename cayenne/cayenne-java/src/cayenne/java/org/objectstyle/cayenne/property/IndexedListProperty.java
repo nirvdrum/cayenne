@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne.property;
 
-import java.util.Collection;
 import java.util.List;
 
+import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.util.IndexPropertyList;
 
 /**
@@ -80,8 +80,9 @@ public class IndexedListProperty extends ListProperty {
     /**
      * Creates a List indexed on a specified property.
      */
-    protected Collection createCollection(Object object) throws PropertyAccessException {
-        List unordered = (List) super.createCollection(object);
+    protected ValueHolder createCollectionValueHolder(Object object)
+            throws PropertyAccessException {
+        List unordered = (List) super.createCollectionValueHolder(object);
         return new IndexPropertyList(indexPropertyName, unordered, true);
     }
 }
