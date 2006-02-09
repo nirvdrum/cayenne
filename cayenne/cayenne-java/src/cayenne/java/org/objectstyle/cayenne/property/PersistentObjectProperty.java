@@ -106,25 +106,4 @@ public class PersistentObjectProperty extends AbstractSingleObjectArcProperty {
                     .getToOneFault());
         }
     }
-
-    public void deepMerge(Object from, Object to, ObjectGraphVisitor visitor) {
-
-        if (visitor.visitToOneArcProperty(this, from)) {
-
-            Object fromValue = accessor.readPropertyDirectly(from);
-            Object toValue = null;
-
-            if (fromValue != null) {
-                toValue = getTargetDescriptor()
-                        .getSubclassDescriptor(from.getClass())
-                        .deepMerge(fromValue, visitor.getChildVisitor(this));
-            }
-
-            writePropertyDirectly(to, accessor.readPropertyDirectly(to), toValue);
-        }
-        else {
-            writePropertyDirectly(to, accessor.readPropertyDirectly(to), Fault
-                    .getToOneFault());
-        }
-    }
 }

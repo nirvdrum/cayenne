@@ -88,6 +88,4 @@ public interface Property extends PropertyAccessor {
      * Copies a property value from one object to another.
      */
     void shallowMerge(Object from, Object to) throws PropertyAccessException;
-
-    void deepMerge(Object from, Object to, ObjectGraphVisitor visitor);
 }

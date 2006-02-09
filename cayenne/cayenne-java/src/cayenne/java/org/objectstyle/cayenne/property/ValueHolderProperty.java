@@ -113,27 +113,6 @@ public class ValueHolderProperty extends AbstractSingleObjectArcProperty {
         // noop
     }
 
-    public void deepMerge(Object from, Object to, ObjectGraphVisitor visitor) {
-
-        ValueHolder toHolder = ensureValueHolderSet(to);
-
-        if (visitor.visitToOneArcProperty(this, from)) {
-
-            ValueHolder fromHolder = ensureValueHolderSet(from);
-            Object target = fromHolder.getValue();
-
-            if (target != null) {
-                target = getTargetDescriptor()
-                        .getSubclassDescriptor(target.getClass())
-                        .deepMerge(target, visitor.getChildVisitor(this));
-            }
-            toHolder.setInitialValue(target);
-        }
-        else {
-            toHolder.invalidate();
-        }
-    }
-
     /**
      * Injects a ValueHolder in the object if it hasn't been done yet.
      */

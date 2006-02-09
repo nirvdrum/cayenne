@@ -111,22 +111,6 @@ public interface ClassDescriptor {
     void shallowMerge(Object from, Object to) throws PropertyAccessException;
 
     /**
-     * Takes an object and merges into the context provided by the ObjectGraphVisitor.
-     * Merge operation reach is defined by the visitor. Returns a merged instance
-     * belonging to the provided context.
-     */
-    Object deepMerge(Object object, ObjectGraphVisitor visitor)
-            throws PropertyAccessException;
-
-    /**
-     * A method similar to {@link #deepMerge(Object, ObjectGraphVisitor)} that merges
-     * object properties from one object to another known object. This method is normally
-     * used internally by 'deepMerge' implementors to cascade property merging to related
-     * objects.
-     */
-    void deepPropertyMerge(Object from, Object to, ObjectGraphVisitor visitor);
-
-    /**
      * Returns a Java Bean property descriptor matching property name or null if no such
      * property is found. Lookup includes properties from this descriptor and all its
      * superclass decsriptors. Returned property maybe any one of simple, value holder or
@@ -146,6 +130,6 @@ public interface ClassDescriptor {
      * Returns an Iterator over descriptor properties.
      */
     Iterator getProperties();
-    
+
     boolean visitProperties(PropertyVisitor visitor);
 }

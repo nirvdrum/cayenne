@@ -56,9 +56,11 @@
 package org.objectstyle.cayenne.property;
 
 /**
- * Defines an operation that uses a ClassDescriptor.
+ * A visitor for various types of properties in a ClassDescriptor. Helpful in defining
+ * operations that should be performed differently on differernt properties.
  * 
- * @author
+ * @since 1.2
+ * @author Andrus Adamchik
  */
 public interface PropertyVisitor {
 

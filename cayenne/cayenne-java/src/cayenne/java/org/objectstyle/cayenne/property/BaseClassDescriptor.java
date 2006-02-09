@@ -60,7 +60,6 @@ import java.util.Map;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.PersistenceState;
 
 /**
@@ -224,36 +223,6 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         }
     }
 
-    protected Object readObjectId(Object object) {
-        return objectIdProperty.readPropertyDirectly(object);
-    }
-
-    /**
-     * Creates a persistent object, initializaing it with an id and context (but not
-     * registering it in the context).
-     */
-    protected Object makePersistentObject(ObjectContext context, Object id) {
-        Object object = createObject();
-
-        objectIdProperty.writePropertyDirectly(object, null, id);
-
-        if (context != null) {
-            objectContextProperty.writePropertyDirectly(object, null, context);
-            persistenceStateProperty.writePropertyDirectly(object, null, HOLLOW_STATE);
-            context.getGraphManager().registerNode(id, object);
-        }
-        else {
-            persistenceStateProperty.writePropertyDirectly(object, null, TRANSIENT_STATE);
-        }
-
-        prepareForAccess(object);
-        return object;
-    }
-
-    protected void writeObjectId(Object object, Object id) {
-        objectIdProperty.writePropertyDirectly(object, null, id);
-    }
-
     /**
      * Copies object properties from one object to another. Invokes 'shallowCopy' of a
      * super descriptor and then invokes 'shallowCopy' of each declared property.
@@ -269,75 +238,6 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         while (it.hasNext()) {
             Property property = (Property) it.next();
             property.shallowMerge(from, to);
-        }
-    }
-
-    public Object deepMerge(Object object, ObjectGraphVisitor visitor)
-            throws PropertyAccessException {
-
-        Object id = readObjectId(object);
-        if (id == null) {
-            throw new PropertyAccessException(
-                    "Object without a defined id can't be merged",
-                    objectIdProperty,
-                    object);
-        }
-
-        // object presence in the mergeMap indicates that it requires no further
-        // processing
-        Object targetObject = visitor.getVisitedObject(id);
-        if (targetObject != null) {
-            return targetObject;
-        }
-
-        if (visitor.getContext() != null) {
-            targetObject = visitor.getContext().getGraphManager().getNode(id);
-        }
-
-        if (targetObject == null) {
-            // TODO: (Andrus, 2/1/2006) note that here we always create a copy of an
-            // object. This creates a major inefficiency when unattached objects are
-            // deserialized from the remote channel, but this is needed for consistency
-            // ... I can't see a better *generic* way of handling this issue, but maybe
-            // when no prefetches are involved, we can take a shortcut and register an
-            // object without copying?
-            targetObject = makePersistentObject(visitor.getContext(), id);
-        }
-
-        visitor.objectVisited(id, targetObject);
-
-        deepPropertyMerge(object, targetObject, visitor);
-        return targetObject;
-    }
-
-    public void deepPropertyMerge(Object from, Object to, ObjectGraphVisitor visitor) {
-
-        int state = ((Number) persistenceStateProperty.readPropertyDirectly(to))
-                .intValue();
-
-        // we can't override resolved properties of this object if it is dirty and by
-        // 'deepMerge' operation definition we shouldn't touch faults ... hence, get out
-        if (state == PersistenceState.NEW
-                || state == PersistenceState.MODIFIED
-                || state == PersistenceState.DELETED) {
-            return;
-        }
-
-        if (getSuperclassDescriptor() != null) {
-            getSuperclassDescriptor().deepPropertyMerge(from, to, visitor);
-        }
-
-        Iterator it = declaredProperties.values().iterator();
-        while (it.hasNext()) {
-            Property property = (Property) it.next();
-            property.deepMerge(from, to, visitor);
-        }
-
-        if (state == PersistenceState.HOLLOW) {
-            persistenceStateProperty.writePropertyDirectly(
-                    to,
-                    new Integer(state),
-                    COMMITTED_STATE);
         }
     }
 

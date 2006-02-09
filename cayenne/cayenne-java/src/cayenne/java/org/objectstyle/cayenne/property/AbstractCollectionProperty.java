@@ -139,8 +139,6 @@ public abstract class AbstractCollectionProperty extends AbstractSingleObjectArc
         // noop
     }
 
-    public abstract void deepMerge(Object from, Object to, ObjectGraphVisitor visitor);
-
     /**
      * Injects a List in the object if it hasn't been done yet.
      */

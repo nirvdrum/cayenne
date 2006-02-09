@@ -108,16 +108,6 @@ public class SimpleProperty implements Property {
                 .readPropertyDirectly(from));
     }
 
-    /**
-     * Checks the visitor and if the merge is allowed, calls
-     * {@link #shallowMerge(Object, Object)}.
-     */
-    public void deepMerge(Object from, Object to, ObjectGraphVisitor visitor) {
-        if (visitor.visitSimpleProperty(this)) {
-            shallowMerge(from, to);
-        }
-    }
-
     public Object readPropertyDirectly(Object object) throws PropertyAccessException {
         return accessor.readPropertyDirectly(object);
     }

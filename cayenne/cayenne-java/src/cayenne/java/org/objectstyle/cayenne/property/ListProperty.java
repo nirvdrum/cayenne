@@ -55,10 +55,6 @@
  */
 package org.objectstyle.cayenne.property;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.ValueHolder;
@@ -98,34 +94,5 @@ public class ListProperty extends AbstractCollectionProperty {
         return target == null
                 || target instanceof Fault
                 || ((ValueHolder) target).isFault();
-    }
-
-    public void deepMerge(Object from, Object to, ObjectGraphVisitor visitor) {
-
-        if (visitor.visitToManyArcProperty(this, from)) {
-
-            ValueHolder toHolder = ensureCollectionValueHolderSet(to);
-
-            Collection fromHolder = (Collection) ensureCollectionValueHolderSet(from);
-            Collection objects = new ArrayList(fromHolder.size());
-
-            Iterator it = fromHolder.iterator();
-            while (it.hasNext()) {
-                Object next = it.next();
-                Object merged = (next != null) ? getTargetDescriptor()
-                        .getSubclassDescriptor(next.getClass())
-                        .deepMerge(next, visitor.getChildVisitor(this)) : null;
-                objects.add(merged);
-            }
-
-            toHolder.setInitialValue(objects);
-        }
-        else {
-            Object target = accessor.readPropertyDirectly(to);
-
-            if (target instanceof ValueHolder) {
-                ((ValueHolder) target).invalidate();
-            }
-        }
     }
 }

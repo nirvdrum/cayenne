@@ -89,14 +89,6 @@ public class MockClassDescriptor implements ClassDescriptor {
     public void shallowMerge(Object from, Object to) throws PropertyAccessException {
     }
 
-    public Object deepMerge(Object object, ObjectGraphVisitor visitor)
-            throws PropertyAccessException {
-        return null;
-    }
-
-    public void deepPropertyMerge(Object from, Object to, ObjectGraphVisitor visitor) {
-    }
-
     public Property getDeclaredProperty(String propertyName) {
         return null;
     }
