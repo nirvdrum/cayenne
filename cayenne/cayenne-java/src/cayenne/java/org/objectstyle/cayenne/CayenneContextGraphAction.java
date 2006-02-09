@@ -57,7 +57,10 @@ package org.objectstyle.cayenne;
 
 import org.objectstyle.cayenne.property.ArcProperty;
 import org.objectstyle.cayenne.property.ClassDescriptor;
+import org.objectstyle.cayenne.property.CollectionProperty;
 import org.objectstyle.cayenne.property.Property;
+import org.objectstyle.cayenne.property.PropertyVisitor;
+import org.objectstyle.cayenne.property.SingleObjectArcProperty;
 
 /**
  * An action object that processes graph change calls from Persistent object. It handles
@@ -182,15 +185,28 @@ class CayenneContextGraphAction {
 
     private void setReverse(
             ArcProperty property,
-            Persistent sourceObject,
-            Persistent targetObject) {
+            final Persistent sourceObject,
+            final Persistent targetObject) {
 
         ArcProperty reverseArc = property.getComplimentaryReverseArc();
         if (reverseArc != null) {
-            reverseArc.writePropertyDirectly(
-                    targetObject,
-                    null,
-                    sourceObject);
+            reverseArc.visit(new PropertyVisitor() {
+
+                public boolean visitCollectionArc(CollectionProperty property) {
+                    property.addTarget(targetObject, sourceObject, false);
+                    return false;
+                }
+
+                public boolean visitSingleObjectArc(SingleObjectArcProperty property) {
+                    property.setTarget(targetObject, sourceObject, false);
+                    return false;
+                }
+
+                public boolean visitProperty(Property property) {
+                    return false;
+                }
+
+            });
 
             context.getGraphManager().arcCreated(
                     targetObject.getObjectId(),
@@ -208,10 +224,7 @@ class CayenneContextGraphAction {
 
         ArcProperty reverseArc = property.getComplimentaryReverseArc();
         if (reverseArc != null) {
-            reverseArc.writePropertyDirectly(
-                    targetObject,
-                    sourceObject,
-                    null);
+            reverseArc.writePropertyDirectly(targetObject, sourceObject, null);
 
             context.getGraphManager().arcDeleted(
                     targetObject.getObjectId(),

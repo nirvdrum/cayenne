@@ -134,23 +134,6 @@ public abstract class AbstractCollectionProperty extends AbstractSingleObjectArc
     }
 
     /**
-     * Removes teh old value from the collection, adds the new value.
-     */
-    public void writePropertyDirectly(Object object, Object oldValue, Object newValue)
-            throws PropertyAccessException {
-
-        Collection collection = ensureCollectionSet(object);
-
-        if (oldValue != null) {
-            collection.remove(oldValue);
-        }
-
-        if (newValue != null) {
-            collection.add(newValue);
-        }
-    }
-
-    /**
      * Checks that an object's List field described by this property is set, injecting a
      * List if needed.
      */

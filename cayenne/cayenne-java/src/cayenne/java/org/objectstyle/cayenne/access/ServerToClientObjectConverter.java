@@ -68,7 +68,10 @@ import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.property.ArcProperty;
 import org.objectstyle.cayenne.property.ClassDescriptor;
+import org.objectstyle.cayenne.property.CollectionProperty;
 import org.objectstyle.cayenne.property.Property;
+import org.objectstyle.cayenne.property.PropertyVisitor;
+import org.objectstyle.cayenne.property.SingleObjectArcProperty;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 
 /**
@@ -154,8 +157,9 @@ class ServerToClientObjectConverter {
             converted.add(clientObject);
         }
         else {
-            Persistent clientParentObject = (Persistent) clientObjectsByOID.get(parent
-                    .getObjectId());
+            final Persistent clientParentObject = (Persistent) clientObjectsByOID
+                    .get(parent.getObjectId());
+            final Object finalClientObject = clientObject;
 
             // sanity check
             if (clientParentObject == null) {
@@ -168,7 +172,22 @@ class ServerToClientObjectConverter {
                     .getClassDescriptor(node.incoming.getSourceEntity().getName());
 
             Property arcProperty = parentDescriptor.getProperty(node.incoming.getName());
-            arcProperty.writePropertyDirectly(clientParentObject, null, clientObject);
+            arcProperty.visit(new PropertyVisitor() {
+
+                public boolean visitCollectionArc(CollectionProperty property) {
+                    property.addTarget(clientParentObject, finalClientObject, false);
+                    return false;
+                }
+
+                public boolean visitSingleObjectArc(SingleObjectArcProperty property) {
+                    property.setTarget(clientParentObject, finalClientObject, false);
+                    return false;
+                }
+
+                public boolean visitProperty(Property property) {
+                    return false;
+                }
+            });
 
             // don't write reverse property ... in case it is a list, we don't want it
             // resolved ... let it stay a fault.
