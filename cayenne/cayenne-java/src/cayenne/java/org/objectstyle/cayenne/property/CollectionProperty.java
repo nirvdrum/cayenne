@@ -64,7 +64,9 @@ package org.objectstyle.cayenne.property;
  */
 public interface CollectionProperty extends ArcProperty {
 
-    public void addTarget(Object source, Object target, boolean setReverse);
+    void addTarget(Object source, Object target, boolean setReverse)
+            throws PropertyAccessException;
 
-    public void removeTarget(Object source, Object target, boolean setReverse);
+    void removeTarget(Object source, Object target, boolean setReverse)
+            throws PropertyAccessException;
 }
