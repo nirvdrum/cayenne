@@ -142,7 +142,7 @@ class ServerToClientObjectConverter {
                 Property property = (Property) it.next();
                 if (!(property instanceof ArcProperty)) {
                     property.writePropertyDirectly(clientObject, null, object
-                            .readProperty(property.getPropertyName()));
+                            .readProperty(property.getName()));
                 }
             }
             clientObjectsByOID.put(object.getObjectId(), clientObject);

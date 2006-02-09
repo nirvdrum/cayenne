@@ -75,7 +75,7 @@ public class DataObjectAccessor implements PropertyAccessor {
         this.propertyName = propertyName;
     }
 
-    public String getPropertyName() {
+    public String getName() {
         return propertyName;
     }
 

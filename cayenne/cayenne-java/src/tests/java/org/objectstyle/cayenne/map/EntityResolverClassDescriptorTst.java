@@ -121,6 +121,6 @@ public class EntityResolverClassDescriptorTst extends CayenneTestCase {
         ClassDescriptor target = ((ArcProperty) p).getTargetDescriptor();
         assertNotNull(target);
         assertSame(resolver.getClassDescriptor("MtTable2"), target);
-        assertEquals(MtTable2.TABLE1_PROPERTY, ((ArcProperty) p).getReversePropertyName());
+        assertEquals(MtTable2.TABLE1_PROPERTY, ((ArcProperty) p).getReverseName());
     }
 }

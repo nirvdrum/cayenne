@@ -72,9 +72,9 @@ import org.objectstyle.cayenne.util.PersistentObjectList;
  */
 public class ListProperty extends AbstractCollectionProperty {
 
-    public ListProperty(PropertyAccessor accessor, ClassDescriptor targetDescriptor,
-            String reversePropertyName) {
-        super(accessor, targetDescriptor, reversePropertyName);
+    public ListProperty(ClassDescriptor owner, ClassDescriptor targetDescriptor,
+            PropertyAccessor accessor, String reverseName) {
+        super(owner, targetDescriptor, accessor, reverseName);
     }
 
     /**
@@ -89,7 +89,7 @@ public class ListProperty extends AbstractCollectionProperty {
                     object);
         }
 
-        return new PersistentObjectList((Persistent) object, getPropertyName());
+        return new PersistentObjectList((Persistent) object, getName());
     }
 
     public boolean isFaultTarget(Object object) {
@@ -111,11 +111,9 @@ public class ListProperty extends AbstractCollectionProperty {
             Iterator it = fromHolder.iterator();
             while (it.hasNext()) {
                 Object next = it.next();
-                Object merged = (next != null)
-                        ? getTargetDescriptor()
-                                .getSubclassDescriptor(next.getClass())
-                                .deepMerge(next, visitor.getChildVisitor(this))
-                        : null;
+                Object merged = (next != null) ? getTargetDescriptor()
+                        .getSubclassDescriptor(next.getClass())
+                        .deepMerge(next, visitor.getChildVisitor(this)) : null;
                 objects.add(merged);
             }
 

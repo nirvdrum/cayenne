@@ -64,21 +64,34 @@ package org.objectstyle.cayenne.property;
  */
 public class SimpleProperty implements Property {
 
+    protected ClassDescriptor owner;
     protected PropertyAccessor accessor;
 
-    public SimpleProperty(PropertyAccessor accessor) {
+    public SimpleProperty(ClassDescriptor owner, PropertyAccessor accessor) {
 
         if (accessor == null) {
             throw new IllegalArgumentException("Null accessor");
         }
 
         this.accessor = accessor;
+        this.owner = owner;
     }
 
-    public String getPropertyName() {
-        return accessor.getPropertyName();
+    public Object readProperty(Object object) throws PropertyAccessException {
+        owner.prepareForAccess(object);
+        return readPropertyDirectly(object);
     }
-    
+
+    public void writeProperty(Object object, Object oldValue, Object newValue)
+            throws PropertyAccessException {
+        owner.prepareForAccess(object);
+        writePropertyDirectly(object, oldValue, newValue);
+    }
+
+    public String getName() {
+        return accessor.getName();
+    }
+
     public boolean visit(PropertyVisitor visitor) {
         return visitor.visitProperty(this);
     }

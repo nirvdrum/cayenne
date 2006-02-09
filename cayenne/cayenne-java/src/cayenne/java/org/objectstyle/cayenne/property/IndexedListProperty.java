@@ -70,11 +70,10 @@ public class IndexedListProperty extends ListProperty {
 
     protected String indexPropertyName;
 
-    public IndexedListProperty(PropertyAccessor accessor,
-            ClassDescriptor targetDescriptor, String reversePropertyName,
-            String indexPropertyName) {
+    public IndexedListProperty(ClassDescriptor owner, ClassDescriptor targetDescriptor,
+            PropertyAccessor accessor, String reverseName, String indexPropertyName) {
 
-        super(accessor, targetDescriptor, reversePropertyName);
+        super(owner, targetDescriptor, accessor, reverseName);
         this.indexPropertyName = indexPropertyName;
     }
 

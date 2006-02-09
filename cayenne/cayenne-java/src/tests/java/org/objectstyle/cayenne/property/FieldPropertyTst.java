@@ -62,16 +62,18 @@ import org.objectstyle.cayenne.unit.util.TestBean;
 public class FieldPropertyTst extends TestCase {
 
     public void testConstructor() {
-        SimpleProperty property = new SimpleProperty(new FieldAccessor(
+        ClassDescriptor d = new MockClassDescriptor();
+        SimpleProperty property = new SimpleProperty(d, new FieldAccessor(
                 TestBean.class,
                 "string",
                 String.class));
 
-        assertEquals("string", property.getPropertyName());
+        assertEquals("string", property.getName());
     }
 
     public void testGet() {
-        SimpleProperty property = new SimpleProperty(new FieldAccessor(
+        ClassDescriptor d = new MockClassDescriptor();
+        SimpleProperty property = new SimpleProperty(d, new FieldAccessor(
                 TestBean.class,
                 "string",
                 String.class));
@@ -83,11 +85,11 @@ public class FieldPropertyTst extends TestCase {
     }
 
     public void testWriteValue() {
-
+        ClassDescriptor d = new MockClassDescriptor();
         TestFields object = new TestFields();
 
         // string
-        new SimpleProperty(
+        new SimpleProperty(d,
                 new FieldAccessor(TestFields.class, "stringField", String.class))
                 .writePropertyDirectly(object, null, "aaa");
         assertEquals("aaa", object.stringField);
@@ -96,7 +98,7 @@ public class FieldPropertyTst extends TestCase {
         byte[] bytes = new byte[] {
                 1, 2, 3
         };
-        new SimpleProperty(new FieldAccessor(
+        new SimpleProperty(d, new FieldAccessor(
                 TestFields.class,
                 "byteArrayField",
                 byte[].class)).writePropertyDirectly(object, null, bytes);
@@ -106,7 +108,7 @@ public class FieldPropertyTst extends TestCase {
         String[] strings = new String[] {
                 "a", "b"
         };
-        new SimpleProperty(new FieldAccessor(
+        new SimpleProperty(d, new FieldAccessor(
                 TestFields.class,
                 "stringArrayField",
                 String[].class)).writePropertyDirectly(object, null, strings);
@@ -114,24 +116,25 @@ public class FieldPropertyTst extends TestCase {
     }
 
     public void testWriteValuePrimitive() {
-
+        ClassDescriptor d = new MockClassDescriptor();
         TestFields object = new TestFields();
 
         // primitive int .. write non-null
-        new SimpleProperty(new FieldAccessor(TestFields.class, "intField", Integer.TYPE))
+        new SimpleProperty(d, new FieldAccessor(TestFields.class, "intField", Integer.TYPE))
                 .writePropertyDirectly(object, null, new Integer(6));
         assertEquals(6, object.intField);
 
         // primitive int .. write null
         object.intField = 55;
-        new SimpleProperty(new FieldAccessor(TestFields.class, "intField", Integer.TYPE))
+        new SimpleProperty(d, new FieldAccessor(TestFields.class, "intField", Integer.TYPE))
                 .writePropertyDirectly(object, null, null);
 
         assertEquals(0, object.intField);
     }
 
     public void testCopy() {
-        SimpleProperty property = new SimpleProperty(new FieldAccessor(
+        ClassDescriptor d = new MockClassDescriptor();
+        SimpleProperty property = new SimpleProperty(d, new FieldAccessor(
                 TestBean.class,
                 "string",
                 String.class));

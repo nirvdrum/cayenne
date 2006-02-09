@@ -69,7 +69,7 @@ public interface PropertyAccessor extends Serializable {
     /**
      * Returns property name.
      */
-    String getPropertyName();
+    String getName();
 
     /**
      * Returns a property value of an object without disturbing the object fault status.

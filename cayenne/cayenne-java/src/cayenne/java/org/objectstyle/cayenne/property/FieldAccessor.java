@@ -87,7 +87,7 @@ public class FieldAccessor implements PropertyAccessor {
         this.nullValue = PropertyUtils.defaultNullValueForType(field.getType());
     }
 
-    public String getPropertyName() {
+    public String getName() {
         return propertyName;
     }
 

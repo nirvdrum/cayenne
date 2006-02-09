@@ -67,14 +67,14 @@ import org.objectstyle.cayenne.util.PersistentObjectHolder;
  */
 public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
 
-    protected String reversePropertyName;
+    protected String reverseName;
     protected ClassDescriptor targetDescriptor;
 
-    public ValueHolderProperty(PropertyAccessor accessor,
-            ClassDescriptor targetDescriptor, String reversePropertyName) {
-        super(accessor);
+    public ValueHolderProperty(ClassDescriptor owner, ClassDescriptor targetDescriptor,
+            PropertyAccessor accessor, String reverseName) {
+        super(owner, accessor);
         this.targetDescriptor = targetDescriptor;
-        this.reversePropertyName = reversePropertyName;
+        this.reverseName = reverseName;
     }
 
     public boolean visit(PropertyVisitor visitor) {
@@ -85,17 +85,49 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
         return targetDescriptor;
     }
 
-    public String getReversePropertyName() {
-        return reversePropertyName;
-    }
-
-    public void shallowMerge(Object from, Object to) throws PropertyAccessException {
-        // noop
+    public String getReverseName() {
+        return reverseName;
     }
 
     public boolean isFaultTarget(Object object) {
         ValueHolder holder = (ValueHolder) accessor.readPropertyDirectly(object);
         return holder == null || holder.isFault();
+    }
+
+    public Object readPropertyDirectly(Object object) throws PropertyAccessException {
+        ValueHolder holder = (ValueHolder) accessor.readPropertyDirectly(object);
+
+        // TODO: Andrus, 2/9/2006 ValueHolder will resolve an object in a call to
+        // 'getValue'; this is inconsistent with 'readPropertyDirectly' contract
+        return (holder != null) ? holder.getValue() : null;
+    }
+
+    public Object readProperty(Object object) throws PropertyAccessException {
+        owner.prepareForAccess(object);
+        return ensureValueHolderSet(object).getValue();
+    }
+
+    public void writePropertyDirectly(Object object, Object oldValue, Object newValue)
+            throws PropertyAccessException {
+
+        ValueHolder holder = (ValueHolder) accessor.readPropertyDirectly(object);
+        if (holder == null) {
+            holder = createValueHolder(object);
+            accessor.writePropertyDirectly(object, null, holder);
+        }
+
+        holder.setInitialValue(newValue);
+    }
+
+    public void writeProperty(Object object, Object oldValue, Object newValue)
+            throws PropertyAccessException {
+
+        owner.prepareForAccess(object);
+        ensureValueHolderSet(object).setValue(newValue);
+    }
+
+    public void shallowMerge(Object from, Object to) throws PropertyAccessException {
+        // noop
     }
 
     public void deepMerge(Object from, Object to, ObjectGraphVisitor visitor) {
@@ -124,18 +156,6 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
      */
     public void prepareForAccess(Object object) throws PropertyAccessException {
         ensureValueHolderSet(object);
-    }
-
-    public Object readPropertyDirectly(Object object) throws PropertyAccessException {
-        ValueHolder holder = (ValueHolder) accessor.readPropertyDirectly(object);
-        return (holder != null) ? holder.getValue() : null;
-    }
-
-    public void writePropertyDirectly(Object object, Object oldValue, Object newValue)
-            throws PropertyAccessException {
-
-        ValueHolder holder = ensureValueHolderSet(object);
-        holder.setInitialValue(newValue);
     }
 
     /**
@@ -167,6 +187,6 @@ public class ValueHolderProperty extends SimpleProperty implements ArcProperty {
                     object);
         }
 
-        return new PersistentObjectHolder((Persistent) object, getPropertyName());
+        return new PersistentObjectHolder((Persistent) object, getName());
     }
 }

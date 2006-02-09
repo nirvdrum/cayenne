@@ -112,7 +112,7 @@ public class EntityDescriptor extends BaseClassDescriptor {
      * generated from ObjEntity by adding new properties or overriding the standard ones.
      */
     public void setDeclaredProperty(Property property) {
-        declaredProperties.put(property.getPropertyName(), property);
+        declaredProperties.put(property.getName(), property);
     }
 
     /**
@@ -189,7 +189,7 @@ public class EntityDescriptor extends BaseClassDescriptor {
 
             Class propertyType = attribute.getJavaClass();
             PropertyAccessor accessor = makeAccessor(attribute.getName(), propertyType);
-            allDescriptors.put(attribute.getName(), new SimpleProperty(accessor));
+            allDescriptors.put(attribute.getName(), new SimpleProperty(this, accessor));
         }
     }
 
@@ -218,12 +218,17 @@ public class EntityDescriptor extends BaseClassDescriptor {
 
                 if (dataObject) {
                     property = new ToManyListProperty(
-                            accessor,
+                            this,
                             targetDescriptor,
+                            accessor,
                             reverseName);
                 }
                 else {
-                    property = new ListProperty(accessor, targetDescriptor, reverseName);
+                    property = new ListProperty(
+                            this,
+                            targetDescriptor,
+                            accessor,
+                            reverseName);
                 }
             }
             else {
@@ -234,8 +239,9 @@ public class EntityDescriptor extends BaseClassDescriptor {
                             relationship.getName(),
                             targetEntity.getJavaClass());
                     property = new PersistentObjectProperty(
-                            accessor,
+                            this,
                             targetDescriptor,
+                            accessor,
                             reverseName);
                 }
                 else {
@@ -243,8 +249,9 @@ public class EntityDescriptor extends BaseClassDescriptor {
                             relationship.getName(),
                             ValueHolder.class);
                     property = new ValueHolderProperty(
-                            accessor,
+                            this,
                             targetDescriptor,
+                            accessor,
                             reverseName);
                 }
             }

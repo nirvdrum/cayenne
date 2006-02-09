@@ -60,7 +60,7 @@ import java.util.Collection;
 import org.objectstyle.cayenne.Fault;
 
 /**
- * Provides access to a property implemented as a Collection.
+ * A generic superclass of CollectionProperty implementations.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -68,16 +68,22 @@ import org.objectstyle.cayenne.Fault;
 public abstract class AbstractCollectionProperty extends SimpleProperty implements
         CollectionProperty {
 
-    protected String reversePropertyName;
+    protected String reverseName;
     protected ClassDescriptor targetDescriptor;
 
-    public AbstractCollectionProperty(PropertyAccessor accessor,
-            ClassDescriptor targetDescriptor, String reversePropertyName) {
-        super(accessor);
+    public AbstractCollectionProperty(ClassDescriptor owner,
+            ClassDescriptor targetDescriptor, PropertyAccessor accessor,
+            String reverseName) {
+        super(owner, accessor);
         this.targetDescriptor = targetDescriptor;
-        this.reversePropertyName = reversePropertyName;
+        this.reverseName = reverseName;
     }
-    
+
+    public Object readProperty(Object object) throws PropertyAccessException {
+        owner.prepareForAccess(object);
+        return ensureCollectionSet(object);
+    }
+
     public boolean visit(PropertyVisitor visitor) {
         return visitor.visitCollectionArc(this);
     }
@@ -86,8 +92,8 @@ public abstract class AbstractCollectionProperty extends SimpleProperty implemen
         return targetDescriptor;
     }
 
-    public String getReversePropertyName() {
-        return reversePropertyName;
+    public String getReverseName() {
+        return reverseName;
     }
 
     public void shallowMerge(Object from, Object to) throws PropertyAccessException {

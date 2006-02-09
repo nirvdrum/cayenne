@@ -127,7 +127,7 @@ class CayenneContextGraphAction {
             context.getGraphManager().arcDeleted(
                     object.getObjectId(),
                     ((Persistent) oldValue).getObjectId(),
-                    property.getPropertyName());
+                    property.getName());
 
             if (!arcChangeInProcess) {
                 unsetReverse(property, object, (Persistent) oldValue);
@@ -140,7 +140,7 @@ class CayenneContextGraphAction {
             context.getGraphManager().arcCreated(
                     object.getObjectId(),
                     ((Persistent) newValue).getObjectId(),
-                    property.getPropertyName());
+                    property.getName());
 
             if (!arcChangeInProcess) {
                 setReverse(property, object, (Persistent) newValue);
@@ -185,7 +185,7 @@ class CayenneContextGraphAction {
             Persistent sourceObject,
             Persistent targetObject) {
 
-        String reverseName = property.getReversePropertyName();
+        String reverseName = property.getReverseName();
         if (reverseName != null) {
             ClassDescriptor reverseDescriptor = context
                     .getEntityResolver()
@@ -209,7 +209,7 @@ class CayenneContextGraphAction {
             Persistent sourceObject,
             Persistent targetObject) {
 
-        String reverseName = property.getReversePropertyName();
+        String reverseName = property.getReverseName();
         if (reverseName != null) {
             ClassDescriptor reverseDescriptor = context
                     .getEntityResolver()

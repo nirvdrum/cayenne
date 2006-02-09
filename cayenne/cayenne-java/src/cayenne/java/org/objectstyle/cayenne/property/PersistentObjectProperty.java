@@ -56,24 +56,26 @@
 package org.objectstyle.cayenne.property;
 
 import org.objectstyle.cayenne.Fault;
+import org.objectstyle.cayenne.Persistent;
 
 /**
- * An extension of SimpleProperty for accessing Persistent objects.
+ * An ArcProperty for accessing to-one relationships.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
 public class PersistentObjectProperty extends SimpleProperty implements ArcProperty {
 
-    protected String reversePropertyName;
+    protected String reverseName;
     protected ClassDescriptor targetDescriptor;
 
-    public PersistentObjectProperty(PropertyAccessor accessor,
-            ClassDescriptor targetDescriptor, String reversePropertyName) {
+    public PersistentObjectProperty(ClassDescriptor owner,
+            ClassDescriptor targetDescriptor, PropertyAccessor accessor,
+            String reverseName) {
 
-        super(accessor);
+        super(owner, accessor);
         this.targetDescriptor = targetDescriptor;
-        this.reversePropertyName = reversePropertyName;
+        this.reverseName = reverseName;
     }
 
     public ClassDescriptor getTargetDescriptor() {
@@ -83,6 +85,19 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
     public boolean isFaultTarget(Object object) {
         Object target = accessor.readPropertyDirectly(object);
         return target instanceof Fault;
+    }
+
+    public Object readProperty(Object object) throws PropertyAccessException {
+        Object value = super.readProperty(object);
+
+        if (value instanceof Fault) {
+            Object resolved = ((Fault) value)
+                    .resolveFault((Persistent) object, getName());
+            writePropertyDirectly(object, value, resolved);
+            value = resolved;
+        }
+
+        return value;
     }
 
     /**
@@ -123,7 +138,7 @@ public class PersistentObjectProperty extends SimpleProperty implements ArcPrope
         }
     }
 
-    public String getReversePropertyName() {
-        return reversePropertyName;
+    public String getReverseName() {
+        return reverseName;
     }
 }

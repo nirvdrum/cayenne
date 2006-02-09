@@ -101,7 +101,7 @@ public class DetachedObjectProducerOperation implements ObjectGraphVisitor {
     }
 
     public boolean visitToOneArcProperty(ArcProperty property, Object targetValue) {
-        return children != null && children.containsKey(property.getPropertyName());
+        return children != null && children.containsKey(property.getName());
     }
 
     public boolean visitToManyArcProperty(ArcProperty property, Object targetValue) {
@@ -111,15 +111,15 @@ public class DetachedObjectProducerOperation implements ObjectGraphVisitor {
     public ObjectGraphVisitor getChildVisitor(ArcProperty property) {
         if (children == null) {
             throw new CayenneRuntimeException("Visiting arc property '"
-                    + property.getPropertyName()
+                    + property.getName()
                     + "' is not allowed.");
         }
 
         ObjectGraphVisitor child = (ObjectGraphVisitor) children.get(property
-                .getPropertyName());
+                .getName());
         if (child == null) {
             throw new CayenneRuntimeException("Visiting arc property '"
-                    + property.getPropertyName()
+                    + property.getName()
                     + "' is not allowed.");
         }
 

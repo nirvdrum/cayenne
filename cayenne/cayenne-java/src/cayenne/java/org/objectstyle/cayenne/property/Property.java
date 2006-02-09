@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.property;
 
-
 /**
  * Defines bean property API used by Cayenne to access object data, do faulting and graph
  * maintenance tasks.
@@ -64,7 +63,19 @@ package org.objectstyle.cayenne.property;
  * @author Andrus Adamchik
  */
 public interface Property extends PropertyAccessor {
-    
+
+    /**
+     * Returns a property value of an object without disturbing the object fault status.
+     */
+    Object readProperty(Object object) throws PropertyAccessException;
+
+    /**
+     * Sets a property value of an object without disturbing the object fault status. Old
+     * value of the property is specified as a hint.
+     */
+    void writeProperty(Object object, Object oldValue, Object newValue)
+            throws PropertyAccessException;
+
     boolean visit(PropertyVisitor visitor);
 
     /**

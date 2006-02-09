@@ -69,9 +69,9 @@ import org.objectstyle.cayenne.Persistent;
  */
 public class ToManyListProperty extends ListProperty {
 
-    public ToManyListProperty(PropertyAccessor accessor,
-            ClassDescriptor targetDescriptor, String reversePropertyName) {
-        super(accessor, targetDescriptor, reversePropertyName);
+    public ToManyListProperty(ClassDescriptor owner, ClassDescriptor targetDescriptor,
+            PropertyAccessor accessor, String reverseName) {
+        super(owner, targetDescriptor, accessor, reverseName);
     }
 
     protected Collection createCollection(Object object) throws PropertyAccessException {
@@ -85,6 +85,6 @@ public class ToManyListProperty extends ListProperty {
 
         return (Collection) Fault.getToManyFault().resolveFault(
                 (Persistent) object,
-                getPropertyName());
+                getName());
     }
 }
