@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.property;
 
-import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Provides access to a set of persistent properties of a Java Bean and methods for
@@ -65,11 +65,11 @@ import java.util.Collection;
  * @author Andrus Adamchik
  */
 public interface ClassDescriptor {
-    
+
     PropertyAccessor getObjectIdProperty();
-    
+
     PropertyAccessor getPersistenceStateProperty();
-    
+
     PropertyAccessor getObjectContextProperty();
 
     /**
@@ -143,13 +143,9 @@ public interface ClassDescriptor {
     Property getDeclaredProperty(String propertyName);
 
     /**
-     * Returns all property names mapped in this descriptor, not including properties from
-     * the superclass decsriptors.
+     * Returns an Iterator over descriptor properties.
      */
-    Collection getDeclaredPropertyNames();
-
-    /**
-     * Returns all property names mapped in this descriptor and all its superdescriptors.
-     */
-    Collection getPropertyNames();
+    Iterator getProperties();
+    
+    boolean visitProperties(PropertyVisitor visitor);
 }

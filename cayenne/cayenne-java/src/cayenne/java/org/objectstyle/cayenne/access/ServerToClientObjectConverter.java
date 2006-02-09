@@ -137,9 +137,9 @@ class ServerToClientObjectConverter {
             clientObject.setObjectId(id);
 
             // copy attributes properties
-            Iterator it = descriptor.getPropertyNames().iterator();
+            Iterator it = descriptor.getProperties();
             while (it.hasNext()) {
-                Property property = descriptor.getProperty((String) it.next());
+                Property property = (Property) it.next();
                 if (!(property instanceof ArcProperty)) {
                     property.writePropertyDirectly(clientObject, null, object
                             .readProperty(property.getPropertyName()));

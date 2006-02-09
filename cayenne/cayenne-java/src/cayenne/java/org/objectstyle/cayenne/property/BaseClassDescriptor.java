@@ -55,12 +55,10 @@
  */
 package org.objectstyle.cayenne.property;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.collections.IteratorUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.PersistenceState;
@@ -136,24 +134,19 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         return subclassDescriptor != null ? subclassDescriptor : this;
     }
 
-    /**
-     * Returns a read-only collection of property names mapped in this descriptor.
-     */
-    public Collection getDeclaredPropertyNames() {
-        return declaredProperties != null ? Collections
-                .unmodifiableCollection(declaredProperties.keySet()) : null;
-    }
+    public Iterator getProperties() {
+        Iterator declaredIt = IteratorUtils.unmodifiableIterator(declaredProperties
+                .values()
+                .iterator());
 
-    public Collection getPropertyNames() {
         if (getSuperclassDescriptor() == null) {
-            return getDeclaredPropertyNames();
+            return declaredIt;
         }
-
-        // TODO: cache this?
-        Collection allNames = new ArrayList(getDeclaredPropertyNames());
-        allNames.addAll(getSuperclassDescriptor().getPropertyNames());
-
-        return allNames;
+        else {
+            return IteratorUtils.chainedIterator(
+                    superclassDescriptor.getProperties(),
+                    declaredIt);
+        }
     }
 
     /**
@@ -182,17 +175,14 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
         return superclassDescriptor;
     }
 
-    
     public PropertyAccessor getObjectContextProperty() {
         return objectContextProperty;
     }
 
-    
     public PropertyAccessor getObjectIdProperty() {
         return objectIdProperty;
     }
 
-    
     public PropertyAccessor getPersistenceStateProperty() {
         return persistenceStateProperty;
     }
@@ -349,5 +339,22 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
                     new Integer(state),
                     COMMITTED_STATE);
         }
+    }
+
+    public boolean visitProperties(PropertyVisitor visitor) {
+        if (superclassDescriptor != null
+                && !superclassDescriptor.visitProperties(visitor)) {
+            return false;
+        }
+
+        Iterator it = declaredProperties.values().iterator();
+        while (it.hasNext()) {
+            Property next = (Property) it.next();
+            if (!next.visit(visitor)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

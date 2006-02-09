@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.property;
 
-import java.util.Collection;
+import java.util.Iterator;
 
 public class MockClassDescriptor implements ClassDescriptor {
 
@@ -63,18 +63,22 @@ public class MockClassDescriptor implements ClassDescriptor {
         return null;
     }
 
+    public Iterator getProperties() {
+        return null;
+    }
+
     public ClassDescriptor resolveDescriptor(Class objectClass) {
         return this;
     }
-    
+
     public PropertyAccessor getObjectContextProperty() {
         return null;
     }
-    
+
     public PropertyAccessor getObjectIdProperty() {
         return null;
     }
-    
+
     public PropertyAccessor getPersistenceStateProperty() {
         return null;
     }
@@ -97,14 +101,6 @@ public class MockClassDescriptor implements ClassDescriptor {
         return null;
     }
 
-    public Collection getDeclaredPropertyNames() {
-        return null;
-    }
-
-    public Collection getPropertyNames() {
-        return null;
-    }
-
     public Class getObjectClass() {
         return null;
     }
@@ -115,5 +111,9 @@ public class MockClassDescriptor implements ClassDescriptor {
 
     public ClassDescriptor getSuperclassDescriptor() {
         return null;
+    }
+
+    public boolean visitProperties(PropertyVisitor visitor) {
+        return true;
     }
 }
