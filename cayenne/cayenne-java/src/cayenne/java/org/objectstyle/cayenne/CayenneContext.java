@@ -385,6 +385,7 @@ public class CayenneContext implements ObjectContext {
                 if (prototype != null) {
                     descriptor.prepareForAccess(cachedObject);
                     descriptor.shallowMerge(prototype, cachedObject);
+                    cachedObject.setPersistenceState(PersistenceState.COMMITTED);
                 }
             }
 

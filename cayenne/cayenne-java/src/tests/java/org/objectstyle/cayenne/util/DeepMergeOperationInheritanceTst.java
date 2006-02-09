@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.util;
 
 import java.util.Iterator;
 
@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.testdo.inherit.Manager;
 import org.objectstyle.cayenne.unit.PeopleTestCase;
 import org.objectstyle.cayenne.util.DeepMergeOperation;
 
-public class EntityDescriptorMergeInheritanceTst extends PeopleTestCase {
+public class DeepMergeOperationInheritanceTst extends PeopleTestCase {
 
     public void testDeepMergeExistingSubclass() {
 
@@ -103,10 +103,11 @@ public class EntityDescriptorMergeInheritanceTst extends PeopleTestCase {
         // resolve Employees
         context1.performQuery(new SelectQuery(Employee.class));
 
+        DeepMergeOperation op = new DeepMergeOperation(context1);
+        
         blockQueries();
         try {
-            Department d2 = (Department) d
-                    .deepMerge(d1, new DeepMergeOperation(context1));
+            Department d2 = (Department) op.merge(d1, d);
             assertNotNull(d2);
             assertEquals(PersistenceState.COMMITTED, d2.getPersistenceState());
 
@@ -155,11 +156,11 @@ public class EntityDescriptorMergeInheritanceTst extends PeopleTestCase {
         // need to make sure source relationship is resolved as a result of some Ashwood
         // strangeness...
         d1.getEmployees().size();
-
+        DeepMergeOperation op = new DeepMergeOperation(context1);
+        
         blockQueries();
         try {
-            Department d2 = (Department) d
-                    .deepMerge(d1, new DeepMergeOperation(context1));
+            Department d2 = (Department) op.merge(d1, d);
             assertNotNull(d2);
             assertEquals(PersistenceState.COMMITTED, d2.getPersistenceState());
 

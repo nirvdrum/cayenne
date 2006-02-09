@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.util;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataObjectUtils;
@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.util.DeepMergeOperation;
 
-public class EntityDescriptorMergeTst extends CayenneTestCase {
+public class DeepMergeOperationTst extends CayenneTestCase {
 
     public void testDeepMergeNonExistent() {
 
@@ -76,9 +76,10 @@ public class EntityDescriptorMergeTst extends CayenneTestCase {
         a.setArtistName("AAA");
         context.commitChanges();
 
+        DeepMergeOperation op = new DeepMergeOperation(context1);
         blockQueries();
         try {
-            Artist a2 = (Artist) d.deepMerge(a, new DeepMergeOperation(context1));
+            Artist a2 = (Artist) op.merge(a, d);
             assertNotNull(a2);
             assertEquals(PersistenceState.COMMITTED, a2.getPersistenceState());
             assertEquals(a.getArtistName(), a2.getArtistName());
@@ -101,10 +102,11 @@ public class EntityDescriptorMergeTst extends CayenneTestCase {
 
         Artist a1 = (Artist) DataObjectUtils.objectForPK(context1, a.getObjectId());
         a1.setArtistName("BBB");
-
+        DeepMergeOperation op = new DeepMergeOperation(context1);
+        
         blockQueries();
         try {
-            Artist a2 = (Artist) d.deepMerge(a, new DeepMergeOperation(context1));
+            Artist a2 = (Artist) op.merge(a, d);
             assertNotNull(a2);
             assertEquals(PersistenceState.MODIFIED, a2.getPersistenceState());
             assertSame(a1, a2);

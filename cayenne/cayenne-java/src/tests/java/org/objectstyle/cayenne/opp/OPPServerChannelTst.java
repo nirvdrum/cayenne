@@ -96,7 +96,7 @@ public class OPPServerChannelTst extends CayenneTestCase {
         Collection entities = Collections.singleton(dataMap);
         context.setEntityResolver(new EntityResolver(entities));
 
-        QueryResponse response = channel.onQuery(context, new SelectQuery("dummy"));
+        QueryResponse response = channel.onQuery(context, new SelectQuery("test_entity"));
         assertNotNull(response);
         List list = response.firstList();
         assertNotNull(list);
@@ -140,7 +140,7 @@ public class OPPServerChannelTst extends CayenneTestCase {
         OPPServerChannel channel = new OPPServerChannel(connection);
 
         context.setChannel(channel);
-        QueryResponse response = channel.onQuery(context, new SelectQuery("dummy"));
+        QueryResponse response = channel.onQuery(context, new SelectQuery("test_entity"));
         assertNotNull(response);
 
         List list = response.firstList();
@@ -178,7 +178,7 @@ public class OPPServerChannelTst extends CayenneTestCase {
         OPPServerChannel channel = new OPPServerChannel(connection);
 
         context.setChannel(channel);
-        QueryResponse response = channel.onQuery(context, new SelectQuery("dummy"));
+        QueryResponse response = channel.onQuery(context, new SelectQuery("test_entity"));
         assertNotNull(response);
         assertEquals(1, response.size());
         List list = response.firstList();

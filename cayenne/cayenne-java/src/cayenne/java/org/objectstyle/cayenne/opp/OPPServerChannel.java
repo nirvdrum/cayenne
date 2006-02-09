@@ -156,8 +156,13 @@ public class OPPServerChannel implements DataChannel {
                         else {
 
                             List childObjects = new ArrayList(objects.size());
-                            DeepMergeOperation mergeContext = new DeepMergeOperation(
-                                    context);
+                            DeepMergeOperation merger = new DeepMergeOperation(context);
+
+                            // subclass descriptors will be resolved on the fly... here
+                            // find objects base descriptor.
+                            ClassDescriptor descriptor = resolver.getClassDescriptor(info
+                                    .getObjEntity()
+                                    .getName());
                             Iterator it = objects.iterator();
                             while (it.hasNext()) {
                                 Persistent object = (Persistent) it.next();
@@ -170,12 +175,7 @@ public class OPPServerChannel implements DataChannel {
                                                     + object);
                                 }
 
-                                ClassDescriptor descriptor = resolver
-                                        .getClassDescriptor(id.getEntityName());
-
-                                childObjects.add(descriptor.deepMerge(
-                                        object,
-                                        mergeContext));
+                                childObjects.add(merger.merge(object, descriptor));
                             }
 
                             childResponse.addResultList(childObjects);

@@ -55,13 +55,21 @@
  */
 package org.objectstyle.cayenne.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.property.ArcProperty;
-import org.objectstyle.cayenne.property.ObjectGraphVisitor;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.property.ClassDescriptor;
+import org.objectstyle.cayenne.property.CollectionProperty;
 import org.objectstyle.cayenne.property.Property;
+import org.objectstyle.cayenne.property.PropertyVisitor;
+import org.objectstyle.cayenne.property.SingleObjectArcProperty;
 
 /**
  * An operation that performs object graph deep merge, terminating merge at unresolved
@@ -70,41 +78,91 @@ import org.objectstyle.cayenne.property.Property;
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class DeepMergeOperation implements ObjectGraphVisitor {
+public class DeepMergeOperation {
 
     protected ObjectContext context;
-    protected Map mergeMap;
+    protected Map seen;
 
     public DeepMergeOperation(ObjectContext context) {
         this.context = context;
-        this.mergeMap = new HashMap();
+        this.seen = new HashMap();
     }
 
-    public boolean visitSimpleProperty(Property property) {
-        return true;
+    public void reset() {
+        seen.clear();
     }
 
-    public boolean visitToOneArcProperty(ArcProperty property, Object object) {
-        return !property.isFault(object);
-    }
+    public Object merge(Object object, ClassDescriptor classDescriptor) {
+        if (!(object instanceof Persistent)) {
+            throw new CayenneRuntimeException("Expected Persistent, got: " + object);
+        }
 
-    public boolean visitToManyArcProperty(ArcProperty property, Object object) {
-        return visitToOneArcProperty(property, object);
-    }
+        final Persistent source = (Persistent) object;
+        ObjectId id = source.getObjectId();
 
-    public ObjectContext getContext() {
-        return context;
-    }
+        // sanity check
+        if (id == null) {
+            throw new CayenneRuntimeException("Server returned an object without an id: "
+                    + source);
+        }
 
-    public ObjectGraphVisitor getChildVisitor(ArcProperty property) {
-        return this;
-    }
+        Object seenTarget = seen.get(id);
+        if (seenTarget != null) {
+            return seenTarget;
+        }
 
-    public Object getVisitedObject(Object id) {
-        return mergeMap.get(id);
-    }
+        final Persistent target = context.localObject(id, (Persistent) source);
+        seen.put(id, target);
 
-    public void objectVisited(Object id, Object object) {
-        mergeMap.put(id, object);
+        ClassDescriptor descriptor = classDescriptor.getSubclassDescriptor(source
+                .getClass());
+        descriptor.visitProperties(new PropertyVisitor() {
+
+            public boolean visitSingleObjectArc(SingleObjectArcProperty property) {
+
+                if (!property.isFault(source)) {
+                    Object destinationSource = property.readProperty(source);
+
+                    Object destinationTarget = destinationSource != null ? merge(
+                            destinationSource,
+                            property.getTargetDescriptor()) : null;
+
+                    Object oldTarget = property.isFault(target) ? null : property
+                            .readProperty(target);
+                    property.writeProperty(target, oldTarget, destinationTarget);
+                }
+
+                return true;
+            }
+
+            public boolean visitCollectionArc(CollectionProperty property) {
+                if (!property.isFault(source)) {
+                    Collection collection = (Collection) property.readProperty(source);
+
+                    Collection targetCollection = new ArrayList(collection.size());
+
+                    Iterator it = collection.iterator();
+                    while (it.hasNext()) {
+                        Object destinationSource = it.next();
+                        Object destinationTarget = destinationSource != null ? merge(
+                                destinationSource,
+                                property.getTargetDescriptor()) : null;
+
+                        targetCollection.add(destinationTarget);
+                    }
+
+                    property.writeProperty(target, null, targetCollection);
+                }
+
+                return true;
+            }
+
+            public boolean visitProperty(Property property) {
+                return true;
+            }
+
+        });
+
+        return target;
     }
 }
