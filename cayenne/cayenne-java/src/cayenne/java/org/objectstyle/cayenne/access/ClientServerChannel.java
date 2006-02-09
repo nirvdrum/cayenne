@@ -55,12 +55,16 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.BaseResponse;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.CompoundDiff;
@@ -68,9 +72,12 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.GraphEvent;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.AbstractQuery;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
+import org.objectstyle.cayenne.util.ObjectDetachOperation;
 
 /**
  * A DataChannel adapter that connects client ObjectContext children to a server
@@ -209,7 +216,9 @@ public class ClientServerChannel implements DataChannel {
         // assuming context is null as we are sending results to the server...
         QueryResponse response = serverContext.onQuery(null, serverQuery);
 
-        QueryMetadata info = serverQuery.getMetaData(serverContext.getEntityResolver());
+        EntityResolver serverResolver = serverContext.getEntityResolver();
+
+        QueryMetadata info = serverQuery.getMetaData(serverResolver);
         if (!info.isFetchingDataRows()) {
 
             // rewrite response to contain client objects
@@ -224,21 +233,36 @@ public class ClientServerChannel implements DataChannel {
                         clientResponse.addResultList(serverObjects);
                     }
                     else {
+                        List clientObjects = new ArrayList(serverObjects.size());
+                        ObjectDetachOperation op = new ObjectDetachOperation(
+                                serverResolver.getClientEntityResolver());
+                        Iterator it = serverObjects.iterator();
+                        PrefetchTreeNode prefetchTree = info.getPrefetchTree();
 
-                        try {
-                            List clientObjects = new ServerToClientObjectConverter(
-                                    serverObjects,
-                                    getEntityResolver(),
-                                    info.getPrefetchTree()).getConverted();
+                        while (it.hasNext()) {
+                            Persistent object = (Persistent) it.next();
+                            ObjectId id = object.getObjectId();
 
-                            clientResponse.addResultList(clientObjects);
+                            // sanity check
+                            if (id == null) {
+                                throw new CayenneRuntimeException(
+                                        "Server returned an object without an id: "
+                                                + object);
+                            }
+
+                            // have to resolve descriptor here for every object, as
+                            // often a query will not have any info indicating the
+                            // entity type
+                            ClassDescriptor serverDescriptor = serverResolver
+                                    .getClassDescriptor(id.getEntityName());
+
+                            clientObjects.add(op.detach(
+                                    object,
+                                    serverDescriptor,
+                                    prefetchTree));
                         }
-                        catch (Exception e) {
-                            throw new CayenneRuntimeException(
-                                    "Error converting to client objects: "
-                                            + e.getLocalizedMessage(),
-                                    e);
-                        }
+
+                        clientResponse.addResultList(clientObjects);
                     }
                 }
                 else {

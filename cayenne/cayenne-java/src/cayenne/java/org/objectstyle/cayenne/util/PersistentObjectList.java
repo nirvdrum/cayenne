@@ -96,17 +96,26 @@ public class PersistentObjectList extends RelationshipFault implements List, Val
      */
     public PersistentObjectList(Persistent relationshipOwner, String relationshipName) {
         super(relationshipOwner, relationshipName);
-
-        if (isTransientParent()) {
-            objectList = new LinkedList();
-        }
     }
 
     /**
      * Returns whether this list is not yet resolved and requires a fetch.
      */
     public boolean isFault() {
-        return objectList == null;
+
+        if (objectList != null) {
+            return false;
+        }
+        // resolve on the fly if owner is transient... Can't do it in constructor, as
+        // object may be in an inconsistent state during construction time
+        // synchronize??
+        else if (isTransientParent()) {
+            objectList = new LinkedList();
+            return false;
+        }
+        else {
+            return true;
+        }
     }
 
     /**
@@ -319,14 +328,7 @@ public class PersistentObjectList extends RelationshipFault implements List, Val
                 // now that we obtained the lock, check
                 // if another thread just resolved the list
                 if (isFault()) {
-                    List localList;
-
-                    if (isTransientParent()) {
-                        localList = new LinkedList();
-                    }
-                    else {
-                        localList = resolveFromDB();
-                    }
+                    List localList = resolveFromDB();
 
                     mergeLocalChanges(localList);
                     this.objectList = localList;

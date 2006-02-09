@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -65,6 +66,7 @@ import org.objectstyle.cayenne.MockDataChannel;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.graph.MockGraphDiff;
 import org.objectstyle.cayenne.graph.NodeCreateOperation;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -74,6 +76,7 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1Subclass;
+import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable3;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
 import org.objectstyle.cayenne.unit.AccessStack;
@@ -236,5 +239,65 @@ public class ClientServerChannelTst extends CayenneTestCase {
         QueryMessage message = new QueryMessage(new MockQuery());
         new ClientServerChannel(context, false).onQuery(null, message.getQuery());
         assertTrue(genericDone[0]);
+    }
+
+    public void testOnQueryPrefetchingToMany() throws Exception {
+        createTestData("testPrefetching");
+
+        DataContext context = createDataContext();
+        ClientServerChannel channel = new ClientServerChannel(context, false);
+
+        SelectQuery q = new SelectQuery(ClientMtTable1.class);
+        q.addOrdering(ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY, true);
+        q.addPrefetch(ClientMtTable1.TABLE2ARRAY_PROPERTY);
+
+        List results = channel.onQuery(null, q).firstList();
+
+        blockQueries();
+        try {
+
+            ClientMtTable1 o1 = (ClientMtTable1) results.get(0);
+            assertNull(o1.getObjectContext());
+
+            List children1 = o1.getTable2Array();
+
+            assertEquals(2, children1.size());
+            Iterator it = children1.iterator();
+            while (it.hasNext()) {
+                ClientMtTable2 o = (ClientMtTable2) it.next();
+                assertNull(o.getObjectContext());
+            }
+        }
+        finally {
+            unblockQueries();
+        }
+    }
+
+    public void testOnQueryPrefetchingToManyEmpty() throws Exception {
+        createTestData("testPrefetching");
+
+        DataContext context = createDataContext();
+        ClientServerChannel channel = new ClientServerChannel(context, false);
+
+        SelectQuery q = new SelectQuery(ClientMtTable1.class);
+        q.addOrdering(ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY, true);
+        q.addPrefetch(ClientMtTable1.TABLE2ARRAY_PROPERTY);
+
+        List results = channel.onQuery(null, q).firstList();
+
+        blockQueries();
+        try {
+
+            ClientMtTable1 o2 = (ClientMtTable1) results.get(1);
+            assertNull(o2.getObjectContext());
+
+            List children2 = o2.getTable2Array();
+            assertNotNull(children2);
+            assertFalse(((ValueHolder) children2).isFault());
+            assertEquals(0, children2.size());
+        }
+        finally {
+            unblockQueries();
+        }
     }
 }

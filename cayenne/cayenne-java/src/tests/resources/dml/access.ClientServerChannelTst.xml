@@ -48,7 +48,34 @@
 		</value></constructor-arg>
 	</bean>
 	
-
+	<bean id="INSERT_MT_TABLEP11" class="org.objectstyle.cayenne.unit.util.UpdatingSQLTemplate">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.cayenne.testdo.mt.MtTable1</value></constructor-arg>
+		<constructor-arg><value>
+		insert into MT_TABLE1 (TABLE1_ID, GLOBAL_ATTRIBUTE1, SERVER_ATTRIBUTE1) values (1, 'g1', 's1')
+		</value></constructor-arg>
+	</bean>
+	
+		<bean id="INSERT_MT_TABLEP12" class="org.objectstyle.cayenne.unit.util.UpdatingSQLTemplate">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.cayenne.testdo.mt.MtTable1</value></constructor-arg>
+		<constructor-arg><value>
+		insert into MT_TABLE1 (TABLE1_ID, GLOBAL_ATTRIBUTE1, SERVER_ATTRIBUTE1) values (2, 'g2', 's2')
+		</value></constructor-arg>
+	</bean>
+	
+	
+	<bean id="INSERT_MT_TABLEP21" class="org.objectstyle.cayenne.unit.util.UpdatingSQLTemplate">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.cayenne.testdo.mt.MtTable2</value></constructor-arg>
+		<constructor-arg><value>
+		insert into MT_TABLE2 (TABLE2_ID, TABLE1_ID, GLOBAL_ATTRIBUTE) values (1, 1, 'g1')
+		</value></constructor-arg>
+	</bean>
+	
+	<bean id="INSERT_MT_TABLEP22" class="org.objectstyle.cayenne.unit.util.UpdatingSQLTemplate">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.cayenne.testdo.mt.MtTable2</value></constructor-arg>
+		<constructor-arg><value>
+		insert into MT_TABLE2 (TABLE2_ID, TABLE1_ID, GLOBAL_ATTRIBUTE) values (2, 1, 'g2')
+		</value></constructor-arg>
+	</bean>
 	
 	<!-- ======================================= -->
 	<!-- Data Sets -->
@@ -78,6 +105,19 @@
 				<ref bean="DELETE_MT_TABLE2"/>
 				<ref bean="DELETE_MT_TABLE1"/>
 				<ref bean="INSERT_MT_TABLE12"/>
+			</list>
+		</constructor-arg>
+	</bean>
+	
+		<bean id="testPrefetching" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<ref bean="DELETE_MT_TABLE2"/>
+				<ref bean="DELETE_MT_TABLE1"/>
+				<ref bean="INSERT_MT_TABLEP11"/>
+				<ref bean="INSERT_MT_TABLEP12"/>
+				<ref bean="INSERT_MT_TABLEP21"/>
+				<ref bean="INSERT_MT_TABLEP22"/>
 			</list>
 		</constructor-arg>
 	</bean>

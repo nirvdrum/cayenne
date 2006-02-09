@@ -100,6 +100,7 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         // to many
         ClientMtTable1 o2 = (ClientMtTable1) context.newObject(ClientMtTable1.class);
         assertNotNull(o2.getTable2ArrayDirect());
+
         assertFalse(((PersistentObjectList) o2.getTable2ArrayDirect()).isFault());
     }
 
@@ -237,36 +238,35 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         }
     }
 
-    // // TODO: fixme
-    // public void testPrefetchingToManyEmpty() throws Exception {
-    // createTestData("testPrefetching");
-    //
-    // TestLocalConnection connection = new TestLocalConnection(new ClientServerChannel(
-    // getDomain()));
-    // OPPServerChannel channel = new OPPServerChannel(connection);
-    // CayenneContext context = new CayenneContext(channel);
-    //
-    // SelectQuery q = new SelectQuery(ClientMtTable1.class);
-    // q.addOrdering(ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY, true);
-    // q.addPrefetch(ClientMtTable1.TABLE2ARRAY_PROPERTY);
-    //
-    // List results = context.performQuery(q);
-    //
-    // connection.setBlockingMessages(true);
-    // try {
-    //
-    // ClientMtTable1 o2 = (ClientMtTable1) results.get(1);
-    // assertEquals(PersistenceState.COMMITTED, o2.getPersistenceState());
-    // assertSame(context, o2.getObjectContext());
-    //
-    // List children2 = o2.getTable2Array();
-    //
-    // assertEquals(0, children2.size());
-    // }
-    // finally {
-    // connection.setBlockingMessages(false);
-    // }
-    // }
+    public void testPrefetchingToManyEmpty() throws Exception {
+        createTestData("testPrefetching");
+
+        TestLocalConnection connection = new TestLocalConnection(new ClientServerChannel(
+                getDomain()));
+        OPPServerChannel channel = new OPPServerChannel(connection);
+        CayenneContext context = new CayenneContext(channel);
+
+        SelectQuery q = new SelectQuery(ClientMtTable1.class);
+        q.addOrdering(ClientMtTable1.GLOBAL_ATTRIBUTE1_PROPERTY, true);
+        q.addPrefetch(ClientMtTable1.TABLE2ARRAY_PROPERTY);
+
+        List results = context.performQuery(q);
+
+        connection.setBlockingMessages(true);
+        try {
+
+            ClientMtTable1 o2 = (ClientMtTable1) results.get(1);
+            assertEquals(PersistenceState.COMMITTED, o2.getPersistenceState());
+            assertSame(context, o2.getObjectContext());
+
+            List children2 = o2.getTable2Array();
+            assertFalse(((ValueHolder) children2).isFault());
+            assertEquals(0, children2.size());
+        }
+        finally {
+            connection.setBlockingMessages(false);
+        }
+    }
 
     public void testOIDQueryInterception() throws Exception {
 

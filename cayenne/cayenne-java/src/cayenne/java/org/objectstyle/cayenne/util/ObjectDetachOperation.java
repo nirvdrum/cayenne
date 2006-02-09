@@ -62,29 +62,31 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.property.CollectionProperty;
 import org.objectstyle.cayenne.property.Property;
 import org.objectstyle.cayenne.property.PropertyVisitor;
 import org.objectstyle.cayenne.property.SingleObjectArcProperty;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
 
 /**
- * An operation that performs object graph deep merge, terminating merge at unresolved
- * nodes.
+ * An operation that creates a subgraph of detached objects, using the PrefetchTree to
+ * delineate the graph boundaries. Traget objects can be described by a different set of
+ * descriptor, thus allowing server-to-client conversion to happen.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class DeepMergeOperation {
+public class ObjectDetachOperation {
 
-    protected ObjectContext context;
+    protected EntityResolver targetResolver;
     protected Map seen;
 
-    public DeepMergeOperation(ObjectContext context) {
-        this.context = context;
+    public ObjectDetachOperation(EntityResolver targetResolver) {
+        this.targetResolver = targetResolver;
         this.seen = new HashMap();
     }
 
@@ -92,7 +94,10 @@ public class DeepMergeOperation {
         seen.clear();
     }
 
-    public Object merge(Object object, ClassDescriptor descriptor) {
+    public Object detach(
+            Object object,
+            ClassDescriptor descriptor,
+            final PrefetchTreeNode prefetchTree) {
         if (!(object instanceof Persistent)) {
             throw new CayenneRuntimeException("Expected Persistent, got: " + object);
         }
@@ -111,52 +116,78 @@ public class DeepMergeOperation {
             return seenTarget;
         }
 
-        final Persistent target = context.localObject(id, (Persistent) source);
+        descriptor = descriptor.getSubclassDescriptor(source.getClass());
+
+        // presumably id's entity name should be of the right subclass.
+        final ClassDescriptor targetDescriptor = targetResolver.getClassDescriptor(id
+                .getEntityName());
+
+        final Persistent target = (Persistent) targetDescriptor.createObject();
+        target.setObjectId(id);
         seen.put(id, target);
 
-        descriptor = descriptor.getSubclassDescriptor(source.getClass());
         descriptor.visitProperties(new PropertyVisitor() {
 
             public boolean visitSingleObjectArc(SingleObjectArcProperty property) {
+                if (prefetchTree != null) {
 
-                if (!property.isFault(source)) {
-                    Object destinationSource = property.readProperty(source);
+                    PrefetchTreeNode child = prefetchTree.getNode(property.getName());
 
-                    Object destinationTarget = destinationSource != null ? merge(
-                            destinationSource,
-                            property.getTargetDescriptor()) : null;
+                    if (child != null) {
+                        Object destinationSource = property.readProperty(source);
 
-                    Object oldTarget = property.isFault(target) ? null : property
-                            .readProperty(target);
-                    property.writeProperty(target, oldTarget, destinationTarget);
+                        Object destinationTarget = destinationSource != null ? detach(
+                                destinationSource,
+                                property.getTargetDescriptor(),
+                                child) : null;
+
+                        SingleObjectArcProperty targetProperty = (SingleObjectArcProperty) targetDescriptor
+                                .getProperty(property.getName());
+                        Object oldTarget = targetProperty.isFault(target)
+                                ? null
+                                : targetProperty.readProperty(target);
+                        targetProperty
+                                .writeProperty(target, oldTarget, destinationTarget);
+                    }
                 }
 
                 return true;
             }
 
             public boolean visitCollectionArc(CollectionProperty property) {
-                if (!property.isFault(source)) {
-                    Collection collection = (Collection) property.readProperty(source);
+                if (prefetchTree != null) {
+                    PrefetchTreeNode child = prefetchTree.getNode(property.getName());
 
-                    Collection targetCollection = new ArrayList(collection.size());
+                    if (child != null) {
+                        Collection collection = (Collection) property
+                                .readProperty(source);
 
-                    Iterator it = collection.iterator();
-                    while (it.hasNext()) {
-                        Object destinationSource = it.next();
-                        Object destinationTarget = destinationSource != null ? merge(
-                                destinationSource,
-                                property.getTargetDescriptor()) : null;
+                        Collection targetCollection = new ArrayList(collection.size());
 
-                        targetCollection.add(destinationTarget);
+                        Iterator it = collection.iterator();
+                        while (it.hasNext()) {
+                            Object destinationSource = it.next();
+                            Object destinationTarget = destinationSource != null
+                                    ? detach(destinationSource, property
+                                            .getTargetDescriptor(), child)
+                                    : null;
+
+                            targetCollection.add(destinationTarget);
+                        }
+
+                        CollectionProperty targetProperty = (CollectionProperty) targetDescriptor
+                                .getProperty(property.getName());
+                        targetProperty.writeProperty(target, null, targetCollection);
                     }
-
-                    property.writeProperty(target, null, targetCollection);
                 }
 
                 return true;
             }
 
             public boolean visitProperty(Property property) {
+                Property targetProperty = targetDescriptor
+                        .getProperty(property.getName());
+                targetProperty.writeProperty(target, null, property.readProperty(source));
                 return true;
             }
 
