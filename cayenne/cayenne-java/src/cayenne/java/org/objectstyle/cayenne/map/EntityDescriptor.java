@@ -62,8 +62,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.property.BaseClassDescriptor;
 import org.objectstyle.cayenne.property.ClassDescriptor;
@@ -136,12 +134,6 @@ public class EntityDescriptor extends BaseClassDescriptor {
         // compile common stuff
         this.objectClass = entity.getJavaClass();
         this.dataObject = DataObject.class.isAssignableFrom(objectClass);
-
-        // TODO: instead of using 'makeAccessor' that tries a field and then a DataObject,
-        // use field and then get/set instead.
-        this.objectIdProperty = makeAccessor("objectId", ObjectId.class);
-        this.objectContextProperty = makeAccessor("objectContext", ObjectContext.class);
-        this.persistenceStateProperty = makeAccessor("persistenceState", Integer.TYPE);
 
         // init property descriptors...
         Map allDescriptors = new HashMap();

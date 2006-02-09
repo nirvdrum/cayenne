@@ -80,9 +80,6 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
     // compiled properties ...
     protected Class objectClass;
     protected Map declaredProperties;
-    protected PropertyAccessor objectIdProperty;
-    protected PropertyAccessor objectContextProperty;
-    protected PropertyAccessor persistenceStateProperty;
     protected Map subclassDescriptors;
 
     /**
@@ -97,11 +94,7 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
      * Returns true if a descriptor is initialized and ready for operation.
      */
     public boolean isValid() {
-        return objectClass != null
-                && declaredProperties != null
-                && objectIdProperty != null
-                && objectContextProperty != null
-                && persistenceStateProperty != null;
+        return objectClass != null && declaredProperties != null;
     }
 
     public Class getObjectClass() {
@@ -172,18 +165,6 @@ public abstract class BaseClassDescriptor implements ClassDescriptor {
      */
     public ClassDescriptor getSuperclassDescriptor() {
         return superclassDescriptor;
-    }
-
-    public PropertyAccessor getObjectContextProperty() {
-        return objectContextProperty;
-    }
-
-    public PropertyAccessor getObjectIdProperty() {
-        return objectIdProperty;
-    }
-
-    public PropertyAccessor getPersistenceStateProperty() {
-        return persistenceStateProperty;
     }
 
     /**
