@@ -1732,10 +1732,9 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
         ClassDescriptor descriptor = getEntityResolver().getClassDescriptor(
                 id.getEntityName());
 
-        GraphManager graphManager = getGraphManager();
-        Persistent cachedObject = (Persistent) graphManager.getNode(id);
+        Persistent cachedObject = (Persistent) getGraphManager().getNode(id);
 
-        // 1. use cached object
+        // merge into an existing object
         if (cachedObject != null) {
 
             // TODO: Andrus, 1/24/2006 implement smart merge for modified objects...
@@ -1751,7 +1750,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
 
             return cachedObject;
         }
-        // 3. create a copy of the source
+        // create and merge into a new object
         else {
 
             // Andrus, 1/26/2006 - note that there is a tricky case of a temporary object
@@ -1767,7 +1766,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
             localObject.setObjectContext(this);
             localObject.setObjectId(id);
 
-            graphManager.registerNode(id, localObject);
+            getGraphManager().registerNode(id, localObject);
 
             if (prototype != null
                     && prototype.getPersistenceState() != PersistenceState.HOLLOW) {

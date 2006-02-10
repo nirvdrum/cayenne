@@ -357,7 +357,7 @@ public class CayenneContext implements ObjectContext {
     public Persistent localObject(ObjectId id, Persistent prototype) {
 
         // TODO: Andrus, 1/26/2006 - this implementation is copied verbatim from
-        // DataContext. Somehow need to pull out the common code or implement inherirance
+        // DataContext. Somehow need to pull out the common code or implement inheritance
 
         // ****** Copied from DataContext - start *******
 
@@ -365,16 +365,12 @@ public class CayenneContext implements ObjectContext {
             throw new IllegalArgumentException("Null ObjectId");
         }
 
-        // note that per-object ClassDescriptor lookup is needed as even if all
-        // objects where fetched as a part of the same query, as they may belong to
-        // different subclasses
         ClassDescriptor descriptor = getEntityResolver().getClassDescriptor(
                 id.getEntityName());
 
-        GraphManager graphManager = getGraphManager();
-        Persistent cachedObject = (Persistent) graphManager.getNode(id);
+        Persistent cachedObject = (Persistent) getGraphManager().getNode(id);
 
-        // 1. use cached object
+        // merge into an existing object
         if (cachedObject != null) {
 
             // TODO: Andrus, 1/24/2006 implement smart merge for modified objects...
@@ -391,7 +387,7 @@ public class CayenneContext implements ObjectContext {
 
             return cachedObject;
         }
-        // 3. create a copy of the source
+        // create and merge into a new object
         else {
 
             // Andrus, 1/26/2006 - note that there is a tricky case of a temporary object
@@ -407,7 +403,7 @@ public class CayenneContext implements ObjectContext {
             localObject.setObjectContext(this);
             localObject.setObjectId(id);
 
-            graphManager.registerNode(id, localObject);
+            getGraphManager().registerNode(id, localObject);
 
             if (prototype != null) {
                 localObject.setPersistenceState(PersistenceState.COMMITTED);
@@ -479,12 +475,11 @@ public class CayenneContext implements ObjectContext {
         }
     }
 
-   
-
     // ****** non-public methods ******
 
     Persistent createNewObject(ObjectId id) {
-        ClassDescriptor descriptor = getEntityResolver().getClassDescriptor(id.getEntityName());
+        ClassDescriptor descriptor = getEntityResolver().getClassDescriptor(
+                id.getEntityName());
 
         Persistent object = (Persistent) descriptor.createObject();
 
@@ -500,7 +495,8 @@ public class CayenneContext implements ObjectContext {
     }
 
     Persistent createFault(ObjectId id) {
-        ClassDescriptor descriptor = getEntityResolver().getClassDescriptor(id.getEntityName());
+        ClassDescriptor descriptor = getEntityResolver().getClassDescriptor(
+                id.getEntityName());
 
         Persistent object = (Persistent) descriptor.createObject();
 
