@@ -73,6 +73,11 @@ import org.objectstyle.cayenne.query.PrefetchTreeNode;
  * @since 1.2
  * @author Andrus Adamchik
  */
+// TODO: Andrus 2/9/2006 optional to-one relationships (Painting -> Artist) are not
+// connected by this algorithm. They are being intercepted later when a corresponding
+// fault is being resolved, but this seems like a wasteful approach. Test case that
+// succeeds, but goes through this wasteful route is
+// DataContextPrefetchTst.testPrefetchingToOneNull().
 class PrefetchProcessorNode extends PrefetchTreeNode {
 
     List dataRows;

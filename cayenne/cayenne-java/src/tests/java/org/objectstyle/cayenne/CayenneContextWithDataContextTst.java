@@ -199,6 +199,35 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         }
     }
 
+    public void testPrefetchingToOneNull() throws Exception {
+        createTestData("testPrefetchingToOneNull");
+
+        TestLocalConnection connection = new TestLocalConnection(new ClientServerChannel(
+                getDomain()));
+        OPPServerChannel channel = new OPPServerChannel(connection);
+        CayenneContext context = new CayenneContext(channel);
+
+        SelectQuery q = new SelectQuery(ClientMtTable2.class);
+        q.addPrefetch(ClientMtTable2.TABLE1_PROPERTY);
+
+        List results = context.performQuery(q);
+
+        connection.setBlockingMessages(true);
+        try {
+
+            assertEquals(1, results.size());
+
+            ClientMtTable2 o = (ClientMtTable2) results.get(0);
+            assertEquals(PersistenceState.COMMITTED, o.getPersistenceState());
+            assertSame(context, o.getObjectContext());
+
+            assertNull(o.getTable1());
+        }
+        finally {
+            connection.setBlockingMessages(false);
+        }
+    }
+
     public void testPrefetchingToMany() throws Exception {
         createTestData("testPrefetching");
 

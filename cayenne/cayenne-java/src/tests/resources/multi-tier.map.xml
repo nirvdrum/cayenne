@@ -10,7 +10,7 @@
 	</db-entity>
 	<db-entity name="MT_TABLE2">
 		<db-attribute name="GLOBAL_ATTRIBUTE" type="VARCHAR" length="100"/>
-		<db-attribute name="TABLE1_ID" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="TABLE1_ID" type="INTEGER"/>
 		<db-attribute name="TABLE2_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 	</db-entity>
 	<db-entity name="MT_TABLE3">

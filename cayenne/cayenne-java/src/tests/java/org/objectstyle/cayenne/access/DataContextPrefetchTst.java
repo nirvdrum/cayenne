@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -105,7 +106,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
             Artist a1 = (Artist) artists.get(0);
             ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
             assertNotNull(toMany);
-            assertFalse(toMany.needsFetch());
+            assertFalse(toMany.isFault());
             assertEquals(1, toMany.size());
 
             Painting p1 = (Painting) toMany.get(0);
@@ -114,7 +115,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
             Artist a2 = (Artist) artists.get(1);
             ToManyList toMany2 = (ToManyList) a2.readPropertyDirectly("paintingArray");
             assertNotNull(toMany2);
-            assertFalse(toMany2.needsFetch());
+            assertFalse(toMany2.isFault());
             assertEquals(1, toMany2.size());
 
             Painting p2 = (Painting) toMany2.get(0);
@@ -143,7 +144,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
                 Artist a = (Artist) artists.get(i);
                 ToManyList toMany = (ToManyList) a.readPropertyDirectly("paintingArray");
                 assertNotNull(toMany);
-                assertFalse(toMany.needsFetch());
+                assertFalse(toMany.isFault());
                 assertEquals(1, toMany.size());
 
                 Painting p = (Painting) toMany.get(0);
@@ -184,7 +185,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
             ToManyList toMany = (ToManyList) a1
                     .readPropertyDirectly("artistExhibitArray");
             assertNotNull(toMany);
-            assertFalse(toMany.needsFetch());
+            assertFalse(toMany.isFault());
             assertEquals(2, toMany.size());
 
             ArtistExhibit artistExhibit = (ArtistExhibit) toMany.get(0);
@@ -221,7 +222,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
                 CayenneDataObject a1 = (CayenneDataObject) result.get(0);
                 ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
                 assertNotNull(toMany);
-                assertFalse(toMany.needsFetch());
+                assertFalse(toMany.isFault());
             }
             finally {
                 unblockQueries();
@@ -262,7 +263,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
                 CayenneDataObject a1 = (CayenneDataObject) result.get(0);
                 ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
                 assertNotNull(toMany);
-                assertFalse(toMany.needsFetch());
+                assertFalse(toMany.isFault());
             }
             finally {
                 unblockQueries();
@@ -475,5 +476,31 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         // prefetch with query using date in qualifier used to fail on SQL Server
         // see CAY-119 for details
         context.performQuery(q);
+    }
+
+    public void testPrefetchingToOneNull() throws Exception {
+
+        Painting p1 = (Painting) context.createAndRegisterNewObject(Painting.class);
+        p1.setPaintingTitle("aaaa");
+
+        context.commitChanges();
+        context.invalidateObjects(Collections.singleton(p1));
+
+        SelectQuery q = new SelectQuery(Painting.class);
+        q.addPrefetch("toArtist");
+
+        // run the query ... see that it doesn't blow
+        List paintings = context.performQuery(q);
+
+        blockQueries();
+        try {
+            assertEquals(1, paintings.size());
+
+            Painting p2 = (Painting) paintings.get(0);
+            assertNull(p2.readProperty(Painting.TO_ARTIST_PROPERTY));
+        }
+        finally {
+            unblockQueries();
+        }
     }
 }

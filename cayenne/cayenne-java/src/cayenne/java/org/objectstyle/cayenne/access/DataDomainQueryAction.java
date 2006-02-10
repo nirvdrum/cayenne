@@ -195,8 +195,10 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
             ObjectId targetId = sourceRow.createTargetObjectId(relationship
                     .getTargetEntityName(), dbRelationship);
 
+            // null id means that FK is null...
             if (targetId == null) {
-                return !DONE;
+                this.response = new BaseResponse(Collections.EMPTY_LIST);
+                return DONE;
             }
 
             DataRow targetRow = cache.getCachedSnapshot(targetId);
