@@ -88,6 +88,11 @@ public interface ValueHolder extends Serializable {
     Object getValue() throws CayenneRuntimeException;
 
     /**
+     * Retrieves ValueHolder value without triggering fault resolution.
+     */
+    Object getValueDirectly() throws CayenneRuntimeException;
+
+    /**
      * Sets an object stored by this ValueHolder.
      * 
      * @param value a new value of the ValueHolder.
@@ -96,11 +101,13 @@ public interface ValueHolder extends Serializable {
     Object setValue(Object value) throws CayenneRuntimeException;
 
     /**
-     * Initializes ValueHolder with some value. Unlike setValue, this method shouldn't
-     * trigger fault resolution.
+     * Sets ValueHolder vaue without triggering fault resolution.
      */
-    Object setInitialValue(Object value) throws CayenneRuntimeException;
+    Object setValueDirectly(Object value) throws CayenneRuntimeException;
 
+    /**
+     * Returns true if the internal value is not yet resolved.
+     */
     boolean isFault();
 
     /**

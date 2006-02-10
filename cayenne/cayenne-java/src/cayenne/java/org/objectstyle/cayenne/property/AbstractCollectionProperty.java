@@ -90,7 +90,7 @@ public abstract class AbstractCollectionProperty extends AbstractSingleObjectArc
             accessor.writePropertyDirectly(object, null, holder);
         }
 
-        holder.setInitialValue(newValue);
+        holder.setValueDirectly(newValue);
     }
 
     public void addTarget(Object source, Object target, boolean setReverse) {

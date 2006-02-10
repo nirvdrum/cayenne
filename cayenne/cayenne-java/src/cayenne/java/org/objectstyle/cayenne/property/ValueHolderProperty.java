@@ -60,7 +60,9 @@ import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.util.PersistentObjectHolder;
 
 /**
- * Provides access to a property implemented as a ValueHolder Field.
+ * Provides access to a property implemented as a ValueHolder Field. This implementation
+ * hides the fact of the ValueHolder existence. I.e. it never returns it from
+ * 'readPropertyDirectly', returning held value instead.
  * 
  * @since 1.2
  * @author Andrus Adamchik
@@ -82,7 +84,7 @@ public class ValueHolderProperty extends AbstractSingleObjectArcProperty {
 
         // TODO: Andrus, 2/9/2006 ValueHolder will resolve an object in a call to
         // 'getValue'; this is inconsistent with 'readPropertyDirectly' contract
-        return (holder != null) ? holder.getValue() : null;
+        return (holder != null) ? holder.getValueDirectly() : null;
     }
 
     public Object readProperty(Object object) throws PropertyAccessException {
@@ -98,12 +100,12 @@ public class ValueHolderProperty extends AbstractSingleObjectArcProperty {
             accessor.writePropertyDirectly(object, null, holder);
         }
 
-        holder.setInitialValue(newValue);
+        holder.setValueDirectly(newValue);
     }
 
     public void writeProperty(Object object, Object oldValue, Object newValue)
             throws PropertyAccessException {
-        ensureValueHolderSet(object).setValue(newValue);
+        ensureValueHolderSet(object).setValueDirectly(newValue);
     }
 
     public void shallowMerge(Object from, Object to) throws PropertyAccessException {

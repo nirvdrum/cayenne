@@ -391,23 +391,6 @@ public class CayenneContext implements ObjectContext {
 
             return cachedObject;
         }
-        // 2. use source as a target
-        // 'null' ObjectContext can happen when the objects are fetched from the
-        // channel that is not an ObjectContext
-        else if (prototype != null
-                && (prototype.getObjectContext() == null || prototype.getObjectContext() == this)) {
-
-            prototype.setPersistenceState(id.isTemporary()
-                    ? PersistenceState.NEW
-                    : PersistenceState.COMMITTED);
-
-            prototype.setObjectContext(this);
-            prototype.setObjectId(id);
-            graphManager.registerNode(id, prototype);
-            descriptor.injectValueHolders(prototype);
-
-            return prototype;
-        }
         // 3. create a copy of the source
         else {
 

@@ -153,6 +153,8 @@ public class ToManyList implements List, Serializable, ValueHolder {
 
     /**
      * Will force refresh on the next access.
+     * 
+     * @deprecated since 1.2 use {@link #invalidate()}
      */
     public void invalidateObjectList() {
         setObjectList(null);
@@ -173,8 +175,12 @@ public class ToManyList implements List, Serializable, ValueHolder {
     public boolean isFault() {
         return objectList == null;
     }
+    
+    public Object getValueDirectly() throws CayenneRuntimeException {
+        return objectList;
+    }
 
-    public Object setInitialValue(Object value) throws CayenneRuntimeException {
+    public Object setValueDirectly(Object value) throws CayenneRuntimeException {
         if (value == null || value instanceof List) {
             Object old = this.objectList;
             setObjectList((List) value);
@@ -188,7 +194,7 @@ public class ToManyList implements List, Serializable, ValueHolder {
 
     public Object setValue(Object value) throws CayenneRuntimeException {
         resolvedObjectList();
-        return setInitialValue(objectList);
+        return setValueDirectly(objectList);
     }
 
     // ====================================================

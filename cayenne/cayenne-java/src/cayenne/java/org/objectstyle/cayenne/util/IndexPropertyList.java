@@ -135,9 +135,9 @@ public class IndexPropertyList extends AbstractList implements ValueHolder {
         return (h != null) ? h.isFault() : false;
     }
 
-    public Object setInitialValue(Object value) throws CayenneRuntimeException {
+    public Object setValueDirectly(Object value) throws CayenneRuntimeException {
         ValueHolder h = getWrappedValueHolder();
-        return h != null ? h.setInitialValue(value) : null;
+        return h != null ? h.setValueDirectly(value) : null;
     }
 
     public Object setValue(Object value) throws CayenneRuntimeException {
@@ -148,6 +148,11 @@ public class IndexPropertyList extends AbstractList implements ValueHolder {
     public Object getValue() throws CayenneRuntimeException {
         ValueHolder h = getWrappedValueHolder();
         return h != null ? h.getValue() : null;
+    }
+    
+    public Object getValueDirectly() throws CayenneRuntimeException {
+        ValueHolder h = getWrappedValueHolder();
+        return h != null ? h.getValueDirectly() : null;
     }
 
     public void invalidate() {

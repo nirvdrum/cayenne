@@ -125,7 +125,7 @@ public class PersistentObjectList extends RelationshipFault implements List, Val
         setObjectList(null);
     }
 
-    public Object setInitialValue(Object value) throws CayenneRuntimeException {
+    public Object setValueDirectly(Object value) throws CayenneRuntimeException {
         if (value == null || value instanceof List) {
             Object old = this.objectList;
             setObjectList((List) value);
@@ -141,9 +141,13 @@ public class PersistentObjectList extends RelationshipFault implements List, Val
         return resolvedObjectList();
     }
 
+    public Object getValueDirectly() throws CayenneRuntimeException {
+        return objectList;
+    }
+
     public Object setValue(Object value) throws CayenneRuntimeException {
         resolvedObjectList();
-        return setInitialValue(objectList);
+        return setValueDirectly(objectList);
     }
 
     public void setObjectList(List objectList) {

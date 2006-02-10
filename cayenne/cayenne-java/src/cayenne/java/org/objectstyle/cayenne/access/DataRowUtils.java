@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.ValueHolder;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -152,8 +153,8 @@ class DataRowUtils {
                     object.writePropertyDirectly(rel.getName(), Fault.getToManyFault());
                 }
                 else if (invalidateToManyRelationships
-                        && toManyList instanceof ToManyList) {
-                    ((ToManyList) toManyList).invalidateObjectList();
+                        && toManyList instanceof ValueHolder) {
+                    ((ValueHolder) toManyList).invalidate();
                 }
 
                 continue;

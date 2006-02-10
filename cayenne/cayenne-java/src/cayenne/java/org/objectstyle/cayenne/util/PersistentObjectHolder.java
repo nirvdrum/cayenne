@@ -107,6 +107,10 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
 
         return value;
     }
+    
+    public Object getValueDirectly() throws CayenneRuntimeException {
+        return value;
+    }
 
     /**
      * Sets an object value, marking this ValueHolder as resolved.
@@ -117,7 +121,7 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
             resolve();
         }
 
-        Object oldValue = setInitialValue(value);
+        Object oldValue = setValueDirectly(value);
 
         if (oldValue != value) {
             // notify ObjectContext
@@ -133,7 +137,7 @@ public class PersistentObjectHolder extends RelationshipFault implements ValueHo
         return oldValue;
     }
 
-    public Object setInitialValue(Object value) throws CayenneRuntimeException {
+    public Object setValueDirectly(Object value) throws CayenneRuntimeException {
 
         // must obtain the value from the local context
         if (value instanceof Persistent) {
