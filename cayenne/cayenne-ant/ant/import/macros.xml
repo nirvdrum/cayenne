@@ -15,10 +15,11 @@
 		<attribute name="destdir"/>
 		<attribute name="srcref"/>
 		<attribute name="classpathref"/>
+		<attribute name="packagenames" default="org.objectstyle.*"/>
 		
 		<sequential>
 			<mkdir dir="@{destdir}"/>
-			<javadoc packagenames="org.objectstyle.*" destdir="@{destdir}"
+			<javadoc packagenames="@{packagenames}" destdir="@{destdir}"
 				sourcepathref="@{srcref}" classpathref="@{classpathref}"
 				author="true" use="false"
 				stylesheetfile="${cayenne.other}/javadoc/objectstyle-javadoc.css"
