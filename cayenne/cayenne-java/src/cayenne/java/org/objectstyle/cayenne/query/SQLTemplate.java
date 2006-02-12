@@ -235,7 +235,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public QueryMetadata getMetaData(EntityResolver resolver) {
-        selectInfo.resolve(root, resolver);
+        selectInfo.resolve(root, resolver, getName());
         return selectInfo;
     }
 

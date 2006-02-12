@@ -99,7 +99,7 @@ public class DataContextPrefetchExtrasTst extends CayenneTestCase {
         assertEquals("n1", pk1.getOtherCol());
         ToManyList toMany = (ToManyList) pk1.readPropertyDirectly("charFKs");
         assertNotNull(toMany);
-        assertFalse(toMany.needsFetch());
+        assertFalse(toMany.isFault());
         assertEquals(3, toMany.size());
 
         CharFkTest fk1 = (CharFkTest) toMany.get(0);
@@ -155,7 +155,7 @@ public class DataContextPrefetchExtrasTst extends CayenneTestCase {
 
         ToManyList toMany = (ToManyList) pk1.readPropertyDirectly("compoundFkArray");
         assertNotNull(toMany);
-        assertFalse(toMany.needsFetch());
+        assertFalse(toMany.isFault());
         assertEquals(2, toMany.size());
 
         CayenneDataObject fk1 = (CayenneDataObject) toMany.get(0);

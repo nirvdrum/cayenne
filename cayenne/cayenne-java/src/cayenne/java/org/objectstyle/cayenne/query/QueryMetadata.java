@@ -78,12 +78,22 @@ public interface QueryMetadata {
      * DataContext.
      */
     public static final String LOCAL_CACHE = "localcache";
+    
+    /**
+     * Same as {@link #LOCAL_CACHE}, only forcing any current cache expiration.
+     */
+    public static final String LOCAL_CACHE_REFRESH = "localcache_refresh";
 
     /**
      * A cache policy ruling that query results shall be stored in a shared cache
      * accessible by all DataContexts.
      */
     public static final String SHARED_CACHE = "sharedcache";
+    
+    /**
+     * Same as {@link #SHARED_CACHE}, only forcing any current cache expiration.
+     */
+    public static final String SHARED_CACHE_REFRESH = "sharedcache_refresh";
 
     /**
      * Defines the name of the property for the query {@link #getFetchLimit() fetch limit}.
@@ -148,6 +158,12 @@ public interface QueryMetadata {
      * policy.
      */
     String getCachePolicy();
+
+    /**
+     * Returns a String that uniquely identifies this query for the purposes of result
+     * caching. If null is returned, no caching is performed.
+     */
+    String getCacheKey();
 
     /**
      * Returns <code>true</code> if this query should produce a list of data rows as

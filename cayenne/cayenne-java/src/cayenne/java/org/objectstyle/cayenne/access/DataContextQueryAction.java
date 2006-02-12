@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.access;
 import java.util.List;
 
 import org.objectstyle.cayenne.BaseResponse;
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.query.Query;
@@ -111,19 +110,24 @@ class DataContextQueryAction extends ObjectContextQueryAction {
      * Wraps execution in local cache checks.
      */
     private boolean interceptLocalCache() {
-        if (!QueryMetadata.LOCAL_CACHE.equals(metadata.getCachePolicy())) {
+
+        String cacheKey = metadata.getCacheKey();
+        if (cacheKey == null) {
             return !DONE;
         }
 
-        if (query.getName() == null) {
-            throw new CayenneRuntimeException(
-                    "Caching of unnamed queries is not supported.");
+        boolean cache = QueryMetadata.LOCAL_CACHE.equals(metadata.getCachePolicy());
+        boolean cacheOrCacheRefresh = cache
+                || QueryMetadata.LOCAL_CACHE_REFRESH.equals(metadata.getCachePolicy());
+
+        if (!cacheOrCacheRefresh) {
+            return !DONE;
         }
 
         ObjectStore objectStore = ((DataContext) actingContext).getObjectStore();
-        if (!metadata.isRefreshingObjects()) {
+        if (cache) {
 
-            List cachedResults = objectStore.getCachedQueryResult(query.getName());
+            List cachedResults = objectStore.getCachedQueryResult(cacheKey);
             if (cachedResults != null) {
                 response = new BaseResponse(cachedResults);
                 return DONE;
@@ -131,7 +135,7 @@ class DataContextQueryAction extends ObjectContextQueryAction {
         }
 
         runQuery();
-        objectStore.cacheQueryResult(query.getName(), response.firstList());
+        objectStore.cacheQueryResult(cacheKey, response.firstList());
         return DONE;
     }
 }

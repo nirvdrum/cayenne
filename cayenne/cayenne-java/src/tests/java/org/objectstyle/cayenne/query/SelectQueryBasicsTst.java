@@ -242,9 +242,6 @@ public class SelectQueryBasicsTst extends TestCase {
         assertTrue(q1.getQualifier() != q.getQualifier());
     }
 
-    /**
-     * "queryWithParameters" must create a different name for the named query.
-     */
     public void testQueryWithParamsSkipName() {
         SelectQuery q = new SelectQuery();
         q.setRoot(Artist.class);
@@ -254,6 +251,6 @@ public class SelectQueryBasicsTst extends TestCase {
         SelectQuery q1 = q.queryWithParameters(Collections.EMPTY_MAP);
         assertEquals("name", q.getName());
         assertNotNull(q1.getName());
-        assertFalse(q.getName().equals(q1.getName()));
+        assertEquals(q.getName(), q1.getName());
     }
 }

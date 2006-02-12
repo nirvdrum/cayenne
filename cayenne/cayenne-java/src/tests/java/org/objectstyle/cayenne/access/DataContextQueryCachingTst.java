@@ -144,6 +144,7 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
             List rows2 = mockupDataRows(4);
             engine.reset();
             engine.addExpectedResult(select, rows2);
+            select.setCachePolicy(QueryMetadata.LOCAL_CACHE_REFRESH);
             List freshResultRows = context.performQuery(select);
             assertEquals(1, engine.getRunCount());
             assertEquals(rows2, freshResultRows);
@@ -218,6 +219,7 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
             List rows2 = mockupDataRows(5);
             engine.reset();
             engine.addExpectedResult(select, rows2);
+            select.setCachePolicy(QueryMetadata.SHARED_CACHE_REFRESH);
             List freshResultRows = context.performQuery(select);
             assertEquals(1, engine.getRunCount());
             assertEquals(rows2, freshResultRows);
@@ -254,7 +256,9 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
             List rows2 = mockupDataRows(4);
             engine.reset();
             engine.addExpectedResult(select, rows2);
+            select.setCachePolicy(QueryMetadata.LOCAL_CACHE_REFRESH);
             List freshResultRows = context.performQuery(select);
+
             assertEquals(1, engine.getRunCount());
             assertEquals(4, freshResultRows.size());
             assertTrue(resultRows.get(0) instanceof DataObject);

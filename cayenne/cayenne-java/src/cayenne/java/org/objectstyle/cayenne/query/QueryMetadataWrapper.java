@@ -95,6 +95,7 @@ class QueryMetadataWrapper implements QueryMetadata {
         return overrides != null && overrides.containsKey(key);
     }
 
+   
     public DataMap getDataMap() {
         return info.getDataMap();
     }
@@ -109,6 +110,10 @@ class QueryMetadataWrapper implements QueryMetadata {
 
     public ObjEntity getObjEntity() {
         return info.getObjEntity();
+    }
+    
+    public String getCacheKey() {
+        return info.getCacheKey();
     }
 
     public String getCachePolicy() {

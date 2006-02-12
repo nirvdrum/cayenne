@@ -103,7 +103,7 @@ public abstract class AbstractQuery implements Query {
      */
     public QueryMetadata getMetaData(EntityResolver resolver) {
         BaseQueryMetadata md = new BaseQueryMetadata();
-        md.resolve(getRoot(), resolver);
+        md.resolve(getRoot(), resolver, getName());
         return md;
     }
 

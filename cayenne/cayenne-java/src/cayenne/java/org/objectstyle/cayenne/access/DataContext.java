@@ -1440,7 +1440,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      */
     public List performQuery(String queryName, Map parameters, boolean refresh) {
         NamedQuery query = new NamedQuery(queryName, parameters);
-        query.setRefreshOverride(refresh ? Boolean.TRUE : Boolean.FALSE);
+        query.setForceNoCache(refresh);
         return performQuery(query);
     }
 

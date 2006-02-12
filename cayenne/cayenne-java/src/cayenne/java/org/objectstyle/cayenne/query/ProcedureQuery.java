@@ -182,7 +182,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public QueryMetadata getMetaData(EntityResolver resolver) {
-        metaData.resolve(root, getResultClass(), resolver);
+        metaData.resolve(root, getResultClass(), resolver, getName());
         return metaData;
     }
 

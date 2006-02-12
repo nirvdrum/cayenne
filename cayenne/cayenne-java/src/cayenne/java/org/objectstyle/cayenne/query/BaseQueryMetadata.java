@@ -86,6 +86,7 @@ class BaseQueryMetadata implements QueryMetadata, XMLSerializable, Serializable 
     boolean refreshingObjects = QueryMetadata.REFRESHING_OBJECTS_DEFAULT;
     boolean resolvingInherited = QueryMetadata.RESOLVING_INHERITED_DEFAULT;
     String cachePolicy = QueryMetadata.CACHE_POLICY_DEFAULT;
+   
     PrefetchTreeNode prefetchTree;
 
     transient ObjEntity objEntity;
@@ -93,6 +94,7 @@ class BaseQueryMetadata implements QueryMetadata, XMLSerializable, Serializable 
     transient DataMap dataMap;
     transient Object lastRoot;
     transient EntityResolver lastEntityResolver;
+    transient String cacheKey;
 
     /**
      * Copies values of this object to another SelectInfo object.
@@ -110,11 +112,14 @@ class BaseQueryMetadata implements QueryMetadata, XMLSerializable, Serializable 
         this.refreshingObjects = info.isRefreshingObjects();
         this.resolvingInherited = info.isResolvingInherited();
         this.cachePolicy = info.getCachePolicy();
+        this.cacheKey = info.getCacheKey();
 
         setPrefetchTree(info.getPrefetchTree());
     }
 
-    boolean resolve(Object root, EntityResolver resolver) {
+    boolean resolve(Object root, EntityResolver resolver, String cacheKey) {
+        this.cacheKey = cacheKey;
+
         if (lastRoot != root || lastEntityResolver != resolver) {
 
             this.objEntity = null;
@@ -245,6 +250,13 @@ class BaseQueryMetadata implements QueryMetadata, XMLSerializable, Serializable 
         if (prefetchTree != null) {
             prefetchTree.encodeAsXML(encoder);
         }
+    }
+
+    /**
+     * @since 1.2
+     */
+    public String getCacheKey() {
+        return cacheKey;
     }
 
     /**

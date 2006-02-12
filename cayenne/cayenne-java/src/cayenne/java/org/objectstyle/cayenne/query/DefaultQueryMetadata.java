@@ -102,6 +102,10 @@ class DefaultQueryMetadata implements QueryMetadata {
         return null;
     }
 
+    public String getCacheKey() {
+        return null;
+    }
+
     public String getCachePolicy() {
         return QueryMetadata.CACHE_POLICY_DEFAULT;
     }

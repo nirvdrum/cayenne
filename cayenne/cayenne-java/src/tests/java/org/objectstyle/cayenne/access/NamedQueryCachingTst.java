@@ -53,61 +53,82 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.Procedure;
+import java.util.List;
 
-public class MockQueryMetadata implements QueryMetadata {
+import org.objectstyle.cayenne.query.NamedQuery;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-    public ObjEntity getObjEntity() {
-        return null;
+public class NamedQueryCachingTst extends CayenneTestCase {
+
+    public void testLocalCache() throws Exception {
+        deleteTestData();
+        createTestData("prepare");
+
+        DataContext context = createDataContext();
+
+        NamedQuery q1 = new NamedQuery("ParameterizedQueryWithLocalCache");
+        String cacheKey = q1.getMetaData(context.getEntityResolver()).getCacheKey();
+
+        assertNull(context.getObjectStore().getCachedQueryResult(cacheKey));
+        context.performQuery(q1);
+        assertNotNull(
+                "Failed to cache results of a NamedQuery that points to a caching query",
+                context.getObjectStore().getCachedQueryResult(cacheKey));
     }
 
-    public DbEntity getDbEntity() {
-        return null;
-    }
+    public void testLocalCacheWithParameters() throws Exception {
+        deleteTestData();
+        createTestData("prepare");
 
-    public Procedure getProcedure() {
-        return null;
-    }
+        NamedQuery q1 = new NamedQuery("ParameterizedQueryWithLocalCache", new String[] {
+            "name"
+        }, new Object[] {
+            "AA%"
+        });
 
-    public DataMap getDataMap() {
-        return null;
-    }
+        DataContext context = createDataContext();
 
-    public String getCachePolicy() {
-        return null;
-    }
-    
-    public String getCacheKey() {
-        return null;
-    }
+        List objects1 = context.performQuery(q1);
 
-    public boolean isFetchingDataRows() {
-        return false;
-    }
+        NamedQuery q2 = new NamedQuery("ParameterizedQueryWithLocalCache", new String[] {
+            "name"
+        }, new Object[] {
+            "BB%"
+        });
 
-    public boolean isRefreshingObjects() {
-        return false;
-    }
+        List objects2 = context.performQuery(q2);
 
-    public boolean isResolvingInherited() {
-        return false;
-    }
+        assertFalse("Incorrect results retrieved from cache - "
+                + "changed parameter set warrants a different cache key", objects1
+                .equals(objects2));
 
-    public int getPageSize() {
-        return 0;
-    }
+        NamedQuery q3 = new NamedQuery("ParameterizedQueryWithLocalCache");
 
-    public int getFetchLimit() {
-        return 0;
-    }
+        List objects3 = context.performQuery(q3);
 
-    public PrefetchTreeNode getPrefetchTree() {
-        return null;
-    }
+        assertFalse("Incorrect results retrieved from cache - "
+                + "changed parameter set warrants a different cache key", objects1
+                .equals(objects3));
+        assertFalse("Incorrect results retrieved from cache - "
+                + "changed parameter set warrants a different cache key", objects2
+                .equals(objects3));
 
+        blockQueries();
+
+        try {
+            // now rerun all queries and see that they are hitting the right cache...
+            List objects11 = context.performQuery(q1);
+            List objects21 = context.performQuery(q2);
+            List objects31 = context.performQuery(q3);
+
+            assertEquals(objects1, objects11);
+            assertEquals(objects2, objects21);
+            assertEquals(objects3, objects31);
+        }
+        finally {
+            unblockQueries();
+        }
+    }
 }

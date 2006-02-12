@@ -81,9 +81,7 @@ public class NamedQuery extends IndirectQuery {
 
     protected Map parameters;
 
-    // using Boolean instead of boolean to implement "trinary" logic - override with
-    // refresh, override with no-refresh, no override.
-    protected Boolean refreshOverride;
+    protected boolean forceNoCache;
 
     protected QueryMetadata metadata;
 
@@ -116,12 +114,24 @@ public class NamedQuery extends IndirectQuery {
 
         QueryMetadata info = super.getMetaData(resolver);
 
-        if (refreshOverride == null) {
+        if (!forceNoCache) {
+            return info;
+        }
+
+        String policy = info.getCachePolicy();
+        String override = null;
+        if (QueryMetadata.LOCAL_CACHE.equals(policy)) {
+            override = QueryMetadata.LOCAL_CACHE_REFRESH;
+        }
+        else if (QueryMetadata.SHARED_CACHE.equals(policy)) {
+            override = QueryMetadata.SHARED_CACHE_REFRESH;
+        }
+        else {
             return info;
         }
 
         QueryMetadataWrapper wrapper = new QueryMetadataWrapper(info);
-        wrapper.override(QueryMetadata.REFRESHING_OBJECTS_PROPERTY, refreshOverride);
+        wrapper.override(QueryMetadata.CACHE_POLICY_PROPERTY, override);
         return wrapper;
     }
 
@@ -202,18 +212,6 @@ public class NamedQuery extends IndirectQuery {
         return StringUtils.substringAfterLast(getClass().getName(), ".")
                 + ":"
                 + getName();
-    }
-
-    public Boolean getRefreshOverride() {
-        return refreshOverride;
-    }
-
-    /**
-     * Sets whether refreshing behavior of the target query should be overrdiden and if so -
-     * what value should be used.
-     */
-    public void setRefreshOverride(Boolean refreshOverride) {
-        this.refreshOverride = refreshOverride;
     }
 
     /**
@@ -318,5 +316,13 @@ public class NamedQuery extends IndirectQuery {
         }
 
         return hashCode;
+    }
+
+    public boolean isForceNoCache() {
+        return forceNoCache;
+    }
+
+    public void setForceNoCache(boolean forcingNoCache) {
+        this.forceNoCache = forcingNoCache;
     }
 }

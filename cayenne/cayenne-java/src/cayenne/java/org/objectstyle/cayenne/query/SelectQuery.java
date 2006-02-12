@@ -62,7 +62,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -70,6 +69,7 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.QueryBuilder;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
@@ -184,7 +184,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public QueryMetadata getMetaData(EntityResolver resolver) {
-        selectInfo.resolve(root, resolver);
+        selectInfo.resolve(root, resolver, getName());
 
         // must force DataRows if custom attributes are fetched
         if (isFetchingCustomAttributes()) {
@@ -351,21 +351,14 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         // This way the query clone can take advantage of caching. Fixes
         // problem reported in CAY-360.
 
-        if (name != null && name.equals("") == false) {
-            Iterator keyValuePairs = parameters.entrySet().iterator();
-            HashCodeBuilder parametersHash = new HashCodeBuilder();
+        if (!Util.isEmptyString(name)) {
+            StringBuffer buffer = new StringBuffer(name);
 
-            while (keyValuePairs.hasNext()) {
-                Map.Entry entry = (Map.Entry) keyValuePairs.next();
-
-                parametersHash.append(entry.getKey());
-                parametersHash.append(entry.getValue());
+            if (parameters != null && !parameters.isEmpty()) {
+                buffer.append(parameters.hashCode());
             }
 
-            query.setName("__CayenneInternalQuery__"
-                    + name
-                    + "__"
-                    + parametersHash.toHashCode());
+            query.setName(buffer.toString());
         }
 
         if (orderings != null) {

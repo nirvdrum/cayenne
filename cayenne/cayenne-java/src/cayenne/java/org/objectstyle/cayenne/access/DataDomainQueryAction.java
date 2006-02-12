@@ -231,19 +231,21 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
      * Wraps execution in shared cache checks
      */
     private final boolean interceptSharedCache() {
-
-        if (!QueryMetadata.SHARED_CACHE.equals(metadata.getCachePolicy())) {
+        String cacheKey = metadata.getCacheKey();
+        if (cacheKey == null) {
             return !DONE;
         }
 
-        if (query.getName() == null) {
-            throw new CayenneRuntimeException(
-                    "Caching of unnamed queries is not supported. Query: " + query);
+        boolean cache = QueryMetadata.SHARED_CACHE.equals(metadata.getCachePolicy());
+        boolean cacheOrCacheRefresh = cache
+                || QueryMetadata.SHARED_CACHE_REFRESH.equals(metadata.getCachePolicy());
+
+        if (!cacheOrCacheRefresh) {
+            return !DONE;
         }
 
-        if (!metadata.isRefreshingObjects()) {
-
-            List cachedRows = cache.getCachedSnapshots(query.getName());
+        if (cache) {
+            List cachedRows = this.cache.getCachedSnapshots(cacheKey);
 
             if (cachedRows != null) {
                 this.response = new BaseResponse();
@@ -260,7 +262,7 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
 
         List list = response.firstList();
         if (list != null) {
-            cache.cacheSnapshots(query.getName(), list);
+            this.cache.cacheSnapshots(cacheKey, list);
         }
 
         return DONE;

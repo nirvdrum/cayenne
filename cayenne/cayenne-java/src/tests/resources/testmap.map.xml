@@ -463,6 +463,14 @@ VALUES (512, 'No Painting Like This', 12.5)]]></sql>
 VALUES (#bind($id), #bind($title), #bind($price))]]></sql>
 		<sql adapter-class="org.objectstyle.cayenne.dba.db2.DB2Adapter"><![CDATA[INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE) values (#bind($id), #bind($title), #bind($price))]]></sql>
 	</query>
+	<query name="ParameterizedQueryWithLocalCache" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Artist">
+		<property name="cayenne.GenericSelectQuery.cachePolicy" value="localcache"/>
+		<qualifier><![CDATA[artistName like $name]]></qualifier>
+	</query>
+	<query name="ParaneterizedQueryWithSharedCache" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Artist">
+		<property name="cayenne.GenericSelectQuery.cachePolicy" value="sharedcache"/>
+		<qualifier><![CDATA[artistName like $name]]></qualifier>
+	</query>
 	<query name="ProcedureQuery" factory="org.objectstyle.cayenne.map.ProcedureQueryBuilder" root="procedure" root-name="cayenne_tst_select_proc" result-type="org.objectstyle.art.Artist">
 	</query>
 	<query name="QueryWithLocalCache" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Artist">
