@@ -60,7 +60,119 @@ import java.util.List;
 import org.objectstyle.cayenne.query.NamedQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-public class NamedQueryCachingTst extends CayenneTestCase {
+public class DataContextNamedQueryCachingTst extends CayenneTestCase {
+
+    public void testDataContextSharedCache() throws Exception {
+        deleteTestData();
+        createTestData("prepare");
+
+        DataContext context = createDataContext();
+
+        String cacheKey = "ParameterizedQueryWithSharedCache";
+
+        assertNull(context.getObjectStore().getCachedQueryResult(cacheKey));
+        context.performQuery("ParameterizedQueryWithSharedCache", false);
+
+        Object cached = getDomain().getSharedSnapshotCache().getCachedSnapshots(cacheKey);
+
+        assertNotNull(
+                "Failed to cache results of a NamedQuery that points to a caching query",
+                cached);
+
+        // get from cache
+        context.performQuery("ParameterizedQueryWithSharedCache", false);
+
+        assertSame(cached, getDomain().getSharedSnapshotCache().getCachedSnapshots(
+                cacheKey));
+
+        // refresh
+        context.performQuery("ParameterizedQueryWithSharedCache", true);
+
+        Object cached1 = getDomain()
+                .getSharedSnapshotCache()
+                .getCachedSnapshots(cacheKey);
+        assertNotNull(
+                "Failed to cache results of refreshing NamedQuery that points to a caching query",
+                cached1);
+
+        assertNotSame("Failed to refresh", cached, cached1);
+    }
+
+    public void testDataContextLocalCache() throws Exception {
+        deleteTestData();
+        createTestData("prepare");
+
+        DataContext context = createDataContext();
+
+        String cacheKey = "ParameterizedQueryWithLocalCache";
+
+        assertNull(context.getObjectStore().getCachedQueryResult(cacheKey));
+        context.performQuery("ParameterizedQueryWithLocalCache", false);
+
+        Object cached = context.getObjectStore().getCachedQueryResult(cacheKey);
+
+        assertNotNull(
+                "Failed to cache results of a NamedQuery that points to a caching query",
+                cached);
+
+        // get from cache
+        context.performQuery("ParameterizedQueryWithLocalCache", false);
+
+        assertSame(cached, context.getObjectStore().getCachedQueryResult(cacheKey));
+
+        // refresh
+        List fetchedCached1 = context.performQuery("ParameterizedQueryWithLocalCache", true);
+
+        Object cached1 = context.getObjectStore().getCachedQueryResult(cacheKey);
+        assertNotNull(
+                "Failed to cache results of refreshing NamedQuery that points to a caching query",
+                cached1);
+
+        assertNotSame("Failed to refresh", cached, cached1);
+        assertSame(cached1, fetchedCached1);
+        
+        List fetchedCached2 = context.performQuery("ParameterizedQueryWithLocalCache", false);
+        assertSame(fetchedCached1, fetchedCached2);
+    }
+
+    public void testSharedCache() throws Exception {
+        deleteTestData();
+        createTestData("prepare");
+
+        DataContext context = createDataContext();
+
+        NamedQuery q1 = new NamedQuery("ParameterizedQueryWithSharedCache");
+        String cacheKey = q1.getMetaData(context.getEntityResolver()).getCacheKey();
+
+        assertNull(context.getObjectStore().getCachedQueryResult(cacheKey));
+        context.performQuery(q1);
+
+        Object cached = getDomain().getSharedSnapshotCache().getCachedSnapshots(cacheKey);
+
+        assertNotNull(
+                "Failed to cache results of a NamedQuery that points to a caching query",
+                cached);
+
+        // get from cache
+        context.performQuery(q1);
+
+        assertSame(cached, getDomain().getSharedSnapshotCache().getCachedSnapshots(
+                cacheKey));
+
+        // refresh
+        q1.setForceNoCache(true);
+
+        context.performQuery(q1);
+
+        Object cached1 = getDomain()
+                .getSharedSnapshotCache()
+                .getCachedSnapshots(cacheKey);
+        assertNotNull(
+                "Failed to cache results of refreshing NamedQuery that points to a caching query",
+                cached1);
+
+        assertNotSame("Failed to refresh", cached, cached1);
+    }
 
     public void testLocalCache() throws Exception {
         deleteTestData();
@@ -73,9 +185,29 @@ public class NamedQueryCachingTst extends CayenneTestCase {
 
         assertNull(context.getObjectStore().getCachedQueryResult(cacheKey));
         context.performQuery(q1);
+
+        Object cached = context.getObjectStore().getCachedQueryResult(cacheKey);
+
         assertNotNull(
                 "Failed to cache results of a NamedQuery that points to a caching query",
-                context.getObjectStore().getCachedQueryResult(cacheKey));
+                cached);
+
+        // get from cache
+        context.performQuery(q1);
+
+        assertSame(cached, context.getObjectStore().getCachedQueryResult(cacheKey));
+
+        // refresh
+        q1.setForceNoCache(true);
+
+        context.performQuery(q1);
+
+        Object cached1 = context.getObjectStore().getCachedQueryResult(cacheKey);
+        assertNotNull(
+                "Failed to cache results of refreshing NamedQuery that points to a caching query",
+                cached1);
+
+        assertNotSame("Failed to refresh", cached, cached1);
     }
 
     public void testLocalCacheWithParameters() throws Exception {
@@ -130,5 +262,7 @@ public class NamedQueryCachingTst extends CayenneTestCase {
         finally {
             unblockQueries();
         }
+
     }
+
 }

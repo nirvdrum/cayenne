@@ -467,7 +467,7 @@ VALUES (#bind($id), #bind($title), #bind($price))]]></sql>
 		<property name="cayenne.GenericSelectQuery.cachePolicy" value="localcache"/>
 		<qualifier><![CDATA[artistName like $name]]></qualifier>
 	</query>
-	<query name="ParaneterizedQueryWithSharedCache" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Artist">
+	<query name="ParameterizedQueryWithSharedCache" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Artist">
 		<property name="cayenne.GenericSelectQuery.cachePolicy" value="sharedcache"/>
 		<qualifier><![CDATA[artistName like $name]]></qualifier>
 	</query>
