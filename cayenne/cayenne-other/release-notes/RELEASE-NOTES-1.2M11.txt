@@ -11,6 +11,9 @@ http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
 
 Changes/New Features:
 
+* Added two new types of cache policy - SHARED_CACHE_REFRESH and LOCAL_CACHE_REFRESH that force
+  cache refreshing when a query is run, but still cache the returned results.
+
 * Addressing concurrency issues in Derby PK generator.
 
 * Speeding up very slow Modeler attribute and relationship operations.
