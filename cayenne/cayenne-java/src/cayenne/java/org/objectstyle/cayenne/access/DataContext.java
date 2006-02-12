@@ -1417,12 +1417,12 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * @param queryName a name of a GenericSelectQuery defined in one of the DataMaps. If
      *            no such query is defined, this method will throw a
      *            CayenneRuntimeException.
-     * @param refresh A flag that determines whether refresh is required in case a query
-     *            uses caching.
+     * @param expireCachedLists A flag that determines whether refresh of <b>cached lists</b>
+     *            is required in case a query uses caching.
      * @since 1.1
      */
-    public List performQuery(String queryName, boolean refresh) {
-        return performQuery(queryName, Collections.EMPTY_MAP, refresh);
+    public List performQuery(String queryName, boolean expireCachedLists) {
+        return performQuery(queryName, Collections.EMPTY_MAP, expireCachedLists);
     }
 
     /**
@@ -1434,13 +1434,13 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      *            no such query is defined, this method will throw a
      *            CayenneRuntimeException.
      * @param parameters A map of parameters to use with stored query.
-     * @param refresh A flag that determines whether refresh is required in case a query
-     *            uses caching.
+     * @param expireCachedLists A flag that determines whether refresh of <b>cached lists</b>
+     *            is required in case a query uses caching.
      * @since 1.1
      */
-    public List performQuery(String queryName, Map parameters, boolean refresh) {
+    public List performQuery(String queryName, Map parameters, boolean expireCachedLists) {
         NamedQuery query = new NamedQuery(queryName, parameters);
-        query.setForceNoCache(refresh);
+        query.setForceNoCache(expireCachedLists);
         return performQuery(query);
     }
 
