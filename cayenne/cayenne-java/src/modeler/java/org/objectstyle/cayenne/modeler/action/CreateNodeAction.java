@@ -57,6 +57,8 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
+import javax.sql.DataSource;
+
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
@@ -97,13 +99,6 @@ public class CreateNodeAction extends CayenneAction {
      * @see org.objectstyle.cayenne.modeler.util.CayenneAction#performAction(ActionEvent)
      */
     public void performAction(ActionEvent e) {
-        createDataNode();
-    }
-
-    /**
-     * Creates a new DataNode, notifying listeners of this event.
-     */
-    protected DataNode createDataNode() {
         ProjectController mediator = getProjectController();
         DataDomain domain = mediator.getCurrentDataDomain();
 
@@ -112,8 +107,6 @@ public class CreateNodeAction extends CayenneAction {
         DataNode node = buildDataNode();
         mediator.fireDataNodeEvent(new DataNodeEvent(this, node, DataNodeEvent.ADD));
         mediator.fireDataNodeDisplayEvent(new DataNodeDisplayEvent(this, domain, node));
-
-        return node;
     }
 
     /**
@@ -125,10 +118,7 @@ public class CreateNodeAction extends CayenneAction {
 
         // use domain name as DataNode base, as node names must be unique across the
         // project...
-        DataNode node = (DataNode) NamedObjectFactory.createObject(
-                DataNode.class,
-                domain,
-                domain.getName() + "Node");
+        DataNode node = createDataNode(domain);
 
         ProjectDataSource src = new ProjectDataSource(new DataSourceInfo());
         node.setDataSource(src);
@@ -139,6 +129,24 @@ public class CreateNodeAction extends CayenneAction {
 
         domain.addNode(node);
         return node;
+    }
+
+    /**
+     * A factory method that makes a new DataNode.
+     */
+    protected DataNode createDataNode(DataDomain domain) {
+        String name = NamedObjectFactory.createName(DataNode.class, domain, domain
+                .getName()
+                + "Node");
+
+        // ensure that DataNode exposes DataSource directly, so that UI widgets could work
+        // with it.
+        return new DataNode(name) {
+
+            public DataSource getDataSource() {
+                return dataSource;
+            }
+        };
     }
 
     /**

@@ -260,6 +260,15 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             return null;
         }
     }
+    
+    /**
+     * Creates a new DataNode. Subclasses may override this method to provide a custom node class.
+     * 
+     * @since 1.
+     */
+    protected DataNode createDataNode(String nodeName) {
+        return new DataNode(nodeName);
+    }
 
     public void shouldLoadDataNode(
             String domainName,
@@ -295,7 +304,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             }
         }
 
-        DataNode node = new DataNode(nodeName);
+        DataNode node = createDataNode(nodeName);
 
         node.setDataSourceFactory(factory);
         node.setDataSourceLocation(dataSource);

@@ -3,6 +3,8 @@ package org.objectstyle.cayenne.modeler.action;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.objectstyle.cayenne.ConfigurationException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
@@ -60,5 +62,18 @@ class ModelerProjectLoadDelegate extends RuntimeLoadDelegate {
                 throw new ConfigurationException("Domain is not loaded: " + domainName);
             }
         }
+    }
+
+    /**
+     * Creates a subclass of the DataNode that does not decorate its DataSource, exposing
+     * the version that was set on it.
+     */
+    protected DataNode createDataNode(String nodeName) {
+        return new DataNode(nodeName) {
+
+            public DataSource getDataSource() {
+                return dataSource;
+            }
+        };
     }
 }
