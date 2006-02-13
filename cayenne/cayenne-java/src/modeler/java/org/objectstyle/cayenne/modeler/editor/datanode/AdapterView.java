@@ -73,7 +73,7 @@ public class AdapterView extends JPanel {
         // assemble
 
         DefaultFormBuilder topPanelBuilder = new DefaultFormBuilder(new FormLayout(
-                "right:80dlu, 3dlu, fill:200dlu",
+                "right:pref, 3dlu, fill:200dlu",
                 ""));
         topPanelBuilder.setDefaultDialogBorder();
 
