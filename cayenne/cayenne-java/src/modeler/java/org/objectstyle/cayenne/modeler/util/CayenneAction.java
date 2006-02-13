@@ -87,6 +87,13 @@ public abstract class CayenneAction extends AbstractAction {
      * Creates a named CayenneAction.
      */
     public CayenneAction(String name, Application application) {
+        this(name, application, name);
+    }
+
+    /**
+     * Creates a named CayenneAction.
+     */
+    public CayenneAction(String name, Application application, String shortDescription) {
         super(name);
         super.putValue(Action.DEFAULT, name);
 
@@ -100,6 +107,10 @@ public abstract class CayenneAction extends AbstractAction {
         KeyStroke accelerator = getAcceleratorKey();
         if (accelerator != null) {
             super.putValue(Action.ACCELERATOR_KEY, accelerator);
+        }
+        
+        if (shortDescription != null && shortDescription.length() > 0) {
+            super.putValue(Action.SHORT_DESCRIPTION, shortDescription);
         }
 
         setEnabled(false);
