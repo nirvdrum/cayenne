@@ -55,9 +55,12 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.Collection;
 import java.util.List;
 
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.query.NamedQuery;
+import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class DataContextNamedQueryCachingTst extends CayenneTestCase {
@@ -74,6 +77,7 @@ public class DataContextNamedQueryCachingTst extends CayenneTestCase {
         context.performQuery("ParameterizedQueryWithSharedCache", false);
 
         Object cached = getDomain().getSharedSnapshotCache().getCachedSnapshots(cacheKey);
+        assertEquals(4, ((Collection) cached).size());
 
         assertNotNull(
                 "Failed to cache results of a NamedQuery that points to a caching query",
@@ -85,8 +89,14 @@ public class DataContextNamedQueryCachingTst extends CayenneTestCase {
         assertSame(cached, getDomain().getSharedSnapshotCache().getCachedSnapshots(
                 cacheKey));
 
+        // delete one record
+        int[] counts = context.performNonSelectingQuery(new SQLTemplate(
+                Artist.class,
+                "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME) VALUES (5, 'XX')"));
+        assertEquals(1, counts[0]);
+
         // refresh
-        context.performQuery("ParameterizedQueryWithSharedCache", true);
+        List objects1 = context.performQuery("ParameterizedQueryWithSharedCache", true);
 
         Object cached1 = getDomain()
                 .getSharedSnapshotCache()
@@ -96,6 +106,8 @@ public class DataContextNamedQueryCachingTst extends CayenneTestCase {
                 cached1);
 
         assertNotSame("Failed to refresh", cached, cached1);
+        assertEquals(5, ((Collection) cached1).size());
+        assertEquals(5, objects1.size());
     }
 
     public void testDataContextLocalCache() throws Exception {
@@ -121,7 +133,9 @@ public class DataContextNamedQueryCachingTst extends CayenneTestCase {
         assertSame(cached, context.getObjectStore().getCachedQueryResult(cacheKey));
 
         // refresh
-        List fetchedCached1 = context.performQuery("ParameterizedQueryWithLocalCache", true);
+        List fetchedCached1 = context.performQuery(
+                "ParameterizedQueryWithLocalCache",
+                true);
 
         Object cached1 = context.getObjectStore().getCachedQueryResult(cacheKey);
         assertNotNull(
@@ -130,8 +144,10 @@ public class DataContextNamedQueryCachingTst extends CayenneTestCase {
 
         assertNotSame("Failed to refresh", cached, cached1);
         assertSame(cached1, fetchedCached1);
-        
-        List fetchedCached2 = context.performQuery("ParameterizedQueryWithLocalCache", false);
+
+        List fetchedCached2 = context.performQuery(
+                "ParameterizedQueryWithLocalCache",
+                false);
         assertSame(fetchedCached1, fetchedCached2);
     }
 
