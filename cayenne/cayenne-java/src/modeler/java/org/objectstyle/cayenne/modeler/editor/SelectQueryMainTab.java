@@ -225,7 +225,9 @@ public class SelectQueryMainTab extends JPanel {
     }
 
     protected SelectQuery getQuery() {
-        return (SelectQuery) mediator.getCurrentQuery();
+        return (mediator.getCurrentQuery() instanceof SelectQuery)
+                ? (SelectQuery) mediator.getCurrentQuery()
+                : null;
     }
 
     /**
