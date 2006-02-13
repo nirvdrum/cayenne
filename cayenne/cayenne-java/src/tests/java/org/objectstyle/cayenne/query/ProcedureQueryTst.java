@@ -86,12 +86,12 @@ public class ProcedureQueryTst extends TestCase {
         assertEquals(params, clone.getParameters());
     }
 
-    public void testResultType() {
+    public void testResultEntityName() {
         ProcedureQuery query = new ProcedureQuery();
-        assertNull(query.getResultClassName());
+        assertNull(query.getResultEntityName());
 
-        query.setResultClassName("abc.AAAA");
-        assertSame("abc.AAAA", query.getResultClassName());
+        query.setResultEntityName("abc.AAAA");
+        assertSame("abc.AAAA", query.getResultEntityName());
     }
 
     public void testResultDescriptors() {

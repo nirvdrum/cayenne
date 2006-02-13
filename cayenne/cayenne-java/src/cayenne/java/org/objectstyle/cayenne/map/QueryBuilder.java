@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.map;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -92,8 +93,8 @@ public abstract class QueryBuilder {
     protected DataMap dataMap;
     protected String rootType;
     protected String rootName;
-    protected String resultType;
     protected boolean selecting = true;
+    protected String resultEntity;
 
     /**
      * Builds a Query object based on internal configuration information.
@@ -140,8 +141,28 @@ public abstract class QueryBuilder {
         this.selecting = ("false".equalsIgnoreCase(selecting)) ? false : true;
     }
 
+    /**
+     * @deprecated since 1.2
+     */
     public void setResultType(String resultType) {
-        this.resultType = resultType;
+        this.resultEntity = null;
+
+        if (resultType != null) {
+
+            // find entity with matching class name
+            Iterator it = dataMap.getObjEntities().iterator();
+            while (it.hasNext()) {
+                ObjEntity next = (ObjEntity) it.next();
+                if(resultType.equals(next.getClassName())) {
+                    this.resultEntity = next.getName();
+                    break;
+                }
+            }
+        }
+    }
+
+    public void setResultEntity(String resultEntity) {
+        this.resultEntity = resultEntity;
     }
 
     /**
@@ -187,6 +208,9 @@ public abstract class QueryBuilder {
         properties.put(name, value);
     }
 
+    /**
+     * @deprecated since 1.2 unused.
+     */
     public void addResultColumn(String label, String dbType, String objectType) {
         if (resultColumns == null) {
             resultColumns = new ArrayList();

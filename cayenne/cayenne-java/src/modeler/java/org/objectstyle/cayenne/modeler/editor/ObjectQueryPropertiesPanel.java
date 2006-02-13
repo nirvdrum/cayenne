@@ -131,6 +131,9 @@ public class ObjectQueryPropertiesPanel extends SelectPropertiesPanel {
     public void initFromModel(Query query) {
         super.initFromModel(query);
 
-        dataRows.setSelected(query.getMetaData(null).isFetchingDataRows());
+        dataRows
+                .setSelected(query
+                        .getMetaData(mediator.getCurrentDataDomain().getEntityResolver())
+                        .isFetchingDataRows());
     }
 }

@@ -149,26 +149,16 @@ hierarchy.
 Defines a Cayenne Query that can be either at the DataMap
 level, or linked to an entity or procedure.
 -->
-<!ELEMENT query (property*, result-column*, (sql* | (qualifier?, ordering*, prefetch*)?) >
+<!ELEMENT query (property*, (sql* | (qualifier?, ordering*, prefetch*)?) >
 <!ATTLIST query
         name CDATA #REQUIRED
         factory CDATA #REQUIRED
 		root (db-entity | obj-entity | procedure | data-map | java-class) "data-map"
         root-name CDATA #IMPLIED
-        result-class CDATA #IMPLIED
-        selecting (true | false) "true"
+        result-entity CDATA #IMPLIED
 >
 
-<!-- ===================================================
-Defines a query ResultSet column. This can be viewed as 
-a stripped down combination of ObjAttribute and DbAttribute. 
--->
-<!ELEMENT result-column>
-<!ATTLIST result-column
-	label CDATA #IMPLIED
-	db-type CDATA #REQUIRED
-	java-type CDATA #REQUIRED
->
+
 
 <!-- ===================================================
 Defines a query qualifier, normally an encoded expression

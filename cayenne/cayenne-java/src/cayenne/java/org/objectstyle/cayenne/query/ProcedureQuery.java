@@ -63,13 +63,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.jdbc.ColumnDescriptor;
 import org.objectstyle.cayenne.access.jdbc.RowDescriptor;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.QueryBuilder;
-import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
@@ -103,8 +102,19 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * If set, allows to fetch results as DataObjects.
      * 
      * @since 1.1
+     * @deprecated since 1.2 'resultEntityName' must be used.
      */
     protected String resultClassName;
+
+    /**
+     * @since 1.2
+     */
+    protected String resultEntityName;
+
+    /**
+     * @since 1.2
+     */
+    protected Class resultClass;
 
     protected Map parameters = new HashMap();
     protected boolean selecting;
@@ -159,6 +169,10 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      */
     public ProcedureQuery(Procedure procedure, Class resultType) {
         setRoot(procedure);
+
+        this.resultClass = resultType;
+
+        // call this for backwards compatibility
         setResultClassName(resultType != null ? resultType.getName() : null);
     }
 
@@ -175,6 +189,9 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      */
     public ProcedureQuery(String procedureName, Class resultType) {
         setRoot(procedureName);
+
+        this.resultClass = resultType;
+
         setResultClassName(resultType != null ? resultType.getName() : null);
     }
 
@@ -182,7 +199,10 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public QueryMetadata getMetaData(EntityResolver resolver) {
-        metaData.resolve(root, getResultClass(), resolver, getName());
+
+        metaData.resolve(root, resultClass != null
+                ? (Object) resultClass
+                : resultEntityName, resolver, getName());
         return metaData;
     }
 
@@ -279,9 +299,9 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
             encoder.print(rootString);
         }
 
-        if (resultClassName != null) {
-            encoder.print("\" result-type=\"");
-            encoder.print(resultClassName);
+        if (resultEntityName != null) {
+            encoder.print("\" result-entity=\"");
+            encoder.print(resultEntityName);
         }
 
         if (!selecting) {
@@ -313,6 +333,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
         }
 
         query.setResultClassName(resultClassName);
+        query.setResultEntityName(resultEntityName);
         query.metaData.copyFromInfo(this.metaData);
         query.setParameters(parameters);
 
@@ -421,6 +442,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * Returns an optional result type of the query.
      * 
      * @since 1.1
+     * @deprecated since 1.2 use {@link #getResultEntityName()}
      */
     public String getResultClassName() {
         return resultClassName;
@@ -429,32 +451,11 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     /**
      * Returns Java class of the DataObjects returned by this query.
      * 
-     * @deprecated since 1.2 - using thread ClassLoader implicitly.
+     * @deprecated since 1.2
      * @since 1.1
      */
     public Class getResultClass(ClassLoader classLoader) {
-        return getResultClass();
-    }
-
-    /**
-     * Returns Java class of the DataObjects returned by this query.
-     * 
-     * @since 1.2
-     */
-    public Class getResultClass() {
-        if (this.getResultClassName() == null) {
-            return null;
-        }
-
-        try {
-            return Util.getJavaClass(getResultClassName());
-        }
-        catch (ClassNotFoundException e) {
-            throw new CayenneRuntimeException("Failed to load class for name '"
-                    + this.getResultClassName()
-                    + "': "
-                    + e.getMessage(), e);
-        }
+        return resultClass;
     }
 
     /**
@@ -462,6 +463,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * DataObject implementation mapped in Cayenne.
      * 
      * @since 1.1
+     * @deprecated since 1.2 use {@link #setResultEntityName(String)}
      */
     public void setResultClassName(String resultClassName) {
         this.resultClassName = resultClassName;
@@ -527,5 +529,19 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      */
     public void clearPrefetches() {
         metaData.clearPrefetches();
+    }
+
+    /**
+     * @since 1.2
+     */
+    public String getResultEntityName() {
+        return resultEntityName;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setResultEntityName(String resultEntityName) {
+        this.resultEntityName = resultEntityName;
     }
 }

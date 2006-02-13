@@ -268,34 +268,25 @@ public class ProcedureQueryView extends JPanel {
      * Returns an entity that maps to a procedure query result class.
      */
     ObjEntity getEntity(ProcedureQuery query) {
-        String resultClass = query.getResultClassName();
-        if (resultClass == null) {
+        String entityName = query.getResultEntityName();
+        if (entityName == null) {
             return null;
         }
-
-        // currently entity resolver doesn't support lookup by class name
-        // we will have to do manual ObjEntity scan...
-        // TODO: replace this once such indexing is supported
 
         DataMap map = mediator.getCurrentDataMap();
         if (map == null) {
             return null;
         }
 
-        return map.getObjEntityForJavaClass(resultClass);
+        return map.getObjEntity(entityName);
     }
 
     void setEntity(ObjEntity entity) {
         Query query = mediator.getCurrentQuery();
         if (query instanceof ProcedureQuery) {
             ProcedureQuery procedureQuery = (ProcedureQuery) query;
-            String resultClass = null;
 
-            if (entity != null) {
-                resultClass = entity.getClassName();
-            }
-
-            procedureQuery.setResultClassName(resultClass);
+            procedureQuery.setResultEntityName(entity != null ? entity.getName() : null);
             mediator.fireQueryEvent(new QueryEvent(this, procedureQuery));
         }
     }

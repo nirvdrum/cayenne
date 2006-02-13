@@ -80,7 +80,7 @@ class ProcedureQueryBuilder extends QueryBuilder {
         }
 
         query.setName(name);
-        query.setResultClassName(resultType);
+        query.setResultEntityName(resultEntity);
         query.initWithProperties(properties);
 
         return query;

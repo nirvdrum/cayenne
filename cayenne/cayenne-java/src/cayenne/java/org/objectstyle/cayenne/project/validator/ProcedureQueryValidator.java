@@ -147,7 +147,7 @@ public class ProcedureQueryValidator extends TreeNodeValidator {
 
         if (query.isSelecting()
                 && !query.isFetchingDataRows()
-                && query.getResultClassName() == null) {
+                && query.getResultEntityName() == null) {
             validator.registerWarning(
                     "Missing result entity for Procedure query fetching DataObjects.",
                     path);

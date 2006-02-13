@@ -82,7 +82,7 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class MapLoader extends DefaultHandler {
 
-   // private static final Logger logObj = Logger.getLogger(MapLoader.class);
+    // private static final Logger logObj = Logger.getLogger(MapLoader.class);
 
     public static final String DATA_MAP_TAG = "data-map";
     public static final String PROPERTY_TAG = "property";
@@ -101,6 +101,10 @@ public class MapLoader extends DefaultHandler {
 
     // Query-related
     public static final String QUERY_TAG = "query";
+
+    /**
+     * @deprecated since 1.2 unused
+     */
     public static final String QUERY_RESULT_COLUMN_TAG = "result-column";
     public static final String QUERY_SQL_TAG = "sql";
     public static final String QUERY_QUALIFIER_TAG = "qualifier";
@@ -277,9 +281,6 @@ public class MapLoader extends DefaultHandler {
         }
         else if (localName.equals(QUERY_TAG)) {
             processStartQuery(attributes);
-        }
-        else if (localName.equals(QUERY_RESULT_COLUMN_TAG)) {
-            processStartQueryResultColumn(attributes);
         }
         else if (localName.equals(QUERY_SQL_TAG)) {
             charactersBuffer = new StringBuffer();
@@ -709,12 +710,21 @@ public class MapLoader extends DefaultHandler {
         String rootType = attributes.getValue("", "root");
         String rootName = attributes.getValue("", "root-name");
         String resultType = attributes.getValue("", "result-type");
+        String resultEntity = attributes.getValue("", "result-entity");
         String selecting = attributes.getValue("", "selecting");
 
         queryBuilder.setName(name);
         queryBuilder.setRoot(dataMap, rootType, rootName);
         queryBuilder.setSelecting(selecting);
-        queryBuilder.setResultType(resultType);
+
+        // TODO: Andrus, 2/13/2006 'result-type' is only used in ProcedureQuery and is
+        // deprecated in 1.2
+        if (Util.isEmptyString(resultEntity)) {
+            queryBuilder.setResultType(resultType);
+        }
+        else {
+            queryBuilder.setResultEntity(resultEntity);
+        }
     }
 
     private void processStartQueryProperty(Attributes attributes) throws SAXException {
@@ -751,28 +761,6 @@ public class MapLoader extends DefaultHandler {
         }
 
         mapProperties.put(name, value);
-    }
-
-    private void processStartQueryResultColumn(Attributes attributes) throws SAXException {
-        String label = attributes.getValue("", "label");
-        if (label == null) {
-            throw new SAXException(
-                    "MapLoader::processStartQueryResultColumn(), no label.");
-        }
-
-        String dbType = attributes.getValue("", "db-type");
-        if (dbType == null) {
-            throw new SAXException(
-                    "MapLoader::processStartQueryResultColumn(), no db-type.");
-        }
-
-        String javaType = attributes.getValue("", "java-type");
-        if (javaType == null) {
-            throw new SAXException(
-                    "MapLoader::processStartQueryResultColumn(), no java-type.");
-        }
-
-        queryBuilder.addResultColumn(label, dbType, javaType);
     }
 
     private void processEndQueryPrefetch() {

@@ -71,6 +71,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
@@ -163,13 +164,14 @@ public abstract class SelectPropertiesPanel extends JPanel {
      * query is changed.
      */
     public void initFromModel(Query query) {
+        EntityResolver resolver = mediator.getCurrentDataDomain().getEntityResolver();
         DefaultComboBoxModel cacheModel = new DefaultComboBoxModel(CACHE_POLICIES);
-        cacheModel.setSelectedItem(query.getMetaData(null).getCachePolicy());
+        cacheModel.setSelectedItem(query.getMetaData(resolver).getCachePolicy());
         cachePolicy.setModel(cacheModel);
 
-        fetchLimit.setText(String.valueOf(query.getMetaData(null).getFetchLimit()));
-        pageSize.setText(String.valueOf(query.getMetaData(null).getPageSize()));
-        refreshesResults.setSelected(query.getMetaData(null).isRefreshingObjects());
+        fetchLimit.setText(String.valueOf(query.getMetaData(resolver).getFetchLimit()));
+        pageSize.setText(String.valueOf(query.getMetaData(resolver).getPageSize()));
+        refreshesResults.setSelected(query.getMetaData(resolver).isRefreshingObjects());
     }
 
     void setFetchLimit(String string) {

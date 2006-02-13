@@ -71,8 +71,8 @@ class ProcedureQueryMetadata extends BaseQueryMetadata {
         super.copyFromInfo(info);
     }
 
-    void resolve(Object root, Class rootClass, EntityResolver resolver, String cacheKey) {
-        if (super.resolve(rootClass, resolver, cacheKey)) {
+    void resolve(Object root, Object resultRoot, EntityResolver resolver, String cacheKey) {
+        if (super.resolve(resultRoot, resolver, cacheKey)) {
             procedure = null;
 
             if (root != null) {
