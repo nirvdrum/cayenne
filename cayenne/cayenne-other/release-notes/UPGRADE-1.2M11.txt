@@ -2,6 +2,17 @@ Cayenne Upgrade Information 1.2 M11 milestone
 Date: 
 ============================================
 
+UPGRADE FROM M10:
+
+* GenericSelectQuery is deprecated. All constants it declares are moved to a new interface QueryMetadata.
+
+* To force refresh of cached query results, one of the two new cache policies should be used 
+  instead of "setRefreshingObjects(..)" ("setRefreshingObjects" should only be used for its
+  original purpose - refreshing individual objects, not list contents). 
+  
+  http://objectstyle.org/confluence/display/CAYDOC/Caching+Query+Results
+
+
 GENERAL UPGRADE NOTES:
 
 *  WARNING: Most API deprecated in 1.1 is removed from 1.2.
@@ -71,3 +82,9 @@ UPGRADE FROM 1.1:
   users. Only if you (a) implemented custom transactions and (b) manually manage their commit/rollback, 
   you will also have to bind and unbind such Transactions to the current thread manually, for Cayenne stack 
   classes to pick them up.
+  
+* To force refresh of cached query results, one of the two new cache policies should be used 
+  instead of "setRefreshingObjects(..)" ("setRefreshingObjects" should only be used for its
+  original purpose - refreshing individual objects, not list contents). 
+  
+  http://objectstyle.org/confluence/display/CAYDOC/Caching+Query+Results
