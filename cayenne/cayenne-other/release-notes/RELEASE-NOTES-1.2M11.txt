@@ -72,4 +72,11 @@ CAY-422	Deferred propagated key error on M10
 CAY-417	Prefetching one-to-one throws an exception
 CAY-420	TypesMapping.getSqlTypeByJava(byte[]) doesn't work
 CAY-416	batch updated -1 rows
+CAY-427	DataDomainView.java--label truncation (Container-Managed Transactions)
+CAY-428	AdapterView -- label truncation; requires changing FormLayout setting
+CAY-426	Label truncation in DBEntityTab; change FormLayout column values
+CAY-409	XMLEncoder drops synthetic root for singleton collections
+CAY-425	ObjEntityTab.java--add tooltip to "Sync" button; correct button size in layout
+CAY-424	Tooltips for all toolbar buttons in Modeler
+CAY-423	ShortDescription misspelled in cayennemodeler-string.properties
 
