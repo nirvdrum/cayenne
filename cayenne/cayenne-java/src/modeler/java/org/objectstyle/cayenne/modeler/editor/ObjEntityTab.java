@@ -202,6 +202,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         tableLabel = CayenneWidgetFactory.createLabelButton("Table/View:");
         syncWithDbEntityButton = CayenneWidgetFactory.createButton("Sync w/DbEntity");
         syncWithDbEntityButton.setIcon(ModelerUtil.buildIcon("icon-sync.gif"));
+        syncWithDbEntityButton.setToolTipText("Sync this ObjEntity with its DBEntity");
 
         serverOnly = new JCheckBox();
         clientClassName = new TextAdapter(new JTextField()) {
@@ -219,7 +220,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
 
         // assemble
         FormLayout layout = new FormLayout(
-                "right:70dlu, 3dlu, fill:135dlu, 3dlu, fill:63dlu",
+                "right:70dlu, 3dlu, fill:135dlu, 3dlu, pref",
                 "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();

@@ -188,7 +188,7 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
                 PK_CUSTOM_SEQUENCE_GENERATOR);
 
         // assemble
-        FormLayout layout = new FormLayout("right:70dlu, 3dlu, fill:200dlu", "");
+        FormLayout layout = new FormLayout("right:pref, 3dlu, fill:200dlu", "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 

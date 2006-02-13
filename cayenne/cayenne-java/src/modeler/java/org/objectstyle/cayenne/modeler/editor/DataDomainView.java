@@ -147,7 +147,7 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
         // assemble
         CellConstraints cc = new CellConstraints();
         FormLayout layout = new FormLayout(
-                "right:100dlu, 3dlu, fill:50dlu, 3dlu, fill:47dlu, 3dlu, fill:100",
+                "right:pref, 3dlu, fill:50dlu, 3dlu, fill:47dlu, 3dlu, fill:100",
                 "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p");
 
         PanelBuilder builder = new PanelBuilder(layout);
