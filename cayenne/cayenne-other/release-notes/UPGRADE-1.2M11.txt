@@ -4,6 +4,9 @@ Date:
 
 UPGRADE FROM M10:
 
+* If you are using remote persistence features, you will need to regenate the classes as the 
+  default template has changed.
+
 * GenericSelectQuery is deprecated. All constants it declares are moved to a new interface QueryMetadata.
 
 * To force refresh of cached query results, one of the two new cache policies should be used 
