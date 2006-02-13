@@ -175,7 +175,11 @@ public class XMLEncoder {
                 encodeProperty(rootTag, object);
             }
 
-            return nodeToString(getRootNode());
+            if (object instanceof Collection) {
+                return nodeToString(getRootNode(true));
+            } else {
+                return nodeToString(getRootNode(false));
+            }
         }
         finally {
             // make sure we can restart the encoder...
@@ -191,7 +195,7 @@ public class XMLEncoder {
      *             the run.
      */
     public String getXml() {
-        return nodeToString(getRootNode());
+        return nodeToString(getRootNode(false));
     }
 
     /**
@@ -213,14 +217,15 @@ public class XMLEncoder {
     /**
      * Returns a root DOM node of the encoder.
      */
-    Node getRootNode() {
+    Node getRootNode(boolean forceSyntheticRoot) {
         if (document == null) {
             return null;
         }
 
         // if synthetic root has a single child, use child as a root
         Node root = document.getDocumentElement();
-        if (root.getChildNodes().getLength() == 1) {
+        
+        if (!forceSyntheticRoot && root.getChildNodes().getLength() == 1) {
             root = root.getFirstChild();
         }
 

@@ -88,7 +88,7 @@ public class XMLEncoderTst extends TestCase {
 
         encoder.setRoot("Test", test.getClass().getName());
         encoder.encodeProperty("children", test.getChildren());
-        String result = encoder.nodeToString(encoder.getRootNode());
+        String result = encoder.nodeToString(encoder.getRootNode(false));
 
         BufferedReader in = new BufferedReader(new InputStreamReader(CayenneTestResources
                 .getResource(XML_DATA_DIR + "encoded-simple-collection.xml")));
