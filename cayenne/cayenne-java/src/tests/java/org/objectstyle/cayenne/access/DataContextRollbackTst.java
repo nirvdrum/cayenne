@@ -166,7 +166,7 @@ public class DataContextRollbackTst extends DataContextTestBase {
         assertEquals(0, artist.getPaintingArray().size());
         context.rollbackChanges();
 
-        assertTrue(((ToManyList) artist.getPaintingArray()).needsFetch());
+        assertTrue(((ToManyList) artist.getPaintingArray()).isFault());
         assertEquals(1, artist.getPaintingArray().size());
         assertEquals(artist, painting.getToArtist());
 

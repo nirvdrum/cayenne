@@ -87,7 +87,7 @@ public class ToManyListTst extends CayenneTestCase {
     public void testNewAddRemove() throws Exception {
         ToManyList list = createForNewArtist();
         assertFalse("Expected resolved list when created with a new object", list
-                .needsFetch());
+                .isFault());
         assertEquals(0, list.size());
 
         Painting p1 = (Painting) context.createAndRegisterNewObject(Painting.class);
@@ -110,27 +110,27 @@ public class ToManyListTst extends CayenneTestCase {
         ((Artist) list.getRelationshipOwner())
                 .setPersistenceState(PersistenceState.MODIFIED);
 
-        assertTrue("List must be unresolved for an existing object", list.needsFetch());
+        assertTrue("List must be unresolved for an existing object", list.isFault());
 
         Painting p1 = (Painting) context.createAndRegisterNewObject(Painting.class);
         list.add(p1);
-        assertTrue("List must be unresolved when adding an object...", list.needsFetch());
+        assertTrue("List must be unresolved when adding an object...", list.isFault());
         assertTrue(list.addedToUnresolved.contains(p1));
 
         Painting p2 = (Painting) context.createAndRegisterNewObject(Painting.class);
         list.add(p2);
-        assertTrue("List must be unresolved when adding an object...", list.needsFetch());
+        assertTrue("List must be unresolved when adding an object...", list.isFault());
         assertTrue(list.addedToUnresolved.contains(p2));
 
         list.remove(p1);
         assertTrue("List must be unresolved when removing an object...", list
-                .needsFetch());
+                .isFault());
         assertFalse(list.addedToUnresolved.contains(p1));
         assertTrue(list.removedFromUnresolved.contains(p1));
 
         // now resolve
         int size = list.size();
-        assertFalse("List must be resolved after checking a size...", list.needsFetch());
+        assertFalse("List must be resolved after checking a size...", list.isFault());
         assertEquals(1, size);
         assertTrue(list.objectList.contains(p2));
     }
@@ -152,19 +152,19 @@ public class ToManyListTst extends CayenneTestCase {
         ((Artist) list.getRelationshipOwner())
                 .setPersistenceState(PersistenceState.MODIFIED);
 
-        assertTrue("List must be unresolved...", list.needsFetch());
+        assertTrue("List must be unresolved...", list.isFault());
         list.add(p1);
-        assertTrue("List must be unresolved when adding an object...", list.needsFetch());
+        assertTrue("List must be unresolved when adding an object...", list.isFault());
         assertTrue(list.addedToUnresolved.contains(p1));
 
         Painting p2 = (Painting) context.createAndRegisterNewObject(Painting.class);
         list.add(p2);
-        assertTrue("List must be unresolved when adding an object...", list.needsFetch());
+        assertTrue("List must be unresolved when adding an object...", list.isFault());
         assertTrue(list.addedToUnresolved.contains(p2));
 
         // now resolve the list and see how merge worked
         int size = list.size();
-        assertFalse("List must be resolved after checking a size...", list.needsFetch());
+        assertFalse("List must be resolved after checking a size...", list.isFault());
         assertEquals(2, size);
         assertTrue(list.objectList.contains(p2));
         assertTrue(list.objectList.contains(p1));
@@ -190,10 +190,10 @@ public class ToManyListTst extends CayenneTestCase {
         ((Artist) list.getRelationshipOwner())
                 .setPersistenceState(PersistenceState.MODIFIED);
 
-        assertTrue("List must be unresolved...", list.needsFetch());
+        assertTrue("List must be unresolved...", list.isFault());
         list.add(p1);
         list.add(p2);
-        assertTrue("List must be unresolved when adding an object...", list.needsFetch());
+        assertTrue("List must be unresolved when adding an object...", list.isFault());
         assertTrue(list.addedToUnresolved.contains(p2));
         assertTrue(list.addedToUnresolved.contains(p1));
 
@@ -202,16 +202,16 @@ public class ToManyListTst extends CayenneTestCase {
         context.deleteObject(p2);
         context.commitChanges();
 
-        assertTrue("List must be unresolved...", list.needsFetch());
+        assertTrue("List must be unresolved...", list.isFault());
         assertTrue(
                 "List must be unresolved when an object was deleted externally...",
-                list.needsFetch());
+                list.isFault());
         assertTrue(list.addedToUnresolved.contains(p2));
         assertTrue(list.addedToUnresolved.contains(p1));
 
         // now resolve the list and see how merge worked
         int size = list.size();
-        assertFalse("List must be resolved after checking a size...", list.needsFetch());
+        assertFalse("List must be resolved after checking a size...", list.isFault());
         assertEquals("Deleted object must have been purged...", 1, size);
         assertTrue(list.objectList.contains(p1));
         assertFalse("Deleted object must have been purged...", list.objectList
@@ -229,21 +229,21 @@ public class ToManyListTst extends CayenneTestCase {
         context.invalidateObjects(Collections.singletonList(artist));
 
         ToManyList list = (ToManyList) artist.getPaintingArray();
-        assertTrue("List must be unresolved...", list.needsFetch());
+        assertTrue("List must be unresolved...", list.isFault());
 
         Painting p2 = (Painting) context.createAndRegisterNewObject(Painting.class);
         p2.setPaintingTitle("p2");
 
         artist.addToPaintingArray(p1);
         artist.addToPaintingArray(p2);
-        assertTrue("List must be unresolved...", list.needsFetch());
+        assertTrue("List must be unresolved...", list.isFault());
 
         context.commitChanges();
 
-        assertTrue("List must be unresolved...", list.needsFetch());
+        assertTrue("List must be unresolved...", list.isFault());
 
         int size = list.size();
-        assertFalse("List must be resolved...", list.needsFetch());
+        assertFalse("List must be resolved...", list.isFault());
         assertTrue(list.contains(p1));
         assertTrue(list.contains(p2));
         assertEquals(2, size);
@@ -260,21 +260,21 @@ public class ToManyListTst extends CayenneTestCase {
         context.invalidateObjects(Collections.singletonList(artist));
 
         ToManyList list = (ToManyList) artist.getPaintingArray();
-        assertTrue("List must be unresolved...", list.needsFetch());
+        assertTrue("List must be unresolved...", list.isFault());
 
         Painting p2 = (Painting) context.createAndRegisterNewObject(Painting.class);
 
         artist.addToPaintingArray(p2);
-        assertTrue("List must be unresolved...", list.needsFetch());
+        assertTrue("List must be unresolved...", list.isFault());
         assertTrue(list.addedToUnresolved.contains(p2));
 
         context.rollbackChanges();
 
-        assertTrue("List must be unresolved...", list.needsFetch());
+        assertTrue("List must be unresolved...", list.isFault());
 
         // call to "contains" must trigger list resolution
         assertTrue(list.contains(p1));
         assertFalse(list.contains(p2));
-        assertFalse("List must be resolved...", list.needsFetch());
+        assertFalse("List must be resolved...", list.isFault());
     }
 }
