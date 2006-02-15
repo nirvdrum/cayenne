@@ -69,7 +69,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.jdbc.BatchAction;
 import org.objectstyle.cayenne.access.jdbc.ProcedureAction;
 import org.objectstyle.cayenne.access.jdbc.RowDescriptor;
@@ -257,55 +257,40 @@ public class DataNode implements QueryEngine {
     }
 
     /**
-     * Runs queries using Connection obtained from internal DataSource. Once Connection is
-     * obtained internally, it is added to the Transaction that will handle its closing.
+     * Runs queries using Connection obtained from internal DataSource.
      * 
      * @since 1.1
      */
     public void performQueries(Collection queries, OperationObserver callback) {
 
-        Transaction transaction = Transaction.getThreadTransaction();
-
-        // TODO: Andrus, 12/5/2005 - This behavior is compatible with 1.1 and many things
-        // in Cayenne rely on such implicit transaction (e.g. PK generators), however it
-        // is unclear how this ever worked with external Transactions? Does it have
-        // something to do with the fact that it was tested on MySQL?
-        if (transaction == null) {
-            Transaction.internalTransaction(null).performQueries(this, queries, callback);
-            return;
-        }
-
         int listSize = queries.size();
         if (listSize == 0) {
             return;
         }
+
+        if (callback.isIteratedResult() && listSize > 1) {
+            throw new CayenneRuntimeException(
+                    "Iterated queries are not allowed in a batch. Batch size: "
+                            + listSize);
+        }
+
         QueryLogger.logQueryStart(listSize);
 
-        // do this meaningless inexpensive operation to
-        // trigger AutoAdapter lazy initialization before opening a connection...
-        // otherwise we may end up with two connections open simultaneously, possibly
-        // hitting connection pool upper limit.
+        // do this meaningless inexpensive operation to trigger AutoAdapter lazy
+        // initialization before opening a connection. Otherwise we may end up with two
+        // connections open simultaneously, possibly hitting connection pool upper limit.
         getAdapter().getExtendedTypes();
 
         Connection connection = null;
 
         try {
-            // check for invalid iterated query
-            if (callback.isIteratedResult() && listSize > 1) {
-                throw new CayenneException(
-                        "Iterated queries are not allowed in a batch. Batch size: "
-                                + listSize);
-            }
-
-            // check out connection
             connection = this.getDataSource().getConnection();
         }
-        // catch stuff like connection allocation errors, etc...
         catch (Exception globalEx) {
             QueryLogger.logQueryError(globalEx);
 
-            if (connection != null) {
-                // rollback failed transaction
+            Transaction transaction = Transaction.getThreadTransaction();
+            if (transaction != null) {
                 transaction.setRollbackOnly();
             }
 
@@ -313,25 +298,37 @@ public class DataNode implements QueryEngine {
             return;
         }
 
-        DataNodeQueryAction queryRunner = new DataNodeQueryAction(this, callback);
-        Iterator it = queries.iterator();
-        while (it.hasNext()) {
-            Query nextQuery = (Query) it.next();
+        try {
+            DataNodeQueryAction queryRunner = new DataNodeQueryAction(this, callback);
+            Iterator it = queries.iterator();
+            while (it.hasNext()) {
+                Query nextQuery = (Query) it.next();
 
-            // catch exceptions for each individual query
-            try {
-                queryRunner.runQuery(connection, nextQuery);
+                // catch exceptions for each individual query
+                try {
+                    queryRunner.runQuery(connection, nextQuery);
+                }
+                catch (Exception queryEx) {
+                    QueryLogger.logQueryError(queryEx);
+
+                    // notify consumer of the exception,
+                    // stop running further queries
+                    callback.nextQueryException(nextQuery, queryEx);
+
+                    Transaction transaction = Transaction.getThreadTransaction();
+                    if (transaction != null) {
+                        transaction.setRollbackOnly();
+                    }
+                    break;
+                }
             }
-            catch (Exception queryEx) {
-                QueryLogger.logQueryError(queryEx);
-
-                // notify consumer of the exception,
-                // stop running further queries
-                callback.nextQueryException(nextQuery, queryEx);
-
-                // rollback transaction
-                transaction.setRollbackOnly();
-                break;
+        }
+        finally {
+            try {
+                connection.close();
+            }
+            catch (SQLException e) {
+                // ignore closing exceptions...
             }
         }
     }
@@ -579,16 +576,15 @@ public class DataNode implements QueryEngine {
                 String key = CONNECTION_RESOURCE_PREFIX + name;
                 Connection c = (Connection) t.getConnection(key);
 
-                // need to check for 'isClosed' as some DataSource users (such as
-                // AutoAdapter) are Transaction-unaware and manage connections themselves
-                // as they should...
-                if (c != null && !c.isClosed()) {
-                    return c;
+                if (c == null || c.isClosed()) {
+                    c = dataSource.getConnection();
+                    t.addConnection(key, c);
                 }
 
-                c = dataSource.getConnection();
-                t.addConnection(key, c);
-                return c;
+                // wrap transaction-attached connections in a decorator that prevents them
+                // from being closed by callers, as transaction should take care of them
+                // on commit or rollback.
+                return new TransactionConnectionDecorator(c);
             }
 
             return dataSource.getConnection();
@@ -596,20 +592,21 @@ public class DataNode implements QueryEngine {
 
         public Connection getConnection(String username, String password)
                 throws SQLException {
+            
             Transaction t = Transaction.getThreadTransaction();
             if (t != null) {
                 String key = CONNECTION_RESOURCE_PREFIX + name;
                 Connection c = (Connection) t.getConnection(key);
-                // need to check for 'isClosed' as some DataSource users (such as
-                // AutoAdapter) are Transaction-unaware and manage connections themselves
-                // as they should...
-                if (c != null && !c.isClosed()) {
-                    return c;
+
+                if (c == null || c.isClosed()) {
+                    c = dataSource.getConnection();
+                    t.addConnection(key, c);
                 }
 
-                c = dataSource.getConnection(username, password);
-                t.addConnection(key, c);
-                return c;
+                // wrap transaction-attached connections in a decorator that prevents them
+                // from being closed by callers, as transaction should take care of them
+                // on commit or rollback.
+                return new TransactionConnectionDecorator(c);
             }
 
             return dataSource.getConnection(username, password);

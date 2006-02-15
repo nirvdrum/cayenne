@@ -693,20 +693,18 @@ public class DataDomain implements QueryEngine, DataChannel {
     /**
      * Routes queries to appropriate DataNodes for execution.
      */
-    public void performQueries(Collection queries, OperationObserver callback) {
+    public void performQueries(final Collection queries, final OperationObserver callback) {
 
-        // wrap in transaction if no Transaction context exists
-        Transaction transaction = Transaction.getThreadTransaction();
-        if (transaction == null) {
-            transaction = (callback.isIteratedResult()) ? Transaction
-                    .externalTransaction(getTransactionDelegate()) : createTransaction();
+        runInTransaction(new Transformer() {
 
-            transaction.performQueries(this, queries, callback);
-            return;
-        }
-
-        new DataDomainLegacyQueryAction(this, new QueryChain(queries), callback)
-                .execute();
+            public Object transform(Object input) {
+                new DataDomainLegacyQueryAction(
+                        DataDomain.this,
+                        new QueryChain(queries),
+                        callback).execute();
+                return null;
+            }
+        });
     }
 
     // ****** DataChannel methods:
@@ -781,6 +779,7 @@ public class DataDomain implements QueryEngine, DataChannel {
     }
 
     GraphDiff onSyncFlushInternal(ObjectContext originatingContext, GraphDiff childChanges) {
+        
         if (!(originatingContext instanceof DataContext)) {
             throw new CayenneRuntimeException(
                     "No support for committing ObjectContexts that are not DataContexts yet. "

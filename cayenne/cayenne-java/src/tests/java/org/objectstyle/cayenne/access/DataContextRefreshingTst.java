@@ -62,16 +62,15 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.DeleteQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
 
 /**
- * Test suite covering possible scenarios of refreshing updated 
- * objects. This includes refreshing relationships and attributes
- * changed outside of Cayenne with and witout prefetching.
+ * Test suite covering possible scenarios of refreshing updated objects. This includes
+ * refreshing relationships and attributes changed outside of Cayenne with and witout
+ * prefetching.
  * 
  * @author Andrei Adamchik
  */
@@ -120,10 +119,10 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         assertNotSame(artistBefore, artistAfter);
 
         // update via DataNode directly
-        updateRow(
-            painting.getObjectId(),
-            "ARTIST_ID",
-            artistAfter.getObjectId().getIdSnapshot().get("ARTIST_ID"));
+        updateRow(painting.getObjectId(), "ARTIST_ID", artistAfter
+                .getObjectId()
+                .getIdSnapshot()
+                .get("ARTIST_ID"));
 
         // select without prefetch
         painting = fetchPainting(painting.getPaintingTitle(), false);
@@ -142,10 +141,10 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         assertNotNull(artistAfter);
 
         // update via DataNode directly
-        updateRow(
-            painting.getObjectId(),
-            "ARTIST_ID",
-            artistAfter.getObjectId().getIdSnapshot().get("ARTIST_ID"));
+        updateRow(painting.getObjectId(), "ARTIST_ID", artistAfter
+                .getObjectId()
+                .getIdSnapshot()
+                .get("ARTIST_ID"));
 
         // select without prefetch
         painting = fetchPainting(painting.getPaintingTitle(), false);
@@ -220,17 +219,16 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         assertNotSame(artistBefore, artistAfter);
 
         // update via DataNode directly
-        updateRow(
-            painting.getObjectId(),
-            "ARTIST_ID",
-            artistAfter.getObjectId().getIdSnapshot().get("ARTIST_ID"));
+        updateRow(painting.getObjectId(), "ARTIST_ID", artistAfter
+                .getObjectId()
+                .getIdSnapshot()
+                .get("ARTIST_ID"));
 
         context.invalidateObjects(Collections.singletonList(painting));
         assertSame(artistAfter, painting.getToArtist());
     }
 
-    public void testInvalidateRootWithNullToOneTargetChangedToNotNull()
-        throws Exception {
+    public void testInvalidateRootWithNullToOneTargetChangedToNotNull() throws Exception {
         Painting painting = insertPaintingInContext("p");
         painting.setToArtist(null);
         context.commitChanges();
@@ -241,10 +239,10 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         assertNotNull(artistAfter);
 
         // update via DataNode directly
-        updateRow(
-            painting.getObjectId(),
-            "ARTIST_ID",
-            artistAfter.getObjectId().getIdSnapshot().get("ARTIST_ID"));
+        updateRow(painting.getObjectId(), "ARTIST_ID", artistAfter
+                .getObjectId()
+                .getIdSnapshot()
+                .get("ARTIST_ID"));
 
         context.invalidateObjects(Collections.singletonList(painting));
         assertSame(artistAfter, painting.getToArtist());
@@ -320,21 +318,19 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         updateQuery.addUpdAttribute(dbAttribute, newValue);
 
         // set qualifier
-        updateQuery.setQualifier(
-            ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
+        updateQuery.setQualifier(ExpressionFactory.matchAllDbExp(
+                id.getIdSnapshot(),
+                Expression.EQUAL_TO));
 
-        getNode().performQueries(
-            Collections.singletonList(updateQuery),
-            new DefaultOperationObserver());
+        getDomain().onQuery(null, updateQuery);
     }
 
     protected void deleteRow(ObjectId id) {
         DeleteQuery deleteQuery = new DeleteQuery();
         deleteQuery.setRoot(id.getEntityName());
-        deleteQuery.setQualifier(
-            ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
-        getNode().performQueries(
-            Collections.singletonList(deleteQuery),
-            new DefaultOperationObserver());
+        deleteQuery.setQualifier(ExpressionFactory.matchAllDbExp(
+                id.getIdSnapshot(),
+                Expression.EQUAL_TO));
+        getDomain().onQuery(null, deleteQuery);
     }
 }

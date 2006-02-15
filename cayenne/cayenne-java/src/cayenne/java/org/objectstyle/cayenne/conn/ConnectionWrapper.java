@@ -66,48 +66,46 @@ import java.sql.Statement;
 import java.util.Map;
 
 /**
- * ConnectionWrapper is a <code>java.sql.Connection</code> implementation that wraps another
- * Connection, delegating method calls to this connection. It 
- * works in conjunction with PooledConnectionImpl, to generate pool events, provide
- * limited automated reconnection functionality, etc.
+ * ConnectionWrapper is a <code>java.sql.Connection</code> implementation that wraps
+ * another Connection, delegating method calls to this connection. It works in conjunction
+ * with PooledConnectionImpl, to generate pool events, provide limited automated
+ * reconnection functionality, etc.
  * 
  * @author Andrei Adamchik
  */
 public class ConnectionWrapper implements Connection {
-    private Connection connectionObj;
+
+    private Connection connection;
     private PooledConnectionImpl pooledConnection;
     private long lastReconnected;
     private int reconnectCount;
 
-    /** 
-     * Fixes Sybase problems with autocommit. Used idea from
-     * Jonas org.objectweb.jonas.jdbc_xa.ConnectionImpl 
-     * (http://www.objectweb.org/jonas/).
-     * 
-     * <p>If problem is not the one that can be fixed by this patch,
-     * original exception is rethrown. If exception occurs when fixing 
-     * the problem, new exception is thrown.</p>
+    /**
+     * Fixes Sybase problems with autocommit. Used idea from Jonas
+     * org.objectweb.jonas.jdbc_xa.ConnectionImpl (http://www.objectweb.org/jonas/).
+     * <p>
+     * If problem is not the one that can be fixed by this patch, original exception is
+     * rethrown. If exception occurs when fixing the problem, new exception is thrown.
+     * </p>
      */
-    static void sybaseAutoCommitPatch(
-        Connection c,
-        SQLException e,
-        boolean autoCommit)
-        throws SQLException {
+    static void sybaseAutoCommitPatch(Connection c, SQLException e, boolean autoCommit)
+            throws SQLException {
 
         String s = e.getMessage().toLowerCase();
         if (s.indexOf("set chained command not allowed") >= 0) {
             c.commit();
             c.setAutoCommit(autoCommit); // Shouldn't fail now.
-        } else {
+        }
+        else {
             throw e;
         }
     }
 
-    /** Creates new ConnectionWrapper */
-    public ConnectionWrapper(
-        Connection connectionObj,
-        PooledConnectionImpl pooledConnection) {
-        this.connectionObj = connectionObj;
+    /** 
+     * Creates new ConnectionWrapper 
+     */
+    public ConnectionWrapper(Connection connection, PooledConnectionImpl pooledConnection) {
+        this.connection = connection;
         this.pooledConnection = pooledConnection;
     }
 
@@ -115,26 +113,25 @@ public class ConnectionWrapper implements Connection {
 
         // if there was a relatively recent reconnect, just rethrow an error
         // and retire itself. THIS WILL PREVENT RECONNECT LOOPS
-        if (reconnectCount > 0
-            && System.currentTimeMillis() - lastReconnected < 60000) {
+        if (reconnectCount > 0 && System.currentTimeMillis() - lastReconnected < 60000) {
 
             retire(exception);
             throw exception;
         }
 
         pooledConnection.reconnect();
-        
-		// Pooled connection will wrap returned connection into
-		// another ConnectionWrapper.... lets get the real connection 
-		// underneath...
-		Connection connection = pooledConnection.getConnection();
-		if (connection instanceof ConnectionWrapper) {
-			this.connectionObj = ((ConnectionWrapper) connection).connectionObj;
-		}
-		else {
-			this.connectionObj = connection;
-		}
-		
+
+        // Pooled connection will wrap returned connection into
+        // another ConnectionWrapper.... lets get the real connection
+        // underneath...
+        Connection connection = pooledConnection.getConnection();
+        if (connection instanceof ConnectionWrapper) {
+            this.connection = ((ConnectionWrapper) connection).connection;
+        }
+        else {
+            this.connection = connection;
+        }
+
         lastReconnected = System.currentTimeMillis();
         reconnectCount++;
     }
@@ -146,8 +143,9 @@ public class ConnectionWrapper implements Connection {
 
     public void clearWarnings() throws SQLException {
         try {
-            connectionObj.clearWarnings();
-        } catch (SQLException sqlEx) {
+            connection.clearWarnings();
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
@@ -155,14 +153,15 @@ public class ConnectionWrapper implements Connection {
 
     public void close() throws SQLException {
         pooledConnection.returnConnectionToThePool();
-        connectionObj = null;
+        connection = null;
         pooledConnection = null;
     }
 
     public void commit() throws SQLException {
         try {
-            connectionObj.commit();
-        } catch (SQLException sqlEx) {
+            connection.commit();
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
@@ -170,8 +169,9 @@ public class ConnectionWrapper implements Connection {
 
     public Statement createStatement() throws SQLException {
         try {
-            return connectionObj.createStatement();
-        } catch (SQLException sqlEx) {
+            return connection.createStatement();
+        }
+        catch (SQLException sqlEx) {
 
             // reconnect has code to prevent loops
             reconnect(sqlEx);
@@ -179,15 +179,12 @@ public class ConnectionWrapper implements Connection {
         }
     }
 
-    public Statement createStatement(
-        int resultSetType,
-        int resultSetConcurrency)
-        throws SQLException {
+    public Statement createStatement(int resultSetType, int resultSetConcurrency)
+            throws SQLException {
         try {
-            return connectionObj.createStatement(
-                resultSetType,
-                resultSetConcurrency);
-        } catch (SQLException sqlEx) {
+            return connection.createStatement(resultSetType, resultSetConcurrency);
+        }
+        catch (SQLException sqlEx) {
 
             // reconnect has code to prevent loops
             reconnect(sqlEx);
@@ -197,8 +194,9 @@ public class ConnectionWrapper implements Connection {
 
     public boolean getAutoCommit() throws SQLException {
         try {
-            return connectionObj.getAutoCommit();
-        } catch (SQLException sqlEx) {
+            return connection.getAutoCommit();
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
@@ -206,8 +204,9 @@ public class ConnectionWrapper implements Connection {
 
     public String getCatalog() throws SQLException {
         try {
-            return connectionObj.getCatalog();
-        } catch (SQLException sqlEx) {
+            return connection.getCatalog();
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
@@ -215,8 +214,9 @@ public class ConnectionWrapper implements Connection {
 
     public DatabaseMetaData getMetaData() throws SQLException {
         try {
-            return connectionObj.getMetaData();
-        } catch (SQLException sqlEx) {
+            return connection.getMetaData();
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
@@ -224,8 +224,9 @@ public class ConnectionWrapper implements Connection {
 
     public int getTransactionIsolation() throws SQLException {
         try {
-            return connectionObj.getTransactionIsolation();
-        } catch (SQLException sqlEx) {
+            return connection.getTransactionIsolation();
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
@@ -233,29 +234,33 @@ public class ConnectionWrapper implements Connection {
 
     public SQLWarning getWarnings() throws SQLException {
         try {
-            return connectionObj.getWarnings();
-        } catch (SQLException sqlEx) {
+            return connection.getWarnings();
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
     }
 
     public boolean isClosed() throws SQLException {
-        if (connectionObj != null) {
+        if (connection != null) {
             try {
-                return connectionObj.isClosed();
-            } catch (SQLException sqlEx) {
+                return connection.isClosed();
+            }
+            catch (SQLException sqlEx) {
                 retire(sqlEx);
                 throw sqlEx;
             }
-        } else
+        }
+        else
             return true;
     }
 
     public boolean isReadOnly() throws SQLException {
         try {
-            return connectionObj.isReadOnly();
-        } catch (SQLException sqlEx) {
+            return connection.isReadOnly();
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
@@ -263,8 +268,9 @@ public class ConnectionWrapper implements Connection {
 
     public String nativeSQL(String sql) throws SQLException {
         try {
-            return connectionObj.nativeSQL(sql);
-        } catch (SQLException sqlEx) {
+            return connection.nativeSQL(sql);
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
@@ -272,8 +278,9 @@ public class ConnectionWrapper implements Connection {
 
     public CallableStatement prepareCall(String sql) throws SQLException {
         try {
-            return connectionObj.prepareCall(sql);
-        } catch (SQLException sqlEx) {
+            return connection.prepareCall(sql);
+        }
+        catch (SQLException sqlEx) {
 
             // reconnect has code to prevent loops
             reconnect(sqlEx);
@@ -282,16 +289,13 @@ public class ConnectionWrapper implements Connection {
     }
 
     public CallableStatement prepareCall(
-        String sql,
-        int resultSetType,
-        int resultSetConcurrency)
-        throws SQLException {
+            String sql,
+            int resultSetType,
+            int resultSetConcurrency) throws SQLException {
         try {
-            return connectionObj.prepareCall(
-                sql,
-                resultSetType,
-                resultSetConcurrency);
-        } catch (SQLException sqlEx) {
+            return connection.prepareCall(sql, resultSetType, resultSetConcurrency);
+        }
+        catch (SQLException sqlEx) {
 
             // reconnect has code to prevent loops
             reconnect(sqlEx);
@@ -301,8 +305,9 @@ public class ConnectionWrapper implements Connection {
 
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         try {
-            return connectionObj.prepareStatement(sql);
-        } catch (SQLException sqlEx) {
+            return connection.prepareStatement(sql);
+        }
+        catch (SQLException sqlEx) {
 
             // reconnect has code to prevent loops
             reconnect(sqlEx);
@@ -311,16 +316,13 @@ public class ConnectionWrapper implements Connection {
     }
 
     public PreparedStatement prepareStatement(
-        String sql,
-        int resultSetType,
-        int resultSetConcurrency)
-        throws SQLException {
+            String sql,
+            int resultSetType,
+            int resultSetConcurrency) throws SQLException {
         try {
-            return connectionObj.prepareStatement(
-                sql,
-                resultSetType,
-                resultSetConcurrency);
-        } catch (SQLException sqlEx) {
+            return connection.prepareStatement(sql, resultSetType, resultSetConcurrency);
+        }
+        catch (SQLException sqlEx) {
 
             // reconnect has code to prevent loops
             reconnect(sqlEx);
@@ -330,8 +332,9 @@ public class ConnectionWrapper implements Connection {
 
     public void rollback() throws SQLException {
         try {
-            connectionObj.rollback();
-        } catch (SQLException sqlEx) {
+            connection.rollback();
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
@@ -339,13 +342,15 @@ public class ConnectionWrapper implements Connection {
 
     public void setAutoCommit(boolean autoCommit) throws SQLException {
         try {
-            connectionObj.setAutoCommit(autoCommit);
-        } catch (SQLException sqlEx) {
+            connection.setAutoCommit(autoCommit);
+        }
+        catch (SQLException sqlEx) {
 
             try {
                 // apply Sybase patch
-                sybaseAutoCommitPatch(connectionObj, sqlEx, autoCommit);
-            } catch (SQLException patchEx) {
+                sybaseAutoCommitPatch(connection, sqlEx, autoCommit);
+            }
+            catch (SQLException patchEx) {
                 retire(sqlEx);
                 throw sqlEx;
             }
@@ -354,8 +359,9 @@ public class ConnectionWrapper implements Connection {
 
     public void setCatalog(String catalog) throws SQLException {
         try {
-            connectionObj.setCatalog(catalog);
-        } catch (SQLException sqlEx) {
+            connection.setCatalog(catalog);
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
@@ -363,8 +369,9 @@ public class ConnectionWrapper implements Connection {
 
     public void setReadOnly(boolean readOnly) throws SQLException {
         try {
-            connectionObj.setReadOnly(readOnly);
-        } catch (SQLException sqlEx) {
+            connection.setReadOnly(readOnly);
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
@@ -372,8 +379,9 @@ public class ConnectionWrapper implements Connection {
 
     public void setTransactionIsolation(int level) throws SQLException {
         try {
-            connectionObj.setTransactionIsolation(level);
-        } catch (SQLException sqlEx) {
+            connection.setTransactionIsolation(level);
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
@@ -381,8 +389,9 @@ public class ConnectionWrapper implements Connection {
 
     public Map getTypeMap() throws SQLException {
         try {
-            return connectionObj.getTypeMap();
-        } catch (SQLException sqlEx) {
+            return connection.getTypeMap();
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
@@ -390,8 +399,9 @@ public class ConnectionWrapper implements Connection {
 
     public void setTypeMap(Map map) throws SQLException {
         try {
-            connectionObj.setTypeMap(map);
-        } catch (SQLException sqlEx) {
+            connection.setTypeMap(map);
+        }
+        catch (SQLException sqlEx) {
             retire(sqlEx);
             throw sqlEx;
         }
@@ -399,51 +409,49 @@ public class ConnectionWrapper implements Connection {
 
     public void setHoldability(int holdability) throws SQLException {
         throw new java.lang.UnsupportedOperationException(
-            "Method setHoldability() not yet implemented.");
+                "Method setHoldability() not yet implemented.");
     }
 
     public int getHoldability() throws SQLException {
         throw new java.lang.UnsupportedOperationException(
-            "Method getHoldability() not yet implemented.");
+                "Method getHoldability() not yet implemented.");
     }
 
     public Savepoint setSavepoint() throws SQLException {
         throw new java.lang.UnsupportedOperationException(
-            "Method setSavepoint() not yet implemented.");
+                "Method setSavepoint() not yet implemented.");
     }
 
     public Savepoint setSavepoint(String name) throws SQLException {
         throw new java.lang.UnsupportedOperationException(
-            "Method setSavepoint() not yet implemented.");
+                "Method setSavepoint() not yet implemented.");
     }
 
     public void rollback(Savepoint savepoint) throws SQLException {
         throw new java.lang.UnsupportedOperationException(
-            "Method rollback() not yet implemented.");
+                "Method rollback() not yet implemented.");
     }
 
     public void releaseSavepoint(Savepoint savepoint) throws SQLException {
         throw new java.lang.UnsupportedOperationException(
-            "Method releaseSavepoint() not yet implemented.");
+                "Method releaseSavepoint() not yet implemented.");
     }
 
     public Statement createStatement(
-        int resultSetType,
-        int resultSetConcurrency,
-        int resultSetHoldability)
-        throws SQLException {
+            int resultSetType,
+            int resultSetConcurrency,
+            int resultSetHoldability) throws SQLException {
         throw new java.lang.UnsupportedOperationException(
-            "Method createStatement() not yet implemented.");
+                "Method createStatement() not yet implemented.");
     }
 
     public PreparedStatement prepareStatement(
-        String sql,
-        int resultSetType,
-        int resultSetConcurrency,
-        int resultSetHoldability)
-        throws SQLException {
+            String sql,
+            int resultSetType,
+            int resultSetConcurrency,
+            int resultSetHoldability) throws SQLException {
         throw new java.lang.UnsupportedOperationException(
-            "Method prepareStatement() not yet implemented.");
+                "Method prepareStatement() not yet implemented.");
     }
 
     public CallableStatement prepareCall(
@@ -452,7 +460,7 @@ public class ConnectionWrapper implements Connection {
             int resultSetConcurrency,
             int resultSetHoldability) throws SQLException {
         try {
-            return connectionObj.prepareCall(
+            return connection.prepareCall(
                     sql,
                     resultSetType,
                     resultSetConcurrency,
@@ -472,9 +480,9 @@ public class ConnectionWrapper implements Connection {
 
     public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys)
             throws SQLException {
-        
+
         try {
-            return connectionObj.prepareStatement(sql, autoGeneratedKeys);
+            return connection.prepareStatement(sql, autoGeneratedKeys);
         }
         catch (SQLException sqlEx) {
 
@@ -487,7 +495,7 @@ public class ConnectionWrapper implements Connection {
     public PreparedStatement prepareStatement(String sql, int[] columnIndexes)
             throws SQLException {
         try {
-            return connectionObj.prepareStatement(sql, columnIndexes);
+            return connection.prepareStatement(sql, columnIndexes);
         }
         catch (SQLException sqlEx) {
 
@@ -500,7 +508,7 @@ public class ConnectionWrapper implements Connection {
     public PreparedStatement prepareStatement(String sql, String[] columnNames)
             throws SQLException {
         try {
-            return connectionObj.prepareStatement(sql, columnNames);
+            return connection.prepareStatement(sql, columnNames);
         }
         catch (SQLException sqlEx) {
 
