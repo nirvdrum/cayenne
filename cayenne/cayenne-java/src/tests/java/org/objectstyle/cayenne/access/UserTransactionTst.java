@@ -55,39 +55,64 @@
  */
 package org.objectstyle.cayenne.access;
 
-import junit.framework.AssertionFailedError;
+import java.sql.Connection;
 
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.unit.TestDataDomain;
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-/**
- * A DataDomainQueryAction that can be configured to block queries that are not run from
- * cache.
- * 
- * @author Andrus Adamchik
- */
-public class MockDataDomainQueryAction extends DataDomainQueryAction {
+public class UserTransactionTst extends CayenneTestCase {
 
-    public MockDataDomainQueryAction(ObjectContext context, TestDataDomain domain,
-            Query query) {
-        super(context, domain, query);
-    }
+    public void testCommit() throws Exception {
+        DataContext context = createDataContext();
 
-    /**
-     * Exposing super as a public method.
-     */
-    public QueryResponse execute() {
-        return super.execute();
-    }
+        Artist a = (Artist) context.createAndRegisterNewObject(Artist.class);
+        a.setArtistName("AAA");
 
-    void runQuery() {
-        checkQueryAllowed();
-        super.runQuery();
-    }
+        final boolean[] willAddConnectionCalled = new boolean[1];
+        final boolean[] willCommitCalled = new boolean[1];
+        final boolean[] didCommitCalled = new boolean[1];
 
-    protected void checkQueryAllowed() throws AssertionFailedError {
-        ((TestDataDomain) domain).checkQueryAllowed();
+        TransactionDelegate delegate = new MockTransactionDelegate() {
+
+            public boolean willAddConnection(
+                    Transaction transaction,
+                    Connection connection) {
+                willAddConnectionCalled[0] = true;
+                return true;
+            }
+
+            public boolean willCommit(Transaction transaction) {
+                willCommitCalled[0] = true;
+                return true;
+            }
+
+            public void didCommit(Transaction transaction) {
+                didCommitCalled[0] = true;
+            }
+        };
+
+        Transaction t = Transaction.internalTransaction(delegate);
+        Transaction.bindThreadTransaction(t);
+
+        try {
+            context.commitChanges();
+
+            assertTrue("User transaction was ignored", willAddConnectionCalled[0]);
+            assertFalse(
+                    "User transaction was unexpectedly committed",
+                    willCommitCalled[0]);
+            assertFalse("User transaction was unexpectedly committed", didCommitCalled[0]);
+        }
+        finally {
+
+            try {
+                t.rollback();
+            }
+            catch (Throwable th) {
+                // ignore
+            }
+            Transaction.bindThreadTransaction(null);
+        }
+
     }
 }

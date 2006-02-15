@@ -94,7 +94,7 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
  * @author Andrus Adamchik
  * @since 1.2
  */
-class DataDomainCommitAction {
+class DataDomainFlushAction {
 
     private DataDomain domain;
     private DataContext context;
@@ -109,11 +109,11 @@ class DataDomainCommitAction {
     private List delObjects; // event support
     private List updObjects; // event support
 
-    DataDomainCommitAction(DataDomain domain) {
+    DataDomainFlushAction(DataDomain domain) {
         this.domain = domain;
     }
 
-    GraphDiff commit(DataContext context, GraphDiff diff) {
+    GraphDiff flush(DataContext context, GraphDiff diff) {
 
         this.context = context;
 
@@ -156,44 +156,34 @@ class DataDomainCommitAction {
             try {
                 context.fireWillCommit();
 
-                Transaction transaction = context
-                        .getParentDataDomain()
-                        .createTransaction();
+                Transaction transaction = Transaction.getThreadTransaction();
 
-                Transaction.bindThreadTransaction(transaction);
                 try {
-                    transaction.begin();
                     Iterator i = nodeHelpers.iterator();
                     while (i.hasNext()) {
                         DataNodeCommitAction nodeHelper = (DataNodeCommitAction) i.next();
                         List queries = nodeHelper.getQueries();
 
                         if (queries.size() > 0) {
-                            // note: observer throws on error
                             nodeHelper.getNode().performQueries(queries, observer);
                         }
                     }
-
-                    // commit
-                    transaction.commit();
                 }
                 catch (Throwable th) {
-                    try {
-                        // rollback
-                        transaction.rollback();
-                    }
-                    catch (Throwable rollbackTh) {
-                        // ignoring...
-                    }
+                    transaction.setRollbackOnly();
 
+                    // TODO: Andrus, 2/14/2006 - as transaction is external to this
+                    // method, it is wrong to notify the listeners here... likely need to
+                    // move to the DataContext.
                     context.fireTransactionRolledback();
                     throw new CayenneRuntimeException("Transaction was rolledback.", th);
                 }
-                finally {
-                    Transaction.bindThreadTransaction(null);
-                }
 
                 GraphDiff changes = context.getObjectStore().postprocessAfterCommit();
+
+                // TODO: Andrus, 2/14/2006 - as transaction is external to this method, it
+                // is wrong to notify the listeners here... likely need to move to the
+                // DataContext.
                 context.fireTransactionCommitted();
                 return changes;
             }

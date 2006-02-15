@@ -63,6 +63,7 @@ import java.util.Map;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.UnitTestDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
@@ -131,7 +132,7 @@ public abstract class CayenneTestCase extends BasicTestCase {
         return getNode().getDataSource().getConnection();
     }
 
-    protected TestDataDomain getDomain() {
+    protected UnitTestDomain getDomain() {
         return accessStack.getDataDomain();
     }
 

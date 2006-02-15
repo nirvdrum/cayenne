@@ -64,10 +64,6 @@ import java.util.Map;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.DataChannel;
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.query.Query;
 
 /**
  * A Cayenne transaction. Currently supports managing JDBC connections.
@@ -188,46 +184,6 @@ public abstract class Transaction {
      */
     protected Transaction() {
         status = STATUS_NO_TRANSACTION;
-    }
-
-    /**
-     * Helper method that wraps a channel query in this transaction.
-     * 
-     * @since 1.2
-     */
-    public QueryResponse onQuery(ObjectContext context, DataChannel channel, Query query)
-            throws CayenneRuntimeException {
-
-        Transaction old = Transaction.getThreadTransaction();
-        Transaction.bindThreadTransaction(this);
-
-        try {
-            // implicit begin..
-            QueryResponse response = channel.onQuery(context, query);
-            commit();
-            return response;
-        }
-        catch (Exception ex) {
-            setRollbackOnly();
-
-            // must rethrow
-            if (ex instanceof CayenneRuntimeException) {
-                throw (CayenneRuntimeException) ex;
-            }
-            else {
-                throw new CayenneRuntimeException(ex);
-            }
-        }
-        finally {
-            Transaction.bindThreadTransaction(old);
-            if (getStatus() == Transaction.STATUS_MARKED_ROLLEDBACK) {
-                try {
-                    rollback();
-                }
-                catch (Exception rollbackEx) {
-                }
-            }
-        }
     }
 
     /**

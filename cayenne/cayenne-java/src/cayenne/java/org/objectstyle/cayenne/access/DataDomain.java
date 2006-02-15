@@ -62,6 +62,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.collections.Transformer;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -715,14 +716,13 @@ public class DataDomain implements QueryEngine, DataChannel {
      * 
      * @since 1.2
      */
-    public QueryResponse onQuery(ObjectContext context, Query query) {
-        // wrap in transaction if no Transaction context exists
-        Transaction transaction = Transaction.getThreadTransaction();
-        if (transaction == null) {
-            return createTransaction().onQuery(context, this, query);
-        }
+    public QueryResponse onQuery(final ObjectContext context, final Query query) {
+        return (QueryResponse) runInTransaction(new Transformer() {
 
-        return new DataDomainQueryAction(context, this, query).execute();
+            public Object transform(Object input) {
+                return onQueryInternal(context, query);
+            }
+        });
     }
 
     /**
@@ -741,30 +741,109 @@ public class DataDomain implements QueryEngine, DataChannel {
      * 
      * @since 1.2
      */
-    public GraphDiff onSync(ObjectContext context, int syncType, GraphDiff contextChanges) {
+    public GraphDiff onSync(
+            final ObjectContext context,
+            int syncType,
+            final GraphDiff contextChanges) {
 
-        if (!(context instanceof DataContext)) {
+        switch (syncType) {
+            case DataChannel.ROLLBACK_SYNC_TYPE:
+                return onSyncRollbackInternal(context);
+            // "commit" and "flush" are the same from the DataDomain perspective,
+            // including transaction handling logic
+            case DataChannel.FLUSH_SYNC_TYPE:
+            case DataChannel.COMMIT_SYNC_TYPE:
+                return (GraphDiff) runInTransaction(new Transformer() {
+
+                    public Object transform(Object input) {
+                        return onSyncFlushInternal(context, contextChanges);
+                    }
+                });
+            default:
+                throw new CayenneRuntimeException("Invalid synchronization type: "
+                        + syncType);
+        }
+    }
+
+    QueryResponse onQueryInternal(ObjectContext context, Query query) {
+        return new DataDomainQueryAction(context, DataDomain.this, query).execute();
+    }
+
+    GraphDiff onSyncRollbackInternal(ObjectContext originatingContext) {
+        // if there is a transaction in progress, roll it back
+
+        Transaction transaction = Transaction.getThreadTransaction();
+        if (transaction != null) {
+            transaction.setRollbackOnly();
+        }
+
+        return new CompoundDiff();
+    }
+
+    GraphDiff onSyncFlushInternal(ObjectContext originatingContext, GraphDiff childChanges) {
+        if (!(originatingContext instanceof DataContext)) {
             throw new CayenneRuntimeException(
-                    "No support for committing ObjectContexts that are not DataContexts yet. Unsupported context: "
-                            + context);
+                    "No support for committing ObjectContexts that are not DataContexts yet. "
+                            + "Unsupported context: "
+                            + originatingContext);
         }
 
-        DataContext dataContext = (DataContext) context;
+        DataContext dataContext = (DataContext) originatingContext;
 
-        // ignore all but commit messages
-        if (syncType == DataChannel.COMMIT_SYNC_TYPE) {
-            // TODO: Andrus, 12/13/2005 - see TODO under DataContext.doCommitChanges() -
-            // need to pass changes around as diffs..
-            
-            DataDomainPrecommitAction precommit = new DataDomainPrecommitAction();
-            if (!precommit.precommit(this, dataContext)) {
-                return new CompoundDiff();
+        DataDomainPrecommitAction precommit = new DataDomainPrecommitAction();
+        if (!precommit.precommit(this, dataContext)) {
+            return new CompoundDiff();
+        }
+
+        return new DataDomainFlushAction(this).flush(dataContext, childChanges);
+    }
+
+    /**
+     * Executes Transfoermer.transform() method in a transaction. Transaction policy is to
+     * check for the thread transaction, and use it if one exists. If it doesn't, a new
+     * transaction is created, with a scope limited to this method.
+     */
+    // WARNING: (andrus) if we ever decide to make this method protected or public, we
+    // need to change the signature to avoid API dependency on commons-collections
+    Object runInTransaction(Transformer operation) {
+
+        // user or container-managed or nested transaction
+        if (Transaction.getThreadTransaction() != null) {
+            return operation.transform(null);
+        }
+
+        // Cayenne-managed transaction
+
+        Transaction transaction = createTransaction();
+        Transaction.bindThreadTransaction(transaction);
+
+        try {
+            // implicit begin..
+            Object result = operation.transform(null);
+            transaction.commit();
+            return result;
+        }
+        catch (Exception ex) {
+            transaction.setRollbackOnly();
+
+            // must rethrow
+            if (ex instanceof CayenneRuntimeException) {
+                throw (CayenneRuntimeException) ex;
             }
-
-            return new DataDomainCommitAction(this).commit(dataContext, contextChanges);
+            else {
+                throw new CayenneRuntimeException(ex);
+            }
         }
-
-        return null;
+        finally {
+            Transaction.bindThreadTransaction(null);
+            if (transaction.getStatus() == Transaction.STATUS_MARKED_ROLLEDBACK) {
+                try {
+                    transaction.rollback();
+                }
+                catch (Exception rollbackEx) {
+                }
+            }
+        }
     }
 
     public String toString() {

@@ -53,33 +53,70 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit;
+package org.objectstyle.cayenne.access;
 
+import java.util.Collection;
 import java.util.Map;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.UnitTestDomain;
+import junit.framework.Assert;
+import junit.framework.AssertionFailedError;
 
-/**
- * DataDomain wrapper used for testing a specific Cayenne stack configuration.
- * 
- * @author Andrei Adamchik
- */
-public interface AccessStack {
+import org.objectstyle.cayenne.ObjectContext;
+import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.query.Query;
 
-    AccessStackAdapter getAdapter(DataNode node);
+public class UnitTestDomain extends DataDomain {
 
-    UnitTestDomain getDataDomain();
+    protected boolean blockingQueries;
+    protected int queryCount;
 
-    void createTestData(Class testCase, String testName, Map parameters) throws Exception;
+    public UnitTestDomain(String name) {
+        super(name);
+    }
 
-    void deleteTestData() throws Exception;
+    public UnitTestDomain(String name, Map properties) {
+        super(name, properties);
+    }
 
-    void dropSchema() throws Exception;
+    public void restartQueryCounter() {
+        queryCount = 0;
+    }
 
-    void createSchema() throws Exception;
+    public int getQueryCount() {
+        return queryCount;
+    }
 
-    void dropPKSupport() throws Exception;
+    public boolean isBlockingQueries() {
+        return blockingQueries;
+    }
 
-    void createPKSupport() throws Exception;
+    public void setBlockingQueries(boolean blockingQueries) {
+        this.blockingQueries = blockingQueries;
+    }
+
+    QueryResponse onQueryInternal(ObjectContext context, Query query) {
+        return new UnitTestDomainQueryAction(context, this, query).execute();
+    }
+
+    public void performQueries(Collection queries, OperationObserver callback) {
+        checkQueryAllowed();
+        super.performQueries(queries, callback);
+    }
+
+    /**
+     * @deprecated since 1.2, as the super method is also deprecated.
+     */
+    public void performQueries(
+            Collection queries,
+            OperationObserver callback,
+            Transaction transaction) {
+        checkQueryAllowed();
+        super.performQueries(queries, callback, transaction);
+    }
+
+    public void checkQueryAllowed() throws AssertionFailedError {
+        Assert.assertFalse("Query is unexpected.", blockingQueries);
+
+        queryCount++;
+    }
 }

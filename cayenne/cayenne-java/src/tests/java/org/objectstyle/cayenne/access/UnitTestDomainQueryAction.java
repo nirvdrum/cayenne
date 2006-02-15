@@ -53,81 +53,40 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit;
+package org.objectstyle.cayenne.access;
 
-import java.util.Collection;
-import java.util.Map;
-
-import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.MockDataDomainQueryAction;
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.query.Query;
 
-public class TestDataDomain extends DataDomain {
+/**
+ * A DataDomainQueryAction that can be configured to block queries that are not run from
+ * cache.
+ * 
+ * @author Andrus Adamchik
+ */
+public class UnitTestDomainQueryAction extends DataDomainQueryAction {
 
-    protected boolean blockingQueries;
-    protected int queryCount;
-
-    public TestDataDomain(String name) {
-        super(name);
-    }
-
-    public TestDataDomain(String name, Map properties) {
-        super(name, properties);
-    }
-
-    public void restartQueryCounter() {
-        queryCount = 0;
-    }
-
-    public int getQueryCount() {
-        return queryCount;
-    }
-
-    public boolean isBlockingQueries() {
-        return blockingQueries;
-    }
-
-    public void setBlockingQueries(boolean blockingQueries) {
-        this.blockingQueries = blockingQueries;
-    }
-
-    public QueryResponse onQuery(ObjectContext context, Query query) {
-
-        // wrap in transaction if no Transaction context exists
-        Transaction transaction = Transaction.getThreadTransaction();
-        if (transaction == null) {
-            return createTransaction().onQuery(context, this, query);
-        }
-
-        return new MockDataDomainQueryAction(context, this, query).execute();
-    }
-
-    public void performQueries(Collection queries, OperationObserver callback) {
-        checkQueryAllowed();
-        super.performQueries(queries, callback);
+    public UnitTestDomainQueryAction(ObjectContext context, UnitTestDomain domain,
+            Query query) {
+        super(context, domain, query);
     }
 
     /**
-     * @deprecated since 1.2, as the super method is also deprecated.
+     * Exposing super as a public method.
      */
-    public void performQueries(
-            Collection queries,
-            OperationObserver callback,
-            Transaction transaction) {
-        checkQueryAllowed();
-        super.performQueries(queries, callback, transaction);
+    public QueryResponse execute() {
+        return super.execute();
     }
 
-    public void checkQueryAllowed() throws AssertionFailedError {
-        Assert.assertFalse("Query is unexpected.", blockingQueries);
+    void runQuery() {
+        checkQueryAllowed();
+        super.runQuery();
+    }
 
-        queryCount++;
+    protected void checkQueryAllowed() throws AssertionFailedError {
+        ((UnitTestDomain) domain).checkQueryAllowed();
     }
 }

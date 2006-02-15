@@ -60,6 +60,7 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.UnitTestDomain;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Procedure;
@@ -72,7 +73,7 @@ import org.objectstyle.cayenne.query.Query;
  */
 public class SimpleAccessStack extends AbstractAccessStack implements AccessStack {
 
-    protected TestDataDomain domain;
+    protected UnitTestDomain domain;
     protected DataSetFactory dataSetFactory;
 
     public SimpleAccessStack(CayenneTestResources resources,
@@ -80,7 +81,7 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
 
         this.dataSetFactory = dataSetFactory;
         this.resources = resources;
-        this.domain = new TestDataDomain("domain");
+        this.domain = new UnitTestDomain("domain");
         domain.setEventManager(new EventManager(2));
         for (int i = 0; i < maps.length; i++) {
             initNode(maps[i]);
@@ -115,7 +116,7 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
     /**
      * Returns DataDomain for this AccessStack.
      */
-    public TestDataDomain getDataDomain() {
+    public UnitTestDomain getDataDomain() {
         return domain;
     }
 
