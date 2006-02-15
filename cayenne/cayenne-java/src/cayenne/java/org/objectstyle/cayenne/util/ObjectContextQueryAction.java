@@ -122,6 +122,11 @@ public class ObjectContextQueryAction {
         return response;
     }
 
+    /**
+     * Transfers fetched objects into the target context if it is different from "acting"
+     * context. Note that when this method is invoked, result objects are already
+     * registered with acting context by the parent channel.
+     */
     protected void interceptObjectConversion() {
 
         if (targetContext != null && !metadata.isFetchingDataRows()) {
@@ -139,7 +144,7 @@ public class ObjectContextQueryAction {
                     }
                     else {
 
-                        // TODO: Andrus 1/31/2006 - InrementalFaultList is not properly
+                        // TODO: Andrus 1/31/2006 - IncrementalFaultList is not properly
                         // transferred between contexts....
 
                         List childObjects = new ArrayList(objects.size());
