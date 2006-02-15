@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.query.RelationshipQuery;
 
 /**
  * Represents a placeholder for an unresolved relationship from a source object. Fault is
- * resolved via {@link #resolveFault(DataObject,String)}. Depending on the type of fault
+ * resolved via {@link #resolveFault(Persistent, String)}. Depending on the type of fault
  * it is resolved differently. Each type of fault is a singleton that can be obtained via
  * corresponding static method.
  * 

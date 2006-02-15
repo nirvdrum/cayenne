@@ -325,7 +325,7 @@ public abstract class Transaction {
     public abstract void begin();
 
     /**
-     * @deprecated since 1.2 use {@link #addConnection(String, Object)}
+     * @deprecated since 1.2 use {@link #addConnection(String, Connection)}.
      */
     public void addConnection(Connection connection) throws IllegalStateException,
             SQLException, CayenneException {

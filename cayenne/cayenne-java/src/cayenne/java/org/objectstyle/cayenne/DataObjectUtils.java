@@ -59,7 +59,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -176,7 +175,7 @@ public final class DataObjectUtils {
      * query. Otherwise a query is built and executed against the database.
      * </p>
      * 
-     * @see #objectForPK(DataContext, ObjectId)
+     * @see #objectForPK(ObjectContext, ObjectId)
      */
     public static DataObject objectForPK(
             ObjectContext context,
@@ -218,7 +217,7 @@ public final class DataObjectUtils {
      * query. Otherwise a query is built and executed against the database.
      * </p>
      * 
-     * @see #objectForPK(DataContext, ObjectId)
+     * @see #objectForPK(ObjectContext, ObjectId)
      */
     public static DataObject objectForPK(
             ObjectContext context,
@@ -252,7 +251,7 @@ public final class DataObjectUtils {
      * query. Otherwise a query is built and executed against the database.
      * </p>
      * 
-     * @see #objectForPK(DataContext, ObjectId)
+     * @see #objectForPK(ObjectContext, ObjectId)
      */
     public static DataObject objectForPK(
             ObjectContext context,
