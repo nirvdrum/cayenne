@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-public class NestedDataContextTst extends CayenneTestCase {
+public class NestedDataContextReadTst extends CayenneTestCase {
 
     public void testCreateChildDataContext() {
         DataContext parent = createDataContext();

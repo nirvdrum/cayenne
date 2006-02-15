@@ -78,17 +78,24 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  * @since 1.2
  * @author Andrus Adamchik
  */
-class DataContextPrecommitAction {
+class DataDomainPrecommitAction {
 
+    DataDomain domain;
     DataContext context;
     Collection deleted;
     Collection inserted;
     Map insertedByEntity;
     Collection updated;
 
-    boolean precommit(DataContext context) throws ValidationException {
+    boolean precommit(DataDomain domain, DataContext context) throws ValidationException {
 
-        init(context);
+        this.context = context;
+        this.domain = domain;
+
+        insertedByEntity = null;
+        inserted = null;
+        updated = null;
+        deleted = null;
 
         categorizeObjects();
 
@@ -110,19 +117,9 @@ class DataContextPrecommitAction {
         return true;
     }
 
-    private void init(DataContext context) {
-        this.context = context;
-
-        insertedByEntity = null;
-        inserted = null;
-        updated = null;
-        deleted = null;
-    }
-
     private void createPrimaryKey() {
         if (inserted != null) {
 
-            DataDomain domain = context.getParentDataDomain();
             PrimaryKeyHelper pkHelper = domain.primaryKeyHelper();
 
             List insertedEntities = new ArrayList(insertedByEntity.keySet());
@@ -187,7 +184,7 @@ class DataContextPrecommitAction {
 
         inserted.add(object);
 
-        ObjEntity e = context.getEntityResolver().lookupObjEntity(object);
+        ObjEntity e = domain.getEntityResolver().lookupObjEntity(object);
         List list = (List) insertedByEntity.get(e);
         if (list == null) {
             list = new ArrayList();

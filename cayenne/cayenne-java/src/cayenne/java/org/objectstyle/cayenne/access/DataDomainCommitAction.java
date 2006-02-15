@@ -69,7 +69,6 @@ import java.util.Set;
 import org.apache.commons.collections.map.LinkedMap;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -114,15 +113,9 @@ class DataDomainCommitAction {
         this.domain = domain;
     }
 
-    GraphDiff commit(ObjectContext objectContext, GraphDiff diff) {
+    GraphDiff commit(DataContext context, GraphDiff diff) {
 
-        if (!(objectContext instanceof DataContext)) {
-            throw new CayenneRuntimeException(
-                    "No support for committing ObjectContexts that are not DataContexts. Unsupported context: "
-                            + context);
-        }
-
-        this.context = (DataContext) objectContext;
+        this.context = context;
 
         // note that there is no syncing on the object store itself. This is caller's
         // responsibility.

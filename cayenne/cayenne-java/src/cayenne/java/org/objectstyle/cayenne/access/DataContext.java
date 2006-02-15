@@ -1078,59 +1078,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * delete queries (generated internally).
      */
     public void commitChanges() throws CayenneRuntimeException {
-        doCommitChanges();
-    }
-
-    /**
-     * Commit worker method.
-     * 
-     * @since 1.2
-     */
-    GraphDiff doCommitChanges() throws CayenneRuntimeException {
-        if (this.getChannel() == null) {
-            throw new CayenneRuntimeException(
-                    "Cannot commit changes - channel is not set.");
-        }
-
-        if (this.getChannel() instanceof DataDomain) {
-
-            // prevent multiple commits occuring simulteneously
-            synchronized (getObjectStore()) {
-
-                // TODO: Andrus, 12/13/2005 - in the OPP spirit, PK generation should be
-                // done
-                // on the DataDomain end and passed back as a diff. At the same time the
-                // problem is that PK generation is the only way to detect some phantom
-                // modifications, and thus is a part of DataContext precommit - need to
-                // resolve this conflict somehow.
-                DataContextPrecommitAction precommit = new DataContextPrecommitAction();
-                if (!precommit.precommit(this)) {
-                    return new CompoundDiff();
-                }
-
-                try {
-                    // TODO: Andrus, 12/06/2005 - this is a violation of OPP rules, as we
-                    // do not pass changes down the stack. Instead this code assumes that
-                    // a channel will get them directly from the context.
-                    return getChannel().onSync(this, DataChannel.COMMIT_SYNC_TYPE, null);
-                }
-                // needed to unwrap OptimisticLockExceptions
-                catch (CayenneRuntimeException ex) {
-                    Throwable unwound = Util.unwindException(ex);
-
-                    if (unwound instanceof CayenneRuntimeException) {
-                        throw (CayenneRuntimeException) unwound;
-                    }
-                    else {
-                        throw new CayenneRuntimeException("Commit Exception", unwound);
-                    }
-                }
-            }
-        }
-        else {
-            // TODO: Andrus, 1/19/2006: implement for nested contexts...
-            throw new CayenneRuntimeException("Not implemented");
-        }
+        syncCommit(this, null);
     }
 
     /**
@@ -1156,7 +1104,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
             case DataChannel.FLUSH_SYNC_TYPE:
                 return syncFlush(contextChanges);
             case DataChannel.COMMIT_SYNC_TYPE:
-                return syncCommit(contextChanges);
+                return syncCommit(context, contextChanges);
             default:
                 throw new CayenneRuntimeException("Unrecognized SyncMessage type: "
                         + syncType);
@@ -1179,9 +1127,38 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
     /**
      * Applies child diff, and then commits.
      */
-    GraphDiff syncCommit(GraphDiff childDiff) {
-        childDiff.apply(new ChildDiffLoader(this));
-        return doCommitChanges();
+    GraphDiff syncCommit(ObjectContext context, GraphDiff contextChanges) {
+
+        if (contextChanges != null && context != this) {
+            contextChanges.apply(new ChildDiffLoader(this));
+        }
+
+        if (this.getChannel() == null) {
+            throw new CayenneRuntimeException(
+                    "Cannot commit changes - channel is not set.");
+        }
+
+        // prevent multiple commits occuring simulteneously
+        synchronized (getObjectStore()) {
+
+            try {
+                // TODO: Andrus, 12/06/2005 - this is a violation of OPP rules, as we
+                // do not pass changes down the stack. Instead this code assumes that
+                // a channel will get them directly from the context.
+                return getChannel().onSync(this, DataChannel.COMMIT_SYNC_TYPE, null);
+            }
+            // needed to unwrap OptimisticLockExceptions
+            catch (CayenneRuntimeException ex) {
+                Throwable unwound = Util.unwindException(ex);
+
+                if (unwound instanceof CayenneRuntimeException) {
+                    throw (CayenneRuntimeException) unwound;
+                }
+                else {
+                    throw new CayenneRuntimeException("Commit Exception", unwound);
+                }
+            }
+        }
     }
 
     /**

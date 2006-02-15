@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -742,12 +743,25 @@ public class DataDomain implements QueryEngine, DataChannel {
      */
     public GraphDiff onSync(ObjectContext context, int syncType, GraphDiff contextChanges) {
 
+        if (!(context instanceof DataContext)) {
+            throw new CayenneRuntimeException(
+                    "No support for committing ObjectContexts that are not DataContexts yet. Unsupported context: "
+                            + context);
+        }
+
+        DataContext dataContext = (DataContext) context;
+
         // ignore all but commit messages
         if (syncType == DataChannel.COMMIT_SYNC_TYPE) {
-            // TODO: Andrus, 12/13/2005 - see TODO under
-            // DataContext.doCommitChanges() -
-            // PK generation needs to be done here...
-            return new DataDomainCommitAction(this).commit(context, contextChanges);
+            // TODO: Andrus, 12/13/2005 - see TODO under DataContext.doCommitChanges() -
+            // need to pass changes around as diffs..
+            
+            DataDomainPrecommitAction precommit = new DataDomainPrecommitAction();
+            if (!precommit.precommit(this, dataContext)) {
+                return new CompoundDiff();
+            }
+
+            return new DataDomainCommitAction(this).commit(dataContext, contextChanges);
         }
 
         return null;
