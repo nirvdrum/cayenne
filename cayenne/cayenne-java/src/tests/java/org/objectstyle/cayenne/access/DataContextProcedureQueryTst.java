@@ -68,7 +68,6 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.access.jdbc.ColumnDescriptor;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -108,15 +107,18 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
 
         ProcedureQuery q = new ProcedureQuery(UPDATE_STORED_PROCEDURE);
         q.addParameter("paintingPrice", new Integer(3000));
-        DefaultOperationObserver observer = new DefaultOperationObserver();
 
         // since stored procedure commits its stuff, we must use an explicit
         // non-committing transaction
 
-        Transaction.externalTransaction(null).performQueries(
-                ctxt,
-                Collections.singletonList(q),
-                observer);
+        Transaction.bindThreadTransaction(Transaction.externalTransaction(null));
+
+        try {
+            ctxt.performGenericQuery(q);
+        }
+        finally {
+            Transaction.bindThreadTransaction(null);
+        }
 
         // check that price have doubled
         SelectQuery select = new SelectQuery(Artist.class);

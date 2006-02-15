@@ -190,6 +190,9 @@ public abstract class Transaction {
      * Helper method that wraps a number of queries in this transaction, runs them, and
      * commits or rolls back depending on the outcome. This method allows users to define
      * their own custom Transactions and wrap Cayenne queries in them.
+     * 
+     * @deprecated since 1.2 this method is not used in Cayenne and is deprecated.
+     *             Thread-bound transactions should be used instead.
      */
     public void performQueries(
             QueryEngine engine,
