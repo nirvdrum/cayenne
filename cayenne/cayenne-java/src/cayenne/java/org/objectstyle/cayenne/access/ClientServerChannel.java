@@ -176,7 +176,7 @@ public class ClientServerChannel implements DataChannel {
      * Applies child diff, and then commits.
      */
     GraphDiff onCommit(GraphDiff childDiff) {
-        GraphDiff diff = serverContext.syncCommit(null, childDiff);
+        GraphDiff diff = serverContext.onContextCommit(null, childDiff);
 
         GraphDiff returnClientDiff;
 

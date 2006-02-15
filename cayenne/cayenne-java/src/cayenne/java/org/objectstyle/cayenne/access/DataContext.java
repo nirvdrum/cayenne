@@ -1023,22 +1023,6 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
     }
 
     /**
-     * If the parent channel is a DataContext, sends the changes to the parent; if the
-     * parent is DataDomain, commits the changes to DB.
-     * 
-     * @since 1.2
-     */
-    // TODO: Andrus, 1/19/2006: implement for nested DataContexts
-    public void flushChanges() {
-        if (getChannel() instanceof DataDomain) {
-            commitChanges();
-        }
-        else {
-            throw new CayenneRuntimeException("Implementation pending.");
-        }
-    }
-
-    /**
      * If the parent channel is a DataContext, reverts local changes to make this context
      * look like the parent, if the parent channel is a DataDomain, reverts all changes.
      * 
@@ -1067,6 +1051,20 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
     }
 
     /**
+     * "Flushes" the changes to the parent {@link DataChannel}. If the parent channel is
+     * a DataContext, it updates its objects with this context's changes, without a
+     * database update. If it is a DataDomain (the most common case), the changes are
+     * written to the database. To cause cascading commit all the way to the database, one
+     * must use {@link #commitChanges()}.
+     * 
+     * @since 1.2
+     * @see #commitChanges()
+     */
+    public void flushChanges() {
+        flushToParent(false);
+    }
+
+    /**
      * @deprecated Since 1.2, use {@link #commitChanges()} instead.
      */
     public void commitChanges(Level logLevel) throws CayenneRuntimeException {
@@ -1078,7 +1076,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * delete queries (generated internally).
      */
     public void commitChanges() throws CayenneRuntimeException {
-        syncCommit(this, null);
+        flushToParent(true);
     }
 
     /**
@@ -1099,44 +1097,58 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
     public GraphDiff onSync(ObjectContext context, int syncType, GraphDiff contextChanges) {
         // sync client changes
         switch (syncType) {
+            // apply the changes locally; send down to the channel
             case DataChannel.ROLLBACK_SYNC_TYPE:
-                return syncRollback();
+                return onContextRollback(context, contextChanges);
+            // apply the changes locally only
             case DataChannel.FLUSH_SYNC_TYPE:
-                return syncFlush(contextChanges);
+                return onContextFlush(context, contextChanges);
+            // apply the changes locally; commit self to the channel
             case DataChannel.COMMIT_SYNC_TYPE:
-                return syncCommit(context, contextChanges);
+                return onContextCommit(context, contextChanges);
             default:
                 throw new CayenneRuntimeException("Unrecognized SyncMessage type: "
                         + syncType);
         }
     }
 
-    GraphDiff syncRollback() {
+    GraphDiff onContextRollback(ObjectContext originatingContext, GraphDiff childChanges) {
         rollbackChanges();
-        return new CompoundDiff();
+        return (channel != null) ? channel.onSync(
+                this,
+                DataChannel.ROLLBACK_SYNC_TYPE,
+                null) : new CompoundDiff();
     }
 
-    /**
-     * Applies child diff, without returning anything back.
-     */
-    GraphDiff syncFlush(GraphDiff childDiff) {
-        childDiff.apply(new ChildDiffLoader(this));
-        return new CompoundDiff();
-    }
-
-    /**
-     * Applies child diff, and then commits.
-     */
-    GraphDiff syncCommit(ObjectContext context, GraphDiff contextChanges) {
-
-        if (contextChanges != null && context != this) {
-            contextChanges.apply(new ChildDiffLoader(this));
+    GraphDiff onContextFlush(ObjectContext originatingContext, GraphDiff childChanges) {
+        if (childChanges != null && this != originatingContext) {
+            childChanges.apply(new ChildDiffLoader(this));
         }
+
+        return new CompoundDiff();
+    }
+
+    GraphDiff onContextCommit(ObjectContext originatingContext, GraphDiff childChanges) {
+        if (childChanges != null && this != originatingContext) {
+            childChanges.apply(new ChildDiffLoader(this));
+        }
+
+        return flushToParent(true);
+    }
+
+    /**
+     * Synchronizes with the parent channel, performing a flus or a commit.
+     */
+    GraphDiff flushToParent(boolean cascade) {
 
         if (this.getChannel() == null) {
             throw new CayenneRuntimeException(
                     "Cannot commit changes - channel is not set.");
         }
+
+        int syncType = cascade
+                ? DataChannel.COMMIT_SYNC_TYPE
+                : DataChannel.FLUSH_SYNC_TYPE;
 
         // prevent multiple commits occuring simulteneously
         synchronized (getObjectStore()) {
@@ -1145,7 +1157,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
                 // TODO: Andrus, 12/06/2005 - this is a violation of OPP rules, as we
                 // do not pass changes down the stack. Instead this code assumes that
                 // a channel will get them directly from the context.
-                return getChannel().onSync(this, DataChannel.COMMIT_SYNC_TYPE, null);
+                return getChannel().onSync(this, syncType, null);
             }
             // needed to unwrap OptimisticLockExceptions
             catch (CayenneRuntimeException ex) {

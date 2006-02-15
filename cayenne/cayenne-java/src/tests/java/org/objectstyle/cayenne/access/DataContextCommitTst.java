@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class DataContextCommitTst extends CayenneTestCase {
 
-    public void testSyncCommit() {
+    public void testFlushToParent_Commit() {
 
         DataContext context = createDataContext();
         
@@ -73,7 +73,7 @@ public class DataContextCommitTst extends CayenneTestCase {
 
         assertTrue(context.hasChanges());
 
-        GraphDiff diff = context.syncCommit(null, null);
+        GraphDiff diff = context.flushToParent(true);
         assertNotNull(diff);
         assertFalse(context.hasChanges());
 
@@ -98,7 +98,7 @@ public class DataContextCommitTst extends CayenneTestCase {
         p.setToArtist(a);
         a.setArtistName(a.getArtistName() + "_");
         
-        GraphDiff diff2 = context.syncCommit(null, null);
+        GraphDiff diff2 = context.flushToParent(true);
         assertNotNull(diff2);
         assertFalse(context.hasChanges());
 
