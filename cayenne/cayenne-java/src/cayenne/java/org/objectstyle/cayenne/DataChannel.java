@@ -98,7 +98,10 @@ public interface DataChannel {
     EntityResolver getEntityResolver();
 
     /**
-     * Runs a query, returning generic response.
+     * Executes a query, using provided <em>context</em> to register persistent objects
+     * if query returns any objects.
+     * 
+     * @return a generic response object that encapsulates result of the execution.
      */
     QueryResponse onQuery(ObjectContext context, Query query);
 
