@@ -112,16 +112,15 @@ class ExternalTransaction extends Transaction {
     }
 
     public void commit() throws IllegalStateException, SQLException, CayenneException {
-
-        if (status == Transaction.STATUS_NO_TRANSACTION) {
-            return;
-        }
-
-        if (delegate != null && !delegate.willCommit(this)) {
-            return;
-        }
-
         try {
+            if (status == Transaction.STATUS_NO_TRANSACTION) {
+                return;
+            }
+
+            if (delegate != null && !delegate.willCommit(this)) {
+                return;
+            }
+
             if (status != Transaction.STATUS_ACTIVE) {
                 throw new IllegalStateException(
                         "Transaction must have 'STATUS_ACTIVE' to be committed. "
@@ -143,17 +142,17 @@ class ExternalTransaction extends Transaction {
 
     public void rollback() throws IllegalStateException, SQLException, CayenneException {
 
-        if (status == Transaction.STATUS_NO_TRANSACTION
-                || status == Transaction.STATUS_ROLLEDBACK
-                || status == Transaction.STATUS_ROLLING_BACK) {
-            return;
-        }
-
-        if (delegate != null && !delegate.willRollback(this)) {
-            return;
-        }
-
         try {
+            if (status == Transaction.STATUS_NO_TRANSACTION
+                    || status == Transaction.STATUS_ROLLEDBACK
+                    || status == Transaction.STATUS_ROLLING_BACK) {
+                return;
+            }
+
+            if (delegate != null && !delegate.willRollback(this)) {
+                return;
+            }
+
             if (status != Transaction.STATUS_ACTIVE) {
                 throw new IllegalStateException(
                         "Transaction must have 'STATUS_ACTIVE' to be rolled back. "

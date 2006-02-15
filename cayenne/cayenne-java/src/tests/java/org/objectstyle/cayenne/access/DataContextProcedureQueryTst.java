@@ -111,13 +111,15 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         // since stored procedure commits its stuff, we must use an explicit
         // non-committing transaction
 
-        Transaction.bindThreadTransaction(Transaction.externalTransaction(null));
+        Transaction t = Transaction.externalTransaction(null);
+        Transaction.bindThreadTransaction(t);
 
         try {
             ctxt.performGenericQuery(q);
         }
         finally {
             Transaction.bindThreadTransaction(null);
+            t.commit();
         }
 
         // check that price have doubled
