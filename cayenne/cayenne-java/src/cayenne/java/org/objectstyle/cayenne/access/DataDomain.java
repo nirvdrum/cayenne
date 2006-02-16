@@ -376,19 +376,28 @@ public class DataDomain implements QueryEngine, DataChannel {
      * call.
      */
     public synchronized DataRowStore getSharedSnapshotCache() {
-        if (sharedSnapshotCache == null) {
+        if (sharedSnapshotCache == null && sharedCacheEnabled) {
             this.sharedSnapshotCache = new DataRowStore(name, properties, eventManager);
         }
 
         return sharedSnapshotCache;
     }
 
+    /**
+     * Shuts down the previous cache instance, sets cache to the new DataSowStore instance
+     * and updates two properties of the new DataSowStore: name and eventManager.
+     */
     public synchronized void setSharedSnapshotCache(DataRowStore snapshotCache) {
         if (this.sharedSnapshotCache != snapshotCache) {
             if (this.sharedSnapshotCache != null) {
                 this.sharedSnapshotCache.shutdown();
             }
             this.sharedSnapshotCache = snapshotCache;
+
+            if (snapshotCache != null) {
+                snapshotCache.setEventManager(getEventManager());
+                snapshotCache.setName(getName());
+            }
         }
     }
 
@@ -677,7 +686,9 @@ public class DataDomain implements QueryEngine, DataChannel {
      * Shutdowns all owned data nodes. Invokes DataNode.shutdown().
      */
     public void shutdown() {
-        this.sharedSnapshotCache.shutdown();
+        if (sharedSnapshotCache != null) {
+            this.sharedSnapshotCache.shutdown();
+        }
 
         Collection dataNodes = getDataNodes();
         for (Iterator i = dataNodes.iterator(); i.hasNext();) {
@@ -779,7 +790,7 @@ public class DataDomain implements QueryEngine, DataChannel {
     }
 
     GraphDiff onSyncFlushInternal(ObjectContext originatingContext, GraphDiff childChanges) {
-        
+
         if (!(originatingContext instanceof DataContext)) {
             throw new CayenneRuntimeException(
                     "No support for committing ObjectContexts that are not DataContexts yet. "

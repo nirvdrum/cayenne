@@ -307,4 +307,50 @@ public class DataDomainTst extends CayenneTestCase {
             // expected
         }
     }
+
+    public void testShutdown() {
+        DataDomain domain = new DataDomain("X");
+
+        final boolean[] nodeShutdown = new boolean[2];
+
+        DataNode n1 = new DataNode("N1") {
+
+            public synchronized void shutdown() {
+                nodeShutdown[0] = true;
+            }
+        };
+
+        DataNode n2 = new DataNode("N2") {
+
+            public synchronized void shutdown() {
+                nodeShutdown[1] = true;
+            }
+        };
+
+        domain.addNode(n1);
+        domain.addNode(n2);
+
+        domain.shutdown();
+
+        assertTrue(nodeShutdown[0]);
+        assertTrue(nodeShutdown[1]);
+    }
+
+    public void testShutdownCache() {
+        DataDomain domain = new DataDomain("X");
+
+        final boolean[] cacheShutdown = new boolean[1];
+
+        DataRowStore cache = new DataRowStore("Y") {
+
+            public void shutdown() {
+                cacheShutdown[0] = true;
+            }
+        };
+        
+        domain.setSharedSnapshotCache(cache);
+        domain.shutdown();
+
+        assertTrue(cacheShutdown[0]);
+    }
 }
