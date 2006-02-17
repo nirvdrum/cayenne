@@ -65,10 +65,10 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * A helper class for DataContextCommitAction.
+ * A helper class for {@link org.objectstyle.cayenne.access.DataDomainFlushAction}.
  * 
  * @since 1.2
- * @author Andrei Adamchik
+ * @author Andrus Adamchik
  */
 class DataNodeCommitAction {
 

@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.access;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -66,11 +67,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.map.LinkedMap;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.Persistent;
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphDiff;
+import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
@@ -105,9 +112,9 @@ class DataDomainFlushAction {
     private List objEntitiesToDelete;
     private List objEntitiesToUpdate;
     private List nodeHelpers;
-    private List insObjects; // event support
-    private List delObjects; // event support
-    private List updObjects; // event support
+    private List newObjects;
+    private List deletedObjects;
+    private List updatedObjects;
 
     DataDomainFlushAction(DataDomain domain) {
         this.domain = domain;
@@ -125,9 +132,9 @@ class DataDomainFlushAction {
             categorizeFlattenedInsertsAndCreateBatches();
             categorizeFlattenedDeletesAndCreateBatches();
 
-            insObjects = new ArrayList();
-            delObjects = new ArrayList();
-            updObjects = new ArrayList();
+            newObjects = new ArrayList();
+            deletedObjects = new ArrayList();
+            updatedObjects = new ArrayList();
 
             for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
                 DataNodeCommitAction nodeHelper = (DataNodeCommitAction) i.next();
@@ -145,9 +152,9 @@ class DataDomainFlushAction {
 
             CommitObserver observer = new CommitObserver(
                     context,
-                    insObjects,
-                    updObjects,
-                    delObjects);
+                    newObjects,
+                    updatedObjects,
+                    deletedObjects);
 
             if (context.isTransactionEventsEnabled()) {
                 observer.registerForDataContextEvents();
@@ -179,7 +186,7 @@ class DataDomainFlushAction {
                     throw new CayenneRuntimeException("Transaction was rolledback.", th);
                 }
 
-                GraphDiff changes = context.getObjectStore().postprocessAfterCommit();
+                GraphDiff changes = postprocessAfterCommit();
 
                 // TODO: Andrus, 2/14/2006 - as transaction is external to this method, it
                 // is wrong to notify the listeners here... likely need to move to the
@@ -193,6 +200,107 @@ class DataDomainFlushAction {
                 }
             }
         }
+    }
+
+    /*
+     * Collects changes in
+     */
+    private GraphDiff postprocessAfterCommit() {
+
+        final Collection deletedIds = new ArrayList(deletedObjects.size());
+
+        int modifiedSize = 0;
+        if (updatedObjects != null) {
+            modifiedSize += updatedObjects.size();
+        }
+        if (newObjects != null) {
+            modifiedSize += newObjects.size();
+        }
+
+        int mapCapacity = (int) (modifiedSize / 0.75);
+        final Map modifiedSnapshots = new HashMap(mapCapacity);
+        final CompoundDiff diff = new CompoundDiff();
+
+        // process deleted
+        if (!deletedObjects.isEmpty()) {
+
+            Iterator it = deletedObjects.iterator();
+            while (it.hasNext()) {
+                Persistent object = (Persistent) it.next();
+                deletedIds.add(object.getObjectId());
+            }
+        }
+
+        // process new and modified
+        if (modifiedSize > 0) {
+
+            // new and modified are processed in essentially the same way, so define a
+            // Closure with access to local vars.
+            Closure op = new Closure() {
+
+                public void execute(Object input) {
+                    if (!(input instanceof Collection)) {
+                        return;
+                    }
+
+                    Collection c = (Collection) input;
+                    if (c.isEmpty()) {
+                        return;
+                    }
+
+                    Iterator it = c.iterator();
+                    while (it.hasNext()) {
+                        DataObject object = (DataObject) it.next();
+                        ObjectId id = object.getObjectId();
+
+                        DataRow dataRow = context.currentSnapshot(object);
+                        dataRow.setReplacesVersion(object.getSnapshotVersion());
+                        object.setSnapshotVersion(dataRow.getVersion());
+
+                        // record id change
+                        if (id.isReplacementIdAttached()) {
+                            ObjectId replacementId = id.createReplacementId();
+                            diff.add(new NodeIdChangeOperation(id, replacementId));
+
+                            // classify replaced permanent ids as "deleted", as
+                            // DataRowCache has no notion of replaced id...
+                            if (!id.isTemporary()) {
+                                deletedIds.add(id);
+                            }
+
+                            modifiedSnapshots.put(replacementId, dataRow);
+                        }
+                        else if (id.isTemporary()) {
+                            throw new CayenneRuntimeException(
+                                    "Temporary ID hasn't been replaced on commit: "
+                                            + object);
+                        }
+                        else {
+                            modifiedSnapshots.put(id, dataRow);
+                        }
+                    }
+                }
+            };
+
+            op.execute(updatedObjects);
+            op.execute(newObjects);
+        }
+
+        // notify cache...
+        if (!deletedIds.isEmpty() || !modifiedSnapshots.isEmpty()) {
+            // create a copy to avoid underlying ObjectStore modification
+            Collection indirectlyModified = new ArrayList(
+                    context.getObjectStore().indirectlyModifiedIds);
+
+            context.getObjectStore().getDataRowCache().processSnapshotChanges(
+                    context.getObjectStore(),
+                    modifiedSnapshots,
+                    deletedIds,
+                    Collections.EMPTY_LIST,
+                    indirectlyModified);
+        }
+
+        return diff;
     }
 
     private void prepareInsertQueries(DataNodeCommitAction commitHelper) {
@@ -251,7 +359,7 @@ class DataDomainFlushAction {
                 }
 
                 if (isMasterDbEntity) {
-                    insObjects.addAll(objects);
+                    newObjects.addAll(objects);
                 }
             }
             commitHelper.getQueries().add(batch);
@@ -360,7 +468,7 @@ class DataDomainFlushAction {
                 }
 
                 if (isRootDbEntity)
-                    delObjects.addAll(objects);
+                    deletedObjects.addAll(objects);
 
             }
             commitHelper.getQueries().addAll(batches.values());
@@ -480,7 +588,7 @@ class DataDomainFlushAction {
                                 idSnapshot,
                                 o.getObjectId().getReplacementIdMap(),
                                 snapshot);
-                        updObjects.add(o);
+                        updatedObjects.add(o);
                     }
                 }
             }

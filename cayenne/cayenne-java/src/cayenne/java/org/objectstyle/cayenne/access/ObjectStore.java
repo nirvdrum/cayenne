@@ -67,24 +67,20 @@ import java.util.Map;
 import org.apache.commons.collections.Factory;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
-import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.access.event.SnapshotEventListener;
 import org.objectstyle.cayenne.event.EventManager;
-import org.objectstyle.cayenne.graph.ArcCreateOperation;
-import org.objectstyle.cayenne.graph.ArcDeleteOperation;
 import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.graph.GraphChangeHandler;
 import org.objectstyle.cayenne.graph.GraphDiff;
-import org.objectstyle.cayenne.graph.NodeCreateOperation;
-import org.objectstyle.cayenne.graph.NodeDeleteOperation;
 import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
-import org.objectstyle.cayenne.graph.NodePropertyChangeOperation;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.validation.ValidationException;
@@ -521,9 +517,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * object persistence state and handles snapshot updates.
      * 
      * @since 1.1
+     * @deprecated since 1.2 unused.
      */
     public synchronized void objectsCommitted() {
-        postprocessAfterCommit();
+        postprocessAfterCommit(new CompoundDiff());
     }
 
     /**
@@ -532,151 +529,47 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * 
      * @since 1.2
      */
-    GraphDiff postprocessAfterCommit() {
-
-        // these will store snapshot changes
-        List deletedIds = null;
-        Map modifiedSnapshots = null;
+    GraphDiff postprocessAfterCommit(GraphDiff parentChanges) {
 
         Iterator entries = objectMap.entrySet().iterator();
-        List modifiedIds = null;
 
+        CompoundDiff diff = new CompoundDiff();
+
+        // have to scan through all entries
         while (entries.hasNext()) {
             Map.Entry entry = (Map.Entry) entries.next();
 
             DataObject object = (DataObject) entry.getValue();
-            int state = object.getPersistenceState();
+            ObjectId registeredId = (ObjectId) entry.getKey();
             ObjectId id = object.getObjectId();
 
-            // OID may have been manually substituted instead of using replacement...
-            // not good, but process it here anyway...
-            // [an alternative would be to throw an exception, but as commit is already
-            // done, this is not a sensible thing to do]
-            if (state == PersistenceState.NEW && !id.isReplacementIdAttached()) {
-                id = fixObjectId((ObjectId) entry.getKey(), object);
-            }
-
-            if (id.isReplacementIdAttached()) {
-                if (modifiedIds == null) {
-                    modifiedIds = new ArrayList();
-                }
-
-                modifiedIds.add(id);
-
-                // postpone processing of objects that require an id change
-                continue;
-            }
-            // sanity check
-            else if (id.isTemporary()) {
-                throw new CayenneRuntimeException(
-                        "Temporary ID hasn't been replaced on commit: " + object);
-            }
-
-            // inserted will all have replacement ids, so do not check for
-            // inserts here
-            // ...
-
-            // deleted
-            switch (state) {
+            switch (object.getPersistenceState()) {
                 case PersistenceState.DELETED:
                     entries.remove();
-                    object.setDataContext(null);
+                    object.setObjectContext(null);
                     object.setPersistenceState(PersistenceState.TRANSIENT);
-
-                    if (deletedIds == null) {
-                        deletedIds = new ArrayList();
-                    }
-
-                    deletedIds.add(id);
                     break;
-                // modified
-                case PersistenceState.MODIFIED:
-                    if (modifiedSnapshots == null) {
-                        modifiedSnapshots = new HashMap();
-                    }
-
-                    DataRow dataRow = object.getDataContext().currentSnapshot(object);
-
-                    modifiedSnapshots.put(id, dataRow);
-                    dataRow.setReplacesVersion(object.getSnapshotVersion());
-
-                    object.setPersistenceState(PersistenceState.COMMITTED);
-                    object.setSnapshotVersion(dataRow.getVersion());
-                    break;
-                // new but without a replacement ID (users may have crafted a perm id
-                // manually)
                 case PersistenceState.NEW:
-                    // TODO: do we need to fix snapshots around?
+                case PersistenceState.MODIFIED:
+
+                    // detect and handle manual id changes done via
+                    // Persistent.setObjectId()
+                    if (!id.equals(registeredId)) {
+                        diff.add(new NodeIdChangeOperation(registeredId, id));
+                    }
+
                     object.setPersistenceState(PersistenceState.COMMITTED);
                     break;
             }
         }
 
-        GraphDiff diff = null;
-
-        // process id replacements
-        if (modifiedIds != null) {
-            OperationRecorder recorder = new OperationRecorder();
-
-            Iterator ids = modifiedIds.iterator();
-            while (ids.hasNext()) {
-                ObjectId id = (ObjectId) ids.next();
-                DataObject object = getObject(id);
-
-                if (object == null) {
-                    throw new CayenneRuntimeException("No object for id: " + id);
-                }
-
-                // store old snapshot as deleted,
-                // even though the object was modified, not deleted
-                // from the common logic standpoint..
-                if (!id.isTemporary()) {
-                    if (deletedIds == null) {
-                        deletedIds = new ArrayList();
-                    }
-
-                    deletedIds.add(id);
-                }
-
-                // store the new snapshot
-                if (modifiedSnapshots == null) {
-                    modifiedSnapshots = new HashMap();
-                }
-
-                ObjectId replacementId = id.createReplacementId();
-
-                // record id change...
-                recorder.nodeIdChanged(id, replacementId);
-
-                DataRow dataRow = object.getDataContext().currentSnapshot(object);
-                modifiedSnapshots.put(replacementId, dataRow);
-                dataRow.setReplacesVersion(object.getSnapshotVersion());
-
-                // fix object state
-                object.setObjectId(replacementId);
-                object.setSnapshotVersion(dataRow.getVersion());
-                object.setPersistenceState(PersistenceState.COMMITTED);
-                addObject(object);
-
-                objectMap.remove(id);
-            }
-
-            diff = recorder.getDiff();
+        if (parentChanges != null && !parentChanges.isNoop()) {
+            diff.add(parentChanges);
         }
 
-        // notify parent cache
-        if (deletedIds != null || modifiedSnapshots != null) {
-            // dataRowCache maybe initialized lazily, so do not access the ivar directly
-            getDataRowCache()
-                    .processSnapshotChanges(
-                            this,
-                            modifiedSnapshots != null
-                                    ? modifiedSnapshots
-                                    : Collections.EMPTY_MAP,
-                            deletedIds != null ? deletedIds : Collections.EMPTY_LIST,
-                            Collections.EMPTY_LIST,
-                            !indirectlyModifiedIds.isEmpty() ? new ArrayList(
-                                    indirectlyModifiedIds) : Collections.EMPTY_LIST);
+        // re-register changed object ids
+        if (!diff.isNoop()) {
+            diff.apply(new IdUpdater());
         }
 
         // clear caches
@@ -685,29 +578,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         this.flattenedDeletes.clear();
         this.flattenedInserts.clear();
 
-        return (diff != null) ? diff : new CompoundDiff();
-    }
-
-    /**
-     * A hack to fix manual ObjectId replacements that may have been done without regards
-     * to the fact that ObjectId is used as a key in ObjectStore. E.g.
-     * http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0210.html. Still not sure
-     * if this is a sensible thing to do, but we can't leave this condition unhandled
-     * either.
-     * 
-     * @since 1.2
-     */
-    ObjectId fixObjectId(ObjectId registeredId, DataObject object) {
-        if (!registeredId.equals(object.getObjectId())
-                && !object.getObjectId().isTemporary()) {
-
-            registeredId.getReplacementIdMap().putAll(
-                    object.getObjectId().getIdSnapshot());
-
-            object.setObjectId(registeredId);
-        }
-
-        return registeredId;
+        return diff;
     }
 
     public synchronized void addObject(DataObject obj) {
@@ -1373,24 +1244,23 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         return dataRowCacheFactory;
     }
 
-    class OperationRecorder implements GraphChangeHandler {
-
-        List diffs = new ArrayList();
-
-        GraphDiff getDiff() {
-            return new CompoundDiff(diffs.isEmpty() ? null : diffs);
-        }
+    class IdUpdater implements GraphChangeHandler {
 
         public void nodeIdChanged(Object nodeId, Object newId) {
-            diffs.add(new NodeIdChangeOperation(nodeId, newId));
+            Persistent object = (Persistent) objectMap.remove(nodeId);
+
+            if (object != null) {
+                object.setObjectId((ObjectId) newId);
+                objectMap.put(newId, object);
+            }
         }
 
         public void nodeCreated(Object nodeId) {
-            diffs.add(new NodeIdChangeOperation(nodeId, new NodeCreateOperation(nodeId)));
+
         }
 
         public void nodeRemoved(Object nodeId) {
-            diffs.add(new NodeDeleteOperation(nodeId));
+
         }
 
         public void nodePropertyChanged(
@@ -1399,19 +1269,14 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 Object oldValue,
                 Object newValue) {
 
-            diffs.add(new NodePropertyChangeOperation(
-                    nodeId,
-                    property,
-                    oldValue,
-                    newValue));
         }
 
         public void arcCreated(Object nodeId, Object targetNodeId, Object arcId) {
-            diffs.add(new ArcCreateOperation(nodeId, targetNodeId, arcId));
+
         }
 
         public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
-            diffs.add(new ArcDeleteOperation(nodeId, targetNodeId, arcId));
+
         }
     }
 }

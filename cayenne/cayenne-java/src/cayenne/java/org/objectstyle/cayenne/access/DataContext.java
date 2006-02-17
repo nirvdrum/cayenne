@@ -1157,9 +1157,11 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
                 // TODO: Andrus, 12/06/2005 - this is a violation of OPP rules, as we
                 // do not pass changes down the stack. Instead this code assumes that
                 // a channel will get them directly from the context.
-                return getChannel().onSync(this, syncType, null);
+                GraphDiff parentChanges = getChannel().onSync(this, syncType, null);
+                
+                return getObjectStore().postprocessAfterCommit(parentChanges);
             }
-            // needed to unwrap OptimisticLockExceptions
+            // "catch" is needed to unwrap OptimisticLockExceptions
             catch (CayenneRuntimeException ex) {
                 Throwable unwound = Util.unwindException(ex);
 

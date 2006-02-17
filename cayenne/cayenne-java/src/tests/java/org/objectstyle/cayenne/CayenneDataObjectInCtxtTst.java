@@ -288,10 +288,11 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         artist.setArtistName("abc");
         context.commitChanges();
 
-        assertEquals(context
-                .getObjectStore()
-                .getCachedSnapshot(artist.getObjectId())
-                .getVersion(), artist.getSnapshotVersion());
+        DataRow cachedSnapshot = context.getObjectStore().getCachedSnapshot(
+                artist.getObjectId());
+
+        assertNotNull(cachedSnapshot);
+        assertEquals(cachedSnapshot.getVersion(), artist.getSnapshotVersion());
     }
 
     public void testSnapshotVersion2() {

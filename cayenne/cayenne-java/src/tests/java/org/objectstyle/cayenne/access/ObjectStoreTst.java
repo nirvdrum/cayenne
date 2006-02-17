@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.MockDataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.graph.CompoundDiff;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
@@ -197,7 +198,7 @@ public class ObjectStoreTst extends CayenneTestCase {
      * setting replacement. This is demonstrated here -
      * http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0210.html
      */
-    public void testObjectsCommittedManualOID() throws Exception {
+    public void testPostprocessAfterCommit() throws Exception {
 
         Artist object = (Artist) context.createAndRegisterNewObject(Artist.class);
         object.setArtistName("ABC");
@@ -205,10 +206,12 @@ public class ObjectStoreTst extends CayenneTestCase {
         objectStore.addObject(object);
 
         // do a manual ID substitution
-        object.setObjectId(new ObjectId("T", Artist.ARTIST_ID_PK_COLUMN, 3));
+        ObjectId manualId = new ObjectId("T", Artist.ARTIST_ID_PK_COLUMN, 3);
+        object.setObjectId(manualId);
 
-        objectStore.objectsCommitted();
+        objectStore.postprocessAfterCommit(new CompoundDiff());
         assertEquals(PersistenceState.COMMITTED, object.getPersistenceState());
+        assertSame(object, objectStore.getObject(manualId));
     }
 
 }

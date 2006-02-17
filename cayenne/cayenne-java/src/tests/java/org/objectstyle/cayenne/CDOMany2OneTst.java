@@ -124,7 +124,6 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         // do select
         Expression e = ExpressionFactory.matchExp("toArtist", a1);
         SelectQuery q = new SelectQuery("Painting", e);
-        // q.setLoggingLevel(Level.ERROR);
 
         // *** TESTING THIS ***
         List paints = ctxt.performQuery(q);
