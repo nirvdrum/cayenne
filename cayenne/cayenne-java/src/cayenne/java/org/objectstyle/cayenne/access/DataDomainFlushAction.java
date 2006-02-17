@@ -203,7 +203,8 @@ class DataDomainFlushAction {
     }
 
     /*
-     * Collects changes in
+     * Sends notification of changes to the DataRowStore, returns GraphDiff with replaced
+     * ObjectIds.
      */
     private GraphDiff postprocessAfterCommit() {
 

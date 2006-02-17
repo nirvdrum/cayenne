@@ -1120,24 +1120,64 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
                 null) : new CompoundDiff();
     }
 
-    GraphDiff onContextFlush(ObjectContext originatingContext, GraphDiff childChanges) {
-        if (childChanges != null && this != originatingContext) {
-            childChanges.apply(new ChildDiffLoader(this));
-        }
+    GraphDiff onContextFlush(ObjectContext originatingContext, GraphDiff diff) {
+        syncChildChanges(originatingContext, diff);
 
         return new CompoundDiff();
     }
 
-    GraphDiff onContextCommit(ObjectContext originatingContext, GraphDiff childChanges) {
-        if (childChanges != null && this != originatingContext) {
-            childChanges.apply(new ChildDiffLoader(this));
-        }
-
+    GraphDiff onContextCommit(ObjectContext originatingContext, GraphDiff diff) {
+        syncChildChanges(originatingContext, diff);
         return flushToParent(true);
     }
 
     /**
+     * Loads changes from another context.
+     */
+    void syncChildChanges(ObjectContext originatingContext, GraphDiff diff) {
+        if (this != originatingContext) {
+            if (diff != null) {
+                diff.apply(new ChildDiffLoader(this));
+            }
+            // (andrus) if a child is a DataContext, we need to pull the changes from it,
+            // as it can't push them; maybe there are better ways to do that, but they are
+            // not obvious to me at this point.
+            else if (originatingContext instanceof DataContext) {
+                DataContext context = (DataContext) originatingContext;
+
+                Iterator it = context.getObjectStore().getObjectIterator();
+                while (it.hasNext()) {
+                    Persistent source = (Persistent) it.next();
+
+                    // TODO, andrus, 2/17/2006 - 'localObject' doesn't do
+                    // merge if the underlying object is modified.....
+
+                    switch (source.getPersistenceState()) {
+                        case PersistenceState.DELETED:
+                            deleteObject(localObject(source.getObjectId(), source));
+                            break;
+                        case PersistenceState.NEW:
+                            Persistent localNew = localObject(
+                                    source.getObjectId(),
+                                    source);
+                            localNew.setPersistenceState(PersistenceState.NEW);
+                            break;
+                        case PersistenceState.MODIFIED:
+                            Persistent localModified = localObject(
+                                    source.getObjectId(),
+                                    source);
+                            localModified.setPersistenceState(PersistenceState.MODIFIED);
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Synchronizes with the parent channel, performing a flus or a commit.
+     * 
+     * @since 1.2
      */
     GraphDiff flushToParent(boolean cascade) {
 
@@ -1158,7 +1198,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
                 // do not pass changes down the stack. Instead this code assumes that
                 // a channel will get them directly from the context.
                 GraphDiff parentChanges = getChannel().onSync(this, syncType, null);
-                
+
                 return getObjectStore().postprocessAfterCommit(parentChanges);
             }
             // "catch" is needed to unwrap OptimisticLockExceptions

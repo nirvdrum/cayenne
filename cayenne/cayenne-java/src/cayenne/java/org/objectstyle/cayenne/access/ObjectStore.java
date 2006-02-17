@@ -531,9 +531,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      */
     GraphDiff postprocessAfterCommit(GraphDiff parentChanges) {
 
-        Iterator entries = objectMap.entrySet().iterator();
-
         CompoundDiff diff = new CompoundDiff();
+        Iterator entries = objectMap.entrySet().iterator();
 
         // have to scan through all entries
         while (entries.hasNext()) {
