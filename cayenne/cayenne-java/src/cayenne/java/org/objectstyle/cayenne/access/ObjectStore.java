@@ -471,12 +471,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             int size = objects.size();
             for (int i = 0; i < size; i++) {
                 DataObject object = (DataObject) objects.get(i);
-                
+
                 // skip HOLLOW objects as they likely were created from partial snapshots
-                if(object.getPersistenceState() == PersistenceState.HOLLOW) {
+                if (object.getPersistenceState() == PersistenceState.HOLLOW) {
                     continue;
                 }
-                
+
                 ObjectId oid = object.getObjectId();
 
                 // add snapshots if refresh is forced, or if a snapshot is
@@ -538,9 +538,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         List deletedIds = null;
         Map modifiedSnapshots = null;
 
-        // dataRowCache maybe initialized lazily, so ensure the local instance is resolved
-        DataRowStore dataRowCache = getDataRowCache();
-
         Iterator entries = objectMap.entrySet().iterator();
         List modifiedIds = null;
 
@@ -583,7 +580,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             switch (state) {
                 case PersistenceState.DELETED:
                     entries.remove();
-                    dataRowCache.forgetSnapshot(id);
                     object.setDataContext(null);
                     object.setPersistenceState(PersistenceState.TRANSIENT);
 
@@ -663,7 +659,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 addObject(object);
 
                 objectMap.remove(id);
-                dataRowCache.forgetSnapshot(id);
             }
 
             diff = recorder.getDiff();
@@ -671,6 +666,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
         // notify parent cache
         if (deletedIds != null || modifiedSnapshots != null) {
+            // dataRowCache maybe initialized lazily, so do not access the ivar directly
             getDataRowCache()
                     .processSnapshotChanges(
                             this,
