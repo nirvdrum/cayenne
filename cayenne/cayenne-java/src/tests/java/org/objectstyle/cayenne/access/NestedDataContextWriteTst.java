@@ -120,6 +120,7 @@ public class NestedDataContextWriteTst extends CayenneTestCase {
             assertNotNull(parentModified);
             assertEquals(PersistenceState.MODIFIED, parentModified.getPersistenceState());
             assertEquals("MMM", parentModified.getArtistName());
+            assertNotNull(context.getObjectStore().getRetainedSnapshot(parentModified.getObjectId()));
 
             assertNotNull(parentCommitted);
             assertEquals(PersistenceState.COMMITTED, parentCommitted

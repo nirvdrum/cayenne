@@ -1146,28 +1146,50 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
                 DataContext context = (DataContext) originatingContext;
 
                 Iterator it = context.getObjectStore().getObjectIterator();
-                while (it.hasNext()) {
-                    Persistent source = (Persistent) it.next();
 
-                    // TODO, andrus, 2/17/2006 - 'localObject' doesn't do
-                    // merge if the underlying object is modified.....
+                synchronized (getObjectStore()) {
 
-                    switch (source.getPersistenceState()) {
-                        case PersistenceState.DELETED:
-                            deleteObject(localObject(source.getObjectId(), source));
-                            break;
-                        case PersistenceState.NEW:
-                            Persistent localNew = localObject(
-                                    source.getObjectId(),
-                                    source);
-                            localNew.setPersistenceState(PersistenceState.NEW);
-                            break;
-                        case PersistenceState.MODIFIED:
-                            Persistent localModified = localObject(
-                                    source.getObjectId(),
-                                    source);
-                            localModified.setPersistenceState(PersistenceState.MODIFIED);
-                            break;
+                    while (it.hasNext()) {
+                        Persistent source = (Persistent) it.next();
+
+                        // TODO, andrus, 2/17/2006 - 'localObject' doesn't do
+                        // merge if the underlying object is modified...
+
+                        switch (source.getPersistenceState()) {
+                            case PersistenceState.DELETED:
+                                deleteObject(localObject(source.getObjectId(), source));
+                                break;
+                                
+                            case PersistenceState.NEW:
+                                Persistent localNew = localObject(
+                                        source.getObjectId(),
+                                        source);
+                                localNew.setPersistenceState(PersistenceState.NEW);
+                                break;
+                                
+                            case PersistenceState.MODIFIED:
+
+                                // retain snapshot before merge
+                                DataObject localModified = getObjectStore().getObject(
+                                        source.getObjectId());
+                                if (localModified != null
+                                        && (localModified.getPersistenceState() == PersistenceState.COMMITTED || localModified
+                                                .getPersistenceState() == PersistenceState.HOLLOW)) {
+
+                                    getObjectStore().retainSnapshot(localModified);
+                                }
+
+                                localModified = (DataObject) localObject(source
+                                        .getObjectId(), source);
+
+                                if (localModified.getPersistenceState() == PersistenceState.COMMITTED
+                                        || localModified.getPersistenceState() == PersistenceState.HOLLOW) {
+                                    localModified
+                                            .setPersistenceState(PersistenceState.MODIFIED);
+                                }
+
+                                break;
+                        }
                     }
                 }
             }
@@ -1783,14 +1805,6 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
         }
         // create and merge into a new object
         else {
-
-            // Andrus, 1/26/2006 - note that there is a tricky case of a temporary object
-            // passed from peer DataContext... In the past we used to throw an exception
-            // or return null. Now that we can have a valid (but generally
-            // indistinguishible) case of such object passed from parent, we let it
-            // slip... Not sure what's the best way of handling it that does not involve
-            // breaking encapsulation of the DataChannel to detect where in the hierarchy
-            // this context is.
 
             Persistent localObject = (Persistent) descriptor.createObject();
 
