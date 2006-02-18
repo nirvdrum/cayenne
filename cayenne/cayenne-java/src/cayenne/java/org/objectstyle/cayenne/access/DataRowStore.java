@@ -317,27 +317,26 @@ public class DataRowStore implements Serializable {
      * If not, a provided QueryEngine is used to fetch it from the database. If there is
      * no database row for a given id, null is returned.
      * 
-     * @deprecated since 1.2 use {@link #getSnapshot(ObjectId, DataChannel)}.
+     * @deprecated since 1.2 unused, as DataRowStore no longer performs queries on its
+     *             own.
      */
     public synchronized DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
         if (engine instanceof DataChannel) {
             return getSnapshot(oid, (DataChannel) engine);
         }
-        else if(engine instanceof DataContext) {
+        else if (engine instanceof DataContext) {
             return getSnapshot(oid, ((DataContext) engine).getChannel());
         }
 
-        throw new CayenneRuntimeException("QueryEngine is not an DataChannel or DataContext: " + engine);
+        throw new CayenneRuntimeException(
+                "QueryEngine is not an DataChannel or DataContext: " + engine);
     }
 
     /**
-     * Returns a snapshot for ObjectId. If snapshot is currently cached, it is returned.
-     * If not, a provided DataChannel is used to fetch it from the database. If there is no
-     * database row for a given id, null is returned.
-     * 
-     * @since 1.2
+     * @deprecated as the only caller {@link #getSnapshot(ObjectId, QueryEngine)} is
+     *             deprecated as well.
      */
-    public synchronized DataRow getSnapshot(ObjectId oid, DataChannel channel) {
+    private DataRow getSnapshot(ObjectId oid, DataChannel channel) {
 
         // try cache
         DataRow cachedSnapshot = getCachedSnapshot(oid);
