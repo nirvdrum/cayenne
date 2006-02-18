@@ -114,6 +114,10 @@ public class SingleObjectQuery extends IndirectQuery {
             public ObjEntity getObjEntity() {
                 return resolver.lookupObjEntity(objectId.getEntityName());
             }
+            
+            public boolean isFetchingDataRows() {
+                return fetchingDataRows;
+            }
         };
     }
 

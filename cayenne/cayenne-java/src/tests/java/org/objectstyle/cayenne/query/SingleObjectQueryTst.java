@@ -110,4 +110,16 @@ public class SingleObjectQueryTst extends TestCase {
         assertFalse(q1.equals(q4));
         assertFalse(q1.hashCode() == q4.hashCode());
     }
+    
+    public void testMetadata() {
+        SingleObjectQuery q1 = new SingleObjectQuery(new ObjectId("abc", "a", 1), true, true);
+        QueryMetadata md1 = q1.getMetaData(null);
+        assertTrue(md1.isFetchingDataRows());
+        assertTrue(md1.isRefreshingObjects());
+        
+        SingleObjectQuery q2 = new SingleObjectQuery(new ObjectId("abc", "a", 1), false, false);
+        QueryMetadata md2 = q2.getMetaData(null);
+        assertFalse(md2.isFetchingDataRows());
+        assertFalse(md2.isRefreshingObjects());
+    }
 }
