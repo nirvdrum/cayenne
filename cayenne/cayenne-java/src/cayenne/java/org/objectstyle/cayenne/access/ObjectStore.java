@@ -270,9 +270,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             return;
         }
 
-        // dataRowCache maybe initialized lazily, so ensure the local instance is resolved
-        DataRowStore dataRowCache = getDataRowCache();
-
         Collection ids = new ArrayList(objects.size());
         Iterator it = objects.iterator();
         while (it.hasNext()) {
@@ -286,9 +283,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             }
 
             object.setPersistenceState(PersistenceState.HOLLOW);
-
-            // remove snapshot, but keep the object
-            dataRowCache.forgetSnapshot(object.getObjectId());
 
             // remove cached changes
             indirectlyModifiedIds.remove(object.getObjectId());
