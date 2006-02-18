@@ -62,7 +62,6 @@ import java.util.List;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.objectstyle.cayenne.BaseResponse;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ObjectContext;
@@ -79,6 +78,7 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
+import org.objectstyle.cayenne.util.BaseResponse;
 import org.objectstyle.cayenne.util.DeepMergeOperation;
 
 /**

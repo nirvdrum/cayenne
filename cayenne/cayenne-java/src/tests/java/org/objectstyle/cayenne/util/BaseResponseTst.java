@@ -53,89 +53,102 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.util;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-import org.objectstyle.cayenne.ObjectContext;
-import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.QueryMetadata;
+import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 import org.objectstyle.cayenne.util.BaseResponse;
-import org.objectstyle.cayenne.util.ObjectContextQueryAction;
+import org.objectstyle.cayenne.util.Util;
 
-/**
- * A DataContext-specific version of
- * {@link org.objectstyle.cayenne.util.ObjectContextQueryAction}.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-// TODO: Andrus, 2/2/2006 - all these DataContext extensions should become available to
-// CayenneContext as well....
-class DataContextQueryAction extends ObjectContextQueryAction {
+import junit.framework.TestCase;
 
-    public DataContextQueryAction(DataContext actingContext, ObjectContext targetContext,
-            Query query) {
-        super(actingContext, targetContext, query);
+public class BaseResponseTst extends TestCase {
+
+    public void testCreation() throws Exception {
+        List list = new ArrayList();
+        list.add(new HashMap());
+
+        BaseResponse r = new BaseResponse();
+        r.addBatchUpdateCount(new int[] {
+                1, 2, 3
+        });
+        r.addResultList(list);
+
+        assertEquals(2, r.size());
+
+        assertTrue(r.next());
+        assertFalse(r.isList());
+
+        int[] srInt = r.currentUpdateCount();
+        assertEquals(3, srInt.length);
+        assertEquals(2, srInt[1]);
+
+        assertTrue(r.next());
+        assertTrue(r.isList());
+
+        assertEquals(list, r.currentList());
+
+        assertFalse(r.next());
     }
 
-    public QueryResponse execute() {
-        if (interceptPaginatedQuery() != DONE) {
-            if (interceptOIDQuery() != DONE) {
-                if (interceptRelationshipQuery() != DONE) {
-                    if (interceptLocalCache() != DONE) {
-                        runQuery();
-                    }
-                }
-            }
-        }
+    public void testSerialization() throws Exception {
+        List list = new ArrayList();
+        list.add(new HashMap());
 
-        interceptObjectConversion();
-        return response;
+        BaseResponse r = new BaseResponse();
+        r.addBatchUpdateCount(new int[] {
+                1, 2, 3
+        });
+        r.addResultList(list);
+
+        BaseResponse sr = (BaseResponse) Util.cloneViaSerialization(r);
+        assertNotNull(sr);
+        assertEquals(2, sr.size());
+
+        assertTrue(sr.next());
+        assertFalse(sr.isList());
+
+        int[] srInt = sr.currentUpdateCount();
+        assertEquals(3, srInt.length);
+        assertEquals(2, srInt[1]);
+
+        assertTrue(sr.next());
+        assertTrue(sr.isList());
+
+        assertEquals(list, sr.currentList());
+
+        assertFalse(sr.next());
     }
+    
+    public void testSerializationWithHessian() throws Exception {
+        List list = new ArrayList();
+        list.add(new HashMap());
 
-    private boolean interceptPaginatedQuery() {
-        if (metadata.getPageSize() > 0) {
-            response = new BaseResponse(new IncrementalFaultList(
-                    (DataContext) actingContext,
-                    query));
-            return DONE;
-        }
+        BaseResponse r = new BaseResponse();
+        r.addBatchUpdateCount(new int[] {
+                1, 2, 3
+        });
+        r.addResultList(list);
 
-        return !DONE;
-    }
+        BaseResponse sr = (BaseResponse) HessianUtil.cloneViaHessianSerialization(r);
+        assertNotNull(sr);
+        assertEquals(2, sr.size());
 
-    /*
-     * Wraps execution in local cache checks.
-     */
-    private boolean interceptLocalCache() {
+        assertTrue(sr.next());
+        assertFalse(sr.isList());
 
-        String cacheKey = metadata.getCacheKey();
-        if (cacheKey == null) {
-            return !DONE;
-        }
+        int[] srInt = sr.currentUpdateCount();
+        assertEquals(3, srInt.length);
+        assertEquals(2, srInt[1]);
 
-        boolean cache = QueryMetadata.LOCAL_CACHE.equals(metadata.getCachePolicy());
-        boolean cacheOrCacheRefresh = cache
-                || QueryMetadata.LOCAL_CACHE_REFRESH.equals(metadata.getCachePolicy());
+        assertTrue(sr.next());
+        assertTrue(sr.isList());
 
-        if (!cacheOrCacheRefresh) {
-            return !DONE;
-        }
+        assertEquals(list, sr.currentList());
 
-        ObjectStore objectStore = ((DataContext) actingContext).getObjectStore();
-        if (cache) {
-
-            List cachedResults = objectStore.getCachedQueryResult(cacheKey);
-            if (cachedResults != null) {
-                response = new BaseResponse(cachedResults);
-                return DONE;
-            }
-        }
-
-        runQuery();
-        objectStore.cacheQueryResult(cacheKey, response.firstList());
-        return DONE;
+        assertFalse(sr.next());
     }
 }

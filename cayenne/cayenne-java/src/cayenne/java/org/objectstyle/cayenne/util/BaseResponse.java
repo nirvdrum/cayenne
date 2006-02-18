@@ -53,101 +53,135 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import org.objectstyle.cayenne.opp.hessian.HessianUtil;
-import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.QueryResponse;
 
-import junit.framework.TestCase;
+/**
+ * A simple serializable implementation of QueryResponse.
+ * 
+ * @since 1.2
+ * @author Andrus Adamchik
+ */
+public class BaseResponse implements QueryResponse, Serializable {
 
-public class BaseResponseTst extends TestCase {
+    protected List results;
 
-    public void testCreation() throws Exception {
-        List list = new ArrayList();
-        list.add(new HashMap());
+    protected transient int currentIndex;
 
-        BaseResponse r = new BaseResponse();
-        r.addBatchUpdateCount(new int[] {
-                1, 2, 3
-        });
-        r.addResultList(list);
-
-        assertEquals(2, r.size());
-
-        assertTrue(r.next());
-        assertFalse(r.isList());
-
-        int[] srInt = r.currentUpdateCount();
-        assertEquals(3, srInt.length);
-        assertEquals(2, srInt[1]);
-
-        assertTrue(r.next());
-        assertTrue(r.isList());
-
-        assertEquals(list, r.currentList());
-
-        assertFalse(r.next());
+    /**
+     * Creates an empty BaseResponse.
+     */
+    public BaseResponse() {
+        results = new ArrayList();
     }
 
-    public void testSerialization() throws Exception {
-        List list = new ArrayList();
-        list.add(new HashMap());
-
-        BaseResponse r = new BaseResponse();
-        r.addBatchUpdateCount(new int[] {
-                1, 2, 3
-        });
-        r.addResultList(list);
-
-        BaseResponse sr = (BaseResponse) Util.cloneViaSerialization(r);
-        assertNotNull(sr);
-        assertEquals(2, sr.size());
-
-        assertTrue(sr.next());
-        assertFalse(sr.isList());
-
-        int[] srInt = sr.currentUpdateCount();
-        assertEquals(3, srInt.length);
-        assertEquals(2, srInt[1]);
-
-        assertTrue(sr.next());
-        assertTrue(sr.isList());
-
-        assertEquals(list, sr.currentList());
-
-        assertFalse(sr.next());
+    /**
+     * Creates a BaseResponse with a single result list.
+     */
+    public BaseResponse(List list) {
+        results = new ArrayList(1);
+        addResultList(list);
     }
-    
-    public void testSerializationWithHessian() throws Exception {
-        List list = new ArrayList();
-        list.add(new HashMap());
 
-        BaseResponse r = new BaseResponse();
-        r.addBatchUpdateCount(new int[] {
-                1, 2, 3
+    /**
+     * Creates a response that it a shallow copy of another response.
+     */
+    public BaseResponse(QueryResponse response) {
+
+        results = new ArrayList(response.size());
+
+        response.reset();
+        while (response.next()) {
+            if (response.isList()) {
+                addResultList(response.currentList());
+            }
+            else {
+                addBatchUpdateCount(response.currentUpdateCount());
+            }
+        }
+    }
+
+    public List firstList() {
+        for (reset(); next();) {
+            if (isList()) {
+                return currentList();
+            }
+        }
+
+        return null;
+    }
+
+    public int[] firstUpdateCount() {
+        for (reset(); next();) {
+            if (!isList()) {
+                return currentUpdateCount();
+            }
+        }
+
+        return null;
+    }
+
+    public List currentList() {
+        return (List) results.get(currentIndex - 1);
+    }
+
+    public int[] currentUpdateCount() {
+        return (int[]) results.get(currentIndex - 1);
+    }
+
+    public boolean isList() {
+        return results.get(currentIndex - 1) instanceof List;
+    }
+
+    public boolean next() {
+        return ++currentIndex <= results.size();
+    }
+
+    public void reset() {
+        // use a zero-based index, not -1, as this will simplify serialization handling
+        currentIndex = 0;
+    }
+
+    public int size() {
+        return results.size();
+    }
+
+    /**
+     * Clears any previously collected information.
+     */
+    public void clear() {
+        results.clear();
+    }
+
+    public void addBatchUpdateCount(int[] resultCount) {
+
+        if (resultCount != null) {
+            results.add(resultCount);
+        }
+    }
+
+    public void addUpdateCount(int resultCount) {
+        results.add(new int[] {
+            resultCount
         });
-        r.addResultList(list);
+    }
 
-        BaseResponse sr = (BaseResponse) HessianUtil.cloneViaHessianSerialization(r);
-        assertNotNull(sr);
-        assertEquals(2, sr.size());
+    public void addResultList(List list) {
+        this.results.add(list);
+    }
 
-        assertTrue(sr.next());
-        assertFalse(sr.isList());
-
-        int[] srInt = sr.currentUpdateCount();
-        assertEquals(3, srInt.length);
-        assertEquals(2, srInt[1]);
-
-        assertTrue(sr.next());
-        assertTrue(sr.isList());
-
-        assertEquals(list, sr.currentList());
-
-        assertFalse(sr.next());
+    /**
+     * Replaces previously stored result with a new result.
+     */
+    public void replaceResult(Object oldResult, Object newResult) {
+        int index = results.indexOf(oldResult);
+        if (index >= 0) {
+            results.set(index, newResult);
+        }
     }
 }

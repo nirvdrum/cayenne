@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.objectstyle.cayenne.BaseResponse;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.ObjectContext;
@@ -77,6 +76,7 @@ import org.objectstyle.cayenne.query.AbstractQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
+import org.objectstyle.cayenne.util.BaseResponse;
 import org.objectstyle.cayenne.util.ObjectDetachOperation;
 
 /**

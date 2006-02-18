@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.BaseResponse;
 
 /**
  * Stores all messages passed via this handler.

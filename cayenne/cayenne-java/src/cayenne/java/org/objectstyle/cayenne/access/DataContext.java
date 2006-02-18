@@ -70,7 +70,6 @@ import java.util.Map;
 
 import org.apache.commons.collections.Factory;
 import org.apache.log4j.Level;
-import org.objectstyle.cayenne.BaseResponse;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataChannel;
@@ -106,6 +105,7 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.util.BaseResponse;
 import org.objectstyle.cayenne.util.Util;
 
 /**

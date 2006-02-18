@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.objectstyle.cayenne.BaseResponse;
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.ObjectId;

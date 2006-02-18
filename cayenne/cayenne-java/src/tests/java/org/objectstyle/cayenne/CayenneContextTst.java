@@ -77,6 +77,7 @@ import org.objectstyle.cayenne.testdo.mt.MtTable1;
 import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
+import org.objectstyle.cayenne.util.BaseResponse;
 
 /**
  * @author Andrus Adamchik

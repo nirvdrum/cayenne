@@ -60,7 +60,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.objectstyle.cayenne.BaseResponse;
 import org.objectstyle.cayenne.CayenneContext;
 import org.objectstyle.cayenne.MockPersistentObject;
 import org.objectstyle.cayenne.ObjectId;
@@ -72,6 +71,7 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.util.BaseResponse;
 
 public class OPPServerChannelTst extends CayenneTestCase {
 

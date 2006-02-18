@@ -65,7 +65,6 @@ import java.util.Map;
 
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Level;
-import org.objectstyle.cayenne.BaseResponse;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataRow;
@@ -83,6 +82,8 @@ import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.QueryRouter;
 import org.objectstyle.cayenne.query.RelationshipQuery;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.util.BaseResponse;
+import org.objectstyle.cayenne.util.SingleListResponse;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -102,7 +103,8 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
     Query query;
     QueryMetadata metadata;
 
-    BaseResponse response;
+    QueryResponse response;
+    BaseResponse fullResponse;
     Map prefetchResultsByPath;
     Map queriesByNode;
     Map queriesByExecutedQueries;
@@ -153,7 +155,7 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
             if (!oidQuery.isRefreshing()) {
                 DataRow row = cache.getCachedSnapshot(oidQuery.getObjectId());
                 if (row != null) {
-                    this.response = new BaseResponse(Collections.singletonList(row));
+                    this.response = new SingleListResponse(row);
                     return DONE;
                 }
             }
@@ -249,10 +251,9 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
             List cachedRows = this.cache.getCachedSnapshots(cacheKey);
 
             if (cachedRows != null) {
-                this.response = new BaseResponse();
-
                 // decorate result immutable list to avoid messing up the cache
-                response.addResultList(Collections.unmodifiableList(cachedRows));
+                this.response = new SingleListResponse(Collections
+                        .unmodifiableList(cachedRows));
                 return DONE;
             }
         }
@@ -272,8 +273,6 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
     /*
      * Gets response from the underlying DataNodes.
      */
-    // the only reason why this method is non-private is to create mockup subclasses for
-    // test cases that intercept this call.
     void runQueryInTransaction() {
 
         domain.runInTransaction(new Transformer() {
@@ -287,7 +286,8 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
 
     private void runQuery() {
         // reset
-        this.response = new BaseResponse();
+        this.fullResponse = new BaseResponse();
+        this.response = this.fullResponse;
         this.queriesByNode = null;
         this.queriesByExecutedQueries = null;
 
@@ -339,7 +339,16 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
                             prefetchResultsByPath);
                 }
 
-                response.replaceResult(mainRows, objects);
+                if (response instanceof BaseResponse) {
+                    ((BaseResponse) response).replaceResult(mainRows, objects);
+                }
+                else if (response instanceof SingleListResponse) {
+                    this.response = new SingleListResponse(objects);
+                }
+                else {
+                    throw new IllegalStateException("Unknown response object: "
+                            + this.response);
+                }
             }
         }
     }
@@ -388,11 +397,11 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
     }
 
     public void nextCount(Query query, int resultCount) {
-        response.addUpdateCount(resultCount);
+        fullResponse.addUpdateCount(resultCount);
     }
 
     public void nextBatchCount(Query query, int[] resultCount) {
-        response.addBatchUpdateCount(resultCount);
+        fullResponse.addBatchUpdateCount(resultCount);
     }
 
     public void nextDataRows(Query query, List dataRows) {
@@ -403,7 +412,7 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
             prefetchResultsByPath.put(prefetchQuery.getPrefetchPath(), dataRows);
         }
         else {
-            response.addResultList(dataRows);
+            fullResponse.addResultList(dataRows);
         }
     }
 
