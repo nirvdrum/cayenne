@@ -103,7 +103,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
     private static Logger logObj = Logger.getLogger(ObjectStore.class);
 
-    protected transient Map newObjectMap = null;
+    protected transient Map newObjectsMap;
 
     protected Map objectMap = new HashMap();
     protected Map queryResultMap = new HashMap();
@@ -584,62 +584,37 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         return diff;
     }
 
-    public synchronized void addObject(DataObject obj) {
-        objectMap.put(obj.getObjectId(), obj);
+    public synchronized void addObject(DataObject object) {
+        objectMap.put(object.getObjectId(), object);
 
-        if (newObjectMap != null) {
-            newObjectMap.put(obj.getObjectId(), obj);
+        if (newObjectsMap != null) {
+            newObjectsMap.put(object.getObjectId(), object);
         }
     }
 
     /**
      * Starts tracking the registration of new objects from this ObjectStore. Used in
      * conjunction with unregisterNewObjects() to control garbage collection when an
-     * instance of ObjectStore is used over a longer time for batch processing. (TODO:
-     * this won't work with changeObjectKey()?)
+     * instance of ObjectStore is used over a longer time for batch processing.
      * 
      * @see org.objectstyle.cayenne.access.ObjectStore#unregisterNewObjects()
      */
     public synchronized void startTrackingNewObjects() {
-        // TODO: something like shared DataContext or nested DataContext
-        // would hopefully obsolete this feature...
-        newObjectMap = new HashMap();
+        newObjectsMap = new HashMap();
     }
 
     /**
      * Unregisters the newly registered DataObjects from this objectStore. Used in
      * conjunction with startTrackingNewObjects() to control garbage collection when an
-     * instance of ObjectStore is used over a longer time for batch processing. (TODO:
-     * this won't work with changeObjectKey()?)
+     * instance of ObjectStore is used over a longer time for batch processing.
      * 
      * @see org.objectstyle.cayenne.access.ObjectStore#startTrackingNewObjects()
      */
     public synchronized void unregisterNewObjects() {
-        // TODO: something like shared DataContext or nested DataContext
-        // would hopefully obsolete this feature...
-
-        if (newObjectMap == null) {
-            return;
+        if (newObjectsMap != null) {
+            objectsUnregistered(newObjectsMap.values());
+            newObjectsMap = null;
         }
-
-        // dataRowCache maybe initialized lazily, so ensure the local instance is resolved
-        DataRowStore dataRowCache = getDataRowCache();
-
-        Iterator it = newObjectMap.values().iterator();
-
-        while (it.hasNext()) {
-            DataObject dataObj = (DataObject) it.next();
-
-            ObjectId oid = dataObj.getObjectId();
-            objectMap.remove(oid);
-            dataRowCache.forgetSnapshot(oid);
-
-            dataObj.setDataContext(null);
-            dataObj.setObjectId(null);
-            dataObj.setPersistenceState(PersistenceState.TRANSIENT);
-        }
-        newObjectMap.clear();
-        newObjectMap = null;
     }
 
     /**
