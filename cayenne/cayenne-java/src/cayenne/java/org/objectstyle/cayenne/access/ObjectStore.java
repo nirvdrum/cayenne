@@ -264,6 +264,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
     /**
      * Invalidates a collection of DataObjects. Changes objects state to HOLLOW.
+     * 
+     * @see #objectsUnregistered(Collection)
      */
     public synchronized void objectsInvalidated(Collection objects) {
         if (objects.isEmpty()) {
@@ -301,17 +303,20 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-     * Evicts a collection of DataObjects from the ObjectStore. Object snapshots are
-     * removed as well. Changes objects state to TRANSIENT. This method can be used for
+     * Evicts a collection of DataObjects from the ObjectStore, invalidates the underlying
+     * cache snapshots. Changes objects state to TRANSIENT. This method can be used for
      * manual cleanup of Cayenne cache.
+     * 
+     * @see #objectsInvalidated(Collection)
      */
+    // this method is exactly the same as "objectsInvalidated", only additionally it
+    // throws out registered objects
     public synchronized void objectsUnregistered(Collection objects) {
         if (objects.isEmpty()) {
             return;
         }
 
-        // dataRowCache maybe initialized lazily, so ensure the local instance is resolved
-        DataRowStore dataRowCache = getDataRowCache();
+        Collection ids = new ArrayList(objects.size());
 
         Iterator it = objects.iterator();
         while (it.hasNext()) {
@@ -320,15 +325,20 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             // remove object but not snapshot
             objectMap.remove(object.getObjectId());
             indirectlyModifiedIds.remove(object.getObjectId());
-            dataRowCache.forgetSnapshot(object.getObjectId());
+            ids.add(object.getObjectId());
 
             object.setDataContext(null);
             object.setObjectId(null);
             object.setPersistenceState(PersistenceState.TRANSIENT);
         }
 
-        // no snapshot events needed... snapshots maybe cleared, but no
-        // database changes have occured.
+        // send an event for removed snapshots
+        getDataRowCache().processSnapshotChanges(
+                this,
+                Collections.EMPTY_MAP,
+                Collections.EMPTY_LIST,
+                ids,
+                Collections.EMPTY_LIST);
     }
 
     /**
