@@ -155,7 +155,7 @@ public class ObjectId implements Serializable {
     }
 
     /**
-     * Creates a portable permanent GlobalID.
+     * Creates a portable permanent ObjectId.
      * 
      * @since 1.2
      */
@@ -266,14 +266,12 @@ public class ObjectId implements Serializable {
 
         ObjectId id = (ObjectId) object;
 
-        if (isTemporary()) {
-            return new EqualsBuilder().append(entityName, id.entityName).append(
-                    key,
-                    id.key).isEquals();
-        }
-
         if (!Util.nullSafeEquals(entityName, id.entityName)) {
             return false;
+        }
+
+        if (isTemporary()) {
+            return new EqualsBuilder().append(key, id.key).isEquals();
         }
 
         if (id.objectIdKeys == null && objectIdKeys == null) {
@@ -291,12 +289,13 @@ public class ObjectId implements Serializable {
         EqualsBuilder builder = new EqualsBuilder();
         Iterator entries = objectIdKeys.entrySet().iterator();
         while (entries.hasNext()) {
-            Map.Entry entry      = (Map.Entry) entries.next();
-            Object    entryKey   = entry.getKey();
-            Object    entryValue = entry.getValue();
+            Map.Entry entry = (Map.Entry) entries.next();
+            Object entryKey = entry.getKey();
+            Object entryValue = entry.getValue();
 
             if (entryValue == null) {
-                if (id.objectIdKeys.get(entryKey) != null || !id.objectIdKeys.containsKey(entryKey)) {
+                if (id.objectIdKeys.get(entryKey) != null
+                        || !id.objectIdKeys.containsKey(entryKey)) {
                     return false;
                 }
             }
@@ -437,7 +436,7 @@ public class ObjectId implements Serializable {
                         entry.getValue());
             }
         }
-        
+
         buffer.append(">");
         return buffer.toString();
     }
