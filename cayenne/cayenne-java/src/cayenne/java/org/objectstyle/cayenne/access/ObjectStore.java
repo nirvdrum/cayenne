@@ -236,9 +236,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-     * Sets parent SnapshotCache. Registers to receive SnapshotEvents if the cache is
+     * Sets parent DataRowStore. Registers to receive SnapshotEvents if the cache is
      * configured to allow ObjectStores to receive such events.
      */
+    // note that as of 1.2, ObjectStore does not access DataRowStore directly when
+    // retrieving snapshots. Instead it sends a query via the DataContext's channel so
+    // that every element in the channel chain could intercept snapshot requests 
     public void setDataRowCache(DataRowStore dataRowCache) {
         if (dataRowCache == this.dataRowCache) {
             return;
