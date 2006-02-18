@@ -65,7 +65,7 @@ import org.objectstyle.art.CharPkTest;
 import org.objectstyle.art.CompoundPkTest;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
@@ -89,7 +89,7 @@ public class DataObjectUtilsTst extends CayenneTestCase {
 
         DataObject object = DataObjectUtils.objectForQuery(
                 context,
-                new SingleObjectQuery(id));
+                new ObjectIdQuery(id));
 
         assertNotNull(object);
         assertTrue(object instanceof Artist);
@@ -104,7 +104,7 @@ public class DataObjectUtilsTst extends CayenneTestCase {
 
         DataObject object = DataObjectUtils.objectForQuery(
                 context,
-                new SingleObjectQuery(id));
+                new ObjectIdQuery(id));
 
         assertNull(object);
     }

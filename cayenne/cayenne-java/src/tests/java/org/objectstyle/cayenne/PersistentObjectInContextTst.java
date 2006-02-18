@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.access.ClientServerChannel;
 import org.objectstyle.cayenne.opp.LocalConnection;
 import org.objectstyle.cayenne.opp.OPPConnection;
 import org.objectstyle.cayenne.opp.OPPServerChannel;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
@@ -96,7 +96,7 @@ public class PersistentObjectInContextTst extends CayenneTestCase {
                 MtTable1.TABLE1_ID_PK_COLUMN,
                 new Integer(1));
         ClientMtTable1 t1 = (ClientMtTable1) ObjectContextQueryUtils
-                .singleObjectOrDataRow(context, new SingleObjectQuery(gid));
+                .singleObjectOrDataRow(context, new ObjectIdQuery(gid));
 
         assertNotNull(t1);
 

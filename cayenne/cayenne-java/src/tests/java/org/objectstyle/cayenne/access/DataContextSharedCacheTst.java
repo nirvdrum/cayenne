@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 import org.objectstyle.cayenne.unit.MultiContextTestCase;
 import org.objectstyle.cayenne.unit.util.ThreadedTestHelper;
 
@@ -392,7 +392,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         // create independent context and fetch artist in it
         DataContext context3 = getDomain().createDataContext(false);
-        List artists = context3.performQuery(new SingleObjectQuery(id));
+        List artists = context3.performQuery(new ObjectIdQuery(id));
         assertEquals(1, artists.size());
         Artist artist3 = (Artist) artists.get(0);
         assertEquals(id, artist3.getObjectId());

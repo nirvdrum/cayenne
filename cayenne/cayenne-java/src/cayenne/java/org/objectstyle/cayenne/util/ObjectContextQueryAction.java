@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.RelationshipQuery;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 
 /**
  * A helper class that implements
@@ -168,8 +168,8 @@ public class ObjectContextQueryAction {
     }
 
     protected boolean interceptOIDQuery() {
-        if (query instanceof SingleObjectQuery) {
-            SingleObjectQuery oidQuery = (SingleObjectQuery) query;
+        if (query instanceof ObjectIdQuery) {
+            ObjectIdQuery oidQuery = (ObjectIdQuery) query;
 
             if (!oidQuery.isRefreshing() && !oidQuery.isFetchingDataRows()) {
                 Object object = actingContext.getGraphManager().getNode(

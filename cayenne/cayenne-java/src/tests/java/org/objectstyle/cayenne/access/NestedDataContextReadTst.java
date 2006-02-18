@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class NestedDataContextReadTst extends CayenneTestCase {
@@ -112,7 +112,7 @@ public class NestedDataContextReadTst extends CayenneTestCase {
                 33001), null);
         DataObject committed = DataObjectUtils.objectForQuery(
                 context,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         33002)));
@@ -120,14 +120,14 @@ public class NestedDataContextReadTst extends CayenneTestCase {
         int modifiedId = 33003;
         Artist modified = (Artist) DataObjectUtils.objectForQuery(
                 context,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         modifiedId)));
         modified.setArtistName("M1");
         DataObject deleted = DataObjectUtils.objectForQuery(
                 context,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         33004)));
@@ -199,13 +199,13 @@ public class NestedDataContextReadTst extends CayenneTestCase {
         int modifiedId = 33003;
         Artist modified = (Artist) DataObjectUtils.objectForQuery(
                 context,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         modifiedId)));
         Artist peerModified = (Artist) DataObjectUtils.objectForQuery(
                 childContext,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         modifiedId)));
@@ -250,7 +250,7 @@ public class NestedDataContextReadTst extends CayenneTestCase {
                 33001), null);
         DataObject committed = DataObjectUtils.objectForQuery(
                 parent,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         33002)));
@@ -258,14 +258,14 @@ public class NestedDataContextReadTst extends CayenneTestCase {
         int modifiedId = 33003;
         Artist modified = (Artist) DataObjectUtils.objectForQuery(
                 parent,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         modifiedId)));
         modified.setArtistName("MODDED");
         DataObject deleted = DataObjectUtils.objectForQuery(
                 parent,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         33004)));

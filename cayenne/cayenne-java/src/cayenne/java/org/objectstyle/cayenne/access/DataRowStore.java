@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.event.EventBridgeFactory;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 
 /**
  * A fixed size cache of DataRows keyed by ObjectId.
@@ -350,7 +350,7 @@ public class DataRowStore implements Serializable {
 
         // try getting it from database
 
-        Query query = new SingleObjectQuery(oid, true, true);
+        Query query = new ObjectIdQuery(oid, true, true);
         List results = channel.onQuery(null, query).firstList();
 
         if (results.size() > 1) {

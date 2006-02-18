@@ -66,29 +66,29 @@ public class SingleObjectQueryTst extends TestCase {
     public void testConstructorObjectId() {
 
         ObjectId oid = new ObjectId("MockDataObject", "a", "b");
-        SingleObjectQuery query = new SingleObjectQuery(oid);
+        ObjectIdQuery query = new ObjectIdQuery(oid);
 
         assertSame(oid, query.getObjectId());
     }
 
     public void testSerializability() throws Exception {
         ObjectId oid = new ObjectId("test", "a", "b");
-        SingleObjectQuery query = new SingleObjectQuery(oid);
+        ObjectIdQuery query = new ObjectIdQuery(oid);
 
         Object o = Util.cloneViaSerialization(query);
         assertNotNull(o);
-        assertTrue(o instanceof SingleObjectQuery);
-        assertEquals(oid, ((SingleObjectQuery) o).getObjectId());
+        assertTrue(o instanceof ObjectIdQuery);
+        assertEquals(oid, ((ObjectIdQuery) o).getObjectId());
     }
 
     public void testSerializabilityWithHessian() throws Exception {
         ObjectId oid = new ObjectId("test", "a", "b");
-        SingleObjectQuery query = new SingleObjectQuery(oid);
+        ObjectIdQuery query = new ObjectIdQuery(oid);
 
         Object o = HessianUtil.cloneViaHessianSerialization(query);
         assertNotNull(o);
-        assertTrue(o instanceof SingleObjectQuery);
-        assertEquals(oid, ((SingleObjectQuery) o).getObjectId());
+        assertTrue(o instanceof ObjectIdQuery);
+        assertEquals(oid, ((ObjectIdQuery) o).getObjectId());
     }
 
     /**
@@ -96,10 +96,10 @@ public class SingleObjectQueryTst extends TestCase {
      * obtained in a QueryChain back to the query.
      */
     public void testEquals() throws Exception {
-        SingleObjectQuery q1 = new SingleObjectQuery(new ObjectId("abc", "a", 1));
-        SingleObjectQuery q2 = new SingleObjectQuery(new ObjectId("abc", "a", 1));
-        SingleObjectQuery q3 = new SingleObjectQuery(new ObjectId("abc", "a", 3));
-        SingleObjectQuery q4 = new SingleObjectQuery(new ObjectId("123", "a", 1));
+        ObjectIdQuery q1 = new ObjectIdQuery(new ObjectId("abc", "a", 1));
+        ObjectIdQuery q2 = new ObjectIdQuery(new ObjectId("abc", "a", 1));
+        ObjectIdQuery q3 = new ObjectIdQuery(new ObjectId("abc", "a", 3));
+        ObjectIdQuery q4 = new ObjectIdQuery(new ObjectId("123", "a", 1));
 
         assertTrue(q1.equals(q2));
         assertEquals(q1.hashCode(), q2.hashCode());
@@ -112,12 +112,12 @@ public class SingleObjectQueryTst extends TestCase {
     }
     
     public void testMetadata() {
-        SingleObjectQuery q1 = new SingleObjectQuery(new ObjectId("abc", "a", 1), true, true);
+        ObjectIdQuery q1 = new ObjectIdQuery(new ObjectId("abc", "a", 1), true, true);
         QueryMetadata md1 = q1.getMetaData(null);
         assertTrue(md1.isFetchingDataRows());
         assertTrue(md1.isRefreshingObjects());
         
-        SingleObjectQuery q2 = new SingleObjectQuery(new ObjectId("abc", "a", 1), false, false);
+        ObjectIdQuery q2 = new ObjectIdQuery(new ObjectId("abc", "a", 1), false, false);
         QueryMetadata md2 = q2.getMetaData(null);
         assertFalse(md2.isFetchingDataRows());
         assertFalse(md2.isRefreshingObjects());

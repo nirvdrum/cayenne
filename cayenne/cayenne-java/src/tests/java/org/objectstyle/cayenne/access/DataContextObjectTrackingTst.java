@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.Persistent;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
@@ -144,7 +144,7 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
                 33001), null);
         DataObject committed = DataObjectUtils.objectForQuery(
                 context,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         33002)));
@@ -152,14 +152,14 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
         int modifiedId = 33003;
         Artist modified = (Artist) DataObjectUtils.objectForQuery(
                 context,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         modifiedId)));
         modified.setArtistName("MODDED");
         DataObject deleted = DataObjectUtils.objectForQuery(
                 context,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         33004)));
@@ -235,13 +235,13 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
         int modifiedId = 33003;
         Artist modified = (Artist) DataObjectUtils.objectForQuery(
                 context,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         modifiedId)));
         Artist peerModified = (Artist) DataObjectUtils.objectForQuery(
                 peerContext,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         modifiedId)));
@@ -284,13 +284,13 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
 
         Artist artist = (Artist) DataObjectUtils.objectForQuery(
                 context,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         33003)));
         Painting painting = (Painting) DataObjectUtils.objectForQuery(
                 context,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Painting",
                         Painting.PAINTING_ID_PK_COLUMN,
                         33003)));
@@ -329,13 +329,13 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
 
         Artist artist = (Artist) DataObjectUtils.objectForQuery(
                 context1,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Artist",
                         Artist.ARTIST_ID_PK_COLUMN,
                         33003)));
         Painting painting = (Painting) DataObjectUtils.objectForQuery(
                 context2,
-                new SingleObjectQuery(new ObjectId(
+                new ObjectIdQuery(new ObjectId(
                         "Painting",
                         Painting.PAINTING_ID_PK_COLUMN,
                         33003)));

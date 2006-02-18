@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 
 /**
  * A collection of utility methods to work with DataObjects.
@@ -273,7 +273,7 @@ public final class DataObjectUtils {
      * @throws CayenneRuntimeException if more than one object matched ObjectId.
      */
     public static DataObject objectForPK(ObjectContext context, ObjectId id) {
-        return DataObjectUtils.objectForQuery(context, new SingleObjectQuery(
+        return DataObjectUtils.objectForQuery(context, new ObjectIdQuery(
                 id,
                 false,
                 false));

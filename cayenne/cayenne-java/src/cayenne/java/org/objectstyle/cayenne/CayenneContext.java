@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 import org.objectstyle.cayenne.util.ObjectContextQueryAction;
 
 /**
@@ -427,7 +427,7 @@ public class CayenneContext implements ObjectContext {
         if (object.getPersistenceState() == PersistenceState.HOLLOW) {
 
             ObjectId gid = object.getObjectId();
-            List objects = performQuery(new SingleObjectQuery(gid));
+            List objects = performQuery(new ObjectIdQuery(gid));
 
             if (objects.size() == 0) {
                 throw new FaultFailureException(

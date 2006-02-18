@@ -81,7 +81,7 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.QueryRouter;
 import org.objectstyle.cayenne.query.RelationshipQuery;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 import org.objectstyle.cayenne.util.GenericResponse;
 import org.objectstyle.cayenne.util.ListResponse;
 import org.objectstyle.cayenne.util.Util;
@@ -150,9 +150,9 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
     }
 
     private boolean interceptOIDQuery() {
-        if (query instanceof SingleObjectQuery) {
+        if (query instanceof ObjectIdQuery) {
 
-            SingleObjectQuery oidQuery = (SingleObjectQuery) query;
+            ObjectIdQuery oidQuery = (ObjectIdQuery) query;
 
             DataRow row = null;
 

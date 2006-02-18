@@ -81,7 +81,7 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 import org.objectstyle.cayenne.validation.ValidationException;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
@@ -694,7 +694,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         }
 
         if (context != null && context.getChannel() != null) {
-            SingleObjectQuery query = new SingleObjectQuery(oid, true, false);
+            ObjectIdQuery query = new ObjectIdQuery(oid, true, false);
             List results = context.getChannel().onQuery(context, query).firstList();
             return results.isEmpty() ? null : (DataRow) results.get(0);
         }

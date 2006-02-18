@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 
 public class DataContextTst extends DataContextTestBase {
 
@@ -138,7 +138,7 @@ public class DataContextTst extends DataContextTestBase {
         populateExhibits();
 
         ObjectId eId = new ObjectId("Exhibit", Exhibit.EXHIBIT_ID_PK_COLUMN, 2);
-        Exhibit e = (Exhibit) context.performQuery(new SingleObjectQuery(eId)).get(0);
+        Exhibit e = (Exhibit) context.performQuery(new ObjectIdQuery(eId)).get(0);
 
         assertTrue(e.readPropertyDirectly(Exhibit.TO_GALLERY_PROPERTY) instanceof Fault);
 

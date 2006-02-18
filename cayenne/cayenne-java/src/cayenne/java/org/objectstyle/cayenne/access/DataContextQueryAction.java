@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 import org.objectstyle.cayenne.util.ListResponse;
 import org.objectstyle.cayenne.util.ObjectContextQueryAction;
 
@@ -101,8 +101,8 @@ class DataContextQueryAction extends ObjectContextQueryAction {
      * Overrides super implementation to property handle data row fetches.
      */
     protected boolean interceptOIDQuery() {
-        if (query instanceof SingleObjectQuery) {
-            SingleObjectQuery oidQuery = (SingleObjectQuery) query;
+        if (query instanceof ObjectIdQuery) {
+            ObjectIdQuery oidQuery = (ObjectIdQuery) query;
 
             if (!oidQuery.isRefreshing()) {
                 Object object = actingContext.getGraphManager().getNode(

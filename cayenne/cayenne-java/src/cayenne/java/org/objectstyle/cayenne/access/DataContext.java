@@ -103,7 +103,7 @@ import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 import org.objectstyle.cayenne.util.GenericResponse;
 import org.objectstyle.cayenne.util.Util;
 
@@ -999,7 +999,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
             }
         }
 
-        DataObject object = DataObjectUtils.objectForQuery(this, new SingleObjectQuery(
+        DataObject object = DataObjectUtils.objectForQuery(this, new ObjectIdQuery(
                 oid));
 
         if (object == null) {

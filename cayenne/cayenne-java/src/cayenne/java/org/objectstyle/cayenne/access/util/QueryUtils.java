@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * 
  * @author Andrus Adamchik
  * @deprecated In 1.2 Cayenne supports specialized queries such as
- *             {@link org.objectstyle.cayenne.query.SingleObjectQuery} and
+ *             {@link org.objectstyle.cayenne.query.ObjectIdQuery} and
  *             {@link org.objectstyle.cayenne.query.RelationshipQuery}, making this class
  *             redundant.
  */

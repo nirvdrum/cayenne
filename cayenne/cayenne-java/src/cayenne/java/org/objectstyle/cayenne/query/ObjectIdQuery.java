@@ -65,31 +65,31 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * A query that returns a single object matching an ObjectId.
+ * A query that matches zero or one object or data row corresponding to the ObjectId. Used
+ * internally by Cayenne to lookup objects by id.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class SingleObjectQuery extends IndirectQuery {
+public class ObjectIdQuery extends IndirectQuery {
 
     protected ObjectId objectId;
     protected boolean refreshing;
     protected boolean fetchingDataRows;
 
     // needed for hessian serialization
-    private SingleObjectQuery() {
+    private ObjectIdQuery() {
 
     }
 
     /**
      * Creates a refreshing SingleObjectQuery.
      */
-    public SingleObjectQuery(ObjectId objectID) {
+    public ObjectIdQuery(ObjectId objectID) {
         this(objectID, false, true);
     }
 
-    public SingleObjectQuery(ObjectId objectID, boolean fetchingDataRows,
-            boolean refreshing) {
+    public ObjectIdQuery(ObjectId objectID, boolean fetchingDataRows, boolean refreshing) {
         if (objectID == null) {
             throw new NullPointerException("Null objectID");
         }
@@ -114,7 +114,7 @@ public class SingleObjectQuery extends IndirectQuery {
             public ObjEntity getObjEntity() {
                 return resolver.lookupObjEntity(objectId.getEntityName());
             }
-            
+
             public boolean isFetchingDataRows() {
                 return fetchingDataRows;
             }
@@ -165,19 +165,19 @@ public class SingleObjectQuery extends IndirectQuery {
     }
 
     /**
-     * An object is considered equal to this SingleObjectQuery if it is also a
-     * SingleObjectQuery with an equal ObjectId.
+     * An object is considered equal to this query if it is also a SingleObjectQuery with
+     * an equal ObjectId.
      */
     public boolean equals(Object object) {
         if (this == object) {
             return true;
         }
 
-        if (!(object instanceof SingleObjectQuery)) {
+        if (!(object instanceof ObjectIdQuery)) {
             return false;
         }
 
-        SingleObjectQuery query = (SingleObjectQuery) object;
+        ObjectIdQuery query = (ObjectIdQuery) object;
 
         return Util.nullSafeEquals(objectId, query.getObjectId());
     }

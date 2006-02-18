@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.opp.LocalConnection;
 import org.objectstyle.cayenne.opp.OPPConnection;
 import org.objectstyle.cayenne.opp.OPPServerChannel;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SingleObjectQuery;
+import org.objectstyle.cayenne.query.ObjectIdQuery;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable1;
 import org.objectstyle.cayenne.testdo.mt.ClientMtTable2;
 import org.objectstyle.cayenne.testdo.mt.MtTable1;
@@ -310,7 +310,7 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         o.setGlobalAttribute1("aaa");
 
         // fetch new
-        SingleObjectQuery q1 = new SingleObjectQuery(o.getObjectId(), false, false);
+        ObjectIdQuery q1 = new ObjectIdQuery(o.getObjectId(), false, false);
 
         connection.setBlockingMessages(true);
         try {
@@ -325,7 +325,7 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         context.commitChanges();
 
         // fetch committed
-        SingleObjectQuery q2 = new SingleObjectQuery(o.getObjectId(), false, false);
+        ObjectIdQuery q2 = new ObjectIdQuery(o.getObjectId(), false, false);
 
         connection.setBlockingMessages(true);
         try {
