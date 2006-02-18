@@ -68,7 +68,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.Factory;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -1653,16 +1652,6 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
         if (!isUsingSharedSnapshotCache()) {
             DataRowStore cache = (DataRowStore) in.readObject();
             objectStore.setDataRowCache(cache);
-        }
-        else {
-            // configure ObjectStore to do deferred initialization
-            objectStore.setDataRowCacheFactory(new Factory() {
-
-                public Object create() {
-                    DataDomain domain = getParentDataDomain();
-                    return (domain != null) ? domain.getSharedSnapshotCache() : null;
-                }
-            });
         }
 
         // CayenneDataObjects have a transient datacontext

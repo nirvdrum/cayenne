@@ -64,7 +64,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.Factory;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
@@ -130,10 +129,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * </p>
      */
     protected transient DataRowStore dataRowCache;
-
-    // a factory that can be set by DataContext to defer attaching of DataRowStore on
-    // deserialization.
-    transient Factory dataRowCacheFactory;
 
     /**
      * The DataContext that owns this ObjectStore.
@@ -226,10 +221,13 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         // Andrus, 11/7/2005 - potential problem with on-demand deferred initialization is
         // that deserialized context won't receive any events... which maybe ok, since it
         // didn't while it was stored in serialized form.
-        if (dataRowCache == null && dataRowCacheFactory != null) {
+        if (dataRowCache == null && context != null) {
             synchronized (this) {
-                if (dataRowCache == null && dataRowCacheFactory != null) {
-                    setDataRowCache((DataRowStore) dataRowCacheFactory.create());
+                if (dataRowCache == null) {
+                    DataDomain domain = context.getParentDataDomain();
+                    if (domain != null) {
+                        setDataRowCache(domain.getSharedSnapshotCache());
+                    }
                 }
             }
         }
@@ -1223,20 +1221,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
     List getFlattenedDeletes() {
         return flattenedDeletes;
-    }
-
-    /**
-     * @since 1.2
-     */
-    void setDataRowCacheFactory(Factory dataRowCacheFactory) {
-        this.dataRowCacheFactory = dataRowCacheFactory;
-    }
-
-    /**
-     * @since 1.2
-     */
-    Factory getDataRowCacheFactory() {
-        return dataRowCacheFactory;
     }
 
     class IdUpdater implements GraphChangeHandler {
