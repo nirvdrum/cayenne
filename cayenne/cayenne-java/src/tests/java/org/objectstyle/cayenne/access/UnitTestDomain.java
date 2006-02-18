@@ -94,7 +94,7 @@ public class UnitTestDomain extends DataDomain {
         this.blockingQueries = blockingQueries;
     }
 
-    QueryResponse onQueryInternal(ObjectContext context, Query query) {
+    public QueryResponse onQuery(ObjectContext context, Query query) {
         return new UnitTestDomainQueryAction(context, this, query).execute();
     }
 

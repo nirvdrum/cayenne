@@ -726,12 +726,11 @@ public class DataDomain implements QueryEngine, DataChannel {
      * @since 1.2
      */
     public QueryResponse onQuery(final ObjectContext context, final Query query) {
-        return (QueryResponse) runInTransaction(new Transformer() {
-
-            public Object transform(Object input) {
-                return onQueryInternal(context, query);
-            }
-        });
+        // transaction note:
+        // we don't wrap this code in transaction to reduce transaction scope to
+        // just the DB operation for better performance ... query action will start a
+        // transaction itself when and if needed
+        return new DataDomainQueryAction(context, DataDomain.this, query).execute();
     }
 
     /**
@@ -772,10 +771,6 @@ public class DataDomain implements QueryEngine, DataChannel {
                 throw new CayenneRuntimeException("Invalid synchronization type: "
                         + syncType);
         }
-    }
-
-    QueryResponse onQueryInternal(ObjectContext context, Query query) {
-        return new DataDomainQueryAction(context, DataDomain.this, query).execute();
     }
 
     GraphDiff onSyncRollbackInternal(ObjectContext originatingContext) {

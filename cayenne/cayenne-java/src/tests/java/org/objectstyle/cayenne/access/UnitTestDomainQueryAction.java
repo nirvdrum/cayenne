@@ -81,9 +81,9 @@ public class UnitTestDomainQueryAction extends DataDomainQueryAction {
         return super.execute();
     }
 
-    void runQuery() {
+    void runQueryInTransaction() {
         checkQueryAllowed();
-        super.runQuery();
+        super.runQueryInTransaction();
     }
 
     protected void checkQueryAllowed() throws AssertionFailedError {

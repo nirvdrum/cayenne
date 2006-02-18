@@ -63,6 +63,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.BaseResponse;
 import org.objectstyle.cayenne.CayenneException;
@@ -135,7 +136,7 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
         if (interceptOIDQuery() != DONE) {
             if (interceptRelationshipQuery() != DONE) {
                 if (interceptSharedCache() != DONE) {
-                    runQuery();
+                    runQueryInTransaction();
                 }
             }
         }
@@ -256,7 +257,7 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
             }
         }
 
-        runQuery();
+        runQueryInTransaction();
 
         // TODO: Andrus, 1/22/2006 - cache QueryResponse object instead of a list!
 
@@ -273,8 +274,18 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
      */
     // the only reason why this method is non-private is to create mockup subclasses for
     // test cases that intercept this call.
-    void runQuery() {
+    void runQueryInTransaction() {
 
+        domain.runInTransaction(new Transformer() {
+
+            public Object transform(Object input) {
+                runQuery();
+                return null;
+            }
+        });
+    }
+
+    private void runQuery() {
         // reset
         this.response = new BaseResponse();
         this.queriesByNode = null;
