@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.util.BaseResponse;
+import org.objectstyle.cayenne.util.GenericResponse;
 
 /**
  * Stores all messages passed via this handler.
@@ -88,7 +88,7 @@ public class MockDataChannel implements DataChannel {
     }
 
     public MockDataChannel(List selectResponse) {
-        this.response = new BaseResponse(selectResponse);
+        this.response = new GenericResponse(selectResponse);
     }
 
     public MockDataChannel(EntityResolver entityResolver, List selectResponse) {
@@ -102,7 +102,7 @@ public class MockDataChannel implements DataChannel {
     }
 
     public MockDataChannel(EntityResolver resolver) {
-        this(resolver, new BaseResponse());
+        this(resolver, new GenericResponse());
     }
 
     public EventManager getEventManager() {

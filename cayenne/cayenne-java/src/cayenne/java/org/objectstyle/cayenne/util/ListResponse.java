@@ -56,90 +56,57 @@
 package org.objectstyle.cayenne.util;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.cayenne.QueryResponse;
 
 /**
- * A simple serializable implementation of QueryResponse.
+ * A QueryResponse optimized to hold a single object or data row list.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class BaseResponse implements QueryResponse, Serializable {
+public class ListResponse implements QueryResponse, Serializable {
 
-    protected List results;
+    protected List objectList;
 
     protected transient int currentIndex;
 
-    /**
-     * Creates an empty BaseResponse.
-     */
-    public BaseResponse() {
-        results = new ArrayList();
+    public ListResponse(Object object) {
+        this.objectList = Collections.singletonList(object);
     }
 
-    /**
-     * Creates a BaseResponse with a single result list.
-     */
-    public BaseResponse(List list) {
-        results = new ArrayList(1);
-        addResultList(list);
+    public ListResponse(List objectList) {
+        this.objectList = objectList;
     }
 
-    /**
-     * Creates a response that it a shallow copy of another response.
-     */
-    public BaseResponse(QueryResponse response) {
-
-        results = new ArrayList(response.size());
-
-        response.reset();
-        while (response.next()) {
-            if (response.isList()) {
-                addResultList(response.currentList());
-            }
-            else {
-                addBatchUpdateCount(response.currentUpdateCount());
-            }
-        }
-    }
-
-    public List firstList() {
-        for (reset(); next();) {
-            if (isList()) {
-                return currentList();
-            }
-        }
-
-        return null;
-    }
-
-    public int[] firstUpdateCount() {
-        for (reset(); next();) {
-            if (!isList()) {
-                return currentUpdateCount();
-            }
-        }
-
-        return null;
-    }
-
-    public List currentList() {
-        return (List) results.get(currentIndex - 1);
-    }
-
-    public int[] currentUpdateCount() {
-        return (int[]) results.get(currentIndex - 1);
+    public int size() {
+        return 1;
     }
 
     public boolean isList() {
-        return results.get(currentIndex - 1) instanceof List;
+        if (currentIndex != 1) {
+            throw new IndexOutOfBoundsException("Past iteration end: " + currentIndex);
+        }
+        
+        return true;
+    }
+
+    public List currentList() {
+        if (currentIndex != 1) {
+            throw new IndexOutOfBoundsException("Past iteration end: " + currentIndex);
+        }
+
+        return objectList;
+    }
+
+    public int[] currentUpdateCount() {
+        throw new IllegalStateException("Current object is not an update count");
     }
 
     public boolean next() {
-        return ++currentIndex <= results.size();
+        return ++currentIndex <= 1;
     }
 
     public void reset() {
@@ -147,41 +114,11 @@ public class BaseResponse implements QueryResponse, Serializable {
         currentIndex = 0;
     }
 
-    public int size() {
-        return results.size();
+    public List firstList() {
+        return objectList;
     }
 
-    /**
-     * Clears any previously collected information.
-     */
-    public void clear() {
-        results.clear();
-    }
-
-    public void addBatchUpdateCount(int[] resultCount) {
-
-        if (resultCount != null) {
-            results.add(resultCount);
-        }
-    }
-
-    public void addUpdateCount(int resultCount) {
-        results.add(new int[] {
-            resultCount
-        });
-    }
-
-    public void addResultList(List list) {
-        this.results.add(list);
-    }
-
-    /**
-     * Replaces previously stored result with a new result.
-     */
-    public void replaceResult(Object oldResult, Object newResult) {
-        int index = results.indexOf(oldResult);
-        if (index >= 0) {
-            results.set(index, newResult);
-        }
+    public int[] firstUpdateCount() {
+        return new int[0];
     }
 }

@@ -55,65 +55,100 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-import org.objectstyle.cayenne.QueryResponse;
+import org.objectstyle.cayenne.opp.hessian.HessianUtil;
+import org.objectstyle.cayenne.util.GenericResponse;
+import org.objectstyle.cayenne.util.Util;
 
-/**
- * A QueryResponse optimized to hold a single object.
- * 
- * @since 1.2
- * @author Andrus Adamchik
- */
-public class SingleListResponse implements QueryResponse {
+import junit.framework.TestCase;
 
-    protected List objectList;
+public class GenericResponseTst extends TestCase {
 
-    protected transient int currentIndex;
+    public void testCreation() throws Exception {
+        List list = new ArrayList();
+        list.add(new HashMap());
 
-    public SingleListResponse(Object object) {
-        this.objectList = Collections.singletonList(object);
+        GenericResponse r = new GenericResponse();
+        r.addBatchUpdateCount(new int[] {
+                1, 2, 3
+        });
+        r.addResultList(list);
+
+        assertEquals(2, r.size());
+
+        assertTrue(r.next());
+        assertFalse(r.isList());
+
+        int[] srInt = r.currentUpdateCount();
+        assertEquals(3, srInt.length);
+        assertEquals(2, srInt[1]);
+
+        assertTrue(r.next());
+        assertTrue(r.isList());
+
+        assertEquals(list, r.currentList());
+
+        assertFalse(r.next());
+    }
+
+    public void testSerialization() throws Exception {
+        List list = new ArrayList();
+        list.add(new HashMap());
+
+        GenericResponse r = new GenericResponse();
+        r.addBatchUpdateCount(new int[] {
+                1, 2, 3
+        });
+        r.addResultList(list);
+
+        GenericResponse sr = (GenericResponse) Util.cloneViaSerialization(r);
+        assertNotNull(sr);
+        assertEquals(2, sr.size());
+
+        assertTrue(sr.next());
+        assertFalse(sr.isList());
+
+        int[] srInt = sr.currentUpdateCount();
+        assertEquals(3, srInt.length);
+        assertEquals(2, srInt[1]);
+
+        assertTrue(sr.next());
+        assertTrue(sr.isList());
+
+        assertEquals(list, sr.currentList());
+
+        assertFalse(sr.next());
     }
     
-    public SingleListResponse(List objectList) {
-        this.objectList = objectList;
-    }
+    public void testSerializationWithHessian() throws Exception {
+        List list = new ArrayList();
+        list.add(new HashMap());
 
-    public int size() {
-        return 1;
-    }
+        GenericResponse r = new GenericResponse();
+        r.addBatchUpdateCount(new int[] {
+                1, 2, 3
+        });
+        r.addResultList(list);
 
-    public boolean isList() {
-        return true;
-    }
+        GenericResponse sr = (GenericResponse) HessianUtil.cloneViaHessianSerialization(r);
+        assertNotNull(sr);
+        assertEquals(2, sr.size());
 
-    public List currentList() {
-        if (currentIndex != 0) {
-            throw new IndexOutOfBoundsException("Past iteration end: " + currentIndex);
-        }
+        assertTrue(sr.next());
+        assertFalse(sr.isList());
 
-        return objectList;
-    }
+        int[] srInt = sr.currentUpdateCount();
+        assertEquals(3, srInt.length);
+        assertEquals(2, srInt[1]);
 
-    public int[] currentUpdateCount() {
-        throw new IllegalStateException("Current object is not an update count");
-    }
+        assertTrue(sr.next());
+        assertTrue(sr.isList());
 
-    public boolean next() {
-        return ++currentIndex <= 1;
-    }
+        assertEquals(list, sr.currentList());
 
-    public void reset() {
-        // use a zero-based index, not -1, as this will simplify serialization handling
-        currentIndex = 0;
-    }
-
-    public List firstList() {
-        return objectList;
-    }
-
-    public int[] firstUpdateCount() {
-        return new int[0];
+        assertFalse(sr.next());
     }
 }

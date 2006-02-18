@@ -76,7 +76,7 @@ import org.objectstyle.cayenne.query.AbstractQuery;
 import org.objectstyle.cayenne.query.PrefetchTreeNode;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
-import org.objectstyle.cayenne.util.BaseResponse;
+import org.objectstyle.cayenne.util.GenericResponse;
 import org.objectstyle.cayenne.util.ObjectDetachOperation;
 
 /**
@@ -222,7 +222,7 @@ public class ClientServerChannel implements DataChannel {
 
             // rewrite response to contain client objects
 
-            BaseResponse clientResponse = new BaseResponse();
+            GenericResponse clientResponse = new GenericResponse();
 
             for (response.reset(); response.next();) {
                 if (response.isList()) {

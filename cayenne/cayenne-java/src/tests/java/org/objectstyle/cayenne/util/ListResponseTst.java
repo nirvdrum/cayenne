@@ -55,100 +55,55 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-
-import org.objectstyle.cayenne.opp.hessian.HessianUtil;
-import org.objectstyle.cayenne.util.BaseResponse;
-import org.objectstyle.cayenne.util.Util;
 
 import junit.framework.TestCase;
 
-public class BaseResponseTst extends TestCase {
+import org.objectstyle.cayenne.opp.hessian.HessianUtil;
+
+public class ListResponseTst extends TestCase {
 
     public void testCreation() throws Exception {
-        List list = new ArrayList();
-        list.add(new HashMap());
 
-        BaseResponse r = new BaseResponse();
-        r.addBatchUpdateCount(new int[] {
-                1, 2, 3
-        });
-        r.addResultList(list);
+        Object object = new Object();
+        ListResponse r = new ListResponse(object);
 
-        assertEquals(2, r.size());
-
-        assertTrue(r.next());
-        assertFalse(r.isList());
-
-        int[] srInt = r.currentUpdateCount();
-        assertEquals(3, srInt.length);
-        assertEquals(2, srInt[1]);
+        assertEquals(1, r.size());
 
         assertTrue(r.next());
         assertTrue(r.isList());
 
-        assertEquals(list, r.currentList());
+        List currentList = r.currentList();
+        assertEquals(1, currentList.size());
+        assertTrue(currentList.contains(object));
 
         assertFalse(r.next());
+
+        r.reset();
+        assertTrue(r.next());
+
+        assertSame(currentList, r.firstList());
     }
 
     public void testSerialization() throws Exception {
-        List list = new ArrayList();
-        list.add(new HashMap());
 
-        BaseResponse r = new BaseResponse();
-        r.addBatchUpdateCount(new int[] {
-                1, 2, 3
-        });
-        r.addResultList(list);
+        ListResponse r = new ListResponse(new Integer(67));
 
-        BaseResponse sr = (BaseResponse) Util.cloneViaSerialization(r);
+        ListResponse sr = (ListResponse) Util.cloneViaSerialization(r);
         assertNotNull(sr);
-        assertEquals(2, sr.size());
+        assertEquals(1, sr.size());
 
-        assertTrue(sr.next());
-        assertFalse(sr.isList());
-
-        int[] srInt = sr.currentUpdateCount();
-        assertEquals(3, srInt.length);
-        assertEquals(2, srInt[1]);
-
-        assertTrue(sr.next());
-        assertTrue(sr.isList());
-
-        assertEquals(list, sr.currentList());
-
-        assertFalse(sr.next());
+        assertTrue(sr.firstList().contains(new Integer(67)));
     }
-    
+
     public void testSerializationWithHessian() throws Exception {
-        List list = new ArrayList();
-        list.add(new HashMap());
 
-        BaseResponse r = new BaseResponse();
-        r.addBatchUpdateCount(new int[] {
-                1, 2, 3
-        });
-        r.addResultList(list);
+        ListResponse r = new ListResponse(new Integer(67));
 
-        BaseResponse sr = (BaseResponse) HessianUtil.cloneViaHessianSerialization(r);
+        ListResponse sr = (ListResponse) HessianUtil.cloneViaHessianSerialization(r);
         assertNotNull(sr);
-        assertEquals(2, sr.size());
+        assertEquals(1, sr.size());
 
-        assertTrue(sr.next());
-        assertFalse(sr.isList());
-
-        int[] srInt = sr.currentUpdateCount();
-        assertEquals(3, srInt.length);
-        assertEquals(2, srInt[1]);
-
-        assertTrue(sr.next());
-        assertTrue(sr.isList());
-
-        assertEquals(list, sr.currentList());
-
-        assertFalse(sr.next());
+        assertTrue(sr.firstList().contains(new Integer(67)));
     }
 }

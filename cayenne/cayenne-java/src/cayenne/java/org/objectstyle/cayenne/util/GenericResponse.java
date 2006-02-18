@@ -53,89 +53,135 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.util;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.QueryMetadata;
-import org.objectstyle.cayenne.util.ObjectContextQueryAction;
-import org.objectstyle.cayenne.util.ListResponse;
 
 /**
- * A DataContext-specific version of
- * {@link org.objectstyle.cayenne.util.ObjectContextQueryAction}.
+ * A simple serializable implementation of QueryResponse.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-// TODO: Andrus, 2/2/2006 - all these DataContext extensions should become available to
-// CayenneContext as well....
-class DataContextQueryAction extends ObjectContextQueryAction {
+public class GenericResponse implements QueryResponse, Serializable {
 
-    public DataContextQueryAction(DataContext actingContext, ObjectContext targetContext,
-            Query query) {
-        super(actingContext, targetContext, query);
-    }
+    protected List results;
 
-    public QueryResponse execute() {
-        if (interceptPaginatedQuery() != DONE) {
-            if (interceptOIDQuery() != DONE) {
-                if (interceptRelationshipQuery() != DONE) {
-                    if (interceptLocalCache() != DONE) {
-                        runQuery();
-                    }
-                }
-            }
-        }
+    protected transient int currentIndex;
 
-        interceptObjectConversion();
-        return response;
-    }
-
-    private boolean interceptPaginatedQuery() {
-        if (metadata.getPageSize() > 0) {
-            response = new ListResponse(new IncrementalFaultList(
-                    (DataContext) actingContext,
-                    query));
-            return DONE;
-        }
-
-        return !DONE;
-    }
-
-    /*
-     * Wraps execution in local cache checks.
+    /**
+     * Creates an empty BaseResponse.
      */
-    private boolean interceptLocalCache() {
+    public GenericResponse() {
+        results = new ArrayList();
+    }
 
-        String cacheKey = metadata.getCacheKey();
-        if (cacheKey == null) {
-            return !DONE;
+    /**
+     * Creates a BaseResponse with a single result list.
+     */
+    public GenericResponse(List list) {
+        results = new ArrayList(1);
+        addResultList(list);
+    }
+
+    /**
+     * Creates a response that it a shallow copy of another response.
+     */
+    public GenericResponse(QueryResponse response) {
+
+        results = new ArrayList(response.size());
+
+        response.reset();
+        while (response.next()) {
+            if (response.isList()) {
+                addResultList(response.currentList());
+            }
+            else {
+                addBatchUpdateCount(response.currentUpdateCount());
+            }
         }
+    }
 
-        boolean cache = QueryMetadata.LOCAL_CACHE.equals(metadata.getCachePolicy());
-        boolean cacheOrCacheRefresh = cache
-                || QueryMetadata.LOCAL_CACHE_REFRESH.equals(metadata.getCachePolicy());
-
-        if (!cacheOrCacheRefresh) {
-            return !DONE;
-        }
-
-        ObjectStore objectStore = ((DataContext) actingContext).getObjectStore();
-        if (cache) {
-
-            List cachedResults = objectStore.getCachedQueryResult(cacheKey);
-            if (cachedResults != null) {
-                response = new ListResponse(cachedResults);
-                return DONE;
+    public List firstList() {
+        for (reset(); next();) {
+            if (isList()) {
+                return currentList();
             }
         }
 
-        runQuery();
-        objectStore.cacheQueryResult(cacheKey, response.firstList());
-        return DONE;
+        return null;
+    }
+
+    public int[] firstUpdateCount() {
+        for (reset(); next();) {
+            if (!isList()) {
+                return currentUpdateCount();
+            }
+        }
+
+        return null;
+    }
+
+    public List currentList() {
+        return (List) results.get(currentIndex - 1);
+    }
+
+    public int[] currentUpdateCount() {
+        return (int[]) results.get(currentIndex - 1);
+    }
+
+    public boolean isList() {
+        return results.get(currentIndex - 1) instanceof List;
+    }
+
+    public boolean next() {
+        return ++currentIndex <= results.size();
+    }
+
+    public void reset() {
+        // use a zero-based index, not -1, as this will simplify serialization handling
+        currentIndex = 0;
+    }
+
+    public int size() {
+        return results.size();
+    }
+
+    /**
+     * Clears any previously collected information.
+     */
+    public void clear() {
+        results.clear();
+    }
+
+    public void addBatchUpdateCount(int[] resultCount) {
+
+        if (resultCount != null) {
+            results.add(resultCount);
+        }
+    }
+
+    public void addUpdateCount(int resultCount) {
+        results.add(new int[] {
+            resultCount
+        });
+    }
+
+    public void addResultList(List list) {
+        this.results.add(list);
+    }
+
+    /**
+     * Replaces previously stored result with a new result.
+     */
+    public void replaceResult(Object oldResult, Object newResult) {
+        int index = results.indexOf(oldResult);
+        if (index >= 0) {
+            results.set(index, newResult);
+        }
     }
 }

@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.property.ClassDescriptor;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
-import org.objectstyle.cayenne.util.BaseResponse;
+import org.objectstyle.cayenne.util.GenericResponse;
 import org.objectstyle.cayenne.util.DeepMergeOperation;
 
 /**
@@ -142,7 +142,7 @@ public class OPPServerChannel implements DataChannel {
 
             if (!info.isFetchingDataRows()) {
 
-                BaseResponse childResponse = new BaseResponse();
+                GenericResponse childResponse = new GenericResponse();
                 response.reset();
 
                 while (response.next()) {

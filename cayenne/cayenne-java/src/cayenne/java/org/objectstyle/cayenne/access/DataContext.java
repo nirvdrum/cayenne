@@ -105,7 +105,7 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
-import org.objectstyle.cayenne.util.BaseResponse;
+import org.objectstyle.cayenne.util.GenericResponse;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -1257,7 +1257,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
 
         query = nonNullDelegate().willPerformGenericQuery(this, query);
         if (query == null) {
-            return new BaseResponse();
+            return new GenericResponse();
         }
 
         if (this.getChannel() == null) {

@@ -77,7 +77,7 @@ import org.objectstyle.cayenne.testdo.mt.MtTable1;
 import org.objectstyle.cayenne.unit.AccessStack;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.CayenneTestResources;
-import org.objectstyle.cayenne.util.BaseResponse;
+import org.objectstyle.cayenne.util.GenericResponse;
 
 /**
  * @author Andrus Adamchik
@@ -320,7 +320,7 @@ public class CayenneContextTst extends CayenneTestCase {
         inflated.setObjectId(gid);
         inflated.setGlobalAttribute1("abc");
 
-        MockOPPConnection connection = new MockOPPConnection(new BaseResponse(Arrays
+        MockOPPConnection connection = new MockOPPConnection(new GenericResponse(Arrays
                 .asList(new Object[] {
                     inflated
                 })));

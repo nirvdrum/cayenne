@@ -132,7 +132,7 @@ public class ObjectContextQueryAction {
 
             // rewrite response to contain objects from the query context
 
-            BaseResponse childResponse = new BaseResponse();
+            GenericResponse childResponse = new GenericResponse();
 
             for (response.reset(); response.next();) {
                 if (response.isList()) {
@@ -174,9 +174,7 @@ public class ObjectContextQueryAction {
                 Object object = actingContext.getGraphManager().getNode(
                         oidQuery.getObjectId());
                 if (object != null) {
-                    List result = new ArrayList(1);
-                    result.add(object);
-                    this.response = new BaseResponse(result);
+                    this.response = new ListResponse(object);
                     return DONE;
                 }
             }
@@ -230,7 +228,7 @@ public class ObjectContextQueryAction {
                             result.add(related);
                         }
 
-                        this.response = new BaseResponse(result);
+                        this.response = new ListResponse(result);
 
                         return DONE;
                     }

@@ -82,8 +82,8 @@ import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.QueryRouter;
 import org.objectstyle.cayenne.query.RelationshipQuery;
 import org.objectstyle.cayenne.query.SingleObjectQuery;
-import org.objectstyle.cayenne.util.BaseResponse;
-import org.objectstyle.cayenne.util.SingleListResponse;
+import org.objectstyle.cayenne.util.GenericResponse;
+import org.objectstyle.cayenne.util.ListResponse;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -104,7 +104,7 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
     QueryMetadata metadata;
 
     QueryResponse response;
-    BaseResponse fullResponse;
+    GenericResponse fullResponse;
     Map prefetchResultsByPath;
     Map queriesByNode;
     Map queriesByExecutedQueries;
@@ -155,7 +155,7 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
             if (!oidQuery.isRefreshing()) {
                 DataRow row = cache.getCachedSnapshot(oidQuery.getObjectId());
                 if (row != null) {
-                    this.response = new SingleListResponse(row);
+                    this.response = new ListResponse(row);
                     return DONE;
                 }
             }
@@ -200,7 +200,7 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
 
             // null id means that FK is null...
             if (targetId == null) {
-                this.response = new BaseResponse(Collections.EMPTY_LIST);
+                this.response = new GenericResponse(Collections.EMPTY_LIST);
                 return DONE;
             }
 
@@ -223,7 +223,7 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
                 return !DONE;
             }
 
-            this.response = new BaseResponse(Collections.singletonList(resultRow));
+            this.response = new GenericResponse(Collections.singletonList(resultRow));
             return DONE;
         }
 
@@ -252,7 +252,7 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
 
             if (cachedRows != null) {
                 // decorate result immutable list to avoid messing up the cache
-                this.response = new SingleListResponse(Collections
+                this.response = new ListResponse(Collections
                         .unmodifiableList(cachedRows));
                 return DONE;
             }
@@ -286,7 +286,7 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
 
     private void runQuery() {
         // reset
-        this.fullResponse = new BaseResponse();
+        this.fullResponse = new GenericResponse();
         this.response = this.fullResponse;
         this.queriesByNode = null;
         this.queriesByExecutedQueries = null;
@@ -339,11 +339,11 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
                             prefetchResultsByPath);
                 }
 
-                if (response instanceof BaseResponse) {
-                    ((BaseResponse) response).replaceResult(mainRows, objects);
+                if (response instanceof GenericResponse) {
+                    ((GenericResponse) response).replaceResult(mainRows, objects);
                 }
-                else if (response instanceof SingleListResponse) {
-                    this.response = new SingleListResponse(objects);
+                else if (response instanceof ListResponse) {
+                    this.response = new ListResponse(objects);
                 }
                 else {
                     throw new IllegalStateException("Unknown response object: "

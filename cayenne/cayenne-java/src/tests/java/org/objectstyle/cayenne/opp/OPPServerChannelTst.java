@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.util.BaseResponse;
+import org.objectstyle.cayenne.util.GenericResponse;
 
 public class OPPServerChannelTst extends CayenneTestCase {
 
@@ -80,7 +80,7 @@ public class OPPServerChannelTst extends CayenneTestCase {
         ObjectId oid1 = new ObjectId("test_entity");
         o1.setObjectId(oid1);
 
-        MockOPPConnection connection = new MockOPPConnection(new BaseResponse(Arrays
+        MockOPPConnection connection = new MockOPPConnection(new GenericResponse(Arrays
                 .asList(new Object[] {
                     o1
                 })));
@@ -132,7 +132,7 @@ public class OPPServerChannelTst extends CayenneTestCase {
         // cached object instead of the one fetched
         MockPersistentObject o2 = new MockPersistentObject(oid);
 
-        MockOPPConnection connection = new MockOPPConnection(new BaseResponse(Arrays
+        MockOPPConnection connection = new MockOPPConnection(new GenericResponse(Arrays
                 .asList(new Object[] {
                     o2
                 })));
@@ -170,7 +170,7 @@ public class OPPServerChannelTst extends CayenneTestCase {
         // another object with the same GID ... we must merge it with cached and return
         // cached object instead of the one fetched
         MockPersistentObject o2 = new MockPersistentObject(oid);
-        MockOPPConnection connection = new MockOPPConnection(new BaseResponse(Arrays
+        MockOPPConnection connection = new MockOPPConnection(new GenericResponse(Arrays
                 .asList(new Object[] {
                     o2
                 })));
