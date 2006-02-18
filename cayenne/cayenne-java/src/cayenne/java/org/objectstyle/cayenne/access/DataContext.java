@@ -909,6 +909,8 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * Unregisters a Collection of DataObjects from the DataContext and the underlying
      * ObjectStore. This operation also unsets DataContext and ObjectId for each object
      * and changes its state to TRANSIENT.
+     * 
+     * @see #invalidateObjects(Collection)
      */
     public void unregisterObjects(Collection dataObjects) {
         getObjectStore().objectsUnregistered(dataObjects);
@@ -918,6 +920,8 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * "Invalidates" a Collection of DataObject. This operation would remove each object's
      * snapshot from cache and change object's state to HOLLOW. On the next access to this
      * object, it will be refetched.
+     * 
+     * @see #unregisterObjects(Collection)
      */
     public void invalidateObjects(Collection dataObjects) {
         getObjectStore().objectsInvalidated(dataObjects);
