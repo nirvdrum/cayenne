@@ -1145,10 +1145,9 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
             else if (originatingContext instanceof DataContext) {
                 DataContext context = (DataContext) originatingContext;
 
-                Iterator it = context.getObjectStore().getObjectIterator();
-
                 synchronized (getObjectStore()) {
 
+                    Iterator it = context.getObjectStore().getObjectIterator();
                     while (it.hasNext()) {
                         Persistent source = (Persistent) it.next();
 
@@ -1159,14 +1158,14 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
                             case PersistenceState.DELETED:
                                 deleteObject(localObject(source.getObjectId(), source));
                                 break;
-                                
+
                             case PersistenceState.NEW:
                                 Persistent localNew = localObject(
                                         source.getObjectId(),
                                         source);
                                 localNew.setPersistenceState(PersistenceState.NEW);
                                 break;
-                                
+
                             case PersistenceState.MODIFIED:
 
                                 // retain snapshot before merge

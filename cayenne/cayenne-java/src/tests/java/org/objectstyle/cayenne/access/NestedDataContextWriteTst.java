@@ -120,7 +120,8 @@ public class NestedDataContextWriteTst extends CayenneTestCase {
             assertNotNull(parentModified);
             assertEquals(PersistenceState.MODIFIED, parentModified.getPersistenceState());
             assertEquals("MMM", parentModified.getArtistName());
-            assertNotNull(context.getObjectStore().getRetainedSnapshot(parentModified.getObjectId()));
+            assertNotNull(context.getObjectStore().getRetainedSnapshot(
+                    parentModified.getObjectId()));
 
             assertNotNull(parentCommitted);
             assertEquals(PersistenceState.COMMITTED, parentCommitted
@@ -172,4 +173,148 @@ public class NestedDataContextWriteTst extends CayenneTestCase {
         assertEquals(PersistenceState.DELETED, parentDeleted.getPersistenceState());
         assertEquals("DDD", parentDeleted.getArtistName());
     }
+
+    public void testCommitChanges() throws Exception {
+        deleteTestData();
+        createTestData("testFlushChanges");
+
+        DataContext context = createDataContext();
+        DataContext childContext = context.createChildDataContext();
+
+        // make sure we fetch in predictable order
+        SelectQuery query = new SelectQuery(Artist.class);
+        query.addOrdering(Artist.ARTIST_NAME_PROPERTY, true);
+        List objects = childContext.performQuery(query);
+
+        assertEquals(4, objects.size());
+
+        Artist childNew = (Artist) childContext.newObject(Artist.class);
+        childNew.setArtistName("NNN");
+
+        Artist childModified = (Artist) objects.get(0);
+        childModified.setArtistName("MMM");
+
+        Artist childCommitted = (Artist) objects.get(1);
+
+        // delete AND modify
+        Artist childDeleted = (Artist) objects.get(2);
+        childContext.deleteObject(childDeleted);
+        childDeleted.setArtistName("DDD");
+
+        Artist childHollow = (Artist) objects.get(3);
+        childContext.invalidateObjects(Collections.singleton(childHollow));
+
+        childContext.commitChanges();
+
+        assertEquals(PersistenceState.COMMITTED, childNew.getPersistenceState());
+        assertEquals(PersistenceState.COMMITTED, childModified.getPersistenceState());
+        assertEquals(PersistenceState.COMMITTED, childCommitted.getPersistenceState());
+        assertEquals(PersistenceState.TRANSIENT, childDeleted.getPersistenceState());
+        assertEquals(PersistenceState.HOLLOW, childHollow.getPersistenceState());
+
+        Artist parentNew = (Artist) context.getObjectStore().getObject(
+                childNew.getObjectId());
+        Artist parentModified = (Artist) context.getObjectStore().getObject(
+                childModified.getObjectId());
+        Artist parentCommitted = (Artist) context.getObjectStore().getObject(
+                childCommitted.getObjectId());
+        Artist parentDeleted = (Artist) context.getObjectStore().getObject(
+                childDeleted.getObjectId());
+        Artist parentHollow = (Artist) context.getObjectStore().getObject(
+                childHollow.getObjectId());
+
+        assertNotNull(parentNew);
+        assertEquals(PersistenceState.COMMITTED, parentNew.getPersistenceState());
+        assertEquals("NNN", parentNew.getArtistName());
+
+        assertNotNull(parentModified);
+        assertEquals(PersistenceState.COMMITTED, parentModified.getPersistenceState());
+        assertEquals("MMM", parentModified.getArtistName());
+        assertNull(context.getObjectStore().getRetainedSnapshot(
+                parentModified.getObjectId()));
+
+        assertNull("Deleted object should not be registered.", parentDeleted);
+
+        assertNotNull(parentCommitted);
+        assertEquals(PersistenceState.COMMITTED, parentCommitted.getPersistenceState());
+
+        assertNotNull(parentHollow);
+    }
+
+//    public void testFlushChangesMergeProperties() throws Exception {
+//        deleteTestData();
+//        createTestData("testFlushChangesMergeProperties");
+//
+//        DataContext context = createDataContext();
+//        DataContext childContext = context.createChildDataContext();
+//
+//        // make sure we fetch in predictable order
+//        SelectQuery query = new SelectQuery(Painting.class);
+//        query.addOrdering(Painting.PAINTING_TITLE_PROPERTY, true);
+//        List objects = childContext.performQuery(query);
+//
+//        assertEquals(6, objects.size());
+//
+//        Painting childModifiedSimple = (Painting) objects.get(0);
+//        childModifiedSimple.setPaintingTitle("C_PT");
+//
+//        Painting childModifiedToOne = (Painting) objects.get(1);
+//        childModifiedToOne.setToArtist(childModifiedSimple.getToArtist());
+//
+//        Artist childModifiedToMany = ((Painting) objects.get(2)).getToArtist();
+//        childModifiedToMany.addToPaintingArray((Painting) objects.get(3));
+//
+//        blockQueries();
+//
+//        try {
+//
+//            childContext.flushChanges();
+//
+//            assertEquals(PersistenceState.COMMITTED, childModifiedSimple
+//                    .getPersistenceState());
+//            assertEquals(PersistenceState.COMMITTED, childModifiedToOne
+//                    .getPersistenceState());
+//            assertEquals(PersistenceState.COMMITTED, childModifiedToMany
+//                    .getPersistenceState());
+//
+//            Painting parentModifiedSimple = (Painting) context
+//                    .getObjectStore()
+//                    .getObject(childModifiedSimple.getObjectId());
+//
+//            Painting parentModifiedToOne = (Painting) context.getObjectStore().getObject(
+//                    childModifiedToOne.getObjectId());
+//
+//            Artist parentModifiedToMany = (Artist) context.getObjectStore().getObject(
+//                    childModifiedToMany.getObjectId());
+//
+//            assertNotNull(parentModifiedSimple);
+//            assertEquals(PersistenceState.MODIFIED, parentModifiedSimple
+//                    .getPersistenceState());
+//            assertEquals("C_PT", parentModifiedSimple.getPaintingTitle());
+//            assertNotNull(context.getObjectStore().getRetainedSnapshot(
+//                    parentModifiedSimple.getObjectId()));
+//
+//            assertNotNull(parentModifiedToOne);
+//            assertEquals(PersistenceState.MODIFIED, parentModifiedToOne
+//                    .getPersistenceState());
+//            assertNotNull(parentModifiedToOne.getToArtist());
+//            assertEquals(33001, DataObjectUtils.intPKForObject(parentModifiedToOne
+//                    .getToArtist()));
+//            assertNotNull(context.getObjectStore().getRetainedSnapshot(
+//                    parentModifiedToOne.getObjectId()));
+//
+//            // indirectly modified....
+//            assertNotNull(parentModifiedToMany);
+//            assertEquals(PersistenceState.MODIFIED, parentModifiedToMany
+//                    .getPersistenceState());
+//            
+//            List paintings = parentModifiedToMany.getPaintingArray();
+//            assertEquals(2, paintings.size());
+//            assertTrue(context.getObjectStore().indirectlyModifiedIds
+//                    .contains(parentModifiedSimple.getObjectId()));
+//        }
+//        finally {
+//            unblockQueries();
+//        }
+//    }
 }
