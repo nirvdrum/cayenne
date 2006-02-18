@@ -639,8 +639,23 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * @since 1.1
      */
     public DataRow getCachedSnapshot(ObjectId oid) {
+
         DataRow retained = getRetainedSnapshot(oid);
-        return (retained != null) ? retained : getDataRowCache().getCachedSnapshot(oid);
+        if (retained != null) {
+            return retained;
+        }
+
+        if (context != null && context.getChannel() != null) {
+            ObjectIdQuery query = new ObjectIdQuery(
+                    oid,
+                    true,
+                    ObjectIdQuery.CACHE_NOREFRESH);
+            List results = context.getChannel().onQuery(context, query).firstList();
+            return results.isEmpty() ? null : (DataRow) results.get(0);
+        }
+        else {
+            return null;
+        }
     }
 
     /**
@@ -694,7 +709,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         }
 
         if (context != null && context.getChannel() != null) {
-            ObjectIdQuery query = new ObjectIdQuery(oid, true, false);
+            ObjectIdQuery query = new ObjectIdQuery(oid, true, ObjectIdQuery.CACHE);
             List results = context.getChannel().onQuery(context, query).firstList();
             return results.isEmpty() ? null : (DataRow) results.get(0);
         }

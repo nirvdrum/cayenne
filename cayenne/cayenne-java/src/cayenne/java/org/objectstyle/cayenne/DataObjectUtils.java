@@ -276,7 +276,7 @@ public final class DataObjectUtils {
         return DataObjectUtils.objectForQuery(context, new ObjectIdQuery(
                 id,
                 false,
-                false));
+                ObjectIdQuery.CACHE));
     }
 
     /**

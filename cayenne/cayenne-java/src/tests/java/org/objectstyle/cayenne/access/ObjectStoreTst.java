@@ -75,70 +75,61 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  */
 public class ObjectStoreTst extends CayenneTestCase {
 
-    protected DataContext context;
-    protected ObjectStore objectStore;
-
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        this.context = createDataContext();
-
-        // create ObjectStore outside of this DataContext
-        DataRowStore cache = new DataRowStore("test");
-        this.objectStore = new ObjectStore(cache);
-
-    }
-
     public void testRegisteredObjectsCount() throws Exception {
-        assertEquals(0, objectStore.registeredObjectsCount());
+        DataContext context = createDataContext();
+        assertEquals(0, context.getObjectStore().registeredObjectsCount());
 
         DataObject o1 = new MockDataObject();
         o1.setObjectId(new ObjectId("T", "key1", "v1"));
-        objectStore.addObject(o1);
-        assertEquals(1, objectStore.registeredObjectsCount());
+        context.getObjectStore().addObject(o1);
+        assertEquals(1, context.getObjectStore().registeredObjectsCount());
 
         // test object with same id
         DataObject o2 = new MockDataObject();
         o2.setObjectId(new ObjectId("T", "key1", "v1"));
-        objectStore.addObject(o2);
-        assertEquals(1, objectStore.registeredObjectsCount());
+        context.getObjectStore().addObject(o2);
+        assertEquals(1, context.getObjectStore().registeredObjectsCount());
 
         // test new object
         DataObject o3 = new MockDataObject();
         o3.setObjectId(new ObjectId("T", "key3", "v3"));
-        objectStore.addObject(o3);
-        assertEquals(2, objectStore.registeredObjectsCount());
+        context.getObjectStore().addObject(o3);
+        assertEquals(2, context.getObjectStore().registeredObjectsCount());
     }
 
     public void testCachedQueriesCount() throws Exception {
-        assertEquals(0, objectStore.cachedQueriesCount());
+        DataContext context = createDataContext();
+        assertEquals(0, context.getObjectStore().cachedQueriesCount());
 
-        objectStore.cacheQueryResult("result", new ArrayList());
-        assertEquals(1, objectStore.cachedQueriesCount());
+        context.getObjectStore().cacheQueryResult("result", new ArrayList());
+        assertEquals(1, context.getObjectStore().cachedQueriesCount());
 
         // test refreshing the cache
-        objectStore.cacheQueryResult("result", new ArrayList());
-        assertEquals(1, objectStore.cachedQueriesCount());
+        context.getObjectStore().cacheQueryResult("result", new ArrayList());
+        assertEquals(1, context.getObjectStore().cachedQueriesCount());
 
         // test new entry
-        objectStore.cacheQueryResult("result2", new ArrayList());
-        assertEquals(2, objectStore.cachedQueriesCount());
+        context.getObjectStore().cacheQueryResult("result2", new ArrayList());
+        assertEquals(2, context.getObjectStore().cachedQueriesCount());
     }
 
     public void testCachedQueryResult() throws Exception {
-        assertNull(objectStore.getCachedQueryResult("result"));
+        DataContext context = createDataContext();
+        assertNull(context.getObjectStore().getCachedQueryResult("result"));
 
         List result = new ArrayList();
-        objectStore.cacheQueryResult("result", result);
-        assertSame(result, objectStore.getCachedQueryResult("result"));
+        context.getObjectStore().cacheQueryResult("result", result);
+        assertSame(result, context.getObjectStore().getCachedQueryResult("result"));
 
         // test refreshing the cache
         List freshResult = new ArrayList();
-        objectStore.cacheQueryResult("result", freshResult);
-        assertSame(freshResult, objectStore.getCachedQueryResult("result"));
+        context.getObjectStore().cacheQueryResult("result", freshResult);
+        assertSame(freshResult, context.getObjectStore().getCachedQueryResult("result"));
     }
 
     public void testObjectsInvalidated() throws Exception {
+        DataContext context = createDataContext();
+
         DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
@@ -147,25 +138,21 @@ public class ObjectStoreTst extends CayenneTestCase {
         ObjectId oid = object.getObjectId();
 
         // insert object into the ObjectStore
-        objectStore.addObject(object);
-        objectStore.getDataRowCache().processSnapshotChanges(
-                this,
-                Collections.singletonMap(object.getObjectId(), row),
-                Collections.EMPTY_LIST,
-                Collections.EMPTY_LIST,
-                Collections.EMPTY_LIST);
+        context.getObjectStore().addObject(object);
 
-        assertSame(object, objectStore.getObject(oid));
-        assertNotNull(objectStore.getCachedSnapshot(oid));
+        assertSame(object, context.getObjectStore().getObject(oid));
+        assertNotNull(context.getObjectStore().getCachedSnapshot(oid));
 
-        objectStore.objectsInvalidated(Collections.singletonList(object));
+        context.getObjectStore().objectsInvalidated(Collections.singletonList(object));
 
         assertSame(oid, object.getObjectId());
-        assertNull(objectStore.getCachedSnapshot(oid));
-        assertSame(object, objectStore.getObject(oid));
+        assertNull(context.getObjectStore().getCachedSnapshot(oid));
+        assertSame(object, context.getObjectStore().getObject(oid));
     }
 
     public void testObjectsUnregistered() throws Exception {
+        DataContext context = createDataContext();
+
         DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
@@ -174,23 +161,17 @@ public class ObjectStoreTst extends CayenneTestCase {
         ObjectId oid = object.getObjectId();
 
         // insert object into the ObjectStore
-        objectStore.addObject(object);
-        objectStore.getDataRowCache().processSnapshotChanges(
-                this,
-                Collections.singletonMap(object.getObjectId(), row),
-                Collections.EMPTY_LIST,
-                Collections.EMPTY_LIST,
-                Collections.EMPTY_LIST);
-        assertSame(object, objectStore.getObject(oid));
-        assertNotNull(objectStore.getCachedSnapshot(oid));
+        context.getObjectStore().addObject(object);
+        assertSame(object, context.getObjectStore().getObject(oid));
+        assertNotNull(context.getObjectStore().getCachedSnapshot(oid));
 
-        objectStore.objectsUnregistered(Collections.singletonList(object));
+        context.getObjectStore().objectsUnregistered(Collections.singletonList(object));
 
         assertNull(object.getObjectId());
-        assertNull(objectStore.getObject(oid));
+        assertNull(context.getObjectStore().getObject(oid));
 
         // in the future this may not be the case
-        assertNull(objectStore.getCachedSnapshot(oid));
+        assertNull(context.getObjectStore().getCachedSnapshot(oid));
     }
 
     /**
@@ -199,19 +180,20 @@ public class ObjectStoreTst extends CayenneTestCase {
      * http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0210.html
      */
     public void testPostprocessAfterCommit() throws Exception {
+        DataContext context = createDataContext();
 
         Artist object = (Artist) context.createAndRegisterNewObject(Artist.class);
         object.setArtistName("ABC");
         assertEquals(PersistenceState.NEW, object.getPersistenceState());
-        objectStore.addObject(object);
+        context.getObjectStore().addObject(object);
 
         // do a manual ID substitution
         ObjectId manualId = new ObjectId("T", Artist.ARTIST_ID_PK_COLUMN, 3);
         object.setObjectId(manualId);
 
-        objectStore.postprocessAfterCommit(new CompoundDiff());
+        context.getObjectStore().postprocessAfterCommit(new CompoundDiff());
         assertEquals(PersistenceState.COMMITTED, object.getPersistenceState());
-        assertSame(object, objectStore.getObject(manualId));
+        assertSame(object, context.getObjectStore().getObject(manualId));
     }
 
 }

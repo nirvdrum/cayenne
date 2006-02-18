@@ -310,7 +310,7 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         o.setGlobalAttribute1("aaa");
 
         // fetch new
-        ObjectIdQuery q1 = new ObjectIdQuery(o.getObjectId(), false, false);
+        ObjectIdQuery q1 = new ObjectIdQuery(o.getObjectId(), false, ObjectIdQuery.CACHE);
 
         connection.setBlockingMessages(true);
         try {
@@ -325,7 +325,7 @@ public class CayenneContextWithDataContextTst extends CayenneTestCase {
         context.commitChanges();
 
         // fetch committed
-        ObjectIdQuery q2 = new ObjectIdQuery(o.getObjectId(), false, false);
+        ObjectIdQuery q2 = new ObjectIdQuery(o.getObjectId(), false, ObjectIdQuery.CACHE);
 
         connection.setBlockingMessages(true);
         try {

@@ -104,7 +104,7 @@ class DataContextQueryAction extends ObjectContextQueryAction {
         if (query instanceof ObjectIdQuery) {
             ObjectIdQuery oidQuery = (ObjectIdQuery) query;
 
-            if (!oidQuery.isRefreshing()) {
+            if (!oidQuery.isFetchMandatory()) {
                 Object object = actingContext.getGraphManager().getNode(
                         oidQuery.getObjectId());
                 if (object != null) {

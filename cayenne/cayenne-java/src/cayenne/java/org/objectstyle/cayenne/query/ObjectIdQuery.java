@@ -66,15 +66,23 @@ import org.objectstyle.cayenne.util.Util;
 
 /**
  * A query that matches zero or one object or data row corresponding to the ObjectId. Used
- * internally by Cayenne to lookup objects by id.
+ * internally by Cayenne to lookup objects by id. Notice that cache policies of
+ * ObjectIdQuery are different from generic {@link QueryMetadata} cache policies.
+ * ObjectIdQuery is special - it is the only query that can be done against Cayenne main
+ * cache, thus cache handling is singnificantly different from all other of the queries.
  * 
  * @since 1.2
  * @author Andrus Adamchik
  */
 public class ObjectIdQuery extends IndirectQuery {
 
+    // TODO: Andrus, 2/18/2006 - reconcile this with QueryMetadata cache policies
+    public static final int CACHE = 1;
+    public static final int CACHE_REFRESH = 2;
+    public static final int CACHE_NOREFRESH = 3;
+
     protected ObjectId objectId;
-    protected boolean refreshing;
+    protected int cachePolicy;
     protected boolean fetchingDataRows;
 
     // needed for hessian serialization
@@ -86,16 +94,19 @@ public class ObjectIdQuery extends IndirectQuery {
      * Creates a refreshing SingleObjectQuery.
      */
     public ObjectIdQuery(ObjectId objectID) {
-        this(objectID, false, true);
+        this(objectID, false, CACHE_REFRESH);
     }
 
-    public ObjectIdQuery(ObjectId objectID, boolean fetchingDataRows, boolean refreshing) {
-        if (objectID == null) {
+    /**
+     * Creates a new ObjectIdQuery.
+     */
+    public ObjectIdQuery(ObjectId objectId, boolean fetchingDataRows, int cachePolicy) {
+        if (objectId == null) {
             throw new NullPointerException("Null objectID");
         }
 
-        this.objectId = objectID;
-        this.refreshing = refreshing;
+        this.objectId = objectId;
+        this.cachePolicy = cachePolicy;
         this.fetchingDataRows = fetchingDataRows;
     }
 
@@ -106,10 +117,6 @@ public class ObjectIdQuery extends IndirectQuery {
     // create replacement (e.g. temp ObjectId).
     public QueryMetadata getMetaData(final EntityResolver resolver) {
         return new DefaultQueryMetadata() {
-
-            public boolean isRefreshingObjects() {
-                return refreshing;
-            }
 
             public ObjEntity getObjEntity() {
                 return resolver.lookupObjEntity(objectId.getEntityName());
@@ -137,7 +144,9 @@ public class ObjectIdQuery extends IndirectQuery {
 
         SelectQuery query = new SelectQuery(objectId.getEntityName(), ExpressionFactory
                 .matchAllDbExp(objectId.getIdSnapshot(), Expression.EQUAL_TO));
-        query.setRefreshingObjects(refreshing);
+
+        // if we got to the point of fetch, always force refresh....
+        query.setRefreshingObjects(true);
         query.setFetchingDataRows(fetchingDataRows);
         return query;
     }
@@ -149,8 +158,16 @@ public class ObjectIdQuery extends IndirectQuery {
         return objectId.getEntityName();
     }
 
-    public boolean isRefreshing() {
-        return refreshing;
+    public int getCachePolicy() {
+        return cachePolicy;
+    }
+    
+    public boolean isFetchMandatory() {
+        return cachePolicy == CACHE_REFRESH;
+    }
+    
+    public boolean isFetchAllowed() {
+        return cachePolicy != CACHE_NOREFRESH;
     }
 
     public boolean isFetchingDataRows() {

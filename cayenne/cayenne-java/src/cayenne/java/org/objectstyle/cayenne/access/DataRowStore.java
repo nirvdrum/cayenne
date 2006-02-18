@@ -350,7 +350,7 @@ public class DataRowStore implements Serializable {
 
         // try getting it from database
 
-        Query query = new ObjectIdQuery(oid, true, true);
+        Query query = new ObjectIdQuery(oid, true, ObjectIdQuery.CACHE_REFRESH);
         List results = channel.onQuery(null, query).firstList();
 
         if (results.size() > 1) {

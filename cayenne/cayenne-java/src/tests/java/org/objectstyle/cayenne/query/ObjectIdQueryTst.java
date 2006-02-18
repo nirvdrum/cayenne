@@ -61,7 +61,7 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.opp.hessian.HessianUtil;
 import org.objectstyle.cayenne.util.Util;
 
-public class SingleObjectQueryTst extends TestCase {
+public class ObjectIdQueryTst extends TestCase {
 
     public void testConstructorObjectId() {
 
@@ -110,16 +110,39 @@ public class SingleObjectQueryTst extends TestCase {
         assertFalse(q1.equals(q4));
         assertFalse(q1.hashCode() == q4.hashCode());
     }
-    
+
     public void testMetadata() {
-        ObjectIdQuery q1 = new ObjectIdQuery(new ObjectId("abc", "a", 1), true, true);
+        ObjectIdQuery q1 = new ObjectIdQuery(
+                new ObjectId("abc", "a", 1),
+                true,
+                ObjectIdQuery.CACHE_REFRESH);
+
+        assertTrue(q1.isFetchAllowed());
+        assertTrue(q1.isFetchMandatory());
+
         QueryMetadata md1 = q1.getMetaData(null);
         assertTrue(md1.isFetchingDataRows());
-        assertTrue(md1.isRefreshingObjects());
-        
-        ObjectIdQuery q2 = new ObjectIdQuery(new ObjectId("abc", "a", 1), false, false);
+
+        ObjectIdQuery q2 = new ObjectIdQuery(
+                new ObjectId("abc", "a", 1),
+                false,
+                ObjectIdQuery.CACHE);
+
+        assertTrue(q2.isFetchAllowed());
+        assertFalse(q2.isFetchMandatory());
+
         QueryMetadata md2 = q2.getMetaData(null);
         assertFalse(md2.isFetchingDataRows());
-        assertFalse(md2.isRefreshingObjects());
+
+        ObjectIdQuery q3 = new ObjectIdQuery(
+                new ObjectId("abc", "a", 1),
+                false,
+                ObjectIdQuery.CACHE_NOREFRESH);
+
+        assertFalse(q3.isFetchAllowed());
+        assertFalse(q3.isFetchMandatory());
+
+        QueryMetadata md3 = q3.getMetaData(null);
+        assertFalse(md3.isFetchingDataRows());
     }
 }

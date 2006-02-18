@@ -171,7 +171,7 @@ public class ObjectContextQueryAction {
         if (query instanceof ObjectIdQuery) {
             ObjectIdQuery oidQuery = (ObjectIdQuery) query;
 
-            if (!oidQuery.isRefreshing() && !oidQuery.isFetchingDataRows()) {
+            if (!oidQuery.isFetchMandatory() && !oidQuery.isFetchingDataRows()) {
                 Object object = actingContext.getGraphManager().getNode(
                         oidQuery.getObjectId());
                 if (object != null) {

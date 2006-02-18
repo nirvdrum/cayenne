@@ -156,28 +156,35 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
 
             DataRow row = null;
 
-            if (!oidQuery.isRefreshing()) {
+            if (!oidQuery.isFetchMandatory()) {
                 row = cache.getCachedSnapshot(oidQuery.getObjectId());
             }
 
             // refresh is forced or not found in cache
             if (row == null) {
-                runQueryInTransaction();
 
-                List result = response.firstList();
-                if (result != null && !result.isEmpty()) {
+                if (oidQuery.isFetchAllowed()) {
 
-                    if (result.size() > 1) {
-                        throw new CayenneRuntimeException(
-                                "More than 1 row found for ObjectId "
-                                        + oidQuery.getObjectId()
-                                        + ". Fetch matched "
-                                        + result.size()
-                                        + " rows.");
+                    runQueryInTransaction();
+
+                    List result = response.firstList();
+                    if (result != null && !result.isEmpty()) {
+
+                        if (result.size() > 1) {
+                            throw new CayenneRuntimeException(
+                                    "More than 1 row found for ObjectId "
+                                            + oidQuery.getObjectId()
+                                            + ". Fetch matched "
+                                            + result.size()
+                                            + " rows.");
+                        }
+
+                        // cache for future use
+                        cache.snapshots.put(oidQuery.getObjectId(), result.get(0));
                     }
-
-                    // cache for future use
-                    cache.snapshots.put(oidQuery.getObjectId(), result.get(0));
+                }
+                else {
+                    response = new ListResponse();
                 }
             }
             else {
