@@ -170,7 +170,8 @@ public class ObjectContextQueryAction {
     protected boolean interceptOIDQuery() {
         if (query instanceof SingleObjectQuery) {
             SingleObjectQuery oidQuery = (SingleObjectQuery) query;
-            if (!oidQuery.isRefreshing()) {
+
+            if (!oidQuery.isRefreshing() && !oidQuery.isFetchingDataRows()) {
                 Object object = actingContext.getGraphManager().getNode(
                         oidQuery.getObjectId());
                 if (object != null) {

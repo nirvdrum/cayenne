@@ -246,8 +246,7 @@ class DataDomainPrecommitAction {
 
         DataContext context = object.getDataContext();
         DataRow committedSnapshot = context.getObjectStore().getSnapshot(
-                object.getObjectId(),
-                context.getChannel());
+                object.getObjectId());
         if (committedSnapshot == null) {
             return false;
         }

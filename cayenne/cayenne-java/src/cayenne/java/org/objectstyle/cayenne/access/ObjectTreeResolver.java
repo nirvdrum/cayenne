@@ -362,7 +362,7 @@ class ObjectTreeResolver {
                         // relationship name.
 
                         DataRow snapshot = objectStore.getSnapshot(destinationObject
-                                .getObjectId(), context.getChannel());
+                                .getObjectId());
 
                         ObjectId id = snapshot.createObjectId(
                                 sourceObjEntity.getName(),

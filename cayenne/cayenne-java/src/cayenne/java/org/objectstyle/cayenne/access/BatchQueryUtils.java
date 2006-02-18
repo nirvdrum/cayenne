@@ -208,9 +208,7 @@ final class BatchQueryUtils {
 
         boolean isMasterDbEntity = (masterDependentRel == null);
         DataContext context = o.getDataContext();
-        DataRow committedSnapshot = context.getObjectStore().getSnapshot(
-                o.getObjectId(),
-                context.getChannel());
+        DataRow committedSnapshot = context.getObjectStore().getSnapshot(o.getObjectId());
         DataRow currentSnapshot = o.getDataContext().currentSnapshot(o);
         Map snapshot = new HashMap(currentSnapshot.size());
 

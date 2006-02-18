@@ -67,7 +67,6 @@ import java.util.Map;
 import org.apache.commons.collections.Factory;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.DataChannel;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
@@ -83,6 +82,7 @@ import org.objectstyle.cayenne.graph.GraphDiff;
 import org.objectstyle.cayenne.graph.NodeIdChangeOperation;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.SingleObjectQuery;
 import org.objectstyle.cayenne.validation.ValidationException;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
@@ -103,7 +103,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
     private static Logger logObj = Logger.getLogger(ObjectStore.class);
 
-    protected transient Map newObjectsMap;
+    protected transient Map newObjectMap = null;
 
     protected Map objectMap = new HashMap();
     protected Map queryResultMap = new HashMap();
@@ -134,6 +134,11 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     // a factory that can be set by DataContext to defer attaching of DataRowStore on
     // deserialization.
     transient Factory dataRowCacheFactory;
+
+    /**
+     * The DataContext that owns this ObjectStore.
+     */
+    protected DataContext context;
 
     public ObjectStore() {
     }
@@ -264,8 +269,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
     /**
      * Invalidates a collection of DataObjects. Changes objects state to HOLLOW.
-     * 
-     * @see #objectsUnregistered(Collection)
      */
     public synchronized void objectsInvalidated(Collection objects) {
         if (objects.isEmpty()) {
@@ -303,20 +306,17 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-     * Evicts a collection of DataObjects from the ObjectStore, invalidates the underlying
-     * cache snapshots. Changes objects state to TRANSIENT. This method can be used for
+     * Evicts a collection of DataObjects from the ObjectStore. Object snapshots are
+     * removed as well. Changes objects state to TRANSIENT. This method can be used for
      * manual cleanup of Cayenne cache.
-     * 
-     * @see #objectsInvalidated(Collection)
      */
-    // this method is exactly the same as "objectsInvalidated", only additionally it
-    // throws out registered objects
     public synchronized void objectsUnregistered(Collection objects) {
         if (objects.isEmpty()) {
             return;
         }
 
-        Collection ids = new ArrayList(objects.size());
+        // dataRowCache maybe initialized lazily, so ensure the local instance is resolved
+        DataRowStore dataRowCache = getDataRowCache();
 
         Iterator it = objects.iterator();
         while (it.hasNext()) {
@@ -325,20 +325,15 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             // remove object but not snapshot
             objectMap.remove(object.getObjectId());
             indirectlyModifiedIds.remove(object.getObjectId());
-            ids.add(object.getObjectId());
+            dataRowCache.forgetSnapshot(object.getObjectId());
 
             object.setDataContext(null);
             object.setObjectId(null);
             object.setPersistenceState(PersistenceState.TRANSIENT);
         }
 
-        // send an event for removed snapshots
-        getDataRowCache().processSnapshotChanges(
-                this,
-                Collections.EMPTY_MAP,
-                Collections.EMPTY_LIST,
-                ids,
-                Collections.EMPTY_LIST);
+        // no snapshot events needed... snapshots maybe cleared, but no
+        // database changes have occured.
     }
 
     /**
@@ -584,37 +579,62 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         return diff;
     }
 
-    public synchronized void addObject(DataObject object) {
-        objectMap.put(object.getObjectId(), object);
+    public synchronized void addObject(DataObject obj) {
+        objectMap.put(obj.getObjectId(), obj);
 
-        if (newObjectsMap != null) {
-            newObjectsMap.put(object.getObjectId(), object);
+        if (newObjectMap != null) {
+            newObjectMap.put(obj.getObjectId(), obj);
         }
     }
 
     /**
      * Starts tracking the registration of new objects from this ObjectStore. Used in
      * conjunction with unregisterNewObjects() to control garbage collection when an
-     * instance of ObjectStore is used over a longer time for batch processing.
+     * instance of ObjectStore is used over a longer time for batch processing. (TODO:
+     * this won't work with changeObjectKey()?)
      * 
      * @see org.objectstyle.cayenne.access.ObjectStore#unregisterNewObjects()
      */
     public synchronized void startTrackingNewObjects() {
-        newObjectsMap = new HashMap();
+        // TODO: something like shared DataContext or nested DataContext
+        // would hopefully obsolete this feature...
+        newObjectMap = new HashMap();
     }
 
     /**
      * Unregisters the newly registered DataObjects from this objectStore. Used in
      * conjunction with startTrackingNewObjects() to control garbage collection when an
-     * instance of ObjectStore is used over a longer time for batch processing.
+     * instance of ObjectStore is used over a longer time for batch processing. (TODO:
+     * this won't work with changeObjectKey()?)
      * 
      * @see org.objectstyle.cayenne.access.ObjectStore#startTrackingNewObjects()
      */
     public synchronized void unregisterNewObjects() {
-        if (newObjectsMap != null) {
-            objectsUnregistered(newObjectsMap.values());
-            newObjectsMap = null;
+        // TODO: something like shared DataContext or nested DataContext
+        // would hopefully obsolete this feature...
+
+        if (newObjectMap == null) {
+            return;
         }
+
+        // dataRowCache maybe initialized lazily, so ensure the local instance is resolved
+        DataRowStore dataRowCache = getDataRowCache();
+
+        Iterator it = newObjectMap.values().iterator();
+
+        while (it.hasNext()) {
+            DataObject dataObj = (DataObject) it.next();
+
+            ObjectId oid = dataObj.getObjectId();
+            objectMap.remove(oid);
+            dataRowCache.forgetSnapshot(oid);
+
+            dataObj.setDataContext(null);
+            dataObj.setObjectId(null);
+            dataObj.setPersistenceState(PersistenceState.TRANSIENT);
+        }
+        newObjectMap.clear();
+        newObjectMap = null;
     }
 
     /**
@@ -669,7 +689,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * CayenneRuntimeException.
      * 
      * @since 1.1
-     * @deprecated since 1.2. Use {@link #getSnapshot(ObjectId, DataChannel)} instead.
+     * @deprecated since 1.2. Use {@link #getSnapshot(ObjectId)} instead.
      */
     public synchronized DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
         DataRow retained = getRetainedSnapshot(oid);
@@ -684,20 +704,19 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * 
      * @since 1.2
      */
-    public synchronized DataRow getSnapshot(ObjectId oid, DataChannel channel) {
+    public synchronized DataRow getSnapshot(ObjectId oid) {
         DataRow retained = getRetainedSnapshot(oid);
         if (retained != null) {
             return retained;
         }
 
-        // nested DataContext case - lookup for retained snapshots in the context
-        // hierarchy.
-        if (channel instanceof DataContext) {
-            DataContext parent = (DataContext) channel;
-            return parent.getObjectStore().getSnapshot(oid, parent.getChannel());
+        if (context != null && context.getChannel() != null) {
+            SingleObjectQuery query = new SingleObjectQuery(oid, true, false);
+            List results = context.getChannel().onQuery(context, query).firstList();
+            return results.isEmpty() ? null : (DataRow) results.get(0);
         }
         else {
-            return getDataRowCache().getSnapshot(oid, channel);
+            return null;
         }
     }
 
@@ -908,7 +927,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         }
 
         synchronized (this) {
-            DataRow snapshot = getSnapshot(object.getObjectId(), context.getChannel());
+            DataRow snapshot = getSnapshot(object.getObjectId());
 
             // handle deleted object
             if (snapshot == null) {
@@ -1000,7 +1019,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                         break;
                     case PersistenceState.MODIFIED:
                         DataContext context = object.getDataContext();
-                        DataRow diff = getSnapshot(oid, context.getChannel());
+                        DataRow diff = getSnapshot(oid);
                         // consult delegate if it exists
                         DataContextDelegate delegate = context.nonNullDelegate();
                         if (delegate.shouldMergeChanges(object, diff)) {
@@ -1099,9 +1118,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                                 .getDataContext()
                                 .getEntityResolver()
                                 .lookupObjEntity(object);
-                        DataRow snapshot = getSnapshot(object.getObjectId(), object
-                                .getDataContext()
-                                .getChannel());
+                        DataRow snapshot = getSnapshot(object.getObjectId());
                         DataRowUtils.refreshObjectWithSnapshot(
                                 entity,
                                 object,
@@ -1256,5 +1273,19 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         public void arcDeleted(Object nodeId, Object targetNodeId, Object arcId) {
 
         }
+    }
+
+    /**
+     * @since 1.2
+     */
+    public DataContext getContext() {
+        return context;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setContext(DataContext context) {
+        this.context = context;
     }
 }

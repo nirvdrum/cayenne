@@ -307,9 +307,7 @@ public class DataContextTst extends DataContextTestBase {
         assertEquals(artistCount, objects.size());
 
         Artist artist = (Artist) objects.get(0);
-        Map snapshot = context.getObjectStore().getSnapshot(
-                artist.getObjectId(),
-                context.getChannel());
+        Map snapshot = context.getObjectStore().getSnapshot(artist.getObjectId());
         assertEquals(3, snapshot.size());
     }
 
@@ -558,7 +556,7 @@ public class DataContextTst extends DataContextTestBase {
                 .getDataNodes()
                 .iterator()
                 .next();
-        
+
         // access DS directly as 'getDataSource' returns a wrapper.
         PoolManager manager = (PoolManager) node.dataSource;
         manager.setMaxConnections(manager.getMaxConnections() + delta);

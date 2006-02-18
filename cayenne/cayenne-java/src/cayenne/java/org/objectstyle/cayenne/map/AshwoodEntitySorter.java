@@ -343,9 +343,7 @@ public class AshwoodEntitySorter implements EntitySorter {
         // IMPORTANT: don't try to get snapshots for new objects, this will result in
         // exception
         if (object.getPersistenceState() != PersistenceState.NEW) {
-            snapshot = context.getObjectStore().getSnapshot(
-                    object.getObjectId(),
-                    context.getChannel());
+            snapshot = context.getObjectStore().getSnapshot(object.getObjectId());
         }
 
         if (snapshot == null) {

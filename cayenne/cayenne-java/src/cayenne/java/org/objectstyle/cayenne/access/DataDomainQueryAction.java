@@ -151,14 +151,40 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
 
     private boolean interceptOIDQuery() {
         if (query instanceof SingleObjectQuery) {
+
             SingleObjectQuery oidQuery = (SingleObjectQuery) query;
+
+            DataRow row = null;
+
             if (!oidQuery.isRefreshing()) {
-                DataRow row = cache.getCachedSnapshot(oidQuery.getObjectId());
-                if (row != null) {
-                    this.response = new ListResponse(row);
-                    return DONE;
+                row = cache.getCachedSnapshot(oidQuery.getObjectId());
+            }
+
+            // refresh is forced or not found in cache
+            if (row == null) {
+                runQueryInTransaction();
+
+                List result = response.firstList();
+                if (result != null && !result.isEmpty()) {
+
+                    if (result.size() > 1) {
+                        throw new CayenneRuntimeException(
+                                "More than 1 row found for ObjectId "
+                                        + oidQuery.getObjectId()
+                                        + ". Fetch matched "
+                                        + result.size()
+                                        + " rows.");
+                    }
+
+                    // cache for future use
+                    cache.snapshots.put(oidQuery.getObjectId(), result.get(0));
                 }
             }
+            else {
+                response = new ListResponse(row);
+            }
+
+            return DONE;
         }
 
         return !DONE;
@@ -252,8 +278,7 @@ class DataDomainQueryAction implements QueryRouter, OperationObserver {
 
             if (cachedRows != null) {
                 // decorate result immutable list to avoid messing up the cache
-                this.response = new ListResponse(Collections
-                        .unmodifiableList(cachedRows));
+                this.response = new ListResponse(Collections.unmodifiableList(cachedRows));
                 return DONE;
             }
         }

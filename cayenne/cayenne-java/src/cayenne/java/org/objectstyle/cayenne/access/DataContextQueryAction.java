@@ -57,12 +57,14 @@ package org.objectstyle.cayenne.access;
 
 import java.util.List;
 
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectContext;
 import org.objectstyle.cayenne.QueryResponse;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryMetadata;
-import org.objectstyle.cayenne.util.ObjectContextQueryAction;
+import org.objectstyle.cayenne.query.SingleObjectQuery;
 import org.objectstyle.cayenne.util.ListResponse;
+import org.objectstyle.cayenne.util.ObjectContextQueryAction;
 
 /**
  * A DataContext-specific version of
@@ -93,6 +95,32 @@ class DataContextQueryAction extends ObjectContextQueryAction {
 
         interceptObjectConversion();
         return response;
+    }
+
+    /**
+     * Overrides super implementation to property handle data row fetches.
+     */
+    protected boolean interceptOIDQuery() {
+        if (query instanceof SingleObjectQuery) {
+            SingleObjectQuery oidQuery = (SingleObjectQuery) query;
+
+            if (!oidQuery.isRefreshing()) {
+                Object object = actingContext.getGraphManager().getNode(
+                        oidQuery.getObjectId());
+                if (object != null) {
+
+                    if (oidQuery.isFetchingDataRows()) {
+                        object = ((DataContext) actingContext)
+                                .currentSnapshot((DataObject) object);
+                    }
+
+                    this.response = new ListResponse(object);
+                    return DONE;
+                }
+            }
+        }
+
+        return !DONE;
     }
 
     private boolean interceptPaginatedQuery() {

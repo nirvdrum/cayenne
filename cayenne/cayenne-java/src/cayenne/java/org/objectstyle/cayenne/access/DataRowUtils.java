@@ -180,9 +180,7 @@ class DataRowUtils {
             DataRow snapshot) {
 
         DataContext context = object.getDataContext();
-        Map oldSnap = context.getObjectStore().getSnapshot(
-                object.getObjectId(),
-                context.getChannel());
+        Map oldSnap = context.getObjectStore().getSnapshot(object.getObjectId());
 
         // attributes
         Map attrMap = entity.getAttributeMap();

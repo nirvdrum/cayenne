@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.util;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -73,6 +74,13 @@ public class ListResponse implements QueryResponse, Serializable {
 
     protected transient int currentIndex;
 
+    /**
+     * Creates an empty response.
+     */
+    public ListResponse() {
+        this.objectList = new ArrayList(1);
+    }
+
     public ListResponse(Object object) {
         this.objectList = Collections.singletonList(object);
     }
@@ -89,7 +97,7 @@ public class ListResponse implements QueryResponse, Serializable {
         if (currentIndex != 1) {
             throw new IndexOutOfBoundsException("Past iteration end: " + currentIndex);
         }
-        
+
         return true;
     }
 

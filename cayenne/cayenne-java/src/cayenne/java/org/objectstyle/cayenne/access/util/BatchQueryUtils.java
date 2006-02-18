@@ -127,9 +127,7 @@ public class BatchQueryUtils {
      */
     public static Map buildSnapshotForUpdate(DataObject o) {
         DataContext context = o.getDataContext();
-        Map committedSnapshot = context.getObjectStore().getSnapshot(
-                o.getObjectId(),
-                context.getChannel());
+        Map committedSnapshot = context.getObjectStore().getSnapshot(o.getObjectId());
         Map currentSnapshot = o.getDataContext().currentSnapshot(o);
 
         if (committedSnapshot == null || committedSnapshot.isEmpty()) {
@@ -326,9 +324,7 @@ public class BatchQueryUtils {
 
         boolean isMasterDbEntity = (masterDependentRel == null);
         DataContext context = o.getDataContext();
-        DataRow committedSnapshot = context.getObjectStore().getSnapshot(
-                o.getObjectId(),
-                context.getChannel());
+        DataRow committedSnapshot = context.getObjectStore().getSnapshot(o.getObjectId());
         DataRow currentSnapshot = o.getDataContext().currentSnapshot(o);
         Map snapshot = new HashMap(currentSnapshot.size());
 

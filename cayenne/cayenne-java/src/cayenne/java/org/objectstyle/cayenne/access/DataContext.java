@@ -311,12 +311,17 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
         // use a setter to properly initialize EntityResolver
         setChannel(channel);
 
-        this.objectStore = objectStore;
-
         this.setTransactionEventsEnabled(transactionEventsEnabledDefault);
-        this.usingSharedSnaphsotCache = getParentDataDomain() != null
-                && objectStore.getDataRowCache() == getParentDataDomain()
-                        .getSharedSnapshotCache();
+
+        // inject self as parent context
+        if (objectStore != null) {
+            this.objectStore = objectStore;
+            objectStore.setContext(this);
+
+            DataDomain domain = getParentDataDomain();
+            this.usingSharedSnaphsotCache = domain != null
+                    && objectStore.getDataRowCache() == domain.getSharedSnapshotCache();
+        }
     }
 
     /**
@@ -584,8 +589,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
         if (object.getPersistenceState() == PersistenceState.HOLLOW
                 && object.getDataContext() != null) {
 
-            ObjectId id = object.getObjectId();
-            return getObjectStore().getSnapshot(id, this.getChannel());
+            return getObjectStore().getSnapshot(object.getObjectId());
         }
 
         DataRow snapshot = new DataRow(10);
@@ -620,8 +624,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
             // to avoid unneeded fault triggering
             if (targetObject instanceof Fault) {
                 DataRow storedSnapshot = getObjectStore().getSnapshot(
-                        object.getObjectId(),
-                        getChannel());
+                        object.getObjectId());
                 if (storedSnapshot == null) {
                     throw new CayenneRuntimeException(
                             "No matching objects found for ObjectId "
@@ -907,8 +910,6 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * Unregisters a Collection of DataObjects from the DataContext and the underlying
      * ObjectStore. This operation also unsets DataContext and ObjectId for each object
      * and changes its state to TRANSIENT.
-     * 
-     * @see #invalidateObjects(Collection)
      */
     public void unregisterObjects(Collection dataObjects) {
         getObjectStore().objectsUnregistered(dataObjects);
@@ -918,8 +919,6 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * "Invalidates" a Collection of DataObject. This operation would remove each object's
      * snapshot from cache and change object's state to HOLLOW. On the next access to this
      * object, it will be refetched.
-     * 
-     * @see #unregisterObjects(Collection)
      */
     public void invalidateObjects(Collection dataObjects) {
         getObjectStore().objectsInvalidated(dataObjects);
