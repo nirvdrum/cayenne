@@ -112,7 +112,7 @@ public class CreateObjEntityAction extends CayenneAction {
         DbEntity dbEntity = mediator.getCurrentDbEntity();
         if (dbEntity != null){
             entity.setDbEntity(dbEntity);
-            String eName = NameConverter.undescoredToJava(dbEntity.getName(), true);
+            String eName = NameConverter.underscoredToJava(dbEntity.getName(), true);
             String entityName = eName;
             int i = 1;
             while(dataMap.getObjEntity(entityName) != null){

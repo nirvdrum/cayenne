@@ -133,7 +133,7 @@ public class EntityMergeSupport {
             Iterator ait = addAttributes.iterator();
             while (ait.hasNext()) {
                 DbAttribute da = (DbAttribute) ait.next();
-                String attrName = NameConverter.undescoredToJava(da.getName(), false);
+                String attrName = NameConverter.underscoredToJava(da.getName(), false);
 
                 // avoid duplicate names
                 attrName = NamedObjectFactory.createName(
@@ -162,7 +162,7 @@ public class EntityMergeSupport {
                     Entity mappedTarget = (Entity) targets.next();
 
                     // avoid duplicate names
-                    String relationshipName = NameConverter.undescoredToJava(dr.getName(), false);
+                    String relationshipName = NameConverter.underscoredToJava(dr.getName(), false);
                     relationshipName = NamedObjectFactory.createName(
                             ObjRelationship.class,
                             entity,

@@ -94,12 +94,22 @@ public class NameConverter {
         return buffer.toString();
     }
 
+    /**
+     * @deprecated since 1.2 replaced with {@link #underscoredToJava(String, boolean)},
+     *             fixing the naming typo.
+     */
+    public static String undescoredToJava(String name, boolean capitalize) {
+        return underscoredToJava(name, capitalize);
+    }
+    
     /** 
      * Converts names like "ABCD_EFG_123" to Java-style names like "abcdEfg123".
      * If <code>capitalize</code> is true, returned name is capitalized
-     * (for instance if this is a class name). 
+     * (for instance if this is a class name).
+     * 
+     *  @since 1.2
      */
-    public static String undescoredToJava(String name, boolean capitalize) {
+    public static String underscoredToJava(String name, boolean capitalize) {
         StringTokenizer st = new StringTokenizer(name, "_");
         StringBuffer buf = new StringBuffer();
 

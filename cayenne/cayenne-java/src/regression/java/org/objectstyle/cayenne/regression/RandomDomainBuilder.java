@@ -561,7 +561,7 @@ public class RandomDomainBuilder {
 
     private ObjEntity createObjEntity(DbEntity dbEntity) {
         ObjEntity objEntity =
-            new ObjEntity(NameConverter.undescoredToJava(dbEntity.getName(), true));
+            new ObjEntity(NameConverter.underscoredToJava(dbEntity.getName(), true));
         objEntity.setDbEntity(dbEntity);
         objEntity.setClassName(objEntity.getName());
         Iterator colIt = dbEntity.getAttributeMap().values().iterator();
@@ -569,7 +569,7 @@ public class RandomDomainBuilder {
             DbAttribute dbAtt = (DbAttribute) colIt.next();
             if (dbAtt.isPrimaryKey())
                 continue;
-            String attName = NameConverter.undescoredToJava(dbAtt.getName(), false);
+            String attName = NameConverter.underscoredToJava(dbAtt.getName(), false);
             String type = TypesMapping.getJavaBySqlType(dbAtt.getType());
             ObjAttribute objAtt = new ObjAttribute(attName, type, objEntity);
             objAtt.setDbAttribute(dbAtt);

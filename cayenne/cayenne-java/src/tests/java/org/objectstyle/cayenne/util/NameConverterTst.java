@@ -59,33 +59,33 @@ import junit.framework.TestCase;
 
 public class NameConverterTst extends TestCase {
 
-    public void testUndescoredToJava1() throws Exception {
+    public void testUnderscoredToJava1() throws Exception {
         String expected = "ClassNameIdentifier";
         assertEquals(
             expected,
-            NameConverter.undescoredToJava("_CLASS_NAME_IDENTIFIER_", true));
+            NameConverter.underscoredToJava("_CLASS_NAME_IDENTIFIER_", true));
     }
 
-    public void testUndescoredToJava2() throws Exception {
+    public void testUnderscoredToJava2() throws Exception {
         String expected = "propNameIdentifier123";
         assertEquals(
             expected,
-            NameConverter.undescoredToJava("_prop_name_Identifier_123", false));
+            NameConverter.underscoredToJava("_prop_name_Identifier_123", false));
     }
 
-    public void testUndescoredToJava3() throws Exception {
+    public void testUnderscoredToJava3() throws Exception {
         String expected = "lastName";
-        assertEquals(expected, NameConverter.undescoredToJava("lastName", false));
+        assertEquals(expected, NameConverter.underscoredToJava("lastName", false));
     }
 
-    public void testUndescoredToJava4() throws Exception {
+    public void testUnderscoredToJava4() throws Exception {
         String expected = "lastName";
-        assertEquals(expected, NameConverter.undescoredToJava("LastName", false));
+        assertEquals(expected, NameConverter.underscoredToJava("LastName", false));
     }
 
-    public void testUndescoredToJava5() throws Exception {
+    public void testUnderscoredToJava5() throws Exception {
         String expected = "LastName";
-        assertEquals(expected, NameConverter.undescoredToJava("LastName", true));
+        assertEquals(expected, NameConverter.underscoredToJava("LastName", true));
     }
 
     public void testJavaToUnderscored1() throws Exception {

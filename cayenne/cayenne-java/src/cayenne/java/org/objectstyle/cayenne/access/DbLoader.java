@@ -113,7 +113,7 @@ public class DbLoader {
     /** Creates default name for loaded relationship */
     private static String defaultRelName(String dstName, boolean toMany) {
         String uglyName = (toMany) ? dstName + "_ARRAY" : "to_" + dstName;
-        return NameConverter.undescoredToJava(uglyName, false);
+        return NameConverter.underscoredToJava(uglyName, false);
     }
 
     /** Creates a unique name for loaded relationship on the given entity. */
@@ -493,7 +493,7 @@ public class DbLoader {
                 continue;
             }
 
-            String objEntityName = NameConverter.undescoredToJava(
+            String objEntityName = NameConverter.underscoredToJava(
                     dbEntity.getName(),
                     true);
             // this loop will terminate even if no valid name is found
