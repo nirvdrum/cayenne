@@ -125,5 +125,10 @@ public interface ClassDescriptor {
      */
     Iterator getProperties();
 
+    /**
+     * Passes the visitor to all properties "visit" method, terminating properties walk
+     * through in case one of the properties returns false. Returns true if all visited
+     * properties returned true, false - if one property returned false.
+     */
     boolean visitProperties(PropertyVisitor visitor);
 }
