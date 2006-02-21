@@ -6,18 +6,23 @@
 	</properties>
 	<body>
 		<section name="Success Stories">
-			<p><strong>National Hockey League</strong> (<a target="_new"
-				href="http://www.nhl.com/">http://www.nhl.com/</a>)</p>
-			<p>After the initial trial of Cayenne in October 2002, NHL switched 
-				all their public applications running at <a target="_new" 
-				href="http://www.nhl.com">NHL.com</a> to use Cayenne. With help 
-				from <a target="_new" 
-				href="http://objectstyle.com">ObjectStyle</a> and <a 
-				target="_new" 
-				href="http://www.centralparksoftware.com/">Central Park 
-				Software</a> the site was successfully launched to production. 
-				Currently applications receive more than 5 million hits a day. 
-				</p>
+			<p>Not the full list by any means, but here is a number of organizations and sites that
+			use Cayenne. If you want to add your Cayenne site to this page, please drop a note to 
+				cayenne-user list or directly to "andrus at objectstyle.org".</p>
+				
+			<p><strong>AccessPoint Inc.</strong> (<a 
+				href="http://www.accesspointinc.com/" 
+				target="_new">http://www.accesspointinc.com/</a>)</p>
+			<p>A story submitted by Bret Gregory: "I work for AccessPoint Inc., 
+				a privately-held CLEC offering integrated communications 
+				services to small- and medium-sized businesses. We use Cayenne 
+				for our internal accounting and reconciliation application. 
+				This application allows us to recognize uncaptured revenue 
+				streams as well as accounting margins and billing errors. In 
+				addition, Cayenne is used in our internal reporting 
+				application. These applications and thus Cayenne are central to 
+				the financial health of the company." </p>
+				
 			<p><strong>Global Legal Information Network (GLIN)</strong> (<a target="_new" 
 				href="http://www.glin.gov/">http://www.glin.gov/</a>)</p>
 			<p>GLIN is a legal repository for the Law Library
@@ -32,13 +37,32 @@
 			the most internationalized site in the federal government, after the IRS.
 			</p>
 
-			<p><strong>RossoAlice</strong> (<a target="_new" 
-				href="http://www.rossoalice.it/">http://www.rossoalice.it/</a>)</p>
-			<p>
-			RossoAlice is an Italian media portal. This is a site where users can download music, watch films,  
-			download games, watch television news and more. The java database layer for the 
-			authentication / authorization  component is developed with Cayenne.
-			</p>
+			<p><strong>National Hockey League</strong> (<a target="_new"
+				href="http://www.nhl.com/">http://www.nhl.com/</a>)</p>
+			<p>After the initial trial of Cayenne in October 2002, NHL switched 
+				all their public applications running at <a target="_new" 
+				href="http://www.nhl.com">NHL.com</a> to use Cayenne. With help 
+				from <a target="_new" 
+				href="http://objectstyle.com">ObjectStyle</a> and <a 
+				target="_new" 
+				href="http://www.centralparksoftware.com/">Central Park 
+				Software</a> the site was successfully launched to production. 
+				Currently applications receive more than 5 million hits a day. 
+				</p>
+
+
+
+			<p><strong>ObjectVisualizer Inc.</strong> (<a 
+				href="http://www.objectvisualizer.com/" 
+				target="_new">http://www.objectvisualizer.com/</a>)</p>
+			<p>ObjectVisualizer is a business intelligence tool that builds 
+				upon Object Persistence technology to provide easy to use 
+				query, reporting, and charting capabilities. Features include: 
+				Query and filter data using objects, Interactive Data Table, 
+				Report Generation, Chart Creation, and Plugin Architecture. 
+				ObjectVisualizer has a Cayenne plugin to work with Cayenne 
+				mapping projects.</p>
+
 
 			<p><strong>Pixxures Inc.</strong> (<a target="_new" 
 				href="http://www.pixxures.ca/">http://www.pixxures.ca/</a>)</p>
@@ -51,33 +75,20 @@
 				system. Now Pixxures plans to revamp their main software to use 
 				Cayenne instead of the connection pooling system and the other 
 				data access methods. </p>
-			<p><strong>AccessPoint Inc.</strong> (<a 
-				href="http://www.accesspointinc.com/" 
-				target="_new">http://www.accesspointinc.com/</a>)</p>
-			<p>A story submitted by Bret Gregory: "I work for AccessPoint Inc., 
-				a privately-held CLEC offering integrated communications 
-				services to small- and medium-sized businesses. We use Cayenne 
-				for our internal accounting and reconciliation application. 
-				This application allows us to recognize uncaptured revenue 
-				streams as well as accounting margins and billing errors. In 
-				addition, Cayenne is used in our internal reporting 
-				application. These applications and thus Cayenne are central to 
-				the financial health of the company." </p>
-			<p><strong>ObjectVisualizer Inc.</strong> (<a 
-				href="http://www.objectvisualizer.com/" 
-				target="_new">http://www.objectvisualizer.com/</a>)</p>
-			<p>ObjectVisualizer is a business intelligence tool that builds 
-				upon Object Persistence technology to provide easy to use 
-				query, reporting, and charting capabilities. Features include: 
-				Query and filter data using objects, Interactive Data Table, 
-				Report Generation, Chart Creation, and Plugin Architecture. 
-				ObjectVisualizer has a Cayenne plugin to work with Cayenne 
-				mapping projects.</p>
-			<p></p>
-			<panel name="Powered by Cayenne">If your site or project uses 
-				Cayenne as its Object-Relational engine, please drop a note to 
-				cayenne-user list or directly to "andrus at objectstyle.org". 
-				Provided information will be displayed on this page. </panel>
+				
+			<p><strong>Provesta Wonen</strong> (<a target="_new" 
+				href="http://www.provesta.nl/">http://www.provesta.nl/</a>)</p>
+			<p><a target="_new" href="http://www.provesta.nl/">Provesta Wonen</a> 
+			is a semi-government housing company. It rents houses to people who need them. Cayenne is a part of the engine for using and reusing the image base. The backend reads reports from an ERP-like system and based on that information can appoint the images to certain addresses and complexes (collection of addresses).</p>
+
+
+			<p><strong>RossoAlice</strong> (<a target="_new" 
+				href="http://www.rossoalice.it/">http://www.rossoalice.it/</a>)</p>
+			<p>
+			RossoAlice is an Italian media portal. This is a site where users can download music, watch films,  
+			download games, watch television news and more. The Java database layer for the 
+			authentication / authorization  component is developed with Cayenne.
+			</p>
 		</section>
 		<section name="Cayenne Badges">
 			<p>Also we developed a few web badges to enable you to endorse 

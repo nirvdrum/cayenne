@@ -10,7 +10,7 @@
         <!-- Contributors section -->
         <section name="Cayenne Contributors">
 
-            <subsection name="Committers">
+        <subsection name="Committers">
   	    <p>Committers are those who have "write" permissions to Cayenne CVS and do in fact check in code.</p>
 
             <table>
@@ -20,11 +20,54 @@
                 <th>Web</th>
             </tr>
             <tr>
-                <td>Andrei Adamchik</td>
+                <td>Andrus Adamchik</td>
                 <td>andrus at objectstyle dot org</td>
                 <td><a href="http://adamchik.org">http://adamchik.org</a> (personal)<br/>
                 <a href="http://objectstyle.com">http://objectstyle.com</a> (business)
                 </td>
+            </tr>
+            <tr>
+                <td>Cris Daniluk</td>
+                <td> </td>
+	    		<td> </td>
+            </tr>
+             <tr>
+                <td>Tore Halset</td>
+                <td> </td>
+	    		<td> </td>
+            </tr>
+            <tr>
+                <td>Michael Gentry</td>
+                <td> </td>
+	    		<td> </td>
+            </tr>
+            <tr>
+                <td>Mike Kienenberger</td>
+                <td> </td>
+	  			<td> </td>
+            </tr>
+            <tr>
+                <td>Kevin Menard</td>
+                <td> </td>
+	    		<td> </td>
+            </tr>
+            <tr>
+                <td>Eric Schneider</td>
+                <td>eric at centralparksoftware dot com</td>
+                <td><a href="http://www.centralparksoftware.com/">http://www.centralparksoftware.com/</a></td>
+            </tr>
+            </table>
+            <p> </p>  
+            </subsection>
+            
+            <subsection name="Emeritus Committers">
+  	    <p>Committers who are no longer active in the community. We wish them well and hope to see them return.</p>
+
+            <table>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Web</th>
             </tr>
             <tr>
                 <td>Holger Hoffstaette</td>
@@ -46,26 +89,9 @@
                 <td>mshenga at pobox dot org</td>
                 <td><a href="http://reusablesoftwarecomponents.com/">http://reusablesoftwarecomponents.com</a></td>
             </tr>
-            <tr>
-                <td>Eric Schneider</td>
-                <td>eric at centralparksoftware dot com</td>
-                <td><a href="http://www.centralparksoftware.com/">http://www.centralparksoftware.com/</a></td>
-            </tr>
-	<tr>
-                <td>Mike Kienenberger</td>
-                <td>mkienenb at alaska dot net</td>
-	  	<td> </td>
-            </tr>
-	<tr>
-                <td>Michael Gentry</td>
-                <td> </td>
-	    <td> </td>
-            </tr>
             </table>
             <p> </p>  
             </subsection>
-            
-            
             <subsection name="Other Contributors">
 
 	<p>These are the folks who helped in many different ways, including graphic design, testing, 
@@ -74,7 +100,7 @@
 	<p>Arndt Brenschede (Arndt dot Brenschede at diamos dot com), Anna Drapeza (anna at ipm dot by),
        	Scott Finnery (scott at codefuey dot com), Nataliya Kholodna (nkholodna at mail dot ru),
 	Dirk Olmes (dirk dot olmes at gmx dot de), Anton Apolit (anton at logical dash process dot com), 
-	Fabricio Voznika, David Cooper, Kevin Menard.
+	Fabricio Voznika, David Cooper, Kevin Menard, Garry Watkins.
 	</p>
 	<p></p>
             </subsection>
