@@ -109,8 +109,6 @@ import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
-import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneAction;
@@ -122,7 +120,7 @@ import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
  */
 public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListener,
         DataMapDisplayListener, ObjEntityDisplayListener, DbEntityDisplayListener,
-        QueryDisplayListener, ProcedureDisplayListener, ProcedureParameterDisplayListener {
+        QueryDisplayListener, ProcedureDisplayListener {
 
     protected EditorView view;
     protected RecentFileMenu recentFileMenu;
@@ -291,14 +289,6 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
 
     public void currentProcedureChanged(ProcedureDisplayEvent e) {
         actionManager.procedureSelected();
-    }
-
-    public void currentProcedureParameterChanged(ProcedureParameterDisplayEvent e) {
-        // assuming that buttons active state has not changed...
-
-        if (e.getProcedureParameter() != null) {
-            getAction(RemoveAction.getActionName()).setName("Remove Parameter");
-        }
     }
 
     /**

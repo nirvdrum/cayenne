@@ -79,7 +79,6 @@ import org.objectstyle.cayenne.map.event.DomainEvent;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.map.event.ProcedureEvent;
-import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
@@ -119,10 +118,7 @@ public class RemoveAction extends CayenneAction {
 
         ProjectController mediator = getProjectController();
 
-        if (mediator.getCurrentProcedureParameter() != null) {
-            removeProcedureParameter();
-        }
-        else if (mediator.getCurrentObjEntity() != null) {
+        if (mediator.getCurrentObjEntity() != null) {
             removeObjEntity();
         }
         else if (mediator.getCurrentDbEntity() != null) {
@@ -261,19 +257,6 @@ public class RemoveAction extends CayenneAction {
                         MapEvent.REMOVE));
             }
         }
-    }
-
-    protected void removeProcedureParameter() {
-        ProjectController mediator = getProjectController();
-        ProcedureParameter parameter = mediator.getCurrentProcedureParameter();
-        mediator.getCurrentProcedure().removeCallParameter(parameter.getName());
-
-        ProcedureParameterEvent e = new ProcedureParameterEvent(
-                Application.getFrame(),
-                parameter,
-                MapEvent.REMOVE);
-
-        mediator.fireProcedureParameterEvent(e);
     }
 
     protected void removeDataMapFromDataNode() {

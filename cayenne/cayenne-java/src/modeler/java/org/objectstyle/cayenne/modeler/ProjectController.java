@@ -343,7 +343,6 @@ public class ProjectController extends CayenneController {
         addDbEntityDisplayListener(frame);
         addQueryDisplayListener(frame);
         addProcedureDisplayListener(frame);
-        addProcedureParameterDisplayListener(frame);
     }
 
     public void reset() {
