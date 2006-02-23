@@ -84,6 +84,7 @@ import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.util.EntityMergeSupport;
 import org.objectstyle.cayenne.util.NameConverter;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Utility class that does reverse engineering of the database. It can create DataMaps
@@ -482,6 +483,14 @@ public class DbLoader {
 
         List loadedEntities = new ArrayList(dbEntityList.size());
 
+        String packageName = map.getDefaultPackage();
+        if (Util.isEmptyString(packageName)) {
+            packageName = "";
+        }
+        else if (!packageName.endsWith(".")) {
+            packageName = packageName + ".";
+        }
+
         // load empty ObjEntities for all the tables
         while (dbEntities.hasNext()) {
             DbEntity dbEntity = (DbEntity) dbEntities.next();
@@ -505,9 +514,10 @@ public class DbLoader {
 
             ObjEntity objEntity = new ObjEntity(objEntityName);
             objEntity.setDbEntity(dbEntity);
+
             objEntity.setClassName(getGenericClassName() != null
                     ? getGenericClassName()
-                    : objEntity.getName());
+                    : packageName + objEntity.getName());
             map.addObjEntity(objEntity);
             loadedEntities.add(objEntity);
 
