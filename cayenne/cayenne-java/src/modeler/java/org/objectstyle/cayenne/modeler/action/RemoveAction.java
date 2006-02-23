@@ -123,10 +123,7 @@ public class RemoveAction extends CayenneAction {
     }
 
     public void performAction(ActionEvent e) {
-        remove();
-    }
 
-    private void remove() {
         ProjectController mediator = getProjectController();
 
         if (mediator.getCurrentObjAttribute() != null) {

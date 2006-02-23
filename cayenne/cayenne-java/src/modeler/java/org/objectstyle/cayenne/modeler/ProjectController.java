@@ -625,7 +625,13 @@ public class ProjectController extends CayenneController {
             temp.currentDomainChanged(e);
         }
 
-        getApplication().getActionManager().domainSelected();
+        // call different methods depending on whether domain was opened or closed
+        if (e.getDomain() == null) {
+            getApplication().getActionManager().projectOpened();
+        }
+        else {
+            getApplication().getActionManager().domainSelected();
+        }
     }
 
     /**
