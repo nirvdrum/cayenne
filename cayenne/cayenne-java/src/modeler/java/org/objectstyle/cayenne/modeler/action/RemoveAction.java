@@ -67,17 +67,12 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.Relationship;
-import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.map.event.DomainEvent;
@@ -86,11 +81,9 @@ import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
 import org.objectstyle.cayenne.map.event.QueryEvent;
-import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneAction;
-import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.query.AbstractQuery;
@@ -126,19 +119,7 @@ public class RemoveAction extends CayenneAction {
 
         ProjectController mediator = getProjectController();
 
-        if (mediator.getCurrentObjAttribute() != null) {
-            removeObjAttribute();
-        }
-        else if (mediator.getCurrentDbAttribute() != null) {
-            removeDbAttribute();
-        }
-        else if (mediator.getCurrentObjRelationship() != null) {
-            removeObjRelationship();
-        }
-        else if (mediator.getCurrentDbRelationship() != null) {
-            removeDbRelationship();
-        }
-        else if (mediator.getCurrentProcedureParameter() != null) {
+        if (mediator.getCurrentProcedureParameter() != null) {
             removeProcedureParameter();
         }
         else if (mediator.getCurrentObjEntity() != null) {
@@ -293,63 +274,6 @@ public class RemoveAction extends CayenneAction {
                 MapEvent.REMOVE);
 
         mediator.fireProcedureParameterEvent(e);
-    }
-
-    protected void removeObjAttribute() {
-        ProjectController mediator = getProjectController();
-        ObjEntity entity = mediator.getCurrentObjEntity();
-        ObjAttribute attrib = mediator.getCurrentObjAttribute();
-
-        entity.removeAttribute(attrib.getName());
-        AttributeEvent e = new AttributeEvent(
-                Application.getFrame(),
-                attrib,
-                entity,
-                MapEvent.REMOVE);
-        mediator.fireObjAttributeEvent(e);
-    }
-
-    protected void removeDbAttribute() {
-        ProjectController mediator = getProjectController();
-        DbEntity entity = mediator.getCurrentDbEntity();
-        DbAttribute attrib = mediator.getCurrentDbAttribute();
-        entity.removeAttribute(attrib.getName());
-        ProjectUtil.cleanObjMappings(mediator.getCurrentDataMap());
-
-        AttributeEvent e = new AttributeEvent(
-                Application.getFrame(),
-                attrib,
-                entity,
-                MapEvent.REMOVE);
-        mediator.fireDbAttributeEvent(e);
-    }
-
-    protected void removeObjRelationship() {
-        ProjectController mediator = getProjectController();
-        ObjEntity entity = mediator.getCurrentObjEntity();
-        ObjRelationship rel = mediator.getCurrentObjRelationship();
-        entity.removeRelationship(rel.getName());
-        RelationshipEvent e = new RelationshipEvent(
-                Application.getFrame(),
-                rel,
-                entity,
-                RelationshipEvent.REMOVE);
-        mediator.fireObjRelationshipEvent(e);
-    }
-
-    protected void removeDbRelationship() {
-        ProjectController mediator = getProjectController();
-        DbEntity entity = mediator.getCurrentDbEntity();
-        DbRelationship rel = mediator.getCurrentDbRelationship();
-        entity.removeRelationship(rel.getName());
-        ProjectUtil.cleanObjMappings(mediator.getCurrentDataMap());
-
-        RelationshipEvent e = new RelationshipEvent(
-                Application.getFrame(),
-                rel,
-                entity,
-                RelationshipEvent.REMOVE);
-        mediator.fireDbRelationshipEvent(e);
     }
 
     protected void removeDataMapFromDataNode() {

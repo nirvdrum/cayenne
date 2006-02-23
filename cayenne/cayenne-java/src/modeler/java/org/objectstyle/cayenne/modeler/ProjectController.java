@@ -341,10 +341,6 @@ public class ProjectController extends CayenneController {
         addDataMapDisplayListener(frame);
         addObjEntityDisplayListener(frame);
         addDbEntityDisplayListener(frame);
-        addObjAttributeDisplayListener(frame);
-        addDbAttributeDisplayListener(frame);
-        addObjRelationshipDisplayListener(frame);
-        addDbRelationshipDisplayListener(frame);
         addQueryDisplayListener(frame);
         addProcedureDisplayListener(frame);
         addProcedureParameterDisplayListener(frame);

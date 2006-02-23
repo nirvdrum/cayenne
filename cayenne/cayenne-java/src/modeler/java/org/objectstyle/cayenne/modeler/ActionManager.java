@@ -260,7 +260,7 @@ public class ActionManager {
         getAction(RemoveAction.getActionName()).setName("Remove DbEntity");
     }
     
-    public void derviedvDbEntitySelected() {
+    public void derivedDbEntitySelected() {
         processActionsState(DB_ENTITY_ACTIONS);
         getAction(RemoveAction.getActionName()).setName("Remove Derived DbEntity");
     }

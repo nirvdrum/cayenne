@@ -93,19 +93,14 @@ import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.modeler.util.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.UIUtil;
 
-/** 
- * Detail view of the DbEntity attributes. 
+/**
+ * Detail view of the DbEntity attributes.
  * 
- * @author Michael Misha Shengaout 
+ * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DbEntityAttributeTab
-    extends JPanel
-    implements
-        DbEntityDisplayListener,
-        ListSelectionListener,
-        DbAttributeListener,
-        ExistingSelectionProcessor,
+public class DbEntityAttributeTab extends JPanel implements DbEntityDisplayListener,
+        ListSelectionListener, DbAttributeListener, ExistingSelectionProcessor,
         ActionListener {
 
     protected ProjectController mediator;
@@ -126,26 +121,22 @@ public class DbEntityAttributeTab
 
     private void init() {
         this.setLayout(new BorderLayout());
-        
+
         JToolBar toolBar = new JToolBar();
         Application app = Application.getInstance();
         toolBar.add(app.getAction(CreateAttributeAction.getActionName()).buildButton());
         toolBar.add(app.getAction(DbEntitySyncAction.getActionName()).buildButton());
-        
+
         toolBar.addSeparator();
 
-        /*
-         * Not sure why this will not show up???
-         */
         editParams = new JButton();
         editParams.setIcon(ModelerUtil.buildIcon("icon-info.gif"));
         editParams.setToolTipText("Edit Parameters");
         toolBar.add(editParams);
 
         toolBar.addSeparator();
-        
         toolBar.add(app.getAction(RemoveAttributeAction.getActionName()).buildButton());
-        
+
         add(toolBar, BorderLayout.NORTH);
 
         // Create table with two columns and no rows.
@@ -157,11 +148,11 @@ public class DbEntityAttributeTab
         if (e.getSource() == editParams) {
             int row = table.getSelectedRow();
             if (row >= 0) {
-                DbAttribute attr =
-                    ((DbAttributeTableModel) table.getModel()).getAttribute(row);
+                DbAttribute attr = ((DbAttributeTableModel) table.getModel())
+                        .getAttribute(row);
 
-                EditDerivedParamsDialog dialog =
-                    new EditDerivedParamsDialog((DerivedDbAttribute) attr);
+                EditDerivedParamsDialog dialog = new EditDerivedParamsDialog(
+                        (DerivedDbAttribute) attr);
                 dialog.setVisible(true);
                 dialog.dispose();
             }
@@ -173,15 +164,21 @@ public class DbEntityAttributeTab
     }
 
     /**
-      * Selects a specified attribute.
-      */
+     * Selects a specified attribute.
+     */
     public void selectAttribute(DbAttribute attr) {
         if (attr == null) {
-            Application.getInstance().getAction(RemoveAttributeAction.getActionName()).setEnabled(false);
+            Application
+                    .getInstance()
+                    .getAction(RemoveAttributeAction.getActionName())
+                    .setEnabled(false);
             return;
         }
         // enable the remove button
-        Application.getInstance().getAction(RemoveAttributeAction.getActionName()).setEnabled(true);
+        Application
+                .getInstance()
+                .getAction(RemoveAttributeAction.getActionName())
+                .setEnabled(true);
 
         DbAttributeTableModel model = (DbAttributeTableModel) table.getModel();
         java.util.List attrs = model.getObjectList();
@@ -190,7 +187,7 @@ public class DbEntityAttributeTab
             table.select(attrPos);
         }
     }
-        
+
     public void processExistingSelection(EventObject e) {
         if (e instanceof ChangeEvent) {
             table.clearSelection();
@@ -205,8 +202,7 @@ public class DbEntityAttributeTab
             UIUtil.scrollToSelectedRow(table);
         }
 
-        mediator.fireDbAttributeDisplayEvent(
-            new AttributeDisplayEvent(
+        mediator.fireDbAttributeDisplayEvent(new AttributeDisplayEvent(
                 this,
                 att,
                 mediator.getCurrentDbEntity(),
@@ -236,7 +232,7 @@ public class DbEntityAttributeTab
             rebuildTable(entity);
         }
 
-        // if an entity was selected on a tree, 
+        // if an entity was selected on a tree,
         // unselect currently selected row
         if (e.isUnselectAttributes()) {
             table.clearSelection();
@@ -247,8 +243,7 @@ public class DbEntityAttributeTab
         editParams.setVisible(ent instanceof DerivedDbEntity);
         editParams.setEnabled(false);
 
-        DbAttributeTableModel model =
-            (ent instanceof DerivedDbEntity)
+        DbAttributeTableModel model = (ent instanceof DerivedDbEntity)
                 ? new DerivedDbAttributeTableModel(ent, mediator, this)
                 : new DbAttributeTableModel(ent, mediator, this);
         table.setModel(model);

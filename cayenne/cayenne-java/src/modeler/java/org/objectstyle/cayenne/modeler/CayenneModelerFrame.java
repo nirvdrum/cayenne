@@ -100,25 +100,19 @@ import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.modeler.editor.EditorView;
-import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DbAttributeDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DbRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.ObjAttributeDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
-import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
-import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
 
@@ -128,8 +122,6 @@ import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
  */
 public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListener,
         DataMapDisplayListener, ObjEntityDisplayListener, DbEntityDisplayListener,
-        ObjAttributeDisplayListener, DbAttributeDisplayListener,
-        ObjRelationshipDisplayListener, DbRelationshipDisplayListener,
         QueryDisplayListener, ProcedureDisplayListener, ProcedureParameterDisplayListener {
 
     protected EditorView view;
@@ -283,10 +275,9 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
 
     public void currentDbEntityChanged(EntityDisplayEvent e) {
         boolean derived = e.getEntity() instanceof DerivedDbEntity;
-       
 
         if (derived) {
-            actionManager.derviedvDbEntitySelected();
+            actionManager.derivedDbEntitySelected();
             getAction(DerivedEntitySyncAction.getActionName()).setEnabled(true);
         }
         else {
@@ -302,43 +293,11 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         actionManager.procedureSelected();
     }
 
-    public void currentDbAttributeChanged(AttributeDisplayEvent e) {
-        // assuming that buttons active state has not changed...
-
-        if (e.getAttribute() != null) {
-            getAction(RemoveAction.getActionName()).setName("Remove DbAttribute");
-        }
-    }
-
     public void currentProcedureParameterChanged(ProcedureParameterDisplayEvent e) {
         // assuming that buttons active state has not changed...
 
         if (e.getProcedureParameter() != null) {
             getAction(RemoveAction.getActionName()).setName("Remove Parameter");
-        }
-    }
-
-    public void currentObjAttributeChanged(AttributeDisplayEvent e) {
-        // assuming that buttons active state has not changed...
-
-        if (e.getAttribute() != null) {
-            getAction(RemoveAction.getActionName()).setName("Remove ObjAttribute");
-        }
-    }
-
-    public void currentDbRelationshipChanged(RelationshipDisplayEvent e) {
-        // assuming that buttons active state has not changed...
-
-        if (e.getRelationship() != null) {
-            getAction(RemoveAction.getActionName()).setName("Remove DbRelationship");
-        }
-    }
-
-    public void currentObjRelationshipChanged(RelationshipDisplayEvent e) {
-        // assuming that buttons active state has not changed...
-
-        if (e.getRelationship() != null) {
-            getAction(RemoveAction.getActionName()).setName("Remove ObjRelationship");
         }
     }
 

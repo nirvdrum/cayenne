@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.modeler.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, version 1.1
@@ -53,14 +52,17 @@ package org.objectstyle.cayenne.modeler.event;
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
+
+package org.objectstyle.cayenne.modeler.event;
 
 import java.util.EventListener;
 
-/** Used to display DbAttribute. */
-public interface DbAttributeDisplayListener extends EventListener
-{
-	/** Display specified db attribute.*/
-	public void currentDbAttributeChanged(AttributeDisplayEvent e);
-}
+/**
+ * Used to display DbAttribute.
+ */
+public interface DbAttributeDisplayListener extends EventListener {
 
+    /** Displays specified db attribute. */
+    public void currentDbAttributeChanged(AttributeDisplayEvent e);
+}

@@ -58,18 +58,26 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.Application;
+import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
  * Removes currently selected relationship from either the DbEntity or ObjEntity.
- *
- * @author Garry Watkins 
+ * 
+ * @author Garry Watkins
  */
 public class RemoveRelationshipAction extends RemoveAction {
+
     private final static String ACTION_NAME = "Remove Relationship";
-    
+
     public static String getActionName() {
         return ACTION_NAME;
     }
@@ -77,19 +85,19 @@ public class RemoveRelationshipAction extends RemoveAction {
     public RemoveRelationshipAction(Application application) {
         super(ACTION_NAME, application);
     }
-    
+
     /**
-     * Returns <code>true</code> if last object in the path contains a removable relationship.
+     * Returns <code>true</code> if last object in the path contains a removable
+     * relationship.
      */
     public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;
         }
-        Object lastObject = path.getObject();
 
-        return lastObject instanceof Relationship;
+        return path.getObject() instanceof Relationship;
     }
-    
+
     public void performAction(ActionEvent e) {
         if (getProjectController().getCurrentObjRelationship() != null) {
             removeObjRelationship();
@@ -97,5 +105,33 @@ public class RemoveRelationshipAction extends RemoveAction {
         else if (getProjectController().getCurrentDbRelationship() != null) {
             removeDbRelationship();
         }
+    }
+
+    protected void removeObjRelationship() {
+        ProjectController mediator = getProjectController();
+        ObjEntity entity = mediator.getCurrentObjEntity();
+        ObjRelationship rel = mediator.getCurrentObjRelationship();
+        entity.removeRelationship(rel.getName());
+        RelationshipEvent e = new RelationshipEvent(
+                Application.getFrame(),
+                rel,
+                entity,
+                RelationshipEvent.REMOVE);
+        mediator.fireObjRelationshipEvent(e);
+    }
+
+    protected void removeDbRelationship() {
+        ProjectController mediator = getProjectController();
+        DbEntity entity = mediator.getCurrentDbEntity();
+        DbRelationship rel = mediator.getCurrentDbRelationship();
+        entity.removeRelationship(rel.getName());
+        ProjectUtil.cleanObjMappings(mediator.getCurrentDataMap());
+
+        RelationshipEvent e = new RelationshipEvent(
+                Application.getFrame(),
+                rel,
+                entity,
+                RelationshipEvent.REMOVE);
+        mediator.fireDbRelationshipEvent(e);
     }
 }

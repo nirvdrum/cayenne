@@ -59,17 +59,26 @@ package org.objectstyle.cayenne.modeler.action;
 import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.event.AttributeEvent;
+import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.modeler.Application;
+import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
  * Removes currently selected attribute from either the DbEntity or ObjEntity.
- *
- * @author Garry Watkins 
+ * 
+ * @author Garry Watkins
  */
 public class RemoveAttributeAction extends RemoveAction {
+
     private final static String ACTION_NAME = "Remove Attribute";
-    
+
     public static String getActionName() {
         return ACTION_NAME;
     }
@@ -77,18 +86,17 @@ public class RemoveAttributeAction extends RemoveAction {
     public RemoveAttributeAction(Application application) {
         super(ACTION_NAME, application);
     }
-    
+
     /**
-     * Returns <code>true</code> if last object in the path contains a removable attribute.
+     * Returns <code>true</code> if last object in the path contains a removable
+     * attribute.
      */
     public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;
         }
 
-        Object lastObject = path.getObject();
-
-        return lastObject instanceof Attribute;
+        return path.getObject() instanceof Attribute;
     }
 
     public void performAction(ActionEvent e) {
@@ -98,5 +106,34 @@ public class RemoveAttributeAction extends RemoveAction {
         else if (getProjectController().getCurrentDbAttribute() != null) {
             removeDbAttribute();
         }
+    }
+
+    protected void removeDbAttribute() {
+        ProjectController mediator = getProjectController();
+        DbEntity entity = mediator.getCurrentDbEntity();
+        DbAttribute attrib = mediator.getCurrentDbAttribute();
+        entity.removeAttribute(attrib.getName());
+        ProjectUtil.cleanObjMappings(mediator.getCurrentDataMap());
+
+        AttributeEvent e = new AttributeEvent(
+                Application.getFrame(),
+                attrib,
+                entity,
+                MapEvent.REMOVE);
+        mediator.fireDbAttributeEvent(e);
+    }
+
+    protected void removeObjAttribute() {
+        ProjectController mediator = getProjectController();
+        ObjEntity entity = mediator.getCurrentObjEntity();
+        ObjAttribute attrib = mediator.getCurrentObjAttribute();
+
+        entity.removeAttribute(attrib.getName());
+        AttributeEvent e = new AttributeEvent(
+                Application.getFrame(),
+                attrib,
+                entity,
+                MapEvent.REMOVE);
+        mediator.fireObjAttributeEvent(e);
     }
 }
