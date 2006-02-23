@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
+import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.ByteType;
 import org.objectstyle.cayenne.access.types.CharType;
@@ -95,15 +96,15 @@ import org.objectstyle.cayenne.util.Util;
  * settings </a> to use with Oracle are shown below:
  * 
  * <pre>
- *      
  *       
- *        test-oracle.cayenne.adapter = org.objectstyle.cayenne.dba.oracle.OracleAdapter
- *        test-oracle.jdbc.username = test
- *        test-oracle.jdbc.password = secret
- *        test-oracle.jdbc.url = jdbc:oracle:thin:@192.168.0.20:1521:ora1 
- *        test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
  *        
- *       
+ *         test-oracle.cayenne.adapter = org.objectstyle.cayenne.dba.oracle.OracleAdapter
+ *         test-oracle.jdbc.username = test
+ *         test-oracle.jdbc.password = secret
+ *         test-oracle.jdbc.url = jdbc:oracle:thin:@192.168.0.20:1521:ora1 
+ *         test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
+ *         
+ *        
  * </pre>
  * 
  * @author Andrei Adamchik
@@ -334,7 +335,9 @@ public class OracleAdapter extends JdbcAdapter {
      * Returns a trimming translator.
      */
     public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
-        return new OracleQualifierTranslator(queryAssembler);
+        return new TrimmingQualifierTranslator(
+                queryAssembler,
+                OracleAdapter.TRIM_FUNCTION);
     }
 
     /**

@@ -9,6 +9,7 @@
 	<classpathentry kind="src" path="src/tutorials/cayenne-cmd-app/java"/>
 	<classpathentry kind="src" path="src/tutorials/cayenne-web-app/WEB-INF/classes"/>
 	<classpathentry kind="src" path="src/tutorials/cayenne-tapestry-app/WEB-INF/classes"/>
+	<classpathentry kind="lib" path="src/tests/resources"/>
 	<classpathentry excluding="com/*" kind="src" path="src/dvmodeler/java"/>
 	<classpathentry exported="true" kind="lib" path="lib/ant-1.6.5.jar"/>
 	<classpathentry exported="true" sourcepath="lib-src/ashwood-1.1-src.jar" kind="lib" path="lib/ashwood-1.1.jar"/>
@@ -41,7 +42,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/velocity-dep-1.3.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry sourcepath="lib-src/postgresql-jdbc-src-8.0-314.jar" kind="lib" path="lib/postgresql-8.0-314.jdbc3.jar"/>
-	<classpathentry kind="lib" path="src/tests/resources"/>
 	<classpathentry sourcepath="lib-src/hsqldb-1.8.0.2-src.jar" kind="lib" path="lib/hsqldb-1.8.0.2.jar"/>
 	<classpathentry kind="output" path="build/eclipse"/>
 </classpath>

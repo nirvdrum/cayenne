@@ -53,34 +53,32 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.oracle;
+package org.objectstyle.cayenne.query;
 
-import org.objectstyle.cayenne.access.trans.QueryAssembler;
-import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
-import org.objectstyle.cayenne.query.QueryMetadata;
+import java.util.List;
 
-/**
- * @since 1.2
- * @author Andrus Adamchik
- */
-class OracleQualifierTranslator extends TrimmingQualifierTranslator {
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-    OracleQualifierTranslator(QueryAssembler queryAssembler) {
-        super(queryAssembler, OracleAdapter.TRIM_FUNCTION);
-    }
+public class SelectQueryFetchLimitOrderingTst extends CayenneTestCase {
 
-    public String doTranslation() {
-        String qualifier = super.doTranslation();
+    public void testOrdering() throws Exception {
+        deleteTestData();
+        createTestData("testOrdering");
 
-        QueryMetadata info = getQueryAssembler().getQuery().getMetaData(
-                getQueryAssembler().getEntityResolver());
+      
 
-        if (info.getFetchLimit() > 0) {
-            return (qualifier != null) ? qualifier
-                    + " AND rownum <= "
-                    + info.getFetchLimit() : "rownum <= " + info.getFetchLimit();
-        }
+        SelectQuery query = new SelectQuery("Artist");
+        query.addOrdering(Artist.ARTIST_NAME_PROPERTY, true);
 
-        return qualifier;
+        query.setFetchLimit(4);
+        
+        List results = createDataContext().performQuery(query);
+        assertEquals(4, results.size());
+        
+        assertEquals("a", ((Artist) results.get(0)).getArtistName());
+        assertEquals("b", ((Artist) results.get(1)).getArtistName());
+        assertEquals("c", ((Artist) results.get(2)).getArtistName());
+        assertEquals("d", ((Artist) results.get(3)).getArtistName());
     }
 }

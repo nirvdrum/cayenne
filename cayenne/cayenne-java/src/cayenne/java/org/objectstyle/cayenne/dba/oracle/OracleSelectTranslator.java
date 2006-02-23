@@ -63,6 +63,7 @@ import java.sql.Statement;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
+import org.objectstyle.cayenne.query.QueryMetadata;
 
 /**
  * Select translator that implements Oracle-specific optimizations.
@@ -80,9 +81,20 @@ public class OracleSelectTranslator extends SelectTranslator {
     private static final Object[] rowPrefetchArgs = new Object[] {
         new Integer(100)
     };
-    
+
     public String createSqlString() throws Exception {
-        return super.createSqlString();
+
+        String sqlString = super.createSqlString();
+
+        QueryMetadata info = getQuery().getMetaData(getEntityResolver());
+        if (info.getFetchLimit() > 0) {
+            sqlString = "SELECT * FROM ("
+                    + sqlString
+                    + ") WHERE rownum <= "
+                    + info.getFetchLimit();
+        }
+
+        return sqlString;
     }
 
     /**
