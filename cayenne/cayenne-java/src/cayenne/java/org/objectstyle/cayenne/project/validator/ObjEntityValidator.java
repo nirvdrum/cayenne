@@ -107,6 +107,11 @@ public class ObjEntityValidator extends TreeNodeValidator {
                     "ObjEntity Java class is invalid: " + className,
                     path);
         }
+        else if (className.indexOf('.') < 0) {
+            validator.registerWarning(
+                    "Placing Java class in default package is discouraged: " + className,
+                    path);
+        }
     }
 
     private void validateSuperClassName(
