@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,26 +55,24 @@
  */
 package org.objectstyle.cayenne.dba.oracle;
 
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.DbAdapterFactory;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.SQLAction;
+import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
+ * An action builder for Oracle8Adapter.
+ * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class OracleSniffer implements DbAdapterFactory {
+class Oracle8ActionBuilder extends OracleActionBuilder {
 
-    public DbAdapter createAdapter(DatabaseMetaData md) throws SQLException {
-        String dbName = md.getDatabaseProductName();
-        if (dbName == null || dbName.toUpperCase().indexOf("ORACLE") < 0) {
-            return null;
-        }
+    Oracle8ActionBuilder(DbAdapter adapter, EntityResolver resolver) {
+        super(adapter, resolver);
+    }
 
-        return (md.getDriverMajorVersion() <= 8)
-                ? new Oracle8Adapter()
-                : new OracleAdapter();
+    public SQLAction sqlAction(SQLTemplate query) {
+        return new Oracle8SQLTemplateAction(query, adapter);
     }
 }

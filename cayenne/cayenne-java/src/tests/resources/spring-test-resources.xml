@@ -6,6 +6,7 @@
 	<!-- DbAdapters -->
 	<!-- ======================================= -->
 	<bean id="OracleAdapter" class="org.objectstyle.cayenne.dba.oracle.OracleAdapter"/>
+	<bean id="Oracle8Adapter" class="org.objectstyle.cayenne.dba.oracle.Oracle8Adapter"/>
 	<bean id="SybaseAdapter" class="org.objectstyle.cayenne.dba.sybase.SybaseAdapter"/>
 	<bean id="FirebirdAdapter" class="org.objectstyle.cayenne.dba.firebird.FirebirdAdapter"/>
 	<bean id="MySQLAdapter" class="org.objectstyle.cayenne.dba.mysql.MySQLAdapter"/>
@@ -22,6 +23,9 @@
 	<!-- ======================================= -->
 	<bean id="OracleStackAdapter" class="org.objectstyle.cayenne.unit.OracleStackAdapter">
 		<constructor-arg><ref bean="OracleAdapter"/></constructor-arg>
+	</bean>
+	<bean id="Oracle8StackAdapter" class="org.objectstyle.cayenne.unit.OracleStackAdapter">
+		<constructor-arg><ref bean="Oracle8Adapter"/></constructor-arg>
 	</bean>
 	<bean id="SybaseStackAdapter" class="org.objectstyle.cayenne.unit.SybaseStackAdapter">
 		<constructor-arg><ref bean="SybaseAdapter"/></constructor-arg>
@@ -163,6 +167,7 @@
 		<constructor-arg>
 			<map>
 				<entry key="org.objectstyle.cayenne.dba.oracle.OracleAdapter"><ref bean="OracleStackAdapter"/></entry>
+				<entry key="org.objectstyle.cayenne.dba.oracle.Oracle8Adapter"><ref bean="Oracle8StackAdapter"/></entry>
 				<entry key="org.objectstyle.cayenne.dba.sybase.SybaseAdapter"><ref bean="SybaseStackAdapter"/></entry>
 				<entry key="org.objectstyle.cayenne.dba.firebird.FirebirdAdapter"><ref bean="FirebirdStackAdapter"/></entry>
 				<entry key="org.objectstyle.cayenne.dba.mysql.MySQLAdapter"><ref bean="MySQLStackAdapter"/></entry>

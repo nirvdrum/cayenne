@@ -63,6 +63,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -125,7 +126,8 @@ public class SQLTemplateAction implements SQLAction {
         // zero size indicates a one-shot query with no parameters
         // so fake a single entry batch...
         int batchSize = (size > 0) ? size : 1;
-        List counts = null;
+
+        List counts = new ArrayList(batchSize);
         Iterator it = (size > 0) ? query.parametersIterator() : IteratorUtils
                 .singletonIterator(Collections.EMPTY_MAP);
         for (int i = 0; i < batchSize; i++) {
@@ -140,50 +142,7 @@ public class SQLTemplateAction implements SQLAction {
                         .getBindings()));
             }
 
-            long t1 = System.currentTimeMillis();
-            boolean iteratedResult = callback.isIteratedResult();
-            PreparedStatement statement = connection.prepareStatement(compiled.getSql());
-            try {
-                bind(statement, compiled.getBindings());
-
-                // process a mix of results
-                boolean isResultSet = statement.execute();
-                boolean firstIteration = true;
-                while (true) {
-
-                    if (firstIteration) {
-                        firstIteration = false;
-                    }
-                    else {
-                        isResultSet = statement.getMoreResults();
-                    }
-
-                    if (isResultSet) {
-                        processSelectResult(compiled, connection, statement, callback, t1);
-                        if (iteratedResult) {
-                            break;
-                        }
-                    }
-                    else {
-                        int updateCount = statement.getUpdateCount();
-                        if (updateCount == -1) {
-                            break;
-                        }
-
-                        if (counts == null) {
-                            counts = new ArrayList();
-                        }
-
-                        counts.add(new Integer(updateCount));
-                        QueryLogger.logUpdateCount(updateCount);
-                    }
-                }
-            }
-            finally {
-                if (!iteratedResult) {
-                    statement.close();
-                }
-            }
+            execute(connection, callback, compiled, counts);
         }
 
         // notify of combined counts of all queries inside SQLTemplate multipled by the
@@ -198,54 +157,110 @@ public class SQLTemplateAction implements SQLAction {
         }
     }
 
-    void processSelectResult(
+    protected void execute(
+            Connection connection,
+            OperationObserver callback,
+            SQLStatement compiled,
+            Collection updateCounts) throws SQLException, Exception {
+
+        long t1 = System.currentTimeMillis();
+        boolean iteratedResult = callback.isIteratedResult();
+        PreparedStatement statement = connection.prepareStatement(compiled.getSql());
+        try {
+            bind(statement, compiled.getBindings());
+
+            // process a mix of results
+            boolean isResultSet = statement.execute();
+            boolean firstIteration = true;
+            while (true) {
+
+                if (firstIteration) {
+                    firstIteration = false;
+                }
+                else {
+                    isResultSet = statement.getMoreResults();
+                }
+
+                if (isResultSet) {
+
+                    ResultSet resultSet = statement.getResultSet();
+
+                    if (resultSet != null) {
+
+                        try {
+                            processSelectResult(
+                                    compiled,
+                                    connection,
+                                    statement,
+                                    resultSet,
+                                    callback,
+                                    t1);
+                        }
+                        finally {
+                            if (iteratedResult) {
+                                break;
+                            }
+                            else {
+                                resultSet.close();
+                            }
+                        }
+                    }
+                }
+                else {
+                    int updateCount = statement.getUpdateCount();
+                    if (updateCount == -1) {
+                        break;
+                    }
+
+                    updateCounts.add(new Integer(updateCount));
+                    QueryLogger.logUpdateCount(updateCount);
+                }
+            }
+        }
+        finally {
+            if (!iteratedResult) {
+                statement.close();
+            }
+        }
+    }
+
+    protected void processSelectResult(
             SQLStatement compiled,
             Connection connection,
             Statement statement,
+            ResultSet resultSet,
             OperationObserver callback,
             long startTime) throws Exception {
 
         boolean iteratedResult = callback.isIteratedResult();
-        ResultSet rs = statement.getResultSet();
 
-        if (rs != null) {
+        ExtendedTypeMap types = adapter.getExtendedTypes();
+        RowDescriptor descriptor = (compiled.getResultColumns().length > 0)
+                ? new RowDescriptor(compiled.getResultColumns(), types)
+                : new RowDescriptor(resultSet, types);
 
+        JDBCResultIterator result = new JDBCResultIterator(
+                connection,
+                statement,
+                resultSet,
+                descriptor,
+                query.getFetchLimit());
+
+        if (!iteratedResult) {
+            List resultRows = result.dataRows(false);
+            QueryLogger.logSelectCount(resultRows.size(), System.currentTimeMillis()
+                    - startTime);
+
+            callback.nextDataRows(query, resultRows);
+        }
+        else {
             try {
-                ExtendedTypeMap types = adapter.getExtendedTypes();
-                RowDescriptor descriptor = (compiled.getResultColumns().length > 0)
-                        ? new RowDescriptor(compiled.getResultColumns(), types)
-                        : new RowDescriptor(rs, types);
-
-                JDBCResultIterator result = new JDBCResultIterator(
-                        connection,
-                        statement,
-                        rs,
-                        descriptor,
-                        query.getFetchLimit());
-
-                if (!iteratedResult) {
-                    List resultRows = result.dataRows(false);
-                    QueryLogger.logSelectCount(resultRows.size(), System
-                            .currentTimeMillis()
-                            - startTime);
-
-                    callback.nextDataRows(query, resultRows);
-                }
-                else {
-                    try {
-                        result.setClosingConnection(true);
-                        callback.nextDataRows(query, result);
-                    }
-                    catch (Exception ex) {
-                        result.close();
-                        throw ex;
-                    }
-                }
+                result.setClosingConnection(true);
+                callback.nextDataRows(query, result);
             }
-            finally {
-                if (!iteratedResult) {
-                    rs.close();
-                }
+            catch (Exception ex) {
+                result.close();
+                throw ex;
             }
         }
     }

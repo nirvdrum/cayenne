@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,26 +55,84 @@
  */
 package org.objectstyle.cayenne.dba.oracle;
 
-import java.sql.DatabaseMetaData;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.access.jdbc.SQLStatement;
+import org.objectstyle.cayenne.access.jdbc.SQLTemplateAction;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.DbAdapterFactory;
+import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
+ * A SQLTemplateAction that addresses Oracle 8 driver limitations.
+ * 
  * @since 1.2
  * @author Andrus Adamchik
  */
-public class OracleSniffer implements DbAdapterFactory {
+class Oracle8SQLTemplateAction extends SQLTemplateAction {
 
-    public DbAdapter createAdapter(DatabaseMetaData md) throws SQLException {
-        String dbName = md.getDatabaseProductName();
-        if (dbName == null || dbName.toUpperCase().indexOf("ORACLE") < 0) {
-            return null;
+    Oracle8SQLTemplateAction(SQLTemplate query, DbAdapter adapter) {
+        super(query, adapter);
+    }
+
+    /**
+     * Overrides super implementation to guess whether the query is selecting or not and
+     * execute it appropriately. Super implementation relied on generic JDBC mechanism,
+     * common for selecting and updating statements that does not work in Oracle 8.*
+     * drivers.
+     */
+    protected void execute(
+            Connection connection,
+            OperationObserver callback,
+            SQLStatement compiled,
+            Collection updateCounts) throws SQLException, Exception {
+
+        String sql = compiled.getSql().trim();
+        boolean select = sql.length() > "SELECT".length()
+                && sql.substring(0, "SELECT".length()).equalsIgnoreCase("SELECT");
+
+        long t1 = System.currentTimeMillis();
+        boolean iteratedResult = callback.isIteratedResult();
+        PreparedStatement statement = connection.prepareStatement(compiled.getSql());
+        try {
+            bind(statement, compiled.getBindings());
+
+            // start - code different from super
+            if (select) {
+
+                ResultSet resultSet = statement.executeQuery();
+                try {
+                    processSelectResult(
+                            compiled,
+                            connection,
+                            statement,
+                            resultSet,
+                            callback,
+                            t1);
+                }
+                finally {
+                    if (!iteratedResult) {
+                        resultSet.close();
+                    }
+                }
+            }
+            else {
+                int updateCount = statement.executeUpdate();
+                updateCounts.add(new Integer(updateCount));
+                QueryLogger.logUpdateCount(updateCount);
+            }
+
+            // end - code different from super
         }
-
-        return (md.getDriverMajorVersion() <= 8)
-                ? new Oracle8Adapter()
-                : new OracleAdapter();
+        finally {
+            if (!iteratedResult) {
+                statement.close();
+            }
+        }
     }
 }

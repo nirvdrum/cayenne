@@ -48,6 +48,9 @@
 				<entry key="org.objectstyle.cayenne.dba.oracle.OracleAdapter">
 					<value>UPDATE ARTIST SET ARTIST_NAME = #bind($newName) WHERE RTRIM(ARTIST_NAME) = #bind($oldName)</value>
 				</entry>
+				<entry key="org.objectstyle.cayenne.dba.oracle.Oracle8Adapter">
+					<value>UPDATE ARTIST SET ARTIST_NAME = #bind($newName) WHERE RTRIM(ARTIST_NAME) = #bind($oldName)</value>
+				</entry>
 			</map>
 		</constructor-arg>
 	</bean>
