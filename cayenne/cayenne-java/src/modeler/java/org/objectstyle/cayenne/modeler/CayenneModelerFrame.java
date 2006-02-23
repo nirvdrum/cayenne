@@ -282,10 +282,15 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
     }
 
     public void currentDbEntityChanged(EntityDisplayEvent e) {
-        actionManager.dbEntitySelected();
+        boolean derived = e.getEntity() instanceof DerivedDbEntity;
+       
 
-        if (e.getEntity() instanceof DerivedDbEntity) {
+        if (derived) {
+            actionManager.derviedvDbEntitySelected();
             getAction(DerivedEntitySyncAction.getActionName()).setEnabled(true);
+        }
+        else {
+            actionManager.dbEntitySelected();
         }
     }
 
