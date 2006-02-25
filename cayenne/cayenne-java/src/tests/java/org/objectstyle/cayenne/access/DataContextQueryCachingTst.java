@@ -346,6 +346,43 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         }
     }
 
+    public void testLocalCacheRefreshObjectsRefresh() throws Exception {
+
+        deleteTestData();
+        createTestData("testLocalCacheRefreshObjectsRefresh_Insert");
+
+        SelectQuery select = new SelectQuery(Artist.class);
+        select.setName("c");
+        select.setRefreshingObjects(true);
+        select.setCachePolicy(QueryMetadata.LOCAL_CACHE_REFRESH);
+
+        // no cache yet...
+
+        List objects1 = context.performQuery(select);
+        assertEquals(1, objects1.size());
+        Artist a1 = (Artist) objects1.get(0);
+        assertEquals("aaa", a1.getArtistName());
+        
+        // cache, but force refresh
+        
+        createTestData("testLocalCacheRefreshObjectsRefresh_Update1");
+        List objects2 = context.performQuery(select);
+        assertEquals(1, objects2.size());
+        Artist a2 = (Artist) objects2.get(0);
+        assertSame(a1, a2);
+        assertEquals("bbb", a2.getArtistName());
+        
+        // cache, no refresh
+        select.setRefreshingObjects(false);
+        createTestData("testLocalCacheRefreshObjectsRefresh_Update1");
+        
+        List objects3 = context.performQuery(select);
+        assertEquals(1, objects3.size());
+        Artist a3 = (Artist) objects3.get(0);
+        assertSame(a1, a3);
+        assertEquals("bbb", a3.getArtistName());
+    }
+
     private List mockupDataRows(int len) {
         List rows = new ArrayList(len);
 
