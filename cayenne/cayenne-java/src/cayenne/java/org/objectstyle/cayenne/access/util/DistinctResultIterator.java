@@ -76,8 +76,8 @@ import org.objectstyle.cayenne.map.DbEntity;
  * "nextObjectId()" is called for the first time), it can't be used to read data rows
  * again. This is pretty sensible for most things in Cayenne.
  * 
- * @since 1.2 Prior to 1.2 this was a non-public class in access package.
- * @author Andrei Adamchik
+ * @since 1.2
+ * @author Andrus Adamchik
  */
 public class DistinctResultIterator implements ResultIterator {
 
@@ -85,6 +85,8 @@ public class DistinctResultIterator implements ResultIterator {
     protected Set fetchedIds;
     protected Map nextDataRow;
     protected DbEntity defaultEntity;
+    protected boolean compareFullRows;
+
     protected boolean readingIds;
 
     /**
@@ -93,8 +95,8 @@ public class DistinctResultIterator implements ResultIterator {
      * @param wrappedIterator
      * @param defaultEntity an entity needed to build ObjectIds for distinct comparison.
      */
-    public DistinctResultIterator(ResultIterator wrappedIterator, DbEntity defaultEntity)
-            throws CayenneException {
+    public DistinctResultIterator(ResultIterator wrappedIterator, DbEntity defaultEntity,
+            boolean compareFullRows) throws CayenneException {
         if (wrappedIterator == null) {
             throw new CayenneException("Null wrapped iterator.");
         }
@@ -106,6 +108,7 @@ public class DistinctResultIterator implements ResultIterator {
         this.wrappedIterator = wrappedIterator;
         this.defaultEntity = defaultEntity;
         this.fetchedIds = new HashSet();
+        this.compareFullRows = compareFullRows;
 
         checkNextRow();
     }
@@ -204,6 +207,29 @@ public class DistinctResultIterator implements ResultIterator {
                     "Can't go back from reading ObjectIds to reading rows.");
         }
 
+        if (this.compareFullRows) {
+            checkNextUniqueRow();
+        }
+        else {
+            checkNextRowWithUniqueId();
+        }
+    }
+
+    void checkNextUniqueRow() throws CayenneException {
+
+        nextDataRow = null;
+        while (wrappedIterator.hasNextRow()) {
+            Map next = wrappedIterator.nextDataRow();
+
+            if (fetchedIds.add(next)) {
+                this.nextDataRow = next;
+                break;
+            }
+        }
+    }
+
+    void checkNextRowWithUniqueId() throws CayenneException {
+
         nextDataRow = null;
         while (wrappedIterator.hasNextRow()) {
             Map next = wrappedIterator.nextDataRow();
@@ -237,6 +263,7 @@ public class DistinctResultIterator implements ResultIterator {
         while (wrappedIterator.hasNextRow()) {
             Map next = wrappedIterator.nextObjectId(entity);
 
+            // if we are reading ids, we ignore "compareFullRows" setting
             if (fetchedIds.add(next)) {
                 this.nextDataRow = next;
                 break;

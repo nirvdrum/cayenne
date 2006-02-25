@@ -68,6 +68,9 @@ import org.objectstyle.cayenne.access.trans.SelectTranslator;
 import org.objectstyle.cayenne.access.util.DistinctResultIterator;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.PrefetchProcessor;
+import org.objectstyle.cayenne.query.PrefetchTreeNode;
+import org.objectstyle.cayenne.query.QueryMetadata;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
@@ -118,7 +121,49 @@ public class SelectAction extends BaseSQLAction {
 
         // wrap result iterator if distinct has to be suppressed
         if (translator.isSuppressingDistinct()) {
-            it = new DistinctResultIterator(workerIterator, translator.getRootDbEntity());
+
+            // a joint prefetch warrants full row compare
+
+            final boolean[] compareFullRows = new boolean[1];
+
+            QueryMetadata md = query.getMetaData(getEntityResolver());
+            final PrefetchTreeNode rootPrefetch = md.getPrefetchTree();
+            
+            if (rootPrefetch != null) {
+                rootPrefetch.traverse(new PrefetchProcessor() {
+
+                    public void finishPrefetch(PrefetchTreeNode node) {
+                    }
+
+                    public boolean startDisjointPrefetch(PrefetchTreeNode node) {
+                        // continue to children only if we are at root
+                        return rootPrefetch == node;
+                    }
+
+                    public boolean startUnknownPrefetch(PrefetchTreeNode node) {
+                        // continue to children only if we are at root
+                        return rootPrefetch == node;
+                    }
+
+                    public boolean startJointPrefetch(PrefetchTreeNode node) {
+                        if (rootPrefetch != node) {
+                            compareFullRows[0] = true;
+                            return false;
+                        }
+
+                        return true;
+                    }
+
+                    public boolean startPhantomPrefetch(PrefetchTreeNode node) {
+                        return true;
+                    }
+                });
+            }
+
+            it = new DistinctResultIterator(
+                    workerIterator,
+                    translator.getRootDbEntity(),
+                    compareFullRows[0]);
         }
 
         // TODO: Should do something about closing ResultSet and PreparedStatement in this
