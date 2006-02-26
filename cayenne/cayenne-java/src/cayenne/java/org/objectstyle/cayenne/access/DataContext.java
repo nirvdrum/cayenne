@@ -999,8 +999,7 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
             }
         }
 
-        DataObject object = DataObjectUtils.objectForQuery(this, new ObjectIdQuery(
-                oid));
+        DataObject object = DataObjectUtils.objectForQuery(this, new ObjectIdQuery(oid));
 
         if (object == null) {
             throw new CayenneRuntimeException(
@@ -1754,6 +1753,10 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * Returns an object local to this DataContext and matching the ObjectId. If
      * <code>prototype</code> is not null, local object is refreshed with the prototype
      * values.
+     * <p>
+     * In case you pass a non-null second parameter, you are responsible for setting
+     * correct persistence state of the returned local object, as generally there is no
+     * way for Cayenne to determine the resulting local object state.
      * 
      * @since 1.2
      */
