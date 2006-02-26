@@ -10,7 +10,6 @@
 	<organization>
 		<name>ObjectStyle Group</name>
 		<url>http://www.objectstyle.org/</url>
-		<logo>/images/os_logo.gif</logo>
 	</organization>
 	
 	<inceptionYear>2001</inceptionYear>
@@ -27,11 +26,6 @@
 	<siteDirectory>/cayenne</siteDirectory>
 	<distributionSite>objectstyle.org</distributionSite>
 	<distributionDirectory>/cayenne</distributionDirectory>
-	<repository>
-		<connection>
-			scm:cvs:pserver:anonymous@cvs.sourceforge.net:/cvsroot/cayenne</connection>
-		<url>http://cvs.sourceforge.net/viewcvs.py/cayenne/</url>
-	</repository>
 	
 	<mailingLists>
 		<mailingList>
