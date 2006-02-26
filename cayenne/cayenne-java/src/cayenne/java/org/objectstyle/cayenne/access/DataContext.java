@@ -1754,14 +1754,6 @@ public class DataContext implements ObjectContext, DataChannel, QueryEngine, Ser
      * Returns an object local to this DataContext and matching the ObjectId. If
      * <code>prototype</code> is not null, local object is refreshed with the prototype
      * values.
-     * <p>
-     * Note that this method may have a side effect on the prototype object. If a
-     * prototype object is not registered with any ObjectContext at all, it will be
-     * registered with this context. This prevents an unneeded copy operation when objects
-     * are served from a channel that is not a context itself. In this case the state of
-     * the prototype object is set to NEW if the ObjectId is temporary or COMMITTED
-     * otherwise.
-     * </p>
      * 
      * @since 1.2
      */
