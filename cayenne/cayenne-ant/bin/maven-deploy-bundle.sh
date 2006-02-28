@@ -9,7 +9,7 @@ VERSION=$3
 
 [ "${BUNDLEURL}" = "" ] && echo && echo "You must specify a bundle URL!" && echo && exit
 
-WORKDIR=bundle.tmp
+WORKDIR=/tmp/m2
 # repo dir relative to WORKDIR
 REPODIR=/var/sites/objectstyle/html/maven2
 
