@@ -14,11 +14,13 @@
 	
 	<target name="install-all" if="m2.repo" depends="all">
 		<antcall target="install">
+			<param name="stage" value="${build}/maven/cayenne"/>
 			<param name="m2.groupDir" value="${m2.repo}/org/objectstyle/cayenne"/>
 			<param name="m2.artifactId" value="${project.name}"/>
 			<param name="cayenne.jar" value="cayenne.jar"/>
 		</antcall>
 		<antcall target="install">
+			<param name="stage" value="${build}/cayenne-nodeps"/>
 			<param name="m2.groupDir" value="${m2.repo}/org/objectstyle/cayenne"/>
 			<param name="m2.artifactId" value="${project.name}-nodeps"/>
 			<param name="cayenne.jar" value="cayenne-nodeps.jar"/>
@@ -48,7 +50,7 @@
 		</delete>
 	</target>
 	
-	<target name="install">
+	<target name="install" depends="bundle">
 		<property name="install.dir" value="${m2.groupDir}/${m2.artifactId}/${project.version}"/>
 		<property name="install.name" value="${m2.artifactId}-${project.version}"/>
 		
@@ -59,14 +61,9 @@
 			</filterset>
 		</copy>
 		
-		<copy
-			file="${dist.base}/${project.name}-${project.version}/lib/${cayenne.jar}"
+		<move
+			file="${stage}/${install.name}.jar"
 			tofile="${install.dir}/${install.name}.jar"/>
-		
-		<jar jarfile="${install.dir}/${install.name}-sources.jar">
-			<fileset dir="${cayenne.java}/src/cayenne/java" includes="**/*.java"/>
-			<fileset dir="${cayenne.java.1_5}/src/cayenne/java" includes="**/*.java"/>
-		</jar>
 		
 		<checksum algorithm="SHA1" fileext=".sha1">
 			<fileset dir="${install.dir}" excludes="*.sha1,*.md5"/>
@@ -80,6 +77,7 @@
 	<target name="bundle">
 		
 		<mkdir dir="${stage}"/>
+		<mkdir dir="${stage}/jar"/>
 		
 		<copy file="ant/maven/${m2.artifactId}.pom" tofile="${stage}/pom.xml">
 			<filterset>
@@ -87,17 +85,21 @@
 			</filterset>
 		</copy>
 		
-		<copy file="${cayenne.other}/licenses/LICENSE.txt" tofile="${stage}/LICENSE.txt"/>
-		<copy
-			file="${dist.base}/${project.name}-${project.version}/lib/${cayenne.jar}"
-			tofile="${stage}/${m2.artifactId}-${project.version}.jar"/>
+		<copy file="${cayenne.other}/licenses/LICENSE.txt"
+			tofile="${stage}/LICENSE.txt"/>
+		<unjar
+			src="${dist.base}/${project.name}-${project.version}/lib/${cayenne.jar}"
+			dest="${stage}/jar"/>
 		
-		<jar jarfile="${stage}/${m2.artifactId}-${project.version}-sources.jar">
+		<jar jarfile="${stage}/${m2.artifactId}-${project.version}.jar">
+			<fileset dir="${stage}/jar"/>
 			<fileset dir="${cayenne.java}/src/cayenne/java" includes="**/*.java"/>
-			<fileset dir="${cayenne.java.1_5}/src/cayenne/java" includes="**/*.java"/>
+			<fileset dir="${cayenne.java.1_5}/src/cayenne/java"
+				includes="**/*.java"/>
 		</jar>
 		
-		<jar jarfile="${dist.base}/${m2.artifactId}-${project.version}-bundle.jar">
+		<jar
+			jarfile="${dist.base}/${m2.artifactId}-${project.version}-bundle.jar">
 			<fileset dir="${stage}"/>
 		</jar>
 	</target>
