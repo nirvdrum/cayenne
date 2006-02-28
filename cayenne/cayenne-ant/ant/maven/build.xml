@@ -12,17 +12,30 @@
 	<property name="dist"
 		value="${dist.base}/${project.name}-${project.version}"/>
 	
+	<target name="install-all" if="m2.repo" depends="all">
+		<antcall target="install">
+			<param name="m2.groupDir" value="${m2.repo}/org/objectstyle/cayenne"/>
+			<param name="m2.artifactId" value="${project.name}"/>
+			<param name="cayenne.jar" value="cayenne.jar"/>
+		</antcall>
+		<antcall target="install">
+			<param name="m2.groupDir" value="${m2.repo}/org/objectstyle/cayenne"/>
+			<param name="m2.artifactId" value="${project.name}-nodeps"/>
+			<param name="cayenne.jar" value="cayenne-nodeps.jar"/>
+		</antcall>
+	</target>
+	
 	<target name="all" depends="build-cayenne">
 		
 		<antcall target="bundle">
 			<param name="stage" value="${build}/maven/cayenne"/>
-			<param name="base.name" value="${project.name}"/>
+			<param name="m2.artifactId" value="${project.name}"/>
 			<param name="cayenne.jar" value="cayenne.jar"/>
 		</antcall>
 		
 		<antcall target="bundle">
 			<param name="stage" value="${build}/cayenne-nodeps"/>
-			<param name="base.name" value="${project.name}-nodeps"/>
+			<param name="m2.artifactId" value="${project.name}-nodeps"/>
 			<param name="cayenne.jar" value="cayenne-nodeps.jar"/>
 		</antcall>
 	</target>
@@ -35,11 +48,33 @@
 		</delete>
 	</target>
 	
+	<target name="install">
+		<property name="install.dir" value="${m2.groupDir}/${m2.artifactId}/${project.version}"/>
+		<property name="install.name" value="${m2.artifactId}-${project.version}"/>
+		
+		<mkdir dir="${install.dir}"/>
+		<copy file="ant/maven/${m2.artifactId}.pom" tofile="${install.dir}/${install.name}.pom">
+			<filterset>
+				<filter token="PROJECT-VERSION" value="${project.version}"/>
+			</filterset>
+		</copy>
+		
+		<copy
+			file="${dist.base}/${project.name}-${project.version}/lib/${cayenne.jar}"
+			tofile="${install.dir}/${install.name}.jar"/>
+		
+		<jar jarfile="${install.dir}/${install.name}-sources.jar">
+			<fileset dir="${cayenne.java}/src/cayenne/java" includes="**/*.java"/>
+			<fileset dir="${cayenne.java.1_5}/src/cayenne/java" includes="**/*.java"/>
+		</jar>
+		
+	</target>
+	
 	<target name="bundle">
 		
 		<mkdir dir="${stage}"/>
 		
-		<copy file="ant/maven/${base.name}.pom" tofile="${stage}/pom.xml">
+		<copy file="ant/maven/${m2.artifactId}.pom" tofile="${stage}/pom.xml">
 			<filterset>
 				<filter token="PROJECT-VERSION" value="${project.version}"/>
 			</filterset>
@@ -48,14 +83,14 @@
 		<copy file="${cayenne.other}/licenses/LICENSE.txt" tofile="${stage}/LICENSE.txt"/>
 		<copy
 			file="${dist.base}/${project.name}-${project.version}/lib/${cayenne.jar}"
-			tofile="${stage}/${base.name}-${project.version}.jar"/>
+			tofile="${stage}/${m2.artifactId}-${project.version}.jar"/>
 		
-		<jar jarfile="${stage}/${base.name}-${project.version}-sources.jar">
+		<jar jarfile="${stage}/${m2.artifactId}-${project.version}-sources.jar">
 			<fileset dir="${cayenne.java}/src/cayenne/java" includes="**/*.java"/>
 			<fileset dir="${cayenne.java.1_5}/src/cayenne/java" includes="**/*.java"/>
 		</jar>
 		
-		<jar jarfile="${dist.base}/${base.name}-${project.version}-bundle.jar">
+		<jar jarfile="${dist.base}/${m2.artifactId}-${project.version}-bundle.jar">
 			<fileset dir="${stage}"/>
 		</jar>
 	</target>
