@@ -7,6 +7,12 @@
 	<name>Cayenne</name>
 	<version>@PROJECT-VERSION@</version>
 	
+	<scm>
+		<connection>scm:cvs:pserver:anonymous:@cvs.sourceforge.net:/cvsroot/cayenne</connection>
+		<developerConnection>scm:cvs:ext:DEVELOPER_NAME@cvs.sourceforge.net:/cvsroot/cayenne</developerConnection>
+		<url>http://cvs.sourceforge.net/viewcvs.py/cayenne/</url>
+	</scm>
+
 	<organization>
 		<name>ObjectStyle Group</name>
 		<url>http://www.objectstyle.org/</url>
@@ -14,12 +20,9 @@
 	
 	<inceptionYear>2001</inceptionYear>
 	<package>org.objectstyle.cayenne</package>
-	
-	<shortDescription>Cayenne Object Persistence Framework</shortDescription>
-	<description>Cayenne is a powerful, full-featured framework for lightweight object
-		persistence.
-	</description>
 	<url>http://objectstyle.org/cayenne/</url>
+	<description>Cayenne Object Persistence Framework including all dependencies.</description>
+	
 	<issueTrackingUrl>
 		http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000</issueTrackingUrl>
 	<siteAddress>objectstyle.org</siteAddress>

@@ -5,7 +5,8 @@
 <!-- ================================================= -->
 <project name="cayenne-maven" default="all" basedir="../..">
 	
-	<property file="default.properties"/>
+	<property file="${basedir}/default.properties"/>
+	<import file="${basedir}/ant/import/paths.xml"/>
 	
 	<property name="build" value="${build.base}/maven"/>
 	<property name="dist"
@@ -38,7 +39,7 @@
 		
 		<mkdir dir="${stage}"/>
 		
-		<copy file="ant/maven/${base.name}.pom" tofile="${stage}/project.xml">
+		<copy file="ant/maven/${base.name}.pom" tofile="${stage}/pom.xml">
 			<filterset>
 				<filter token="PROJECT-VERSION" value="${project.version}"/>
 			</filterset>
@@ -48,6 +49,11 @@
 		<copy
 			file="${dist.base}/${project.name}-${project.version}/lib/${cayenne.jar}"
 			tofile="${stage}/${base.name}-${project.version}.jar"/>
+		
+		<jar jarfile="${stage}/${base.name}-${project.version}-sources.jar">
+			<fileset dir="${cayenne.java}/src/cayenne/java" includes="**/*.java"/>
+			<fileset dir="${cayenne.java.1_5}/src/cayenne/java" includes="**/*.java"/>
+		</jar>
 		
 		<jar jarfile="${dist.base}/${base.name}-${project.version}-bundle.jar">
 			<fileset dir="${stage}"/>
