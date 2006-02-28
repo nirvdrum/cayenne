@@ -1,7 +1,7 @@
 #!/bin/sh
 
 JAVA_HOME=/opt/java-1.5
-CAYENNE_BASE=/home/andrus/work/cayenne-snapshots/cayenne
+CAYENNE_BASE=/home/andrus/work/cayenne
 CAYENNE_ANT=$CAYENNE_BASE/cayenne-ant
 
 cd $CAYENNE_BASE
