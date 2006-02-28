@@ -68,6 +68,13 @@
 			<fileset dir="${cayenne.java.1_5}/src/cayenne/java" includes="**/*.java"/>
 		</jar>
 		
+		<checksum algorithm="SHA1" fileext=".sha1">
+			<fileset dir="${install.dir}" excludes="*.sha1,*.md5"/>
+		</checksum>
+		
+		<checksum algorithm="MD5" fileext=".md5">
+			<fileset dir="${install.dir}" excludes="*.sha1,*.md5"/>
+		</checksum>
 	</target>
 	
 	<target name="bundle">
