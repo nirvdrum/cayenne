@@ -14,4 +14,5 @@ ant clean
 cd $CAYENNE_ANT/ant/maven
 ant -Dproject.version=$PROJECT_VERSION
 
-$CAYENNE_ANT/bin/maven-deploy-bundle.sh
+$CAYENNE_ANT/bin/maven-deploy-bundle.sh file:$CAYENNE_ANT/dist/cayenne-$PROJECT_VERSION-bundle.jar
+$CAYENNE_ANT/bin/maven-deploy-bundle.sh file:$CAYENNE_ANT/dist/cayenne-nodeps-$PROJECT_VERSION-bundle.jar
