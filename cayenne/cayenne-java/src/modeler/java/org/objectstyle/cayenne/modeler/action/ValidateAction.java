@@ -56,7 +56,11 @@
  
  package org.objectstyle.cayenne.modeler.action;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.KeyStroke;
 
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidationDisplayHandler;
@@ -81,7 +85,13 @@ public class ValidateAction extends CayenneAction {
 		super(getActionName(), application);
 	}
 
-	/**
+    public KeyStroke getAcceleratorKey() {
+        return KeyStroke.getKeyStroke
+                 (KeyEvent.VK_V,
+                  Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() | ActionEvent.SHIFT_MASK);
+    }
+
+    /**
 	 * Validates project for possible conflicts and incomplete mappings.
 	 */
 	public void performAction(ActionEvent e) {

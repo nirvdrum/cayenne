@@ -55,7 +55,11 @@
  */
 package org.objectstyle.cayenne.modeler.action;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.KeyStroke;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -87,6 +91,9 @@ public class ObjEntitySyncAction extends CayenneAction {
         return "icon-sync.gif";
     }
 
+    public KeyStroke getAcceleratorKey() {
+        return KeyStroke.getKeyStroke(KeyEvent.VK_U, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    }
     /**
      * @see org.objectstyle.cayenne.modeler.util.CayenneAction#performAction(ActionEvent)
      */

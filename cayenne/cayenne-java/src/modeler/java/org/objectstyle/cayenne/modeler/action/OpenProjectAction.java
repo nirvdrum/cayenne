@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.modeler.action;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -97,7 +98,7 @@ public class OpenProjectAction extends ProjectAction {
     }
 
     public KeyStroke getAcceleratorKey() {
-        return KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK);
+        return KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
     }
 
     public void performAction(ActionEvent e) {

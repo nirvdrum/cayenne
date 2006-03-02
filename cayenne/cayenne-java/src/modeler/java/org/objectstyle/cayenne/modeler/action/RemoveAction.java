@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.modeler.action;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -111,7 +112,7 @@ public class RemoveAction extends CayenneAction {
     }
 
     public KeyStroke getAcceleratorKey() {
-        return KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK);
+        return KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
     }
 
     public void performAction(ActionEvent e) {

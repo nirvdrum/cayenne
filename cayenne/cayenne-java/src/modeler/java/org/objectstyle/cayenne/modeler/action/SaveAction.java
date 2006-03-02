@@ -56,7 +56,7 @@
 
 package org.objectstyle.cayenne.modeler.action;
 
-import java.awt.event.ActionEvent;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -78,7 +78,7 @@ public class SaveAction extends SaveAsAction {
     }
 
     public KeyStroke getAcceleratorKey() {
-        return KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK);
+        return KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
     }
 
     public String getIconName() {

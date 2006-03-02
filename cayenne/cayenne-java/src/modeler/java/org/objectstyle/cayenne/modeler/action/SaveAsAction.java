@@ -55,8 +55,12 @@
  */
 package org.objectstyle.cayenne.modeler.action;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
+
+import javax.swing.KeyStroke;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.modeler.Application;
@@ -88,6 +92,12 @@ public class SaveAsAction extends CayenneAction {
     protected SaveAsAction(String name, Application application) {
         super(name, application);
         this.fileChooser = new ProjectOpener();
+    }
+
+    public KeyStroke getAcceleratorKey() {
+        return KeyStroke.getKeyStroke
+                 (KeyEvent.VK_S,
+                  Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() | ActionEvent.SHIFT_MASK);
     }
 
     /**
