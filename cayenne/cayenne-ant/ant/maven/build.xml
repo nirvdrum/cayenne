@@ -51,18 +51,20 @@
 	</target>
 	
 	<target name="install" depends="bundle">
-		<property name="install.dir" value="${m2.groupDir}/${m2.artifactId}/${project.version}"/>
-		<property name="install.name" value="${m2.artifactId}-${project.version}"/>
+		<property name="install.dir"
+			value="${m2.groupDir}/${m2.artifactId}/${project.version}"/>
+		<property name="install.name"
+			value="${m2.artifactId}-${project.version}"/>
 		
 		<mkdir dir="${install.dir}"/>
-		<copy file="ant/maven/${m2.artifactId}.pom" tofile="${install.dir}/${install.name}.pom">
+		<copy file="ant/maven/${m2.artifactId}.pom"
+			tofile="${install.dir}/${install.name}.pom">
 			<filterset>
 				<filter token="PROJECT-VERSION" value="${project.version}"/>
 			</filterset>
 		</copy>
 		
-		<move
-			file="${stage}/${install.name}.jar"
+		<move file="${stage}/${install.name}.jar"
 			tofile="${install.dir}/${install.name}.jar"/>
 		
 		<checksum algorithm="SHA1" fileext=".sha1">
@@ -74,7 +76,7 @@
 		</checksum>
 	</target>
 	
-	<target name="bundle">
+	<target name="bundle" depends="validate-pom">
 		
 		<mkdir dir="${stage}"/>
 		<mkdir dir="${stage}/jar"/>
@@ -104,7 +106,21 @@
 		</jar>
 	</target>
 	
+	<target name="validate-pom">
+		<xmlvalidate failonerror="true" file="ant/maven/${m2.artifactId}.pom">
+			<attribute name="http://xml.org/sax/features/validation"
+				value="true"/>
+			<attribute name="http://apache.org/xml/features/validation/schema"
+				value="true"/>
+			<attribute name="http://xml.org/sax/features/namespaces"
+				value="true"/>
+			<property
+				name="http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation"
+				value="ant/maven/maven-v4_0_0.xsd"/>
+		</xmlvalidate>
+	</target>
+	
 	<target name="build-cayenne">
 		<ant antfile="build.xml" target="dist-bin"/>
-	</target>	
+	</target>
 </project>
