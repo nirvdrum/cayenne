@@ -141,9 +141,7 @@ public class MainDataNodeEditor extends CayenneController {
 
         DataNode matchingNode = null;
 
-        Iterator it = config.getDomains().iterator();
-        while (it.hasNext()) {
-            DataDomain domain = (DataDomain) it.next();
+        for (DataDomain domain : config.getDomains()) {
             DataNode nextNode = domain.getNode(newName);
 
             if (nextNode == node) {
@@ -261,8 +259,8 @@ public class MainDataNodeEditor extends CayenneController {
 
         refreshLocalDataSources();
 
-        for (int i = 0; i < bindings.length; i++) {
-            bindings[i].updateView();
+        for (ObjectBinding binding : bindings) {
+            binding.updateView();
         }
 
         showDataSourceSubview(getFactoryName());

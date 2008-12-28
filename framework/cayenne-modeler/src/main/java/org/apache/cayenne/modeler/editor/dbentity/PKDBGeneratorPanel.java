@@ -91,12 +91,11 @@ public class PKDBGeneratorPanel extends PKGeneratorPanel {
     }
 
     void updateView(final DbEntity entity) {
-        ItemListener[] listeners = attributes.getItemListeners();
-        for (int i = 0; i < listeners.length; i++) {
-            attributes.removeItemListener(listeners[i]);
+        for (ItemListener listener : attributes.getItemListeners()) {
+            attributes.removeItemListener(listener);
         }
 
-        Collection pkAttributes = entity.getPrimaryKeys();
+        Collection<DbAttribute> pkAttributes = entity.getPrimaryKeys();
         if (pkAttributes.isEmpty()) {
             attributes.removeAllItems();
             attributes.addItem("<Entity has no PK columns>");
@@ -112,9 +111,7 @@ public class PKDBGeneratorPanel extends PKGeneratorPanel {
             model.setSelectedItem(noSelection);
             attributes.setModel(model);
 
-            Iterator it = pkAttributes.iterator();
-            while (it.hasNext()) {
-                DbAttribute a = (DbAttribute) it.next();
+            for (DbAttribute a : pkAttributes) {
                 if (a.isGenerated()) {
                     model.setSelectedItem(a);
                     break;
